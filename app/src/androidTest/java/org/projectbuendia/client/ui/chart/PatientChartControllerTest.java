@@ -47,13 +47,11 @@ import static org.mockito.Mockito.when;
 
 /** Tests for {@link PatientChartController}. */
 public final class PatientChartControllerTest extends AndroidTestCase {
+    private static final String PATIENT_UUID_1 = "patient-uuid-1";
+    private static final String PATIENT_NAME_1 = "Bob";
+    private static final String PATIENT_ID_1 = "patient-id-1";
 
-    private static final String PATIENT_UUID_1 = "uuid1";
-    private static final String PATIENT_NAME_1 = "bob";
-    private static final String PATIENT_ID_1 = "id1";
-
-    private static final Obs OBSERVATION_A =
-        new Obs(0, "c", "c", "TEXT", "value", "");
+    private static final Obs OBS_1 = new Obs(0, ConceptUuids.TEMPERATURE_UUID, "NUMERIC", "37.2", "");
 
     private PatientChartController mController;
 
@@ -88,9 +86,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     public void testPatientDetailsLoaded_SetsObservationsOnUi() {
         // GIVEN the observations provider is set up to return some dummy data
         List<Obs> allObservations =
-            ImmutableList.of(OBSERVATION_A);
+            ImmutableList.of(OBS_1);
         Map<String, Obs> recentObservations =
-            ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
+            ImmutableMap.of(OBS_1.conceptUuid, OBS_1);
         when(mMockChartHelper.getObservations(PATIENT_UUID_1))
             .thenReturn(allObservations);
         when(mMockChartHelper.getLatestObservations(PATIENT_UUID_1))

@@ -415,7 +415,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         for (Obs obs : mObservations) {
             if (AppModel.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
                 order.uuid.equals(obs.value)) {
-                executionTimes.add(obs.obsTime);
+                executionTimes.add(obs.time);
             }
         }
         mUi.showOrderExecutionDialog(order, interval, executionTimes);
@@ -492,7 +492,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         Map<String, Obs> latestObservations =
             new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
         for (Obs obs : mObservations) {
-            mLastObsTime = Utils.max(mLastObsTime, obs.obsTime);
+            mLastObsTime = Utils.max(mLastObsTime, obs.time);
         }
         List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
         mOrdersByUuid = new HashMap<>();

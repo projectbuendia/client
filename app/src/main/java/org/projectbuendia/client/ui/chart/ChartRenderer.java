@@ -12,6 +12,7 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.ReadableInstant;
 import org.joda.time.chrono.ISOChronology;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
@@ -19,6 +20,7 @@ import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -58,6 +60,7 @@ public class ChartRenderer {
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
+    // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
     public void render(Chart chart, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
@@ -100,8 +103,8 @@ public class ChartRenderer {
         LocalDate mFirstSymptomsDate;
 
         List<List<Tile>> mTileRows = new ArrayList<>();
-        List<Row> mRows = new ArrayList<>();
-        Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
+        List<org.projectbuendia.client.ui.chart.Row> mRows = new ArrayList<>();
+        Map<String, org.projectbuendia.client.ui.chart.Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         SortedSet<LocalDate> mDays = new TreeSet<>();
 
@@ -116,17 +119,20 @@ public class ChartRenderer {
             for (ChartSection tileGroup : chart.tileGroups) {
                 List<Tile> tileRow = new ArrayList<>();
                 for (ChartItem item : tileGroup.items) {
-                    Obs[] obses = new Obs[item.conceptUuids.length];
-                    for (int i = 0; i < obses.length; i++) {
-                        obses[i] = latestObservations.get(item.conceptUuids[i]);
+                    ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
+                    for (int i = 0; i < points.length; i++) {
+                        Obs obs = latestObservations.get(item.conceptUuids[i]);
+                        if (obs != null) {
+                            points[i] = obs.getObsPoint();
+                        }
                     }
-                    tileRow.add(new Tile(item, obses));
+                    tileRow.add(new Tile(item, points));
                 }
                 mTileRows.add(tileRow);
             }
             for (ChartSection chartSection : chart.rowGroups) {
                 for (ChartItem chartItem : chartSection.items) {
-                    Row row = new Row(chartItem);
+                    org.projectbuendia.client.ui.chart.Row row = new org.projectbuendia.client.ui.chart.Row(chartItem);
                     mRows.add(row);
                     mRowsByUuid.put(chartItem.conceptUuids[0], row);
                 }
@@ -136,24 +142,25 @@ public class ChartRenderer {
 
         void addObservations(List<Obs> observations) {
             for (Obs obs : observations) {
-                if (obs.value == null) continue;
+                if (obs == null) continue;
+                ObsPoint point = obs.getObsPoint();
+                if (point == null) continue;
 
-                mDays.add(obs.obsTime.toLocalDate());
-                Column column = getColumnContainingTime(obs.obsTime);
-                if (obs.value != null && !obs.value.isEmpty()) {
-                    addObs(column, obs);
-                }
+                mDays.add(new DateTime(point.time).toLocalDate());
+                Column column = getColumnContainingTime(point.time);
 
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
-                    Integer count = column.orderExecutionCounts.get(obs.value);
-                    column.orderExecutionCounts.put(
+                    Integer count = column.executionCountsByOrderUuid.get(obs.value);
+                    column.executionCountsByOrderUuid.put(
                         obs.value, count == null ? 1 : count + 1);
+                } else {
+                    addObs(column, obs);
                 }
             }
         }
 
-        Column getColumnContainingTime(DateTime dt) {
-            LocalDate date = dt.toLocalDate();
+        Column getColumnContainingTime(ReadableInstant instant) {
+            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
             DateTime start = date.toDateTimeAtStartOfDay();
             long startMillis = start.getMillis();
             if (!mColumnsByStartMillis.containsKey(startMillis)) {
@@ -168,10 +175,10 @@ public class ChartRenderer {
         }
 
         void addObs(Column column, Obs obs) {
-            if (!column.obsMap.containsKey(obs.conceptUuid)) {
-                column.obsMap.put(obs.conceptUuid, new TreeSet<>(Obs.BY_OBS_TIME));
+            if (!column.pointSetByConceptUuid.containsKey(obs.conceptUuid)) {
+                column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<ObsPoint>());
             }
-            column.obsMap.get(obs.conceptUuid).add(obs);
+            column.pointSetByConceptUuid.get(obs.conceptUuid).add(obs.getObsPoint());
         }
 
         // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)

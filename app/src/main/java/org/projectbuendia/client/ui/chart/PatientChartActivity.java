@@ -377,7 +377,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 String pcrLString = "–";
                 DateTime pcrObsTime = null;
                 if (pcrLObservation != null && pcrLObservation.valueName != null) {
-                    pcrObsTime = pcrLObservation.obsTime;
+                    pcrObsTime = pcrLObservation.time;
                     try {
                         double pcrL = Double.parseDouble(pcrLObservation.valueName);
                         pcrLString = getFormattedPcrString(pcrL);
@@ -390,7 +390,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
                 String pcrNpString = "–";
                 if (pcrNpObservation != null && pcrNpObservation.valueName != null) {
-                    pcrObsTime = pcrNpObservation.obsTime;
+                    pcrObsTime = pcrNpObservation.time;
                     try {
                         double pcrNp = Double.parseDouble(pcrNpObservation.valueName);
                         pcrNpString = getFormattedPcrString(pcrNp);

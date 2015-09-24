@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Days;
+import org.joda.time.Instant;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -48,8 +49,14 @@ import javax.annotation.Nullable;
 
 /** Utility methods. */
 public class Utils {
-    public static final DateTime MIN_DATE = new DateTime(0, 1, 1, 0, 0, 0, DateTimeZone.UTC);
-    public static final DateTime MAX_DATE = new DateTime(100000, 1, 1, 0, 0, 0, DateTimeZone.UTC);
+    // Minimum and maximum representable Instant, DateTime, and LocalDate values.
+    public static final Instant MIN_TIME = new Instant(Long.MIN_VALUE);
+    public static final Instant MAX_TIME = new Instant(Long.MAX_VALUE);
+    public static final DateTime MIN_DATETIME = new DateTime(MIN_TIME, DateTimeZone.UTC);
+    public static final DateTime MAX_DATETIME = new DateTime(MAX_TIME, DateTimeZone.UTC);
+    public static final LocalDate MIN_DATE = new LocalDate(0, 1, 1).year().withMinimumValue();
+    public static final LocalDate MAX_DATE = new LocalDate(0, 12, 31).year().withMaximumValue();
+
     /**
      * Compares two objects that may be null, Integer, Long, BigInteger, or String.
      * null sorts before everything; all integers sort before all strings; integers
@@ -398,8 +405,8 @@ public class Utils {
 
     /** Creates an interval from a min and max, where null means "unbounded". */
     public static Interval toInterval(DateTime start, DateTime stop) {
-        return new Interval(start == null ? MIN_DATE : start,
-            stop == null ? MAX_DATE : stop);
+        return new Interval(start == null ? MIN_DATETIME : start,
+            stop == null ? MAX_DATETIME : stop);
     }
 
     /** Compresses a UUID optionally to a small integer. */

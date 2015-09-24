@@ -2,7 +2,7 @@ package org.projectbuendia.client.ui.chart;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
@@ -14,8 +14,8 @@ public class Column {
     public DateTime start;
     public DateTime stop;
     public String headingHtml;
-    public Map<String, SortedSet<Obs>> obsMap = new HashMap<>();  // keyed by conceptUuid
-    public Map<String, Integer> orderExecutionCounts = new HashMap<>();  // keyed by orderUuid
+    public Map<String, SortedSet<ObsPoint>> pointSetByConceptUuid = new HashMap<>();
+    public Map<String, Integer> executionCountsByOrderUuid = new HashMap<>();
 
     public Column(DateTime start, DateTime stop, String headingHtml) {
         this.start = start;

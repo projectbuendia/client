@@ -19,8 +19,6 @@ public class Row {
         DEFAULTS.put("text", new ChartItem("", "", false, null, "{1,text,5}", "{1,text,40}", "", "", ""));
         DEFAULTS.put("date", new ChartItem("", "", false, null, "{1,date,MMM dd}", "{1,date,MMM dd}", "", "", ""));
         DEFAULTS.put("time", new ChartItem("", "", false, null, "{1,time,HH:mm}", "{1,time,HH:mm}", "", "", ""));
-        DEFAULTS.put("obs_date", new ChartItem("", "", false, null, "{1,obs_time,MMM dd}", "{1,obs_time,MMM dd}", "", "", ""));
-        DEFAULTS.put("obs_time", new ChartItem("", "", false, null, "{1,obs_time,HH:mm}", "{1,obs_time,MMM dd 'at' HH:mm}", "", "", ""));
     }
 
     public Row(@Nonnull ChartItem item) {

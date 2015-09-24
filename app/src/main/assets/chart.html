@@ -15,12 +15,13 @@ $(document).ready(function() {
     <tr>
       {% for tile in tileRow %}
         {% set id = tile.item.conceptIds | first %}
-        {% set class = tile.obses | obsformat(tile.item.cssClass) %}
-        {% set style = tile.obses | obsformat(tile.item.cssStyle) %}
+        {% set values = tile.points | values %}
+        {% set class = values | format_values(tile.item.cssClass) %}
+        {% set style = values | format_values(tile.item.cssStyle) %}
         <td class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
-          <div class="value">{{tile.obses | obsformat(tile.item.format) | linebreak | raw}}</div>
-          <div class="caption">{{tile.obses | obsformat(tile.item.captionFormat) | linebreak | raw}}</div>
+          <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
+          <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
         </td>
       {% endfor %}
     </tr>
@@ -53,38 +54,38 @@ $(document).ready(function() {
             {{row.item.label}}
           </th>
           {% for column in columns %}
-            {% set values = get_all(row=row, column=column) %}
-            {% if values is empty %}
-              {% set aggregate = null %}
+            {% set points = get_all_points(row=row, column=column) %}
+            {% if points is empty %}
+              {% set summaryValue = null %}
             {% elseif row.item.type == 'yes_no' %}
-              {% set aggregate = values | max %}
+              {% set summaryValue = points | values | max %}
             {% else %}
-              {% set aggregate = values | last %}
+              {% set summaryValue = (points | last).value %}
             {% endif %}
-            {% set class = aggregate | obsformat(row.item.cssClass) %}
-            {% set style = aggregate | obsformat(row.item.cssStyle) %}
+            {% set class = summaryValue | format_values(row.item.cssClass) %}
+            {% set style = summaryValue | format_values(row.item.cssStyle) %}
             <td class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
                style="{{style}}" onclick="popup({{row.item.label | js}},
-              {% if values is empty %}
+              {% if points is empty %}
                 []
               {% else %}
-                [ {%- for value in values -%}
-                  [{{value | obsformat(row.item.captionFormat) | js}},
-                   {{value | obsformat('{1,obs_time,HH:mm}') | js}}],
+                [ {%- for point in points -%}
+                  [{{point.value | format_value(row.item.captionFormat) | js}},
+                   {{point.time | format_time('HH:mm') | js}}],
                 {%- endfor -%} ]
               {% endif %} )">
-              {% if values is not empty %}
+              {% if points is not empty %}
                 {% if row.item.type == 'text_icon' %}
                   <div onclick="alert(''
-                        {%- for value in values -%}
+                        {%- for point in points -%}
                           + '---- '
-                          + {{value.encounterTime | dateformat('dd MMM \'at\' HH:mm') | js}}
+                          + {{point.time | format_time('dd MMM \'at\' HH:mm') | js}}
                           + ' ----\n'
-                          + {{value.value | js}}
+                          + {{point.value | js}}
                           + '\n\n'
                         {%- endfor -%}); return false">&#x1f4dd;</div>
                 {% else %}
-                  {{aggregate | obsformat(row.item.format)}}
+                  {{summaryValue | format_value(row.item.format)}}
                 {% endif %}
               {% endif %}
             </td>
@@ -138,25 +139,25 @@ $(document).ready(function() {
     </tbody>
 
     <script>
-      function popup(name, values) {
-        var dialog = document.getElementById('obs-dialog');
-        var html = '<h2>' + name + '</h2>';
+      function popup(name, pairs) {
+        // var dialog = document.getElementById('obs-dialog');
+        // var html = '<h2>' + name + '</h2>';
         var text = name + '\n\n';
-        if (values.length > 0) {
-          for (var i = 0; i < values.length; i++) {
-            var value = values[i][0], observed = values[i][1];
-            html += '<b>' + value + '</b> at ' + observed + '<br>';
-            text += value + ' at ' + observed + '\n';
+        if (pairs.length > 0) {
+          for (var i = 0; i < pairs.length; i++) {
+            var value = pairs[i][0], time = pairs[i][1];
+            // html += '<b>' + value + '</b> at ' + time + '<br>';
+            text += value + ' at ' + time + '\n';
           }
-          html += '&nbsp;<br>Comments <input type="text" size="40">';
+          // html += '&nbsp;<br>Comments <input type="text" size="40">';
         } else {
-          html += 'No observations.';
+          // html += 'No observations.';
           text += 'No observations.';
         }
         alert(text);
         return;
-        dialog.innerHTML = html;
-        dialog.showModal();
+        // dialog.innerHTML = html;
+        // dialog.showModal();
       }
     </script>
   </table>

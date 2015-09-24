@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
@@ -19,9 +20,11 @@ import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,8 +52,15 @@ public final class ObsValue implements Comparable<ObsValue> {
      */
     public @Nullable String name;
 
-    public static final ObsValue MIN = ObsValue.fromBoolean(false);
-    public static final ObsValue MAX = ObsValue.fromMillis(Long.MAX_VALUE);
+    public static final ObsValue MIN_VALUE = ObsValue.newCoded(false);
+    public static final ObsValue MAX_VALUE = ObsValue.newTime(Long.MAX_VALUE);
+    public static final ObsValue MIN_DATE = ObsValue.newDate(Utils.MIN_DATE);
+    public static final ObsValue MAX_DATE = ObsValue.newDate(Utils.MAX_DATE);
+    public static final ObsValue MIN_TIME = ObsValue.newTime(Utils.MIN_TIME);
+    public static final ObsValue MAX_TIME = ObsValue.newTime(Utils.MAX_TIME);
+    public static final ObsValue ZERO = ObsValue.newNumber(0);
+    public static final ObsValue FALSE = ObsValue.newCoded(false);
+    public static final ObsValue TRUE = ObsValue.newCoded(true);
 
     private static final Map<String, Integer> CODED_VALUE_ORDERING =
         new ImmutableMap.Builder<String, Integer>()
@@ -63,40 +73,63 @@ public final class ObsValue implements Comparable<ObsValue> {
             .put(ConceptUuids.SEVERE_UUID, 3)
             .put(ConceptUuids.YES_UUID, 100).build();
 
+    /** Coded values that are considered false by asBoolean(). */
+    private static final Set<String> FALSE_CONCEPT_UUIDS = ImmutableSet.of(
+        ConceptUuids.NO_UUID,
+        ConceptUuids.NONE_UUID,
+        ConceptUuids.NORMAL_UUID,
+        ConceptUuids.UNKNOWN_UUID
+    );
+
     // All constructors must honour the invariant that exactly one field is non-null.
 
-    public static ObsValue fromBoolean(boolean bool) {
-        return fromUuid(bool ? ConceptUuids.YES_UUID : ConceptUuids.NO_UUID);
+    public static ObsValue newCoded(boolean bool) {
+        return newCoded(bool ? ConceptUuids.YES_UUID : ConceptUuids.NO_UUID);
     }
 
-    public static ObsValue fromUuid(@Nonnull String uuid) {
+    public static ObsValue newCoded(@Nonnull String uuid) {
         return new ObsValue(uuid, null, null, null, null);
     }
 
-    public static ObsValue fromUuid(@Nonnull String uuid, String name) {
-        ObsValue ov = ObsValue.fromUuid(uuid);
+    public static ObsValue newCoded(@Nonnull String uuid, String name) {
+        ObsValue ov = ObsValue.newCoded(uuid);
         ov.name = name;
         return ov;
     }
 
-    public static ObsValue fromNumber(double number) {
+    public static ObsValue newNumber(double number) {
         return new ObsValue(null, number, null, null, null);
     }
 
-    public static ObsValue fromText(@Nonnull String text) {
+    public static ObsValue newText(@Nonnull String text) {
         return new ObsValue(null, null, text, null, null);
     }
 
-    public static ObsValue fromDate(@Nonnull LocalDate date) {
+    public static ObsValue newDate(@Nonnull LocalDate date) {
         return new ObsValue(null, null, null, date, null);
     }
 
-    public static ObsValue fromInstant(@Nonnull ReadableInstant instant) {
+    public static ObsValue newTime(@Nonnull ReadableInstant instant) {
         return new ObsValue(null, null, null, null, instant);
     }
 
-    public static ObsValue fromMillis(long millis) {
+    public static ObsValue newTime(long millis) {
         return new ObsValue(null, null, null, null, new Instant(millis));
+    }
+
+    public boolean asBoolean() {
+        if (uuid != null) {
+            return !FALSE_CONCEPT_UUIDS.contains(uuid);
+        } else if (number != null) {
+            return number != 0;
+        } else if (text != null) {
+            return !text.isEmpty();
+        } else if (date != null) {
+            return true;
+        } else if (instant != null) {
+            return true;
+        }
+        return false;
     }
 
     @Override public String toString() {
@@ -149,6 +182,7 @@ public final class ObsValue implements Comparable<ObsValue> {
 
     /**
      * Compares ObsValue instances according to a total ordering such that:
+     * - All non-null values are greater than null.
      * - The lowest value is the "false" Boolean value (encoded as the coded concept for "No").
      * - Next are all coded values, ordered from least severe to most severe (if they can
      *   be interpreted as having a severity); or from first to last (if they can
@@ -161,7 +195,8 @@ public final class ObsValue implements Comparable<ObsValue> {
      * @param other The other Value to compare to.
      * @return
      */
-    @Override public int compareTo(@Nonnull ObsValue other) {
+    @Override public int compareTo(@Nullable ObsValue other) {
+        if (other == null) return 1;
         int result = 0;
         result = Integer.compare(getTypeOrdering(), other.getTypeOrdering());
         if (result != 0) return result;

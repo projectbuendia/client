@@ -143,10 +143,11 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
                         String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
                         LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
+                        String age = birthdate == null ? "age unknown" : Utils.birthdateToAge(birthdate);
                         String gender = Utils.getString(cursor, Patients.GENDER, "");
                         mPatientUuid = uuid;
                         mPatientSearchResult.setText(givenName + " " + familyName +
-                            " (" + gender + ", " + Utils.birthdateToAge(birthdate) + ")");
+                            " (" + gender + ", " + age + ")");
                     } else {
                         String message = getResources().getString(R.string.go_to_patient_no_data);
                         DateTime lastSyncTime = mAppModel.getLastFullSyncTime();

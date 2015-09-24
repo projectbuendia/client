@@ -65,7 +65,7 @@ public class ChartDataHelper {
     private static String sLoadedLocale;
 
     private static Map<String, String> sConceptNames;
-    private static Map<String, String> sConceptTypes;
+    private static Map<String, ConceptType> sConceptTypes;
 
     public ChartDataHelper(ContentResolver contentResolver) {
         mContentResolver = checkNotNull(contentResolver);
@@ -93,9 +93,13 @@ public class ChartDataHelper {
                     Concepts.CONTENT_URI, new String[] {Concepts.UUID, Concepts.CONCEPT_TYPE},
                     null, null, null)) {
                     while (c.moveToNext()) {
-                        sConceptTypes.put(c.getString(0), c.getString(1));
+                        try {
+                            sConceptTypes.put(c.getString(0), ConceptType.valueOf(c.getString(1)));
+                        } catch (IllegalArgumentException e) { /* bad concept type name */ }
                     }
                 }
+                // Special case: we know this is a date even if it's not in any forms or charts.
+                sConceptTypes.put(ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE);
                 sLoadedLocale = locale;
             }
         }
@@ -120,6 +124,7 @@ public class ChartDataHelper {
     }
 
     /** Gets all observations for a given patient from the local cache, localized to English. */
+    // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
     public List<Obs> getObservations(String patientUuid) {
         return getObservations(patientUuid, ENGLISH_LOCALE);
     }
@@ -128,16 +133,17 @@ public class ChartDataHelper {
         long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
         String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
         String conceptName = sConceptNames.get(conceptUuid);
-        String conceptType = sConceptTypes.get(conceptUuid);
+        ConceptType conceptType = sConceptTypes.get(conceptUuid);
         String value = c.getString(c.getColumnIndex(Observations.VALUE));
         String localizedValue = value;
         if (ConceptType.CODED.name().equals(conceptType)) {
             localizedValue = sConceptNames.get(value);
         }
-        return new Obs(millis, conceptUuid, conceptName, conceptType, value, localizedValue);
+        return new Obs(millis, conceptUuid, conceptType, value, localizedValue);
     }
 
     /** Gets all observations for a given patient, localized for a given locale. */
+    // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
     public List<Obs> getObservations(String patientUuid, String locale) {
         loadConceptData(locale);
         List<Obs> results = new ArrayList<>();
@@ -152,16 +158,18 @@ public class ChartDataHelper {
     }
 
     /** Gets the latest observation of each concept for a given patient, localized to English. */
+    // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservations(String patientUuid) {
         return getLatestObservations(patientUuid, ENGLISH_LOCALE);
     }
 
     /** Gets the latest observation of each concept for a given patient from the app db. */
+    // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservations(String patientUuid, String locale) {
         Map<String, Obs> result = new HashMap<>();
         for (Obs obs : getObservations(patientUuid, locale)) {
             Obs existing = result.get(obs.conceptUuid);
-            if (existing == null || obs.obsTime.isAfter(existing.obsTime)) {
+            if (existing == null || obs.time.isAfter(existing.time)) {
                 result.put(obs.conceptUuid, obs);
             }
         }
@@ -169,6 +177,7 @@ public class ChartDataHelper {
     }
 
     /** Gets the latest observation of the specified concept for all patients. */
+    // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservationsForConcept(
         String conceptUuid, String locale) {
         loadConceptData(locale);
