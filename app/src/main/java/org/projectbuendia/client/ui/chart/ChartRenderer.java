@@ -18,7 +18,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -41,7 +41,7 @@ public class ChartRenderer {
 
     WebView mView;  // view into which the HTML table will be rendered
     Resources mResources;  // resources used for localizing the rendering
-    private List<ObsValue> mLastRenderedObs;  // last set of observations rendered
+    private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
     private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
 
@@ -58,8 +58,8 @@ public class ChartRenderer {
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
-    public void render(Chart chart, Map<String, ObsValue> latestObservations,
-                       List<ObsValue> observations, List<Order> orders,
+    public void render(Chart chart, Map<String, Obs> latestObservations,
+                       List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
 
@@ -105,8 +105,8 @@ public class ChartRenderer {
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         SortedSet<LocalDate> mDays = new TreeSet<>();
 
-        GridHtmlGenerator(Chart chart, Map<String, ObsValue> latestObservations,
-                          List<ObsValue> observations, List<Order> orders,
+        GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
+                          List<Obs> observations, List<Order> orders,
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
@@ -116,11 +116,11 @@ public class ChartRenderer {
             for (ChartSection tileGroup : chart.tileGroups) {
                 List<Tile> tileRow = new ArrayList<>();
                 for (ChartItem item : tileGroup.items) {
-                    ObsValue[] obsValues = new ObsValue[item.conceptUuids.length];
-                    for (int i = 0; i < obsValues.length; i++) {
-                        obsValues[i] = latestObservations.get(item.conceptUuids[i]);
+                    Obs[] obses = new Obs[item.conceptUuids.length];
+                    for (int i = 0; i < obses.length; i++) {
+                        obses[i] = latestObservations.get(item.conceptUuids[i]);
                     }
-                    tileRow.add(new Tile(item, obsValues));
+                    tileRow.add(new Tile(item, obses));
                 }
                 mTileRows.add(tileRow);
             }
@@ -134,8 +134,8 @@ public class ChartRenderer {
             addObservations(observations);
         }
 
-        void addObservations(List<ObsValue> observations) {
-            for (ObsValue obs : observations) {
+        void addObservations(List<Obs> observations) {
+            for (Obs obs : observations) {
                 if (obs.value == null) continue;
 
                 mDays.add(obs.obsTime.toLocalDate());
@@ -167,9 +167,9 @@ public class ChartRenderer {
             return mColumnsByStartMillis.get(startMillis);
         }
 
-        void addObs(Column column, ObsValue obs) {
+        void addObs(Column column, Obs obs) {
             if (!column.obsMap.containsKey(obs.conceptUuid)) {
-                column.obsMap.put(obs.conceptUuid, new TreeSet<>(ObsValue.BY_OBS_TIME));
+                column.obsMap.put(obs.conceptUuid, new TreeSet<>(Obs.BY_OBS_TIME));
             }
             column.obsMap.get(obs.conceptUuid).add(obs);
         }

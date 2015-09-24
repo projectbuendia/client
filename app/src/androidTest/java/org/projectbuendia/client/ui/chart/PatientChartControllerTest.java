@@ -30,7 +30,7 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -52,8 +52,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private static final String PATIENT_NAME_1 = "bob";
     private static final String PATIENT_ID_1 = "id1";
 
-    private static final ObsValue OBSERVATION_A =
-        new ObsValue(0, "c", "c", "TEXT", "value", "");
+    private static final Obs OBSERVATION_A =
+        new Obs(0, "c", "c", "TEXT", "value", "");
 
     private PatientChartController mController;
 
@@ -87,9 +87,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     /** Tests that observations are updated in the UI when patient details fetched. */
     public void testPatientDetailsLoaded_SetsObservationsOnUi() {
         // GIVEN the observations provider is set up to return some dummy data
-        List<ObsValue> allObservations =
+        List<Obs> allObservations =
             ImmutableList.of(OBSERVATION_A);
-        Map<String, ObsValue> recentObservations =
+        Map<String, Obs> recentObservations =
             ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
         when(mMockChartHelper.getObservations(PATIENT_UUID_1))
             .thenReturn(allObservations);

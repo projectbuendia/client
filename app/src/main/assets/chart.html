@@ -15,12 +15,12 @@ $(document).ready(function() {
     <tr>
       {% for tile in tileRow %}
         {% set id = tile.item.conceptIds | first %}
-        {% set class = tile.obsValues | obsformat(tile.item.cssClass) %}
-        {% set style = tile.obsValues | obsformat(tile.item.cssStyle) %}
+        {% set class = tile.obses | obsformat(tile.item.cssClass) %}
+        {% set style = tile.obses | obsformat(tile.item.cssStyle) %}
         <td class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
-          <div class="value">{{tile.obsValues | obsformat(tile.item.format) | linebreak | raw}}</div>
-          <div class="caption">{{tile.obsValues | obsformat(tile.item.captionFormat) | linebreak | raw}}</div>
+          <div class="value">{{tile.obses | obsformat(tile.item.format) | linebreak | raw}}</div>
+          <div class="caption">{{tile.obses | obsformat(tile.item.captionFormat) | linebreak | raw}}</div>
         </td>
       {% endfor %}
     </tr>

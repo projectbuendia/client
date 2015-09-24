@@ -1,7 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import org.projectbuendia.client.models.ChartItem;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.Obs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 /** Descriptor for a tile (latest observed value) in the patient chart. */
 public class Tile {
     public final ChartItem item;
-    public final ObsValue[] obsValues;
+    public final Obs[] obses;
 
     static Map<String, ChartItem> DEFAULTS = new HashMap<>();
     static {
@@ -25,8 +25,8 @@ public class Tile {
         DEFAULTS.put("obs_time", new ChartItem("", "", false, null, "{1,obs_time,HH:mm}", "", "", "", ""));
     }
     
-    public Tile(@Nonnull ChartItem item, @Nonnull ObsValue[] obsValues) {
+    public Tile(@Nonnull ChartItem item, @Nonnull Obs[] obses) {
         this.item = item.withDefaults(DEFAULTS.get(item.type));
-        this.obsValues = obsValues;
+        this.obses = obses;
     }
 }

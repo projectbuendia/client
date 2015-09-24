@@ -9,15 +9,15 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.sync;
+package org.projectbuendia.client.models;
 
 import android.support.annotation.NonNull;
 
 import com.google.common.collect.ImmutableMap;
 
 import org.joda.time.DateTime;
-import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -28,9 +28,13 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A simple bean class representing an observation with localized names and values. */
-public final class ObsValue implements Comparable<ObsValue> {
-    public static final Comparator<ObsValue> BY_OBS_TIME = new Comparator<ObsValue>() {
-        @Override public int compare(ObsValue left, ObsValue right) {
+// TODO: Make ObsValue a member of Obs; change the structure of Obs to be simply:
+// { final String uuid; String name; final Instant time; final ObsValue value; }
+// then delete getObsValue(), compareTo(), getTypeOrdering(), getCodedValueOrdering().
+// Eliminate future headaches by declaring uuid, time, and value to all be @Nonnull.
+public final class Obs implements Comparable<Obs> {
+    public static final Comparator<Obs> BY_OBS_TIME = new Comparator<Obs>() {
+        @Override public int compare(Obs left, Obs right) {
             return left.obsTime.compareTo(right.obsTime);
         }
     };
@@ -42,7 +46,6 @@ public final class ObsValue implements Comparable<ObsValue> {
     public final String conceptUuid;
 
     /** The data type of the concept that was observed. */
-    // TODO: Instead of conceptType, have separate valueUuid, valueNumber, and valueText fields.
     public final ConceptType conceptType;
 
     /** The localized name of the concept that was observed. */
@@ -54,7 +57,7 @@ public final class ObsValue implements Comparable<ObsValue> {
     /** The name of the answer concept, if the value is an answer concept. */
     @Nullable public final String valueName;
 
-    public ObsValue(
+    public Obs(
         long millis,
         String conceptUuid,
         String conceptName,
@@ -69,8 +72,27 @@ public final class ObsValue implements Comparable<ObsValue> {
         this.valueName = valueName;
     }
 
+    /** Returns the value of this observation as an ObsValue. */
+    public ObsValue getObsValue() {
+        switch (conceptType) {
+            case CODED:
+                return ObsValue.fromUuid(value, valueName);
+            case NUMERIC:
+                return ObsValue.fromNumber(Double.valueOf(value));
+            case TEXT:
+                return ObsValue.fromText(value);
+            case BOOLEAN:
+                return ObsValue.fromBoolean(ConceptUuids.YES_UUID.equals(value));
+            case DATE:
+                return ObsValue.fromDate(Utils.toLocalDate(value));
+            case DATETIME:
+                return ObsValue.fromMillis(Long.valueOf(value));
+        }
+        return null;
+    }
+
     @Override public String toString() {
-        return "ObsValue(obsTime=" + obsTime
+        return "Obs(obsTime=" + obsTime
             + ", conceptUuid=" + conceptUuid
             + ", conceptName=" + conceptName
             + ", conceptType=" + conceptType
@@ -79,8 +101,8 @@ public final class ObsValue implements Comparable<ObsValue> {
     }
 
     @Override public boolean equals(Object other) {
-        if (other instanceof ObsValue) {
-            ObsValue o = (ObsValue) other;
+        if (other instanceof Obs) {
+            Obs o = (Obs) other;
             return Objects.equals(obsTime, o.obsTime)
                 && Objects.equals(conceptUuid, o.conceptUuid)
                 && Objects.equals(conceptName, o.conceptName)
@@ -111,7 +133,7 @@ public final class ObsValue implements Comparable<ObsValue> {
      * @param other The other Value to compare to.
      * @return
      */
-    @Override public int compareTo(@NonNull ObsValue other) {
+    @Override public int compareTo(@NonNull Obs other) {
         if (value == null || other.value == null) {
             return value == other.value ? 0 : value == null ? -1 : 1;
         }
