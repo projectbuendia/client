@@ -150,6 +150,46 @@ to
 
 the client will have its server URL set to `http://10.0.2.2:9000/openmrs` by default.
 
+### Editing Faking Tablet Resolution on Non Tablet Devices
+
+## Resolution of field devices
+
+In the field, the Buendia project uses Sony Xperia Z2 Tablets. The user interface, has thus been written assuming a tablet interface, and in particular, assuming the specific resolution and DPI of the Sony Xperia Z2.
+
+You can determine the specific resolution / DPI of the Sony Xperia Z2 Tablet by plugging it into a computer and running the following commands (make sure you have [`adb` set up and USB debugging turned on](https://github.com/projectbuendia/buendia/wiki/Debug-and-Run-Buendia-in-Android-Studio-using-a-Xperia-z2-Tablet)):
+
+    $ adb shell wm size
+    Physical size: 1920x1200
+    $ adb shell wm density
+    Physical density: 240
+
+## Faking the resolution on an Android phone
+
+If you've got an Android _phone_, but not an Android _tablet_, it's still possible to develop the Buendia app, but it will be much easier if you fake the screen resolution of the tablet on your phone. You can do this by plugging your Android device into a computer, and running:
+
+    $ adb shell wm size 1920x1200
+    $ adb shell wm density 240
+    $ adb reboot
+
+**Note:**
+
+- You may need to use a size of `1200x1920` instead of `1920x1200`; it depends on the default orientation of your phone screen.
+- It's important to reboot because most apps assume that the density (in particular) doesn't change over the life of the application.
+- These settings persist after reboots.
+
+## Resetting your Android phone to normal
+Once you're finished developing, you probably want to be able to use your phone as normal again :smile:
+
+I suggest the following commands:
+
+    $ adb shell wm size reset
+    $ adb shell wm density reset
+    $ adb reboot
+
+## Testing Notes
+
+- Works on a release-build Nexus 5 running Lollipop.
+
 ### Android SDK packages
 
 If you're using Android Studio, you don't need to worry about installing SDK packages; Android Studio will take care of it for you (see **Android Studio project setup** above).  You only need to install the packages yourself if you want to build the client from the command line.
