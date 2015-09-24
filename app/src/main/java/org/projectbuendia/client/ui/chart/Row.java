@@ -21,6 +21,7 @@ public class Row {
         DEFAULTS.put("time", new ChartItem("", "", false, null, "{1,time,HH:mm}", "{1,time,HH:mm}", "", "", ""));
         DEFAULTS.put("obs_date", new ChartItem("", "", false, null, "{1,obs_time,MMM dd}", "{1,obs_time,MMM dd}", "", "", ""));
         DEFAULTS.put("obs_time", new ChartItem("", "", false, null, "{1,obs_time,HH:mm}", "{1,obs_time,MMM dd 'at' HH:mm}", "", "", ""));
+        DEFAULTS.put("severity_bars", new ChartItem("", "", false, null, "{1,select,1107:\u25cb;1498:\u002d;1499:\u003d;1500:\u2261}", "{1,name}", "{1,select,1500:critical}", "{1,select,1107:color:#ccc}", ""));
     }
 
     public Row(@Nonnull ChartItem item) {
