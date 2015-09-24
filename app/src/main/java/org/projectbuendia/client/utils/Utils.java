@@ -29,6 +29,8 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.net.Server;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -270,8 +272,6 @@ public class Utils {
         return value == null ? defaultValue : value;
     }
 
-
-
     /** Converts a list of Longs to an array of primitive longs. */
     public static long[] toArray(List<Long> items) {
         long[] array = new long[items.size()];
@@ -434,6 +434,13 @@ public class Utils {
     /** Shows or a hides a view based on a boolean flag. */
     public static void showIf(View view, boolean show) {
         view.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /** Gets the stack trace as a string.  Handy for looking inside exceptions when debugging. */
+    public static String toString(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 
     private Utils() {
