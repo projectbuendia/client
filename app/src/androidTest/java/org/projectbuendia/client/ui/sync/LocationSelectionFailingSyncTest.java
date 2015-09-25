@@ -49,7 +49,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
             click(viewWithText(R.string.sync_failed_back));
             screenshot("After Sync Fails");
             waitForProgressFragment(); // Wait for user screen to display.
-            expectVisible(viewWithText("GU"));
+            expectVisible(viewWithText("Guest User"));
             screenshot("Test Finish");
         }
     }
@@ -65,10 +65,12 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         click(viewWithText(R.string.sync_failed_settings));
         screenshot("After Settings Clicked");
 
+        expectVisible(viewWithText("Advanced"));
+        click(viewWithText("Advanced"));
+
         expectVisible(viewWithText("OpenMRS base URL"));
 
         // Go back to user selection before cleaning up wifi, or a sync will start.
-        pressBack();
         pressBack();
         cleanupWifi();
     }
