@@ -79,4 +79,7 @@ th[scope="row"] div { max-width: 100%; overflow: hidden; }
 }
 
 /* Content */
-.critical { color: red; }
+.critical   { color: #ff0000; }
+.abnormal   { color: #ff9500; }
+.borderline { color: #aa6600; }
+.good       { color: #4CAF50; }
