@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.models;
 
-import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.ReadableInstant;
 import org.json.JSONException;
@@ -35,7 +34,7 @@ public final class ObsPoint implements Comparable<ObsPoint> {
     }
 
     @Override public String toString() {
-        return "ObsPoint(time=" + new DateTime(time) + ", " + value + ")";
+        return "ObsPoint(time=" + time + ", " + value + ")";
     }
 
     public JSONObject toJson() throws JSONException {

@@ -14,7 +14,6 @@ package org.projectbuendia.client.models;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
@@ -142,7 +141,7 @@ public final class ObsValue implements Comparable<ObsValue> {
         } else if (date != null) {
             return "ObsValue(date=" + date + ")";
         } else if (instant != null) {
-            return "ObsValue(instant=" + new DateTime(instant) + ")";
+            return "ObsValue(instant=" + instant + ")";
         } else {
             throw new IllegalStateException();  // this should never happen
         }

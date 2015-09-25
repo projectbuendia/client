@@ -200,18 +200,22 @@ public class ChartRenderer {
             JSONObject dump = new JSONObject();
             for (String uuid : mConceptsToDump) {
                 try {
-                    JSONArray columnSeries = new JSONArray();
-                    for (Map.Entry<Long, Column> entry : mColumnsByStarts.entrySet()) {
+                    JSONArray pointGroups = new JSONArray();
+                    for (Column column : mColumnsByStarts.values()) {
                         JSONArray pointArray = new JSONArray();
-                        SortedSet<ObsPoint> points = entry.getValue().pointSetByConceptUuid.get(uuid);
+                        SortedSet<ObsPoint> points = column.pointSetByConceptUuid.get(uuid);
                         if (points != null && points.size() > 0) {
                             for (ObsPoint point : points) {
                                 pointArray.put(point.toJson());
                             }
-                            columnSeries.put(new JSONArray(new Object[] {entry.getKey(), pointArray}));
+                            JSONObject pointGroup = new JSONObject();
+                            pointGroup.put("start", column.start.getMillis());
+                            pointGroup.put("stop", column.stop.getMillis());
+                            pointGroup.put("points", pointArray);
+                            pointGroups.put(pointGroup);
                         }
                     }
-                    dump.put("" + Utils.compressUuid(uuid), columnSeries);
+                    dump.put("" + Utils.compressUuid(uuid), pointGroups);
                 } catch (JSONException e) {
                     LOG.e(e, "JSON error while dumping chart data");
                 }
@@ -248,7 +252,7 @@ public class ChartRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStarts.values()));
             context.put("nowColumnStart", getColumnContainingTime(Instant.now()).start);
             context.put("orders", mOrders);
-            context.put("columnSeriesByConceptId", getJsonDataDump());
+            context.put("dataCellsByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
         }
 
