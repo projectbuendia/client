@@ -24,6 +24,7 @@ import org.joda.time.Instant;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
+import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
@@ -404,7 +405,7 @@ public class Utils {
     }
 
     /** Creates an interval from a min and max, where null means "unbounded". */
-    public static Interval toInterval(DateTime start, DateTime stop) {
+    public static Interval toInterval(ReadableInstant start, ReadableInstant stop) {
         return new Interval(start == null ? MIN_DATETIME : start,
             stop == null ? MAX_DATETIME : stop);
     }

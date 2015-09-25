@@ -18,7 +18,7 @@ $(document).ready(function() {
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-        <td class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
+        <td id="tile-{{id}}" class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -64,8 +64,9 @@ $(document).ready(function() {
             {% endif %}
             {% set class = summaryValue | format_values(row.item.cssClass) %}
             {% set style = summaryValue | format_values(row.item.cssStyle) %}
-            <td class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
-               style="{{style}}" onclick="popup({{row.item.label | js}},
+            <td id="cell-{{id}}-{{column.start}}"
+                class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
+                style="{{style}}" onclick="popup({{row.item.label | js}},
               {% if points is empty %}
                 []
               {% else %}
@@ -159,6 +160,52 @@ $(document).ready(function() {
         // dialog.innerHTML = html;
         // dialog.showModal();
       }
+
+      function getPoints(columnSeries) {
+        var pointArrays = [];
+        for (var i = 0; i < columnSeries.length; i++) {
+          pointArrays.push(columnSeries[i][1]);
+        }
+        return Array.concat.apply(pointArrays);
+      }
+
+      var columnSeriesByConceptId = {{columnSeriesByConceptId | raw }};
+      function runTileScript(conceptIds, tileFunction) {
+        var args = [conceptIds];
+        for (var i = 0; i < conceptIds.length; i++) {
+          args.push(getPoints(columnSeriesByConceptId[conceptIds[i]]);
+        }
+        apply(tileFunction, args);
+      }
+      function runChartRowScript(conceptIds, chartRowFunction) {
+        var args = [conceptIds];
+        for (var i = 0; i < conceptIds.length; i++) {
+          args.push(columnSeriesByConceptId[conceptIds[i]];
+        }
+        apply(chartRowFunction, args);
+      }
+
+      {% for tileRow in tileRows %}
+        {% for tile in tileRow %}
+          {% if tile.item.script is not empty %}
+            try {
+              // Use eval so that bad syntax in one script doesn't break the whole page.
+              var tileFunction = eval('(' + {{tile.item.script | js}} + ')');
+              runTileScript({{tile.item.conceptIds | join(',') | js}}.split(','), tileFunction);
+            } catch (e) { }
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+
+      {% for row in rows %}
+        {% if row.item.script is not empty %}
+          try {
+            // Use eval so that bad syntax in one script doesn't break the whole page.
+            var chartRowFunction = eval('(' + {{row.item.script | js}} + ')');
+            runChartRowScript({{row.item.conceptIds | join(',') | js}}.split(','), chartRowFunction);
+          } catch (e) { }
+        {% endif %}
+      {% endfor %}
     </script>
   </table>
 </div>

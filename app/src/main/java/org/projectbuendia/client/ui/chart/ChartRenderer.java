@@ -11,9 +11,13 @@ import com.mitchellbosecke.pebble.PebbleEngine;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
 import org.joda.time.chrono.ISOChronology;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
@@ -28,9 +32,12 @@ import org.projectbuendia.client.utils.Utils;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -105,8 +112,9 @@ public class ChartRenderer {
         List<List<Tile>> mTileRows = new ArrayList<>();
         List<org.projectbuendia.client.ui.chart.Row> mRows = new ArrayList<>();
         Map<String, org.projectbuendia.client.ui.chart.Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
-        SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
+        SortedMap<Long, Column> mColumnsByStarts = new TreeMap<>();  // ordered by start millis
         SortedSet<LocalDate> mDays = new TreeSet<>();
+        Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
         GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
                           List<Obs> observations, List<Order> orders,
@@ -127,14 +135,20 @@ public class ChartRenderer {
                         }
                     }
                     tileRow.add(new Tile(item, points));
+                    if (!item.script.trim().isEmpty()) {
+                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                    }
                 }
                 mTileRows.add(tileRow);
             }
-            for (ChartSection chartSection : chart.rowGroups) {
-                for (ChartItem chartItem : chartSection.items) {
-                    org.projectbuendia.client.ui.chart.Row row = new org.projectbuendia.client.ui.chart.Row(chartItem);
+            for (ChartSection section : chart.rowGroups) {
+                for (ChartItem item : section.items) {
+                    Row row = new Row(item);
                     mRows.add(row);
-                    mRowsByUuid.put(chartItem.conceptUuids[0], row);
+                    mRowsByUuid.put(item.conceptUuids[0], row);
+                    if (!item.script.trim().isEmpty()) {
+                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                    }
                 }
             }
             addObservations(observations);
@@ -163,15 +177,15 @@ public class ChartRenderer {
             LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
             DateTime start = date.toDateTimeAtStartOfDay();
             long startMillis = start.getMillis();
-            if (!mColumnsByStartMillis.containsKey(startMillis)) {
+            if (!mColumnsByStarts.containsKey(startMillis)) {
                 int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
                 String admitDayLabel = (admitDay >= 1) ?
                     mResources.getString(R.string.day_n, admitDay) : "–";
                 String dateLabel = date.toString("d MMM");
-                mColumnsByStartMillis.put(startMillis, new Column(
+                mColumnsByStarts.put(startMillis, new Column(
                     start, start.plusDays(1), admitDayLabel + "<br>" + dateLabel));
             }
-            return mColumnsByStartMillis.get(startMillis);
+            return mColumnsByStarts.get(startMillis);
         }
 
         void addObs(Column column, Obs obs) {
@@ -179,6 +193,30 @@ public class ChartRenderer {
                 column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<ObsPoint>());
             }
             column.pointSetByConceptUuid.get(obs.conceptUuid).add(obs.getObsPoint());
+        }
+
+        /** Exports a map of concept IDs to arrays of [columnStart, points] pairs. */
+        JSONObject getJsonDataDump() {
+            JSONObject dump = new JSONObject();
+            for (String uuid : mConceptsToDump) {
+                try {
+                    JSONArray columnSeries = new JSONArray();
+                    for (Map.Entry<Long, Column> entry : mColumnsByStarts.entrySet()) {
+                        JSONArray pointArray = new JSONArray();
+                        SortedSet<ObsPoint> points = entry.getValue().pointSetByConceptUuid.get(uuid);
+                        if (points != null && points.size() > 0) {
+                            for (ObsPoint point : points) {
+                                pointArray.put(point.toJson());
+                            }
+                            columnSeries.put(new JSONArray(new Object[] {entry.getKey(), pointArray}));
+                        }
+                    }
+                    dump.put("" + Utils.compressUuid(uuid), columnSeries);
+                } catch (JSONException e) {
+                    LOG.e(e, "JSON error while dumping chart data");
+                }
+            }
+            return dump;
         }
 
         // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)
@@ -207,9 +245,10 @@ public class ChartRenderer {
             Map<String, Object> context = new HashMap<>();
             context.put("tileRows", mTileRows);
             context.put("rows", mRows);
-            context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
-            context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
+            context.put("columns", Lists.newArrayList(mColumnsByStarts.values()));
+            context.put("nowColumnStart", getColumnContainingTime(Instant.now()).start);
             context.put("orders", mOrders);
+            context.put("columnSeriesByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
         }
 
