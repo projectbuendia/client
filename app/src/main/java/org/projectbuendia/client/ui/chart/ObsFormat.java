@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Formats an array of Obs objects according to a format string.  The format string is
+ * Formats an array of ObsValue objects according to a format string.  The format string is
  * based on the MessageFormat syntax, but is 1-based so that "{1}" is replaced with the first
  * observation, "{2} is replaced with the second, and so on.
  *
