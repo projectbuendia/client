@@ -68,6 +68,13 @@
                             .css({position: 'absolute',
                                   top: $this.offset().top,
                                   left: $this.offset().left});
+
+                        // Ensure all the rows match the heights of the original rows.
+                        var origRows = $this.find('tr');
+                        var leftRows = leftHeader.find('tr');
+                        for (var i = 0; i < leftRows.length; i++) {
+                            leftRows[i].style.height = origRows[i].offsetHeight + 'px';
+                        }
                     }
 
                     if (settings.top) {
@@ -76,6 +83,13 @@
                             .appendTo(document.body)
                             .wrap("<div>").parent()
                             .css({position: 'fixed', top: '0', left: '0', visibility: 'hidden'});
+
+                        // Ensure all the columns match the widths of the original columns.
+                        var origCells = $this.find('th');
+                        var topCells = topHeader.find('th');
+                        for (var i = 0; i < topCells.length; i++) {
+                            topCells[i].style.width = origCells[i].offsetWidth + 'px';
+                        }
                     }
 
                     if (settings.left && settings.top) {
@@ -83,6 +97,14 @@
                             .find("th:nth-child(n+2)").remove().end()
                             .appendTo(document.body)
                             .css({position: 'fixed', top: '0', left: '0', visibility: 'hidden'});
+
+                        // Ensure all the corner cell matches the width and height of the original.
+                        var origCells = $this.find('th');
+                        var cornerCells = cornerHeader.find('th');
+                        for (var i = 0; i < cornerCells.length; i++) {
+                            cornerCells[i].style.width = origCells[i].offsetWidth + 'px';
+                            cornerCells[i].style.height = origCells[i].offsetHeight + 'px';
+                        }
                     }
 
                     $this.data('freezeHeader', {top: topHeader, left: leftHeader, corner: cornerHeader});

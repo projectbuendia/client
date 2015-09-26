@@ -3,11 +3,6 @@
 <script src="jquery-1.5.1.min.js"></script>
 <script src="freezeheader.js"></script>
 <script src="chart.js"></script>
-<script>
-$(document).ready(function() {
-  $('#grid').freezeHeader({top: true, left: true});
-});
-</script>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 
@@ -159,4 +154,8 @@ $(document).ready(function() {
       runChartRowScript(data, {{row.item.conceptIds | join(',') | js | raw}}, {{row.item.script | js | raw}});
     {% endif %}
   {% endfor %}
+
+  $(document).ready(function() {
+    $('#grid').freezeHeader({top: true, left: true});
+  });
 </script>
