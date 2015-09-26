@@ -132,11 +132,10 @@ public class ChartDataHelper {
     private Obs obsFromCursor(Cursor c) {
         long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
         String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
-        String conceptName = sConceptNames.get(conceptUuid);
         ConceptType conceptType = sConceptTypes.get(conceptUuid);
         String value = c.getString(c.getColumnIndex(Observations.VALUE));
         String localizedValue = value;
-        if (ConceptType.CODED.name().equals(conceptType)) {
+        if (ConceptType.CODED.equals(conceptType)) {
             localizedValue = sConceptNames.get(value);
         }
         return new Obs(millis, conceptUuid, conceptType, value, localizedValue);
