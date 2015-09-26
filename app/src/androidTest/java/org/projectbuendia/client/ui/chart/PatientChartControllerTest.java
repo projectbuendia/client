@@ -25,12 +25,13 @@ import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -51,7 +52,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private static final String PATIENT_NAME_1 = "Bob";
     private static final String PATIENT_ID_1 = "patient-id-1";
 
-    private static final Obs OBS_1 = new Obs(0, ConceptUuids.TEMPERATURE_UUID, "NUMERIC", "37.2", "");
+    private static final Obs OBS_1 = new Obs(
+        0, ConceptUuids.TEMPERATURE_UUID, ConceptType.NUMERIC, "37.2", "");
 
     private PatientChartController mController;
 
