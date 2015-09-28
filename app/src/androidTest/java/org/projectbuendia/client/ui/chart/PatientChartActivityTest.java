@@ -159,7 +159,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             new EventBusIdlingResource<FetchXformSucceededEvent>(
                 UUID.randomUUID().toString(),
                 mEventBus);
-        click(viewWithText("[test] Form"));
+        click(viewWithText(FORM_LABEL));
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).
@@ -181,7 +181,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testDismissButtonShowsDialogWithChanges() {
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
-        answerTextQuestion("Temperature", "29.2");
+        answerTextQuestion(RESPIRATORY_RATE_LABEL, "17");
 
         // Try to discard and give up.
         discardForm();
@@ -202,38 +202,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                     hasDescendantThat(hasTextContaining(questionText)))));
     }
 
-    /** Tests that PCR submission does not occur without confirmation being specified. */
-    public void testPcr_requiresConfirmation() {
-        inUserLoginGoToDemoPatientChart();
-        openPcrForm();
-        answerTextQuestion("Ebola L gene", "38");
-        answerTextQuestion("Ebola Np gene", "35");
-
-        click(viewWithText("Save"));
-
-        // Saving form should not work (can't check for a Toast within Espresso)
-        expectVisible(viewWithText(R.string.form_entry_save));
-
-        // Try again with confirmation
-        answerCodedQuestion("confirm this lab test result", "Confirm Lab Test Results");
-        saveForm();
-
-        // Check that new values displayed.
-        expectVisibleSoon(viewThat(hasTextContaining("38.0 / 35.0")));
-    }
-
-    protected void openPcrForm() {
-        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
-            new EventBusIdlingResource<FetchXformSucceededEvent>(
-                UUID.randomUUID().toString(),
-                mEventBus);
-        click(viewWithId(R.id.attribute_pcr));
-        Espresso.registerIdlingResources(xformIdlingResource);
-
-        // Give the form time to be parsed on the client (this does not result in an event firing).
-        expectVisibleSoon(viewWithText("Encounter"));
-    }
-
     private void answerSingleCodedQuestion(String questionText, String answerText) {
         answerCodedQuestion(questionText, answerText, ButtonsSelectOneWidget.class,
             TableWidgetGroup.class);
@@ -241,7 +209,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     private void answerMultipleCodedQuestion(String questionText, String answerText) {
         answerCodedQuestion(questionText, answerText, ButtonsSelectOneWidget.class,
-            TableWidgetGroup.class, ODKView.class);
+                TableWidgetGroup.class, ODKView.class);
     }
 
     private void answerCodedQuestion(String questionText, String answerText,
@@ -253,11 +221,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         Espresso.closeSoftKeyboard();
 
         scrollToAndClick(viewThat(
-            isAnyOf(CheckBox.class, RadioButton.class),
-            hasAncestorThat(
-                isAnyOf(classes),
-                hasDescendantThat(hasTextContaining(questionText))),
-            hasTextContaining(answerText)));
+                isAnyOf(CheckBox.class, RadioButton.class),
+                hasAncestorThat(
+                        isAnyOf(classes),
+                        hasDescendantThat(hasTextContaining(questionText))),
+                hasTextContaining(answerText)));
     }
 
     private void saveForm() {
@@ -272,18 +240,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             mEventBus);
     }
 
-    /** Tests that PCR displays 'NEG' in place of numbers when 40.0 is specified. */
-    public void testPcr_showsNegFor40() {
-        inUserLoginGoToDemoPatientChart();
-        openPcrForm();
-        answerTextQuestion("Ebola L gene", "40");
-        answerTextQuestion("Ebola Np gene", "40");
-        answerCodedQuestion("confirm this lab test result", "Confirm Lab Test Results");
-        saveForm();
-
-        expectVisibleSoon(viewThat(hasTextContaining("NEG / NEG")));
-    }
-
     /**
      * Tests that, when multiple encounters for the same encounter time are submitted within a short
      * period of time, that only the latest encounter is present in the relevant column.
@@ -296,17 +252,18 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         for (int i = 0; i < 6; i++) {
             openEncounterForm();
 
-            String pulse = Integer.toString(i + 80);
-            String temp = Integer.toString(i + 35) + ".0";
-            String vomiting = Integer.toString(5 - i);
-            answerTextQuestion("Pulse", pulse);
-            answerTextQuestion("Temperature", temp);
-            answerTextQuestion("Vomiting", vomiting);
+            String respiratoryRate = Integer.toString(i + 80);
+            String bpSystolic = Integer.toString(i + 80);
+            String bpDiastolic = Integer.toString(5 + 100);
+            answerTextQuestion(RESPIRATORY_RATE_LABEL, respiratoryRate);
+            answerTextQuestion(BLOOD_PRESSURE_SYSTOLIC_LABEL, bpSystolic);
+            answerTextQuestion(BLOOD_PRESSURE_DIASTOLIC_LABEL, bpDiastolic);
             saveForm();
 
-            checkVitalValueContains("Pulse", pulse);
-            checkObservationValueEquals(0 /*Temperature*/, temp, "Today");
-            checkObservationValueEquals(6 /*Vomiting*/, vomiting, "Today");
+            //FIXME: Check the proper values
+            checkVitalValueContains("Pulse", respiratoryRate);
+            checkObservationValueEquals(0 /*Temperature*/, bpSystolic, "Today");
+            checkObservationValueEquals(6 /*Vomiting*/, bpDiastolic, "Today");
         }
     }
 
@@ -330,9 +287,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         inUserLoginGoToDemoPatientChart();
         // Enter first set of observations for this encounter.
         openEncounterForm();
-        //answerTextQuestion(TEMPERATURE_LABEL, "37.5");
+        //answerTextQuestion(TEMPERATURE_LABEL, "37.5"); //issue #10
         answerTextQuestion(RESPIRATORY_RATE_LABEL, "23");
-        //answerTextQuestion(SPO2_OXYGEN_SAT_LABEL, "95");
+        //answerTextQuestion(SPO2_OXYGEN_SAT_LABEL, "95"); //issue #10
         answerTextQuestion(BLOOD_PRESSURE_SYSTOLIC_LABEL, "80");
         answerTextQuestion(BLOOD_PRESSURE_DIASTOLIC_LABEL, "100");
         saveForm();
@@ -357,6 +314,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerTextQuestion(NOTES_LABEL, "Call the family");
         saveForm();
 
+        //FIXME - check the proper values
         // Check that all values are now visible.
         checkVitalValueContains("Pulse", "74");
         checkVitalValueContains("Respiration", "23");
@@ -378,31 +336,26 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // TODO/robustness: Get rid of magic numbers in these tests.
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
-        answerTextQuestion("Pulse", "80");
-        answerTextQuestion("Respiratory rate", "20");
-        answerTextQuestion("Temperature", "31");
-        answerTextQuestion("Weight", "90");
-        answerCodedQuestion("Signs and Symptoms", "Nausea");
-        answerTextQuestion("Vomiting", "4");
-        answerTextQuestion("Diarrhoea", "6");
-        answerCodedQuestion("Pain level", "Severe");
-        answerCodedQuestion("Pain (Detail)", "Headache");
-        answerCodedQuestion("Pain (Detail)", "Back pain");
-        answerCodedQuestion("Bleeding", "Yes");
-        answerCodedQuestion("Bleeding (Detail)", "Nosebleed");
-        answerCodedQuestion("Weakness", "Moderate");
-        answerCodedQuestion("Other Symptoms", "Red eyes");
-        answerCodedQuestion("Other Symptoms", "Hiccups");
-        answerCodedQuestion("Consciousness", "Responds to voice");
-        answerCodedQuestion("Mobility", "Assisted");
-        answerCodedQuestion("Diet", "Fluids");
-        answerCodedQuestion("Hydration", "Needs ORS");
-        answerCodedQuestion("Condition", "5");
-        answerCodedQuestion("Additional Details", "Pregnant");
-        answerCodedQuestion("Additional Details", "IV access present");
-        answerTextQuestion("Notes", "possible malaria");
+        //answerTextQuestion(TEMPERATURE_LABEL, "37.5"); //issue #10
+        answerTextQuestion(RESPIRATORY_RATE_LABEL, "23");
+        //answerTextQuestion(SPO2_OXYGEN_SAT_LABEL, "95"); //issue #10
+        answerTextQuestion(BLOOD_PRESSURE_SYSTOLIC_LABEL, "80");
+        answerTextQuestion(BLOOD_PRESSURE_DIASTOLIC_LABEL, "100");
+        answerTextQuestion(WEIGHT_LABEL, "80");
+        answerTextQuestion(HEIGHT_LABEL, "170");
+        answerCodedQuestion(SHOCK_LABEL, SHOCK_VALUE);
+        answerCodedQuestion(CONSCIOUSNESS_LABEL, CONSCIOUSNESS_VALUE);
+        answerCodedQuestion(OTHER_SYMPTOMS_LABEL, OTHER_SYMPTOMS_VALUE);
+        answerCodedQuestion(HICCUPS_LABEL, "Yes");
+        answerCodedQuestion(HEADACHE_LABEL, "Yes");
+        answerCodedQuestion(SORE_THROAT_LABEL, "Yes");
+        answerCodedQuestion(HEARTBURN_LABEL, "No");
+        answerCodedQuestion(PREGNANT_LABEL, "Yes");
+        answerCodedQuestion(CONDITION_LABEL, CONDITION_VALUE);
+        answerTextQuestion(NOTES_LABEL, "Call the family");
         saveForm();
 
+        //FIXME - check the proper values
         checkVitalValueContains("Pulse", "80");
         checkVitalValueContains("Respiration", "20");
         checkVitalValueContains("Consciousness", "Responds to voice");
