@@ -172,24 +172,24 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         click(viewWithId(R.id.action_add));
         expectVisible(viewWithText("New patient"));
         if (delta.id.isPresent()) {
-            type(delta.id.get(), viewWithId(R.id.patient_creation_text_patient_id));
+            type(delta.id.get(), viewWithId(R.id.patient_id));
         }
         if (delta.givenName.isPresent()) {
-            type(delta.givenName.get(), viewWithId(R.id.patient_creation_text_patient_given_name));
+            type(delta.givenName.get(), viewWithId(R.id.patient_given_name));
         }
         if (delta.familyName.isPresent()) {
-            type(delta.familyName.get(), viewWithId(R.id.patient_creation_text_patient_family_name));
+            type(delta.familyName.get(), viewWithId(R.id.patient_family_name));
         }
         if (delta.birthdate.isPresent()) {
             Period age = new Period(delta.birthdate.get(), LocalDate.now());
-            type(age.getMonths(), viewWithId(R.id.patient_creation_age_months));
-            type(age.getYears(), viewWithId(R.id.patient_creation_age_years));
+            type(age.getMonths(), viewWithId(R.id.patient_age_months));
+            type(age.getYears(), viewWithId(R.id.patient_age_years));
         }
         if (delta.gender.isPresent()) {
             if (delta.gender.get() == Patient.GENDER_MALE) {
-                click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
+                click(viewWithId(R.id.patient_sex_male));
             } else if (delta.gender.get() == Patient.GENDER_FEMALE) {
-                click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
+                click(viewWithId(R.id.patient_sex_female));
             }
         }
         if (delta.admissionDate.isPresent()) {
@@ -209,15 +209,16 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             // A little tricky as we need to select by UUID.
             // click(viewWithId(R.id.patient_creation_button_change_location));
         }
+        click(viewWithText("OK"));
+
         if (locationName != null) {
-            click(viewWithId(R.id.patient_creation_button_change_location));
+            click(viewWithText("Location"));
             click(viewWithText(locationName));
         }
 
         EventBusIdlingResource<ItemCreatedEvent<Patient>> resource =
             new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
 
-        click(viewWithId(R.id.patient_creation_button_create));
         Espresso.registerIdlingResources(resource); // wait for patient to be created
     }
 
