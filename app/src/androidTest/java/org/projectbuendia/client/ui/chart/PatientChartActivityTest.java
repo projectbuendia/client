@@ -17,6 +17,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.view.View;
 
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
@@ -40,6 +41,29 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
 
     private static final int ROW_HEIGHT = 84;
+
+    private static final String FORM_LABEL = "[test] Form";
+    private static final String TEMPERATURE_LABEL = "[test] Temperature (°C)";
+    private static final String RESPIRATORY_RATE_LABEL = "[test] Respiratory rate (bpm)";
+    private static final String SPO2_OXYGEN_SAT_LABEL = "[test] SpO2 oxygen sat (%%)";
+    private static final String BLOOD_PRESSURE_SYSTOLIC_LABEL = "[test] Blood pressure, systolic";
+    private static final String BLOOD_PRESSURE_DIASTOLIC_LABEL = "[test] Blood pressure, diastolic";
+    private static final String WEIGHT_LABEL = "[test] Weight (kg)";
+    private static final String HEIGHT_LABEL = "[test] Height (cm)";
+    private static final String SHOCK_LABEL = "[test] Shock";
+    private static final String SHOCK_VALUE = "1. [test] Mild";
+    private static final String CONSCIOUSNESS_LABEL = "[test] Consciousness (AVPU)";
+    private static final String CONSCIOUSNESS_VALUE = "V. [test] Responds to voice";
+    private static final String OTHER_SYMPTOMS_LABEL = "[test] Other symptoms";
+    private static final String OTHER_SYMPTOMS_VALUE = "[test] Cough";
+    private static final String HICCUPS_LABEL = "[test] Hiccups";
+    private static final String HEADACHE_LABEL = "[test] Headache";
+    private static final String SORE_THROAT_LABEL = "[test] Sore throat";
+    private static final String HEARTBURN_LABEL = "[test] Heartburn";
+    private static final String PREGNANT_LABEL = "Pregnant";
+    private static final String CONDITION_LABEL = "Condition";
+    private static final String CONDITION_VALUE = "2. Unwell";
+    private static final String NOTES_LABEL = "[test] Notes";
 
     public PatientChartActivityTest() {
         super();
@@ -172,10 +196,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     private void answerTextQuestion(String questionText, String answerText) {
         scrollToAndType(answerText, viewThat(
-            isA(EditText.class),
-            hasSiblingThat(
-                isA(MediaLayout.class),
-                hasDescendantThat(hasTextContaining(questionText)))));
+                isA(EditText.class),
+                hasSiblingThat(
+                    isA(MediaLayout.class),
+                    hasDescendantThat(hasTextContaining(questionText)))));
     }
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
@@ -210,7 +234,18 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         expectVisibleSoon(viewWithText("Encounter"));
     }
 
-    private void answerCodedQuestion(String questionText, String answerText) {
+    private void answerSingleCodedQuestion(String questionText, String answerText) {
+        answerCodedQuestion(questionText, answerText, ButtonsSelectOneWidget.class,
+            TableWidgetGroup.class);
+    }
+
+    private void answerMultipleCodedQuestion(String questionText, String answerText) {
+        answerCodedQuestion(questionText, answerText, ButtonsSelectOneWidget.class,
+            TableWidgetGroup.class, ODKView.class);
+    }
+
+    private void answerCodedQuestion(String questionText, String answerText,
+        final Class<? extends View>... classes) {
         // Close the soft keyboard before answering any toggle questions -- on rare occasions,
         // if Espresso answers one of these questions and is then instructed to type into another
         // field, the input event will actually be generated as the keyboard is hiding and will be
@@ -220,7 +255,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         scrollToAndClick(viewThat(
             isAnyOf(CheckBox.class, RadioButton.class),
             hasAncestorThat(
-                isAnyOf(ButtonsSelectOneWidget.class, TableWidgetGroup.class, ODKView.class),
+                isAnyOf(classes),
                 hasDescendantThat(hasTextContaining(questionText))),
             hasTextContaining(answerText)));
     }
@@ -295,15 +330,31 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         inUserLoginGoToDemoPatientChart();
         // Enter first set of observations for this encounter.
         openEncounterForm();
-        answerTextQuestion("Pulse", "74");
-        answerTextQuestion("Respiratory rate", "23");
-        answerTextQuestion("Temperature", "36.1");
+        //answerTextQuestion(TEMPERATURE_LABEL, "37.5");
+        answerTextQuestion(RESPIRATORY_RATE_LABEL, "23");
+        //answerTextQuestion(SPO2_OXYGEN_SAT_LABEL, "95");
+        answerTextQuestion(BLOOD_PRESSURE_SYSTOLIC_LABEL, "80");
+        answerTextQuestion(BLOOD_PRESSURE_DIASTOLIC_LABEL, "100");
         saveForm();
+
         // Enter second set of observations for this encounter.
         openEncounterForm();
-        answerCodedQuestion("Signs and Symptoms", "Nausea");
-        answerTextQuestion("Vomiting", "2");
-        answerTextQuestion("Diarrhoea", "5");
+        answerTextQuestion(WEIGHT_LABEL, "80");
+        answerTextQuestion(HEIGHT_LABEL, "170");
+        answerSingleCodedQuestion(SHOCK_LABEL, SHOCK_VALUE);
+        answerSingleCodedQuestion(CONSCIOUSNESS_LABEL, CONSCIOUSNESS_VALUE);
+        answerMultipleCodedQuestion(OTHER_SYMPTOMS_LABEL, OTHER_SYMPTOMS_VALUE);
+        saveForm();
+
+        // Enter third set of observations for this encounter.
+        openEncounterForm();
+        answerSingleCodedQuestion(HICCUPS_LABEL, "No");
+        answerSingleCodedQuestion(HEADACHE_LABEL, "No");
+        answerSingleCodedQuestion(SORE_THROAT_LABEL, "Yes");
+        answerSingleCodedQuestion(HEARTBURN_LABEL, "No");
+        answerSingleCodedQuestion(PREGNANT_LABEL, "Yes");
+        answerSingleCodedQuestion(CONDITION_LABEL, CONDITION_VALUE);
+        answerTextQuestion(NOTES_LABEL, "Call the family");
         saveForm();
 
         // Check that all values are now visible.
