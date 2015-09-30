@@ -107,7 +107,7 @@
     <inspection_tool class="StaticMethodNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_regex" value="[a-z][a-z0-9]+([A-Z][a-z0-9]+)*" />
       <option name="m_minLength" value="2" />
-      <option name="m_maxLength" value="32" />
+      <option name="m_maxLength" value="50" />
     </inspection_tool>
     <inspection_tool class="StaticVariableNamingConvention" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="checkMutableFinals" value="false" />

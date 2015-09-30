@@ -62,10 +62,9 @@ public class App extends Application {
         Collect.onCreate(this);
         super.onCreate();
 
-        Stetho.initialize(Stetho.newInitializerBuilder(this)
-            .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
-            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-            .build());
+        // Enable Stetho, which lets you inspect the app's database, UI, and network activity
+        // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
+        Stetho.initializeWithDefaults(this);
 
         SQLiteDatabase.loadLibs(this);
 
