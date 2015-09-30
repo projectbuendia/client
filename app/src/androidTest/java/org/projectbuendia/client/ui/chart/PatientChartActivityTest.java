@@ -13,11 +13,13 @@ package org.projectbuendia.client.ui.chart;
 
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.IdlingResource;
+import android.support.test.espresso.web.webdriver.Locator;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.view.View;
+import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.view.View;
 
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
@@ -33,6 +35,11 @@ import org.projectbuendia.client.utils.Logger;
 
 import java.util.UUID;
 
+import static android.support.test.espresso.web.assertion.WebViewAssertions.webMatches;
+import static android.support.test.espresso.web.sugar.Web.onWebView;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
 
 /** Functional tests for {@link PatientChartActivity}. */
@@ -67,27 +74,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     public PatientChartActivityTest() {
         super();
-    }
-
-    /** Tests that the general condition dialog successfully changes general condition. */
-    public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
-        inUserLoginGoToDemoPatientChart();
-        click(viewWithId(R.id.patient_chart_vital_general_parent));
-        screenshot("General Condition Dialog");
-        click(viewWithText(R.string.status_well));
-
-        // Wait for a sync operation to update the chart.
-        EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
-            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
-        Espresso.registerIdlingResources(syncFinishedIdlingResource);
-
-        // Check for updated vital view.
-        expectVisibleSoon(viewWithText(R.string.status_well));
-
-        // Check for updated chart view.
-        expectVisible(viewThat(
-            hasText(R.string.status_short_desc_well),
-            not(hasId(R.id.patient_chart_vital_general_condition_number))));
     }
 
     /** Tests that the encounter form can be opened more than once. */
@@ -152,13 +138,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         saveForm();
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
     }*/
+
     protected void openEncounterForm() {
         openActionBarOptionsMenu();
 
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
             new EventBusIdlingResource<FetchXformSucceededEvent>(
-                UUID.randomUUID().toString(),
-                mEventBus);
+                UUID.randomUUID().toString(), mEventBus);
         click(viewWithText(FORM_LABEL));
         Espresso.registerIdlingResources(xformIdlingResource);
 
@@ -236,8 +222,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     private IdlingResource getXformSubmissionIdlingResource() {
         return new EventBusIdlingResource<SubmitXformSucceededEvent>(
-            UUID.randomUUID().toString(),
-            mEventBus);
+           UUID.randomUUID().toString(),
+           mEventBus);
     }
 
     /**
@@ -313,6 +299,16 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerSingleCodedQuestion(CONDITION_LABEL, CONDITION_VALUE);
         answerTextQuestion(NOTES_LABEL, "Call the family");
         saveForm();
+
+        onWebView()
+                .withElement(findElement(Locator.CSS_SELECTOR, ".concept-5089 td:nth-child(2)"))
+                .check(webMatches(getText(), isEmptyString()));
+
+//        onWebView()
+//                .withElement(findElement(Locator.CLASS_NAME, "obs concept-5089 td:nth-child(2)"))
+//                .check(webMatches(getText(), isEmptyString()));
+
+        //onWebView().withElement(findElement(Locator.CLASS_NAME, "concept-5089"));
 
         //FIXME - check the proper values
         // Check that all values are now visible.
