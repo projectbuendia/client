@@ -48,8 +48,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
 
 /**
  * OkHttp backed {@link com.android.volley.toolbox.HttpStack HttpStack} that does not
@@ -65,7 +63,7 @@ public class OkHttpStack implements HttpStack {
 
     @Override
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
-        throws IOException, AuthFailureError {
+            throws IOException, AuthFailureError {
 
         OkHttpClient client = mClient.clone();
         int timeoutMs = request.getTimeoutMs();
@@ -121,7 +119,7 @@ public class OkHttpStack implements HttpStack {
 
     @SuppressWarnings("deprecation")
     private static void setConnectionParametersForRequest(com.squareup.okhttp.Request.Builder builder, Request<?> request)
-        throws IOException, AuthFailureError {
+            throws IOException, AuthFailureError {
         switch (request.getMethod()) {
             case Request.Method.DEPRECATED_GET_OR_POST:
                 // Ensure backwards compatibility.  Volley assumes a request with a null body is a GET.
@@ -171,10 +169,10 @@ public class OkHttpStack implements HttpStack {
                 return new ProtocolVersion("HTTP", 2, 0);
         }
 
-        throw new IllegalAccessError("Unknown protocol");
+        throw new IllegalAccessError("Unkwown protocol");
     }
 
-    private static @Nullable RequestBody createRequestBody(Request r) throws AuthFailureError {
+    private static RequestBody createRequestBody(Request r) throws AuthFailureError {
         final byte[] body = r.getBody();
         if (body == null) return null;
 
