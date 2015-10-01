@@ -154,11 +154,9 @@ public class EditPatientDialogFragment extends DialogFragment {
             }
         }
 
-
         if (!valid) {
             throw new ValidationException("Validation Error");
         }
-
 
         Utils.logUserAction("patient_submitted",
             "id", id,
