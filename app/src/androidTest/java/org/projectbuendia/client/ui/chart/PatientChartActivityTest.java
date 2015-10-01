@@ -21,6 +21,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
+import org.hamcrest.Matcher;
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
 import org.odk.collect.android.widgets2.group.TableWidgetGroup;
@@ -39,8 +40,12 @@ import static android.support.test.espresso.web.assertion.WebViewAssertions.webM
 import static android.support.test.espresso.web.sugar.Web.onWebView;
 import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
 import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
+
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
+
+import static java.lang.String.format;
 
 /** Functional tests for {@link PatientChartActivity}. */
 @MediumTest
@@ -182,10 +187,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     private void answerTextQuestion(String questionText, String answerText) {
         scrollToAndType(answerText, viewThat(
-                isA(EditText.class),
-                hasSiblingThat(
-                    isA(MediaLayout.class),
-                    hasDescendantThat(hasTextContaining(questionText)))));
+            isA(EditText.class),
+            hasSiblingThat(
+                isA(MediaLayout.class),
+                hasDescendantThat(hasTextContaining(questionText)))));
     }
 
     private void answerSingleCodedQuestion(String questionText, String answerText) {
@@ -195,7 +200,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     private void answerMultipleCodedQuestion(String questionText, String answerText) {
         answerCodedQuestion(questionText, answerText, ButtonsSelectOneWidget.class,
-                TableWidgetGroup.class, ODKView.class);
+            TableWidgetGroup.class, ODKView.class);
     }
 
     private void answerCodedQuestion(String questionText, String answerText,
@@ -207,11 +212,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         Espresso.closeSoftKeyboard();
 
         scrollToAndClick(viewThat(
-                isAnyOf(CheckBox.class, RadioButton.class),
-                hasAncestorThat(
-                        isAnyOf(classes),
-                        hasDescendantThat(hasTextContaining(questionText))),
-                hasTextContaining(answerText)));
+            isAnyOf(CheckBox.class, RadioButton.class),
+            hasAncestorThat(
+                isAnyOf(classes),
+                hasDescendantThat(hasTextContaining(questionText))),
+            hasTextContaining(answerText)));
     }
 
     private void saveForm() {
@@ -233,8 +238,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testEncounter_latestEncounterIsAlwaysShown() {
         inUserLoginGoToDemoPatientChart();
 
-        // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
-        // count), and verify that the latest value is visible for each.
+        // Update a couple of observations (respirattory rate and blood pressure),
+        // and verify that the latest value is visible for each.
         for (int i = 0; i < 6; i++) {
             openEncounterForm();
 
@@ -246,10 +251,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             answerTextQuestion(BLOOD_PRESSURE_DIASTOLIC_LABEL, bpDiastolic);
             saveForm();
 
-            //FIXME: Check the proper values
-            checkVitalValueContains("Pulse", respiratoryRate);
-            checkObservationValueEquals(0 /*Temperature*/, bpSystolic, "Today");
-            checkObservationValueEquals(6 /*Vomiting*/, bpDiastolic, "Today");
+            // Check the proper values.
+            checkObservationValue("999005242", equalTo(respiratoryRate)); //RESPIRATORY_RATE
+            checkObservationValue("999005085", equalTo(bpSystolic)); //BLOOD_PRESSURE_SYSTOLIC
+            checkObservationValue("999005086", equalTo(bpDiastolic)); //BLOOD_PRESSURE_DIASTOLIC
         }
     }
 
@@ -271,6 +276,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     /** Ensures that non-overlapping observations for the same encounter are combined. */
     public void testCombinesNonOverlappingObservationsForSameEncounter() {
         inUserLoginGoToDemoPatientChart();
+
         // Enter first set of observations for this encounter.
         openEncounterForm();
         //answerTextQuestion(TEMPERATURE_LABEL, "37.5"); //issue #10
@@ -297,27 +303,34 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerSingleCodedQuestion(HEARTBURN_LABEL, "No");
         answerSingleCodedQuestion(PREGNANT_LABEL, "Yes");
         answerSingleCodedQuestion(CONDITION_LABEL, CONDITION_VALUE);
-        answerTextQuestion(NOTES_LABEL, "Call the family");
+        answerTextQuestion(NOTES_LABEL, "Call family");
         saveForm();
 
-        onWebView()
-                .withElement(findElement(Locator.CSS_SELECTOR, ".concept-5089 td:nth-child(2)"))
-                .check(webMatches(getText(), isEmptyString()));
-
-//        onWebView()
-//                .withElement(findElement(Locator.CLASS_NAME, "obs concept-5089 td:nth-child(2)"))
-//                .check(webMatches(getText(), isEmptyString()));
-
-        //onWebView().withElement(findElement(Locator.CLASS_NAME, "concept-5089"));
-
-        //FIXME - check the proper values
         // Check that all values are now visible.
-        checkVitalValueContains("Pulse", "74");
-        checkVitalValueContains("Respiration", "23");
-        checkObservationValueEquals(0, "36.1", "Today"); // Temp
-        checkObservationSet(5, "Today"); // Nausea
-        checkObservationValueEquals(6, "2", "Today"); // Vomiting
-        checkObservationValueEquals(7, "5", "Today"); // Diarrhoea
+        //checkObservationValue("999005088", equalTo("37.5")); //TEMPERATURE //issue #10
+        checkObservationValue("999005242", equalTo("23")); //RESPIRATORY_RATE
+        //checkObservationValue("999005092", equalTo("95")); //SPO2_OXYGEN_SAT //issue #10
+        checkObservationValue("999005085", equalTo("80")); //BLOOD_PRESSURE_SYSTOLIC
+        checkObservationValue("999005086", equalTo("100")); //BLOOD_PRESSURE_DIASTOLIC
+        checkObservationValue("999005089", equalTo("80")); //WEIGHT
+        checkObservationValue("999005090", equalTo("170")); //HEIGHT
+        checkObservationValue("999112989", equalTo(SHOCK_VALUE)); //SHOCK
+        checkObservationValue("999162643", equalTo(CONSCIOUSNESS_VALUE)); //CONSCIOUSNESS
+        checkObservationValue("999143264", equalTo(OTHER_SYMPTOMS_VALUE)); //COUGH
+        checkObservationValue("999138862", equalTo("No")); //HICCUPS
+        checkObservationValue("999139084", equalTo("No")); //HEADACHE
+        checkObservationValue("999158843", equalTo("Yes")); //SORE_THROAT
+        checkObservationValue("concept-a3657203-cfed-44b8-8e3f-960f8d4cf3b3",
+            equalTo(CONDITION_VALUE)); //UNWELL
+        checkObservationValue("concept-999162169", equalTo("Call family")); //NOTES
+    }
+
+    private void checkObservationValue(String conceptionId, Matcher<String> resultMatcher) {
+        //TODO: Remove hard-coded class name.
+        onWebView()
+                .withElement(findElement(Locator.CSS_SELECTOR,
+                    String.format(".concept-%s td:nth-child(2)", conceptionId)))
+            .check(webMatches(getText(), resultMatcher));
     }
 
     private void checkObservationSet(int row, String dateKey) {
@@ -351,36 +364,22 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerTextQuestion(NOTES_LABEL, "Call the family");
         saveForm();
 
-        //FIXME - check the proper values
-        checkVitalValueContains("Pulse", "80");
-        checkVitalValueContains("Respiration", "20");
-        checkVitalValueContains("Consciousness", "Responds to voice");
-        checkVitalValueContains("Mobility", "Assisted");
-        checkVitalValueContains("Diet", "Fluids");
-        checkVitalValueContains("Hydration", "Needs ORS");
-        checkVitalValueContains("Condition", "5");
-        checkVitalValueContains("Pain level", "Severe");
-
-        checkObservationValueEquals(0, "31.0", "Today"); // Temp
-        checkObservationValueEquals(1, "90", "Today"); // Weight
-        checkObservationValueEquals(2, "5", "Today"); // Condition
-        checkObservationValueEquals(3, "V", "Today"); // Consciousness
-        checkObservationValueEquals(4, "As", "Today"); // Mobility
-        checkObservationSet(5, "Today"); // Nausea
-        checkObservationValueEquals(6, "4", "Today"); // Vomiting
-        checkObservationValueEquals(7, "6", "Today"); // Diarrhoea
-        checkObservationValueEquals(8, "3", "Today"); // Pain level
-        checkObservationSet(9, "Today"); // Bleeding
-        checkObservationValueEquals(10, "2", "Today"); // Weakness
-        checkObservationSet(13, "Today"); // Hiccups
-        checkObservationSet(14, "Today"); // Red eyes
-        checkObservationSet(15, "Today"); // Headache
-        checkObservationSet(21, "Today"); // Back pain
-        checkObservationSet(24, "Today"); // Nosebleed
-
-        expectVisible(viewThat(hasTextContaining("Pregnant")));
-        expectVisible(viewThat(hasTextContaining("IV Fitted")));
-
-        // TODO/completeness: exercise the Notes field
+        // Check that all values are now visible.
+        //checkObservationValue("999005088", equalTo("37.5")); //TEMPERATURE //issue #10
+        checkObservationValue("999005242", equalTo("23")); //RESPIRATORY_RATE
+        //checkObservationValue("999005092", equalTo("95")); //SPO2_OXYGEN_SAT //issue #10
+        checkObservationValue("999005085", equalTo("80")); //BLOOD_PRESSURE_SYSTOLIC
+        checkObservationValue("999005086", equalTo("100")); //BLOOD_PRESSURE_DIASTOLIC
+        checkObservationValue("999005089", equalTo("80")); //WEIGHT
+        checkObservationValue("999005090", equalTo("170")); //HEIGHT
+        checkObservationValue("999112989", equalTo(SHOCK_VALUE)); //SHOCK
+        checkObservationValue("999162643", equalTo(CONSCIOUSNESS_VALUE)); //CONSCIOUSNESS
+        checkObservationValue("999143264", equalTo(OTHER_SYMPTOMS_VALUE)); //COUGH
+        checkObservationValue("999138862", equalTo("No")); //HICCUPS
+        checkObservationValue("999139084", equalTo("No")); //HEADACHE
+        checkObservationValue("999158843", equalTo("Yes")); //SORE_THROAT
+        checkObservationValue("concept-a3657203-cfed-44b8-8e3f-960f8d4cf3b3",
+            equalTo(CONDITION_VALUE)); //UNWELL
+        checkObservationValue("concept-999162169", equalTo("Call family")); //NOTES
     }
 }
