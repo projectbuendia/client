@@ -63,9 +63,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     private static final String WEIGHT_LABEL = "[test] Weight (kg)";
     private static final String HEIGHT_LABEL = "[test] Height (cm)";
     private static final String SHOCK_LABEL = "[test] Shock";
-    private static final String SHOCK_VALUE = "1. [test] Mild";
+    private static final String SHOCK_VALUE = "[test] Mild";
     private static final String CONSCIOUSNESS_LABEL = "[test] Consciousness (AVPU)";
-    private static final String CONSCIOUSNESS_VALUE = "V. [test] Responds to voice";
+    private static final String CONSCIOUSNESS_VALUE = "[test] Responds to voice";
     private static final String OTHER_SYMPTOMS_LABEL = "[test] Other symptoms";
     private static final String OTHER_SYMPTOMS_VALUE = "[test] Cough";
     private static final String HICCUPS_LABEL = "[test] Hiccups";
@@ -74,8 +74,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     private static final String HEARTBURN_LABEL = "[test] Heartburn";
     private static final String PREGNANT_LABEL = "Pregnant";
     private static final String CONDITION_LABEL = "Condition";
-    private static final String CONDITION_VALUE = "2. Unwell";
+    private static final String CONDITION_VALUE = "Unwell";
     private static final String NOTES_LABEL = "[test] Notes";
+
+    private static final String NO_VALUE = "○";
+    private static final String YES_VALUE = "●";
 
     public PatientChartActivityTest() {
         super();
@@ -240,7 +243,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Update a couple of observations (respirattory rate and blood pressure),
         // and verify that the latest value is visible for each.
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             openEncounterForm();
 
             String respiratoryRate = Integer.toString(i + 80);
@@ -315,11 +318,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValue("999005089", equalTo("80")); //WEIGHT
         checkObservationValue("999005090", equalTo("170")); //HEIGHT
         checkObservationValue("999112989", equalTo(SHOCK_VALUE)); //SHOCK
-        checkObservationValue("999162643", equalTo(CONSCIOUSNESS_VALUE)); //CONSCIOUSNESS
-        checkObservationValue("999143264", equalTo(OTHER_SYMPTOMS_VALUE)); //COUGH
-        checkObservationValue("999138862", equalTo("No")); //HICCUPS
-        checkObservationValue("999139084", equalTo("No")); //HEADACHE
-        checkObservationValue("999158843", equalTo("Yes")); //SORE_THROAT
+        checkObservationValue("999162643", equalTo("V")); //CONSCIOUSNESS
+        checkObservationValue("999143264", equalTo(YES_VALUE)); //COUGH
+        checkObservationValue("999138862", equalTo(NO_VALUE)); //HICCUPS
+        checkObservationValue("999139084", equalTo(NO_VALUE)); //HEADACHE
+        checkObservationValue("999158843", equalTo(YES_VALUE)); //SORE_THROAT
         checkObservationValue("concept-a3657203-cfed-44b8-8e3f-960f8d4cf3b3",
             equalTo(CONDITION_VALUE)); //UNWELL
         checkObservationValue("concept-999162169", equalTo("Call family")); //NOTES
