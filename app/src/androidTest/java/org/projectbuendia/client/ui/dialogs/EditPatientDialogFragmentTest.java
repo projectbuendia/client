@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.ui.newpatient;
+package org.projectbuendia.client.ui.dialogs;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -24,7 +24,7 @@ import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 /** Tests for adding a new patient. */
-public class NewPatientActivityTest extends FunctionalTestCase {
+public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
     /** Tests adding a new patient with a location. */
     public void testNewPatient() {
