@@ -331,8 +331,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     private void checkObservationValue(String conceptionId, Matcher<String> resultMatcher) {
         //TODO: Remove hard-coded class name.
         onWebView()
-                .withElement(findElement(Locator.CSS_SELECTOR,
-                    String.format(".concept-%s td:nth-child(2)", conceptionId)))
+            .withElement(findElement(Locator.CSS_SELECTOR,
+                String.format(".concept-%s td:nth-child(2)", conceptionId)))
             .check(webMatches(getText(), resultMatcher));
     }
 
@@ -347,6 +347,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
         // TODO/robustness: Get rid of magic numbers in these tests.
         inUserLoginGoToDemoPatientChart();
+
         openEncounterForm();
         //answerTextQuestion(TEMPERATURE_LABEL, "37.5"); //issue #10
         answerTextQuestion(RESPIRATORY_RATE_LABEL, "23");
@@ -355,16 +356,16 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerTextQuestion(BLOOD_PRESSURE_DIASTOLIC_LABEL, "100");
         answerTextQuestion(WEIGHT_LABEL, "80");
         answerTextQuestion(HEIGHT_LABEL, "170");
-        answerCodedQuestion(SHOCK_LABEL, SHOCK_VALUE);
-        answerCodedQuestion(CONSCIOUSNESS_LABEL, CONSCIOUSNESS_VALUE);
-        answerCodedQuestion(OTHER_SYMPTOMS_LABEL, OTHER_SYMPTOMS_VALUE);
-        answerCodedQuestion(HICCUPS_LABEL, "Yes");
-        answerCodedQuestion(HEADACHE_LABEL, "Yes");
-        answerCodedQuestion(SORE_THROAT_LABEL, "Yes");
-        answerCodedQuestion(HEARTBURN_LABEL, "No");
-        answerCodedQuestion(PREGNANT_LABEL, "Yes");
-        answerCodedQuestion(CONDITION_LABEL, CONDITION_VALUE);
-        answerTextQuestion(NOTES_LABEL, "Call the family");
+        answerSingleCodedQuestion(SHOCK_LABEL, SHOCK_VALUE);
+        answerSingleCodedQuestion(CONSCIOUSNESS_LABEL, CONSCIOUSNESS_VALUE);
+        answerMultipleCodedQuestion(OTHER_SYMPTOMS_LABEL, OTHER_SYMPTOMS_VALUE);
+        answerSingleCodedQuestion(HICCUPS_LABEL, "No");
+        answerSingleCodedQuestion(HEADACHE_LABEL, "No");
+        answerSingleCodedQuestion(SORE_THROAT_LABEL, "Yes");
+        answerSingleCodedQuestion(HEARTBURN_LABEL, "No");
+        answerSingleCodedQuestion(PREGNANT_LABEL, "Yes");
+        answerSingleCodedQuestion(CONDITION_LABEL, CONDITION_VALUE);
+        answerTextQuestion(NOTES_LABEL, "Call family");
         saveForm();
 
         // Check that all values are now visible.
