@@ -84,7 +84,11 @@ $(document).ready(function() {
                           + '\n\n'
                         {%- endfor -%}); return false">&#x1f4dd;</div>
                 {% else %}
-                  {{aggregate | obsformat(row.item.format)}}
+                    {% set output = aggregate | obsformat(row.item.format) %}
+                    {% if output is empty %}
+                      {% set output = aggregate | obsformat(row.item.captionFormat) %}
+                    {% endif %}
+                    {{output}}
                 {% endif %}
               {% endif %}
             </td>
