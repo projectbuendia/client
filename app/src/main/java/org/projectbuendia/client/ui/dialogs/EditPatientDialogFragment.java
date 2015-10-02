@@ -14,6 +14,8 @@ package org.projectbuendia.client.ui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -252,15 +254,17 @@ public class EditPatientDialogFragment extends DialogFragment {
     }
 
     private void showErrorMessage(String Message) {
-        new AlertDialog.Builder(getActivity())
+        Drawable alertIcon = getResources().getDrawable(android.R.drawable.ic_dialog_alert);
+        alertIcon.setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
+            new AlertDialog.Builder(getActivity())
             .setTitle(getResources().getString(R.string.invalid_input))
             .setMessage(Message)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    // continue with delete
+                    // continue
                 }
             })
-            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setIcon(alertIcon)
             .show();
     }
 }

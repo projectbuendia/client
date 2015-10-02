@@ -19,21 +19,30 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import java.util.Date;
+import java.util.Random;
 
+import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
 /** Tests for adding a new patient. */
 public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
-    /** Tests adding a new patient with a location. */
+    /**
+     * Tests adding a new patient;
+     * Tests adding a location to the patient;
+     * Test symptom date;
+     * Test last observation date;
+     * Test admission date;
+     */
     public void testNewPatient() {
 
         // Create the patient
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
         String id = Long.toString(new Date().getTime()%100000);
-        populateNewPatientField(id);
+        populateNewPatientFields(id);
         click(viewWithText("OK"));
         waitForProgressFragment();
         screenshot("On Patient Chart");
@@ -59,19 +68,41 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
         // The admission date should be visible right after adding a patient.
         // Flaky because of potential periodic syncs.
-        expectVisibleWithin(100000, viewThat(
+        expectVisibleWithin(399999, viewThat(
             hasAncestorThat(withId(R.id.attribute_admission_days)),
             hasText("Day 1")));
 
         // The last observation should be today.
         DateTimeFormatter formatter = DateTimeFormat.forPattern("MMM d, yyyy");
-        expectVisibleWithin(100000, viewThat(
+        expectVisibleWithin(399999, viewThat(
             withId(R.id.patient_chart_last_observation_date_time),
             hasTextContaining(formatter.print(DateTime.now()))));
     }
 
+    /** Test Age Validation (cannot be more then 120 years). */
+    public void testAgeValidation(){
+        inUserLoginGoToPatientCreation();
+        screenshot("Test Start");
+        chooseSex();
+        type("120", viewWithId(R.id.patient_age_years));
+        click(viewWithText("OK"));
+        screenshot("After OK Pressed");
+        waitForProgressFragment();
+        onView(withId(R.id.patient_age_years)).check(matches(editTextWithError(
+            getActivity().getString(R.string.age_limit))));
+    }
+
+    /** Patients cannot be created without sex. */
+    public void testSexValidation(){
+        inUserLoginGoToPatientCreation();
+        screenshot("Test Start");
+        click(viewWithText("OK"));
+        screenshot("After OK Pressed");
+        expectVisible(viewThat(hasTextContaining(getActivity().getString(R.string.sex_cannot_be_null))));
+    }
+
     /** Populates all the fields on the New Patient screen. */
-    private void populateNewPatientField(String id) {
+    private void populateNewPatientFields(String id) {
         screenshot("Before Patient Populated");
         String given = "Given" + id;
         String family = "Family" + id;
@@ -80,8 +111,20 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         type(family, viewWithId(R.id.patient_family_name));
         type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_years));
         type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
-        click(viewWithId(R.id.patient_sex_male));
-        click(viewWithId(R.id.patient_sex_female));
+        chooseSex();
         screenshot("After Patient Populated");
+    }
+
+    /** Randomly choose a sex for the patient */
+    private void chooseSex(){
+        Random rand = new Random();
+        int randomNum = rand.nextInt((2 - 1) + 1) + 1;
+
+        if(randomNum == 1){
+            click(viewWithId(R.id.patient_sex_male));
+        }
+        else if(randomNum == 2){
+            click(viewWithId(R.id.patient_sex_female));
+        }
     }
 }
