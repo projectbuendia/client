@@ -22,12 +22,11 @@
         android:id="@+id/user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="240dp"
-        android:minHeight="64dp"
+        android:minWidth="180sp"
+        android:minHeight="48sp"
         android:padding="16dp"
         android:gravity="start|center_vertical"
         android:textColor="#757575"
-        android:textSize="24sp"
         tools:text="David Chen" />
 
     <View
@@ -38,7 +37,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="48sp"
         android:orientation="horizontal">
 
         <ImageButton

@@ -44,8 +44,11 @@ import de.greenrobot.event.EventBus;
  * troubleshooting and status messages.
  */
 public abstract class BaseActivity extends FragmentActivity {
-
     private static final Logger LOG = Logger.create();
+    private static final double PHI = (Math.sqrt(5) + 1)/2; // golden ratio
+    private static final double STEP_FACTOR = Math.sqrt(PHI);
+    private static final long MIN_STEP = -2;
+    private static final long MAX_STEP = 2;
 
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
@@ -72,7 +75,11 @@ public abstract class BaseActivity extends FragmentActivity {
 
     public void adjustFontScale(int delta) {
         Configuration config = getResources().getConfiguration();
-        float newScale = (float) Math.max(0.7, Math.min(1.3, config.fontScale + delta*0.15));
+
+        // Each button press scales the font sizes up or down by STEP_FACTOR.
+        long currentStep = Math.round(Math.log(config.fontScale) / Math.log(STEP_FACTOR));
+        long newStep = Math.max(MIN_STEP, Math.min(MAX_STEP, currentStep + delta));
+        float newScale = (float) Math.pow(STEP_FACTOR, newStep);
         if (newScale != config.fontScale) {
             config.fontScale = newScale;
             getResources().updateConfiguration(config, getResources().getDisplayMetrics());

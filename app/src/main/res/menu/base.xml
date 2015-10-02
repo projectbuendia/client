@@ -17,6 +17,6 @@
         android:id="@+id/user"
         android:showAsAction="ifRoom"
         android:title=""
-        android:actionLayout="@layout/action_view_user" />
+        android:actionLayout="@layout/action_bar_user_menu_button" />
 
 </menu>

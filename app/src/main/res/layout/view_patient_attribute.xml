@@ -29,27 +29,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/view_attribute_icon"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp"
-        android:textColor="#000000"
-        android:textSize="32sp"
+        android:textAppearance="@style/text.large"
         tools:text="Day 5"/>
 
-    <!-- paddingStart="1dp" aligns left edge of view_attribute_name with view_attribute_value -->
+    <!-- paddingStart="1sp" aligns left edge of view_attribute_name with view_attribute_value -->
     <TextView
         android:id="@+id/view_attribute_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/view_attribute_value"
         android:layout_alignStart="@id/view_attribute_value"
-        android:paddingStart="1dp"
-        android:paddingEnd="0dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp"
-        android:textColor="#000000"
-        android:textSize="16sp"
+        android:paddingStart="1sp"
+        android:textAppearance="@style/text.caption"
         tools:text="Since admission" />
 
 </RelativeLayout>

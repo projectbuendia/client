@@ -11,125 +11,235 @@
 -->
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+  <!-- THEMES -->
 
-        <!-- Action Bar -->
-        <item name="android:actionBarStyle" >@style/Widget.Buendia.ActionBar</item>
-        <item name="android:actionMenuTextAppearance">@style/MenuActionBar</item>
-        <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+  <!-- Base application theme -->
+  <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
 
-        <!-- Widgets -->
-        <item name="android:textViewStyle">@style/Widget.Buendia.TextView</item>
-        <item name="android:editTextStyle">@style/Widget.Buendia.EditText</item>
-        <item name="android:buttonStyle">@style/Widget.Buendia.Button</item>
-        <item name="android:radioButtonStyle">
-            @style/Widget.Buendia.CompoundButton.RadioButton
-        </item>
-    </style>
+    <!-- Action Bar -->
+    <item name="android:actionBarStyle">@style/ActionBar</item>
+    <item name="android:actionMenuTextAppearance">@style/MenuActionBar</item>
+    <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
 
-    <!-- Use if the activity has text buttons for the action bar -->
-    <style name="AppThemeTextButtonActionBar" parent="AppTheme">
-        <item name="android:actionButtonStyle">@style/ActionTextButtonStyle</item>
-    </style>
+    <!-- Widgets -->
+    <item name="android:textViewStyle">@style/widgets.TextView</item>
+    <item name="android:editTextStyle">@style/widgets.EditText</item>
+    <item name="android:buttonStyle">@style/widgets.Button</item>
+    <item name="android:radioButtonStyle">@style/widgets.RadioButton</item>
+  </style>
 
-    <style name="MenuActionBar" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
-        <item name="android:textSize">20sp</item>
-    </style>
+  <!-- Theme for an activity with text buttons in the action bar -->
+  <style name="AppThemeTextButtonActionBar" parent="AppTheme">
+    <item name="android:actionButtonStyle">@style/ActionTextButtonStyle</item>
+  </style>
 
-    <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
-        <item name="android:minWidth">@dimen/action_bar_height</item>
-    </style>
 
-    <style name="ActionTextButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
-        <item name="android:minWidth">@dimen/action_bar_height_and_a_half</item>
-    </style>
+  <!-- ACTION BAR -->
 
-    <style name="row">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:showDividers">middle</item>
-        <item name="android:divider">?android:dividerVertical</item>
-    </style>
-    <style name="cell">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:gravity">center</item>
-        <item name="android:padding">16dp</item>
-    </style>
-    <style name="cell_left_align">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:gravity">left</item>
-        <item name="android:padding">16dp</item>
-    </style>
-    <style name="cell_heading">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textSize">22sp</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:layout_marginBottom">8dp</item>
-    </style>
-    <style name="cell_subheading">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center</item>
-    </style>
+  <style name="ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+    <item name="android:height">@dimen/action_bar_height</item>
+    <item name="android:titleTextStyle">@style/text.large.white</item>
+    <item name="android:background">@drawable/action_bar_bg</item>
+    <item name="android:progressBarPadding">32sp</item>
+    <item name="android:itemPadding">8sp</item>
+  </style>
 
-    <style name="FormLabel">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">22sp</item>
-        <!--<item name="android:textStyle">bold</item>-->
-        <item name="android:textColor">#ff747374</item>
-        <!--<item name="android:textAllCaps">true</item>-->
-        <item name="android:paddingLeft">8dp</item>
-    </style>
+  <style name="MenuActionBar" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
+    <item name="android:textAppearance">@style/text.large.white</item>
+  </style>
 
-    <style name="FormItem">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:paddingTop">22dp</item>
-        <item name="android:paddingBottom">22dp</item>
-    </style>
-    <style name="FormInput">
-        <item name="android:textSize">20sp</item>
-    </style>
-    <style name="vertical_small_horizontal_large">
-        <item name="android:orientation">vertical</item>
-    </style>
-    <style name="stacked_small">
-        <item name="android:layout_width">wrap_content</item>
-    </style>
+  <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+    <item name="android:textSize">22sp</item>
+    <item name="android:textStyle">normal</item>
+    <item name="android:minWidth">@dimen/action_bar_height</item>
+  </style>
 
-    <style name="button_large">
-        <item name="android:minWidth">400dp</item>
-        <item name="android:textSize">30sp</item>
-        <item name="android:layout_gravity">center_horizontal|top</item>
-        <item name="android:background">@drawable/button_selector</item>
-        <item name="android:textColor">@drawable/white</item>
-        <item name="android:layout_marginBottom">10dp</item>
-        <item name="android:padding">30dp</item>
-    </style>
+  <style name="ActionTextButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+    <item name="android:textSize">22sp</item>
+    <item name="android:textStyle">normal</item>
+    <item name="android:minWidth">144sp</item>
+  </style>
 
-    <style name="overview_details_row">
-        <item name="android:background">@color/yellow</item>
-        <item name="android:layout_margin">30dp</item>
-    </style>
 
-    <style name="TentGrid">
-        <item name="android:layout_margin">10dp</item>
-        <item name="android:numColumns">3</item>
-        <item name="android:verticalSpacing">5dp</item>
-        <item name="android:horizontalSpacing">5dp</item>
-        <item name="android:stretchMode">columnWidth</item>
-    </style>
+  <!-- WIDGETS -->
+
+  <style name="widgets" parent="None"/>
+
+  <!-- TextView -->
+  <style name="widgets.TextView" parent="android:Widget.Holo.Light.TextView">
+    <item name="android:textAppearance">@style/text</item>
+  </style>
+
+  <!-- EditText -->
+  <style name="widgets.EditText" parent="android:Widget.Holo.Light.EditText">
+    <item name="android:focusable">true</item>
+    <item name="android:focusableInTouchMode">true</item>
+    <item name="android:clickable">true</item>
+    <item name="android:textAppearance">@style/text</item>
+  </style>
+
+  <!-- Button -->
+  <style name="widgets.Button" parent="android:Widget.Holo.Light.Button">
+    <item name="android:textAppearance">@style/text</item>
+  </style>
+
+  <!-- Radio Button -->
+  <style name="widgets.RadioButton"
+      parent="android:Widget.Holo.Light.CompoundButton.RadioButton">
+    <item name="android:paddingTop">6sp</item>
+    <item name="android:paddingBottom">6sp</item>
+    <item name="android:paddingLeft">18sp</item>
+    <item name="android:paddingRight">18sp</item>
+    <item name="android:button">@null</item>
+    <item name="android:background">@drawable/bg_radio_button</item>
+    <item name="android:textAppearance">@style/text</item>
+  </style>
+
+  <!-- AutoCompleteTextView -->
+  <!--<style-->
+  <!--name="Widget.Buendia.AutoCompleteTextView"-->
+  <!--parent="Widget.AppCompat.AutoCompleteTextView">-->
+  <!--</style>-->
+
+
+  <!-- OTHER STYLES -->
+
+  <!-- A label next to a form field in a table of fields. -->
+  <style name="field_label">
+    <item name="android:gravity">center_vertical</item> <!-- align with field -->
+    <item name="android:layout_height">48sp</item> <!-- makes rows uniform -->
+    <item name="android:layout_marginEnd">18sp</item> <!-- space before field -->
+  </style>
+
+  <style name="row">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:orientation">horizontal</item>
+    <item name="android:showDividers">middle</item>
+    <item name="android:divider">?android:dividerVertical</item>
+  </style>
+
+  <style name="cell">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_weight">1</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:orientation">vertical</item>
+    <item name="android:gravity">center</item>
+    <item name="android:padding">16dp</item>
+  </style>
+
+  <style name="cell_left_align">
+    <item name="android:layout_width">0dp</item>
+    <item name="android:layout_weight">1</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:orientation">vertical</item>
+    <item name="android:gravity">left</item>
+    <item name="android:padding">16dp</item>
+  </style>
+
+  <style name="cell_heading">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:gravity">center</item>
+    <item name="android:textAppearance">@style/text</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:layout_marginBottom">8dp</item>
+  </style>
+
+  <style name="cell_subheading">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:gravity">center</item>
+  </style>
+
+  <style name="FormLabel">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:textAppearance">@style/text</item>
+    <!--<item name="android:textStyle">bold</item>-->
+    <item name="android:textColor">#ff747374</item>
+    <!--<item name="android:textAllCaps">true</item>-->
+    <item name="android:paddingLeft">8dp</item>
+  </style>
+
+  <style name="FormItem">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:orientation">vertical</item>
+    <item name="android:paddingTop">22dp</item>
+    <item name="android:paddingBottom">22dp</item>
+  </style>
+
+  <style name="FormInput">
+    <item name="android:textAppearance">@style/text</item>
+  </style>
+
+  <style name="vertical_small_horizontal_large">
+    <item name="android:orientation">vertical</item>
+  </style>
+
+  <style name="stacked_small">
+    <item name="android:layout_width">wrap_content</item>
+  </style>
+
+  <style name="button_large">
+    <item name="android:minWidth">400dp</item>
+    <item name="android:textAppearance">@style/text</item>
+    <item name="android:layout_gravity">center_horizontal|top</item>
+    <item name="android:background">@drawable/button_selector</item>
+    <item name="android:textColor">@drawable/white</item>
+    <item name="android:layout_marginBottom">10dp</item>
+    <item name="android:padding">30dp</item>
+  </style>
+
+  <style name="overview_details_row">
+    <item name="android:background">@color/yellow</item>
+    <item name="android:layout_margin">30dp</item>
+  </style>
+
+  <style name="TentGrid">
+    <item name="android:layout_margin">10dp</item>
+    <item name="android:numColumns">3</item>
+    <item name="android:verticalSpacing">5dp</item>
+    <item name="android:horizontalSpacing">5dp</item>
+    <item name="android:stretchMode">columnWidth</item>
+  </style>
+
+
+  <!-- TYPE HIERARCHY -->
+
+  <!-- Default: most grid cells, dialog text, form widgets, entry fields. -->
+  <style name="text" parent="TextAppearance.AppCompat">
+    <item name="android:textSize">19sp</item>
+  </style>
+
+  <!-- Heading: regular headings. -->
+  <style name="text.heading">
+    <item name="android:textStyle">bold</item>
+  </style>
+
+  <!-- Caption: captions and small table headings. -->
+  <style name="text.caption">
+    <item name="android:textSize">14sp</item>
+  </style>
+
+  <!-- Caps: section/tile headings in small caps. -->
+  <style name="text.caps" parent="text.caption">
+    <item name="android:textAllCaps">true</item>
+  </style>
+
+  <!-- Large: activity titles, action bar text, snackbar text, toast text. -->
+  <style name="text.large">
+    <item name="android:textSize">22sp</item> <!-- matches dialog title size -->
+  </style>
+  <style name="text.large.white">
+    <item name="android:textColor">@android:color/white</item>
+  </style>
+
+  <!-- Huge: primary information, e.g. patient counts, important values. -->
+  <style name="text.huge">
+    <item name="android:fontFamily">sans-serif-light</item>
+    <item name="android:textSize">32sp</item>
+  </style>
 
 </resources>

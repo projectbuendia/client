@@ -10,80 +10,79 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
+
+<!-- Use dp for paddingStart and paddingEnd because we want to align -->
+<!-- with the action bar's left margin, which doesn't scale with sp. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:paddingStart="12dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="2dp"
-        android:paddingTop="2dp"
-        android:gravity="center_vertical"
-        android:layout_weight="1">
+  <LinearLayout
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center_vertical"
+      android:orientation="horizontal"
+      android:paddingBottom="4sp"
+      android:paddingTop="4sp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/listview_cell_search_results_id"
-            android:layout_marginEnd="15dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:width="120dp"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:background="@android:color/darker_gray"
-            tools:text="Kh.1234" />
-
-        <TextView
-            android:id="@+id/listview_cell_search_results_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="36sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:scrollHorizontally="true"
-            android:singleLine="true"
-            tools:text="Horatio Thornthrower" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_gravity="end"
+    <TextView
+        android:id="@+id/listview_cell_search_results_id"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16sp"
+        android:width="108sp"
+        android:background="@android:color/darker_gray"
+        android:gravity="center"
+        android:paddingBottom="16sp"
+        android:paddingTop="16sp"
+        android:textAppearance="@style/text.large"
+        android:textColor="@color/white"
+        tools:text="Kh.1234"/>
+
+    <TextView
+        android:id="@+id/listview_cell_search_results_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textAppearance="@style/text.large"
+        tools:text="Horatio Thornthrower"/>
+
+  </LinearLayout>
+
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_gravity="end">
+
+    <ImageView
+        android:id="@+id/listview_cell_search_results_gender"
+        android:layout_width="32sp"
         android:layout_height="match_parent"
-        android:layout_marginEnd="12dp">
+        android:layout_gravity="center"
+        android:contentDescription="Sex"
+        android:scaleType="fitCenter"
+        tools:src="@drawable/ic_gender_male"/>
 
-        <ImageView
-            android:id="@+id/listview_cell_search_results_gender"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="fitCenter"
-            android:contentDescription="Gender"
-            tools:src="@drawable/ic_gender_male" />
+    <TextView
+        android:id="@+id/listview_cell_search_results_age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:gravity="center_vertical|end"
+        android:minWidth="96sp"
+        android:textAppearance="@style/text"
+        tools:text="65 y 11 mo"/>
 
-        <TextView
-            android:id="@+id/listview_cell_search_results_age"
-            android:gravity="center_vertical|end"
-            android:layout_gravity="center_vertical|end"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="96dp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            tools:text="5 y 10 mo"/>
-
-        </LinearLayout>
+  </LinearLayout>
 
 </LinearLayout>

@@ -45,6 +45,7 @@ $(document).ready(function() {
         <th scope="rowgroup">
           Observations
         </th>
+        <th scope="rowgroup" colspan=999"></th>
       </tr>
       {% for row in rows %}
         {% set id = row.item.conceptIds | first %}
@@ -82,7 +83,7 @@ $(document).ready(function() {
                           + ' ----\n'
                           + {{value.value | js}}
                           + '\n\n'
-                        {%- endfor -%}); return false">&#x1f4dd;</div>
+                        {%- endfor -%}); event.stopPropagation();">&#x1f4dd;</div>
                 {% else %}
                   {{aggregate | obsformat(row.item.format)}}
                 {% endif %}
@@ -98,6 +99,7 @@ $(document).ready(function() {
         <th scope="rowgroup">
           Treatment Plan
         </th>
+        <th scope="rowgroup" colspan=999"></th>
       </tr>
       {% for order in orders %}
         <tr class="order">
@@ -131,7 +133,7 @@ $(document).ready(function() {
       {% endfor %}
 
       <tr>
-        <th class="command" onclick="controller.onNewOrderPressed()">
+        <th scope="row" class="command" onclick="controller.onNewOrderPressed()">
           Add a New Treatment
         </th>
       </tr>

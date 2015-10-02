@@ -23,14 +23,13 @@
         android:text="Medication and dosage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold" />
+        android:textAppearance="@style/text.heading" />
 
     <TextView
         android:id="@+id/order_start_time"
         android:text="Started on Date at Time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
         android:layout_marginBottom="32dp" />
 
     <TextView
@@ -43,7 +42,6 @@
         android:id="@+id/order_execution_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
         android:paddingTop="16dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
@@ -57,7 +55,6 @@
         android:id="@+id/order_execution_mark_toggle"
         android:textOn="@string/order_execution_marked_as_given"
         android:textOff="@string/order_execution_mark_as_given"
-        android:textSize="24dp"
         android:padding="24dp"
         android:layout_marginTop="32dp"
         android:layout_width="fill_parent"

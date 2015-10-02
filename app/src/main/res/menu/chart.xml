@@ -11,12 +11,15 @@
     specific language governing permissions and limitations under the License.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/action_edit"
+      android:title="@string/action_edit"
+      android:showAsAction="ifRoom|collapseActionView" />
 
   <item android:id="@+id/action_go_to"
-          android:title="@string/action_go_to"
-          android:showAsAction="ifRoom|collapseActionView" />
+      android:title="@string/action_go_to"
+      android:showAsAction="ifRoom|collapseActionView" />
 
-    <item android:id="@+id/action_update_chart"
-          android:showAsAction="ifRoom"
-          android:title="@string/action_update_chart"/>
+  <item android:id="@+id/action_update_chart"
+      android:showAsAction="ifRoom"
+      android:title="@string/action_update_chart"/>
 </menu>
