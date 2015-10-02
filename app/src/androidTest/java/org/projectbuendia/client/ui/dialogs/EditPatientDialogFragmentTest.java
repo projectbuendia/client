@@ -18,9 +18,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
-import java.util.Date;
-import java.util.Random;
-
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -41,7 +38,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         // Create the patient
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
-        String id = Long.toString(new Date().getTime()%100000);
+        String id = generateId();
         populateNewPatientFields(id);
         click(viewWithText("OK"));
         waitForProgressFragment();
@@ -99,32 +96,5 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         click(viewWithText("OK"));
         screenshot("After OK Pressed");
         expectVisible(viewThat(hasTextContaining(getActivity().getString(R.string.sex_cannot_be_null))));
-    }
-
-    /** Populates all the fields on the New Patient screen. */
-    private void populateNewPatientFields(String id) {
-        screenshot("Before Patient Populated");
-        String given = "Given" + id;
-        String family = "Family" + id;
-        type(id, viewWithId(R.id.patient_id));
-        type(given, viewWithId(R.id.patient_given_name));
-        type(family, viewWithId(R.id.patient_family_name));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_years));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
-        chooseSex();
-        screenshot("After Patient Populated");
-    }
-
-    /** Randomly choose a sex for the patient */
-    private void chooseSex(){
-        Random rand = new Random();
-        int randomNum = rand.nextInt((2 - 1) + 1) + 1;
-
-        if(randomNum == 1){
-            click(viewWithId(R.id.patient_sex_male));
-        }
-        else if(randomNum == 2){
-            click(viewWithId(R.id.patient_sex_female));
-        }
     }
 }
