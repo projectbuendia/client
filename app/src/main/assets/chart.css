@@ -49,9 +49,10 @@ th, td {
 
 /* Cells: text should match @style/text */
 .obs td, .order td { text-align: center; min-width: 3em; }
-.order .future { font-size: 75%; color: #999; vertical-align: center; }
-.order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
-.order .drug { font-family: sans-serif-medium; }
+#grid .order th { padding: 0 16px; vertical-align: middle; }
+.order .future { font-size: 75%; color: #999; vertical-align: middle; }
+.order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; vertical-align: middle; }
+.order .medication { font-weight: bold; }
 .command {
   color: #09e;
   background: #fff;

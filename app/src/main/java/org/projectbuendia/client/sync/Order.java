@@ -35,6 +35,16 @@ public final class Order {
         return Utils.toInterval(start, stop);
     }
 
+    public String getMedication() {
+        int space = instructions.indexOf(" ");
+        return space > 0 ? instructions.substring(0, space) : instructions;
+    }
+
+    public String getDosage() {
+        int space = instructions.indexOf(" ");
+        return space > 0 ? instructions.substring(space + 1) : "";
+    }
+
     @Override public String toString() {
         return "<Order uuid=" + uuid
             + ", instructions=" + instructions

@@ -78,7 +78,7 @@ public class OrderDialogFragment extends DialogFragment {
         String dosage = mDosage.getText().toString().trim();
         String frequency = mFrequency.getText().toString().trim();
 
-        String instructions = medication;
+        String instructions = medication.replace(" ", "\u00a0");
         if (!dosage.isEmpty()) {
             instructions += " " + dosage;
         }

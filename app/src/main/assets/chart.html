@@ -104,7 +104,8 @@ $(document).ready(function() {
       {% for order in orders %}
         <tr class="order">
           <th scope="row">
-            {{order.instructions}}
+            <div class="medication">{{order.medication}}</div>
+            <div>{{order.dosage}}&nbsp;</div>
           </th>
           {% set previousActive = false %}
           {% set future = false %}
