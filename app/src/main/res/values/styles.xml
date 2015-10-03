@@ -19,7 +19,7 @@
     <!-- Action Bar -->
     <item name="android:actionBarStyle">@style/ActionBar</item>
     <item name="android:actionMenuTextAppearance">@style/MenuActionBar</item>
-    <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+    <item name="android:actionButtonStyle">@style/ActionButton</item>
 
     <!-- Widgets -->
     <item name="android:textViewStyle">@style/widgets.TextView</item>
@@ -28,16 +28,11 @@
     <item name="android:radioButtonStyle">@style/widgets.RadioButton</item>
   </style>
 
-  <!-- Theme for an activity with text buttons in the action bar -->
-  <style name="AppThemeTextButtonActionBar" parent="AppTheme">
-    <item name="android:actionButtonStyle">@style/ActionTextButtonStyle</item>
-  </style>
-
 
   <!-- ACTION BAR -->
 
   <style name="ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
-    <item name="android:height">@dimen/action_bar_height</item>
+    <item name="android:height">56sp</item>
     <item name="android:titleTextStyle">@style/text.large.white</item>
     <item name="android:background">@drawable/action_bar_bg</item>
     <item name="android:progressBarPadding">32sp</item>
@@ -48,16 +43,12 @@
     <item name="android:textAppearance">@style/text.large.white</item>
   </style>
 
-  <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
-    <item name="android:textSize">22sp</item>
-    <item name="android:textStyle">normal</item>
-    <item name="android:minWidth">@dimen/action_bar_height</item>
-  </style>
-
-  <style name="ActionTextButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
-    <item name="android:textSize">22sp</item>
-    <item name="android:textStyle">normal</item>
-    <item name="android:minWidth">144sp</item>
+  <!-- TODO: Figure out why applying padding to @style/ActionButton doesn't work. -->
+  <style name="ActionButton" parent="@android:style/Widget.Holo.Light.ActionButton">
+    <item name="android:textSize">19sp</item>
+    <item name="android:minWidth">56sp</item>
+    <item name="android:paddingStart">16sp</item>
+    <item name="android:paddingEnd">16sp</item>
   </style>
 
 
@@ -88,8 +79,8 @@
       parent="android:Widget.Holo.Light.CompoundButton.RadioButton">
     <item name="android:paddingTop">6sp</item>
     <item name="android:paddingBottom">6sp</item>
-    <item name="android:paddingLeft">18sp</item>
-    <item name="android:paddingRight">18sp</item>
+    <item name="android:paddingStart">18sp</item>
+    <item name="android:paddingEnd">18sp</item>
     <item name="android:button">@null</item>
     <item name="android:background">@drawable/bg_radio_button</item>
     <item name="android:textAppearance">@style/text</item>
@@ -108,7 +99,7 @@
   <style name="field_label">
     <item name="android:gravity">center_vertical</item> <!-- align with field -->
     <item name="android:layout_height">48sp</item> <!-- makes rows uniform -->
-    <item name="android:layout_marginEnd">18sp</item> <!-- space before field -->
+    <item name="android:layout_marginEnd">12sp</item> <!-- space before field -->
   </style>
 
   <style name="row">
@@ -159,7 +150,7 @@
     <!--<item name="android:textStyle">bold</item>-->
     <item name="android:textColor">#ff747374</item>
     <!--<item name="android:textAllCaps">true</item>-->
-    <item name="android:paddingLeft">8dp</item>
+    <item name="android:paddingStart">8dp</item>
   </style>
 
   <style name="FormItem">

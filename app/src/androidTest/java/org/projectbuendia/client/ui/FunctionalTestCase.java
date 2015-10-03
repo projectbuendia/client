@@ -169,7 +169,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         LOG.i("Adding patient: %s (location %s)",
             delta.toContentValues().toString(), locationName);
 
-        click(viewWithId(R.id.action_add));
+        click(viewWithId(R.id.action_new_patient));
         expectVisible(viewWithText("New patient"));
         if (delta.id.isPresent()) {
             type(delta.id.get(), viewWithId(R.id.patient_creation_text_patient_id));
@@ -338,7 +338,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void inUserLoginGoToPatientCreation() {
         inUserLoginGoToLocationSelection();
-        click(viewWithId(R.id.action_add));
+        click(viewWithId(R.id.action_new_patient));
         expectVisible(viewWithText("New patient"));
     }
 

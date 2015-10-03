@@ -73,7 +73,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
-        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
+        menu.findItem(R.id.action_new_patient).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
                 @Override public boolean onMenuItemClick(MenuItem menuItem) {
@@ -102,7 +102,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                 .sizeDp(36));
         search.setVisible(getLoadingState() == LoadingState.LOADED);
 
-        MenuItem addPatient = menu.findItem(R.id.action_add);
+        MenuItem addPatient = menu.findItem(R.id.action_new_patient);
         addPatient.setIcon(
             new IconDrawable(this, Iconify.IconValue.fa_plus)
                 .color(0xCCFFFFFF)

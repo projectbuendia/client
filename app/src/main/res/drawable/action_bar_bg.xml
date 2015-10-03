@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright 2015 The Project Buendia Authors
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -9,6 +10,7 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<resources>
-  <dimen name="action_bar_height">64sp</dimen>
-</resources>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+  <solid android:color="#494" />
+</shape>
