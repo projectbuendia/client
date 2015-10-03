@@ -111,7 +111,6 @@ public class DbSyncHelper {
 
     public static List<ContentProviderOperation> getFormUpdateOps(SyncResult syncResult)
         throws ExecutionException, InterruptedException {
-        LOG.i("Listing all forms on server");
         RequestFuture<List<JsonForm>> future = RequestFuture.newFuture();
         App.getServer().listForms(future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
@@ -127,15 +126,14 @@ public class DbSyncHelper {
             while (c.moveToNext()) {
                 String uuid = Utils.getString(c, Contracts.Forms.UUID);
                 Uri uri = Contracts.Forms.CONTENT_URI.buildUpon().appendPath(uuid).build();
-                LOG.i("  - will delete form " + uuid);
+                LOG.d("  - will delete form " + uuid);
                 ops.add(ContentProviderOperation.newDelete(uri).build());
             }
         } finally {
             c.close();
         }
-
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert form " + values.getAsString(Contracts.Forms.UUID));
+            LOG.d("  - will insert form " + values.getAsString(Contracts.Forms.UUID));
             ops.add(ContentProviderOperation.newInsert(Contracts.Forms.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
@@ -172,12 +170,12 @@ public class DbSyncHelper {
                     ContentValues localCv = new ContentValues();
                     DatabaseUtils.cursorRowToContentValues(c, localCv);
                     if (!cv.equals(localCv)) {  // record has changed on server
-                        LOG.i("  - will update patient " + uuid);
+                        LOG.d("  - will update patient " + uuid);
                         ops.add(ContentProviderOperation.newUpdate(uri).withValues(cv).build());
                         syncResult.stats.numUpdates++;
                     }
                 } else {  // record doesn't exist on server
-                    LOG.i("  - will delete patient " + uuid);
+                    LOG.d("  - will delete patient " + uuid);
                     ops.add(ContentProviderOperation.newDelete(uri).build());
                     syncResult.stats.numDeletes++;
                 }
@@ -187,7 +185,7 @@ public class DbSyncHelper {
         }
 
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert patient " + values.getAsString(Patients.UUID));
+            LOG.d("  - will insert patient " + values.getAsString(Patients.UUID));
             ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
@@ -270,7 +268,7 @@ public class DbSyncHelper {
                 Uri uri = Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
                 JsonOrder order = ordersToStore.get(uuid);
                 if (order != null) {  // apply update to a local order
-                    LOG.v("  - will update order " + uuid);
+                    LOG.d("  - will update order " + uuid);
                     ops.add(ContentProviderOperation.newUpdate(uri)
                         .withValue(Orders.PATIENT_UUID, order.patient_uuid)
                         .withValue(Orders.INSTRUCTIONS, order.instructions)
@@ -280,7 +278,7 @@ public class DbSyncHelper {
                     ordersToStore.remove(uuid);  // done with this incoming order
                     syncResult.stats.numUpdates++;
                 } else {  // delete the local order (the server doesn't have it)
-                    LOG.v("  - will delete order " + uuid);
+                    LOG.d("  - will delete order " + uuid);
                     ops.add(ContentProviderOperation.newDelete(uri).build());
                     syncResult.stats.numDeletes++;
                 }
@@ -291,7 +289,7 @@ public class DbSyncHelper {
 
         // Store all the remaining received orders as new orders.
         for (JsonOrder order : ordersToStore.values()) {
-            LOG.v("  - will insert order " + order.uuid);
+            LOG.d("  - will insert order " + order.uuid);
             ops.add(ContentProviderOperation.newInsert(Orders.CONTENT_URI)
                 .withValue(Orders.UUID, order.uuid)
                 .withValue(Orders.PATIENT_UUID, order.patient_uuid)
@@ -405,7 +403,7 @@ public class DbSyncHelper {
 
                 if (location.parent_uuid != null && !location.parent_uuid.equals(parentUuid)) {
                     // Update existing record
-                    LOG.i("  - will update location " + uuid);
+                    LOG.d("  - will update location " + uuid);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
                         .withValue(Locations.UUID, uuid)
                         .withValue(Locations.PARENT_UUID, parentUuid)
@@ -433,7 +431,7 @@ public class DbSyncHelper {
                 }
             } else {
                 // Entry doesn't exist. Remove it from the database.
-                LOG.i("  - will delete location " + uuid);
+                LOG.d("  - will delete location " + uuid);
                 Uri deleteUri = uri.buildUpon().appendPath(uuid).build();
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
@@ -445,7 +443,7 @@ public class DbSyncHelper {
         c.close();
 
         for (JsonLocation location : locationsByUuid.values()) {
-            LOG.i("  - will insert location " + location.uuid);
+            LOG.d("  - will insert location " + location.uuid);
             batch.add(ContentProviderOperation.newInsert(Locations.CONTENT_URI)
                 .withValue(Locations.UUID, location.uuid)
                 .withValue(Locations.PARENT_UUID, location.parent_uuid)

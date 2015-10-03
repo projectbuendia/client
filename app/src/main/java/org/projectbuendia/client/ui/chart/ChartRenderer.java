@@ -62,8 +62,10 @@ public class ChartRenderer {
                        List<ObsValue> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
+        LOG.i("render()");
 
         if (observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders)) {
+            LOG.i("<- render()");
             return;  // nothing has changed; no need to render again
         }
 
@@ -81,14 +83,19 @@ public class ChartRenderer {
                                             admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
+        LOG.i("loadDataWithBaseURL()");
         mView.loadDataWithBaseURL("file:///android_asset/", html,
             "text/html; charset=utf-8", "utf-8", null);
+        LOG.i("<- loadDataWithBaseURL()");
+        LOG.i("loadDataWithBaseURL()");
         mView.loadDataWithBaseURL("file:///android_asset/", html,
             "text/html; charset=utf-8", "utf-8", null);
+        LOG.i("<- loadDataWithBaseURL()");
         mView.setWebContentsDebuggingEnabled(true);
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
+        LOG.i("<- render()");
     }
 
     class GridHtmlGenerator {
@@ -108,6 +115,7 @@ public class ChartRenderer {
         GridHtmlGenerator(Chart chart, Map<String, ObsValue> latestObservations,
                           List<ObsValue> observations, List<Order> orders,
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
+            LOG.i("GridHtmlGenerator()");
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
             mToday = LocalDate.now(chronology);
@@ -132,9 +140,11 @@ public class ChartRenderer {
                 }
             }
             addObservations(observations);
+            LOG.i("<- GridHtmlGenerator()");
         }
 
         void addObservations(List<ObsValue> observations) {
+            LOG.i("addObservations()");
             for (ObsValue obs : observations) {
                 if (obs.value == null) continue;
 
@@ -150,6 +160,7 @@ public class ChartRenderer {
                         obs.value, count == null ? 1 : count + 1);
                 }
             }
+            LOG.i("<- addObservations()");
         }
 
         Column getColumnContainingTime(DateTime dt) {
@@ -177,6 +188,7 @@ public class ChartRenderer {
         // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)
         // TODO: concept tags for formatting hints (e.g. none/mild/moderate/severe, abbreviated)
         String getHtml() {
+            LOG.i("getHtml()");
             // Create the list of all the columns to show.  The admission date, the
             // current day, and start and stop days for all orders should be present,
             // as well as any days in between.  TODO: Omit long empty gaps?
@@ -203,11 +215,16 @@ public class ChartRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
             context.put("orders", mOrders);
-            return renderTemplate("assets/chart.html", context);
+            String result =  renderTemplate("assets/chart.html", context);
+            LOG.i("<- getHtml()");
+
+            return result;
         }
 
         /** Renders a Pebble template. */
         String renderTemplate(String filename, Map<String, Object> context) {
+            LOG.i("renderTemplate()");
+
             if (sEngine == null) {
                 // PebbleEngine caches compiled templates by filename, so as long as we keep using the
                 // same engine instance, it's okay to call getTemplate(filename) on each render.
@@ -217,10 +234,13 @@ public class ChartRenderer {
             try {
                 StringWriter writer = new StringWriter();
                 sEngine.getTemplate(filename).evaluate(writer, context);
+                LOG.i("<- renderTemplate()");
+
                 return writer.toString();
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();
                 e.printStackTrace(new PrintWriter(writer));
+                LOG.i("!! renderTemplate()");
                 return "<div style=\"font-size: 150%\">" + writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
             }
         }
