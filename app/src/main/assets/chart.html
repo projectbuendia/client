@@ -48,7 +48,7 @@ $(document).ready(function() {
       </tr>
       {% for row in rows %}
         {% set id = row.item.conceptIds | first %}
-        <tr class="obs concept-{{id}}">
+        <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
           <th scope="row">
             {{row.item.label}}
           </th>
@@ -84,7 +84,11 @@ $(document).ready(function() {
                           + '\n\n'
                         {%- endfor -%}); return false">&#x1f4dd;</div>
                 {% else %}
-                  {{aggregate | obsformat(row.item.format)}}
+                  {% set output = aggregate | obsformat(row.item.format) %}
+                  {% if output is empty %}
+                    {% set output = aggregate | obsformat(row.item.captionFormat) %}
+                  {% endif %}
+                  {{output}}
                 {% endif %}
               {% endif %}
             </td>

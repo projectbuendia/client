@@ -329,10 +329,16 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      * user login activity.  Note: this function will not work during
      * {@link #setUp()} as it uses {@link #waitForProgressFragment()}.
      */
-    protected void inUserLoginGoToDemoPatientChart() {
-        inUserLoginInitDemoPatient();
-        inUserLoginGoToPatientList();
-        inPatientListClickPatientWithId(sDemoPatientId);
+    protected String inUserLoginGoToDemoPatientChart() {
+        // Create the patient
+        inUserLoginGoToPatientCreation();
+        screenshot("Test Start");
+        String id = generateId();
+        populateNewPatientFields(id);
+        click(viewWithText("OK"));
+        waitForProgressFragment();
+        screenshot("On Patient Chart");
+        return id;
     }
 
     /**

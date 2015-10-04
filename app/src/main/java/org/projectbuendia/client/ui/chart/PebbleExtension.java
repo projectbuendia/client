@@ -11,6 +11,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.Format;
@@ -36,6 +37,8 @@ public class PebbleExtension extends AbstractExtension {
         filters.put("obsformat", new ObsFormatFilter());
         filters.put("dateformat", new DateFormatFilter());
         filters.put("linebreak", new LineBreakFilter());
+        filters.put("tosafechars", new toSafeCharsFilter());
+
     }
     static Map<String, Function> functions = new HashMap<>();
     static {
@@ -159,6 +162,16 @@ public class PebbleExtension extends AbstractExtension {
         @Override public Object apply(Object input, Map<String, Object> args) {
             String pattern = (String) args.get("pattern");
             return DateTimeFormat.forPattern(pattern).print((DateTime) input);
+        }
+    }
+
+    static class toSafeCharsFilter implements Filter {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("input");
+        }
+
+        @Override public Object apply(Object input, Map<String, Object> args) {
+            return Utils.removeUnsafeChars(("" + input));
         }
     }
 

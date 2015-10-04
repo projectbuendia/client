@@ -36,13 +36,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
     public void testNewPatient() {
 
         // Create the patient
-        inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
-        String id = generateId();
-        populateNewPatientFields(id);
-        click(viewWithText("OK"));
-        waitForProgressFragment();
-        screenshot("On Patient Chart");
+        String id = inUserLoginGoToDemoPatientChart();
 
         // Assign a location to the patient
         click(viewWithId(R.id.attribute_location));

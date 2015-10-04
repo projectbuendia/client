@@ -443,6 +443,11 @@ public class Utils {
         return sw.toString();
     }
 
+    public static String removeUnsafeChars(String input)
+    {
+        return input.replaceAll("[\\W]", "_");
+    }
+
     private Utils() {
         // Prevent instantiation.
     }
