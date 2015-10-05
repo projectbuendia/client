@@ -62,9 +62,11 @@ public class ChartDataHelper {
     /** When non-null, sConceptNames and sConceptTypes contain valid data for this locale. */
     private static Object sLoadingLock = new Object();
     private static String sLoadedLocale;
+    private static Map<String, String> sConceptNames = new HashMap<>();
+    private static Map<String, String> sConceptTypes = new HashMap<>();
 
-    private static Map<String, String> sConceptNames;
-    private static Map<String, String> sConceptTypes;
+    /** Cache of loaded Chart objects by UUID. */
+    private static Map<String, Chart> sCharts = new HashMap<>();
 
     public ChartDataHelper(ContentResolver contentResolver) {
         mContentResolver = checkNotNull(contentResolver);
@@ -80,7 +82,7 @@ public class ChartDataHelper {
         LOG.i("loadConceptData(" + locale + ")");
         synchronized (sLoadingLock) {
             if (!locale.equals(sLoadedLocale)) {
-                sConceptNames = new HashMap<>();
+                sConceptNames.clear();
                 try (Cursor c = mContentResolver.query(
                     ConceptNames.CONTENT_URI, new String[] {ConceptNames.CONCEPT_UUID, ConceptNames.NAME},
                     ConceptNames.LOCALE + " = ?", new String[] {locale}, null)) {
@@ -88,7 +90,7 @@ public class ChartDataHelper {
                         sConceptNames.put(c.getString(0), c.getString(1));
                     }
                 }
-                sConceptTypes = new HashMap<>();
+                sConceptTypes.clear();
                 try (Cursor c = mContentResolver.query(
                     Concepts.CONTENT_URI, new String[] {Concepts.UUID, Concepts.CONCEPT_TYPE},
                     null, null, null)) {
@@ -157,6 +159,20 @@ public class ChartDataHelper {
         return results;
     }
 
+    /** Gets the latest observation of each concept from a given list of observations. */
+    public Map<String, ObsValue> getLatestObservations(List<ObsValue> obsValues) {
+        LOG.i("getLatestObservations(%d obs)", obsValues.size());
+        Map<String, ObsValue> result = new HashMap<>();
+        for (ObsValue obs : obsValues) {
+            ObsValue existing = result.get(obs.conceptUuid);
+            if (existing == null || obs.obsTime.isAfter(existing.obsTime)) {
+                result.put(obs.conceptUuid, obs);
+            }
+        }
+        LOG.i("<- getLatestObservations(%d obs)", obsValues.size());
+        return result;
+    }
+
     /** Gets the latest observation of each concept for a given patient, localized to English. */
     public Map<String, ObsValue> getLatestObservations(String patientUuid) {
         return getLatestObservations(patientUuid, ENGLISH_LOCALE);
@@ -164,16 +180,7 @@ public class ChartDataHelper {
 
     /** Gets the latest observation of each concept for a given patient from the app db. */
     public Map<String, ObsValue> getLatestObservations(String patientUuid, String locale) {
-        LOG.i("getLatestObservations(" + patientUuid + ", " + locale + ")");
-        Map<String, ObsValue> result = new HashMap<>();
-        for (ObsValue obs : getObservations(patientUuid, locale)) {
-            ObsValue existing = result.get(obs.conceptUuid);
-            if (existing == null || obs.obsTime.isAfter(existing.obsTime)) {
-                result.put(obs.conceptUuid, obs);
-            }
-        }
-        LOG.i("<- getLatestObservations(" + patientUuid + ", " + locale + ")");
-        return result;
+        return getLatestObservations(getObservations(patientUuid, locale));
     }
 
     /** Gets the latest observation of the specified concept for all patients. */
@@ -199,6 +206,9 @@ public class ChartDataHelper {
     /** Retrieves and assembles a Chart from the local datastore. */
     public Chart getChart(String uuid) {
         LOG.i("getChart(" + uuid + ")");
+        Chart chart = sCharts.get(uuid);
+        if (chart != null) return chart;
+
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();
         Map<Long, ChartSection> rowGroupsById = new HashMap<>();
         List<ChartSection> tileGroups = new ArrayList<>();
@@ -242,8 +252,10 @@ public class ChartDataHelper {
                 }
             }
         }
+        chart = new Chart(uuid, tileGroups, rowGroups);
+        sCharts.put(uuid, chart);
         LOG.i("<- getChart(" + uuid + ")");
-        return new Chart(uuid, tileGroups, rowGroups);
+        return chart;
     }
 
     public List<Form> getForms() {

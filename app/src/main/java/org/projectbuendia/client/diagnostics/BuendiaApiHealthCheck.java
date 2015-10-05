@@ -46,7 +46,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
     // Under normal conditions, make requests to the server with this frequency
     // to check if it's reachable and responding.
-    private static final int CHECK_PERIOD_MS = 20000;
+    private static final int CHECK_PERIOD_MS = 60000;
 
     // During certain problem conditions, check more often so that when the
     // problem is resolved, we can hide the snackbar more promptly.

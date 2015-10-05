@@ -489,8 +489,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
         mObservations = mChartHelper.getObservations(mPatientUuid);
-        Map<String, ObsValue> latestObservations =
-            new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
+        Map<String, ObsValue> latestObservations = mChartHelper.getLatestObservations(mPatientUuid);
+        latestObservations = mChartHelper.getLatestObservations(mObservations);
         for (ObsValue obs : mObservations) {
             mLastObsTime = Utils.max(mLastObsTime, obs.obsTime);
         }
