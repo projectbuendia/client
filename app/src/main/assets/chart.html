@@ -78,7 +78,7 @@
                           + '---- '
                           + {{point.time | format_time('dd MMM \'at\' HH:mm') | js}}
                           + ' ----\n'
-                          + {{point.value | js}}
+                          + {{point.value.text | js}}
                           + '\n\n'
                         {%- endfor -%}); event.stopPropagation();">&#x1f4dd;</div>
                 {% else %}
