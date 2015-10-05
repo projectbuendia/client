@@ -77,9 +77,13 @@ public class ChartDataHelper {
         sLoadedLocale = null;
     }
 
+    /** Marks in-memory Chart objects out of date.  Call this when chart items change in the app db. */
+    public static void invalidateLoadedChartObjects() {
+        sCharts.clear();
+    }
+
     /** Loads concept names and types from the app db into HashMaps in memory. */
     public void loadConceptData(String locale) {
-        LOG.i("loadConceptData(" + locale + ")");
         synchronized (sLoadingLock) {
             if (!locale.equals(sLoadedLocale)) {
                 sConceptNames.clear();
@@ -101,13 +105,10 @@ public class ChartDataHelper {
                 sLoadedLocale = locale;
             }
         }
-        LOG.i("<- loadConceptData(" + locale + ")");
-
     }
 
     /** Gets all the orders for a given patient. */
     public List<Order> getOrders(String patientUuid) {
-        LOG.i("getOrders(" + patientUuid + ")");
         Cursor c = mContentResolver.query(
             Orders.CONTENT_URI, null,
             Orders.PATIENT_UUID + " = ?", new String[] {patientUuid},
@@ -121,7 +122,6 @@ public class ChartDataHelper {
                 Utils.getLong(c, Orders.STOP_MILLIS, null)));
         }
         c.close();
-        LOG.i("<- getOrders(" + patientUuid + ")");
         return orders;
     }
 
@@ -145,7 +145,6 @@ public class ChartDataHelper {
 
     /** Gets all observations for a given patient, localized for a given locale. */
     public List<ObsValue> getObservations(String patientUuid, String locale) {
-        LOG.i("getObservations(" + patientUuid + ", " + locale + ")");
         loadConceptData(locale);
         List<ObsValue> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
@@ -155,13 +154,11 @@ public class ChartDataHelper {
                 results.add(obsFromCursor(c));
             }
         }
-        LOG.i("<- getObservations(" + patientUuid + ", " + locale + ")");
         return results;
     }
 
     /** Gets the latest observation of each concept from a given list of observations. */
     public Map<String, ObsValue> getLatestObservations(List<ObsValue> obsValues) {
-        LOG.i("getLatestObservations(%d obs)", obsValues.size());
         Map<String, ObsValue> result = new HashMap<>();
         for (ObsValue obs : obsValues) {
             ObsValue existing = result.get(obs.conceptUuid);
@@ -169,7 +166,6 @@ public class ChartDataHelper {
                 result.put(obs.conceptUuid, obs);
             }
         }
-        LOG.i("<- getLatestObservations(%d obs)", obsValues.size());
         return result;
     }
 
@@ -186,7 +182,6 @@ public class ChartDataHelper {
     /** Gets the latest observation of the specified concept for all patients. */
     public Map<String, ObsValue> getLatestObservationsForConcept(
         String conceptUuid, String locale) {
-        LOG.i("getLatestObservationsForConcept(" + conceptUuid + ", " + locale + ")");
         loadConceptData(locale);
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
@@ -198,14 +193,12 @@ public class ChartDataHelper {
                 if (result.containsKey(patientUuid)) continue;
                 result.put(patientUuid, obsFromCursor(c));
             }
-            LOG.i("<- getLatestObservationsForConcept(" + conceptUuid + ", " + locale + ")");
             return result;
         }
     }
 
     /** Retrieves and assembles a Chart from the local datastore. */
     public Chart getChart(String uuid) {
-        LOG.i("getChart(" + uuid + ")");
         Chart chart = sCharts.get(uuid);
         if (chart != null) return chart;
 
@@ -254,7 +247,6 @@ public class ChartDataHelper {
         }
         chart = new Chart(uuid, tileGroups, rowGroups);
         sCharts.put(uuid, chart);
-        LOG.i("<- getChart(" + uuid + ")");
         return chart;
     }
 

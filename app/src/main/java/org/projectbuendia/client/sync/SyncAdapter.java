@@ -367,6 +367,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<ContentProviderOperation> ops = DbSyncHelper.getChartUpdateOps(chart, syncResult);
         provider.applyBatch(ops);
         LOG.i("Finished updating chart items (" + ops.size() + " db ops)");
+
+        ChartDataHelper.invalidateLoadedChartObjects();
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
