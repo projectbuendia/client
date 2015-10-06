@@ -26,4 +26,6 @@ public class Column {
     public Interval getInterval() {
         return Utils.toInterval(start, stop);
     }
+
+    public boolean hasObservations() { return ! obsMap.isEmpty(); }
 }

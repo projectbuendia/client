@@ -26,9 +26,12 @@ import org.projectbuendia.client.utils.Utils;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -152,6 +155,7 @@ public class ChartRenderer {
             }
         }
 
+        /** Returns a column for a given date. Creates a new column, if it does not exist yet */
         Column getColumnContainingTime(DateTime dt) {
             LocalDate date = dt.toLocalDate();
             DateTime start = date.toDateTimeAtStartOfDay();
@@ -179,23 +183,13 @@ public class ChartRenderer {
         String getHtml() {
             // Create the list of all the columns to show.  The admission date, the
             // current day, and start and stop days for all orders should be present,
-            // as well as any days in between.  TODO: Omit long empty gaps?
+            // as well as the days in between which are not empty at least by 3 consecutive days.
             mDays.add(mToday);
             if (mAdmissionDate != null) {
                 mDays.add(mAdmissionDate);
             }
-            for (Order order : mOrders) {
-                if (order.start != null) {
-                    mDays.add(order.start.toLocalDate());
-                    if (order.stop != null) {
-                        mDays.add(order.stop.toLocalDate().plusDays(1));
-                    }
-                }
-            }
-            LocalDate lastDay = mDays.last();
-            for (LocalDate d = mDays.first(); !d.isAfter(lastDay); d = d.plusDays(1)) {
-                getColumnContainingTime(d.toDateTimeAtStartOfDay());
-            }
+            mDays.addAll(getOrderDates());
+            fillOrderPeriodColumns(mDays.first(), mDays.last());
 
             Map<String, Object> context = new HashMap<>();
             context.put("tileRows", mTileRows);
@@ -204,6 +198,48 @@ public class ChartRenderer {
             context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
             context.put("orders", mOrders);
             return renderTemplate("assets/chart.html", context);
+        }
+
+        /**
+         * Fills the observation period columns in a given period of date.
+         * If there are no observations or recordings of treatments given for a day, that column is
+         * considered empty. In addition, if there are 3 or more adjacent empty columns, those
+         * should be collapsed down, considering that both current day and future days must never
+         * be collapsed.
+         */
+        void fillOrderPeriodColumns(LocalDate since, LocalDate to) {
+            List<DateTime> consecutiveEmptyColumns = new ArrayList<>();
+
+            for (LocalDate d = since; !d.isAfter(to); d = d.plusDays(1)) {
+                Column column = getColumnContainingTime(d.toDateTimeAtStartOfDay());
+
+                if(!column.hasObservations() && d.isBefore(mToday)) {
+                    consecutiveEmptyColumns.add(column.start);
+                } else {
+                    if(consecutiveEmptyColumns.size() >= 3) {
+                        for(DateTime voidDay : consecutiveEmptyColumns) {
+                            mColumnsByStartMillis.remove(voidDay.getMillis());
+                        }
+                    }
+                    consecutiveEmptyColumns.clear();
+                }
+            }
+        }
+
+        /** Returns all non null start and stop observation dates */
+        private Collection<LocalDate> getOrderDates() {
+            Set<LocalDate> dates = new HashSet<>();
+
+            for (Order order : mOrders) {
+                if (order.start != null) {
+                    mDays.add(order.start.toLocalDate());
+                    if (order.stop != null) {
+                        mDays.add(order.stop.toLocalDate().plusDays(1));
+                    }
+                }
+            }
+
+            return dates;
         }
 
         /** Renders a Pebble template. */
