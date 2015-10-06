@@ -345,8 +345,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         OperationApplicationException {
         ArrayList<ContentProviderOperation> ops = DbSyncHelper.getLocationUpdateOps(syncResult);
         checkCancellation("before applying location updates");
-        LOG.i("Applying batch update of locations.");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
+        LOG.i("Finished updating locations (" + ops.size() + " db ops)");
         mContentResolver.notifyChange(Locations.CONTENT_URI, null, false);
         mContentResolver.notifyChange(LocationNames.CONTENT_URI, null, false);
     }
@@ -364,7 +364,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.delete(ChartItems.CONTENT_URI, null, null);
         syncResult.stats.numDeletes++;
         checkCancellation("before applying chart structure insertions");
-        provider.applyBatch(DbSyncHelper.getChartUpdateOps(chart, syncResult));
+        ArrayList<ContentProviderOperation> ops = DbSyncHelper.getChartUpdateOps(chart, syncResult);
+        provider.applyBatch(ops);
+        LOG.i("Finished updating chart items (" + ops.size() + " db ops)");
+
+        ChartDataHelper.invalidateLoadedChartObjects();
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
@@ -410,6 +414,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         checkCancellation("before inserting concept names");
         provider.bulkInsert(ConceptNames.CONTENT_URI,
             conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
+        LOG.i("Finished updating concepts (bulk-inserted %d concepts, %d concept names)",
+            conceptInserts.size(), conceptNameInserts.size());
 
         ChartDataHelper.invalidateLoadedConceptData();
     }
@@ -562,8 +568,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 toInsert.toArray(new ContentValues[toInsert.size()]));
             timingLogger.addSplit("bulk inserts");
         }
-        return response.snapshotTime == null ? null :
-            response.snapshotTime.toInstant();
+        LOG.i("Finished incremental update of observations (bulk-inserted %d)", toInsert.size());
+        return response.snapshotTime == null ? null : response.snapshotTime.toInstant();
     }
 
     private Instant updateAllObservations(
@@ -602,8 +608,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.bulkInsert(Observations.CONTENT_URI,
             toInsert.toArray(new ContentValues[toInsert.size()]));
         timingLogger.addSplit("bulk inserts");
-        return response.snapshotTime == null ? null :
-            response.snapshotTime.toInstant();
+        LOG.i("Finished full update of observations (bulk-deleted %d, bulk-inserted %d)",
+            toDelete.size(), toInsert.size());
+        return response.snapshotTime == null ? null : response.snapshotTime.toInstant();
     }
 
     private void storeLastSyncTime(ContentProviderClient provider, Instant newSyncTime)

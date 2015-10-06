@@ -35,7 +35,7 @@ $(document).ready(function() {
         {% for column in columns %}
           <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col">
             {{column.headingHtml | raw}}
-          </th>
+                                                                                         </th>
         {% endfor %}
       </tr>
     </thead>
