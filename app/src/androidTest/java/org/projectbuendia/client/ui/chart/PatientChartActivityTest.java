@@ -208,7 +208,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * period of time, that only the latest encounter is present in the relevant column.
      */
     public void testEncounter_latestEncounterIsAlwaysShown() {
-        //TODO: do we need to have the [test] keyword? If we remove the [test] keyword we could test Vital Values.
         inUserLoginGoToDemoPatientChart();
 
         // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
@@ -216,14 +215,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         for (int i = 0; i < 6; i++) {
             openEncounterForm();
 
-            //String pulse = Integer.toString(i + 80);
-            //String temp = Integer.toString(i + 35) + ".0"; TODO: no decimal values on the chart. Is it a bug?
-            String temp = Integer.toString(i + 35);
+            String temp = Integer.toString(i + 35) + ".7";
             String respiratoryRate = Integer.toString(i + 80);
             String bpSystolic = Integer.toString(i + 80);
-            String bpDiastolic = Integer.toString(5 + 100);
+            String bpDiastolic = Integer.toString(i + 100);
 
-            //answerTextQuestion("Pulse", pulse);
             answerTextQuestion("Temperature", temp);
             answerTextQuestion("Respiratory rate", respiratoryRate);
             answerTextQuestion("Blood pressure, systolic", bpSystolic);
@@ -232,10 +228,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
             waitForProgressFragment();
 
-            // Wait a bit for the chart to update it's values.
             // TODO: implement IdlingResource for webview to remove this sleep.
+            // Wait a bit for the chart to update it's values.
             try{
-                Thread.sleep(20000);
+                Thread.sleep(30000);
             } catch (InterruptedException e){}
 
             //checkVitalValueContains("Pulse", pulse);
@@ -293,7 +289,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // Enter second set of observations for this encounter.
         waitForProgressFragment();
         openEncounterForm();
-        answerTextQuestion("Weight", "80");
+        answerTextQuestion("Weight", "80.4");
         answerTextQuestion("Height", "170");
         answerSingleCodedQuestion("Shock", "Mild");
         answerSingleCodedQuestion("Consciousness", "Responds to voice");
@@ -319,7 +315,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals("[test] SpO₂ oxygen sat (%)", "95");
         checkObservationValueEquals("[test] Blood pressure, systolic", "80");
         checkObservationValueEquals("[test] Blood pressure, diastolic", "100");
-        checkObservationValueEquals("[test] Weight (kg)", "80");
+        checkObservationValueEquals("[test] Weight (kg)", "80.4");
         checkObservationValueEquals("[test] Height (cm)", "170");
         checkObservationValueEquals("[test] Shock", "Mild");
         checkObservationValueEquals("[test] Consciousness (AVPU)", "V");
@@ -344,12 +340,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
 
         openEncounterForm();
-        answerTextQuestion("Temperature", "36.5"); //TODO: this value is being rounded in the chart
+        answerTextQuestion("Temperature", "36.5");
         answerTextQuestion("Respiratory rate", "23");
         answerTextQuestion("oxygen sat", "95");
         answerTextQuestion("Blood pressure, systolic", "80");
         answerTextQuestion("Blood pressure, diastolic", "100");
-        answerTextQuestion("Weight", "80");
+        answerTextQuestion("Weight", "80.5");
         answerTextQuestion("Height", "170");
         answerSingleCodedQuestion("Shock", "Severe");
         answerSingleCodedQuestion("Consciousness", "Unresponsive");
@@ -364,24 +360,24 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         saveForm();
 
         waitForProgressFragment();
-        checkObservationValueEquals("[test] Temperature (°C)", "36");
+        checkObservationValueEquals("[test] Temperature (°C)", "36.5");
         checkObservationValueEquals("[test] Respiratory rate (bpm)", "23");
         checkObservationValueEquals("[test] SpO₂ oxygen sat (%)", "95");
         checkObservationValueEquals("[test] Blood pressure, systolic", "80");
         checkObservationValueEquals("[test] Blood pressure, diastolic", "100");
-        checkObservationValueEquals("[test] Weight (kg)", "80");
+        checkObservationValueEquals("[test] Weight (kg)", "80.5");
         checkObservationValueEquals("[test] Height (cm)", "170");
-        checkObservationValueEquals("[test] Shock", "Severe"); //TODO: this was not showing on the chart. Verify with ping if it is right now.
+        checkObservationValueEquals("[test] Shock", "Severe");
         checkObservationValueEquals("[test] Consciousness (AVPU)", "U");
         checkObservationValueEquals("[test] Gingivitis", YES);
         checkObservationValueEquals("[test] Hiccups", NO);
         checkObservationValueEquals("[test] Headache", YES);
         checkObservationValueEquals("[test] Sore throat", NO);
-        checkObservationValueEquals("Condition", "6"); //TODO: is this right? Should it be Confirmed Dead instead of 6?
+        checkObservationValueEquals("Condition", "6");
         checkObservationValueEquals("[test] Notes", "Possi…");
 
 /*
-        TODO: for now tests are not checking Vital values. Confirm what to do.
+        TODO: for now tests are not checking Vital values. We will implement a Test profile to correct this.
         checkVitalValueContains("Pulse", "80");
         checkVitalValueContains("Respiration", "20");
         checkVitalValueContains("Consciousness", "Responds to voice");
