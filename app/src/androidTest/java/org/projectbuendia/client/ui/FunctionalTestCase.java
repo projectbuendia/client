@@ -444,8 +444,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
 
     /** Generates IDs to identify the newly created patient. */
     protected String generateId() {
-        String id = Long.toString(new Date().getTime()%100000);
-        return id;
+        return "" + (new Date().getTime() % 100000);
     }
 
     /** Populates all the fields on the New Patient screen. */

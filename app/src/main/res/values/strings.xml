@@ -135,9 +135,6 @@
   <string name="username_cannot_be_null">\"Username must not be null\"</string>
   <string name="given_name_cannot_be_null">Given name must not be null</string>
   <string name="family_name_cannot_be_null">Family name must not be null</string>
-  <string name="sex_cannot_be_null">Please, select a sex.</string>
-  <string name="age_limit">The age limit is 120 years.</string>
-  <string name="invalid_input">Invalid Input</string>
   <string name="invalid_username">Username must be between 2 and 50 characters. Only letters, digits, ".", "-", and "_" are allowed.</string>
   <string name="latest_pcr_label">Ebola test</string>
   <string name="latest_pcr_label_with_date">Ebola test (%s)</string>

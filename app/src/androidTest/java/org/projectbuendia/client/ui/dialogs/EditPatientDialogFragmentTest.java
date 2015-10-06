@@ -75,26 +75,4 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
             withId(R.id.patient_chart_last_observation_date_time),
             hasTextContaining(formatter.print(DateTime.now()))));
     }
-
-    /** Test Age Validation (cannot be more then 120 years). */
-    public void testAgeValidation(){
-        inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
-        chooseSex();
-        type("120", viewWithId(R.id.patient_age_years));
-        click(viewWithText("OK"));
-        screenshot("After OK Pressed");
-        waitForProgressFragment();
-        onView(withId(R.id.patient_age_years)).check(matches(editTextWithError(
-            getActivity().getString(R.string.age_limit))));
-    }
-
-    /** Patients cannot be created without sex. */
-    public void testSexValidation(){
-        inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
-        click(viewWithText("OK"));
-        screenshot("After OK Pressed");
-        expectVisible(viewThat(hasTextContaining(getActivity().getString(R.string.sex_cannot_be_null))));
-    }
 }

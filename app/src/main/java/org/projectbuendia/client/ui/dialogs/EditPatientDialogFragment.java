@@ -14,8 +14,6 @@ package org.projectbuendia.client.ui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,7 +21,6 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -114,7 +111,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         }
     }
 
-    public void onSubmit() throws ValidationException {
+    public void onSubmit() {
         String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
         String familyName = Utils.toNonemptyOrNull(mFamilyName.getText().toString().trim());
@@ -122,44 +119,23 @@ public class EditPatientDialogFragment extends DialogFragment {
         String ageMonths = mAgeMonths.getText().toString().trim();
         LocalDate birthdate = null;
         LocalDate admissionDate = LocalDate.now();
-        boolean valid = true;
 
         if (!ageYears.isEmpty() || !ageMonths.isEmpty()) {
             birthdate = LocalDate.now().minusYears(Integer.parseInt("0" + ageYears))
                 .minusMonths(Integer.parseInt("0" + ageMonths));
         }
-
-        clearErrors();
-        // VALIDATION
-        //OpenMRS Age limit is 120 years.
-        if ((birthdate != null) && (birthdate.isBefore(LocalDate.now().minusYears(119)
-            .minusMonths(11).minusDays(29)))) {
-            setError(mAgeYears, R.string.age_limit);
-            setError(mAgeMonths, R.string.age_limit);
-            valid = false;
+        // TODO: This should start out as "Sex sex = null" and then get set to female, male,
+        // other, or unknown if any button is selected (there should be four buttons) -- so
+        // that we can distinguish "no change to sex" (null) from "change sex to unknown" ("U").
+        int sex = Patient.GENDER_UNKNOWN;
+        switch (mSex.getCheckedRadioButtonId()) {
+            case R.id.patient_sex_female:
+                sex = Patient.GENDER_FEMALE;
+                break;
+            case R.id.patient_sex_male:
+                sex = Patient.GENDER_MALE;
+                break;
         }
-
-        int sex = mSex.getCheckedRadioButtonId();
-        if (sex == -1) {
-            mSexFemale.setError(getResources().getString(R.string.sex_cannot_be_null));
-            mSexMale.setError(getResources().getString(R.string.sex_cannot_be_null));
-            showErrorMessage(getResources().getString(R.string.sex_cannot_be_null));
-            valid = false;
-        } else {
-            switch (mSex.getCheckedRadioButtonId()) {
-                case R.id.patient_sex_female:
-                    sex = Patient.GENDER_FEMALE;
-                    break;
-                case R.id.patient_sex_male:
-                    sex = Patient.GENDER_MALE;
-                    break;
-            }
-        }
-
-        if (!valid) {
-            throw new ValidationException("Validation Error");
-        }
-
         Utils.logUserAction("patient_submitted",
             "id", id,
             "given_name", givenName,
@@ -198,39 +174,17 @@ public class EditPatientDialogFragment extends DialogFragment {
         String title = args.getBoolean("new") ? "New patient" : "Edit patient";
         populateFields(args);
 
-        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(title)
-            .setPositiveButton(getResources().getString(R.string.ok), new DialogInterface
-                .OnClickListener() {
+            .setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialogInterface, int i) {
+                    onSubmit();
                 }
             })
             .setNegativeButton(getResources().getString(R.string.cancel), null)
             .setView(fragment)
             .create();
-
-        //TODO: Create an encapsulated version of this
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-
-            @Override
-            public void onShow(DialogInterface arg0) {
-
-                Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                okButton.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View arg0) {
-                        try {
-                            onSubmit();
-                            dialog.dismiss();
-                        } catch (ValidationException e) {
-                            Utils.logEvent("add_patient_failed", "reason", "" + e.getMessage());
-                        }
-                    }
-                });
-            }
-        });
 
         // Open the keyboard, ready to type into the given name field.
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -241,30 +195,5 @@ public class EditPatientDialogFragment extends DialogFragment {
         field.setError(getResources().getString(resourceId));
         field.invalidate();
         field.requestFocus();
-    }
-
-    private void clearErrors(){
-        mId.setError(null);
-        mGivenName.setError(null);
-        mFamilyName.setError(null);
-        mAgeYears.setError(null);
-        mAgeMonths.setError(null);
-        mSexFemale.setError(null);
-        mSexMale.setError(null);
-    }
-
-    private void showErrorMessage(String Message) {
-        Drawable alertIcon = getResources().getDrawable(android.R.drawable.ic_dialog_alert);
-        alertIcon.setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
-            new AlertDialog.Builder(getActivity())
-            .setTitle(getResources().getString(R.string.invalid_input))
-            .setMessage(Message)
-            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    // continue
-                }
-            })
-            .setIcon(alertIcon)
-            .show();
     }
 }
