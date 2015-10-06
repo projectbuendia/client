@@ -87,15 +87,15 @@ public class Utils {
         };
 
     private static final DateTimeFormatter SHORT_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM");
+        DateTimeFormat.forPattern("d MMM"); // TODO/i18n
     private static final DateTimeFormatter MEDIUM_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM yyyy");
+        DateTimeFormat.forPattern("d MMM yyyy"); // TODO/i18n
     private static final DateTimeFormatter SHORT_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("d MMM 'at' HH:mm");
+        DateTimeFormat.forPattern("d MMM 'at' HH:mm"); // TODO/i18n
     private static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER =
         DateTimeFormat.mediumDateTime();
     private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
-        DateTimeFormat.forPattern("HH:mm");
+        DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
     // Note: Use of \L here assumes a string that is already NFC-normalized.
     private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
     private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
@@ -380,9 +380,9 @@ public class Utils {
         // TODO/i18n
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
-        return years == 0 ? "" + months + " mo" :
-            months == 0 || years >= 5 ? "" + years + " y" :
-                "" + years + " y " + months + " mo";
+        return years == 0 ? "" + months + " mo" : // TODO/i18n
+            months == 0 || years >= 5 ? "" + years + " y" : // TODO/i18n
+                "" + years + " y " + months + " mo"; // TODO/i18n
     }
 
     /**
