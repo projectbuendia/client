@@ -72,7 +72,7 @@ public class Database extends SQLiteOpenHelper {
      * A map of SQL table schemas, with one entry per table.  The values should
      * be strings that take the place of X in a "CREATE TABLE foo (X)" statement.
      */
-    static final Map<Table, String> SCHEMAS = new HashMap();
+    static final Map<Table, String> SCHEMAS = new HashMap<>();
 
     // For descriptions of these tables and the meanings of their columns, see Contracts.java.
     static {

@@ -30,6 +30,7 @@ def debugContentAuthority = debugAppId + '.provider'
 android {
     dexOptions {
         preDexLibraries = false
+        javaMaxHeapSize = '4g'
     }
 }
 dependencies {
@@ -61,6 +62,7 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0' // The event bus
     compile 'joda-time:joda-time:2.5' // Better dates and times
     compile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
+    compile 'com.facebook.stetho:stetho-okhttp:1.2.0' // Network debugging
 
     // Testing
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
