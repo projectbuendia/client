@@ -44,7 +44,6 @@ import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.Date;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -457,20 +456,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         type(family, viewWithId(R.id.patient_family_name));
         type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_years));
         type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
-        chooseSex();
+        int sex = Integer.parseInt(id) % 2 == 0 ? R.id.patient_sex_female : R.id.patient_sex_male;
+        click(viewWithId(sex));
         screenshot("After Patient Populated");
-    }
-
-    /** Randomly choose a sex for the patient */
-    protected void chooseSex(){
-        Random rand = new Random();
-        int randomNum = rand.nextInt((2 - 1) + 1) + 1;
-
-        if(randomNum == 1){
-            click(viewWithId(R.id.patient_sex_male));
-        }
-        else if(randomNum == 2){
-            click(viewWithId(R.id.patient_sex_female));
-        }
     }
 }
