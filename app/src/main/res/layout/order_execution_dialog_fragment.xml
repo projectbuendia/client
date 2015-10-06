@@ -18,6 +18,7 @@
     android:orientation="vertical"
     >
 
+    <!-- TODO/i18n -->
     <TextView
         android:id="@+id/order_instructions"
         android:text="Medication and dosage"
@@ -25,6 +26,8 @@
         android:layout_height="wrap_content"
         android:textStyle="bold" />
 
+    <!-- TODO/i18n: Remove this android:text string; it will always be replaced -->
+    <!-- by a computed string when this dialog is displayed. -->
     <TextView
         android:id="@+id/order_start_time"
         android:text="Started on Date at Time"
@@ -33,6 +36,8 @@
         android:textSize="24sp"
         android:layout_marginBottom="32dp" />
 
+    <!-- TODO/i18n: Remove this android:text string; it will always be replaced -->
+    <!-- by a computed string when this dialog is displayed. -->
     <TextView
         android:id="@+id/order_execution_count"
         android:text="Given N times today"

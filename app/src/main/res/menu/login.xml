@@ -12,10 +12,12 @@
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- TODO/i18n -->
     <item
         android:showAsAction="ifRoom"
         android:id="@+id/action_add_user"
         android:title="Add User"/>
+    <!-- TODO/i18n -->
     <item
         android:id="@+id/settings"
         android:showAsAction="ifRoom"

@@ -476,7 +476,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         public void updatePatientLocationUi(LocationTree locationTree, Patient patient) {
             Location location = locationTree.findByUuid(patient.locationUuid);
-            String locationText = location == null ? "Unknown" : location.toString();
+            String locationText = location == null ? "Unknown" : location.toString(); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIconDrawable(
@@ -499,7 +499,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
+                ? "age unknown" : Utils.birthdateToAge(patient.birthdate)); // TODO/i18n
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 

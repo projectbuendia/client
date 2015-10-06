@@ -311,7 +311,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         if (dialogShowing()) return;
 
         Preset preset = new Preset();
-        preset.locationName = "Triage";
+        preset.locationName = "Triage"; // TODO/i18n: Several occurrences of "Triage" in this file.
 
         JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed",

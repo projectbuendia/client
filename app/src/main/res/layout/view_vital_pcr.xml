@@ -23,6 +23,9 @@
         android:layout_height="match_parent"
         android:background="?android:attr/selectableItemBackground">
 
+        <!-- TODO/i18n: "Latest Ebola Result" is hardcoded, but this XML file is -->
+        <!-- soon to be deleted as these tiles can all be generated -->
+        <!-- dynamically based on the profile. -->
         <TextView
             android:id="@+id/vital_name_pcr"
             android:layout_width="match_parent"
