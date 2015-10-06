@@ -26,6 +26,9 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
         }
     };
     public String fullName;
+    // TODO/i18n: This will be tricky to internationalize as it's stored on the server.
+    // Perhaps create the guest account with a special name like "*" on the server, and replace
+    // "*" with the localized string for "Guest User" on the client when displaying the user?
     private static final String GUEST_ACCOUNT_NAME = "Guest User";
     public static final Comparator<JsonUser> COMPARATOR_BY_NAME = new Comparator<JsonUser>() {
 

@@ -24,6 +24,9 @@
         android:id="@+id/patient_chart_vital_temperature_parent"
         android:background="?android:attr/selectableItemBackground">
 
+        <!-- TODO/i18n: "Temperature" is hardcoded, but this XML file is -->
+        <!-- soon to be deleted as these tiles can all be generated -->
+        <!-- dynamically based on the profile. -->
         <TextView
             android:id="@+id/vital_name_temperature"
             android:layout_width="match_parent"

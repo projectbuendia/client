@@ -21,7 +21,6 @@ import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
-import android.widget.EditText;
 
 import com.estimote.sdk.internal.Preconditions;
 import com.google.common.base.Joiner;
@@ -231,25 +230,6 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
         return new MatcherWithDescription<>(
             ViewMatchers.withText(StringMatchers.matchesRegex(regex)),
             "has text matching regex /" + regex + "/");
-    }
-
-    public static Matcher<View> editTextWithError(final String expected) {
-        return new TypeSafeMatcher<View>() {
-
-            @Override
-            public boolean matchesSafely(View view) {
-                if (!(view instanceof EditText)) {
-                    return false;
-                }
-                EditText editText = (EditText) view;
-                return editText.getError().toString().equals(expected);
-            }
-
-            @Override
-            public void describeTo(Description description) {
-
-            }
-        };
     }
 
     public static Matcher<View> isAtLeastNPercentVisible(int percentage) {
