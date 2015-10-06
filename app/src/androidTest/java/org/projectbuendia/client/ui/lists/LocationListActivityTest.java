@@ -55,31 +55,33 @@ public class LocationListActivityTest extends FunctionalTestCase {
 
     /** Tests that zones and tents are still displayed after returning from chart view. */
     public void testZonesAndTentsDisplayed_afterChartView() {
-        inUserLoginInitDemoPatient();
-        inUserLoginGoToLocationSelection();
-        inLocationSelectionClickLocation(LOCATION_NAME);
-        inPatientListClickFirstPatient(); // open patient chart
-
-        pressBack(); // back to search fragment
-        pressBack(); // back to tent selection screen
+        inUserLoginGoToPatientCreation();
+        screenshot("Test Start");
+        String id = generateId();
+        populateNewPatientFields(id);
+        click(viewWithText("OK"));
+        waitForProgressFragment();
+        pressBack(); // back to location selection screen
         inLocationSelectionCheckZonesAndTentsDisplayed();
     }
 
     /** Tests that zones and tents are still displayed after changing a patient's location. */
     public void testZonesAndTentsDisplayed_afterPatientLocationChanged() {
-        inUserLoginInitDemoPatient();
-        inUserLoginGoToLocationSelection();
-        inLocationSelectionClickLocation(LOCATION_NAME);
-        inPatientListClickFirstPatient(); // open patient chart
+        inUserLoginGoToPatientCreation();
+        screenshot("Test Start");
+        String id = generateId();
+        populateNewPatientFields(id);
+        click(viewWithText("OK"));
+        waitForProgressFragment();
+        screenshot("On Patient Chart");
 
-        // Relocate the patient to C1.
+        // Assign a location to the patient
         click(viewWithId(R.id.attribute_location));
-        click(viewWithText("C1"));
+        screenshot("After Location Dialog Shown");
+        click(viewWithText(LOCATION_NAME));
+        screenshot("After Location Selected");
 
-        pressBack(); // back to search fragment
-        pressBack(); // back to tent selection screen
+        pressBack(); // back to location selection screen
         inLocationSelectionCheckZonesAndTentsDisplayed();
-
-        invalidateDemoPatient(); // don't reuse the relocated patient for future tests
     }
 }
