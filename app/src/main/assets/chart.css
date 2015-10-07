@@ -44,7 +44,7 @@ th[scope="row"] { max-width: 40%; overflow: hidden; }
 th[scope="row"] div { max-width: 100%; overflow: hidden; }
 
 /* Cells */
-.obs td, .order td { text-align: center; min-width: 3em; }
+.obs td, .order td { text-align: center; min-width: 3em; position: relative; }
 .order .future { font-size: 75%; color: #999; vertical-align: center; }
 .order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
 .command {
@@ -59,7 +59,7 @@ th[scope="row"] div { max-width: 100%; overflow: hidden; }
 
 /* Tiles */
 #tiles { table-layout: fixed; width: 100%; }
-.tile { height: 3em; overflow: hidden; white-space: nowrap; padding: 16px; }
+.tile { height: 3em; overflow: hidden; white-space: nowrap; padding: 16px; position: relative; }
 .tile div { width: 100%; overflow: hidden; }
 .tile .heading {
   font-size: 1.8em;

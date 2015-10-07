@@ -1,15 +1,13 @@
 package org.projectbuendia.client.ui.chart;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableSet;
 
 import org.apache.commons.lang3.text.ExtendedMessageFormat;
 import org.apache.commons.lang3.text.FormatFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.json.ConceptType;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.ObsPoint;
+import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.utils.Utils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -39,16 +37,17 @@ import javax.annotation.Nullable;
  * ObsOutputFormat classes below.  Each one may be invoked with a short name, e.g.
  * "{1,number,##.#}" renders a numeric value to one decimal place; "{1,yes_no,YES;NO}" renders
  * a coded answer to "YES" or "NO"; "{1,date,YYYY-mm-dd}" renders a date value, etc.
+ *
+ * Everything in this file should be written to avoid throwing exceptions as much as possible;
+ * it's better to return something that reveals useful information about the problem in the output.
  */
 public class ObsFormat extends Format {
-    public static final ObsValue NULL_OBS = new ObsValue(0, "", "", "NONE", null, null);
-
-    private static final Set<String> FALSE_CONCEPT_UUIDS = ImmutableSet.of(
-        ConceptUuids.NO_UUID,
-        ConceptUuids.NONE_UUID,
-        ConceptUuids.NORMAL_UUID,
-        ConceptUuids.UNKNOWN_UUID
-    );
+    /**
+     * A value that means "there have been no observations for this concept".  Normally one
+     * would use null for this, but unfortunately ExtendedMessageFormat does not pass along
+     * null to formatters so we have to use a sentinel.  See PebbleExtension.formatValues.
+     */
+    public static final ObsValue UNOBSERVED = ObsValue.newCoded("");
 
     private static final Map<String, Class<? extends Format>> FORMAT_CLASSES = new HashMap<>();
     static {
@@ -59,12 +58,12 @@ public class ObsFormat extends Format {
         FORMAT_CLASSES.put("text", ObsTextFormat.class);
         FORMAT_CLASSES.put("date", ObsDateFormat.class);
         FORMAT_CLASSES.put("time", ObsTimeFormat.class);
-        FORMAT_CLASSES.put("obs_time", ObsEncounterTimeFormat.class);
         FORMAT_CLASSES.put("select", ObsSelectFormat.class);
     }
 
-    public static final String ELLIPSIS = "\u2026";
-    public static final String EN_DASH = "\u2013";
+    public static final String ELLIPSIS = "\u2026";  // used when truncating excessively long text
+    public static final String EN_DASH = "\u2013";  // an en-dash to mean "nothing has been observed"
+    public static final String TYPE_ERROR = "?";  // shown for a type mismatch (e.g. non-ObsValue)
 
     private String mPattern;
     private Format mFormat;
@@ -81,7 +80,7 @@ public class ObsFormat extends Format {
     private ObsFormat mRootObsFormat;  // root ObsFormat from which this ObsFormat descended
     private Object[] mCurrentArgs;  // args currently being formatted by this ObsFormat
 
-    public ObsFormat(String pattern, ObsFormat rootObsFormat) {
+    public ObsFormat(String pattern, @Nullable ObsFormat rootObsFormat) {
         if (pattern == null) {
             pattern = "";
         }
@@ -94,7 +93,22 @@ public class ObsFormat extends Format {
             } catch (IllegalArgumentException e) { }
         }
         mRootObsFormat = rootObsFormat == null ? this : rootObsFormat;
-        mFormat = new ExtendedMessageFormat(pattern, new FormatFactoryMap());
+        try {
+            mFormat = new ExtendedMessageFormat(pattern, new FormatFactoryMap());
+        } catch (IllegalArgumentException e) {
+            // Instead of crashing, display the invalid pattern in the output to aid debugging.
+            mFormat = new Format() {
+                @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
+                                                     @Nonnull FieldPosition pos) {
+                    buf.append(mPattern);
+                    return buf;
+                }
+
+                @Override public Object parseObject(String str, @Nonnull ParsePosition pos) {
+                    throw new UnsupportedOperationException();
+                }
+            };
+        }
     }
     
     public ObsFormat(String pattern) {
@@ -106,7 +120,7 @@ public class ObsFormat extends Format {
     }
 
     /** Returns an ObsFormat for the given pattern, or null for a null or empty pattern. */
-    public static ObsFormat fromPattern(@Nullable String pattern) {
+    public static @Nullable ObsFormat fromPattern(@Nullable String pattern) {
         // TODO/speed: If creating ObsFormats is slow, we could cache instances here by pattern.
         return Utils.isEmpty(pattern) ? null : new ObsFormat(pattern);
     }
@@ -117,8 +131,13 @@ public class ObsFormat extends Format {
 
     @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                          @Nonnull FieldPosition pos) {
-        mCurrentArgs = (Object[]) obj;
-        return mFormat.format(obj, buf, pos);
+        if (obj instanceof ObsValue[]) {
+            mCurrentArgs = (ObsValue[]) obj;
+            return mFormat.format(obj, buf, pos);
+        } else {
+            buf.append(TYPE_ERROR);
+            return buf;
+        }
     }
 
     @Override public Object parseObject(String str, @Nonnull ParsePosition pos) {
@@ -139,7 +158,7 @@ public class ObsFormat extends Format {
          * we simply return this class, which can instantiate any Format.
          */
         @Override public @Nullable FormatFactory get(Object name) {
-            return FORMAT_CLASSES.containsKey(name) ? this : null;
+            return FORMAT_CLASSES.containsKey("" + name) ? this : null;
         }
 
         /** Instantiates a Format class, whose constructor must take one String argument. */
@@ -156,14 +175,18 @@ public class ObsFormat extends Format {
     }
 
     /**
-     * Base class for formats that format a single ObsValue.  Subclasses should have a
-     * public constructor that takes a single String argument, and should implement formatObs.
+     * Base class for formats that format a single Obs.  Subclasses should have a
+     * public constructor that takes a single String argument, and should implement formatObsValue.
      */
     abstract class ObsOutputFormat extends Format {
         @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                              @Nonnull FieldPosition pos) {
-            ObsValue obs = (ObsValue) obj;
-            buf.append(formatObs(obs == NULL_OBS ? null : obs));
+            // UNOBSERVED is compared by identity (not using equals()) because it is a sentinel.
+            if (obj == UNOBSERVED) {
+                buf.append(formatObsValue(null));
+            } else if (obj instanceof ObsValue) {
+                buf.append(formatObsValue((ObsValue) obj));
+            }
             return buf;
         }
 
@@ -176,10 +199,11 @@ public class ObsFormat extends Format {
             return mRootObsFormat.getCurrentArgs();
         }
 
-        public abstract String formatObs(@Nullable ObsValue obs);
+        /** Formats the value, treating null to mean "there have been no observations". */
+        public abstract String formatObsValue(@Nullable ObsValue value);
     }
 
-    /** "yes_no" format for boolean values (UUIDs).  Typical use: {1,yes_no,Present;Not present} */
+    /** "yes_no" format for values of any type.  Typical use: {1,yes_no,Present;Not present} */
     class ObsYesNoFormat extends ObsOutputFormat {
         String mYesText;
         String mNoText;
@@ -192,10 +216,9 @@ public class ObsFormat extends Format {
             mNullText = parts.length >= 3 ? parts[2] : EN_DASH;
         }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return mNullText;
-            String str = Utils.valueOrDefault(obs.value, "").trim();
-            return str.isEmpty() || FALSE_CONCEPT_UUIDS.contains(str) ? mNoText : mYesText;
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return mNullText;
+            return value.asBoolean() ? mYesText : mNoText;
         }
     }
 
@@ -205,9 +228,11 @@ public class ObsFormat extends Format {
 
         public ObsAbbrFormat(String pattern) { }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return EN_DASH;
-            String name = Utils.valueOrDefault(obs.valueName, "");
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.uuid == null) return TYPE_ERROR;
+            if (value.name == null) return "";
+            String name = value.name;
             int abbrevLength = name.indexOf('.');
             if (abbrevLength >= 1 && abbrevLength <= MAX_ABBR_CHARS) {
                 return name.substring(0, abbrevLength);
@@ -229,9 +254,11 @@ public class ObsFormat extends Format {
             }
         }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return EN_DASH;
-            String name = Utils.valueOrDefault(obs.valueName, "");
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.uuid == null) return TYPE_ERROR;
+            if (value.name == null) return "";
+            String name = value.name;
             int abbrevLength = name.indexOf('.');
             if (abbrevLength >= 1 && abbrevLength <= ObsAbbrFormat.MAX_ABBR_CHARS) {
                 name = name.substring(abbrevLength + 1).trim();
@@ -248,13 +275,10 @@ public class ObsFormat extends Format {
             mFormat = new DecimalFormat(pattern);
         }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return EN_DASH;
-            try {
-                return mFormat.format(Double.valueOf(obs.value));
-            } catch (NumberFormatException e) {
-                return obs.value;
-            }
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.number == null) return TYPE_ERROR;
+            return mFormat.format(value.number);
         }
     }
 
@@ -270,10 +294,11 @@ public class ObsFormat extends Format {
             }
         }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return EN_DASH;
-            String value = Utils.valueOrDefault(obs.value, "");
-            return maxLength < value.length() ? value.substring(0, maxLength) + ELLIPSIS : value;
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.text == null) return TYPE_ERROR;
+            String text = value.text;
+            return maxLength < text.length() ? text.substring(0, maxLength) + ELLIPSIS : text;
         }
     }
 
@@ -285,13 +310,14 @@ public class ObsFormat extends Format {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return EN_DASH;
-            return new LocalDate(obs.value).toString(mPattern);
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.date == null) return TYPE_ERROR;
+            return new LocalDate(value.date).toString(mPattern);
         }
     }
 
-    /** "time" format for timestamp values (seconds since epoch).  Typical use: {1,time,MMM dd 'at' HH:mm} */
+    /** "time" format for instant values (seconds since epoch).  Typical use: {1,time,MMM dd 'at' HH:mm} */
     class ObsTimeFormat extends ObsOutputFormat {
         String mPattern;
 
@@ -299,23 +325,10 @@ public class ObsFormat extends Format {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return EN_DASH;
-            return new DateTime(Double.valueOf(obs.value) * 1000).toString(mPattern);
-        }
-    }
-
-    /** "obs_time" format for observation times.  Typical use: {1,obs_time,HH:mm 'on' MMM dd} */
-    class ObsEncounterTimeFormat extends ObsOutputFormat {
-        String mPattern;
-
-        public ObsEncounterTimeFormat(String pattern) {
-            mPattern = pattern;
-        }
-
-        @Override public String formatObs(@Nullable ObsValue obs) {
-            if (obs == null) return EN_DASH;
-            return obs.obsTime.toString(mPattern);
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.instant == null) return TYPE_ERROR;
+            return new DateTime(value.instant).toString(mPattern);
         }
     }
 
@@ -394,51 +407,71 @@ public class ObsFormat extends Format {
             return n;  // not terminated
         }
 
-        /** Returns true if the value of an observation matches the given condition. */
-        private boolean matches(ObsValue obs, String operator, String operand) {
-            if (operand.isEmpty()) return true;
+        /** Returns true if an observed value matches the given condition. */
+        private boolean matches(@Nullable Object obj, String operator, String operandStr) {
+            ObsValue value;
+            if (obj == null) {
+                // To test for null, use = to compare to an empty string.
+                switch (operator) {
+                    case "":
+                    case "=":
+                    case "==":
+                        return operandStr.isEmpty();
+                    default:
+                        return false;
+                }
+            } else if (obj instanceof ObsPoint) {
+                value = ((ObsPoint) obj).value;
+            } else if (obj instanceof ObsValue) {
+                value = (ObsValue) obj;
+            } else return false;
 
-            String strValue = null;
-            String strOperand = operand;
-            Double numValue = null;
-            Double numOperand = null;
-            if (obs != null) {
-                strValue = obs.value;
-                if (obs.conceptType == ConceptType.CODED) {
-                    // Coded UUIDs can be compared according to their short form.
-                    strOperand = Utils.expandUuid(operand);
-                } else if (obs.conceptType == ConceptType.NUMERIC) {
-                    numValue = Utils.toDoubleOrNull(obs.value);
-                    numOperand = Utils.toDoubleOrNull(operand);
+            // Coerce the string operand to match the value's data type.
+            ObsValue operand = null;
+            if (value.uuid != null) {
+                operand = ObsValue.newCoded(Utils.expandUuid(operandStr));
+            } else if (value.number != null) {
+                try {
+                    operand = ObsValue.newNumber(Double.valueOf(operandStr));
+                } catch (NumberFormatException e) {
+                    operand = ObsValue.ZERO;
+                }
+            } else if (value.text != null) {
+                operand = ObsValue.newText(operandStr);
+            } else if (value.date != null) {
+                try {
+                    operand = ObsValue.newDate(LocalDate.parse(operandStr));
+                } catch (IllegalArgumentException e) {
+                    operand = ObsValue.MIN_DATE;
+                }
+            } else if (value.instant != null) {
+                try {
+                    operand = ObsValue.newTime(Long.valueOf(operandStr));
+                } catch (IllegalArgumentException e) {
+                    operand = ObsValue.MIN_TIME;
                 }
             }
 
-            // To test for null, use = to compare to an empty string.
-            // The comparison operators <, <=, >, >= are only valid for numbers.
             switch (operator) {
                 case "":
                 case "=":
                 case "==":
-                    if (operand.isEmpty()) {
-                        return (strValue == null || strValue.isEmpty()) && numValue == null;
-                    }
-                    return numValue != null ? numValue.equals(numOperand)
-                        : Objects.equal(strOperand, strValue);
+                    return Objects.equal(value, operand);
                 case "<":
-                    return numValue != null && numValue.compareTo(numOperand) < 0;
+                    return value.compareTo(operand) < 0;
                 case "<=":
-                    return numValue != null && numValue.compareTo(numOperand) <= 0;
+                    return value.compareTo(operand) <= 0;
                 case ">":
-                    return numValue != null && numValue.compareTo(numOperand) > 0;
+                    return value.compareTo(operand) > 0;
                 case ">=":
-                    return numValue != null && numValue.compareTo(numOperand) >= 0;
+                    return value.compareTo(operand) >= 0;
             }
             return false;
         }
 
-        @Override public String formatObs(@Nullable ObsValue obs) {
+        @Override public String formatObsValue(@Nullable ObsValue value) {
             for (Option option : mOptions) {
-                if (matches(obs, option.operator, option.operand)) {
+                if (matches(value, option.operator, option.operand)) {
                     return option.format.format(getRootArgs());
                 }
             }

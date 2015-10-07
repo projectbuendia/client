@@ -30,7 +30,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
@@ -60,8 +60,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private static final String EN_DASH = "\u2013";
 
     private Location[] mLocations;
-    private Map<String, ObsValue> mPregnancyObs = new HashMap<>();
-    private Map<String, ObsValue> mConditionObs = new HashMap<>();
+    private Map<String, Obs> mPregnancyObs = new HashMap<>();
+    private Map<String, Obs> mConditionObs = new HashMap<>();
 
     /**
      * Creates a {@link PatientListTypedCursorAdapter}.
@@ -139,7 +139,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
 
         // Show pregnancy status and condition, if the data for these has been loaded.
-        ObsValue obs = mPregnancyObs.get(patient.uuid);
+        Obs obs = mPregnancyObs.get(patient.uuid);
         boolean pregnant = obs != null && ConceptUuids.YES_UUID.equals(obs.value);
 
         obs = mConditionObs.get(patient.uuid);
