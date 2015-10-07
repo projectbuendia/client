@@ -11,14 +11,20 @@ import com.mitchellbosecke.pebble.PebbleEngine;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
+import org.joda.time.ReadableInstant;
 import org.joda.time.chrono.ISOChronology;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -27,6 +33,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +51,7 @@ public class ChartRenderer {
 
     WebView mView;  // view into which the HTML table will be rendered
     Resources mResources;  // resources used for localizing the rendering
-    private List<ObsValue> mLastRenderedObs;  // last set of observations rendered
+    private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
     private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
 
@@ -61,8 +68,9 @@ public class ChartRenderer {
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
-    public void render(Chart chart, Map<String, ObsValue> latestObservations,
-                       List<ObsValue> observations, List<Order> orders,
+    // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
+    public void render(Chart chart, Map<String, Obs> latestObservations,
+                       List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
 
@@ -103,13 +111,14 @@ public class ChartRenderer {
         LocalDate mFirstSymptomsDate;
 
         List<List<Tile>> mTileRows = new ArrayList<>();
-        List<Row> mRows = new ArrayList<>();
-        Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
+        List<org.projectbuendia.client.ui.chart.Row> mRows = new ArrayList<>();
+        Map<String, org.projectbuendia.client.ui.chart.Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         SortedSet<LocalDate> mDays = new TreeSet<>();
+        Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
-        GridHtmlGenerator(Chart chart, Map<String, ObsValue> latestObservations,
-                          List<ObsValue> observations, List<Order> orders,
+        GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
+                          List<Obs> observations, List<Order> orders,
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
@@ -119,45 +128,55 @@ public class ChartRenderer {
             for (ChartSection tileGroup : chart.tileGroups) {
                 List<Tile> tileRow = new ArrayList<>();
                 for (ChartItem item : tileGroup.items) {
-                    ObsValue[] obsValues = new ObsValue[item.conceptUuids.length];
-                    for (int i = 0; i < obsValues.length; i++) {
-                        obsValues[i] = latestObservations.get(item.conceptUuids[i]);
+                    ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
+                    for (int i = 0; i < points.length; i++) {
+                        Obs obs = latestObservations.get(item.conceptUuids[i]);
+                        if (obs != null) {
+                            points[i] = obs.getObsPoint();
+                        }
                     }
-                    tileRow.add(new Tile(item, obsValues));
+                    tileRow.add(new Tile(item, points));
+                    if (!item.script.trim().isEmpty()) {
+                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                    }
                 }
                 mTileRows.add(tileRow);
             }
-            for (ChartSection chartSection : chart.rowGroups) {
-                for (ChartItem chartItem : chartSection.items) {
-                    Row row = new Row(chartItem);
+            for (ChartSection section : chart.rowGroups) {
+                for (ChartItem item : section.items) {
+                    Row row = new Row(item);
                     mRows.add(row);
-                    mRowsByUuid.put(chartItem.conceptUuids[0], row);
+                    mRowsByUuid.put(item.conceptUuids[0], row);
+                    if (!item.script.trim().isEmpty()) {
+                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                    }
                 }
             }
             addObservations(observations);
         }
 
-        void addObservations(List<ObsValue> observations) {
-            for (ObsValue obs : observations) {
-                if (obs.value == null) continue;
+        void addObservations(List<Obs> observations) {
+            for (Obs obs : observations) {
+                if (obs == null) continue;
+                ObsPoint point = obs.getObsPoint();
+                if (point == null) continue;
 
-                mDays.add(obs.obsTime.toLocalDate());
-                Column column = getColumnContainingTime(obs.obsTime);
-                if (obs.value != null && !obs.value.isEmpty()) {
-                    addObs(column, obs);
-                }
+                mDays.add(new DateTime(point.time).toLocalDate());
+                Column column = getColumnContainingTime(point.time);
 
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
-                    Integer count = column.orderExecutionCounts.get(obs.value);
-                    column.orderExecutionCounts.put(
+                    Integer count = column.executionCountsByOrderUuid.get(obs.value);
+                    column.executionCountsByOrderUuid.put(
                         obs.value, count == null ? 1 : count + 1);
+                } else {
+                    addObs(column, obs);
                 }
             }
         }
 
         /** Returns a column for a given date. Creates a new column, if it does not exist yet */
-        Column getColumnContainingTime(DateTime dt) {
-            LocalDate date = dt.toLocalDate();
+        Column getColumnContainingTime(ReadableInstant instant) {
+            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
             DateTime start = date.toDateTimeAtStartOfDay();
             long startMillis = start.getMillis();
             if (!mColumnsByStartMillis.containsKey(startMillis)) {
@@ -171,11 +190,39 @@ public class ChartRenderer {
             return mColumnsByStartMillis.get(startMillis);
         }
 
-        void addObs(Column column, ObsValue obs) {
-            if (!column.obsMap.containsKey(obs.conceptUuid)) {
-                column.obsMap.put(obs.conceptUuid, new TreeSet<>(ObsValue.BY_OBS_TIME));
+        void addObs(Column column, Obs obs) {
+            if (!column.pointSetByConceptUuid.containsKey(obs.conceptUuid)) {
+                column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<ObsPoint>());
             }
-            column.obsMap.get(obs.conceptUuid).add(obs);
+            column.pointSetByConceptUuid.get(obs.conceptUuid).add(obs.getObsPoint());
+        }
+
+        /** Exports a map of concept IDs to arrays of [columnStart, points] pairs. */
+        JSONObject getJsonDataDump() {
+            JSONObject dump = new JSONObject();
+            for (String uuid : mConceptsToDump) {
+                try {
+                    JSONArray pointGroups = new JSONArray();
+                    for (Column column : mColumnsByStartMillis.values()) {
+                        JSONArray pointArray = new JSONArray();
+                        SortedSet<ObsPoint> points = column.pointSetByConceptUuid.get(uuid);
+                        if (points != null && points.size() > 0) {
+                            for (ObsPoint point : points) {
+                                pointArray.put(point.toJson());
+                            }
+                            JSONObject pointGroup = new JSONObject();
+                            pointGroup.put("start", column.start.getMillis());
+                            pointGroup.put("stop", column.stop.getMillis());
+                            pointGroup.put("points", pointArray);
+                            pointGroups.put(pointGroup);
+                        }
+                    }
+                    dump.put("" + Utils.compressUuid(uuid), pointGroups);
+                } catch (JSONException e) {
+                    LOG.e(e, "JSON error while dumping chart data");
+                }
+            }
+            return dump;
         }
 
         // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)
@@ -208,16 +255,18 @@ public class ChartRenderer {
          * be collapsed.
          */
         void fillOrderPeriodColumns(LocalDate since, LocalDate to) {
-            List<DateTime> consecutiveEmptyColumns = new ArrayList<>();
+            List<Instant> consecutiveEmptyColumns = new ArrayList<>();
 
             for (LocalDate d = since; !d.isAfter(to); d = d.plusDays(1)) {
+                //Column column = getColumnContainingTime(d.toDateTimeAtStartOfDay());
+
                 Column column = getColumnContainingTime(d.toDateTimeAtStartOfDay());
 
                 if(!column.hasObservations() && d.isBefore(mToday)) {
                     consecutiveEmptyColumns.add(column.start);
                 } else {
                     if(consecutiveEmptyColumns.size() >= 3) {
-                        for(DateTime voidDay : consecutiveEmptyColumns) {
+                        for(Instant voidDay : consecutiveEmptyColumns) {
                             mColumnsByStartMillis.remove(voidDay.getMillis());
                         }
                     }
@@ -238,7 +287,6 @@ public class ChartRenderer {
                     }
                 }
             }
-
             return dates;
         }
 
