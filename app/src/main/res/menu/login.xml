@@ -17,11 +17,11 @@
   <item
       android:id="@+id/action_new_user"
       android:showAsAction="ifRoom"
-      android:title="&#xa0;New User&#xa0;"/>
+      android:title="@string/title_add_new_user"/>
   <!-- TODO/i18n -->
   <item
       android:id="@+id/settings"
       android:showAsAction="ifRoom"
-      android:title="&#xa0;Settings&#xa0;"/>
+      android:title= "@string/title_activity_settings"/>
 
 </menu>

@@ -44,6 +44,6 @@
         android:textStyle="bold"
         android:textAppearance="@style/text.caps"
         android:text="–"
-        tools:text="Palliative"/>
+        tools:text="@string/status_palliative"/>
 
 </LinearLayout>

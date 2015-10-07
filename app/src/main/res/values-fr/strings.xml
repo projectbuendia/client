@@ -66,6 +66,9 @@
   <string name="no_present_patients">Aucun présents patients</string>
   <string name="one_present_patient">1 présents patient</string>
   <string name="n_present_patients">%d présents patients</string>
+  <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
+
+
 
   <string name="title_new_order">Nouveau traitement</string>
   <string name="order_medication">médicament</string>
@@ -317,5 +320,13 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_desc_require_wifi">Désactivez cette option pour permettre l\'application de travailler avec des non-wifi (ou émulé captif Bluetooth) en réseau.</string>
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Appliquer et effacer les données locales</string>
+  <string name="discharged">Libéré</string>
+  <string name="action_edit">Modifier</string>
+  <string name="probable"> Probables 1 (10 patients)</string>
+  <string name="admission">depuis l\'admission</string>
+  <string name="loading">Chargement...</string>
+  <string name="no_such_patient_as_of_48_min_ago">Aucune patient d\'il ya 48 min</string>
+  <string name="observation">Observation</string>
+
 </resources>
 

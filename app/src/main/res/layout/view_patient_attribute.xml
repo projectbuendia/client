@@ -41,6 +41,6 @@
         android:layout_alignStart="@id/view_attribute_value"
         android:paddingStart="1sp"
         android:textAppearance="@style/text.caption"
-        tools:text="Since admission" />
+        tools:text="@string/admission" />
 
 </RelativeLayout>

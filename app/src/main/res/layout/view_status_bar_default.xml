@@ -27,7 +27,7 @@
         android:paddingEnd="32sp"
         android:gravity="center_vertical"
         android:textColor="@color/white"
-        tools:text="Application update available" />
+        tools:text="@string/snackbar_update_available" />
 
     <TextView
         android:id="@+id/status_bar_default_action"
@@ -40,6 +40,6 @@
         android:background="@drawable/bg_status_bar_action"
         android:textColor="@color/green"
         android:textAllCaps="true"
-        tools:text="Download" />
+        tools:text="@string/snackbar_action_download" />
 
 </RelativeLayout>
