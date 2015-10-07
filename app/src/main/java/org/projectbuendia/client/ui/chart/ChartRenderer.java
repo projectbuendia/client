@@ -62,6 +62,7 @@ public class ChartRenderer {
                        List<ObsValue> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
+
         if (observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders)) {
             return;  // nothing has changed; no need to render again
         }
