@@ -9,17 +9,16 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.sync;
+package org.projectbuendia.client.models;
 
 import android.support.annotation.NonNull;
 
 import com.google.common.collect.ImmutableMap;
 
 import org.joda.time.DateTime;
-import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.utils.Utils;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -28,62 +27,77 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A simple bean class representing an observation with localized names and values. */
-public final class ObsValue implements Comparable<ObsValue> {
-    public static final Comparator<ObsValue> BY_OBS_TIME = new Comparator<ObsValue>() {
-        @Override public int compare(ObsValue left, ObsValue right) {
-            return left.obsTime.compareTo(right.obsTime);
-        }
-    };
-
+// TODO: Make ObsPoint a member of Obs; change the structure of Obs to be simply:
+// { final @Nonnull String uuid; String name; final @Nonnull ObsPoint point; } then delete
+// getObsPoint(), getObsValue(), compareTo(), getTypeOrdering(), getCodedValueOrdering().
+public final class Obs implements Comparable<Obs> {
     /** The time at which this observation was taken. */
-    public final DateTime obsTime;
+    public final DateTime time;
 
     /** The UUID of the concept that was observed. */
     public final String conceptUuid;
 
     /** The data type of the concept that was observed. */
-    // TODO: Instead of conceptType, have separate valueUuid, valueNumber, and valueText fields.
     public final ConceptType conceptType;
 
-    /** The localized name of the concept that was observed. */
-    public final String conceptName;
-
     /** The observed value (a string, number as a string, or answer concept UUID). */
-    @Nullable public final String value;
+    public final @Nullable String value;
 
     /** The name of the answer concept, if the value is an answer concept. */
-    @Nullable public final String valueName;
+    public final @Nullable String valueName;
 
-    public ObsValue(
+    public Obs(
         long millis,
         String conceptUuid,
-        String conceptName,
-        String conceptType,
+        ConceptType conceptType,
         @Nullable String value,
         @Nullable String valueName) {
-        this.obsTime = new DateTime(millis);
+        this.time = new DateTime(millis);
         this.conceptUuid = checkNotNull(conceptUuid);
-        this.conceptName = conceptName == null ? "" : conceptName;
-        this.conceptType = conceptType == null ? null : ConceptType.valueOf(conceptType);
+        this.conceptType = conceptType;
         this.value = value;
         this.valueName = valueName;
     }
 
+    /** Returns the time and value of this observation as an ObsPoint. */
+    public @Nullable ObsPoint getObsPoint() {
+        ObsValue ov = getObsValue();
+        return ov == null ? null : new ObsPoint(time, getObsValue());
+    }
+
+    /** Returns the value of this observation as an ObsValue. */
+    public @Nullable ObsValue getObsValue() {
+        if (value == null || conceptType == null) return null;
+        switch (conceptType) {
+            case CODED:
+                return ObsValue.newCoded(value, valueName);
+            case NUMERIC:
+                return ObsValue.newNumber(Double.valueOf(value));
+            case TEXT:
+                return ObsValue.newText(value);
+            case BOOLEAN:
+                return ObsValue.newCoded(ConceptUuids.YES_UUID.equals(value));
+            case DATE:
+                return ObsValue.newDate(Utils.toLocalDate(value));
+            case DATETIME:
+                return ObsValue.newTime(Long.valueOf(value));
+        }
+        return null;
+    }
+
     @Override public String toString() {
-        return "ObsValue(obsTime=" + obsTime
+        return "Obs(time=" + time
             + ", conceptUuid=" + conceptUuid
-            + ", conceptName=" + conceptName
             + ", conceptType=" + conceptType
             + ", value=" + value
             + ", valueName=" + valueName + ")";
     }
 
     @Override public boolean equals(Object other) {
-        if (other instanceof ObsValue) {
-            ObsValue o = (ObsValue) other;
-            return Objects.equals(obsTime, o.obsTime)
+        if (other instanceof Obs) {
+            Obs o = (Obs) other;
+            return Objects.equals(time, o.time)
                 && Objects.equals(conceptUuid, o.conceptUuid)
-                && Objects.equals(conceptName, o.conceptName)
                 && Objects.equals(conceptType, o.conceptType)
                 && Objects.equals(value, o.value)
                 && Objects.equals(valueName, o.valueName);
@@ -93,7 +107,7 @@ public final class ObsValue implements Comparable<ObsValue> {
     }
 
     @Override public int hashCode() {
-        return (int) obsTime.getMillis() + conceptUuid.hashCode() + conceptName.hashCode()
+        return (int) time.getMillis() + conceptUuid.hashCode()
             + conceptType.hashCode() + (value == null ? 0 : value.hashCode())
             + (valueName == null ? 0 : valueName.hashCode());
     }
@@ -111,7 +125,7 @@ public final class ObsValue implements Comparable<ObsValue> {
      * @param other The other Value to compare to.
      * @return
      */
-    @Override public int compareTo(@NonNull ObsValue other) {
+    @Override public int compareTo(@NonNull Obs other) {
         if (value == null || other.value == null) {
             return value == other.value ? 0 : value == null ? -1 : 1;
         }

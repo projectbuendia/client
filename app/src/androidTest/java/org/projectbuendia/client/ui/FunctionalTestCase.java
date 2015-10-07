@@ -43,6 +43,7 @@ import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -169,7 +170,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         LOG.i("Adding patient: %s (location %s)",
             delta.toContentValues().toString(), locationName);
 
-        click(viewWithId(R.id.action_add));
+        click(viewWithId(R.id.action_new_patient));
         expectVisible(viewWithText("New patient"));
         if (delta.id.isPresent()) {
             type(delta.id.get(), viewWithId(R.id.patient_creation_text_patient_id));
@@ -268,6 +269,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      * that the UI is in the user login activity, and leaves the UI back in
      * the user login activity.  Note: this function will not work during
      * {@link #setUp()} as it relies on {@link #waitForProgressFragment()}.
+     * TODO: Remove this method.
+     * TODO: inUserLoginGoToPatientCreation and populateNewPatientFields replaces this method.
      */
     protected void inUserLoginInitDemoPatient() {
         if (sDemoPatientId != null) { // demo patient exists and is reusable
@@ -338,7 +341,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void inUserLoginGoToPatientCreation() {
         inUserLoginGoToLocationSelection();
-        click(viewWithId(R.id.action_add));
+        click(viewWithId(R.id.action_new_patient));
         expectVisible(viewWithText("New patient"));
     }
 
@@ -436,5 +439,25 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         click(dataThat(isPatientWithId(id))
             .inAdapterView(hasId(R.id.fragment_patient_list))
             .atPosition(0));
+    }
+
+    /** Generates IDs to identify the newly created patient. */
+    protected String generateId() {
+        return "" + (new Date().getTime() % 100000);
+    }
+
+    /** Populates all the fields on the New Patient screen. */
+    protected void populateNewPatientFields(String id) {
+        screenshot("Before Patient Populated");
+        String given = "Given" + id;
+        String family = "Family" + id;
+        type(id, viewWithId(R.id.patient_id));
+        type(given, viewWithId(R.id.patient_given_name));
+        type(family, viewWithId(R.id.patient_family_name));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_years));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
+        int sex = Integer.parseInt(id) % 2 == 0 ? R.id.patient_sex_female : R.id.patient_sex_male;
+        click(viewWithId(sex));
+        screenshot("After Patient Populated");
     }
 }

@@ -30,12 +30,12 @@ public class RelativeDateTimeFormatter {
     /** Formats a representation of {@code date} relative to {@code anchor}. */
     public String format(LocalDate date, LocalDate anchor) {
         if (date.isAfter(anchor)) {
-            return "in the future";
+            return "in the future"; // TODO/i18n
         }
         Period period = new Period(date, anchor);
         int daysAgo = period.toStandardDays().getDays();
-        return daysAgo > 1 ? daysAgo + " days ago" :
-            daysAgo == 1 ? "yesterday" : "today";
+        return daysAgo > 1 ? daysAgo + " days ago" : // TODO/i18n
+            daysAgo == 1 ? "yesterday" : "today"; // TODO/i18n
     }
 
     public String format(DateTime dateTime) {
@@ -45,16 +45,16 @@ public class RelativeDateTimeFormatter {
     /** Formats a representation of {@code dateTime} relative to {@code anchor}. */
     public String format(DateTime dateTime, DateTime anchor) {
         if (dateTime.isAfter(anchor)) {
-            return "in the future";
+            return "in the future"; // TODO/i18n
         }
         Period period = new Period(dateTime, anchor);
         int daysAgo = period.toStandardDays().getDays();
         int hoursAgo = period.toStandardHours().getHours();
         int minutesAgo = period.toStandardMinutes().getMinutes();
 
-        return daysAgo > 1 ? daysAgo + " days ago" :
-            hoursAgo > 1 ? hoursAgo + " hours ago" :
-                minutesAgo > 1 ? minutesAgo + " min ago" :
-                    "right now";
+        return daysAgo > 1 ? daysAgo + " days ago" : // TODO/i18n
+            hoursAgo > 1 ? hoursAgo + " hours ago" : // TODO/i18n
+                minutesAgo > 1 ? minutesAgo + " min ago" : // TODO/i18n
+                    "right now"; // TODO/i18n
     }
 }

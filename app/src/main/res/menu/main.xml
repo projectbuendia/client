@@ -21,11 +21,13 @@
           android:title="@string/action_go_to"
           android:showAsAction="ifRoom|collapseActionView" />
 
-    <item android:id="@+id/action_add"
+    <!-- TODO/i18n -->
+    <item android:id="@+id/action_new_patient"
           android:showAsAction="ifRoom|collapseActionView"
-          android:title="Add Patient"/>
+          android:title="New Patient"/>
 
     <item android:id="@+id/action_cancel"
           android:showAsAction="ifRoom|collapseActionView"
           android:title="@string/cancel_sync"/>
+
 </menu>

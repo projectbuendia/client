@@ -78,12 +78,12 @@ public class OrderDialogFragment extends DialogFragment {
         String dosage = mDosage.getText().toString().trim();
         String frequency = mFrequency.getText().toString().trim();
 
-        String instructions = medication;
+        String instructions = medication.replace(" ", "\u00a0");
         if (!dosage.isEmpty()) {
             instructions += " " + dosage;
         }
         if (!frequency.isEmpty()) {
-            instructions += " " + frequency + "x daily";
+            instructions += " " + frequency + "x daily"; // TODO/i18n
         }
         String durationStr = mGiveForDays.getText().toString().trim();
         Integer durationDays = durationStr.isEmpty() ? null : Integer.valueOf(durationStr);

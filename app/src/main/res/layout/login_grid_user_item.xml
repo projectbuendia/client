@@ -15,28 +15,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="8dp">
 
-    <TextView
-        android:id="@+id/user_initials"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:gravity="center"
-        android:background="#000000"
-        android:textSize="48sp"
-        android:textColor="#FFFFFF"
-        tools:text="CC" />
+  <TextView
+      android:id="@+id/user_initials"
+      android:layout_width="96sp"
+      android:layout_height="96sp"
+      android:layout_marginLeft="16sp"
+      android:layout_marginRight="16sp"
+      android:layout_marginTop="16sp"
+      android:background="#000000"
+      android:gravity="center"
+      android:textAppearance="@style/text.huge"
+      android:textColor="#FFFFFF"
+      tools:text="CC"/>
 
-    <TextView
-        android:id="@+id/user_name"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="4dp"
-        android:textSize="14sp"
-        android:ellipsize="end"
-        android:lines="2"
-        tools:text="Christian Clinician" />
+  <TextView
+      android:id="@+id/user_name"
+      android:layout_width="128sp"
+      android:layout_height="wrap_content"
+      android:ellipsize="end"
+      android:gravity="center_horizontal"
+      android:lines="2"
+      android:paddingTop="8sp"
+      android:textAppearance="@style/text.caption"
+      tools:text="Christian Clinician"/>
 
 </LinearLayout>

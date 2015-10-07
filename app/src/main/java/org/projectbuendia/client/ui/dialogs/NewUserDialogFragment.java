@@ -60,12 +60,12 @@ public class NewUserDialogFragment extends DialogFragment {
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.dialog_fragment_add_new_user, null);
+        View fragment = mInflater.inflate(R.layout.new_user_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
-            .setTitle(getResources().getString(R.string.title_add_new_user))
+            .setTitle(getResources().getString(R.string.title_new_user))
             .setPositiveButton(getResources().getString(R.string.ok), null)
             .setNegativeButton(getResources().getString(R.string.cancel), null)
             .setView(fragment);

@@ -25,12 +25,13 @@ import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -47,13 +48,12 @@ import static org.mockito.Mockito.when;
 
 /** Tests for {@link PatientChartController}. */
 public final class PatientChartControllerTest extends AndroidTestCase {
+    private static final String PATIENT_UUID_1 = "patient-uuid-1";
+    private static final String PATIENT_NAME_1 = "Bob";
+    private static final String PATIENT_ID_1 = "patient-id-1";
 
-    private static final String PATIENT_UUID_1 = "uuid1";
-    private static final String PATIENT_NAME_1 = "bob";
-    private static final String PATIENT_ID_1 = "id1";
-
-    private static final ObsValue OBSERVATION_A =
-        new ObsValue(0, "c", "c", "TEXT", "value", "");
+    private static final Obs OBS_1 = new Obs(
+        0, ConceptUuids.TEMPERATURE_UUID, ConceptType.NUMERIC, "37.2", "");
 
     private PatientChartController mController;
 
@@ -87,10 +87,10 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     /** Tests that observations are updated in the UI when patient details fetched. */
     public void testPatientDetailsLoaded_SetsObservationsOnUi() {
         // GIVEN the observations provider is set up to return some dummy data
-        List<ObsValue> allObservations =
-            ImmutableList.of(OBSERVATION_A);
-        Map<String, ObsValue> recentObservations =
-            ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
+        List<Obs> allObservations =
+            ImmutableList.of(OBS_1);
+        Map<String, Obs> recentObservations =
+            ImmutableMap.of(OBS_1.conceptUuid, OBS_1);
         when(mMockChartHelper.getObservations(PATIENT_UUID_1))
             .thenReturn(allObservations);
         when(mMockChartHelper.getLatestObservations(PATIENT_UUID_1))

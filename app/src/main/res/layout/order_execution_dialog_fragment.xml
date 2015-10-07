@@ -14,25 +14,28 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="32dp"
-    android:orientation="vertical"
-    >
+    android:padding="16dp"
+    android:orientation="vertical">
 
+    <!-- TODO/i18n -->
     <TextView
         android:id="@+id/order_instructions"
         android:text="Medication and dosage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold" />
+        android:textAppearance="@style/text.heading" />
 
+    <!-- TODO/i18n: Remove this android:text string; it will always be replaced -->
+    <!-- by a computed string when this dialog is displayed. -->
     <TextView
         android:id="@+id/order_start_time"
         android:text="Started on Date at Time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="24sp" />
 
+    <!-- TODO/i18n: Remove this android:text string; it will always be replaced -->
+    <!-- by a computed string when this dialog is displayed. -->
     <TextView
         android:id="@+id/order_execution_count"
         android:text="Given N times today"
@@ -43,12 +46,11 @@
         android:id="@+id/order_execution_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:paddingTop="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingBottom="0dp"
-        android:layout_marginTop="12dp"
+        android:paddingTop="16sp"
+        android:paddingStart="16sp"
+        android:paddingEnd="16sp"
+        android:paddingBottom="0sp"
+        android:layout_marginTop="12sp"
         android:text="11:30&#x0a;12:45"
         android:lineSpacingMultiplier="1.5"
         android:background="#ddd" />
@@ -57,9 +59,8 @@
         android:id="@+id/order_execution_mark_toggle"
         android:textOn="@string/order_execution_marked_as_given"
         android:textOff="@string/order_execution_mark_as_given"
-        android:textSize="24dp"
-        android:padding="24dp"
-        android:layout_marginTop="32dp"
+        android:padding="24sp"
+        android:layout_marginTop="32sp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/toggle_button_selector"

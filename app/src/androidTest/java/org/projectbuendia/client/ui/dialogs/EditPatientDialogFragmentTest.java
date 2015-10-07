@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.ui.newpatient;
+package org.projectbuendia.client.ui.dialogs;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -18,22 +18,28 @@ import org.joda.time.format.DateTimeFormat;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
-import java.util.Date;
-
+import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
 /** Tests for adding a new patient. */
-public class NewPatientActivityTest extends FunctionalTestCase {
+public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
-    /** Tests adding a new patient with a location. */
+    /**
+     * Tests adding a new patient;
+     * Tests adding a location to the patient;
+     * Test symptom date;
+     * Test last observation date;
+     * Test admission date;
+     */
     public void testNewPatient() {
 
         // Create the patient
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
-        String id = Long.toString(new Date().getTime()%100000);
-        populateNewPatientField(id);
+        String id = generateId();
+        populateNewPatientFields(id);
         click(viewWithText("OK"));
         waitForProgressFragment();
         screenshot("On Patient Chart");
@@ -59,29 +65,14 @@ public class NewPatientActivityTest extends FunctionalTestCase {
 
         // The admission date should be visible right after adding a patient.
         // Flaky because of potential periodic syncs.
-        expectVisibleWithin(100000, viewThat(
+        expectVisibleWithin(399999, viewThat(
             hasAncestorThat(withId(R.id.attribute_admission_days)),
             hasText("Day 1")));
 
         // The last observation should be today.
         DateTimeFormatter formatter = DateTimeFormat.forPattern("MMM d, yyyy");
-        expectVisibleWithin(100000, viewThat(
+        expectVisibleWithin(399999, viewThat(
             withId(R.id.patient_chart_last_observation_date_time),
             hasTextContaining(formatter.print(DateTime.now()))));
-    }
-
-    /** Populates all the fields on the New Patient screen. */
-    private void populateNewPatientField(String id) {
-        screenshot("Before Patient Populated");
-        String given = "Given" + id;
-        String family = "Family" + id;
-        type(id, viewWithId(R.id.patient_id));
-        type(given, viewWithId(R.id.patient_given_name));
-        type(family, viewWithId(R.id.patient_family_name));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_years));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
-        click(viewWithId(R.id.patient_sex_male));
-        click(viewWithId(R.id.patient_sex_female));
-        screenshot("After Patient Populated");
     }
 }
