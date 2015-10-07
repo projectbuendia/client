@@ -23,25 +23,23 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:paddingStart="32dp"
-        android:paddingEnd="32dp"
+        android:paddingStart="32sp"
+        android:paddingEnd="32sp"
         android:gravity="center_vertical"
         android:textColor="@color/white"
-        tools:text="Application update available"
-        style="@style/TextAppearance.Buendia.Medium" />
+        tools:text="Application update available" />
 
     <TextView
         android:id="@+id/status_bar_default_action"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:paddingStart="32dp"
-        android:paddingEnd="32dp"
+        android:paddingStart="32sp"
+        android:paddingEnd="32sp"
         android:gravity="center_vertical"
         android:background="@drawable/bg_status_bar_action"
         android:textColor="@color/green"
         android:textAllCaps="true"
-        tools:text="Download"
-        style="@style/TextAppearance.Buendia.Medium" />
+        tools:text="Download" />
 
 </RelativeLayout>

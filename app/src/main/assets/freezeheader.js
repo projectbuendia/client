@@ -82,7 +82,7 @@
                             .children("tbody").remove().end()
                             .appendTo(document.body)
                             .wrap("<div>").parent()
-                            .css({position: 'fixed', top: '0', left: '0', visibility: 'hidden'});
+                            .css({position: 'fixed', top: 0, left: 0, visibility: 'hidden'});
 
                         // Ensure all the columns match the widths of the original columns.
                         var origCells = $this.find('th');
@@ -96,9 +96,9 @@
                         cornerHeader = topHeader.clone(false) // skip a few steps by cloning topHeader
                             .find("th:nth-child(n+2)").remove().end()
                             .appendTo(document.body)
-                            .css({position: 'fixed', top: '0', left: '0', visibility: 'hidden'});
+                            .css({position: 'fixed', top: 0, left: 0, visibility: 'hidden'});
 
-                        // Ensure all the corner cell matches the width and height of the original.
+                        // Ensure the corner cell matches the width and height of the original.
                         var origCells = $this.find('th');
                         var cornerCells = cornerHeader.find('th');
                         for (var i = 0; i < cornerCells.length; i++) {

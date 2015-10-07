@@ -87,7 +87,7 @@ public class LoginActivity extends BaseActivity {
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.login, menu);
 
-        menu.findItem(R.id.action_add_user).setOnMenuItemClickListener(
+        menu.findItem(R.id.action_new_user).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
                 @Override public boolean onMenuItemClick(MenuItem item) {

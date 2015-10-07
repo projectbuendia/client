@@ -23,9 +23,7 @@
 
     <TableRow>
       <TextView
-          android:gravity="center_vertical"
-          android:layout_height="80sp"
-          android:layout_marginEnd="24sp"
+          style="@style/field_label"
           android:labelFor="@+id/patient_id"
           android:text="@string/id" />
       <EditText
@@ -40,9 +38,7 @@
 
     <TableRow>
       <TextView
-          android:gravity="center_vertical"
-          android:layout_height="80sp"
-          android:layout_marginEnd="24sp"
+          style="@style/field_label"
           android:labelFor="@+id/patient_given_name"
           android:text="@string/given_name" />
       <EditText
@@ -56,9 +52,7 @@
 
     <TableRow>
       <TextView
-          android:gravity="center_vertical"
-          android:layout_height="80sp"
-          android:layout_marginEnd="24sp"
+          style="@style/field_label"
           android:labelFor="@+id/patient_family_name"
           android:text="@string/family_name" />
       <EditText
@@ -72,9 +66,7 @@
 
     <TableRow>
       <TextView
-          android:gravity="center_vertical"
-          android:layout_height="80sp"
-          android:layout_marginEnd="24sp"
+          style="@style/field_label"
           android:labelFor="@+id/patient_age_years"
           android:text="@string/age" />
 
@@ -88,12 +80,13 @@
             android:inputType="numberDecimal"
             android:digits="0123456789"
             android:singleLine="true"
-            android:ems="2"
+            android:ems="3"
             android:maxLength="3"/>
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_marginEnd="24sp"
+            android:layout_marginStart="4sp"
+            android:layout_marginEnd="12sp"
             android:text="@string/years"/>
         <EditText
             android:id="@+id/patient_age_months"
@@ -103,20 +96,18 @@
             android:digits="0123456789"
             android:singleLine="true"
             android:ems="2"
-            android:maxLength="3"/>
+            android:maxLength="2"/>
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_marginEnd="24sp"
-            android:text="@string/months"/>
+            android:text="@string/months"
+            android:layout_marginStart="4sp"/>
       </LinearLayout>
     </TableRow>
 
     <TableRow>
       <TextView
-          android:gravity="center_vertical"
-          android:layout_height="80sp"
-          android:layout_marginEnd="24sp"
+          style="@style/field_label"
           android:labelFor="@+id/patient_sex"
           android:text="@string/sex" />
 
@@ -131,6 +122,7 @@
             android:id="@+id/patient_sex_female"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8sp"
             android:text="@string/female" />
         <RadioButton
             android:id="@+id/patient_sex_male"

@@ -24,7 +24,7 @@
         android:horizontalSpacing="0dp"
         android:verticalSpacing="0dp"
         android:stretchMode="spacingWidthUniform"
-        android:columnWidth="136dp"
+        android:columnWidth="144sp"
         android:numColumns="auto_fit"
         tools:listitem="@layout/grid_item_user"/>
 

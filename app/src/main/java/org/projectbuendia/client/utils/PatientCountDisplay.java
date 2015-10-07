@@ -31,7 +31,7 @@ public class PatientCountDisplay {
         }
 
         return context.getResources().getString(
-            R.string.string_with_paren, prefix, getPatientCountSubtitle(context, patientCount));
+            R.string.heading_with_patient_count, prefix, getPatientCountSubtitle(context, patientCount));
     }
 
     public static String getPatientCountSubtitle(Context context, long patientCount) {

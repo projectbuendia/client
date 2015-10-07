@@ -42,6 +42,7 @@
         <th scope="rowgroup">
           Observations
         </th>
+        <th scope="rowgroup" colspan=999"></th>
       </tr>
       {% for row in rows %}
         {% set id = row.item.conceptIds | first %}
@@ -96,11 +97,13 @@
         <th scope="rowgroup">
           Treatment Plan
         </th>
+        <th scope="rowgroup" colspan=999"></th>
       </tr>
       {% for order in orders %}
         <tr class="order">
           <th scope="row">
-            {{order.instructions}}
+            <div class="medication">{{order.medication}}</div>
+            <div>{{order.dosage}}&nbsp;</div>
           </th>
           {% set previousActive = false %}
           {% set future = false %}
@@ -129,12 +132,37 @@
       {% endfor %}
 
       <tr>
-        <th class="command" onclick="controller.onNewOrderPressed()">
+        <th scope="row" class="command" onclick="controller.onNewOrderPressed()">
           Add a New Treatment
         </th>
       </tr>
     </tbody>
+    <script>
+      function popup(name, values) {
+        var dialog = document.getElementById('obs-dialog');
+        var html = '<h2>' + name + '</h2>';
+        var text = name + '\n\n';
+        if (values.length > 0) {
+          for (var i = 0; i < values.length; i++) {
+            var value = values[i][0], observed = values[i][1];
+            html += '<b>' + value + '</b> at ' + observed + '<br>';
+            text += value + ' at ' + observed + '\n';
+          }
+          html += '&nbsp;<br>Comments <input type="text" size="40">';
+        } else {
+          html += 'No observations.';
+          text += 'No observations.';
+        }
+        alert(text);
+        return;
+        dialog.innerHTML = html;
+        dialog.showModal();
+      }
 
+      $(document).ready(function() {
+        $('#grid').freezeHeader({top: true, left: true});
+      });
+    </script>
   </table>
 </div>
 

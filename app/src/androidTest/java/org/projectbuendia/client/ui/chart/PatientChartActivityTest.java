@@ -25,14 +25,11 @@ import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
-import org.projectbuendia.client.events.sync.SyncFinishedEvent;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.UUID;
-
-import static org.hamcrest.Matchers.not;
 
 /** Functional tests for {@link PatientChartActivity}. */
 @MediumTest
@@ -45,7 +42,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         super();
     }
 
-    /** Tests that the general condition dialog successfully changes general condition. */
+    /**
+     * Tests that the general condition dialog successfully changes general condition.
+     * TODO/completeness: Currently disabled because this is now rendered in a WebView.
+     * A new test needs to be written that interacts with the WebView.
+     */
+    /*
     public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
         inUserLoginGoToDemoPatientChart();
         click(viewWithId(R.id.patient_chart_vital_general_parent));
@@ -65,6 +67,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             hasText(R.string.status_short_desc_well),
             not(hasId(R.id.patient_chart_vital_general_condition_number))));
     }
+    */
 
     /** Tests that the encounter form can be opened more than once. */
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
