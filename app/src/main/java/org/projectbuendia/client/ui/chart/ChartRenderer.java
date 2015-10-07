@@ -287,19 +287,7 @@ public class ChartRenderer {
                     }
                 }
             }
-
-//<<<<<<< HEAD
             return dates;
-/*=======
-            Map<String, Object> context = new HashMap<>();
-            context.put("tileRows", mTileRows);
-            context.put("rows", mRows);
-            context.put("columns", Lists.newArrayList(mColumnsByStarts.values()));
-            context.put("nowColumnStart", getColumnContainingTime(Instant.now()).start);
-            context.put("orders", mOrders);
-            context.put("dataCellsByConceptId", getJsonDataDump());
-            return renderTemplate("assets/chart.html", context);
->>>>>>> dev*/
         }
 
         /** Renders a Pebble template. */

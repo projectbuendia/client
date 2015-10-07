@@ -28,5 +28,5 @@ public class Column {
         return Utils.toInterval(start, stop);
     }
 
-    public boolean hasObservations() { return ! obsMap.isEmpty(); }
+    public boolean hasObservations() { return ! pointSetByConceptUuid.isEmpty(); }
 }
