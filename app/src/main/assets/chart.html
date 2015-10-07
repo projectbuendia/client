@@ -2,6 +2,7 @@
 <link rel="stylesheet" href="chart.css">
 <script src="jquery-1.5.1.min.js"></script>
 <script src="freezeheader.js"></script>
+<script src="chart.js"></script>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 
@@ -10,12 +11,13 @@
     <tr>
       {% for tile in tileRow %}
         {% set id = tile.item.conceptIds | first %}
-        {% set class = tile.obsValues | obsformat(tile.item.cssClass) %}
-        {% set style = tile.obsValues | obsformat(tile.item.cssStyle) %}
-        <td class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
+        {% set values = tile.points | values %}
+        {% set class = values | format_values(tile.item.cssClass) %}
+        {% set style = values | format_values(tile.item.cssStyle) %}
+        <td id="tile-{{id}}" class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
-          <div class="value">{{tile.obsValues | obsformat(tile.item.format) | linebreak | raw}}</div>
-          <div class="caption">{{tile.obsValues | obsformat(tile.item.captionFormat) | linebreak | raw}}</div>
+          <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
+          <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
         </td>
       {% endfor %}
     </tr>
@@ -49,38 +51,39 @@
             {{row.item.label}}
           </th>
           {% for column in columns %}
-            {% set values = get_all(row=row, column=column) %}
-            {% if values is empty %}
-              {% set aggregate = null %}
+            {% set points = get_all_points(row=row, column=column) %}
+            {% if points is empty %}
+              {% set summaryValue = null %}
             {% elseif row.item.type == 'yes_no' %}
-              {% set aggregate = values | max %}
+              {% set summaryValue = points | values | max %}
             {% else %}
-              {% set aggregate = values | last %}
+              {% set summaryValue = (points | last).value %}
             {% endif %}
-            {% set class = aggregate | obsformat(row.item.cssClass) %}
-            {% set style = aggregate | obsformat(row.item.cssStyle) %}
-            <td class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
-               style="{{style}}" onclick="popup({{row.item.label | js}},
-              {% if values is empty %}
+            {% set class = summaryValue | format_values(row.item.cssClass) %}
+            {% set style = summaryValue | format_values(row.item.cssStyle) %}
+            <td id="cell-{{id}}-{{column.start.millis}}"
+                class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
+                style="{{style}}" onclick="popup({{row.item.label | js}},
+              {% if points is empty %}
                 []
               {% else %}
-                [ {%- for value in values -%}
-                  [{{value | obsformat(row.item.captionFormat) | js}},
-                   {{value | obsformat('{1,obs_time,HH:mm}') | js}}],
+                [ {%- for point in points -%}
+                  [{{point.value | format_value(row.item.captionFormat) | js}},
+                   {{point.time | format_time('HH:mm') | js}}],
                 {%- endfor -%} ]
               {% endif %} )">
-              {% if values is not empty %}
+              {% if points is not empty %}
                 {% if row.item.type == 'text_icon' %}
                   <div onclick="alert(''
-                        {%- for value in values -%}
+                        {%- for point in points -%}
                           + '---- '
-                          + {{value.encounterTime | dateformat('dd MMM \'at\' HH:mm') | js}}
+                          + {{point.time | format_time('dd MMM \'at\' HH:mm') | js}}
                           + ' ----\n'
-                          + {{value.value | js}}
+                          + {{point.value.text | js}}
                           + '\n\n'
                         {%- endfor -%}); event.stopPropagation();">&#x1f4dd;</div>
                 {% else %}
-                  {{aggregate | obsformat(row.item.format)}}
+                  {{summaryValue | format_value(row.item.format)}}
                 {% endif %}
               {% endif %}
             </td>
@@ -134,7 +137,6 @@
         </th>
       </tr>
     </tbody>
-
     <script>
       function popup(name, values) {
         var dialog = document.getElementById('obs-dialog');
@@ -164,3 +166,24 @@
   </table>
 </div>
 
+<script>
+  var data = {{dataCellsByConceptId | raw}};
+
+  {% for tileRow in tileRows %}
+    {% for tile in tileRow %}
+      {% if tile.item.script is not empty %}
+        runTileScript(data, {{tile.item.conceptIds | join(',') | js | raw}}, {{tile.item.script | js | raw}});
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+
+  {% for row in rows %}
+    {% if row.item.script is not empty %}
+      runChartRowScript(data, {{row.item.conceptIds | join(',') | js | raw}}, {{row.item.script | js | raw}});
+    {% endif %}
+  {% endfor %}
+
+  $(document).ready(function() {
+    $('#grid').freezeHeader({top: true, left: true});
+  });
+</script>

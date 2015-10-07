@@ -171,7 +171,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         ButterKnife.inject(this, fragment);
 
         Bundle args = getArguments();
-        String title = args.getBoolean("new") ? "New patient" : "Edit patient";
+        String title = args.getBoolean("new") ? "New patient" : "Edit patient"; // TODO/i18n
         populateFields(args);
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())

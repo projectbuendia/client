@@ -44,7 +44,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
@@ -359,10 +359,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // (e.g. the format "{1,select,>39.95:NEG;#} / {2,select,>39.95:NEG;#}" with the
         // concepts "162826,162827").  The only reason we haven't deleted this code is
         // that we need to do the other tiles like Admission Date to complete the layout.
-        @Override public void updateEbolaPcrTestResultUi(Map<String, ObsValue> observations) {
+        @Override public void updateEbolaPcrTestResultUi(Map<String, Obs> observations) {
             // PCR
-            ObsValue pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
-            ObsValue pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
+            Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
+            Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
             mPcr.setIconDrawable(
                 new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                     .color(0x00000000)
@@ -374,7 +374,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 String pcrLString = "–";
                 DateTime pcrObsTime = null;
                 if (pcrLObservation != null && pcrLObservation.valueName != null) {
-                    pcrObsTime = pcrLObservation.obsTime;
+                    pcrObsTime = pcrLObservation.time;
                     try {
                         double pcrL = Double.parseDouble(pcrLObservation.valueName);
                         pcrLString = getFormattedPcrString(pcrL);
@@ -387,7 +387,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
                 String pcrNpString = "–";
                 if (pcrNpObservation != null && pcrNpObservation.valueName != null) {
-                    pcrObsTime = pcrNpObservation.obsTime;
+                    pcrObsTime = pcrNpObservation.time;
                     try {
                         double pcrNp = Double.parseDouble(pcrNpObservation.valueName);
                         pcrNpString = getFormattedPcrString(pcrNp);
@@ -416,10 +416,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // concepts "5272,f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").  The only reason we haven't
         // deleted this code is that we need to do the other tiles like Admission Date to
         // complete the layout.
-        @Override public void updatePregnancyAndIvStatusUi(Map<String, ObsValue> observations) {
+        @Override public void updatePregnancyAndIvStatusUi(Map<String, Obs> observations) {
             // Pregnancy & IV status
             List<String> specialLabels = new ArrayList<>();
-            ObsValue obs;
+            Obs obs;
 
             obs = observations.get(ConceptUuids.PREGNANCY_UUID);
             if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
@@ -461,8 +461,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void updateTilesAndGrid(
             Chart chart,
-            Map<String, ObsValue> latestObservations,
-            List<ObsValue> observations,
+            Map<String, Obs> latestObservations,
+            List<Obs> observations,
             List<Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate) {
@@ -473,7 +473,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         public void updatePatientLocationUi(LocationTree locationTree, Patient patient) {
             Location location = locationTree.findByUuid(patient.locationUuid);
-            String locationText = location == null ? "Unknown" : location.toString();
+            String locationText = location == null ? "Unknown" : location.toString(); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIconDrawable(
@@ -495,7 +495,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
+                ? "age unknown" : Utils.birthdateToAge(patient.birthdate)); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
             PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
         }

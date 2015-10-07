@@ -18,6 +18,7 @@
     android:orientation="vertical"
     android:padding="20dp">
 
+    <!-- TODO/i18n -->
     <TextView
         android:id="@+id/patient_list_tent_tv"
         android:layout_width="wrap_content"

@@ -16,23 +16,13 @@ import android.content.Context;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
-
-import org.projectbuendia.client.utils.Logger;
+import com.circle.android.api.OkHttpStack;
+import com.facebook.stetho.okhttp.StethoInterceptor;
+import com.squareup.okhttp.OkHttpClient;
 
 /** Wraps Volley up in a singleton object. */
 public class VolleySingleton {
-
-    private static final Logger LOG = Logger.create();
     private static VolleySingleton sInstance;
-    private static final String[] sMethodNames = new String[6];
-
-    static {
-        sMethodNames[Request.Method.GET] = "GET";
-        sMethodNames[Request.Method.POST] = "POST";
-        sMethodNames[Request.Method.PUT] = "PUT";
-        sMethodNames[Request.Method.DELETE] = "DELETE";
-        sMethodNames[Request.Method.HEAD] = "HEAD";
-    }
 
     private final RequestQueue mRequestQueue;
 
@@ -54,14 +44,7 @@ public class VolleySingleton {
      * handling and contexts correct.
      */
     public <T> void addToRequestQueue(Request<T> req) {
-        LOG.i("%s %s", getMethodName(req.getMethod()), req.getUrl());
         getRequestQueue().add(req);
-    }
-
-    /** Gets the string name of a Request.Method constant. */
-    public static String getMethodName(int method) {
-        String methodName = method < sMethodNames.length ? sMethodNames[method] : null;
-        return methodName == null ? "" + method : methodName;
     }
 
     public RequestQueue getRequestQueue() {
@@ -69,8 +52,13 @@ public class VolleySingleton {
     }
 
     private VolleySingleton(Context context) {
+        // Let Stetho inspect all our network requests.
+        final OkHttpClient client = new OkHttpClient();
+        client.networkInterceptors().add(new StethoInterceptor());
+
         // getApplicationContext() is key, it keeps you from leaking the
         // Activity or BroadcastReceiver if someone passes one in.
-        mRequestQueue = Volley.newRequestQueue(context.getApplicationContext());
+        mRequestQueue = Volley.newRequestQueue(
+            context.getApplicationContext(), new OkHttpStack(client));
     }
 }

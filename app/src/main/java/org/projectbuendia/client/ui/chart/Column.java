@@ -1,8 +1,9 @@
 package org.projectbuendia.client.ui.chart;
 
-import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.joda.time.Interval;
-import org.projectbuendia.client.sync.ObsValue;
+import org.joda.time.ReadableInstant;
+import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
@@ -11,15 +12,15 @@ import java.util.SortedSet;
 
 /** A column (containing the data for its observations) in the patient history grid. */
 public class Column {
-    public DateTime start;
-    public DateTime stop;
+    public Instant start;
+    public Instant stop;
     public String headingHtml;
-    public Map<String, SortedSet<ObsValue>> obsMap = new HashMap<>();  // keyed by conceptUuid
-    public Map<String, Integer> orderExecutionCounts = new HashMap<>();  // keyed by orderUuid
+    public Map<String, SortedSet<ObsPoint>> pointSetByConceptUuid = new HashMap<>();
+    public Map<String, Integer> executionCountsByOrderUuid = new HashMap<>();
 
-    public Column(DateTime start, DateTime stop, String headingHtml) {
-        this.start = start;
-        this.stop = stop;
+    public Column(ReadableInstant start, ReadableInstant stop, String headingHtml) {
+        this.start = new Instant(start);
+        this.stop = new Instant(stop);
         this.headingHtml = headingHtml;
     }
 

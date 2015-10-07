@@ -60,7 +60,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     private SearchView mSearchView;
     private CancelButtonListener mCancelListener = new CancelButtonListener();
 
-    // TODO: Populate properly.
+    // TODO/i18n: Populate properly.
     protected final String mLocale = "en";
 
     public PatientSearchController getSearchController() {
