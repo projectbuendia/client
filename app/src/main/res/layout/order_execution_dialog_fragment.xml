@@ -17,28 +17,23 @@
     android:padding="16dp"
     android:orientation="vertical">
 
-    <!-- TODO/i18n -->
     <TextView
         android:id="@+id/order_instructions"
-        android:text="Medication and dosage"
+        android:text="@string/Medication_and_dosage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/text.heading" />
 
-    <!-- TODO/i18n: Remove this android:text string; it will always be replaced -->
-    <!-- by a computed string when this dialog is displayed. -->
     <TextView
         android:id="@+id/order_start_time"
-        android:text="Started on Date at Time"
+        android:text="@string/Started_on_Date_at_Time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24sp" />
 
-    <!-- TODO/i18n: Remove this android:text string; it will always be replaced -->
-    <!-- by a computed string when this dialog is displayed. -->
     <TextView
         android:id="@+id/order_execution_count"
-        android:text="Given N times today"
+        android:text="@string/Given_N_times_today"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
