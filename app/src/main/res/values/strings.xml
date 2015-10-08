@@ -45,8 +45,9 @@
   <string name="add_user_example_given_name">Jane</string>
   <string name="family_name">Family name</string>
   <string name="add_user_example_family_name">Smith</string>
-  <string name="title_add_new_user">Add new user</string>
+  <string name="title_new_user">New user</string>
   <string name="action_search">Search</string>
+  <string name="action_edit">Edit</string>
   <string name="action_go_to">ID</string>
   <string name="title_location_list">Locations</string>
   <string name="today">Today</string>
@@ -92,7 +93,7 @@
   <string name="order_execution_marked_as_given">&#x2714; Marked as given now</string>
   <string name="order_started_on_date_at_time">Started on %1$s at %2$s</string>
 
-  <string name="string_with_paren">%1$s (%2$s)</string>
+  <string name="heading_with_patient_count">%1$s&#xa0;&#xa0;&#xb7;&#xa0;&#xa0;%2$s</string>
   <string name="unknown_tent">Unknown tent</string>
   <string name="unknown_zone">Unknown zone</string>
   <string name="mild_symptom">Mild</string>

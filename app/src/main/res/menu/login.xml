@@ -12,15 +12,16 @@
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- TODO/i18n -->
-    <item
-        android:showAsAction="ifRoom"
-        android:id="@+id/action_add_user"
-        android:title="Add User"/>
-    <!-- TODO/i18n -->
-    <item
-        android:id="@+id/settings"
-        android:showAsAction="ifRoom"
-        android:title="Settings" />
+  <!-- TODO: Figure out why applying padding to @style/ActionButton doesn't work. -->
+  <!-- TODO/i18n -->
+  <item
+      android:id="@+id/action_new_user"
+      android:showAsAction="ifRoom"
+      android:title="&#xa0;New User&#xa0;"/>
+  <!-- TODO/i18n -->
+  <item
+      android:id="@+id/settings"
+      android:showAsAction="ifRoom"
+      android:title="&#xa0;Settings&#xa0;"/>
 
 </menu>

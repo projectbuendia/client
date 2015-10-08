@@ -56,6 +56,34 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         super();
     }
 
+
+    /**
+     * Tests that the general condition dialog successfully changes general condition.
+     * TODO/completeness: Currently disabled because this is now rendered in a WebView.
+     * A new test needs to be written that interacts with the WebView.
+     */
+    /*
+    public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
+        inUserLoginGoToDemoPatientChart();
+        click(viewWithId(R.id.patient_chart_vital_general_parent));
+        screenshot("General Condition Dialog");
+        click(viewWithText(R.string.status_well));
+
+        // Wait for a sync operation to update the chart.
+        EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
+            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        Espresso.registerIdlingResources(syncFinishedIdlingResource);
+
+        // Check for updated vital view.
+        expectVisibleSoon(viewWithText(R.string.status_well));
+
+        // Check for updated chart view.
+        expectVisible(viewThat(
+            hasText(R.string.status_short_desc_well),
+            not(hasId(R.id.patient_chart_vital_general_condition_number))));
+    }
+    */
+
     /** Tests that the encounter form can be opened more than once. */
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
         inUserLoginGoToDemoPatientChart();

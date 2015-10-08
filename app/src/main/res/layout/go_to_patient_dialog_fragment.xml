@@ -16,7 +16,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TableLayout
-        android:padding="32dp"
+        android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <TableRow
@@ -24,23 +24,22 @@
             android:layout_height="fill_parent">
             <TextView
                 android:text="@string/go_to_patient_id_label"
-                android:layout_column="0"
-                android:layout_marginEnd="12sp" />
+                style="@style/field_label" />
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
-                android:ems="10"
+                android:ems="12"
                 android:id="@+id/go_to_patient_id"
                 android:layout_column="1"
                 tools:text="23" />
         </TableRow>
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_marginTop="32sp">
+            android:layout_height="fill_parent">
             <TextView
+                style="@style/field_label"
                 android:layout_column="0"
                 android:layout_span="2"
                 android:id="@+id/go_to_patient_result"

@@ -38,7 +38,7 @@ public final class BigToast {
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
         LinearLayout layout = (LinearLayout) toast.getView();
         TextView view = (TextView) layout.getChildAt(0);
-        view.setTextAppearance(context, R.style.TextAppearance_Buendia_Large_Inverse);
+        view.setTextAppearance(context, R.style.text_large_white);
         toast.show();
     }
 

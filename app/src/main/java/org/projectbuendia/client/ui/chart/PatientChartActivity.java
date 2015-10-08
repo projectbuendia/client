@@ -44,7 +44,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
@@ -86,6 +86,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
+    private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
 
     private PatientChartController mController;
     private boolean mIsFetchingXform = false;
@@ -105,8 +106,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
     @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
-    @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
-    @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
     ChartRenderer mChartRenderer;
@@ -123,6 +122,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chart, menu);
+
+        menu.findItem(R.id.action_edit).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+
+                @Override public boolean onMenuItemClick(MenuItem menuItem) {
+                    Utils.logUserAction("edit_patient_pressed");
+                    mController.onEditPatientPressed();
+                    return true;
+                }
+            });
 
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
@@ -240,18 +249,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mPatientFullNameView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("full_name_pressed");
-                mController.onEditPatientPressed();
-            }
-        });
-        mPatientGenderAgeView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("gender_age_pressed");
-                mController.onEditPatientPressed();
-            }
-        });
         mPatientLocationView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 Utils.logUserAction("location_view_pressed");
@@ -362,10 +359,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // (e.g. the format "{1,select,>39.95:NEG;#} / {2,select,>39.95:NEG;#}" with the
         // concepts "162826,162827").  The only reason we haven't deleted this code is
         // that we need to do the other tiles like Admission Date to complete the layout.
-        @Override public void updateEbolaPcrTestResultUi(Map<String, ObsValue> observations) {
+        @Override public void updateEbolaPcrTestResultUi(Map<String, Obs> observations) {
             // PCR
-            ObsValue pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
-            ObsValue pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
+            Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
+            Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
             mPcr.setIconDrawable(
                 new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                     .color(0x00000000)
@@ -377,7 +374,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 String pcrLString = "–";
                 DateTime pcrObsTime = null;
                 if (pcrLObservation != null && pcrLObservation.valueName != null) {
-                    pcrObsTime = pcrLObservation.obsTime;
+                    pcrObsTime = pcrLObservation.time;
                     try {
                         double pcrL = Double.parseDouble(pcrLObservation.valueName);
                         pcrLString = getFormattedPcrString(pcrL);
@@ -390,7 +387,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
                 String pcrNpString = "–";
                 if (pcrNpObservation != null && pcrNpObservation.valueName != null) {
-                    pcrObsTime = pcrNpObservation.obsTime;
+                    pcrObsTime = pcrNpObservation.time;
                     try {
                         double pcrNp = Double.parseDouble(pcrNpObservation.valueName);
                         pcrNpString = getFormattedPcrString(pcrNp);
@@ -419,10 +416,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // concepts "5272,f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").  The only reason we haven't
         // deleted this code is that we need to do the other tiles like Admission Date to
         // complete the layout.
-        @Override public void updatePregnancyAndIvStatusUi(Map<String, ObsValue> observations) {
+        @Override public void updatePregnancyAndIvStatusUi(Map<String, Obs> observations) {
             // Pregnancy & IV status
             List<String> specialLabels = new ArrayList<>();
-            ObsValue obs;
+            Obs obs;
 
             obs = observations.get(ConceptUuids.PREGNANCY_UUID);
             if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
@@ -432,7 +429,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
-            mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));
+            mPatientPregnantOrIvView.setText(Joiner.on("\n").join(specialLabels));
         }
 
         @Override public void updatePatientConditionUi(String generalConditionUuid) {
@@ -464,8 +461,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void updateTilesAndGrid(
             Chart chart,
-            Map<String, ObsValue> latestObservations,
-            List<ObsValue> observations,
+            Map<String, Obs> latestObservations,
+            List<Obs> observations,
             List<Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate) {
@@ -487,10 +484,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
-            mPatientFullNameView.setText(
-                Utils.valueOrDefault(patient.id, EN_DASH) + ": " +
-                    Utils.valueOrDefault(patient.givenName, EN_DASH) + " " +
-                    Utils.valueOrDefault(patient.familyName, EN_DASH));
+            String id = Utils.valueOrDefault(patient.id, EN_DASH);
+            String fullName = Utils.valueOrDefault(patient.givenName, EN_DASH) + " " +
+                    Utils.valueOrDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
@@ -500,7 +496,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
             labels.add(patient.birthdate == null
                 ? "age unknown" : Utils.birthdateToAge(patient.birthdate)); // TODO/i18n
-            mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
+            String sexAge = Joiner.on(", ").join(labels);
+            PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
         }
 
         @Override public void showError(int errorMessageResource, Object... args) {

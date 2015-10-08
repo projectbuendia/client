@@ -15,120 +15,126 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TableLayout
-        android:padding="32dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        >
+  <TableLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_gravity="center"
+      android:padding="16dp">
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-            <TextView
-                android:layout_column="0"
-                android:text="@string/order_medication"
-                android:layout_marginEnd="12sp" />
+      <TextView
+          style="@style/field_label"
+          android:layout_column="0"
+          android:layout_marginEnd="12sp"
+          android:text="@string/order_medication"/>
 
-            <EditText
-                android:id="@+id/order_medication"
-                android:layout_column="1"
-                android:layout_span="2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textCapSentences|textNoSuggestions"
-                android:maxLength="40"
-                android:ems="15" />
-        </TableRow>
+      <EditText
+          android:id="@+id/order_medication"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="1"
+          android:layout_span="2"
+          android:ems="15"
+          android:inputType="textCapSentences|textNoSuggestions"
+          android:maxLength="40"/>
+    </TableRow>
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-            <TextView
-                android:layout_column="0"
-                android:text="@string/order_dosage"
-                android:layout_marginEnd="12sp" />
+      <TextView
+          style="@style/field_label"
+          android:layout_column="0"
+          android:layout_marginEnd="12sp"
+          android:text="@string/order_dosage"/>
 
-            <EditText
-                android:id="@+id/order_dosage"
-                android:layout_column="1"
-                android:layout_span="2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textNoSuggestions"
-                android:maxLength="40"
-                android:ems="15" />
-        </TableRow>
+      <EditText
+          android:id="@+id/order_dosage"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="1"
+          android:layout_span="2"
+          android:ems="15"
+          android:inputType="textNoSuggestions"
+          android:maxLength="40"/>
+    </TableRow>
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-            <TextView
-                android:layout_column="0"
-                android:text="@string/order_frequency"
-                android:layout_marginEnd="12sp" />
+      <TextView
+          style="@style/field_label"
+          android:layout_column="0"
+          android:layout_marginEnd="12sp"
+          android:text="@string/order_frequency"/>
 
-            <EditText
-                android:id="@+id/order_frequency"
-                android:layout_column="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:digits="0123456789"
-                android:maxLength="3"
-                android:ems="3" />
+      <EditText
+          android:id="@+id/order_frequency"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="1"
+          android:digits="0123456789"
+          android:ems="3"
+          android:inputType="numberDecimal"
+          android:maxLength="3"/>
 
-            <TextView
-                android:id="@+id/order_times_per_day_label"
-                android:layout_column="2"
-                android:layout_width="300dip"
-                android:layout_gravity="top|start"
-                android:text="@string/order_times_per_day"
-                android:layout_marginStart="12sp" />
-        </TableRow>
+      <TextView
+          android:id="@+id/order_times_per_day_label"
+          android:layout_width="300dip"
+          android:layout_column="2"
+          android:layout_gravity="top|start"
+          android:layout_marginStart="4sp"
+          android:text="@string/order_times_per_day"/>
+    </TableRow>
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-            <TextView
-                android:layout_column="0"
-                android:gravity="center_vertical"
-                android:text="@string/order_give_for"
-                android:layout_marginEnd="12sp" />
+      <TextView
+          style="@style/field_label"
+          android:layout_column="0"
+          android:layout_marginEnd="12sp"
+          android:gravity="center_vertical"
+          android:text="@string/order_give_for"/>
 
-            <EditText
-                android:id="@+id/order_give_for_days"
-                android:layout_column="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:digits="0123456789"
-                android:maxLength="3"
-                android:ems="3" />
+      <EditText
+          android:id="@+id/order_give_for_days"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="1"
+          android:digits="0123456789"
+          android:ems="3"
+          android:inputType="numberDecimal"
+          android:maxLength="3"/>
 
-            <TextView
-                android:id="@+id/order_give_for_days_label"
-                android:layout_column="2"
-                android:layout_width="300dip"
-                android:layout_gravity="top|start"
-                android:text="@string/order_give_for_days"
-                android:layout_marginStart="12sp" />
-        </TableRow>
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-            <TextView
-                android:id="@+id/order_duration_label"
-                android:layout_column="1"
-                android:layout_span="2"
-                android:layout_width="400dip"
-                android:layout_gravity="top|start"
-                android:text="@string/order_duration_unspecified"
-                android:layout_marginStart="12sp" />
-        </TableRow>
-    </TableLayout>
+      <TextView
+          android:id="@+id/order_give_for_days_label"
+          android:layout_width="600sp"
+          android:layout_column="2"
+          android:layout_gravity="top|start"
+          android:layout_marginStart="4sp"
+          android:text="@string/order_give_for_days"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+      <TextView
+          android:id="@+id/order_duration_label"
+          style="@style/field_label"
+          android:layout_width="wrap_content"
+          android:layout_column="1"
+          android:layout_gravity="top|start"
+          android:layout_marginStart="4sp"
+          android:layout_span="2"
+          android:text="@string/order_duration_unspecified"/>
+    </TableRow>
+  </TableLayout>
 </FrameLayout>

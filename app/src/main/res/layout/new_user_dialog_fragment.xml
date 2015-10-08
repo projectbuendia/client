@@ -16,7 +16,7 @@
     android:layout_height="match_parent">
 
     <TableLayout
-        android:padding="32dp"
+        android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
@@ -27,9 +27,8 @@
             android:layout_height="fill_parent">
 
             <TextView
-                android:gravity="center_vertical"
+                style="@style/field_label"
                 android:text="@string/given_name"
-                android:layout_column="0"
                 android:id="@+id/add_user_given_name_label" />
 
             <EditText
@@ -38,8 +37,7 @@
                 android:inputType="textCapWords|textPersonName"
                 android:hint="@string/add_user_example_given_name"
                 android:ems="10"
-                android:id="@+id/add_user_given_name_tv"
-                android:layout_column="1" />
+                android:id="@+id/add_user_given_name_tv" />
 
         </TableRow>
 
@@ -48,9 +46,8 @@
             android:layout_height="fill_parent">
 
             <TextView
-                android:gravity="center_vertical"
+                style="@style/field_label"
                 android:text="@string/family_name"
-                android:layout_column="0"
                 android:id="@+id/add_user_family_name_label" />
 
             <EditText
@@ -59,10 +56,8 @@
                 android:inputType="textCapWords|textPersonName"
                 android:hint="@string/add_user_example_family_name"
                 android:ems="10"
-                android:id="@+id/add_user_family_name_tv"
-                android:layout_column="1" />
+                android:id="@+id/add_user_family_name_tv" />
 
         </TableRow>
-
     </TableLayout>
 </FrameLayout>

@@ -1,10 +1,3 @@
 <component name="CopyrightManager">
-  <settings default="Buendia">
-    <module2copyright>
-      <element module="app" copyright="Buendia" />
-    </module2copyright>
-    <LanguageOptions name="__TEMPLATE__">
-      <option name="block" value="false" />
-    </LanguageOptions>
-  </settings>
+  <settings default="" />
 </component>

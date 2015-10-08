@@ -31,7 +31,7 @@ final class UserListAdapter extends ArrayAdapter<JsonUser> {
     private final Colorizer mColorizer;
 
     public UserListAdapter(Context context, Colorizer colorizer) {
-        super(context, R.layout.grid_item_user);
+        super(context, R.layout.login_grid_user_item);
         mColorizer = colorizer;
     }
 
@@ -41,7 +41,7 @@ final class UserListAdapter extends ArrayAdapter<JsonUser> {
             holder = (ItemViewHolder) view.getTag();
         } else {
             view = LayoutInflater.from(getContext())
-                .inflate(R.layout.grid_item_user, parent, false);
+                .inflate(R.layout.login_grid_user_item, parent, false);
             holder = new ItemViewHolder(view);
             view.setTag(holder);
         }

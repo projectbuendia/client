@@ -167,10 +167,10 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      *                     or null to leave unset (assumes this name is unique among locations)
      */
     protected void inLocationSelectionAddNewPatient(PatientDelta delta, String locationName) {
-        LOG.i("Adding patient: %s (location %s)",
+        /*LOG.i("Adding patient: %s (location %s)",
             delta.toContentValues().toString(), locationName);
 
-        click(viewWithId(R.id.action_add));
+        click(viewWithId(R.id.action_new_patient));
         expectVisible(viewWithText("New patient"));
         if (delta.id.isPresent()) {
             type(delta.id.get(), viewWithId(R.id.patient_creation_text_patient_id));
@@ -219,7 +219,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
 
         click(viewWithId(R.id.patient_creation_button_create));
-        Espresso.registerIdlingResources(resource); // wait for patient to be created
+        Espresso.registerIdlingResources(resource); // wait for patient to be created*/
     }
 
     // Broken, but hopefully fixed in Espresso 2.0.
@@ -347,7 +347,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void inUserLoginGoToPatientCreation() {
         inUserLoginGoToLocationSelection();
-        click(viewWithId(R.id.action_add));
+        click(viewWithId(R.id.action_new_patient));
         expectVisible(viewWithText("New patient"));
     }
 

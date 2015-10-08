@@ -254,4 +254,6 @@ public class Contracts {
             .appendPath(locale)
             .build();
     }
+
+    private Contracts() { /* prevent instantiation */ }
 }
