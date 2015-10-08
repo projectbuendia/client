@@ -44,7 +44,7 @@
   <string name="add_user_example_given_name">Jane</string>
   <string name="family_name">Nom de famille</string>
   <string name="add_user_example_family_name">Smith</string>
-  <string name="title_add_new_user">Ajouter un nouvel utilisateur</string>
+  <string name="title_add_new_user">Nouvel utilisateur</string>
   <string name="action_search">Rechercher</string>
   <string name="action_go_to">ID</string>
   <string name="title_location_list">Emplacements</string>
@@ -229,14 +229,14 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_wifi_disconnected_action_connect">Connectez</string>
   <string name="troubleshoot_server_auth">Serveur nom d\'utilisateur / mot de passe peut être incorrect</string>
   <string name="troubleshoot_server_auth_action_check">Vérifier</string>
-  <string name="troubleshoot_server_address">Adresse du serveur peut être incorrect</string>
+  <string name="troubleshoot_server_address">Adresse du serveur peut être incorrecte</string>
   <string name="troubleshoot_server_address_action_check">Vérifier</string>
   <string name="troubleshoot_server_unreachable">Serveur inaccessible</string>
   <string name="troubleshoot_action_more_info">Plus d\'information</string>
   <string name="troubleshoot_server_unreachable_details">
       Le serveur n\'a pas pu être atteint. Cela peut être parce que:
       \n
-      \n • Le réseau wifi est incorrecte.
+      \n • Le réseau wifi est incorrect.
       \n • L\'URL du serveur est incorrecte.
       \n • Le serveur est en panne.
       \n
@@ -255,24 +255,24 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
       \n
       \n S\'il vous plaît contacter un administrateur.</string>
   <string name="patient_location_error_unknown">Une erreur inconnue est survenue lors de la mise à jour se trouve le patient. Veuillez réessayer.</string>
-  <string name="patient_location_error_interrupted">Patient mise à jour de l\'emplacement a été interrompu. Veuillez réessayer.</string>
+  <string name="patient_location_error_interrupted">Mise à jour de l\'emplacement du patient a été interrompu. Veuillez réessayer.</string>
   <string name="patient_location_error_network">Erreur de mise à jour du patient; s\'il vous plaît vérifier que vous êtes connecté au serveur.</string>
   <string name="patient_location_error_no_such_patient">Mise à jour de localisation d\'un patient Erreur: ce patient ne existe pas sur le serveur.</string>
   <string name="troubleshoot_package_server_unreachable">Serveur de Package inaccessible</string>
   <string name="troubleshoot_update_server_unreachable_details">
       Le serveur de package n\'a pas pu être atteint. Cela peut être parce que:
       \n
-      \n • L\'URL du serveur est incorrect.
+      \n • L\'URL du serveur est incorrecte.
       \n • Le serveur est en panne.
       \n
-      \n S\'il vous plaît corriger les paramètres du serveur de colis ou consulter un administrateur de l\'aide.
+      \n S\'il vous plaît corriger les paramètres du serveur de package ou consulter un administrateur de l\'aide.
   </string>
   <string name="troubleshoot_package_server_misconfigured">Paramètre de serveur de package peut être incorrect</string>
   <string name="troubleshoot_update_server_misconfigured_details">
       S\'il vous plaît vérifier que les paramètres du serveur de package est correct ou consultez un administrateur de l\'aide.
   </string>
 
-  <string name="present_filter_description">Tous les présents patients</string>
+  <string name="present_filter_description">Tous les patients présents</string>
   <string name="age_filter_description">Sous %d années</string>
   <string name="filter_group_default_name">Plusieurs filtres</string>
 
@@ -284,7 +284,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_missing_gender">S\'il vous plaît sélectionnez Masculin ou Féminin.</string>
   <string name="patient_validation_future_admission_date">Date d\'admission ne peut pas être dans l\'avenir.</string>
   <string name="patient_validation_future_onset_date">Symptôme date de début ne peut pas être dans l\'avenir.</string>
-  <string name="patient_creation_clear_symptom_onset_date">Clair</string>
+  <string name="patient_creation_clear_symptom_onset_date">Nettoyer</string>
   <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
   <string name="family_name_hint_unknown">–</string>
   <string name="given_name_hint_unknown">–</string>
@@ -299,18 +299,18 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_header_developer">Développeur</string>
 
   <!-- Preference titles and descriptions -->
-  <string name="pref_title_server">Buendia server</string>
-  <string name="pref_title_openmrs_user">OpenMRS nom d\'utilisateur</string>
-  <string name="pref_title_openmrs_password">OpenMRS mot de passe</string>
-  <string name="pref_title_openmrs_root_url">OpenMRS URL de base</string>
-  <string name="pref_title_package_server_url">Package URL du serveur</string>
+  <string name="pref_title_server">Serveur Buendia</string>
+  <string name="pref_title_openmrs_user">Nom d\'utilisateur d\' OpenMRS</string>
+  <string name="pref_title_openmrs_password">Mot de passe d\' OpenMRS</string>
+  <string name="pref_title_openmrs_root_url">URL de base d\' OpenMRS</string>
+  <string name="pref_title_package_server_url">URL du serveur de package</string>
 
   <string name="pref_title_apk_update_interval_secs">APK mise à jour Intervalle de vérification (secondes)</string>
   <string name="pref_title_store_form_instances">Instances de formulaire de stocker localement</string>
   <string name="pref_desc_store_form_instances">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
-  <string name="pref_title_xform_update_client_cache">Mettre à jour observations locales sur la soumission</string>
-  <string name="pref_desc_xform_update_client_cache">Cela donne une meilleure expérience de l\'assurance-chômage, mais est une fonctionnalité expérimentale.</string>
-  <string name="pref_title_incremental_observation_update">Observations synchronisation incrémentielle</string>
+  <string name="pref_title_xform_update_client_cache">Mettre à jour des observations locales sur la soumission</string>
+  <string name="pref_desc_xform_update_client_cache">Cela donne une meilleure expérience de l\'expérience de l'utilisateur, mais est une fonctionnalité expérimentale.</string>
+  <string name="pref_title_incremental_observation_update">Synchronisation des observations incrémentielle</string>
   <string name="pref_desc_incremental_observation_update">Cela est beaucoup plus rapide, mais encore au stade expérimental.</string>
   <string name="pref_title_require_wifi">Exiger connexion wifi</string>
   <string name="pref_desc_require_wifi">Désactivez cette option pour permettre l\'application de travailler avec des non-wifi (ou émulé captif Bluetooth) en réseau.</string>
