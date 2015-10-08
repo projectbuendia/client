@@ -167,7 +167,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      *                     or null to leave unset (assumes this name is unique among locations)
      */
     protected void inLocationSelectionAddNewPatient(PatientDelta delta, String locationName) {
-        LOG.i("Adding patient: %s (location %s)",
+        /*LOG.i("Adding patient: %s (location %s)",
             delta.toContentValues().toString(), locationName);
 
         click(viewWithId(R.id.action_new_patient));
@@ -219,7 +219,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
 
         click(viewWithId(R.id.patient_creation_button_create));
-        Espresso.registerIdlingResources(resource); // wait for patient to be created
+        Espresso.registerIdlingResources(resource); // wait for patient to be created*/
     }
 
     // Broken, but hopefully fixed in Espresso 2.0.
@@ -328,10 +328,16 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      * user login activity.  Note: this function will not work during
      * {@link #setUp()} as it uses {@link #waitForProgressFragment()}.
      */
-    protected void inUserLoginGoToDemoPatientChart() {
-        inUserLoginInitDemoPatient();
-        inUserLoginGoToPatientList();
-        inPatientListClickPatientWithId(sDemoPatientId);
+    protected String inUserLoginGoToDemoPatientChart() {
+        // Create the patient
+        inUserLoginGoToPatientCreation();
+        screenshot("Test Start");
+        String id = generateId();
+        populateNewPatientFields(id);
+        click(viewWithText("OK"));
+        waitForProgressFragment();
+        screenshot("On Patient Chart");
+        return id;
     }
 
     /**

@@ -46,7 +46,7 @@
       </tr>
       {% for row in rows %}
         {% set id = row.item.conceptIds | first %}
-        <tr class="obs concept-{{id}}">
+        <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
           <th scope="row">
             {{row.item.label}}
           </th>
@@ -83,7 +83,11 @@
                           + '\n\n'
                         {%- endfor -%}); event.stopPropagation();">&#x1f4dd;</div>
                 {% else %}
-                  {{summaryValue | format_value(row.item.format)}}
+                  {% set output = summaryValue | format_value(row.item.format) %}
+                  {% if output is empty %}
+                    {% set output = summaryValue | format_value(row.item.captionFormat) %}
+                  {% endif %}
+                  {{output}}
                 {% endif %}
               {% endif %}
             </td>
