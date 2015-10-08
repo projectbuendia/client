@@ -326,5 +326,6 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="Medication_and_dosage">Médicaments et posologie</string>
   <string name="Started_on_Date_at_Time"> Commencé le date à heure</string>
   <string name="Given_N_times_today"> Compte tenu de N fois aujourd\'hui</string>
+  <string name="title_new_user">Nouveau utilisateur</string>
 </resources>
 
