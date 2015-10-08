@@ -21,10 +21,9 @@
           android:title="@string/action_go_to"
           android:showAsAction="ifRoom|collapseActionView" />
 
-    <!-- TODO/i18n -->
     <item android:id="@+id/action_new_patient"
           android:showAsAction="ifRoom|collapseActionView"
-          android:title="New Patient"/>
+          android:title="@string/action_new_patient"/>
 
     <item android:id="@+id/action_cancel"
           android:showAsAction="ifRoom|collapseActionView"

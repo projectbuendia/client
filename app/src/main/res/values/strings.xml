@@ -320,4 +320,15 @@
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>
+  <string name="all_present_patients">ALL PRESENT PATIENTS</string>
+  <string name="discharged">Discharged</string>
+  <string name="probable">Probable 1 (10 patients)</string>
+  <string name="admission">Since admission</string>
+  <string name="loading">Loading...</string>
+  <string name="no_such_patient_as_of_48_min_ago">No such patient as of 48 min ago</string>
+  <string name="observation">Observation</string>
+  <string name="Medication_and_dosage">Medication and dosage</string>
+  <string name="Started_on_Date_at_Time">Started on Date at Time</string>
+  <string name="Given_N_times_today">Given N times today</string>
+  <string name="string_with_paren">%1$s (%2$s)</string>
 </resources>

@@ -27,15 +27,15 @@
             android:layout_width="match_parent"
             android:layout_margin="10dp"
             android:clickable="true"
-            app:subtitledButtonTitle="ALL PRESENT PATIENTS"
-            app:subtitledButtonSubtitle="No patients"/>
+            app:subtitledButtonTitle="@string/all_present_patients"
+            app:subtitledButtonSubtitle="@string/no_patients"/>
         <org.projectbuendia.client.widgets.SubtitledButtonView
             android:id="@+id/location_selection_triage"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_margin="10dp"
             app:subtitledButtonTitle="Triage"
-            app:subtitledButtonSubtitle="No patients"/>
+            app:subtitledButtonSubtitle="@string/no_patients"/>
         <org.projectbuendia.client.widgets.ScrollViewCompatibleGridView
             style="@style/TentGrid"
             android:id="@+id/location_selection_locations"
@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_margin="10dp"
-            app:subtitledButtonTitle="Discharged"
-            app:subtitledButtonSubtitle="No patients"/>
+            app:subtitledButtonTitle="@string/discharged"
+            app:subtitledButtonSubtitle="@string/no_patients"/>
     </LinearLayout>
 </ScrollView>

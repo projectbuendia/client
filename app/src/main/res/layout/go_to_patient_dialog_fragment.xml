@@ -43,7 +43,7 @@
                 android:layout_column="0"
                 android:layout_span="2"
                 android:id="@+id/go_to_patient_result"
-                tools:text="No such patient as of 48 min ago" />
+                tools:text="@string/no_such_patient_as_of_48_min_ago" />
         </TableRow>
     </TableLayout>
 </LinearLayout>
