@@ -210,7 +210,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="syncing_orders">Synchronisation des commandes…</string>
   <string name="syncing_forms">Synchronisation des formes…</string>
   <string name="syncing_locations">Synchronisation des emplacements…</string>
-  <string name="syncing_users">Utilisateurs synchronisation…</string>
+  <string name="syncing_users">Synchronisation des utilisateurs…</string>
   <string name="completing_sync">Fin de la synchronisation…</string>
   <string name="sync_in_progress">Début de la synchronisation…</string>
   <string name="submit_xform_failed_unknown_reason">Quelque chose a mal soumettre le formulaire.</string>
