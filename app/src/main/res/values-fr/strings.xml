@@ -65,7 +65,6 @@
   <string name="n_present_patients">%d patients présents</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
 
-
   <string name="title_new_order">Nouveau traitement</string>
   <string name="order_medication">Médicament</string>
   <string name="order_dosage">Dosage</string>
