@@ -329,5 +329,4 @@
   <string name="observation">Observation</string>
   <string name="Medication_and_dosage">Medication and dosage</string>
   <string name="Started_on_Date_at_Time">Started on Date at Time</string>
-  <string name="Given_N_times_today">Given N times today</string>
 </resources>

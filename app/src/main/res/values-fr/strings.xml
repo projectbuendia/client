@@ -60,7 +60,7 @@
   <string name="no_patients">Aucun patient</string>
   <string name="one_patient">1 patient</string>
   <string name="n_patients">%d patients</string>
-  <string name="no_present_patients">Aucun présents patients</string>
+  <string name="no_present_patients">Aucun patient est présent</string>
   <string name="one_present_patient">1 présents patient</string>
   <string name="n_present_patients">%d présents patients</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
@@ -321,10 +321,10 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="probable"> Probables 1 (10 patients)</string>
   <string name="admission">depuis l\'admission</string>
   <string name="loading">Chargement...</string>
-  <string name="no_such_patient_as_of_48_min_ago">Aucune patient d\'il ya 48 min</string>
+  <string name="no_such_patient_as_of_48_min_ago">Aucun patient d\'il ya 48 min</string>
   <string name="observation">Observation</string>
   <string name="Medication_and_dosage">Médicaments et posologie</string>
   <string name="Started_on_Date_at_Time"> Commencé le date à heure</string>
-  <string name="Given_N_times_today"> Compte tenu de N fois aujourd'hui</string>
+  <string name="Given_N_times_today"> Compte tenu de N fois aujourd\'hui</string>
 </resources>
 
