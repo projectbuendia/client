@@ -65,7 +65,6 @@
   <string name="n_present_patients">%d patients présents</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
 
-
   <string name="title_new_order">Nouveau traitement</string>
   <string name="order_medication">Médicament</string>
   <string name="order_dosage">Dosage</string>
@@ -309,7 +308,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_store_form_instances">Instances de formulaire de stocker localement</string>
   <string name="pref_desc_store_form_instances">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
   <string name="pref_title_xform_update_client_cache">Mettre à jour des observations locales sur la soumission</string>
-  <string name="pref_desc_xform_update_client_cache">Cela donne une meilleure expérience de l\'expérience de l'utilisateur, mais est une fonctionnalité expérimentale.</string>
+  <string name="pref_desc_xform_update_client_cache">Cela donne une meilleure expérience de l\'expérience de l\'utilisateur, mais est une fonctionnalité expérimentale.</string>
   <string name="pref_title_incremental_observation_update">Synchronisation des observations incrémentielle</string>
   <string name="pref_desc_incremental_observation_update">Cela est beaucoup plus rapide, mais encore au stade expérimental.</string>
   <string name="pref_title_require_wifi">Exiger connexion wifi</string>
