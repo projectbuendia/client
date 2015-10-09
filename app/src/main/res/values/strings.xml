@@ -331,5 +331,4 @@
   <string name="Started_on_Date_at_Time">Started on Date at Time</string>
   <string name="Given_N_times_today">Given N times today</string>
   <string name="string_with_paren">%1$s (%2$s)</string>
-  <string name="title_add_new_user">Add User</string>
 </resources>

@@ -44,7 +44,6 @@
   <string name="add_user_example_given_name">Jane</string>
   <string name="family_name">Nom de famille</string>
   <string name="add_user_example_family_name">Smith</string>
-  <string name="title_add_new_user">Nouvel utilisateur</string>
   <string name="action_search">Rechercher</string>
   <string name="action_go_to">ID</string>
   <string name="title_location_list">Emplacements</string>
@@ -325,7 +324,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="Medication_and_dosage">Médicaments et posologie</string>
   <string name="Started_on_Date_at_Time"> Commencé le date à heure</string>
   <string name="Given_N_times_today"> Compte tenu de N fois aujourd\'hui</string>
-  <string name="title_new_user">Nouveau utilisateur</string>
+  <string name="title_new_user">Nouvel utilisateur</string>
   <string name="troubleshoot_action_check_settings"> Vérifiez les paramètres</string>
 </resources>
 
