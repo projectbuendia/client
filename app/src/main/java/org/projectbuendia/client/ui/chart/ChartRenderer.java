@@ -158,11 +158,9 @@ public class ChartRenderer {
         void addObservations(List<Obs> observations) {
             for (Obs obs : observations) {
                 if (obs == null) continue;
-                ObsPoint point = obs.getObsPoint();
-                if (point == null) continue;
 
-                mDays.add(new DateTime(point.time).toLocalDate());
-                Column column = getColumnContainingTime(point.time);
+                mDays.add(new DateTime(obs.time).toLocalDate());
+                Column column = getColumnContainingTime(obs.time);
 
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Integer count = column.executionCountsByOrderUuid.get(obs.value);
@@ -194,7 +192,10 @@ public class ChartRenderer {
             if (!column.pointSetByConceptUuid.containsKey(obs.conceptUuid)) {
                 column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<ObsPoint>());
             }
-            column.pointSetByConceptUuid.get(obs.conceptUuid).add(obs.getObsPoint());
+            ObsPoint point = obs.getObsPoint();
+            if (point != null) {
+                column.pointSetByConceptUuid.get(obs.conceptUuid).add(point);
+            }
         }
 
         /** Exports a map of concept IDs to arrays of [columnStart, points] pairs. */
