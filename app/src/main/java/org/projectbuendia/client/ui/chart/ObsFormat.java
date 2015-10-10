@@ -456,7 +456,7 @@ public class ObsFormat extends Format {
                 case "":
                 case "=":
                 case "==":
-                    return Objects.equal(value, operand);
+                    return Objects.equal(value.uuid, operand.uuid);
                 case "<":
                     return value.compareTo(operand) < 0;
                 case "<=":
