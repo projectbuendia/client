@@ -192,6 +192,8 @@ public class PebbleExtension extends AbstractExtension {
                 for (Object item : (Collection) input) {
                     values.add(item instanceof ObsValue ? (ObsValue) item : null);
                 }
+            } else if (input instanceof ObsValue) {
+                values.add((ObsValue) input);
             }
             return formatValues(values, asFormat(args.get("format")));
         }
