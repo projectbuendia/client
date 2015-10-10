@@ -16,7 +16,7 @@
   <item
       android:id="@+id/action_new_user"
       android:showAsAction="ifRoom"
-      android:title="@string/title_add_new_user"/>
+      android:title="@string/title_new_user"/>
   <item
       android:id="@+id/settings"
       android:showAsAction="ifRoom"
