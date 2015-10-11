@@ -244,6 +244,7 @@ public class ChartRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
             context.put("orders", mOrders);
+            context.put("dataCellsByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
         }
 
