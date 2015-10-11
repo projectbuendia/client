@@ -48,7 +48,7 @@
   <string name="title_new_user">New user</string>
   <string name="action_search">Search</string>
   <string name="action_edit">Edit</string>
-  <string name="action_go_to">ID</string>
+  <string name="action_go_to">Search by ID</string>
   <string name="title_location_list">Locations</string>
   <string name="today">Today</string>
   <string name="today_date">Today, %s</string>
