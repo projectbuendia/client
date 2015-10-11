@@ -153,6 +153,7 @@ public class ChartRenderer {
             }
 
             addObservations(observations);
+            addOrders(orders);
             insertEmptyColumns();
         }
 
@@ -167,6 +168,17 @@ public class ChartRenderer {
                         obs.value, count == null ? 1 : count + 1);
                 } else {
                     addObs(column, obs);
+                }
+            }
+        }
+
+        /** Ensures that columns are shown for any days in which an order is prescribed. */
+        void addOrders(List<Order> orders) {
+            for (Order order : orders) {
+                if (order.stop != null) {
+                    for (DateTime dt = order.start; !dt.isAfter(order.stop); dt = dt.plusDays(1)) {
+                        getColumnContainingTime(dt); // creates the column if it doesn't exist
+                    }
                 }
             }
         }

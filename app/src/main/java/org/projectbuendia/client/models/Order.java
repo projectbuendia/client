@@ -68,9 +68,9 @@ public final class Order extends Base<String> implements Comparable<Order> {
         JSONObject json = new JSONObject();
         json.put("patient_uuid", patientUuid);
         json.put("instructions", instructions);
-        json.put("start", start.getMillis());
+        json.put("start_millis", start.getMillis());
         if (stop != null) {
-            json.put("stop", stop.getMillis());
+            json.put("stop_millis", stop.getMillis());
         }
         return json;
     }
