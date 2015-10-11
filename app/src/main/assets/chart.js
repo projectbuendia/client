@@ -7,7 +7,7 @@ function popup(name, pairs) {
     for (var i = 0; i < pairs.length; i++) {
       var value = pairs[i][0], time = pairs[i][1];
       // html += '<b>' + value + '</b> at ' + time + '<br>';
-      text += value + ' at ' + time + '\n';
+      text += time + ' – ' + value + '\n';
     }
     // html += '&nbsp;<br>Comments <input type="text" size="40">';
   } else {
