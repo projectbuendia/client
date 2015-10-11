@@ -107,7 +107,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
         if (id.equals(patient.id)) {  // server returned the patient we were looking for
             mPatientUuid = patient.uuid;
             mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                " (" + patient.gender + ", " + Utils.birthdateToAge(patient.birthdate) + ")");
+                " (" + patient.gender + ", " + Utils.birthdateToAge(
+                patient.birthdate, getResources()) + ")");
 
             // Perform incremental observation sync to get the patient's admission date
             // and any other recent observations.
@@ -143,7 +144,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
                         String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
                         LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
-                        String age = birthdate == null ? "age unknown" : Utils.birthdateToAge(birthdate);
+                        String age = birthdate == null ? "age unknown"
+                            : Utils.birthdateToAge(birthdate, getResources());
                         String gender = Utils.getString(cursor, Patients.GENDER, "");
                         mPatientUuid = uuid;
                         mPatientSearchResult.setText(givenName + " " + familyName +
