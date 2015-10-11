@@ -38,6 +38,9 @@ th, td {
   font-size: 1.4rem;
   padding: 0.2em 0 0.3em; /* extra 0.1em on bottom for vertical centering */
 }
+#grid .gap {
+  background: #eee;
+}
 
 /* Row headers: should match @style/text.caps */
 #grid tbody th { white-space: nowrap; }
