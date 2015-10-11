@@ -65,6 +65,7 @@
                         leftHeader = $this.clone(false)
                             .find("th:nth-child(n+2), td:nth-child(n+2)").remove().end()
                             .appendTo(document.body).wrap("<div>").parent()
+                            .addClass("frozen-left")
                             .css({position: 'absolute',
                                   top: $this.offset().top,
                                   left: $this.offset().left});
@@ -82,6 +83,7 @@
                             .children("tbody").remove().end()
                             .appendTo(document.body)
                             .wrap("<div>").parent()
+                            .addClass("frozen-top")
                             .css({position: 'fixed', top: 0, left: 0, visibility: 'hidden'});
 
                         // Ensure all the columns match the widths of the original columns.
@@ -94,6 +96,7 @@
 
                     if (settings.left && settings.top) {
                         cornerHeader = topHeader.clone(false) // skip a few steps by cloning topHeader
+                            .addClass("frozen-corner")
                             .find("th:nth-child(n+2)").remove().end()
                             .appendTo(document.body)
                             .css({position: 'fixed', top: 0, left: 0, visibility: 'hidden'});
