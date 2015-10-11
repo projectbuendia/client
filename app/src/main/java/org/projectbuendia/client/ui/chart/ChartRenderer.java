@@ -11,7 +11,6 @@ import com.mitchellbosecke.pebble.PebbleEngine;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
 import org.joda.time.chrono.ISOChronology;
@@ -32,7 +31,6 @@ import org.projectbuendia.client.utils.Utils;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,7 +100,8 @@ public class ChartRenderer {
         List<String> mTileConceptUuids;
         List<String> mGridConceptUuids;
         List<Order> mOrders;
-        LocalDate mToday;
+        DateTime mNow;
+        Column mNowColumn;
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
@@ -110,7 +109,6 @@ public class ChartRenderer {
         List<org.projectbuendia.client.ui.chart.Row> mRows = new ArrayList<>();
         Map<String, org.projectbuendia.client.ui.chart.Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
-        SortedSet<LocalDate> mDays = new TreeSet<>();
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
         GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
@@ -118,8 +116,9 @@ public class ChartRenderer {
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
-            mToday = LocalDate.now(chronology);
             mOrders = orders;
+            mNow = DateTime.now();
+            mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
             for (ChartSection tileGroup : chart.tileGroups) {
                 List<Tile> tileRow = new ArrayList<>();
@@ -149,13 +148,12 @@ public class ChartRenderer {
                 }
             }
             addObservations(observations);
+            insertEmptyColumns();
         }
 
         void addObservations(List<Obs> observations) {
             for (Obs obs : observations) {
                 if (obs == null) continue;
-
-                mDays.add(new DateTime(obs.time).toLocalDate());
                 Column column = getColumnContainingTime(obs.time);
 
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
@@ -168,7 +166,7 @@ public class ChartRenderer {
             }
         }
 
-        /** Returns a column for a given date. Creates a new column, if it does not exist yet */
+        /** Returns the column that contains the given instant, creating it if it doesn't exist. */
         Column getColumnContainingTime(ReadableInstant instant) {
             LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
             DateTime start = date.toDateTimeAtStartOfDay();
@@ -225,67 +223,34 @@ public class ChartRenderer {
         // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)
         // TODO: concept tags for formatting hints (e.g. none/mild/moderate/severe, abbreviated)
         String getHtml() {
-            // Create the list of all the columns to show.  The admission date, the
-            // current day, and start and stop days for all orders should be present,
-            // as well as the days in between which are not empty at least by 3 consecutive days.
-            mDays.add(mToday);
-            if (mAdmissionDate != null) {
-                mDays.add(mAdmissionDate);
-            }
-            mDays.addAll(getOrderDates());
-            fillOrderPeriodColumns(mDays.first(), mDays.last());
-
             Map<String, Object> context = new HashMap<>();
             context.put("tileRows", mTileRows);
             context.put("rows", mRows);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
-            context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
+            context.put("nowColumnStart", mNowColumn.start);
             context.put("orders", mOrders);
             context.put("dataCellsByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
         }
 
         /**
-         * Fills the observation period columns in a given period of date.
-         * If there are no observations or recordings of treatments given for a day, that column is
-         * considered empty. In addition, if there are 3 or more adjacent empty columns, those
-         * should be collapsed down, considering that both current day and future days must never
-         * be collapsed.
+         * Inserts empty columns to fill in the gaps between the existing columns, wherever
+         * the gap can be filled by inserting fewer than 3 adjacent empty columns.
          */
-        void fillOrderPeriodColumns(LocalDate since, LocalDate to) {
-            List<Instant> consecutiveEmptyColumns = new ArrayList<>();
-
-            for (LocalDate d = since; !d.isAfter(to); d = d.plusDays(1)) {
-                //Column column = getColumnContainingTime(d.toDateTimeAtStartOfDay());
-
-                Column column = getColumnContainingTime(d.toDateTimeAtStartOfDay());
-
-                if(!column.hasObservations() && d.isBefore(mToday)) {
-                    consecutiveEmptyColumns.add(column.start);
-                } else {
-                    if(consecutiveEmptyColumns.size() >= 3) {
-                        for(Instant voidDay : consecutiveEmptyColumns) {
-                            mColumnsByStartMillis.remove(voidDay.getMillis());
-                        }
-                    }
-                    consecutiveEmptyColumns.clear();
-                }
+        void insertEmptyColumns() {
+            List<DateTime> starts = new ArrayList<>();
+            for (Long startMillis : mColumnsByStartMillis.keySet()) {
+                starts.add(new DateTime(startMillis));
             }
-        }
-
-        /** Returns all non null start and stop observation dates */
-        private Collection<LocalDate> getOrderDates() {
-            Set<LocalDate> dates = new HashSet<>();
-
-            for (Order order : mOrders) {
-                if (order.start != null) {
-                    mDays.add(order.start.toLocalDate());
-                    if (order.stop != null) {
-                        mDays.add(order.stop.toLocalDate().plusDays(1));
+            DateTime prev = starts.get(0);
+            for (DateTime next : starts) {
+                if (!next.isAfter(prev.plusDays(3))) {
+                    for (DateTime dt = prev.plusDays(1); dt.isBefore(next); dt = dt.plusDays(1)) {
+                        getColumnContainingTime(dt); // creates a column if it doesn't exist yet
                     }
                 }
+                prev = next;
             }
-            return dates;
         }
 
         /** Renders a Pebble template. */
