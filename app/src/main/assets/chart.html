@@ -161,12 +161,6 @@
         </th>
       </tr>
     </tbody>
-    <script>
-      $(document).ready(function() {
-        $('#grid').freezeHeader({top: true, left: true});
-        $('#grid-scroller').scrollLeft(1e6);
-      });
-    </script>
   </table>
 </div>
 
@@ -187,9 +181,8 @@
     {% endif %}
   {% endfor %}
 
-  $(document).ready(function() {
-    $('#grid').freezeHeader({top: true, left: true});
-  });
+  $('#grid').freezeHeader({top: true, left: true});
+  $('#grid-scroller').scrollLeft(1e6);
 </script>
 </body>
 </html>
