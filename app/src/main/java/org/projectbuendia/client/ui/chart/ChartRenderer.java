@@ -259,8 +259,6 @@ public class ChartRenderer {
             List<Instant> consecutiveEmptyColumns = new ArrayList<>();
 
             for (LocalDate d = since; !d.isAfter(to); d = d.plusDays(1)) {
-                //Column column = getColumnContainingTime(d.toDateTimeAtStartOfDay());
-
                 Column column = getColumnContainingTime(d.toDateTimeAtStartOfDay());
 
                 if(!column.hasObservations() && d.isBefore(mToday)) {
@@ -274,6 +272,9 @@ public class ChartRenderer {
                     consecutiveEmptyColumns.clear();
                 }
             }
+
+            // Ensure that the last column is present.
+            getColumnContainingTime(to.toDateTimeAtStartOfDay());
         }
 
         /** Returns all non null start and stop observation dates */

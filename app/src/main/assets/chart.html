@@ -117,7 +117,7 @@
           {% for column in columns %}
             <td class="{{column.start == nowColumnStart ? 'now' : ''}}">
               {% set active = intervals_overlap(order.interval, column.interval) %}
-              {% if order.stop == null and previousActive %}
+              {% if future and order.stop == null %}
                 <div class="future">&nbsp;</div>
               {% elseif order.stop != null and previousActive and not active %}
                 <div class="stop">Stop</div>
