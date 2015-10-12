@@ -45,7 +45,7 @@
   <string name="family_name">Nom de famille</string>
   <string name="add_user_example_family_name">Smith</string>
   <string name="action_search">Rechercher</string>
-  <string name="action_go_to">ID</string>
+  <string name="action_go_to">Recherche ID</string>
   <string name="title_location_list">Emplacements</string>
   <string name="today">Aujourd\'hui</string>
   <string name="today_date">Aujourd\'hui, %s</string>
