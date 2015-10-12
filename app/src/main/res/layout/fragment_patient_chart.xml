@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
-        app:attributeName="Since admission"
+        app:attributeName="@string/since_admission"
         app:attributeValue="–"/>
 
     <org.projectbuendia.client.widgets.PatientAttributeView
@@ -41,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
-        app:attributeName="Since symptom onset"
+        app:attributeName="@string/since_symptom_onset"
         app:attributeValue="–"/>
 
     <org.projectbuendia.client.widgets.PatientAttributeView
@@ -49,7 +49,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
-        app:attributeName="Location"
+        app:attributeName="@string/location"
         app:attributeValue="–"/>
 
     <org.projectbuendia.client.widgets.PatientAttributeView

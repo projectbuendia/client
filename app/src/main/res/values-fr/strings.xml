@@ -39,11 +39,8 @@
   <string name="snackbar_action_download">Télécharger</string>
   <string name="snackbar_action_install">Installer</string>
   <string name="title_edit_patient_location">Modifier l\'emplacement du patient</string>
-  <string name="add_user_example_username">jsmith</string>
   <string name="given_name">Prénom</string>
-  <string name="add_user_example_given_name">Jane</string>
   <string name="family_name">Nom de famille</string>
-  <string name="add_user_example_family_name">Smith</string>
   <string name="action_search">Rechercher</string>
   <string name="action_go_to">ID</string>
   <string name="title_location_list">Emplacements</string>
@@ -56,13 +53,19 @@
   <string name="add_user_user_exists_on_server">Nom d\'utilisateur existe déjà sur le serveur</string>
   <string name="add_user_connection_error">Erreur de connexion au serveur</string>
   <string name="title_single_location">Les patients dans ce lieu</string>
+
   <string name="no_patients">Aucun patient</string>
   <string name="one_patient">1 patient</string>
   <string name="n_patients">%d patients</string>
+
   <string name="no_present_patients">Aucun patient présent</string>
   <string name="one_present_patient">1 patient présents</string>
   <string name="n_present_patients">%d patients présents</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
+
+  <string name="abbrev_n_months">%d mo</string>
+  <string name="abbrev_n_years">%d a</string>
+  <string name="abbrev_n_years_n_months">%1$d a %2$d mo</string>
 
   <string name="title_new_order">Nouveau traitement</string>
   <string name="order_medication">Médicament</string>
@@ -71,8 +74,8 @@
   <string name="order_time_per_day">foi par jour</string>
   <string name="order_times_per_day">fois par jour</string>
   <string name="order_give_for">Donne pour</string>
-  <string name="order_give_for_days">Jours</string>
-  <string name="order_give_for_day">Jour</string>
+  <string name="order_give_for_days">jours</string>
+  <string name="order_give_for_day">jour</string>
   <string name="order_duration_stop_after_today">(arrêter après aujourd\'hui)</string>
   <string name="order_duration_stop_after_tomorrow">(arrêter après demain)</string>
   <string name="order_duration_stop_after_date">(arrêter après %s)</string>
@@ -113,12 +116,15 @@
   <string name="go_to_patient_not_found">Aucun patient trouvé</string>
   <string name="go_to_patient_go">Aller à tracer</string>
 
+  <string name="since_admission">Depuis admission</string>
+  <string name="since_symptom_onset">Depuis début des symptômes</string>
+  <string name="location">Emplacement</string>
   <string name="id">ID</string>
   <string name="patient_creation_given_name_label">Prénom</string>
   <string name="patient_creation_family_name_label">Nom de famille</string>
   <string name="age">Age</string>
-  <string name="years">Ans</string>
-  <string name="months">Mois</string>
+  <string name="years">ans</string>
+  <string name="months">mois</string>
   <string name="sex">Sexe</string>
   <string name="patient_creation_location_label">Emplacement</string>
   <string name="patient_creation_location_assign">Attribuer emplacement</string>
@@ -271,7 +277,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   </string>
 
   <string name="present_filter_description">Tous les patients présents</string>
-  <string name="age_filter_description">Sous %d années</string>
+  <string name="age_filter_description">Moins de %d ans</string>
   <string name="filter_group_default_name">Plusieurs filtres</string>
 
   <string name="patient_missing_age">Entrez l\'âge (en utilisant années, mois, ou les deux)</string>
@@ -283,10 +289,6 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_validation_future_admission_date">Date d\'admission ne peut pas être dans l\'avenir.</string>
   <string name="patient_validation_future_onset_date">Symptôme date de début ne peut pas être dans l\'avenir.</string>
   <string name="patient_creation_clear_symptom_onset_date">Nettoyer</string>
-  <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
-  <string name="family_name_hint_unknown">–</string>
-  <string name="given_name_hint_unknown">–</string>
-  <string name="unknown_name">–</string>
 
   <!-- UI strings related to settings (see default_settings.xml for default values) -->
   <string name="title_activity_settings">Paramètres</string>
@@ -298,12 +300,12 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
 
   <!-- Preference titles and descriptions -->
   <string name="pref_title_server">Serveur Buendia</string>
-  <string name="pref_title_openmrs_user">Nom d\'utilisateur d\' OpenMRS</string>
-  <string name="pref_title_openmrs_password">Mot de passe d\' OpenMRS</string>
-  <string name="pref_title_openmrs_root_url">URL de base d\' OpenMRS</string>
-  <string name="pref_title_package_server_url">URL du serveur de package</string>
+  <string name="pref_title_openmrs_user">Nom d\'utilisateur d\'OpenMRS</string>
+  <string name="pref_title_openmrs_password">Mot de passe d\'OpenMRS</string>
+  <string name="pref_title_openmrs_root_url">URL de base d\'OpenMRS</string>
+  <string name="pref_title_package_server_url">URL du serveur des packages</string>
 
-  <string name="pref_title_apk_update_interval_secs">APK mise à jour Intervalle de vérification (secondes)</string>
+  <string name="pref_title_apk_update_interval_secs">APK mise à jour intervalle de vérification (secondes)</string>
   <string name="pref_title_store_form_instances">Instances de formulaire de stocker localement</string>
   <string name="pref_desc_store_form_instances">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
   <string name="pref_title_xform_update_client_cache">Mettre à jour des observations locales sur la soumission</string>
@@ -312,19 +314,16 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_desc_incremental_observation_update">Cela est beaucoup plus rapide, mais encore au stade expérimental.</string>
   <string name="pref_title_require_wifi">Exiger connexion wifi</string>
   <string name="pref_desc_require_wifi">Désactivez cette option pour permettre l\'application de travailler avec des non-wifi (ou émulé captif Bluetooth) en réseau.</string>
+
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Appliquer et effacer les données locales</string>
   <string name="discharged">Libéré</string>
   <string name="action_edit">Modifier</string>
-  <string name="probable"> Probables 1 (10 patients)</string>
   <string name="admission">depuis l\'admission</string>
   <string name="loading">Chargement...</string>
-  <string name="no_such_patient_as_of_48_min_ago">Aucun patient d\'il ya 48 min</string>
+  <string name="no_such_patient_as_of_48_min_ago">Aucun patient d\'il y a 48 min</string>
   <string name="observation">Observation</string>
   <string name="Medication_and_dosage">Médicaments et posologie</string>
-  <string name="Started_on_Date_at_Time"> Commencé le date à heure</string>
-  <string name="Given_N_times_today"> Compte tenu de N fois aujourd\'hui</string>
   <string name="title_new_user">Nouvel utilisateur</string>
-  <string name="troubleshoot_action_check_settings"> Vérifiez les paramètres</string>
+  <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
 </resources>
-

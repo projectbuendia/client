@@ -12,6 +12,7 @@
 package org.projectbuendia.client.utils;
 
 import android.app.Dialog;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.view.View;
 
@@ -384,13 +385,12 @@ public class Utils {
     }
 
     /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate) {
-        // TODO/i18n
+    public static String birthdateToAge(LocalDate birthdate, Resources resources) {
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
-        return years == 0 ? "" + months + " mo" : // TODO/i18n
-            months == 0 || years >= 5 ? "" + years + " y" : // TODO/i18n
-                "" + years + " y " + months + " mo"; // TODO/i18n
+        return years == 0 ? resources.getString(R.string.abbrev_n_months, months) :
+            months == 0 || years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
+                resources.getString(R.string.abbrev_n_years_n_months, years, months);
     }
 
     /**
