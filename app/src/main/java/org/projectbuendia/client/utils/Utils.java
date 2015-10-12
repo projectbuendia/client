@@ -388,9 +388,8 @@ public class Utils {
     public static String birthdateToAge(LocalDate birthdate, Resources resources) {
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
-        return years == 0 ? resources.getString(R.string.abbrev_n_months, months) :
-            months == 0 || years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
-                resources.getString(R.string.abbrev_n_years_n_months, years, months);
+        return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
+                resources.getString(R.string.abbrev_n_months, months + years * 12);
     }
 
     /**
