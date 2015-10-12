@@ -104,8 +104,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_admission_days) PatientAttributeView mAdmissionDaysView;
     @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
-    @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
-    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
     ChartRenderer mChartRenderer;
@@ -324,17 +322,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private final class Ui implements PatientChartController.Ui {
         @Override public void setTitle(String title) {
             PatientChartActivity.this.setTitle(title);
-        }
-
-        // TODO/cleanup: We should format this date in chart.html and get rid of this method.
-        @Override public void updateLastObsTimeUi(DateTime lastObsTime) {
-            if (lastObsTime == null) {
-                mLastObservationTimeView.setText(R.string.last_observation_none);
-                mLastObservationLabel.setVisibility(View.GONE);
-            } else {
-                mLastObservationTimeView.setText(Utils.toMediumString(lastObsTime));
-                mLastObservationLabel.setVisibility(View.VISIBLE);
-            }
         }
 
         // TODO/cleanup: As soon as we implement an ObsFormat formatter that displays

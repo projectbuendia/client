@@ -97,7 +97,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
-    private DateTime mLastObsTime = null;
     private String mPatientUuid = "";
     private Map<String, org.projectbuendia.client.sync.Order> mOrdersByUuid;
     private List<Obs> mObservations;
@@ -149,9 +148,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             List<org.projectbuendia.client.sync.Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate);
-
-        /** Updates the indicator of this patient's latest encounter time. */
-        void updateLastObsTimeUi(DateTime lastObsTime);
 
         /** Updates the UI with the patient's personal details (name, gender, etc.). */
         void updatePatientDetailsUi(Patient patient);
@@ -491,9 +487,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, Obs> latestObservations =
             new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
-        for (Obs obs : mObservations) {
-            mLastObsTime = Utils.max(mLastObsTime, obs.time);
-        }
         List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
         mOrdersByUuid = new HashMap<>();
         for (org.projectbuendia.client.sync.Order order : orders) {
@@ -506,7 +499,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
         LocalDate firstSymptomsDate = getObservedDate(
             latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
-        mUi.updateLastObsTimeUi(mLastObsTime);
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
