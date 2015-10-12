@@ -114,7 +114,7 @@
   <string name="go_to_patient_no_data">Pas encore de données chargées à partir du serveur</string>
   <string name="go_to_patient_not_found_as_of_time">Aucun patient trouvé des %s</string>
   <string name="go_to_patient_not_found">Aucun patient trouvé</string>
-  <string name="go_to_patient_go">Aller à tracer</string>
+  <string name="go_to_patient_go">Ouvrir</string>
 
   <string name="since_admission">Depuis admission</string>
   <string name="since_symptom_onset">Depuis début des symptômes</string>
