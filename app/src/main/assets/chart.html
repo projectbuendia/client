@@ -144,32 +144,6 @@
         </th>
       </tr>
     </tbody>
-    <script>
-      function popup(name, values) {
-        var dialog = document.getElementById('obs-dialog');
-        var html = '<h2>' + name + '</h2>';
-        var text = name + '\n\n';
-        if (values.length > 0) {
-          for (var i = 0; i < values.length; i++) {
-            var value = values[i][0], observed = values[i][1];
-            html += '<b>' + value + '</b> at ' + observed + '<br>';
-            text += value + ' at ' + observed + '\n';
-          }
-          html += '&nbsp;<br>Comments <input type="text" size="40">';
-        } else {
-          html += 'No observations.';
-          text += 'No observations.';
-        }
-        alert(text);
-        return;
-        dialog.innerHTML = html;
-        dialog.showModal();
-      }
-
-      $(document).ready(function() {
-        $('#grid').freezeHeader({top: true, left: true});
-      });
-    </script>
   </table>
 </div>
 
@@ -190,9 +164,8 @@
     {% endif %}
   {% endfor %}
 
-  $(document).ready(function() {
-    $('#grid').freezeHeader({top: true, left: true});
-  });
+  $('#grid').freezeHeader({top: true, left: true});
+  $('#grid-scroller').scrollLeft(1e6);
 </script>
 </body>
 </html>
