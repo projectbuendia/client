@@ -259,7 +259,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             }
         };
 
-        handler.postDelayed(runnable, OBSERVATION_SYNC_PERIOD_MILLIS);
+        handler.postDelayed(runnable, 0);
     }
 
     /** Releases any resources used by the controller. */
