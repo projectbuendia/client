@@ -24,6 +24,20 @@
     <TableRow>
       <TextView
           style="@style/field_label"
+          android:labelFor="@+id/patient_id_prefix"
+          android:text="@string/id_prefix" />
+      <EditText
+          android:id="@+id/patient_id_prefix"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:inputType="textCapCharacters"
+          android:singleLine="true"
+          android:ems="5" />
+    </TableRow>
+
+    <TableRow>
+      <TextView
+          style="@style/field_label"
           android:labelFor="@+id/patient_id"
           android:text="@string/id" />
       <EditText
