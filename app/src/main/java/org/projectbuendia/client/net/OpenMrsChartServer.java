@@ -110,7 +110,7 @@ public class OpenMrsChartServer {
         // created at 12:00:00.750 will be stored with a creation time of 12:00:00 -- which means
         // that in order to return all the observations that were created after 12:00:00.500, we
         // actually have to check for creation times after 12:00:00.000.
-        long startMillis = ((int) (lastTime.getMillis() / 1000)) * 1000;
+        long startMillis = (lastTime.getMillis() / 1000) * 1000;
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl()
                 + "/encounters?sm=" + startMillis,
             successListener, errorListener);
