@@ -122,6 +122,7 @@
   <string name="since_symptom_onset">Since symptom onset</string>
   <string name="location">Location</string>
   <string name="id">ID</string>
+  <string name="id_prefix">ID prefix</string>
   <string name="patient_creation_given_name_label">Given name</string>
   <string name="patient_creation_family_name_label">Family name</string>
   <string name="age">Age</string>
