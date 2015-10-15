@@ -78,29 +78,6 @@
       android:layout_marginStart="16dp"
       android:layout_marginTop="8dp"
       android:layout_marginBottom="8dp">
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start">
-
-      <TextView
-          android:id="@+id/patient_chart_last_observation_label"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/chart_last_updated"
-          android:textAppearance="@style/text.caption"
-          android:textColor="@android:color/darker_gray"
-          tools:ignore="RelativeOverlap"/>
-
-      <TextView
-          android:id="@+id/patient_chart_last_observation_date_time"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_toEndOf="@id/patient_chart_last_observation_label"
-          android:text="–"
-          android:textAppearance="@style/text.caption"/>
-    </RelativeLayout>
   </FrameLayout>
 
   <WebView
