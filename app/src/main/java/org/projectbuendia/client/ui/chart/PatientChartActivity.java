@@ -494,8 +494,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             } else if (patient.gender == Patient.GENDER_FEMALE) {
                 labels.add("F");
             }
-            labels.add(patient.birthdate == null
-                ? "age unknown" : Utils.birthdateToAge(patient.birthdate)); // TODO/i18n
+            labels.add(patient.birthdate == null ? "age unknown"
+                : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
             PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
         }

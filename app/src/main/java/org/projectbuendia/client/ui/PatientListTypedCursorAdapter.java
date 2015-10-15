@@ -161,7 +161,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
 
         holder.mPatientAge.setText(
-            patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate));
+            patient.birthdate == null ? "" : Utils.birthdateToAge(
+                patient.birthdate, mContext.getResources()));
 
         holder.mPatientGender.setVisibility(
             patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);

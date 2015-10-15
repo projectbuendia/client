@@ -26,14 +26,12 @@
 
     <TextView
         android:id="@+id/order_start_time"
-        android:text="@string/Started_on_Date_at_Time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24sp" />
 
     <TextView
         android:id="@+id/order_execution_count"
-        android:text="@string/Given_N_times_today"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

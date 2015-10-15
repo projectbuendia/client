@@ -24,6 +24,6 @@
         android:layout_height="wrap_content"
         android:text="@string/unknown_tent"
         android:textAppearance="@style/text.heading"
-        tools:text="@string/probable" />
+        tools:text="Probable 1 (10 patients)" />
 
 </LinearLayout>
