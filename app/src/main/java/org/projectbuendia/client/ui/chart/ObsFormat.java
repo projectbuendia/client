@@ -278,7 +278,7 @@ public class ObsFormat extends Format {
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
             if (value.number == null) return TYPE_ERROR;
-            return mFormat.format(value.number);
+            return mFormat.format(value.number).replace('-', '\u2212');  // use a real minus sign
         }
     }
 
