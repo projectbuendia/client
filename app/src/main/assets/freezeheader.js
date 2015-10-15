@@ -65,6 +65,7 @@
                         leftHeader = $this.clone(false)
                             .find("th:nth-child(n+2), td:nth-child(n+2)").remove().end()
                             .appendTo(document.body).wrap("<div>").parent()
+                            .attr('class', 'frozen-left')
                             .css({position: 'absolute',
                                   top: $this.offset().top,
                                   left: $this.offset().left});
@@ -82,6 +83,7 @@
                             .children("tbody").remove().end()
                             .appendTo(document.body)
                             .wrap("<div>").parent()
+                            .attr('class', 'frozen-top')
                             .css({position: 'fixed', top: 0, left: 0, visibility: 'hidden'});
 
                         // Ensure all the columns match the widths of the original columns.
@@ -94,6 +96,7 @@
 
                     if (settings.left && settings.top) {
                         cornerHeader = topHeader.clone(false) // skip a few steps by cloning topHeader
+                            .attr('class', 'frozen-corner')
                             .find("th:nth-child(n+2)").remove().end()
                             .appendTo(document.body)
                             .css({position: 'fixed', top: 0, left: 0, visibility: 'hidden'});
@@ -102,6 +105,10 @@
                         var origCells = $this.find('th');
                         var cornerCells = cornerHeader.find('th');
                         for (var i = 0; i < cornerCells.length; i++) {
+                            cornerCells[i].style.paddingLeft = 0;
+                            cornerCells[i].style.paddingRight = 0;
+                            cornerCells[i].style.paddingTop = 0;
+                            cornerCells[i].style.paddingBottom = 0;
                             cornerCells[i].style.width = origCells[i].offsetWidth + 'px';
                             cornerCells[i].style.height = origCells[i].offsetHeight + 'px';
                         }
