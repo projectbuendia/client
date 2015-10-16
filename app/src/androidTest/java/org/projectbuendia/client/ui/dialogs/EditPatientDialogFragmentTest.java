@@ -34,7 +34,6 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
      * Test admission date;
      */
     public void testNewPatient() {
-
         // Create the patient
         String id = inUserLoginGoToDemoPatientChart();
 
@@ -62,11 +61,5 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         expectVisibleWithin(399999, viewThat(
             hasAncestorThat(withId(R.id.attribute_admission_days)),
             hasText("Day 1")));
-
-        // The last observation should be today.
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("MMM d, yyyy");
-        expectVisibleWithin(399999, viewThat(
-            withId(R.id.patient_chart_last_observation_date_time),
-            hasTextContaining(formatter.print(DateTime.now()))));
     }
 }
