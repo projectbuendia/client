@@ -24,12 +24,11 @@ public class LoginActivityTest extends FunctionalTestCase {
     public void testAddUser() {
         screenshot("Test Start");
         final long n = new Date().getTime()%100000;
-        final String username = "test" + n;
         final String given = "Testgiven" + n;
         final String family = "Testfamily" + n;
 
         // Add new user
-        click(viewWithText("Add User"));
+        click(viewWithId(R.id.action_new_user));
         screenshot("After Add User Clicked");
         type(given, viewWithId(R.id.add_user_given_name_tv));
         type(family, viewWithId(R.id.add_user_family_name_tv));
@@ -69,7 +68,7 @@ public class LoginActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
 
         // Should be back at the user list
-        expectVisible(viewWithText("Add User"));
+        click(viewWithId(R.id.action_new_user));
         screenshot("After Logout");
     }
 }
