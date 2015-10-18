@@ -29,8 +29,12 @@ public class Zones {
     public static final String DISCHARGED_ZONE_UUID = "d7ca63c3-6ea0-4357-82fd-0910cc17a2cb";
     // Where to place patients with no location.
     public static final String DEFAULT_LOCATION_UUID = TRIAGE_ZONE_UUID;
+    // Where to order zones that are not in the hardcoded list.
+    private static final String OTHER_ZONES_SENTINEL = "all other zones";
+
     private static final List<String> ORDERED_ZONES = Arrays.asList(
         TRIAGE_ZONE_UUID,
+        OTHER_ZONES_SENTINEL,
         SUSPECT_ZONE_UUID,
         PROBABLE_ZONE_UUID,
         CONFIRMED_ZONE_UUID,
@@ -38,10 +42,22 @@ public class Zones {
         OUTSIDE_ZONE_UUID,
         DISCHARGED_ZONE_UUID
     );
+    private static final int OTHER_ZONES_INDEX = ORDERED_ZONES.indexOf(OTHER_ZONES_SENTINEL);
 
     /** Compares two zones so that they sort in the order given in ORDERED_ZONES. */
     public static int compare(Location a, Location b) {
-        return Integer.compare(ORDERED_ZONES.indexOf(a.uuid), ORDERED_ZONES.indexOf(b.uuid));
+        int result = 0;
+        int aPosition = ORDERED_ZONES.indexOf(a.uuid);
+        int bPosition = ORDERED_ZONES.indexOf(b.uuid);
+        if (aPosition < 0 && bPosition < 0) {
+            // Zones not in the list are ordered alphabetically by name.
+            result = a.name.compareTo(b.name);
+        } else {
+            result = Integer.compare(aPosition < 0 ? OTHER_ZONES_INDEX : aPosition,
+                bPosition < 0 ? OTHER_ZONES_INDEX : bPosition);
+        }
+        // Zones can only be identical if they have the same UUID.
+        return result != 0 ? result : a.uuid.compareTo(b.uuid);
     }
 
     /** Returns the {@link ResZone} for the specified zone UUID. */
