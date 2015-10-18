@@ -30,6 +30,6 @@
           android:title="@string/cancel_sync"/>
 
     <item android:id="@+id/action_dashboard"
-          android:showAsAction="ifRoom|collapseActionView"
+          android:showAsAction="never"
           android:title="@string/title_dashboard"/>
 </menu>
