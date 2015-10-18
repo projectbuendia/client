@@ -117,6 +117,19 @@
                 android:value=".ui.lists.FilteredPatientListActivity" />
         </activity>
         <activity
+            android:name=".ui.chart.DashboardActivity"
+            android:label="@string/title_dashboard"
+            android:parentActivityName=".ui.lists.FilteredPatientListActivity"
+            android:screenOrientation="userPortrait"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.lists.FilteredPatientListActivity" />
+        </activity>
+        <activity
             android:name="org.projectbuendia.client.ui.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".ui.lists.FilteredPatientListActivity"

@@ -34,6 +34,7 @@ import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoadingState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
+import org.projectbuendia.client.ui.chart.DashboardActivity;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
@@ -91,6 +92,16 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                     Utils.logUserAction("go_to_patient_pressed");
                     GoToPatientDialogFragment.newInstance()
                         .show(getSupportFragmentManager(), null);
+                    return true;
+                }
+            });
+
+        menu.findItem(R.id.action_dashboard).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+
+                @Override public boolean onMenuItemClick(MenuItem menuItem) {
+                    Utils.logUserAction("dashboard");
+                    DashboardActivity.start(BaseSearchablePatientListActivity.this);
                     return true;
                 }
             });

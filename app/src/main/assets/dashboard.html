@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="chart.css">
+<script src="jquery-1.5.1.min.js"></script>
+<script src="freezeheader.js"></script>
+<style>
+  th { font-size: 2em !important; }
+  td { font-size: 2.4em !important; }
+  tr.heading th { font-size: 2em !important; padding: 16px !important; }
+  td { padding: 16px !important; text-align: right !important; }
+</style>
+
+<!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
+<body>
+<p>&nbsp;</p>
+<table id="grid" cellspacing="0" cellpadding="0">
+  <tr class="heading">
+    <th></th>
+    <th>Patients</th>
+    <th>Malaria +</th>
+    <th>Malaria %</th>
+    <th>g/kg/day</th>
+    <th>MUAC mm/day</th>
+  </tr>
+  {% for location in locations %}
+    <tr>
+      <th scope="row">
+        {{location.name}}&nbsp;&nbsp;&nbsp;
+      </th>
+      <td>{{location.pc}}</td>
+      <td>{{location.mpc}}</td>
+      <td>{{location.mpp}}</td>
+      <td>{{location.kg}}</td>
+      <td>{{location.mm}}</td>
+    </tr>
+  {% endfor %}
+  </table>
+
+<script>
+  $('#grid').freezeHeader({top: true, left: true});
+</script>
+</body>
+</html>

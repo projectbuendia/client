@@ -106,6 +106,7 @@ public class SyncAccountService extends Service {
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
         // Fetch just the newly added observations.
+        b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
         b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
         b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
         b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
