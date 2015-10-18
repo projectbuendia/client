@@ -91,7 +91,9 @@ public class PatientDelta {
             }
             if (gender.isPresent()) {
                 json.put(
-                    Server.PATIENT_GENDER_KEY, gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
+                    Server.PATIENT_GENDER_KEY,
+                    gender.get() == JsonPatient.GENDER_UNKNOWN ? "U"
+                        : gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
             }
             if (birthdate.isPresent()) {
                 json.put(
