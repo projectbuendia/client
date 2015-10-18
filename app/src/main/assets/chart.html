@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="chart.css">
-<script src="jquery-1.5.1.min.js"></script>
-<script src="freezeheader.js"></script>
-<script src="chart.js"></script>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
-<body>
 <table id="tiles" cellspacing="0" cellpadding="0">
   {% for tileRow in tileRows %}
     <tr>
@@ -166,6 +161,9 @@
   </table>
 </div>
 
+<script src="jquery-1.5.1.min.js"></script>
+<script src="freezeheader.js"></script>
+<script src="chart.js"></script>
 <script>
   var data = {{dataCellsByConceptId | raw}};
 
@@ -186,5 +184,3 @@
   $('#grid').freezeHeader({top: true, left: true});
   $('#grid-scroller').scrollLeft(1e6);
 </script>
-</body>
-</html>
