@@ -156,72 +156,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         Espresso.registerIdlingResources(syncSucceededResource);
     }
 
-    /**
-     * Adds a new patient using the new patient form.  Assumes that the UI is
-     * in the location selection activity, and leaves the UI in the same
-     * activity.  Note: this function will not work during {@link #setUp()}
-     * as it relies on {@link #waitForProgressFragment()}.
-     * @param delta        an PatientDelta containing the data for the new patient;
-     *                     use Optional.absent() to leave fields unset
-     * @param locationName the name of a location to assign to the new patient,
-     *                     or null to leave unset (assumes this name is unique among locations)
-     */
-    protected void inLocationSelectionAddNewPatient(PatientDelta delta, String locationName) {
-        /*LOG.i("Adding patient: %s (location %s)",
-            delta.toContentValues().toString(), locationName);
-
-        click(viewWithId(R.id.action_new_patient));
-        expectVisible(viewWithText("New patient"));
-        if (delta.id.isPresent()) {
-            type(delta.id.get(), viewWithId(R.id.patient_creation_text_patient_id));
-        }
-        if (delta.givenName.isPresent()) {
-            type(delta.givenName.get(), viewWithId(R.id.patient_creation_text_patient_given_name));
-        }
-        if (delta.familyName.isPresent()) {
-            type(delta.familyName.get(), viewWithId(R.id.patient_creation_text_patient_family_name));
-        }
-        if (delta.birthdate.isPresent()) {
-            Period age = new Period(delta.birthdate.get(), LocalDate.now());
-            type(age.getMonths(), viewWithId(R.id.patient_creation_age_months));
-            type(age.getYears(), viewWithId(R.id.patient_creation_age_years));
-        }
-        if (delta.gender.isPresent()) {
-            if (delta.gender.get() == Patient.GENDER_MALE) {
-                click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
-            } else if (delta.gender.get() == Patient.GENDER_FEMALE) {
-                click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
-            }
-        }
-        if (delta.admissionDate.isPresent()) {
-            // TODO/completeness: Support admission date in addNewPatient().
-            // The following code is broken -- hopefully fixed by Espresso 2.0.
-            // click(viewWithId(R.id.patient_creation_admission_date));
-            // selectDateFromDatePickerDialog(mDemoPatient.admissionDate.get());
-        }
-        if (delta.firstSymptomDate.isPresent()) {
-            // TODO/completeness: Support first symptoms date in addNewPatient().
-            // The following code is broken -- hopefully fixed by Espresso 2.0.
-            // click(viewWithId(R.id.patient_creation_symptoms_onset_date));
-            // selectDateFromDatePickerDialog(mDemoPatient.firstSymptomDate.get());
-        }
-        if (delta.assignedLocationUuid.isPresent()) {
-            // TODO/completeness: Support assigned location in addNewPatient().
-            // A little tricky as we need to select by UUID.
-            // click(viewWithId(R.id.patient_creation_button_change_location));
-        }
-        if (locationName != null) {
-            click(viewWithId(R.id.patient_creation_button_change_location));
-            click(viewWithText(locationName));
-        }
-
-        EventBusIdlingResource<ItemCreatedEvent<Patient>> resource =
-            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
-
-        click(viewWithId(R.id.patient_creation_button_create));
-        Espresso.registerIdlingResources(resource); // wait for patient to be created*/
-    }
-
     // Broken, but hopefully fixed in Espresso 2.0.
     private void selectDateFromDatePickerDialog(DateTime dateTime) {
         selectDateFromDatePicker(dateTime);
@@ -262,38 +196,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         LOG.i("numberPickerId: %d", numberPickerId);
         LOG.i("spinnerId: %d", spinnerId);
         type(value, viewThat(hasId(numberPickerId), whoseParent(hasId(spinnerId))));
-    }
-
-    /**
-     * Ensures that a demo patient exists, creating one if necessary.  Assumes
-     * that the UI is in the user login activity, and leaves the UI back in
-     * the user login activity.  Note: this function will not work during
-     * {@link #setUp()} as it relies on {@link #waitForProgressFragment()}.
-     * TODO: Remove this method.
-     * TODO: inUserLoginGoToPatientCreation and populateNewPatientFields replaces this method.
-     */
-    protected void inUserLoginInitDemoPatient() {
-        if (sDemoPatientId != null) { // demo patient exists and is reusable
-            return;
-        }
-
-        PatientDelta delta = new PatientDelta();
-        String id = "" + (System.currentTimeMillis()%100000);
-        delta.id = Optional.of(id);
-        delta.givenName = Optional.of("Given" + id);
-        delta.familyName = Optional.of("Family" + id);
-        delta.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
-        delta.gender = Optional.of(JsonPatient.GENDER_FEMALE);
-        delta.birthdate = Optional.of(LocalDate.now().minusYears(12).minusMonths(3));
-
-        // Setting location within the PatientDelta is not yet supported.
-        // delta.assignedLocationUuid = Optional.of(Zones.TRIAGE_ZONE_UUID);
-
-        inUserLoginGoToLocationSelection();
-        inLocationSelectionAddNewPatient(delta, LOCATION_NAME); // add the patient
-        sDemoPatientId = id; // record ID so future tests can reuse the patient
-        pressBack(); // return to location list
-        pressBack(); // return to user login activity
     }
 
     /**
