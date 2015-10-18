@@ -13,6 +13,7 @@ package org.projectbuendia.client.models;
 
 import android.database.Cursor;
 
+import org.projectbuendia.client.ui.chart.DashboardController;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
@@ -34,6 +35,12 @@ public final class Location extends Base<String> {
     public final String parentUuid;
     public final String name;
     public final long patientCount;
+    public DashboardController.Stat stat;
+    public String pc;
+    public String mpc;
+    public String mpp;
+    public String kg;
+    public String mm;
 
     /** Creates an instance of {@link Location}. */
     public Location(String uuid, String parentUuid, String name, long patientCount) {

@@ -6,7 +6,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
 import com.google.common.collect.Lists;
-import com.mitchellbosecke.pebble.PebbleEngine;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -29,8 +28,6 @@ import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Arrays;
@@ -46,7 +43,6 @@ import java.util.TreeSet;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
-    static PebbleEngine sEngine;
     private static final Logger LOG = Logger.create();
 
     WebView mView;  // view into which the HTML table will be rendered
@@ -246,7 +242,7 @@ public class ChartRenderer {
             context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
             context.put("orders", mOrders);
             context.put("dataCellsByConceptId", getJsonDataDump());
-            return renderTemplate("assets/chart.html", context);
+            return Utils.renderTemplate("chart.html", context);
         }
 
         /**
@@ -290,25 +286,6 @@ public class ChartRenderer {
                 }
             }
             return dates;
-        }
-
-        /** Renders a Pebble template. */
-        String renderTemplate(String filename, Map<String, Object> context) {
-            if (sEngine == null) {
-                // PebbleEngine caches compiled templates by filename, so as long as we keep using the
-                // same engine instance, it's okay to call getTemplate(filename) on each render.
-                sEngine = new PebbleEngine();
-                sEngine.addExtension(new PebbleExtension());
-            }
-            try {
-                StringWriter writer = new StringWriter();
-                sEngine.getTemplate(filename).evaluate(writer, context);
-                return writer.toString();
-            } catch (Exception e) {
-                StringWriter writer = new StringWriter();
-                e.printStackTrace(new PrintWriter(writer));
-                return "<div style=\"font-size: 150%\">" + writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
-            }
         }
     }
 }

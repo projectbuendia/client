@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.view.View;
 
 import com.google.common.collect.Lists;
+import com.mitchellbosecke.pebble.PebbleEngine;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -31,6 +32,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.ui.chart.PebbleExtension;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,6 +61,8 @@ public class Utils {
     public static final DateTime MAX_DATETIME = new DateTime(MAX_TIME, DateTimeZone.UTC);
     public static final LocalDate MIN_DATE = new LocalDate(0, 1, 1).year().withMinimumValue();
     public static final LocalDate MAX_DATE = new LocalDate(0, 12, 31).year().withMaximumValue();
+
+    static PebbleEngine sEngine;
 
     /**
      * Compares two objects that may be null, Integer, Long, BigInteger, or String.
@@ -389,7 +394,7 @@ public class Utils {
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
         return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
-                resources.getString(R.string.abbrev_n_months, months + years * 12);
+                resources.getString(R.string.abbrev_n_months, months + years*12);
     }
 
     /**
@@ -453,6 +458,25 @@ public class Utils {
     public static String removeUnsafeChars(String input)
     {
         return input.replaceAll("[\\W]", "_");
+    }
+
+    /** Renders a Pebble template. */
+    public static String renderTemplate(String filename, Map<String, Object> context) {
+        if (sEngine == null) {
+            // PebbleEngine caches compiled templates by filename, so as long as we keep using the
+            // same engine instance, it's okay to call getTemplate(filename) on each render.
+            sEngine = new PebbleEngine();
+            sEngine.addExtension(new PebbleExtension());
+        }
+        try {
+            StringWriter writer = new StringWriter();
+            sEngine.getTemplate("assets/" + filename).evaluate(writer, context);
+            return writer.toString();
+        } catch (Exception e) {
+            StringWriter writer = new StringWriter();
+            e.printStackTrace(new PrintWriter(writer));
+            return "<div style=\"font-size: 150%\">" + writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
+        }
     }
 
     private Utils() {

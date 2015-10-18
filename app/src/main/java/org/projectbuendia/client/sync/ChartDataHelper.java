@@ -195,6 +195,26 @@ public class ChartDataHelper {
         }
     }
 
+    /** Gets the earliest observation of the specified concept for all patients. */
+    // TODO/cleanup: Have this return a Map<String, ObsPoint>.
+    public Map<String, Obs> getEarliestObservationsForConcept(
+        String conceptUuid, String locale) {
+        loadConceptData(locale);
+        try (Cursor c = mContentResolver.query(
+            Observations.CONTENT_URI, null,
+            Observations.CONCEPT_UUID + " = ?", new String[] {conceptUuid},
+            Observations.ENCOUNTER_MILLIS + " ASC")) {
+            Map<String, Obs> result = new HashMap<>();
+            while (c.moveToNext()) {
+                String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
+                if (result.containsKey(patientUuid)) continue;
+                result.put(patientUuid, obsFromCursor(c));
+            }
+            return result;
+        }
+    }
+
+
     /** Retrieves and assembles a Chart from the local datastore. */
     public Chart getChart(String uuid) {
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();

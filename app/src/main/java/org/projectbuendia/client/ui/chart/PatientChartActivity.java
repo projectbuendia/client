@@ -105,7 +105,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
-    @InjectView(R.id.chart_webview) WebView mGridWebView;
+    @InjectView(R.id.webview) WebView mGridWebView;
     ChartRenderer mChartRenderer;
 
     private static final String EN_DASH = "\u2013";

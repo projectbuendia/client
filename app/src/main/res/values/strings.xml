@@ -26,6 +26,7 @@
   <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>
   <string name="title_patient_chart">Patient chart</string>
+  <string name="title_dashboard">Dashboard</string>
   <string name="title_activity_patient_add">New patient</string>
   <string name="cancel">Cancel</string>
   <string name="action_new_patient">+ Create new patient</string>

@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A tree containing a hierarchy of {@link Location} objects, where the root is assumed to be a
@@ -245,7 +247,9 @@ public class LocationTree implements Observable {
     }
 
     private void addChildrenToCollection(Collection<Location> collection, Location root) {
-        for (Location child : getChildren(root)) {
+        SortedSet<Location> sorted = new TreeSet<>(new LocationComparator(this));
+        sorted.addAll(getChildren(root));
+        for (Location child : sorted) {
             collection.add(child);
             addChildrenToCollection(collection, child);
         }
