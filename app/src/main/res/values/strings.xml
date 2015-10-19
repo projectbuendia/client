@@ -12,16 +12,16 @@
 -->
 <resources>
   <!-- Statuses -->
-  <string name="status_unknown">Unknown</string>
-  <string name="status_well">Well</string>
-  <string name="status_unwell">Unwell</string>
-  <string name="status_critical">Critical</string>
-  <string name="status_palliative">Palliative</string>
-  <string name="status_convalescent">Convalescing</string>
-  <string name="status_discharged_non_case">Discharged Non-Case</string>
-  <string name="status_discharged_cured">Discharged Cured</string>
-  <string name="status_suspected_dead">Suspected Dead</string>
-  <string name="status_confirmed_dead">Confirmed Dead</string>
+  <string name="condition_unknown">Unknown</string>
+  <string name="condition_well">Well</string>
+  <string name="condition_unwell">Unwell</string>
+  <string name="condition_critical">Critical</string>
+  <string name="condition_palliative">Palliative</string>
+  <string name="condition_convalescent">Convalescing</string>
+  <string name="condition_discharged_non_case">Discharged Non-Case</string>
+  <string name="condition_discharged_cured">Discharged Cured</string>
+  <string name="condition_suspected_dead">Suspected Dead</string>
+  <string name="condition_confirmed_dead">Confirmed Dead</string>
 
   <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>

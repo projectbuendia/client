@@ -38,7 +38,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
@@ -348,8 +348,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // that we need to do the other tiles like Admission Date to complete the layout.
         @Override public void updateEbolaPcrTestResultUi(Map<String, Obs> observations) {
             // PCR
-            Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
-            Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
+            Obs pcrLObservation = observations.get(Concepts.PCR_L_UUID);
+            Obs pcrNpObservation = observations.get(Concepts.PCR_NP_UUID);
             mPcr.setIconDrawable(
                 new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                     .color(0x00000000)
@@ -408,12 +408,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             List<String> specialLabels = new ArrayList<>();
             Obs obs;
 
-            obs = observations.get(ConceptUuids.PREGNANCY_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            obs = observations.get(Concepts.PREGNANCY_UUID);
+            if (obs != null && Concepts.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.pregnant));
             }
-            obs = observations.get(ConceptUuids.IV_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            obs = observations.get(Concepts.IV_UUID);
+            if (obs != null && Concepts.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
             mPatientPregnantOrIvView.setText(Joiner.on("\n").join(specialLabels));
@@ -432,8 +432,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralCondition.setText("–"); // en dash
                 mGeneralConditionNum.setText("–");
             } else {
-                ResStatus resStatus = ConceptUuids.getResStatus(generalConditionUuid);
-                ResStatus.Resolved status = resStatus.resolve(getResources());
+                Condition resStatus = Concepts.getCondition(generalConditionUuid);
+                Condition.Resolved status = resStatus.resolve(getResources());
 
                 mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
                 mGeneralCondition.setTextColor(status.getForegroundColor());

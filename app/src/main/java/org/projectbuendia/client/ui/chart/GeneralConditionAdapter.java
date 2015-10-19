@@ -21,8 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.resolvables.ResStatus;
+import org.projectbuendia.client.models.Conditions;
+import org.projectbuendia.client.resolvables.Condition;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -66,18 +66,15 @@ public class GeneralConditionAdapter extends ArrayAdapter<String> {
             view.setTag(holder);
         }
 
-        String conditionUuid = getItem(position);
-        ResStatus.Resolved condition =
-            ConceptUuids.getResStatus(conditionUuid).resolve(getContext().getResources());
-
-        holder.mConditionNumber.setText(condition.getShortDescription());
-        holder.mConditionNumber.setTextColor(condition.getForegroundColor());
-        holder.mConditionText.setText(condition.getMessage());
-        holder.mConditionText.setTextColor(condition.getForegroundColor());
-        holder.mConditionParent.setBackgroundColor(condition.getBackgroundColor());
-
-        // TODO: Show currently-selected condition differently.
-
+        Condition condition = Conditions.getCondition(getItem(position));
+        int textColor = getContext().getResources().getColor(condition.fgColorId);
+        int bgColor = getContext().getResources().getColor(condition.bgColorId);
+        holder.mConditionNumber.setText(condition.abbrev);
+        holder.mConditionNumber.setTextColor(textColor);
+        holder.mConditionText.setText(condition.messageId);
+        holder.mConditionText.setTextColor(textColor);
+        holder.mConditionParent.setBackgroundColor(bgColor);
+        // TODO: Show the currently-selected condition differently.
         return view;
     }
 

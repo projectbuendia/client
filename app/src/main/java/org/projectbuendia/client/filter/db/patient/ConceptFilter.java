@@ -21,8 +21,8 @@ import org.projectbuendia.client.models.Patient;
  * <code>
  * ConceptFilter myFilter = new ConceptFilter(
  * "Pregnant",              // Filter description for display purposes
- * ConceptUuids.PREGNANCY_UUID, // Concept id
- * ConceptUuids.YES_UUID);      // Value
+ * Concepts.PREGNANCY_UUID, // Concept id
+ * Concepts.YES_UUID);      // Value
  * </code>
  */
 public final class ConceptFilter extends SimpleSelectionFilter<Patient> {

@@ -24,7 +24,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Zones;
-import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
 
 import java.util.List;
@@ -69,25 +68,23 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
             view = convertView;
             holder = (ViewHolder) convertView.getTag();
         } else {
-            view = inflater.inflate(
-                R.layout.listview_cell_location_selection, parent, false);
+            view = inflater.inflate(R.layout.listview_cell_location_selection, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
         Location location = getItem(position);
-        // TODO/robustness: This line only works if 'location' is a tent; otherwise zone is ResZone.UNKNOWN.
-        ResZone.Resolved zone = Zones.getResZone(
-            location.parentUuid).resolve(mContext.getResources());
+        Zones.Style style = Zones.getStyle(location);
+        int textColor = getContext().getResources().getColor(style.fgColorId);
+        int bgColor = getContext().getResources().getColor(style.bgColorId);
 
         long count = mLocationTree.getTotalPatientCount(location);
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle("" + count);
-        holder.mButton.setBackgroundColor(zone.getBackgroundColor());
-        holder.mButton.setTextColor(zone.getForegroundColor());
-        if (count == 0) {
-            int fg = zone.getForegroundColor();
-            holder.mButton.setSubtitleColor(0x40000000 | fg & 0x00ffffff);
+        holder.mButton.setBackgroundColor(bgColor);
+        holder.mButton.setTextColor(textColor);
+        if (count == 0) {  // fade out the count when it's zero
+            holder.mButton.setSubtitleColor(0x40000000 | textColor & 0x00ffffff);
         }
 
         if (mSelectedLocationUuid.isPresent()
@@ -101,7 +98,6 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
     }
 
     static class ViewHolder {
-
         @InjectView(R.id.location_selection_location) SubtitledButtonView mButton;
 
         public ViewHolder(View view) {

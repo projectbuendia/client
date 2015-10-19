@@ -11,15 +11,17 @@
 
 package org.projectbuendia.client.models;
 
-import org.projectbuendia.client.resolvables.ResZone;
+import com.google.common.collect.ImmutableMap;
+
+import org.projectbuendia.client.R;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /** Defines a hardcoded set of possible zones returned by the server and their semantics and UI. */
 // TODO/robustness: Get rid of these constants and use the actual locations on the server!
 public class Zones {
-
     public static final String CONFIRMED_ZONE_UUID = "b9038895-9c9d-4908-9e0d-51fd535ddd3c";
     public static final String MORGUE_ZONE_UUID = "4ef642b9-9843-4d0d-9b2b-84fe1984801f";
     public static final String OUTSIDE_ZONE_UUID = "00eee068-4d2a-4b41-bfe1-41e3066ab213";
@@ -44,6 +46,22 @@ public class Zones {
     );
     private static final int OTHER_ZONES_INDEX = ORDERED_ZONES.indexOf(OTHER_ZONES_SENTINEL);
 
+    public static class Style {
+        public int fgColorId;
+        public int bgColorId;
+
+        Style(int fgColorId, int bgColorId) {
+            this.fgColorId = fgColorId;
+            this.bgColorId = bgColorId;
+        }
+    }
+
+    public static Map<String, Style> STYLES = ImmutableMap.of(
+        SUSPECT_ZONE_UUID, new Style(R.color.vital_fg_dark, R.color.zone_suspect),
+        PROBABLE_ZONE_UUID, new Style(R.color.vital_fg_light, R.color.zone_probable),
+        CONFIRMED_ZONE_UUID, new Style(R.color.vital_fg_light, R.color.zone_confirmed));
+    public static Style DEFAULT_STYLE = new Style(R.color.vital_fg_unknown, R.color.vital_unknown);
+
     /** Compares two zones so that they sort in the order given in ORDERED_ZONES. */
     public static int compare(Location a, Location b) {
         int result = 0;
@@ -60,24 +78,12 @@ public class Zones {
         return result != 0 ? result : a.uuid.compareTo(b.uuid);
     }
 
-    /** Returns the {@link ResZone} for the specified zone UUID. */
-    public static ResZone getResZone(String uuid) {
-        switch (uuid) {
-            case SUSPECT_ZONE_UUID:
-                return ResZone.SUSPECT;
-            case PROBABLE_ZONE_UUID:
-                return ResZone.PROBABLE;
-            case CONFIRMED_ZONE_UUID:
-                return ResZone.CONFIRMED;
-            case MORGUE_ZONE_UUID:
-            case OUTSIDE_ZONE_UUID:
-            case TRIAGE_ZONE_UUID:
-            default:
-                return ResZone.UNKNOWN;
-        }
+    /** Gets the foreground and background colours associated with a location. */
+    public static Style getStyle(Location loc) {
+        Style style = STYLES.get(loc.uuid);
+        Style parentStyle = STYLES.get(loc.parentUuid);
+        return style != null ? style : parentStyle != null ? parentStyle : DEFAULT_STYLE;
     }
 
-    private Zones() {
-        // Zone contains only static methods.
-    }
+    private Zones() { } // Zones contains only static methods.
 }

@@ -107,8 +107,8 @@ public class ChartRenderer {
         LocalDate mFirstSymptomsDate;
 
         List<List<Tile>> mTileRows = new ArrayList<>();
-        List<org.projectbuendia.client.ui.chart.Row> mRows = new ArrayList<>();
-        Map<String, org.projectbuendia.client.ui.chart.Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
+        List<Row> mRows = new ArrayList<>();
+        Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 

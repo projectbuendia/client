@@ -76,7 +76,7 @@ public final class Obs implements Comparable<Obs> {
             case TEXT:
                 return ObsValue.newText(value);
             case BOOLEAN:
-                return ObsValue.newCoded(ConceptUuids.YES_UUID.equals(value));
+                return ObsValue.newCoded(Concepts.YES_UUID.equals(value));
             case DATE:
                 return ObsValue.newDate(Utils.toLocalDate(value));
             case DATETIME:
@@ -145,7 +145,7 @@ public final class Obs implements Comparable<Obs> {
     public Integer getTypeOrdering() {
         switch (conceptType) {
             case BOOLEAN:
-                return ConceptUuids.YES_UUID.equals(value) ? 5 : 1;
+                return Concepts.YES_UUID.equals(value) ? 5 : 1;
             case NUMERIC:
                 return 2;
             case TEXT:
@@ -163,14 +163,14 @@ public final class Obs implements Comparable<Obs> {
      */
     public Integer getCodedValueOrdering() {
         final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
-            .put(ConceptUuids.NO_UUID, 0)
-            .put(ConceptUuids.NONE_UUID, 1)
-            .put(ConceptUuids.NORMAL_UUID, 2)
-            .put(ConceptUuids.SOLID_FOOD_UUID, 3)
-            .put(ConceptUuids.MILD_UUID, 4)
-            .put(ConceptUuids.MODERATE_UUID, 5)
-            .put(ConceptUuids.SEVERE_UUID, 6)
-            .put(ConceptUuids.YES_UUID, 7).build();
+            .put(Concepts.NO_UUID, 0)
+            .put(Concepts.NONE_UUID, 1)
+            .put(Concepts.NORMAL_UUID, 2)
+            .put(Concepts.SOLID_FOOD_UUID, 3)
+            .put(Concepts.MILD_UUID, 4)
+            .put(Concepts.MODERATE_UUID, 5)
+            .put(Concepts.SEVERE_UUID, 6)
+            .put(Concepts.YES_UUID, 7).build();
         Integer cvo = CODED_VALUE_ORDERING.get(value);
         return cvo == null ? 0 : cvo;
     }

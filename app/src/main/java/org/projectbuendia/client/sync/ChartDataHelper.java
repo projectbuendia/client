@@ -20,14 +20,13 @@ import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
-import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Logger;
@@ -52,10 +51,10 @@ public class ChartDataHelper {
 
     /** UUIDs for concepts that mean everything is normal; there is no worrying symptom. */
     public static final ImmutableSet<String> NO_SYMPTOM_VALUES = ImmutableSet.of(
-        ConceptUuids.NO_UUID, // NO
-        ConceptUuids.SOLID_FOOD_UUID, // Solid food
-        ConceptUuids.NORMAL_UUID, // NORMAL
-        ConceptUuids.NONE_UUID); // None
+        Concepts.NO_UUID, // NO
+        Concepts.SOLID_FOOD_UUID, // Solid food
+        Concepts.NORMAL_UUID, // NORMAL
+        Concepts.NONE_UUID); // None
 
     private final ContentResolver mContentResolver;
 
@@ -91,7 +90,8 @@ public class ChartDataHelper {
                 }
                 sConceptTypes = new HashMap<>();
                 try (Cursor c = mContentResolver.query(
-                    Concepts.CONTENT_URI, new String[] {Concepts.UUID, Concepts.CONCEPT_TYPE},
+                    Contracts.Concepts.CONTENT_URI,
+                    new String[] {Contracts.Concepts.UUID, Contracts.Concepts.CONCEPT_TYPE},
                     null, null, null)) {
                     while (c.moveToNext()) {
                         try {
@@ -100,7 +100,7 @@ public class ChartDataHelper {
                     }
                 }
                 // Special case: we know this is a date even if it's not in any forms or charts.
-                sConceptTypes.put(ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE);
+                sConceptTypes.put(Concepts.ADMISSION_DATE_UUID, ConceptType.DATE);
                 sLoadedLocale = locale;
             }
         }

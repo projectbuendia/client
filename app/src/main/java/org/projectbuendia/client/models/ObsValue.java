@@ -63,27 +63,27 @@ public final class ObsValue implements Comparable<ObsValue> {
 
     private static final Map<String, Integer> CODED_VALUE_ORDERING =
         new ImmutableMap.Builder<String, Integer>()
-            .put(ConceptUuids.NO_UUID, -100)
-            .put(ConceptUuids.NONE_UUID, -1)
-            .put(ConceptUuids.NORMAL_UUID, -1)
-            .put(ConceptUuids.SOLID_FOOD_UUID, -1)
-            .put(ConceptUuids.MILD_UUID, 1)
-            .put(ConceptUuids.MODERATE_UUID, 2)
-            .put(ConceptUuids.SEVERE_UUID, 3)
-            .put(ConceptUuids.YES_UUID, 100).build();
+            .put(Concepts.NO_UUID, -100)
+            .put(Concepts.NONE_UUID, -1)
+            .put(Concepts.NORMAL_UUID, -1)
+            .put(Concepts.SOLID_FOOD_UUID, -1)
+            .put(Concepts.MILD_UUID, 1)
+            .put(Concepts.MODERATE_UUID, 2)
+            .put(Concepts.SEVERE_UUID, 3)
+            .put(Concepts.YES_UUID, 100).build();
 
     /** Coded values that are considered false by asBoolean(). */
     private static final Set<String> FALSE_CONCEPT_UUIDS = ImmutableSet.of(
-        ConceptUuids.NO_UUID,
-        ConceptUuids.NONE_UUID,
-        ConceptUuids.NORMAL_UUID,
-        ConceptUuids.UNKNOWN_UUID
+        Concepts.NO_UUID,
+        Concepts.NONE_UUID,
+        Concepts.NORMAL_UUID,
+        Concepts.UNKNOWN_UUID
     );
 
     // All constructors must honour the invariant that exactly one field is non-null.
 
     public static ObsValue newCoded(boolean bool) {
-        return newCoded(bool ? ConceptUuids.YES_UUID : ConceptUuids.NO_UUID);
+        return newCoded(bool ? Concepts.YES_UUID : Concepts.NO_UUID);
     }
 
     public static ObsValue newCoded(@Nonnull String uuid) {

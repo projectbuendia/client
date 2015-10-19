@@ -28,7 +28,6 @@ import org.projectbuendia.client.utils.Utils;
 
 /** Represents the data to write to a new patient or the data to update on a patient. */
 public class PatientDelta {
-
     public Optional<String> id = Optional.absent();
     public Optional<String> givenName = Optional.absent();
     public Optional<String> familyName = Optional.absent();
@@ -104,7 +103,7 @@ public class PatientDelta {
             JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
                 JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.ADMISSION_DATE_UUID);
+                observation.put(Server.OBSERVATION_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
                 observation.put(
                     Server.OBSERVATION_ANSWER_DATE,
                     Utils.toString(admissionDate.get()));
@@ -112,7 +111,7 @@ public class PatientDelta {
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
+                observation.put(Server.OBSERVATION_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(
                     Server.OBSERVATION_ANSWER_DATE,
                     Utils.toString(firstSymptomDate.get()));

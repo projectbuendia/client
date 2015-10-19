@@ -27,7 +27,8 @@ import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.Conditions;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
@@ -53,7 +54,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private static final String PATIENT_ID_1 = "patient-id-1";
 
     private static final Obs OBS_1 = new Obs(
-        0, ConceptUuids.TEMPERATURE_UUID, ConceptType.NUMERIC, "37.2", "");
+        0, Concepts.TEMPERATURE_UUID, ConceptType.NUMERIC, "37.2", "");
 
     private PatientChartController mController;
 
@@ -127,7 +128,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // GIVEN controller is initialized
         mController.init();
         // WHEN a new general condition is set from the dialog
-        mController.setCondition(ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID);
+        mController.setCondition(Conditions.PALLIATIVE_UUID);
         // THEN a new encounter is added
         verify(mMockAppModel).addEncounter(
             any(CrudEventBus.class),

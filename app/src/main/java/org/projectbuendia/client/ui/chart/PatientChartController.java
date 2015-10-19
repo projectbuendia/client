@@ -43,7 +43,7 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationTree;
@@ -322,13 +322,13 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         Map<String, Obs> observations =
             mChartHelper.getLatestObservations(mPatientUuid);
 
-        if (observations.containsKey(ConceptUuids.PREGNANCY_UUID)
-            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.PREGNANCY_UUID).value)) {
+        if (observations.containsKey(Concepts.PREGNANCY_UUID)
+            && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
             preset.pregnant = Preset.YES;
         }
 
-        if (observations.containsKey(ConceptUuids.IV_UUID)
-            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.IV_UUID).value)) {
+        if (observations.containsKey(Concepts.IV_UUID)
+            && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
             preset.ivFitted = Preset.YES;
         }
 
@@ -449,7 +449,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             DateTime.now(),
             new Observation[] {
                 new Observation(
-                    ConceptUuids.GENERAL_CONDITION_UUID,
+                    Concepts.CONDITION_UUID,
                     newConditionUuid,
                     Observation.Type.NON_DATE)
             }, null);
@@ -503,9 +503,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             + orders.size() + " orders");
 
         LocalDate admissionDate = getObservedDate(
-            latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
+            latestObservations, Concepts.ADMISSION_DATE_UUID);
         LocalDate firstSymptomsDate = getObservedDate(
-            latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
+            latestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);

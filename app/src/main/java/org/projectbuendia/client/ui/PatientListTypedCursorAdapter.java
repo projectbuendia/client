@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,15 +23,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.Conditions;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationComparator;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.resolvables.ResStatus;
+import org.projectbuendia.client.resolvables.Condition;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
@@ -140,29 +142,26 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
         // Show pregnancy status and condition, if the data for these has been loaded.
         Obs obs = mPregnancyObs.get(patient.uuid);
-        boolean pregnant = obs != null && ConceptUuids.YES_UUID.equals(obs.value);
+        boolean pregnant = obs != null && Concepts.YES_UUID.equals(obs.value);
 
         obs = mConditionObs.get(patient.uuid);
-        String condition = obs == null ? null : obs.value;
+        String conditionUuid = obs == null ? null : obs.value;
+        Condition condition = Conditions.getCondition(conditionUuid);
 
         if (convertView == null) {
             convertView = newChildView();
         }
-
-        ResStatus.Resolved status =
-            ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
-
+        Resources res = mContext.getResources();
         ViewHolder holder = (ViewHolder) convertView.getTag();
         String givenName = Utils.valueOrDefault(patient.givenName, EN_DASH);
         String familyName = Utils.valueOrDefault(patient.familyName, EN_DASH);
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(patient.id);
-        holder.mPatientId.setTextColor(status.getForegroundColor());
-        holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
+        holder.mPatientId.setTextColor(res.getColor(condition.fgColorId));
+        holder.mPatientId.setBackgroundColor(res.getColor(condition.bgColorId));
 
         holder.mPatientAge.setText(
-            patient.birthdate == null ? "" : Utils.birthdateToAge(
-                patient.birthdate, mContext.getResources()));
+            patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate, res));
 
         holder.mPatientGender.setVisibility(
             patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
@@ -250,8 +249,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
-            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.PREGNANCY_UUID, "en");
-            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID, "en");
+            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(Concepts.PREGNANCY_UUID, "en");
+            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(Concepts.CONDITION_UUID, "en");
             return null;
         }
 
