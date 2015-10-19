@@ -31,7 +31,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
-import org.projectbuendia.client.sync.Order;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
     void updateUi(boolean orderExecutedNow) {
         Bundle args = getArguments();
-        LocalDate date = new DateTime(args.getLong("intervalStartMillis")).toLocalDate();
+        LocalDate date = new DateTime(Utils.getLong(args, "intervalStartMillis")).toLocalDate();
         List<DateTime> executionTimes = new ArrayList<>();
         for (long millis : args.getLongArray("executionTimes")) {
             executionTimes.add(new DateTime(millis));
@@ -120,7 +120,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
         // Show what was ordered and when the order started.
         mOrderInstructions.setText(args.getString("instructions"));
-        DateTime start = new DateTime(args.getLong("orderStartMillis"));
+        DateTime start = Utils.getDateTime(args, "orderStartMillis");
         mOrderStartTime.setText(getResources().getString(
             R.string.order_started_on_date_at_time,
             Utils.toShortString(start.toLocalDate()), Utils.toTimeOfDayString(start)));
@@ -144,7 +144,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             htmlItems.add(Utils.toTimeOfDayString(executionTime));
         }
         if (editable) {
-            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
+            DateTime encounterTime = Utils.getDateTime(args, "encounterTimeMillis");
             htmlItems.add(orderExecutedNow ?
                 "<b>" + Utils.toTimeOfDayString(encounterTime) + "</b>" :
                 "<b>&nbsp;</b>");  // keep total height stable
@@ -158,9 +158,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             String orderUuid = args.getString("orderUuid");
             String instructions = args.getString("instructions");
             Interval interval = new Interval(
-                args.getLong("intervalStartMillis"),
-                args.getLong("intervalStopMillis"));
-            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
+                Utils.getDateTime(args, "intervalStartMillis"),
+                Utils.getDateTime(args, "intervalStopMillis"));
+            DateTime encounterTime = Utils.getDateTime(args, "encounterTimeMillis");
             Utils.logUserAction("order_execution_submitted",
                 "orderUuid", orderUuid,
                 "instructions", instructions,

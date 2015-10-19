@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutionException;
  * {@link CrudEventBus} with both the old and updated patient data. If the operation fails, a
  * {@link PatientUpdateFailedEvent} is posted instead.
  */
-public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
+public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
     private final TaskFactory mTaskFactory;
@@ -51,7 +51,7 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
     private final PatientDelta mPatientDelta;
     private final CrudEventBus mBus;
 
-    AppUpdatePatientTask(
+    UpdatePatientTask(
         TaskFactory taskFactory,
         LoaderSet loaderSet,
         Server server,

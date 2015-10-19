@@ -147,10 +147,19 @@ public interface Server {
     public void listLocations(Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener);
 
-    /** Adds an order for a patient. */
-    void addOrder(Order order,
-                  Response.Listener<JsonOrder> successListener,
-                  Response.ErrorListener errorListener);
+    /** Lists all existing orders. */
+    public void listOrders(Response.Listener<List<JsonOrder>> successListener,
+                           Response.ErrorListener errorListener);
+
+    /** Adds or updates an order. */
+    void saveOrder(Order order,
+                   Response.Listener<JsonOrder> successListener,
+                   Response.ErrorListener errorListener);
+
+    /** Deletes an order. */
+    void deleteOrder(String orderUuid,
+                     Response.Listener<Void> successListener,
+                     Response.ErrorListener errorListener);
 
     /** Cancels all pending requests. */
     public void cancelPendingRequests();
