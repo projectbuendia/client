@@ -7,12 +7,9 @@ import android.webkit.WebView;
 
 import com.google.common.collect.Lists;
 
-import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
-import org.joda.time.chrono.ISOChronology;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,7 +44,6 @@ public class ChartRenderer {
     Resources mResources;  // resources used for localizing the rendering
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
-    private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
 
     public interface GridJsInterface {
         @android.webkit.JavascriptInterface void onNewOrderPressed();
@@ -83,8 +79,8 @@ public class ChartRenderer {
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
-        String html = new GridHtmlGenerator(chart, latestObservations, observations, orders,
-                                            admissionDate, firstSymptomsDate).getHtml();
+        String html = new GridHtmlGenerator(chart, latestObservations, observations,
+            orders, admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
         mView.loadDataWithBaseURL("file:///android_asset/", html,
@@ -206,27 +202,31 @@ public class ChartRenderer {
             }
         }
 
-        /** Exports a map of concept IDs to arrays of [columnStart, points] pairs. */
-        JSONObject getJsonDataDump() {
+        /** Exports a map of concept IDs to parallel arrays {ts: [...], vs: [...], cis: [...]}. */
+        JSONObject getConceptData() {
             JSONObject dump = new JSONObject();
             for (String uuid : mConceptsToDump) {
                 try {
-                    JSONArray pointGroups = new JSONArray();
+                    int index = 0;
+                    JSONArray ts = new JSONArray();
+                    JSONArray vs = new JSONArray();
+                    JSONArray cis = new JSONArray();
                     for (Column column : mColumnsByStartMillis.values()) {
-                        JSONArray pointArray = new JSONArray();
                         SortedSet<ObsPoint> points = column.pointSetByConceptUuid.get(uuid);
                         if (points != null && points.size() > 0) {
                             for (ObsPoint point : points) {
-                                pointArray.put(point.toJson());
+                                ts.put(point.time.getMillis());
+                                vs.put(point.value.number); // TODO: handle other types
+                                cis.put(index);
                             }
-                            JSONObject pointGroup = new JSONObject();
-                            pointGroup.put("start", column.start.getMillis());
-                            pointGroup.put("stop", column.stop.getMillis());
-                            pointGroup.put("points", pointArray);
-                            pointGroups.put(pointGroup);
                         }
+                        index++;
                     }
-                    dump.put("" + Utils.compressUuid(uuid), pointGroups);
+                    JSONObject conceptInfo = new JSONObject();
+                    conceptInfo.put("ts", ts);
+                    conceptInfo.put("vs", vs);
+                    conceptInfo.put("cis", cis);
+                    dump.put("" + Utils.compressUuid(uuid), conceptInfo);
                 } catch (JSONException e) {
                     LOG.e(e, "JSON error while dumping chart data");
                 }
@@ -243,7 +243,7 @@ public class ChartRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumnStart", mNowColumn.start);
             context.put("orders", mOrders);
-            context.put("dataCellsByConceptId", getJsonDataDump());
+            context.put("conceptData", getConceptData());
             return Utils.renderTemplate("chart.html", context);
         }
 

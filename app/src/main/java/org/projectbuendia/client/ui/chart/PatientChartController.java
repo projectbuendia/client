@@ -511,8 +511,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
         mUi.updateTilesAndGrid(
             mChartHelper.getChart(AppModel.CHART_UUID),
-            latestObservations, mObservations, orders,
-            admissionDate, firstSymptomsDate);
+            latestObservations, mObservations,
+            orders, admissionDate, firstSymptomsDate);
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */

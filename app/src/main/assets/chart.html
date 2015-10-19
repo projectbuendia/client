@@ -165,19 +165,20 @@
 <script src="freezeheader.js"></script>
 <script src="chart.js"></script>
 <script>
-  var data = {{dataCellsByConceptId | raw}};
+  var conceptData = {{conceptData | raw}};
+  putConceptFuncs(conceptData);
 
   {% for tileRow in tileRows %}
     {% for tile in tileRow %}
       {% if tile.item.script is not empty %}
-        runTileScript(data, {{tile.item.conceptIds | join(',') | js | raw}}, {{tile.item.script | js | raw}});
+        runTileScript(conceptData, {{tile.item.conceptIds | join(',') | js | raw}}, {{tile.item.script | js | raw}});
       {% endif %}
     {% endfor %}
   {% endfor %}
 
   {% for row in rows %}
     {% if row.item.script is not empty %}
-      runChartRowScript(data, {{row.item.conceptIds | join(',') | js | raw}}, {{row.item.script | js | raw}});
+      runGridRowScript(conceptData, {{row.item.conceptIds | join(',') | js | raw}}, {{row.item.script | js | raw}});
     {% endif %}
   {% endfor %}
 

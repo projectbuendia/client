@@ -453,8 +453,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             List<Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate) {
-            mChartRenderer.render(chart, latestObservations, observations, orders,
-                                  admissionDate, firstSymptomsDate, mController);
+            mChartRenderer.render(chart, latestObservations, observations,
+                orders, admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
         }
 

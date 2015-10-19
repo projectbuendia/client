@@ -20,27 +20,83 @@ function popup(name, pairs) {
   // dialog.showModal();
 }
 
-function runTileScript(pointGroupsByConceptId, conceptIds, tileScript) {
+api = {
+  min: function(f) {
+    if (f.min !== undefined) return f.min;
+    return Math.min.apply(null, api.values(f));
+  },
+  max: function(f) {
+    if (f.max !== undefined) return f.max;
+    return Math.max.apply(null, api.values(f));
+  },
+  values: function(f) {
+    var ts = f().times, vs = [];
+    for (var i = 0; i < ts.length; i++) {
+      vs.push(f(ts[i]));
+    }
+    return vs;
+  },
+  first: function(f) {
+    var t = f().times[0];
+    return t == null ? null : {time: t, value: f(t)};
+  },
+  last: function(f) {
+    var ts = f().times;
+    var t = ts[ts.length - 1];
+    return t == null ? null : {time: t, value: f(t)};
+  }
+};
+
+function putConceptFuncs(conceptData) {
+  for (var id in conceptData) {
+    api['concept' + id] = getConceptFunc(id);
+  }
+}
+
+function getConceptFunc(id) {
+  var i = 0;
+  var data = conceptData[id];
+  var f = function(t) {
+    var n = data.ts.length;
+    if (t === undefined) return {times: data.ts};
+    if (t === data.ts[i]) return data.vs[i];  // optimization for repeated calls
+    if (t === data.ts[i + 1]) return data.vs[++i];  // optimization for loops
+    if (n === 0 || t < data.ts[0]) return null;
+    for (i = 0; i < n - 1; i++) {
+      if (t < data.ts[i + 1]) return data.vs[i];
+    }
+    return data.vs[n - 1];
+  };
+  if (data.vs.length > 0) {
+    f.min = Math.min.apply(null, data.vs);
+    f.max = Math.max.apply(null, data.vs);
+  }
+  return f;
+}
+
+function runTileScript(conceptData, conceptIds, tileScript) {
   conceptIds = conceptIds.split(',');
   var args = [conceptIds];
   for (var i = 0; i < conceptIds.length; i++) {
-    var id = conceptIds[i];
-    args.push(getPoints(pointGroupsByConceptId[id]));
+    args.push(getConceptFunc(conceptIds[i]));
   }
   applyScript(tileScript, args);
 }
 
-function runChartRowScript(pointGroupsByConceptId, conceptIds, chartRowScript) {
+function runGridRowScript(conceptData, conceptIds, chartRowScript) {
   conceptIds = conceptIds.split(',');
   var args = [conceptIds];
   for (var i = 0; i < conceptIds.length; i++) {
     var id = conceptIds[i];
-    var pointGroups = pointGroupsByConceptId[id];
-    for (var j = 0; j < pointGroups.length; j++) {
-      var group = pointGroups[j];
-      group.cell = document.getElementById('cell-' + id + '-' + group.start);
+    var data = conceptData[id];
+    args.push(getConceptFunc(id));
+    args.push(data.ts);
+    var rowCells = document.querySelectorAll('.concept-' + id + ' td');
+    var cells = [];
+    for (var c = 0; c < data.cis.length; c++) {
+      cells.push(rowCells[data.cis[c]]);
     }
-    args.push(pointGroups);
+    args.push(cells);
   }
   applyScript(chartRowScript, args);
 }
@@ -52,15 +108,6 @@ function applyScript(script, args) {
     var func = eval(code);  // should evaluate to a function
     func.apply(null, args);
   } catch (e) {
-    console.log(e);
-    console.log(e.stack + '\nwhile trying to run script:\n' + code);
+    console.log(e.stack + '\n\nin script:\n\n' + code);
   }
-}
-
-function getPoints(pointGroups) {
-  var pointArrays = [];
-  for (var i = 0; i < pointGroups.length; i++) {
-    pointArrays.push(pointGroups[i].points);
-  }
-  return Array.prototype.concat.apply([], pointArrays);
 }
