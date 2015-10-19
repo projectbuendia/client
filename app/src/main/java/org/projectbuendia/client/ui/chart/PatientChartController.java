@@ -145,7 +145,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updateTilesAndGrid(
             Chart chart,
-            Map<String, Obs> latestObservations,
+            Patient patient, Map<String, Obs> latestObservations,
             List<Obs> observations,
             List<Order> orders,
             LocalDate admissionDate,
@@ -510,9 +510,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
         mUi.updateTilesAndGrid(
-            mChartHelper.getChart(AppModel.CHART_UUID),
-            latestObservations, mObservations,
-            orders, admissionDate, firstSymptomsDate);
+            mChartHelper.getChart(AppModel.CHART_UUID), mPatient,
+            latestObservations, mObservations, orders, admissionDate, firstSymptomsDate);
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */

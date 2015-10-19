@@ -106,7 +106,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
         verify(mMockUi).updateTilesAndGrid(
-            null, recentObservations, allObservations, ImmutableList.<Order> of(), null, null);
+            null, patient, recentObservations, allObservations, ImmutableList.<Order> of(), null, null);
         verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
         verify(mMockUi).updateEbolaPcrTestResultUi(recentObservations);
         verify(mMockUi).updatePregnancyAndIvStatusUi(recentObservations);

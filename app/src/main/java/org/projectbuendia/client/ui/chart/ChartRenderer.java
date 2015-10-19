@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +22,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -60,7 +62,7 @@ public class ChartRenderer {
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
     // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
-    public void render(Chart chart, Map<String, Obs> latestObservations,
+    public void render(Chart chart, Patient patient, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
@@ -79,8 +81,8 @@ public class ChartRenderer {
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
-        String html = new GridHtmlGenerator(chart, latestObservations, observations,
-            orders, admissionDate, firstSymptomsDate).getHtml();
+        String html = new GridHtmlGenerator(chart, patient, latestObservations,
+            observations, orders, admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
         mView.loadDataWithBaseURL("file:///android_asset/", html,
@@ -99,6 +101,7 @@ public class ChartRenderer {
         List<Order> mOrders;
         DateTime mNow;
         Column mNowColumn;
+        Patient mPatient;
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
@@ -108,11 +111,12 @@ public class ChartRenderer {
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
-        GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
+        GridHtmlGenerator(Chart chart, Patient patient, Map<String, Obs> latestObservations,
                           List<Obs> observations, List<Order> orders,
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
+            mPatient = patient;
             mOrders = orders;
             mNow = DateTime.now();
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
@@ -176,6 +180,20 @@ public class ChartRenderer {
             }
         }
 
+        // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)
+        // TODO: concept tags for formatting hints (e.g. none/mild/moderate/severe, abbreviated)
+        String getHtml() {
+            Map<String, Object> context = new HashMap<>();
+            context.put("tileRows", mTileRows);
+            context.put("rows", mRows);
+            context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
+            context.put("nowColumnStart", mNowColumn.start);
+            context.put("orders", mOrders);
+            context.put("patientData", getPatientData());
+            context.put("conceptData", getConceptData());
+            return Utils.renderTemplate("chart.html", context);
+        }
+
         /** Returns the column that contains the given instant, creating it if it doesn't exist. */
         Column getColumnContainingTime(ReadableInstant instant) {
             LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
@@ -200,6 +218,25 @@ public class ChartRenderer {
             if (point != null) {
                 column.pointSetByConceptUuid.get(obs.conceptUuid).add(point);
             }
+        }
+
+        JSONObject getPatientData() {
+            JSONObject result = new JSONObject();
+            try {
+                result.put("uuid", mPatient.uuid);
+                result.put("given_name", mPatient.givenName);
+                result.put("family_name", mPatient.familyName);
+                result.put("gender", mPatient.gender == Patient.GENDER_FEMALE ? "F" :
+                    mPatient.gender == Patient.GENDER_MALE ? "M" : "U");
+                result.put("birthdate", mPatient.birthdate.toString());
+                Period age = new Period(mPatient.birthdate, LocalDate.now());
+                result.put("age_months", age.getYears()*12 + age.getMonths());
+                result.put("age_years", age.getYears() + age.getMonths()/12.0);
+                result.put("location_uuid", mPatient.locationUuid);
+            } catch (JSONException e) {
+                LOG.e(e, "JSON error while dumping patient data");
+            }
+            return result;
         }
 
         /** Exports a map of concept IDs to parallel arrays {ts: [...], vs: [...], cis: [...]}. */
@@ -232,19 +269,6 @@ public class ChartRenderer {
                 }
             }
             return dump;
-        }
-
-        // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)
-        // TODO: concept tags for formatting hints (e.g. none/mild/moderate/severe, abbreviated)
-        String getHtml() {
-            Map<String, Object> context = new HashMap<>();
-            context.put("tileRows", mTileRows);
-            context.put("rows", mRows);
-            context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
-            context.put("nowColumnStart", mNowColumn.start);
-            context.put("orders", mOrders);
-            context.put("conceptData", getConceptData());
-            return Utils.renderTemplate("chart.html", context);
         }
 
         /**

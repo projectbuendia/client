@@ -11,17 +11,12 @@
 
 package org.projectbuendia.client.ui.sync;
 
-import android.support.test.espresso.Espresso;
-
 import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.json.JsonPatient;
 
 import java.util.UUID;
 
@@ -74,7 +69,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         PatientDelta newPatient = new PatientDelta();
         newPatient.familyName = Optional.of("XformSyncTest");
         newPatient.givenName = Optional.of("TestPatientFor");
-        newPatient.gender = Optional.of(JsonPatient.GENDER_FEMALE);
+        newPatient.gender = Optional.of(Patient.GENDER_FEMALE);
         newPatient.id = Optional.of(UUID.randomUUID().toString().substring(30));
         newPatient.birthdate = Optional.of(LocalDate.now().minusYears(12).minusMonths(3));
         return newPatient;

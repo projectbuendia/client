@@ -19,10 +19,6 @@ import java.io.Serializable;
 
 /** JSON representation of an OpenMRS Patient. */
 public class JsonPatient implements Serializable {
-    public static final int GENDER_UNKNOWN = 0;
-    public static final int GENDER_MALE = 1;
-    public static final int GENDER_FEMALE = 2;
-
     public String uuid;  // OpenMRS record UUID
     public String id;  // user-specified patient ID
     public String given_name;
@@ -31,8 +27,7 @@ public class JsonPatient implements Serializable {
     public LocalDate birthdate;
     public JsonLocation assigned_location; // TODO: make this a plain uuid; API change
 
-    public JsonPatient() {
-    }
+    public JsonPatient() { }
 
     @Override public String toString() {
         return MoreObjects.toStringHelper(this)

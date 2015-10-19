@@ -62,8 +62,8 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         cv.put(Contracts.Patients.GIVEN_NAME, givenName);
         cv.put(Contracts.Patients.FAMILY_NAME, familyName);
         cv.put(Contracts.Patients.GENDER,
-            gender == JsonPatient.GENDER_MALE ? "M" :
-                gender == JsonPatient.GENDER_FEMALE ? "F" : "U");
+            gender == GENDER_MALE ? "M" :
+                gender == GENDER_FEMALE ? "F" : "U");
         cv.put(Contracts.Patients.BIRTHDATE, Utils.toString(birthdate));
         cv.put(Contracts.Patients.LOCATION_UUID,
             locationUuid == null ? Zones.DEFAULT_LOCATION_UUID : locationUuid);

@@ -447,14 +447,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override public void updateTilesAndGrid(
-            Chart chart,
-            Map<String, Obs> latestObservations,
-            List<Obs> observations,
-            List<Order> orders,
-            LocalDate admissionDate,
-            LocalDate firstSymptomsDate) {
-            mChartRenderer.render(chart, latestObservations, observations,
-                orders, admissionDate, firstSymptomsDate, mController);
+            Chart chart, Patient patient, Map<String, Obs> latestObservations,
+            List<Obs> observations, List<Order> orders,
+            LocalDate admissionDate, LocalDate firstSymptomsDate) {
+            mChartRenderer.render(chart, patient, latestObservations,
+                observations, orders, admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
         }
 
