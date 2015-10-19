@@ -23,6 +23,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
@@ -115,6 +116,7 @@ public class ChartDataHelper {
         while (c.moveToNext()) {
             orders.add(new Order(
                 Utils.getString(c, Orders.UUID, ""),
+                patientUuid,
                 Utils.getString(c, Orders.INSTRUCTIONS, ""),
                 Utils.getLong(c, Orders.START_MILLIS, null),
                 Utils.getLong(c, Orders.STOP_MILLIS, null)));

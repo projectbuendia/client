@@ -122,7 +122,7 @@
       </tr>
       {% for order in orders %}
         <tr class="order">
-          <th scope="row">
+          <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
             <div class="medication">{{order.medication}}</div>
             <div>{{order.dosage}}&nbsp;</div>
           </th>

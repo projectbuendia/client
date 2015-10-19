@@ -290,21 +290,21 @@ public class OpenMrsServer implements Server {
         return mGson.fromJson(object.toString(), JsonEncounter.class);
     }
 
-    @Override public void addOrder(Order order,
-                         final Response.Listener<JsonOrder> successListener,
-                         final Response.ErrorListener errorListener) {
+    @Override public void saveOrder(Order order,
+                                    final Response.Listener<JsonOrder> successListener,
+                                    final Response.ErrorListener errorListener) {
         JSONObject json;
         try {
             json = order.toJson();
-        } catch (JSONException e) {
-            throw new IllegalArgumentException("Unable to serialize the order to JSON.", e);
+        } catch (Exception e) {
+            errorListener.onErrorResponse(new VolleyError("failed to serialize request", e));
+            return;
         }
-
-        LOG.v("Adding order with JSON: %s", json);
+        LOG.v("Saving order with JSON: %s", json);
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/orders",
+            "/orders" + (order.uuid == null ? "" : "/" + order.uuid),
             json,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -315,6 +315,30 @@ public class OpenMrsServer implements Server {
                         LOG.e(e, "Failed to parse response");
                         errorListener.onErrorResponse(
                             new VolleyError("Failed to parse response", e));
+                    }
+                }
+            },
+            wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+    @Override public void deleteOrder(String orderUuid,
+                                      final Response.Listener<Void> successListener,
+                                      final Response.ErrorListener errorListener) {
+
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+            mConnectionDetails,
+            Request.Method.DELETE,
+            "/orders/" + orderUuid,
+            null,
+            new Response.Listener<JSONObject>() {
+                @Override public void onResponse(JSONObject response) {
+                    try {
+                        successListener.onResponse(null);
+                    } catch (JsonSyntaxException e) {
+                        LOG.e(e, "Failed to parse response");
+                        errorListener.onErrorResponse(new VolleyError("Failed to parse response", e));
                     }
                 }
             },

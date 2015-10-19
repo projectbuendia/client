@@ -12,6 +12,8 @@
 package org.projectbuendia.client.net;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 
@@ -56,16 +58,17 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
      * Constructs a request to OpenMRS using an arbitrary HTTP method.
      * @param connectionDetails an {@link OpenMrsConnectionDetails} for communicating with OpenMRS
      * @param method            the HTTP method
-     * @param url               the absolute URL being requested
+     * @param urlSuffix         the API URL being requested, relative to the API root
      * @param jsonRequest       a {@link JSONObject} containing the request body
      * @param listener          a {@link Response.Listener} that handles successful requests
      * @param errorListener     a {@link Response.ErrorListener} that handles failed requests
      */
     public OpenMrsJsonRequest(OpenMrsConnectionDetails connectionDetails,
-                              int method, String url, JSONObject jsonRequest,
+                              int method, String urlSuffix, JSONObject jsonRequest,
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
-        super(method, url, jsonRequest, listener, errorListener);
+        super(method, connectionDetails.getBuendiaApiUrl() + urlSuffix,
+            jsonRequest, listener, errorListener);
         this.mUsername = connectionDetails.getUser();
         this.mPassword = connectionDetails.getPassword();
     }
@@ -76,5 +79,11 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
         OpenMrsConnectionDetails.addAuthHeader(mUsername, mPassword, params);
         params.put("Connection-Type", "application/json");
         return params;
+    }
+
+    @Override
+    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+        if (getMethod() == Request.Method.DELETE) return Response.success(null, null);
+        return super.parseNetworkResponse(response);
     }
 }

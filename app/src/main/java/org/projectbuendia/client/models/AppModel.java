@@ -28,7 +28,7 @@ import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
-import org.projectbuendia.client.models.tasks.AppUpdatePatientTask;
+import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
@@ -147,7 +147,7 @@ public class AppModel {
      * the specified event bus when complete.
      */
     public void addPatient(CrudEventBus bus, PatientDelta patientDelta) {
-        AddPatientTask task = mTaskFactory.newAddPatientAsyncTask(patientDelta, bus);
+        AddPatientTask task = mTaskFactory.newAddPatientTask(patientDelta, bus);
         task.execute();
     }
 
@@ -158,17 +158,22 @@ public class AppModel {
      */
     public void updatePatient(
         CrudEventBus bus, String patientUuid, PatientDelta patientDelta) {
-        AppUpdatePatientTask task =
-            mTaskFactory.newUpdatePatientAsyncTask(patientUuid, patientDelta, bus);
+        UpdatePatientTask task =
+            mTaskFactory.newUpdatePatientTask(patientUuid, patientDelta, bus);
         task.execute();
     }
 
     /**
-     * Asynchronously adds an order, posting a
-     * {@link ItemCreatedEvent} when complete.
+     * Asynchronously adds or updates an order (depending whether order.uuid is null), posting an
+     * {@link ItemCreatedEvent} or {@link ItemUpdatedEvent} when complete.
      */
-    public void addOrder(CrudEventBus bus, Order order) {
-        mTaskFactory.newAddOrderAsyncTask(order, bus).execute();
+    public void saveOrder(CrudEventBus bus, Order order) {
+        mTaskFactory.newSaveOrderTask(order, bus).execute();
+    }
+
+    /** Asynchronously deletes an order. */
+    public void deleteOrder(CrudEventBus bus, String orderUuid) {
+        mTaskFactory.newDeleteOrderTask(orderUuid, bus).execute();
     }
 
     /**
@@ -186,7 +191,7 @@ public class AppModel {
      * {@link ItemCreatedEvent} when complete.
      */
     public void addEncounter(CrudEventBus bus, Patient patient, Encounter encounter) {
-        mTaskFactory.newAddEncounterAsyncTask(patient, encounter, bus).execute();
+        mTaskFactory.newAddEncounterTask(patient, encounter, bus).execute();
     }
 
     AppModel(ContentResolver contentResolver,

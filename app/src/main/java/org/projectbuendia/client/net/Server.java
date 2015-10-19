@@ -15,10 +15,6 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.json.JsonLocation;
@@ -26,6 +22,10 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 
 import java.util.List;
 
@@ -158,10 +158,15 @@ public interface Server {
     public void listOrders(Response.Listener<List<JsonOrder>> successListener,
                            Response.ErrorListener errorListener);
 
-    /** Adds an order for a patient. */
-    void addOrder(Order order,
-                  Response.Listener<JsonOrder> successListener,
-                  Response.ErrorListener errorListener);
+    /** Adds or updates an order. */
+    void saveOrder(Order order,
+                   Response.Listener<JsonOrder> successListener,
+                   Response.ErrorListener errorListener);
+
+    /** Deletes an order. */
+    void deleteOrder(String orderUuid,
+                     Response.Listener<Void> successListener,
+                     Response.ErrorListener errorListener);
 
     /** Cancels all pending requests. */
     public void cancelPendingRequests();
