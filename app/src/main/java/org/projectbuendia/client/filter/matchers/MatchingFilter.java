@@ -18,5 +18,5 @@ public interface MatchingFilter<T> {
      * @param object     the object to match
      * @param constraint the search term
      */
-    public boolean matches(T object, CharSequence constraint);
+    boolean matches(T object, CharSequence constraint);
 }

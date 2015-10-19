@@ -17,8 +17,7 @@ import android.os.Looper;
 
 /** Runs async tasks in a unit-testable way. */
 public interface AsyncTaskRunner {
-
-    public static final AsyncTaskRunner DEFAULT = new AsyncTaskRunner() {
+    AsyncTaskRunner DEFAULT = new AsyncTaskRunner() {
         @Override @SafeVarargs
         public final <ParamsT, ProgressT, ResultT> void runTask(
             final AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
@@ -35,7 +34,6 @@ public interface AsyncTaskRunner {
     };
 
     @SuppressWarnings("unchecked")
-    public <ParamsT, ProgressT, ResultT> void runTask(
-        AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
-        ParamsT... params);
+    <ParamsT, ProgressT, ResultT> void runTask(
+        AsyncTask<ParamsT, ProgressT, ResultT> asyncTask, ParamsT... params);
 }

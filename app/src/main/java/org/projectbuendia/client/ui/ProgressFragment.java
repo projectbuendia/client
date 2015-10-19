@@ -64,7 +64,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     /** Subscriber for listening for state changes. */
     public interface ChangeStateSubscriber {
         /** Called whenever the state is changed. */
-        public void onChangeState(State newState);
+        void onChangeState(State newState);
     }
 
     public ProgressFragment() {

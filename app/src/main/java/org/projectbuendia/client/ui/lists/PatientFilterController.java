@@ -25,7 +25,7 @@ public class PatientFilterController {
     private final Ui mUi;
 
     public interface Ui {
-        public void populateActionBar(SimpleSelectionFilter[] filters);
+        void populateActionBar(SimpleSelectionFilter[] filters);
     }
 
     /**

@@ -51,8 +51,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     @Nullable
     private final FormWrittenListener mFormWrittenListener;
 
-    public static interface FormWrittenListener {
-        public void formWritten(File path, String uuid);
+    public interface FormWrittenListener {
+        void formWritten(File path, String uuid);
     }
 
     public OdkXformSyncTask(@Nullable FormWrittenListener formWrittenListener) {
