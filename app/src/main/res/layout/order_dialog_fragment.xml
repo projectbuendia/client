@@ -139,12 +139,6 @@
     </TableRow>
   </TableLayout>
 
-  <LinearLayout
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      >
-
   <ToggleButton
       android:id="@+id/order_stop"
       android:layout_width="wrap_content"
@@ -155,15 +149,5 @@
       android:textOn="@string/order_stop_now"
       android:textOff="@string/order_stop_now"
       />
-
-  <Button
-      android:id="@+id/order_delete"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="16sp"
-      android:padding="24sp"
-      android:text="@string/order_delete"
-  />
-  </LinearLayout>
 
 </LinearLayout>

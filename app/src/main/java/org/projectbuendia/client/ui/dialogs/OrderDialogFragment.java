@@ -48,7 +48,6 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_stop) Button mStop;
-    @InjectView(R.id.order_delete) Button mDelete;
     private LayoutInflater mInflater;
 
     /** Creates a new instance and registers the given UI, if specified. */
@@ -191,32 +190,34 @@ public class OrderDialogFragment extends DialogFragment {
         final String orderUuid = args.getString("uuid");
         populateFields(args);
 
-        final Dialog dialog = new AlertDialog.Builder(getActivity())
+        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(title)
-            // The positive button uses dialog, so we have to set it below, after dialog is assigned.
+            // The buttons that use `dialog` have to be added below, after dialog is assigned.
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();
 
-        ((AlertDialog) dialog).setButton(Dialog.BUTTON_POSITIVE,
-            getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
+        dialog.setButton(Dialog.BUTTON_POSITIVE,
+            getResources().getString(R.string.save), new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialogInterface, int i) {
                     onSubmit(dialog);
                 }
             });
 
-        mDelete.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                onDelete(dialog, orderUuid);
-            }
-        });
+        if (!newOrder) {
+            dialog.setButton(Dialog.BUTTON_NEUTRAL,
+                getString(R.string.delete), new DialogInterface.OnClickListener() {
+                    @Override public void onClick(DialogInterface anInterface, int i) {
+                        onDelete(dialog, orderUuid);
+                    }
+                });
+        }
 
-        // Hide or show the "Stop" and "Delete" buttons appropriately.
-        Long stopMillis = Utils.getLong(args, "stop_millis");
-        Long nowMillis = Utils.getLong(args, "now_millis");
-        Utils.showIf(mStop, !newOrder && (stopMillis == null || stopMillis > nowMillis));
-        Utils.showIf(mDelete, !newOrder);
+        // TODO/feature: Implement stopping an order immediately.  Providing this capability in the
+        // API might be tricky because OpenMRS stupidly forces all orders to end at 23:59:59.999
+        // on the given date.  For now, users can set the number of days to 1 and click Save.
+        Utils.showIf(mStop, false);
 
         // Open the keyboard, ready to type into the medication field.
         dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);

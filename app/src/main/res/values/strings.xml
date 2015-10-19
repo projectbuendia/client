@@ -91,6 +91,7 @@
   <string name="title_confirmation">Confirmation</string>
   <string name="confirm_order_delete">Really delete?</string>
   <string name="delete">Delete</string>
+  <string name="save">Save</string>
 
   <string name="order_execution_title">Treatment history</string>
   <string name="order_execution_historical_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time on %2$s</string>
