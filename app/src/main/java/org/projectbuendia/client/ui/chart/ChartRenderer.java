@@ -228,10 +228,12 @@ public class ChartRenderer {
                 result.put("family_name", mPatient.familyName);
                 result.put("gender", mPatient.gender == Patient.GENDER_FEMALE ? "F" :
                     mPatient.gender == Patient.GENDER_MALE ? "M" : "U");
-                result.put("birthdate", mPatient.birthdate.toString());
-                Period age = new Period(mPatient.birthdate, LocalDate.now());
-                result.put("age_months", age.getYears()*12 + age.getMonths());
-                result.put("age_years", age.getYears() + age.getMonths()/12.0);
+                if (mPatient.birthdate != null) {
+                    result.put("birthdate", "" + mPatient.birthdate);
+                    Period age = new Period(mPatient.birthdate, LocalDate.now());
+                    result.put("age_months", age.getYears()*12 + age.getMonths());
+                    result.put("age_years", age.getYears() + age.getMonths()/12.0);
+                }
                 result.put("location_uuid", mPatient.locationUuid);
             } catch (JSONException e) {
                 LOG.e(e, "JSON error while dumping patient data");

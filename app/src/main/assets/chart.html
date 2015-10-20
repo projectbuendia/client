@@ -165,7 +165,10 @@
 <script src="freezeheader.js"></script>
 <script src="chart.js"></script>
 <script>
+  var patientData = {{patientData | raw}};
   var conceptData = {{conceptData | raw}};
+
+  api.patient = patientData;
   putConceptFuncs(conceptData);
 
   {% for tileRow in tileRows %}

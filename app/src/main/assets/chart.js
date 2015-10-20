@@ -22,14 +22,17 @@ function popup(name, pairs) {
 
 api = {
   min: function(f) {
+    if (f == null) return null;
     if (f.min !== undefined) return f.min;
     return Math.min.apply(null, api.values(f));
   },
   max: function(f) {
+    if (f == null) return null;
     if (f.max !== undefined) return f.max;
     return Math.max.apply(null, api.values(f));
   },
   values: function(f) {
+    if (f == null) return null;
     var ts = f().times, vs = [];
     for (var i = 0; i < ts.length; i++) {
       vs.push(f(ts[i]));
@@ -37,10 +40,12 @@ api = {
     return vs;
   },
   first: function(f) {
+    if (f == null) return null;
     var t = f().times[0];
     return t == null ? null : {time: t, value: f(t)};
   },
   last: function(f) {
+    if (f == null) return null;
     var ts = f().times;
     var t = ts[ts.length - 1];
     return t == null ? null : {time: t, value: f(t)};
