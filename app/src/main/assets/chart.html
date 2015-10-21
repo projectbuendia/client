@@ -55,7 +55,7 @@
       </tr>
       {% for row in rows %}
         {% set id = row.item.conceptIds | first %}
-        <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
+        <tr class="obs concept-{{id}}">
           <th scope="row">
             {{row.item.label}}
           </th>

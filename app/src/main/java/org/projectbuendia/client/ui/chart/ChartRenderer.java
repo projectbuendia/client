@@ -226,7 +226,7 @@ public class ChartRenderer {
                 result.put("uuid", mPatient.uuid);
                 result.put("given_name", mPatient.givenName);
                 result.put("family_name", mPatient.familyName);
-                result.put("gender", mPatient.gender == Patient.GENDER_FEMALE ? "F" :
+                result.put("sex", mPatient.gender == Patient.GENDER_FEMALE ? "F" :
                     mPatient.gender == Patient.GENDER_MALE ? "M" : "U");
                 if (mPatient.birthdate != null) {
                     result.put("birthdate", "" + mPatient.birthdate);
