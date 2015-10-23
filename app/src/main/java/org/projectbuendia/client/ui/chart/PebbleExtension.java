@@ -263,7 +263,9 @@ public class PebbleExtension extends AbstractExtension {
             String pattern = "" + args.get("pattern");
 
             if (input instanceof ReadableInstant) {
-                return DateTimeFormat.forPattern(pattern).print(new DateTime(input));
+                //Return time specif to time zone rather than UTC
+                return DateTimeFormat.forPattern(pattern).print(
+                    new DateTime(((ReadableInstant) input).getMillis()));
             } else return TYPE_ERROR;
         }
     }
