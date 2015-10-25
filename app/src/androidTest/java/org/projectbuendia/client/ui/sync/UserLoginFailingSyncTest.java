@@ -53,7 +53,7 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
         click(viewWithText(R.string.sync_failed_settings));
         screenshot("After Settings Clicked");
 
-        expectVisible(viewWithText("OpenMRS base URL"));
+        expectVisible(viewWithText(R.string.pref_title_server));
     }
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
