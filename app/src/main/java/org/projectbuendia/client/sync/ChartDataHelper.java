@@ -211,7 +211,12 @@ public class ChartDataHelper {
                 String label = Utils.getString(c, ChartItems.LABEL, "");
                 if (parentRowid == null) {
                     // Add a section.
-                    switch (Utils.getString(c, ChartItems.SECTION_TYPE)) {
+
+
+                    String SectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
+
+
+                    switch (SectionType) {
                         case "TILE_ROW":
                             ChartSection tileGroup = new ChartSection(label);
                             tileGroups.add(tileGroup);
