@@ -296,14 +296,8 @@ public class UserManager {
             if (knownUsers != null) {
                 mKnownUsers.addAll(knownUsers);
             }
-            if (mKnownUsers.isEmpty()) {
-                LOG.e("No users returned from db");
-                mEventBus.post(new KnownUsersLoadFailedEvent(
-                    KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
-            } else {
-                mSynced = true;
-                mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
-            }
+            mSynced = true;
+            mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
         }
     }
 
