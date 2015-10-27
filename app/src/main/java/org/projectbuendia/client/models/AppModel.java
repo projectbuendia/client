@@ -110,14 +110,20 @@ public class AppModel {
      */
     public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
-        new FetchTypedCursorAsyncTask<>(
+        // NOTE: We need to keep the object creation separate from calling #execute() here, because
+        // the type inference breaks on Java 8 otherwise, which throws
+        // `java.lang.ClassCastException: java.lang.Object[] cannot be cast to java.lang.Void[]`.
+        // See http://stackoverflow.com/questions/24136126/fatal-exception-asynctask and
+        // https://github.com/projectbuendia/client/issues/7
+        FetchTypedCursorAsyncTask<Patient> task = new FetchTypedCursorAsyncTask<>(
             Contracts.Patients.CONTENT_URI,
             // The projection must contain an "_id" column for the ListAdapter as well as all
             // the columns used in Patient.Loader.fromCursor().
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
                 //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.GENDER, Patients.LOCATION_UUID},
             Patient.class, mContentResolver,
-            filter, constraint, mLoaderSet.patientLoader, bus).execute();
+            filter, constraint, mLoaderSet.patientLoader, bus);
+        task.execute();
     }
 
     /**
