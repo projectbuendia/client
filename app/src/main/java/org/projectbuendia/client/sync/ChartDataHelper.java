@@ -211,37 +211,37 @@ public class ChartDataHelper {
                 String label = Utils.getString(c, ChartItems.LABEL, "");
                 if (parentRowid == null) {
                     // Add a section.
-
-
                     String SectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
-
-
-                    switch (SectionType) {
-                        case "TILE_ROW":
-                            ChartSection tileGroup = new ChartSection(label);
-                            tileGroups.add(tileGroup);
-                            tileGroupsById.put(rowid, tileGroup);
-                            break;
-                        case "GRID_SECTION":
-                            ChartSection rowGroup = new ChartSection(label);
-                            rowGroups.add(rowGroup);
-                            rowGroupsById.put(rowid, rowGroup);
-                            break;
+                    if (SectionType != null) {
+                        switch (SectionType) {
+                            case "TILE_ROW":
+                                ChartSection tileGroup = new ChartSection(label);
+                                tileGroups.add(tileGroup);
+                                tileGroupsById.put(rowid, tileGroup);
+                                break;
+                            case "GRID_SECTION":
+                                ChartSection rowGroup = new ChartSection(label);
+                                rowGroups.add(rowGroup);
+                                rowGroupsById.put(rowid, rowGroup);
+                                break;
+                        }
                     }
                 } else {
                     // Add a tile to its tile group or a grid row to its row group.
-                    ChartItem item = new ChartItem(label,
-                        Utils.getString(c, ChartItems.TYPE),
-                        Utils.getLong(c, ChartItems.REQUIRED, 0L) > 0L,
-                        Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(","),
-                        Utils.getString(c, ChartItems.FORMAT),
-                        Utils.getString(c, ChartItems.CAPTION_FORMAT),
-                        Utils.getString(c, ChartItems.CSS_CLASS),
-                        Utils.getString(c, ChartItems.CSS_STYLE),
-                        Utils.getString(c, ChartItems.SCRIPT));
                     ChartSection section = tileGroupsById.containsKey(parentRowid)
                         ? tileGroupsById.get(parentRowid) : rowGroupsById.get(parentRowid);
-                    section.items.add(item);
+                    if (section != null) {
+                        ChartItem item = new ChartItem(label,
+                            Utils.getString(c, ChartItems.TYPE),
+                            Utils.getLong(c, ChartItems.REQUIRED, 0L) > 0L,
+                            Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(","),
+                            Utils.getString(c, ChartItems.FORMAT),
+                            Utils.getString(c, ChartItems.CAPTION_FORMAT),
+                            Utils.getString(c, ChartItems.CSS_CLASS),
+                            Utils.getString(c, ChartItems.CSS_STYLE),
+                            Utils.getString(c, ChartItems.SCRIPT));
+                        section.items.add(item);
+                    }
                 }
             }
         }
