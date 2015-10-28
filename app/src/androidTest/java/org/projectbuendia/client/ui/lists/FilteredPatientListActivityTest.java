@@ -26,30 +26,30 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         click(viewWithText("Guest User"));
     }
 
+    /** Opens the patient list. */
+    private void openPatientList() {
+        waitForProgressFragment(); // Wait for tents.
+        click(viewWithId(R.id.location_selection_all_patients));
+        waitForProgressFragment(); // Wait for patients.
+    }
+
     /** Looks for the filter menu. */
     public void testFilterMenu() {
         openPatientList();
         screenshot("Test Start");
         click(viewWithText("All present patients"));
+        waitForProgressFragment();
         expectVisible(viewWithText("Triage"));
         expectVisible(viewWithText("Pregnant"));
         screenshot("In Filter Menu");
     }
 
-    /** Opens the patient list. */
-    public void openPatientList() {
-        waitForProgressFragment(); // Wait for tents.
-        click(viewWithText("ALL PRESENT PATIENTS"));
-        waitForProgressFragment(); // Wait for patients.
-    }
-
-    /** Looks for two zone headings and at least one patient. */
+    /** Looks for one zone heading and at least one patient. */
     public void testZoneAndPatientDisplayed() {
         openPatientList();
         screenshot("Test Start");
-        // There should be patients in both Triage and S1.
-        expectVisibleSoon(viewThat(hasTextMatchingRegex("Triage \\((No|[0-9]+) patients?\\)")));
-
+        // There should be at least one patient in Triage.
+        expectVisibleSoon(viewThat(hasTextContaining("Triage  ·  ")));
         // Click the first patient
         click(dataThat(is(Patient.class))
             .inAdapterView(withId(R.id.fragment_patient_list))
