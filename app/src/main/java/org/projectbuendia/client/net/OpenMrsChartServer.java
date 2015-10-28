@@ -46,24 +46,6 @@ public class OpenMrsChartServer {
     }
 
     /**
-     * Retrieves charts from the server for a given patient.
-     * @param patientUuid     the UUID of the patient
-     * @param successListener a {@link Response.Listener} that handles successful chart retrieval
-     * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
-     */
-    public void getEncounters(String patientUuid,
-                              Response.Listener<JsonPatientRecord> successListener,
-                              Response.ErrorListener errorListener) {
-        GsonRequest<JsonPatientRecord> request = new GsonRequest<>(
-            mConnectionDetails.getBuendiaApiUrl() + "/encounters?patientUuid=" + patientUuid,
-            JsonPatientRecord.class, false,
-            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-            successListener, errorListener);
-        Serializers.registerTo(request.getGson());
-        mConnectionDetails.getVolley().addToRequestQueue(request);
-    }
-
-    /**
      * Retrieves all observations from the server for all patients.
      * @param successListener a {@link Response.Listener} that handles successful chart retrieval
      * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
