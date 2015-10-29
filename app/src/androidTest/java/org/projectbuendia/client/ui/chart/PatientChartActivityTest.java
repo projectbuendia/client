@@ -388,6 +388,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         saveForm();
 
         waitForProgressFragment();
+        // TODO: implement IdlingResource for webview to remove this sleep.
+        // Wait for webview to reload and scripts to run
+        try{
+            Thread.sleep(30000);
+        } catch (InterruptedException e){}
+
         checkObservationValueEquals("[test] Temperature (°C)", "36.5");
         checkObservationValueEquals("[test] Respiratory rate (bpm)", "23");
         checkObservationValueEquals("[test] SpO₂ oxygen sat (%)", "95");
