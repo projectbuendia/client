@@ -62,7 +62,7 @@ public class EditPatientDialogFragment extends DialogFragment {
     @InjectView(R.id.patient_sex_female) RadioButton mSexFemale;
     @InjectView(R.id.patient_sex_male) RadioButton mSexMale;
 
-    private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)");
+    private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
     private LayoutInflater mInflater;
     @Nullable private ActivityUi mActivityUi;  // optional UI for showing a spinner
