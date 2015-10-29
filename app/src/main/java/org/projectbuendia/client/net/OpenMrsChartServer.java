@@ -11,14 +11,15 @@
 
 package org.projectbuendia.client.net;
 
+import android.support.annotation.Nullable;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.joda.time.Instant;
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonConceptResponse;
-import org.projectbuendia.client.json.JsonPatientRecord;
-import org.projectbuendia.client.json.JsonPatientRecordResponse;
+import org.projectbuendia.client.json.JsonEncountersResponse;
 import org.projectbuendia.client.json.Serializers;
 
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class OpenMrsChartServer {
      * @param successListener a {@link Response.Listener} that handles successful chart retrieval
      * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
      */
-    public void getAllEncounters(Response.Listener<JsonPatientRecordResponse> successListener,
+    public void getAllEncounters(Response.Listener<JsonEncountersResponse> successListener,
                                  Response.ErrorListener errorListener) {
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/encounters",
             successListener, errorListener);
@@ -58,11 +59,11 @@ public class OpenMrsChartServer {
 
     private void doEncountersRequest(
         String url,
-        Response.Listener<JsonPatientRecordResponse> successListener,
+        Response.Listener<JsonEncountersResponse> successListener,
         Response.ErrorListener errorListener) {
-        GsonRequest<JsonPatientRecordResponse> request = new GsonRequest<>(
+        GsonRequest<JsonEncountersResponse> request = new GsonRequest<>(
             url,
-            JsonPatientRecordResponse.class, false,
+            JsonEncountersResponse.class, false,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener);
         Serializers.registerTo(request.getGson());
@@ -74,16 +75,18 @@ public class OpenMrsChartServer {
     /**
      * Get all observations that happened in an encounter after or on lastTime. Allows a client to
      * do incremental cache updating.
-     * @param lastTime        a joda instant representing the start time for new observations (inclusive)
+     * @param lastTime        a joda instant representing the start time for new observations
+     *                        (inclusive). if null, will fetch all encounters since the dawn of
+     *                        time.
      * @param successListener a listener to get the results on the event of success
      * @param errorListener   a (Volley) listener to get any errors
      */
     public void getIncrementalEncounters(
-        Instant lastTime,
-        Response.Listener<JsonPatientRecordResponse> successListener,
+        @Nullable Instant lastTime,
+        Response.Listener<JsonEncountersResponse> successListener,
         Response.ErrorListener errorListener) {
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl()
-                + "/encounters?sm=" + lastTime.getMillis(),
+                + "/encounters" + (lastTime != null ? "?since=" + lastTime.toString() : ""),
             successListener, errorListener);
     }
 

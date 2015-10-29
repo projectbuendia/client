@@ -32,7 +32,6 @@ import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.json.JsonLocation;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.json.JsonPatientRecord;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Form;
@@ -195,45 +194,32 @@ public class DbSyncHelper {
         return ops;
     }
 
-    /** Converts a chart data response into appropriate inserts in the chart table. */
+    /** Converts an encounter data response into appropriate inserts in the encounters table. */
     public static List<ContentValues> getObsValuesToInsert(
-        JsonPatientRecord response, SyncResult syncResult) {
+            JsonEncounter encounter, SyncResult syncResult) {
         List<ContentValues> cvs = new ArrayList<>();
-        final String patientUuid = response.uuid;
-        for (JsonEncounter encounter : response.encounters) {
-            if (encounter.uuid == null) {
-                LOG.e("Patient %s has an encounter with uuid = null", patientUuid);
-                continue;
-            }
-            final String encounterUuid = encounter.uuid;
-            DateTime timestamp = encounter.timestamp;
-            if (timestamp == null) {
-                LOG.e("Encounter %s has timestamp = null", encounterUuid);
-                continue;
-            }
-            ContentValues base = new ContentValues();
-            base.put(Observations.PATIENT_UUID, patientUuid);
-            base.put(Observations.ENCOUNTER_UUID, encounterUuid);
-            base.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
+        ContentValues base = new ContentValues();
+        base.put(Observations.PATIENT_UUID, encounter.patient_uuid);
+        base.put(Observations.ENCOUNTER_UUID, encounter.uuid);
+        base.put(Observations.ENCOUNTER_MILLIS, encounter.timestamp.getMillis());
 
-            if (encounter.observations != null) {
-                for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
-                    final String conceptUuid = (String) entry.getKey();
-                    ContentValues values = new ContentValues(base);
-                    values.put(Observations.CONCEPT_UUID, conceptUuid);
-                    values.put(Observations.VALUE, entry.getValue().toString());
-                    cvs.add(values);
-                    syncResult.stats.numInserts++;
-                }
+        if (encounter.observations != null) {
+            for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
+                final String conceptUuid = (String) entry.getKey();
+                ContentValues values = new ContentValues(base);
+                values.put(Observations.CONCEPT_UUID, conceptUuid);
+                values.put(Observations.VALUE, entry.getValue().toString());
+                cvs.add(values);
+                syncResult.stats.numInserts++;
             }
-            if (encounter.order_uuids != null) {
-                for (String orderUuid : encounter.order_uuids) {
-                    ContentValues values = new ContentValues(base);
-                    values.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
-                    values.put(Observations.VALUE, orderUuid);
-                    cvs.add(values);
-                    syncResult.stats.numInserts++;
-                }
+        }
+        if (encounter.order_uuids != null) {
+            for (String orderUuid : encounter.order_uuids) {
+                ContentValues values = new ContentValues(base);
+                values.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
+                values.put(Observations.VALUE, orderUuid);
+                cvs.add(values);
+                syncResult.stats.numInserts++;
             }
         }
         return cvs;
