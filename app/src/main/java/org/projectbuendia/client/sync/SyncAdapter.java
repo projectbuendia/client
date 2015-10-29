@@ -211,7 +211,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             int progressIncrement = 100/phases.size();
             for (SyncPhase phase : SyncPhase.values()) {
-                if (!phases.contains(phase)) break;
+                if (!phases.contains(phase)) continue;
                 checkCancellation("before " + phase);
                 LOG.i("--- Begin %s ---", phase);
                 reportProgress(0, PHASE_MESSAGES.get(phase));
