@@ -14,7 +14,9 @@ package org.projectbuendia.client.ui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -37,6 +39,9 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
@@ -47,6 +52,7 @@ public class EditPatientDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
     @Inject CrudEventBus mCrudEventBus;
 
+    @InjectView(R.id.patient_id_prefix) EditText mIdPrefix;
     @InjectView(R.id.patient_id) EditText mId;
     @InjectView(R.id.patient_given_name) EditText mGivenName;
     @InjectView(R.id.patient_family_name) EditText mFamilyName;
@@ -55,6 +61,8 @@ public class EditPatientDialogFragment extends DialogFragment {
     @InjectView(R.id.patient_sex) RadioGroup mSex;
     @InjectView(R.id.patient_sex_female) RadioButton mSexFemale;
     @InjectView(R.id.patient_sex_male) RadioButton mSexMale;
+
+    private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
     private LayoutInflater mInflater;
     @Nullable private ActivityUi mActivityUi;  // optional UI for showing a spinner
@@ -92,7 +100,19 @@ public class EditPatientDialogFragment extends DialogFragment {
     }
 
     private void populateFields(Bundle args) {
-        mId.setText(Utils.valueOrDefault(args.getString("id"), ""));
+        String idPrefix = "";
+        String id = Utils.valueOrDefault(args.getString("id"), "");
+        Matcher matcher = ID_PATTERN.matcher(id);
+        if (matcher.matches()) {
+            idPrefix = matcher.group(1);
+            id = matcher.group(2);
+        }
+        if (idPrefix.isEmpty() && id.isEmpty()) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            idPrefix = pref.getString("last_id_prefix", "");
+        }
+        mIdPrefix.setText(idPrefix);
+        mId.setText(id);
         mGivenName.setText(Utils.valueOrDefault(args.getString("givenName"), ""));
         mFamilyName.setText(Utils.valueOrDefault(args.getString("familyName"), ""));
         LocalDate birthdate = Utils.toLocalDate(args.getString("birthdate"));
@@ -112,7 +132,8 @@ public class EditPatientDialogFragment extends DialogFragment {
     }
 
     public void onSubmit() {
-        String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
+        String idPrefix = mIdPrefix.getText().toString().trim();
+        String id = mId.getText().toString().trim();
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
         String familyName = Utils.toNonemptyOrNull(mFamilyName.getText().toString().trim());
         String ageYears = mAgeYears.getText().toString().trim();
@@ -136,6 +157,8 @@ public class EditPatientDialogFragment extends DialogFragment {
                 sex = Patient.GENDER_MALE;
                 break;
         }
+
+        id = idPrefix.isEmpty() ? id : idPrefix + "/" + id;
         Utils.logUserAction("patient_submitted",
             "id", id,
             "given_name", givenName,
@@ -145,12 +168,17 @@ public class EditPatientDialogFragment extends DialogFragment {
             "sex", "" + sex);
 
         PatientDelta delta = new PatientDelta();
-        delta.id = Optional.fromNullable(id);
+        delta.id = Optional.of(id);
         delta.givenName = Optional.fromNullable(givenName);
         delta.familyName = Optional.fromNullable(familyName);
         delta.birthdate = Optional.fromNullable(birthdate);
         delta.gender = Optional.of(sex);
         delta.admissionDate = Optional.of(admissionDate);
+
+        if (!idPrefix.isEmpty()) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            pref.edit().putString("last_id_prefix", idPrefix).commit();
+        }
 
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
@@ -164,6 +192,23 @@ public class EditPatientDialogFragment extends DialogFragment {
         // TODO: While the network request is in progress, show a spinner and/or keep the
         // dialog open but greyed out -- keep the UI blocked to make it clear that there is a
         // modal operation going on, while providing a way for the user to abort the operation.
+    }
+
+    public void focusFirstEmptyField(Dialog dialog) {
+        // Open the keyboard.
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        // Set focus.
+        EditText[] fields = {mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths};
+        for (EditText field : fields) {
+            if (field.getText().toString().isEmpty()) {
+                field.requestFocus();
+                break;
+            }
+        }
+
+        // Default to focusing on the given name field.
+        mGivenName.requestFocus();
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -186,8 +231,7 @@ public class EditPatientDialogFragment extends DialogFragment {
             .setView(fragment)
             .create();
 
-        // Open the keyboard, ready to type into the given name field.
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        focusFirstEmptyField(dialog);
         return dialog;
     }
 
