@@ -66,12 +66,8 @@ public class SyncAccountService extends Service {
             ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 1);
             ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
             Bundle b = new Bundle();
-            b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
-            b.putBoolean(SyncPhase.SYNC_CONCEPTS.name(), true);
-            b.putBoolean(SyncPhase.SYNC_CHART_ITEMS.name(), true);
-            b.putBoolean(SyncPhase.SYNC_LOCATIONS.name(), true);
-            b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
-            b.putBoolean(SyncPhase.SYNC_USERS.name(), true);
+            b.putBoolean(SyncOption.FULL_SYNC.name(), true);
+            b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
             ContentResolver.addPeriodicSync(account, Contracts.CONTENT_AUTHORITY, b, SYNC_PERIOD);
             return true;
         }
@@ -87,12 +83,6 @@ public class SyncAccountService extends Service {
 
         // Fetch everything, except fetch only newly added observations if so enabled.
         b.putBoolean(SyncOption.FULL_SYNC.name(), true);
-        b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
-        b.putBoolean(SyncPhase.SYNC_CONCEPTS.name(), true);
-        b.putBoolean(SyncPhase.SYNC_CHART_ITEMS.name(), true);
-        b.putBoolean(SyncPhase.SYNC_LOCATIONS.name(), true);
-        b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
-        b.putBoolean(SyncPhase.SYNC_USERS.name(), true);
         LOG.i("Requesting full sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
@@ -169,4 +159,3 @@ public class SyncAccountService extends Service {
         }
     }
 }
-
