@@ -355,14 +355,12 @@ public class OpenMrsServer implements Server {
         // TODO: Implement or remove (currently handled by updatePatient).
     }
 
-    @Override public void listPatients(@Nullable String filterState, @Nullable String filterLocation,
-                             @Nullable String filterQueryTerm,
-                             final Response.Listener<List<JsonPatient>> successListener,
-                             Response.ErrorListener errorListener) {
-        String query = filterQueryTerm != null ? filterQueryTerm : "";
+    @Override public void listPatients(
+            final Response.Listener<List<JsonPatient>> successListener,
+            Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patients?q=" + Utils.urlEncode(query),
+            "/patients",
             null,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
