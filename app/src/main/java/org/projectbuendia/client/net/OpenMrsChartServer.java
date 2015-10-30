@@ -46,17 +46,6 @@ public class OpenMrsChartServer {
         this.mConnectionDetails = connectionDetails;
     }
 
-    /**
-     * Retrieves all observations from the server for all patients.
-     * @param successListener a {@link Response.Listener} that handles successful chart retrieval
-     * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
-     */
-    public void getAllEncounters(Response.Listener<JsonEncountersResponse> successListener,
-                                 Response.ErrorListener errorListener) {
-        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/encounters",
-            successListener, errorListener);
-    }
-
     private void doEncountersRequest(
         String url,
         Response.Listener<JsonEncountersResponse> successListener,
