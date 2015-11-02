@@ -484,6 +484,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         getContext().sendBroadcast(syncProgressIntent);
     }
 
+    /** Returns the server timestamp corresponding to the last observation sync. */
     @Nullable
     private Instant getLastObservationSyncTime(ContentProviderClient provider)
             throws RemoteException {

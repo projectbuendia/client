@@ -62,21 +62,21 @@ public class OpenMrsChartServer {
     }
 
     /**
-     * Get all observations that happened in an encounter after or on lastTime. Allows a client to
-     * do incremental cache updating.
-     * @param lastTime        a joda instant representing the start time for new observations
+     * Get all observations that happened in an encounter after or on {@code minCreationTime}.
+     * Allows a client to do incremental cache updating.
+     * @param minCreationTime a joda instant representing the start time for new observations
      *                        (inclusive). if null, will fetch all encounters since the dawn of
      *                        time.
      * @param successListener a listener to get the results on the event of success
      * @param errorListener   a (Volley) listener to get any errors
      */
     public void getIncrementalEncounters(
-        @Nullable Instant lastTime,
+        @Nullable Instant minCreationTime,
         Response.Listener<JsonEncountersResponse> successListener,
         Response.ErrorListener errorListener) {
-        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl()
-                + "/encounters" + (lastTime != null ? "?since=" + lastTime.toString() : ""),
-            successListener, errorListener);
+        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/encounters" +
+                (minCreationTime != null ? "?since=" + minCreationTime.toString() : ""),
+                successListener, errorListener);
     }
 
     /**
