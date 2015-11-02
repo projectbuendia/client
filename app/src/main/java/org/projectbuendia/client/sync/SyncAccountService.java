@@ -67,7 +67,6 @@ public class SyncAccountService extends Service {
             ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
             Bundle b = new Bundle();
             b.putBoolean(SyncOption.FULL_SYNC.name(), true);
-            b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
             ContentResolver.addPeriodicSync(account, Contracts.CONTENT_AUTHORITY, b, SYNC_PERIOD);
             return true;
         }
@@ -83,9 +82,6 @@ public class SyncAccountService extends Service {
 
         // Fetch everything, except fetch only newly added observations if so enabled.
         b.putBoolean(SyncOption.FULL_SYNC.name(), true);
-        if (sSettings.getIncrementalObservationUpdate()) {
-            b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
-        }
         LOG.i("Requesting full sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
@@ -107,7 +103,6 @@ public class SyncAccountService extends Service {
 
         // Fetch just the newly added observations.
         b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
-        b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
         b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
         LOG.i("Requesting incremental observation sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
@@ -163,4 +158,3 @@ public class SyncAccountService extends Service {
         }
     }
 }
-

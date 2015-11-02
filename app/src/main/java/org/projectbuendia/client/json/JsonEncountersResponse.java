@@ -11,10 +11,11 @@
 
 package org.projectbuendia.client.json;
 
-import org.joda.time.DateTime;
-
-/** JSON representation of a set of patient records returned by the server. */
-public class JsonPatientRecordResponse {
-    public JsonPatientRecord[] results;
-    public DateTime snapshotTime;
+/** JSON representation of a set of encounters returned by the server. */
+public class JsonEncountersResponse {
+    public JsonEncounter[] results;
+    // TODO(capnfabs): If we keep JSON as the interchange format, change this to use Joda Instant
+    // and use a converter with Gson instead.
+    /** In ISO 8601 date format. */
+    public String snapshotTime;
 }
