@@ -67,7 +67,6 @@ public class SyncAccountService extends Service {
             ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
             Bundle b = new Bundle();
             b.putBoolean(SyncOption.FULL_SYNC.name(), true);
-            b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
             ContentResolver.addPeriodicSync(account, Contracts.CONTENT_AUTHORITY, b, SYNC_PERIOD);
             return true;
         }
