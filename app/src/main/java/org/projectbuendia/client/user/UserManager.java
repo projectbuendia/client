@@ -27,8 +27,6 @@ import org.projectbuendia.client.events.user.KnownUsersSyncFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersSyncedEvent;
 import org.projectbuendia.client.events.user.UserAddFailedEvent;
 import org.projectbuendia.client.events.user.UserAddedEvent;
-import org.projectbuendia.client.events.user.UserDeleteFailedEvent;
-import org.projectbuendia.client.events.user.UserDeletedEvent;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.utils.AsyncTaskRunner;
@@ -67,8 +65,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <ul>
  * <li>{@link UserAddedEvent}
  * <li>{@link UserAddFailedEvent}
- * <li>{@link UserDeletedEvent}
- * <li>{@link UserDeleteFailedEvent}
  * </ul>
  * <p/>
  * <p>All methods should be called on the main thread.
@@ -116,10 +112,6 @@ public class UserManager {
         mIsDirty = shouldInvalidateFormCache;
     }
 
-    public boolean hasUsers() {
-        return !mKnownUsers.isEmpty();
-    }
-
     /**
      * Loads the set of all users known to the application from local cache.
      * <p/>
@@ -137,21 +129,7 @@ public class UserManager {
         }
     }
 
-    /**
-     * Syncs the set of all users known to the application with the server.
-     * <p/>
-     * <p>Server synchronization will periodically happen automatically, but this method allows for
-     * the sync to be forced.
-     * <p/>
-     * <p>This method will post a {@link KnownUsersSyncedEvent} if the sync succeeded and a
-     * {@link KnownUsersSyncFailedEvent} otherwise. If the sync succeeded and the current active
-     * user was deleted on the server, this method will post a {@link ActiveUserUnsetEvent}.
-     */
-    public void syncKnownUsers() {
-        mAsyncTaskRunner.runTask(new SyncKnownUsersTask());
-    }
-
-    /** Synchronous version of {@link #syncKnownUsers()}. */
+    /** Sync users synchronously. Blocks until the list of users is synced, or interrupted. */
     public void syncKnownUsersSynchronously()
         throws InterruptedException, ExecutionException, RemoteException,
         OperationApplicationException, UserSyncException {
@@ -234,18 +212,6 @@ public class UserManager {
         mAsyncTaskRunner.runTask(new AddUserTask(user));
     }
 
-    /**
-     * Deletes a user from the set of known users, both locally and on the server.
-     * <p/>
-     * <p>This method will post a {@link UserDeletedEvent} if the user was deleted successfully and
-     * a {@link UserDeleteFailedEvent} otherwise.
-     */
-    public void deleteUser(JsonUser user) {
-        checkNotNull(user);
-        // TODO: Validate user.
-        mAsyncTaskRunner.runTask(new DeleteUserTask(user));
-    }
-
     /** Thrown when an error occurs syncing users from server. */
     public static class UserSyncException extends Throwable {
         public UserSyncException(String s) {
@@ -301,35 +267,6 @@ public class UserManager {
         }
     }
 
-    /** Syncs the user list with the server. */
-    private final class SyncKnownUsersTask extends AsyncTask<Void, Void, Set<JsonUser>> {
-
-        @Override protected Set<JsonUser> doInBackground(Void... voids) {
-            try {
-                return mUserStore.syncKnownUsers();
-            } catch (Exception e) {
-                // TODO: Figure out the type of exception to throw.
-                LOG.e(e, "User sync failed");
-                return null;
-            }
-        }
-
-        @Override protected void onPostExecute(Set<JsonUser> syncedUsers) {
-            if (syncedUsers == null) {
-                mEventBus.post(
-                    new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
-                return;
-            }
-
-            try {
-                onUsersSynced(syncedUsers);
-            } catch (UserSyncException e) {
-                mEventBus.post(
-                    new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
-            }
-        }
-    }
-
     /** Adds a user to the database asynchronously. */
     private final class AddUserTask extends AsyncTask<Void, Void, JsonUser> {
 
@@ -371,39 +308,6 @@ public class UserManager {
                     mUser, UserAddFailedEvent.REASON_CONNECTION_ERROR));
             } else {
                 mEventBus.post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
-            }
-        }
-    }
-
-    /** Deletes a user from the database asynchronously. */
-    private final class DeleteUserTask extends AsyncTask<Void, Void, Boolean> {
-        private final JsonUser mUser;
-
-        public DeleteUserTask(JsonUser user) {
-            mUser = checkNotNull(user);
-        }
-
-        @Override protected Boolean doInBackground(Void... voids) {
-            try {
-                mUserStore.deleteUser(mUser);
-            } catch (Exception e) {
-                // TODO: Figure out the type of exception to throw.
-                LOG.e(e, "Failed to delete user");
-                return false;
-            }
-            return true;
-        }
-
-        @Override protected void onPostExecute(Boolean success) {
-            if (success) {
-                mKnownUsers.remove(mUser);
-                mEventBus.post(new UserDeletedEvent(mUser));
-
-                // Set of known users has changed.
-                setDirty(true);
-            } else {
-                mEventBus.post(
-                    new UserDeleteFailedEvent(mUser, UserDeleteFailedEvent.REASON_UNKNOWN));
             }
         }
     }
