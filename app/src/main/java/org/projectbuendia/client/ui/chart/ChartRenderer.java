@@ -171,7 +171,7 @@ public class ChartRenderer {
         void addOrders(List<Order> orders) {
             for (Order order : orders) {
                 if (order.stop != null) {
-                    for (DateTime dt = order.start; !dt.isAfter(order.stop); dt = dt.plusDays(1)) {
+                    for (DateTime dt = order.start; !dt.isAfter(order.stop.plusDays(1)); dt = dt.plusDays(1)) {
                         getColumnContainingTime(dt); // creates the column if it doesn't exist
                     }
                 }
