@@ -54,7 +54,7 @@ public final class UserManagerTest extends InstrumentationTestCase {
         mFakeAsyncTaskRunner.runUntilEmpty();
         // THEN the user manager fires off a KnownUsersLoadedEvent
         assertTrue(mFakeEventBus.getEventLog().contains(
-                new KnownUsersLoadedEvent(ImmutableSet.of(USER))));
+            new KnownUsersLoadedEvent(ImmutableSet.of(USER))));
     }
 
     /** Tests that an event is posted when users fail to load. */
@@ -71,7 +71,7 @@ public final class UserManagerTest extends InstrumentationTestCase {
         mFakeAsyncTaskRunner.runUntilEmpty();
         // THEN the user manager fires off a KnownUsersLoadFailedEvent
         mFakeEventBus.assertEventLogContains(
-                new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
+            new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
     }
 
     @Override protected void setUp() throws Exception {
