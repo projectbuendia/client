@@ -41,20 +41,30 @@ import org.projectbuendia.client.BuildConfig;
  */
 public final class Logger {
 
+    private static final int MAX_TAG_LENGTH = 23;
+
     public final String tag;
 
     /** Creates a {@link Logger} with the calling class's class name as a tag. */
-    public static final Logger create() {
+    public static Logger create() {
         return new Logger(getTag());
     }
 
-    private static final String getTag() {
+    private static String getTag() {
         String[] parts = new Throwable().getStackTrace()[2].getClassName().split("\\.");
-        return "buendia/" + parts[parts.length - 1];
+        String tag = "buendia/" + parts[parts.length - 1];
+        if (tag.length() > MAX_TAG_LENGTH) {
+            return tag.substring(0, MAX_TAG_LENGTH);
+        } else {
+            return tag;
+        }
     }
 
     /** Creates a {@link Logger} with a manually-specified tag. */
-    public static final Logger create(String tag) {
+    public static Logger create(String tag) {
+        if (tag.length() > MAX_TAG_LENGTH) {
+            throw new IllegalArgumentException("Tag length should be less than " + MAX_TAG_LENGTH);
+        }
         return new Logger(tag);
     }
 
