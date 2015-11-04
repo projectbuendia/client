@@ -85,7 +85,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
-    private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
     private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
 
     private PatientChartController mController;
@@ -270,39 +269,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         super.onStopImpl();
     }
 
-    /*
-    @OnClick(R.id.patient_chart_pain_parent)
-    void onSpecialPressed(View v) {
-        mController.onAddObservationPressed("The pain assessment field");
-    }
-    */
-
-    /*
-    @OnClick(R.id.patient_chart_general_condition_parent)
-    void onGeneralConditionPressed(View v) {
-        Utils.logUserAction("condition_pressed");
-        mController.showAssignGeneralConditionDialog(this, mGeneralConditionUuid);
-    }
-    */
-
-    /*
-    @OnClick({
-            R.id.vital_diet,
-            R.id.vital_food_drink,
-            R.id.patient_chart_responsiveness_parent,
-            R.id.patient_chart_mobility_parent})
-    void onOverallAssessmentPressed(View v) {
-        mController.onAddObservationPressed("Overall Assessment");
-    }
-
-    @OnClick({
-            R.id.vital_respiration,
-            R.id.vital_pulse})
-    void onSignsAndSymptomsPressed(View v) {
-        mController.onAddObservationPressed("Vital signs");
-    }
-    */
-
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mIsFetchingXform = false;
         mController.onXFormResult(requestCode, resultCode, data);
@@ -355,7 +321,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     .color(0x00000000)
                     .sizeDp(36));
             if ((pcrLObservation == null || pcrLObservation.valueName == null)
-                && (pcrNpObservation == null || pcrNpObservation == null)) {
+                && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
             } else {
                 String pcrLString = "–";
@@ -420,30 +386,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override public void updatePatientConditionUi(String generalConditionUuid) {
-            /*
-            mGeneralConditionUuid = generalConditionUuid;
-            if (generalConditionUuid == null) {
-                mGeneralConditionUuid = null;
-                mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
-                mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
-                mGeneralConditionNum.setTextColor(mVitalUnknown.getForegroundColor());
-
-                mGeneralCondition.setText("–"); // en dash
-                mGeneralConditionNum.setText("–");
-            } else {
-                ResStatus resStatus = ConceptUuids.getResStatus(generalConditionUuid);
-                ResStatus.Resolved status = resStatus.resolve(getResources());
-
-                mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
-                mGeneralCondition.setTextColor(status.getForegroundColor());
-                mGeneralConditionName.setTextColor(status.getForegroundColor());
-                mGeneralConditionNum.setTextColor(status.getForegroundColor());
-
-                mGeneralCondition.setText(status.getMessage());
-                mGeneralConditionNum.setText(status.getShortDescription());
-            }
-            */
         }
 
         @Override public void updateTilesAndGrid(
