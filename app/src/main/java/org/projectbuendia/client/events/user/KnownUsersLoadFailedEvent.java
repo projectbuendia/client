@@ -15,7 +15,6 @@ package org.projectbuendia.client.events.user;
 public final class KnownUsersLoadFailedEvent {
 
     public static final int REASON_UNKNOWN = 0;
-    public static final int REASON_NO_USERS_RETURNED = 1;
     public static final int REASON_CANCELLED = 2;
 
     public final int reason;
