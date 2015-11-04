@@ -33,10 +33,15 @@
     <thead>
       <tr>
         <th> </th>
+        {% set prevColumn = null %}
         {% for column in columns %}
+          {% if prevColumn is not null and column.start != prevColumn.stop %}
+            <th class="gap" scope="col">&nbsp;</th>
+          {% endif %}
           <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col">
             {{column.headingHtml | raw}}
           </th>
+          {% set prevColumn = column %}
         {% endfor %}
       </tr>
     </thead>
@@ -46,7 +51,13 @@
         <th scope="rowgroup">
           Observations
         </th>
-        <th scope="rowgroup" colspan=999"></th>
+        {% for column in columns %}
+          {% if prevColumn is not null and column.start != prevColumn.stop %}
+            <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
+          {% endif %}
+          <th scope="rowgroup"></th>
+          {% set prevColumn = column %}
+        {% endfor %}
       </tr>
       {% for row in rows %}
         {% set id = row.item.conceptIds | first %}
@@ -105,7 +116,13 @@
         <th scope="rowgroup">
           Treatment Plan
         </th>
-        <th scope="rowgroup" colspan=999"></th>
+        {% for column in columns %}
+          {% if prevColumn is not null and column.start != prevColumn.stop %}
+            <th scope="rowgroup" class="gap" rowspan={{orders.size + 1}}>&nbsp;</th>
+          {% endif %}
+          <th scope="rowgroup"></th>
+          {% set prevColumn = column %}
+        {% endfor %}
       </tr>
       {% for order in orders %}
         <tr class="order">
