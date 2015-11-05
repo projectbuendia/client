@@ -26,6 +26,7 @@ th, td {
 
 /* History grid: cells should match @style/text */
 #grid th[scope="row"], #grid td { font-size: 1.9rem; } /* @style/text */
+#grid-scroller { position: relative; } /* for overlays with position: absolute */
 
 /* Row and column shading */
 #grid .now { font-weight: bold; background: #e0f0ff; }
@@ -37,6 +38,9 @@ th, td {
   white-space: nowrap;
   font-size: 1.4rem;
   padding: 0.2em 0 0.3em; /* extra 0.1em on bottom for vertical centering */
+}
+#grid .gap {
+  background: #eee;
 }
 
 /* Row headers: should match @style/text.caps */

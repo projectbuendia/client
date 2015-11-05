@@ -18,7 +18,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,12 +64,6 @@ public class EditPatientDialogFragment extends DialogFragment {
     private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
     private LayoutInflater mInflater;
-    @Nullable private ActivityUi mActivityUi;  // optional UI for showing a spinner
-
-    /** An interface to show a spinner while the new user is being saved. */
-    public interface ActivityUi {
-        void showSpinner(boolean show);
-    }
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static EditPatientDialogFragment newInstance(Patient patient) {
@@ -87,10 +80,6 @@ public class EditPatientDialogFragment extends DialogFragment {
         }
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public void setUi(ActivityUi activityUi) {
-        mActivityUi = activityUi;
     }
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -118,16 +107,16 @@ public class EditPatientDialogFragment extends DialogFragment {
         LocalDate birthdate = Utils.toLocalDate(args.getString("birthdate"));
         if (birthdate != null) {
             Period age = new Period(birthdate, LocalDate.now());
-            mAgeYears.setText("" + age.getYears());
-            mAgeMonths.setText("" + age.getMonths());
+            mAgeYears.setText(String.valueOf(age.getYears()));
+            mAgeMonths.setText(String.valueOf(age.getMonths()));
         }
-        Integer gender = args.getInt("gender");
-        if (gender != null) {
-            if (gender == Patient.GENDER_FEMALE) {
+        switch (args.getInt("gender", Patient.GENDER_UNKNOWN)) {
+            case Patient.GENDER_FEMALE:
                 mSexFemale.setChecked(true);
-            } else if (gender == Patient.GENDER_MALE) {
+                break;
+            case Patient.GENDER_MALE:
                 mSexMale.setChecked(true);
-            }
+                break;
         }
     }
 
@@ -233,11 +222,5 @@ public class EditPatientDialogFragment extends DialogFragment {
 
         focusFirstEmptyField(dialog);
         return dialog;
-    }
-
-    private void setError(EditText field, int resourceId) {
-        field.setError(getResources().getString(resourceId));
-        field.invalidate();
-        field.requestFocus();
     }
 }
