@@ -137,9 +137,9 @@ public class OpenMrsServer implements Server {
     private JsonPatient patientFromJson(JSONObject object) throws JSONException {
         JsonPatient patient = mGson.fromJson(object.toString(), JsonPatient.class);
 
-        if (!patient.gender.matches("^[MFOU]$")) {
-            LOG.e("Invalid gender from server: " + patient.gender);
-            patient.gender = "U";
+        if (!patient.sex.matches("^[MFOU]$")) {
+            LOG.e("Invalid sex from server: " + patient.sex);
+            patient.sex = "U";
         }
         return patient;
     }

@@ -27,7 +27,7 @@ public class JsonPatient implements Serializable {
     public String id;  // user-specified patient ID
     public String given_name;
     public String family_name;
-    public String gender;  // must be "M" or "F"
+    public String sex; // must be "M" or "F"
     public LocalDate birthdate;
     public JsonLocation assigned_location; // TODO: make this a plain uuid; API change
 
@@ -40,7 +40,7 @@ public class JsonPatient implements Serializable {
             .add("id", id)
             .add("given_name", given_name)
             .add("family_name", family_name)
-            .add("gender", gender)
+            .add("sex", sex)
             .add("birthdate", birthdate.toString())
             .add("assigned_location", assigned_location)
             .toString();
