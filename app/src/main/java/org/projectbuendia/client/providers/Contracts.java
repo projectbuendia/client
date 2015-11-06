@@ -154,7 +154,7 @@ public class Contracts {
     public interface SyncTokens {
         Uri CONTENT_URI = buildContentUri("sync-tokens");
         String ITEM_CONTENT_TYPE = buildItemType("sync-token");
-        String TYPE = "type";
+        String TABLE_NAME = "table_name";
         String SYNC_TOKEN = "sync_token";
     }
 

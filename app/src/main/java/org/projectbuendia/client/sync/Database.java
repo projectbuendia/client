@@ -154,7 +154,7 @@ public class Database extends SQLiteOpenHelper {
             + "full_sync_end_millis INTEGER");
 
         SCHEMAS.put(Table.SYNC_TOKENS, ""
-            + "type TEXT PRIMARY KEY NOT NULL,"
+            + "table_name TEXT PRIMARY KEY NOT NULL,"
             + "sync_token TEXT NOT NULL");
     }
 

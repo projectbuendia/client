@@ -77,7 +77,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     /** UI messages to show while each phase of the sync is in progress. */
     private static final Map<SyncPhase, Integer> PHASE_MESSAGES = new HashMap<>();
-    private static final String SYNC_TOKEN_TYPE_OBSERVATIONS = "observations";
 
     static {
         PHASE_MESSAGES.put(SyncPhase.SYNC_USERS, R.string.syncing_users);
@@ -427,11 +426,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         checkCancellation("before updating observations");
-        String lastSyncToken = getLastSyncToken(provider, SYNC_TOKEN_TYPE_OBSERVATIONS);
+        String lastSyncToken = getLastSyncToken(provider, Contracts.Table.OBSERVATIONS);
         String newSyncToken = updateObservations(
                 lastSyncToken, provider, syncResult, chartServer, listFuture, timingLogger);
         // This is only safe transactionally if we can rely on the entire sync being transactional.
-        storeSyncToken(provider, SYNC_TOKEN_TYPE_OBSERVATIONS, newSyncToken);
+        storeSyncToken(provider, Contracts.Table.OBSERVATIONS, newSyncToken);
 
         checkCancellation("before deleting temporary observations");
         // Remove all temporary observations now we have the real ones
@@ -488,10 +487,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     /** Returns the server timestamp corresponding to the last observation sync. */
     @Nullable
-    private String getLastSyncToken(ContentProviderClient provider, String type)
+    private String getLastSyncToken(ContentProviderClient provider, Contracts.Table table)
             throws RemoteException {
         try(Cursor c = provider.query(
-                SyncTokens.CONTENT_URI.buildUpon().appendPath(type).build(),
+                SyncTokens.CONTENT_URI.buildUpon().appendPath(table.name).build(),
                 new String[] {SyncTokens.SYNC_TOKEN}, null, null, null)) {
             // Make the linter happy, there's no way that the cursor can be null without throwing
             // an exception.
@@ -554,10 +553,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 && record.timestamp != null;
     }
 
-    private void storeSyncToken(ContentProviderClient provider, String type, String syncToken)
-        throws RemoteException {
+    private void storeSyncToken(
+            ContentProviderClient provider, Contracts.Table table, String syncToken)
+            throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(SyncTokens.TYPE, type);
+        cv.put(SyncTokens.TABLE_NAME, table.name);
         cv.put(SyncTokens.SYNC_TOKEN, syncToken);
         provider.insert(SyncTokens.CONTENT_URI, cv);
     }

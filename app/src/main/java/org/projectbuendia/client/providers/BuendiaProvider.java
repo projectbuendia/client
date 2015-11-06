@@ -154,7 +154,7 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                 new ItemProviderDelegate(
                         Contracts.SyncTokens.ITEM_CONTENT_TYPE,
                         Table.SYNC_TOKENS,
-                        Contracts.SyncTokens.TYPE));
+                        Contracts.SyncTokens.TABLE_NAME));
 
         return registry;
     }
