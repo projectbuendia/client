@@ -50,6 +50,7 @@ import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.providers.Contracts.Patients;
+import org.projectbuendia.client.providers.Contracts.SyncTokens;
 import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.Logger;
@@ -76,6 +77,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     /** UI messages to show while each phase of the sync is in progress. */
     private static final Map<SyncPhase, Integer> PHASE_MESSAGES = new HashMap<>();
+    private static final String SYNC_TOKEN_TYPE_OBSERVATIONS = "observations";
 
     static {
         PHASE_MESSAGES.put(SyncPhase.SYNC_USERS, R.string.syncing_users);
@@ -425,11 +427,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         checkCancellation("before updating observations");
-        Instant lastSyncTime = getLastObservationSyncTime(provider);
-        Instant newSyncTime = updateObservations(
-                lastSyncTime, provider, syncResult, chartServer, listFuture, timingLogger);
+        String lastSyncToken = getLastSyncToken(provider, SYNC_TOKEN_TYPE_OBSERVATIONS);
+        String newSyncToken = updateObservations(
+                lastSyncToken, provider, syncResult, chartServer, listFuture, timingLogger);
         // This is only safe transactionally if we can rely on the entire sync being transactional.
-        storeLastSyncTime(provider, newSyncTime);
+        storeSyncToken(provider, SYNC_TOKEN_TYPE_OBSERVATIONS, newSyncToken);
 
         checkCancellation("before deleting temporary observations");
         // Remove all temporary observations now we have the real ones
@@ -486,29 +488,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     /** Returns the server timestamp corresponding to the last observation sync. */
     @Nullable
-    private Instant getLastObservationSyncTime(ContentProviderClient provider)
+    private String getLastSyncToken(ContentProviderClient provider, String type)
             throws RemoteException {
-        Cursor c = null;
-        try {
-            c = provider.query(
-                Misc.CONTENT_URI,
-                new String[] {Misc.OBS_SYNC_END_MILLIS}, null, null, null);
+        try(Cursor c = provider.query(
+                SyncTokens.CONTENT_URI.buildUpon().appendPath(type).build(),
+                new String[] {SyncTokens.SYNC_TOKEN}, null, null, null)) {
             // Make the linter happy, there's no way that the cursor can be null without throwing
             // an exception.
             assert c != null;
             if (c.moveToNext()) {
+                // Whether c.getString is null or not is implementation-defined, so we explicitly
+                // check for nullness.
                 if (c.isNull(0)) {
                     return null;
                 }
-                // c.getLong will return 0 as a default value if the column has nothing in it, so
-                // we explicitly do a null-check beforehand.
-                return new Instant(c.getLong(0));
+                return c.getString(0);
             } else {
                 return null;
-            }
-        } finally {
-            if (c != null) {
-                c.close();
             }
         }
     }
@@ -517,13 +513,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * Updates observations, possibly incrementally.
      * NOTE: this logic relies upon observations inserts being an upsert.
      */
-    private Instant updateObservations(
-            @Nullable Instant lastSyncTime, ContentProviderClient provider, SyncResult syncResult,
+    private String updateObservations(
+            @Nullable String lastSyncToken, ContentProviderClient provider, SyncResult syncResult,
             OpenMrsChartServer chartServer, RequestFuture<JsonEncountersResponse> listFuture,
             TimingLogger timingLogger)
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting incremental encounters");
-        chartServer.getIncrementalEncounters(lastSyncTime, listFuture, listFuture);
+        chartServer.getIncrementalEncounters(lastSyncToken, listFuture, listFuture);
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed incremental response");
         final JsonEncountersResponse response =
@@ -548,7 +544,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 toInsert.toArray(new ContentValues[toInsert.size()]));
             timingLogger.addSplit("bulk inserts");
         }
-        return Instant.parse(response.snapshotTime);
+        return response.snapshotTime;
     }
 
     /** returns {@code true} if the encounter is valid. */
@@ -558,10 +554,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 && record.timestamp != null;
     }
 
-    private void storeLastSyncTime(ContentProviderClient provider, Instant newSyncTime)
+    private void storeSyncToken(ContentProviderClient provider, String type, String syncToken)
         throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(Misc.OBS_SYNC_END_MILLIS, newSyncTime.getMillis());
-        provider.insert(Misc.CONTENT_URI, cv);
+        cv.put(SyncTokens.TYPE, type);
+        cv.put(SyncTokens.SYNC_TOKEN, syncToken);
+        provider.insert(SyncTokens.CONTENT_URI, cv);
     }
 }

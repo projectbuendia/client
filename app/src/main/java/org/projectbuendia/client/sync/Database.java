@@ -151,8 +151,11 @@ public class Database extends SQLiteOpenHelper {
         // and a value column, not all values in one row with an ever-growing number of columns.
         SCHEMAS.put(Table.MISC, ""
             + "full_sync_start_millis INTEGER,"
-            + "full_sync_end_millis INTEGER,"
-            + "obs_sync_end_millis INTEGER");
+            + "full_sync_end_millis INTEGER");
+
+        SCHEMAS.put(Table.SYNC_TOKENS, ""
+            + "type TEXT PRIMARY KEY NOT NULL,"
+            + "sync_token TEXT NOT NULL");
     }
 
     public Database(Context context) {

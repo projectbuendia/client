@@ -16,7 +16,6 @@ import android.support.annotation.Nullable;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
-import org.joda.time.Instant;
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonConceptResponse;
 import org.projectbuendia.client.json.JsonEncountersResponse;
@@ -64,18 +63,17 @@ public class OpenMrsChartServer {
     /**
      * Get all observations that happened in an encounter after or on {@code minCreationTime}.
      * Allows a client to do incremental cache updating.
-     * @param minCreationTime a joda instant representing the start time for new observations
-     *                        (inclusive). if null, will fetch all encounters since the dawn of
-     *                        time.
+     * @param lastSyncToken   a sync token provided by the server on a previous sync.
      * @param successListener a listener to get the results on the event of success
      * @param errorListener   a (Volley) listener to get any errors
      */
     public void getIncrementalEncounters(
-        @Nullable Instant minCreationTime,
+        @Nullable String lastSyncToken,
         Response.Listener<JsonEncountersResponse> successListener,
         Response.ErrorListener errorListener) {
+        // TODO: URL-encode the sync token?
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/encounters" +
-                (minCreationTime != null ? "?since=" + minCreationTime.toString() : ""),
+                (lastSyncToken != null ? "?since=" + lastSyncToken : ""),
                 successListener, errorListener);
     }
 
