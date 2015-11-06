@@ -13,21 +13,15 @@ package org.projectbuendia.client.ui.chart;
 
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.IdlingResource;
+import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.web.webdriver.Locator;
-
-import static android.support.test.espresso.web.assertion.WebViewAssertions.webMatches;
-import static android.support.test.espresso.web.sugar.Web.onWebView;
-import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
-import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
-
-import static org.hamcrest.Matchers.containsString;
-
 import android.test.suitebuilder.annotation.MediumTest;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
+import org.hamcrest.Matcher;
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
 import org.odk.collect.android.widgets2.group.TableWidgetGroup;
@@ -42,6 +36,19 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.UUID;
 
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isJavascriptEnabled;
+import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
+import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
+import static android.support.test.espresso.web.assertion.WebViewAssertions.webMatches;
+import static android.support.test.espresso.web.sugar.Web.onWebView;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+
 /** Functional tests for {@link PatientChartActivity}. */
 @MediumTest
 public class PatientChartActivityTest extends FunctionalTestCase {
@@ -51,6 +58,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     private static final String YES = "●";
 
     private static final int ROW_HEIGHT = 84;
+    private static final Matcher<View> OVERFLOW_BUTTON_MATCHER = anyOf(
+            allOf(isDisplayed(), withContentDescription("More options")),
+            allOf(isDisplayed(), withClassName(endsWith("OverflowMenuButton"))));;
 
     public PatientChartActivityTest() {
         super();
@@ -148,13 +158,15 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }*/
 
     protected void openEncounterForm() {
-        // TODO: this method is still producing intermittent errors
+        // Wait until the overflow menu button is available.
+        expectVisibleSoon(Espresso.onView(OVERFLOW_BUTTON_MATCHER));
         openActionBarOptionsMenu();
 
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
-            new EventBusIdlingResource<FetchXformSucceededEvent>(
-                UUID.randomUUID().toString(), mEventBus);
-        click(viewWithText("[test] Form"));
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        ViewInteraction testForm = viewWithText("[test] Form");
+        expectVisibleSoon(testForm);
+        click(testForm);
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).
@@ -240,7 +252,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
         // count), and verify that the latest value is visible for each.
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             openEncounterForm();
 
             String temp = Integer.toString(i + 35) + ".7";
@@ -259,8 +271,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             // TODO: implement IdlingResource for webview to remove this sleep.
             // Wait a bit for the chart to update it's values.
             try{
-                Thread.sleep(30000);
-            } catch (InterruptedException e){}
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored){}
 
             //checkVitalValueContains("Pulse", pulse);
             checkObservationValueEquals("[test] Temperature (°C)", temp);
@@ -338,7 +350,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Check that all values are now visible.
         waitForProgressFragment();
-        checkObservationValueEquals("[test] Temperature (°C)", "36");
+        // Expect a WebView with JS enabled to be visible soon (the chart).
+        expectVisibleSoon(viewThat(isJavascriptEnabled()));
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignored) {
+        }
+        checkObservationValueEquals("[test] Temperature (°C)", "36.5");
         checkObservationValueEquals("[test] Respiratory rate (bpm)", "23");
         checkObservationValueEquals("[test] SpO₂ oxygen sat (%)", "95");
         checkObservationValueEquals("[test] Blood pressure, systolic", "80");

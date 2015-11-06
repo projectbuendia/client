@@ -17,6 +17,8 @@ import com.google.common.collect.ImmutableSet;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.projectbuendia.client.FakeAsyncTaskRunner;
 import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
@@ -57,14 +59,19 @@ public final class UserManagerTest extends InstrumentationTestCase {
 
     /** Tests that an event is posted when users fail to load. */
     public void testLoadKnownUsers_GeneratesEventOnFailure() throws Exception {
-        // GIVEN the user store returns an empty set of users
-        when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.<JsonUser> of());
+        // GIVEN the user store throws an exception when trying to load the users
+        when(mMockUserStore.loadKnownUsers()).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                throw new InterruptedException("INTENDED FOR TEST");
+            }
+        });
         // WHEN loadKnownUsers is called and the async task is run
         mUserManager.loadKnownUsers();
         mFakeAsyncTaskRunner.runUntilEmpty();
         // THEN the user manager fires off a KnownUsersLoadFailedEvent
         mFakeEventBus.assertEventLogContains(
-            new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
+            new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
     }
 
     @Override protected void setUp() throws Exception {
