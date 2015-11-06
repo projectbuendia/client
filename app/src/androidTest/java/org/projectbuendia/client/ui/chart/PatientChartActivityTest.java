@@ -252,7 +252,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
         // count), and verify that the latest value is visible for each.
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             openEncounterForm();
 
             String temp = Integer.toString(i + 35) + ".7";
@@ -271,8 +271,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             // TODO: implement IdlingResource for webview to remove this sleep.
             // Wait a bit for the chart to update it's values.
             try{
-                Thread.sleep(30000);
-            } catch (InterruptedException e){}
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored){}
 
             //checkVitalValueContains("Pulse", pulse);
             checkObservationValueEquals("[test] Temperature (°C)", temp);
@@ -352,7 +352,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
         // Expect a WebView with JS enabled to be visible soon (the chart).
         expectVisibleSoon(viewThat(isJavascriptEnabled()));
-        checkObservationValueEquals("[test] Temperature (°C)", "36");
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignored) {
+        }
+        checkObservationValueEquals("[test] Temperature (°C)", "36.5");
         checkObservationValueEquals("[test] Respiratory rate (bpm)", "23");
         checkObservationValueEquals("[test] SpO₂ oxygen sat (%)", "95");
         checkObservationValueEquals("[test] Blood pressure, systolic", "80");
