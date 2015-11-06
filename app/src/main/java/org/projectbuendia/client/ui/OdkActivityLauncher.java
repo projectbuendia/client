@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui;
 
 import android.app.Activity;
-import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -21,7 +20,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 
-import com.android.volley.NoConnectionError;
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
@@ -48,7 +46,6 @@ import org.odk.collect.android.utilities.FileUtils;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
-import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.net.OdkDatabase;
@@ -87,6 +84,28 @@ public class OdkActivityLauncher {
 
     private static final Logger LOG = Logger.create();
 
+    //TODO: Comment
+    public static void fetchAllXforms() {
+        new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
+            new Response.Listener<List<OpenMrsXformIndexEntry>>() {
+                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                    for (OpenMrsXformIndexEntry formEntry : response) {
+                        fetchXform(formEntry);
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override public void onErrorResponse(VolleyError error) {
+                    handleSyncError(error);
+                }
+            });
+    }
+
+    //TODO: Comment
+    public static void fetchXform(OpenMrsXformIndexEntry formEntry) {
+        new OdkXformSyncTask(null).fetchXFormFromServer(formEntry.uuid, false,
+            formEntry.makeFileForForm());
+    }
+
     /**
      * Fetches all xforms from the server, caches them, and launches ODK using the requested form.
      * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
@@ -114,9 +133,8 @@ public class OdkActivityLauncher {
                             FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
                         return;
                     }
-                    // Cache all the forms into the ODK form cache
-                    cacheXformIntoOdkStorage(callingActivity, uuidToShow, requestCode, patient,
-                        fields, response);
+                    // Cache the form into the ODK form cache
+                    showForm(callingActivity, uuidToShow, requestCode, patient, fields, findUuid(response, uuidToShow));
                 }
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
@@ -133,95 +151,12 @@ public class OdkActivityLauncher {
                     if (!formToShow.makeFileForForm().exists()) return false;
 
                     LOG.i(String.format("Using form %s from local cache.", uuidToShow));
-                    cacheXformIntoOdkStorage(callingActivity, uuidToShow, requestCode, patient,
-                        fields, entries);
+                    showForm(callingActivity, uuidToShow, requestCode, patient,
+                        fields, formToShow);
 
                     return true;
                 }
-
-                private List<OpenMrsXformIndexEntry> getLocalFormEntries() {
-                    List<OpenMrsXformIndexEntry> entries = new ArrayList<>();
-
-                    final ContentResolver resolver = App.getInstance().getContentResolver();
-                    Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, null, null, null, null);
-                    try {
-                        while (c.moveToNext()) {
-                            String uuid = Utils.getString(c, Contracts.Forms.UUID);
-                            String name = Utils.getString(c, Contracts.Forms.NAME);
-                            long date = 0; // need to check where to retrieve it
-                            entries.add(new OpenMrsXformIndexEntry(uuid, name, date));
-                        }
-                    } finally {
-                        c.close();
-                    }
-
-                    return entries;
-                }
-
-                private void handleSyncError(VolleyError error) {
-                    FetchXformFailedEvent.Reason reason =
-                        FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
-                    if (error.networkResponse != null) {
-                        switch (error.networkResponse.statusCode) {
-                            case HttpURLConnection.HTTP_FORBIDDEN:
-                            case HttpURLConnection.HTTP_UNAUTHORIZED:
-                                reason = FetchXformFailedEvent.Reason.SERVER_AUTH;
-                                break;
-                            case HttpURLConnection.HTTP_NOT_FOUND:
-                                reason = FetchXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
-                                break;
-                            case HttpURLConnection.HTTP_INTERNAL_ERROR:
-                            default:
-                                reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
-                        }
-                    }
-                    EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
-                }
             });
-    }
-
-    /**
-     * Fetches all xforms from the server, caches them, and launches ODK using the requested form.
-     * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
-     *                        will be returned to this activity
-     * @param uuidToShow      UUID of the form to show
-     * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
-     *                        activity exits
-     * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
-     *                        correspond to
-     * @param fields          a {@link Preset} object with any form fields that should be
-     *                        pre-populated
-     */
-    private static void cacheXformIntoOdkStorage(final Activity callingActivity,
-                                                   final String uuidToShow,
-                                                   final int requestCode,
-                                                   @Nullable final org.odk.collect.android.model.Patient patient,
-                                                   @Nullable final Preset fields,
-                                                   final List<OpenMrsXformIndexEntry> formsToCache) {
-        for(OpenMrsXformIndexEntry form : formsToCache) {
-            if(uuidToShow.equals(form.uuid)) {
-                new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
-                    @Override public void formWritten(File path, String uuid) {
-                        LOG.i("wrote form " + path);
-                        showOdkCollect(
-                            callingActivity,
-                            requestCode,
-                            OdkDatabase.getFormIdForPath(path),
-                            patient,
-                            fields);
-                    }
-                }).execute(form);
-            } else {
-                showOdkCollect(
-                    callingActivity,
-                    requestCode,
-                    OdkDatabase.getFormIdForPath(form.makeFileForForm()),
-                    patient,
-                    fields);
-            }
-        }
-
-
     }
 
     /**
@@ -253,6 +188,78 @@ public class OdkActivityLauncher {
             intent.putExtra("fields", fields);
         }
         callingActivity.startActivityForResult(intent, requestCode);
+    }
+
+    private static List<OpenMrsXformIndexEntry> getLocalFormEntries() {
+        List<OpenMrsXformIndexEntry> entries = new ArrayList<>();
+
+        final ContentResolver resolver = App.getInstance().getContentResolver();
+        Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, null, null, null, null);
+        try {
+            while (c.moveToNext()) {
+                String uuid = Utils.getString(c, Contracts.Forms.UUID);
+                String name = Utils.getString(c, Contracts.Forms.NAME);
+                long date = 0; // date is not important here
+                entries.add(new OpenMrsXformIndexEntry(uuid, name, date));
+            }
+        } finally {
+            c.close();
+        }
+
+        return entries;
+    }
+
+    private static void handleSyncError(VolleyError error) {
+        FetchXformFailedEvent.Reason reason =
+            FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+        if (error.networkResponse != null) {
+            switch (error.networkResponse.statusCode) {
+                case HttpURLConnection.HTTP_FORBIDDEN:
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    reason = FetchXformFailedEvent.Reason.SERVER_AUTH;
+                    break;
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    reason = FetchXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
+                    break;
+                case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                default:
+                    reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+            }
+        }
+        EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
+    }
+
+    /**
+     * Given all xforms, caches them, and launches ODK using the requested form.
+     * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
+     *                        will be returned to this activity
+     * @param uuidToShow      UUID of the form to show
+     * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
+     *                        activity exits
+     * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                        correspond to
+     * @param fields          a {@link Preset} object with any form fields that should be
+     *                        pre-populated
+     * @param formToCache    a {@link OpenMrsXformIndexEntry} object representing the form that
+     *                       should be cached
+     */
+    private static void showForm(final Activity callingActivity,
+                                 final String uuidToShow,
+                                 final int requestCode,
+                                 @Nullable final org.odk.collect.android.model.Patient patient,
+                                 @Nullable final Preset fields,
+                                 final OpenMrsXformIndexEntry formToCache) {
+        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
+            @Override public void formWritten(File path, String uuid) {
+                LOG.i("wrote form " + path);
+                showOdkCollect(
+                    callingActivity,
+                    requestCode,
+                    OdkDatabase.getFormIdForPath(path),
+                    patient,
+                    fields);
+            }
+        }).execute(formToCache);
     }
 
     // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or

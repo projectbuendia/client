@@ -81,9 +81,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
     @Override protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
 
-        OpenMrsXformsConnection openMrsXformsConnection =
-            new OpenMrsXformsConnection(App.getConnectionDetails());
-
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
             final File proposedPath = formInfo.makeFileForForm();
 
@@ -135,24 +132,32 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 continue;
             }
 
-            LOG.i("fetching " + formInfo.uuid);
-            // Doesn't exist, so insert it
-            // Fetch the file from OpenMRS
-            openMrsXformsConnection.getXform(formInfo.uuid, new Response.Listener<String>() {
-                @Override public void onResponse(String response) {
-                    LOG.i("adding form to db " + response);
-                    new AddFormToDbAsyncTask(mFormWrittenListener, formInfo.uuid, isUpdate)
-                        .execute(new FormToWrite(response, proposedPath));
-                }
-            }, new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "failed to fetch file");
-                    EventBus.getDefault().post(new FetchXformFailedEvent(
-                        FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
-                }
-            });
+            // Doesn't exist, so insert it. Fetch the file from OpenMRS
+            fetchXFormFromServer(formInfo.uuid, isUpdate, proposedPath);
         }
         return null;
+    }
+
+    //TODO: Document
+    public void fetchXFormFromServer(final String uuid, final boolean isUpdate,
+                                   final File proposedPath) {
+        LOG.i("fetching form " + uuid);
+
+        OpenMrsXformsConnection openMrsXformsConnection =
+            new OpenMrsXformsConnection(App.getConnectionDetails());
+        openMrsXformsConnection.getXform(uuid, new Response.Listener<String>() {
+            @Override public void onResponse(String response) {
+                LOG.i("adding form to db " + response);
+                new AddFormToDbAsyncTask(mFormWrittenListener, uuid, isUpdate)
+                    .execute(new FormToWrite(response, proposedPath));
+            }
+        }, new Response.ErrorListener() {
+            @Override public void onErrorResponse(VolleyError error) {
+                LOG.e(error, "failed to fetch file");
+                EventBus.getDefault().post(new FetchXformFailedEvent(
+                    FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
+            }
+        });
     }
 
     /**

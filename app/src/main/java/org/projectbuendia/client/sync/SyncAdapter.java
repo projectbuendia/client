@@ -52,6 +52,7 @@ import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
+import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.Logger;
 
@@ -267,6 +268,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // there are only a few forms, usually less than 10.
                     case SYNC_FORMS:
                         updateForms(provider, syncResult);
+                        OdkActivityLauncher.fetchAllXforms();  //Fetching and caching all the forms
                         break;
                 }
                 timings.addSplit(phase.name() + " phase completed");
