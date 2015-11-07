@@ -154,6 +154,8 @@ public class OdkActivityLauncher {
                     }
                 }
 
+                //TODO: Application needs to make the user aware of the fact that the form is being
+                // loaded offline
                 private boolean loadXformFromCache() {
                     List<OpenMrsXformIndexEntry> entries = getLocalFormEntries();
                     OpenMrsXformIndexEntry formToShow = findUuid(entries, uuidToShow);
