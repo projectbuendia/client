@@ -84,13 +84,16 @@ public class OdkActivityLauncher {
 
     private static final Logger LOG = Logger.create();
 
-    //TODO: Comment
-    public static void fetchAllXforms() {
+    /**
+     * Fetches all xforms from the server and caches them. If any error occurs during fetching,
+     * a failed event is triggered.
+     */
+    public static void fetchAndCacheAllXforms() {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
             new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                 @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                     for (OpenMrsXformIndexEntry formEntry : response) {
-                        fetchXform(formEntry);
+                        fetchAndCacheXForm(formEntry);
                     }
                 }
             }, new Response.ErrorListener() {
@@ -100,14 +103,20 @@ public class OdkActivityLauncher {
             });
     }
 
-    //TODO: Comment
-    public static void fetchXform(OpenMrsXformIndexEntry formEntry) {
-        new OdkXformSyncTask(null).fetchXFormFromServer(formEntry.uuid, false,
+    /**
+     * Fetches the xform specified by the form uuid.
+     *
+     * @param formEntry the {@link OpenMrsXformIndexEntry} object containing the uuid form
+     */
+    public static void fetchAndCacheXForm(OpenMrsXformIndexEntry formEntry) {
+        new OdkXformSyncTask(null).fetchAndAddXFormToDb(formEntry.uuid,
             formEntry.makeFileForForm());
     }
 
     /**
-     * Fetches all xforms from the server, caches them, and launches ODK using the requested form.
+     * Fetches all xforms from the server and launches ODK using the requested form. If the app
+     * can't fetch it from the server by any reason, the app tries to load its cached version. If
+     * the cache is not available, it is triggered a failed event.
      * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
      *                        will be returned to this activity
      * @param uuidToShow      UUID of the form to show

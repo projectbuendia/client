@@ -268,7 +268,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // there are only a few forms, usually less than 10.
                     case SYNC_FORMS:
                         updateForms(provider, syncResult);
-                        OdkActivityLauncher.fetchAllXforms();  //Fetching and caching all the forms
+                        OdkActivityLauncher.fetchAndCacheAllXforms();  //Fetching and caching all the forms
                         break;
                 }
                 timings.addSplit(phase.name() + " phase completed");

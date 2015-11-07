@@ -59,26 +59,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         this.mFormWrittenListener = formWrittenListener;
     }
 
-    private static boolean writeStringToFile(String response, File proposedPath) {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(proposedPath);
-            writer.write(response);
-            return true;
-        } catch (IOException e) {
-            LOG.e(e, "failed to write downloaded xform to ODK forms directory");
-            return false;
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    LOG.e(e, "failed to close writer into ODK directory");
-                }
-            }
-        }
-    }
-
     @Override protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
 
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
@@ -133,14 +113,18 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             }
 
             // Doesn't exist, so insert it. Fetch the file from OpenMRS
-            fetchXFormFromServer(formInfo.uuid, isUpdate, proposedPath);
+            fetchAndAddXFormToDb(formInfo.uuid, proposedPath);
         }
         return null;
     }
 
-    //TODO: Document
-    public void fetchXFormFromServer(final String uuid, final boolean isUpdate,
-                                   final File proposedPath) {
+    /**
+     * Fetches the request xforms from the server and adds it into db.
+     * @param uuid      UUID of the form to be fetched
+     * @param proposedPath          a {@link File} containing the form fields that should be
+     *                        added
+     */
+    public void fetchAndAddXFormToDb(final String uuid, final File proposedPath) {
         LOG.i("fetching form " + uuid);
 
         OpenMrsXformsConnection openMrsXformsConnection =
@@ -148,7 +132,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         openMrsXformsConnection.getXform(uuid, new Response.Listener<String>() {
             @Override public void onResponse(String response) {
                 LOG.i("adding form to db " + response);
-                new AddFormToDbAsyncTask(mFormWrittenListener, uuid, isUpdate)
+                new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
                     .execute(new FormToWrite(response, proposedPath));
             }
         }, new Response.ErrorListener() {
@@ -193,15 +177,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
         private final FormWrittenListener mFormWrittenListener;
         private final String mUuid;
-        private final boolean mUpdate;
 
         private AddFormToDbAsyncTask(
             @Nullable FormWrittenListener formWrittenListener,
-            String uuid,
-            boolean update) {
+            String uuid) {
             mFormWrittenListener = formWrittenListener;
             mUuid = uuid;
-            mUpdate = update;
         }
 
         @Override protected File doInBackground(FormToWrite[] params) {
@@ -247,6 +228,29 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             EventBus.getDefault().post(new FetchXformSucceededEvent());
 
             App.getUserManager().setDirty(false);
+        }
+
+        private static boolean writeStringToFile(String response, File proposedPath) {
+            //Create OKD dirs if necessary
+            Collect.getInstance().createODKDirs();
+
+            FileWriter writer = null;
+            try {
+                writer = new FileWriter(proposedPath);
+                writer.write(response);
+                return true;
+            } catch (IOException e) {
+                LOG.e(e, "failed to write downloaded xform to ODK forms directory");
+                return false;
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (IOException e) {
+                        LOG.e(e, "failed to close writer into ODK directory");
+                    }
+                }
+            }
         }
     }
 }
