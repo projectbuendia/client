@@ -45,7 +45,6 @@ public class OdkDatabase {
                         + "error occurred on insert (probably a race condition) and should be "
                         + "fixed. However, the app should still function correctly");
                 }
-                Preconditions.checkArgument(cursor.getColumnCount() == 1);
                 // getCursorForFormFile returns the most recent element first, so we can just use
                 // the first one.
                 cursor.moveToNext();
