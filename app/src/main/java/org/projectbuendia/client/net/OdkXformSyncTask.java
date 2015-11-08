@@ -119,7 +119,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     }
 
     /**
-     * Fetches the request xforms from the server and adds it into db.
+     * Fetches the requested xform from the server and adds it into db.
      * @param uuid      UUID of the form to be fetched
      * @param proposedPath          a {@link File} containing the form fields that should be
      *                        added
