@@ -77,9 +77,8 @@ public class AppModel {
             if (c.moveToNext()) {
                 DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_MILLIS);
                 DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_MILLIS);
-                DateTime obsSyncEnd = Utils.getDateTime(c, Contracts.Misc.OBS_SYNC_END_MILLIS);
-                LOG.i("full_sync_start_millis = %s, full_sync_end_millis = %s, obs_sync_end_millis = %s",
-                    fullSyncStart, fullSyncEnd, obsSyncEnd);
+                LOG.i("full_sync_start_millis = %s, full_sync_end_millis = %s",
+                    fullSyncStart, fullSyncEnd);
                 if (fullSyncStart != null && fullSyncEnd != null && fullSyncEnd.isAfter(fullSyncStart)) {
                     return fullSyncEnd;
                 }

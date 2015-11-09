@@ -144,6 +144,18 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                 Table.MISC,
                 "rowid"));
 
+        registry.registerDelegate(
+            Contracts.SyncTokens.CONTENT_URI.getPath(),
+            new GroupProviderDelegate(
+                Contracts.SyncTokens.ITEM_CONTENT_TYPE,
+                Table.SYNC_TOKENS));
+        registry.registerDelegate(
+                Contracts.SyncTokens.CONTENT_URI.getPath() + "/*",
+                new ItemProviderDelegate(
+                        Contracts.SyncTokens.ITEM_CONTENT_TYPE,
+                        Table.SYNC_TOKENS,
+                        Contracts.SyncTokens.TABLE_NAME));
+
         return registry;
     }
 }
