@@ -137,7 +137,7 @@ def serverEdison = 'server';
 def serverEmulatorHost = '10.0.2.2';
 
 // Server on the Fantastica wifi network.
-def serverFantastica = '192.168.1.161';
+def serverFantastica = '192.168.1.179';
 
 // If you run `adb reverse tcp:9000 tcp:9000` on your machine with a device connected, and
 // use this setting, then the device will talk to a locally running server instance.
@@ -145,7 +145,7 @@ def serverLocalHost = '127.0.0.1';
 
 // Just for development.  In production builds, these should be overridden
 // using -Pserver=server -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def serverDefault = serverDev;
+def serverDefault = serverFantastica; //serverFantastica or serverDev;
 def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs';
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'

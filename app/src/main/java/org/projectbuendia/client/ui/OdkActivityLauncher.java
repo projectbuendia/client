@@ -142,8 +142,7 @@ public class OdkActivityLauncher {
                             FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
                         return;
                     }
-                    // Cache the form into the ODK form cache
-                    showForm(callingActivity, uuidToShow, requestCode, patient, fields, findUuid(response, uuidToShow));
+                    showForm(callingActivity, requestCode, patient, fields, findUuid(response, uuidToShow));
                 }
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
@@ -162,8 +161,7 @@ public class OdkActivityLauncher {
                     if (!formToShow.makeFileForForm().exists()) return false;
 
                     LOG.i(String.format("Using form %s from local cache.", uuidToShow));
-                    showForm(callingActivity, uuidToShow, requestCode, patient,
-                        fields, formToShow);
+                    showForm(callingActivity, requestCode, patient, fields, formToShow);
 
                     return true;
                 }
@@ -241,25 +239,23 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Given all xforms, caches them, and launches ODK using the requested form.
+     * Launches ODK using the requested form.
      * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
      *                        will be returned to this activity
-     * @param uuidToShow      UUID of the form to show
      * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
      *                        activity exits
      * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
      *                        correspond to
      * @param fields          a {@link Preset} object with any form fields that should be
      *                        pre-populated
-     * @param formToCache    a {@link OpenMrsXformIndexEntry} object representing the form that
-     *                       should be cached
+     * @param formToShow    a {@link OpenMrsXformIndexEntry} object representing the form that
+     *                       should be opened
      */
     private static void showForm(final Activity callingActivity,
-                                 final String uuidToShow,
                                  final int requestCode,
                                  @Nullable final org.odk.collect.android.model.Patient patient,
                                  @Nullable final Preset fields,
-                                 final OpenMrsXformIndexEntry formToCache) {
+                                 final OpenMrsXformIndexEntry formToShow) {
         new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
             @Override public void formWritten(File path, String uuid) {
                 LOG.i("wrote form " + path);
@@ -270,7 +266,7 @@ public class OdkActivityLauncher {
                     patient,
                     fields);
             }
-        }).execute(formToCache);
+        }).execute(formToShow);
     }
 
     // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
