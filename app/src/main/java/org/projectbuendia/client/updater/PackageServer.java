@@ -13,6 +13,7 @@ package org.projectbuendia.client.updater;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
+import com.google.gson.reflect.TypeToken;
 
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.net.Common;
@@ -49,9 +50,9 @@ public class PackageServer {
         Response.Listener<List<JsonUpdateInfo>> listener,
         Response.ErrorListener errorListener) {
         mVolley.addToRequestQueue(
-            GsonRequest.withArrayResponse(
+            new GsonRequest<>(
                 mSettings.getPackageServerUrl("/" + MODULE_NAME + ".json"),
-                JsonUpdateInfo.class,
+                new TypeToken<List<JsonUpdateInfo>>() {}.getType(),
                 null /* headers */,
                 listener,
                 errorListener
