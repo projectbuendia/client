@@ -114,9 +114,8 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Fetches all xforms from the server and launches ODK using the requested form. If the app
-     * can't fetch it from the server by any reason, the app tries to load its cached version. If
-     * the cache is not available, it is triggered a failed event.
+     * Loads the xform from the cache and launches ODK using it. If the cache is not available,
+     * the app tries to fetch it from the server. If no form is got, it is triggered a failed event.
      * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
      *                        will be returned to this activity
      * @param uuidToShow      UUID of the form to show
@@ -133,6 +132,11 @@ public class OdkActivityLauncher {
         final int requestCode,
         @Nullable final org.odk.collect.android.model.Patient patient,
         @Nullable final Preset fields) {
+        LOG.i("Trying to fetch it from cache.");
+        if (loadXformFromCache(callingActivity, uuidToShow, requestCode, patient, fields)) {
+            return;
+        }
+
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
             new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                 @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
@@ -142,28 +146,13 @@ public class OdkActivityLauncher {
                             FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
                         return;
                     }
-                    showForm(callingActivity, requestCode, patient, fields, findUuid(response, uuidToShow));
+                    showForm(callingActivity, requestCode, patient, fields, findUuid(response,
+                        uuidToShow));
                 }
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "Fetching xform list from server failed. "
-                        + "Trying to fetch it from cache.");
-                    if (!loadXformFromCache()) {
-                        handleSyncError(error);
-                    }
-                }
-
-                //TODO: Application needs to make the user aware of the fact that the form is being
-                // loaded offline
-                private boolean loadXformFromCache() {
-                    List<OpenMrsXformIndexEntry> entries = getLocalFormEntries();
-                    OpenMrsXformIndexEntry formToShow = findUuid(entries, uuidToShow);
-                    if (!formToShow.makeFileForForm().exists()) return false;
-
-                    LOG.i(String.format("Using form %s from local cache.", uuidToShow));
-                    showForm(callingActivity, requestCode, patient, fields, formToShow);
-
-                    return true;
+                    LOG.e(error, "Fetching xform list from server failed. ");
+                    handleSyncError(error);
                 }
             });
     }
@@ -197,6 +186,34 @@ public class OdkActivityLauncher {
             intent.putExtra("fields", fields);
         }
         callingActivity.startActivityForResult(intent, requestCode);
+    }
+
+    /**
+     * Loads the xform from the cache and launches ODK using it. Return true if the cache is
+     * available.
+     * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
+     *                        will be returned to this activity
+     * @param uuidToShow      UUID of the form to show
+     * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
+     *                        activity exits
+     * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                        correspond to
+     * @param fields          a {@link Preset} object with any form fields that should be
+     *                        pre-populated
+     */
+    private static boolean loadXformFromCache(final Activity callingActivity,
+                                              final String uuidToShow,
+                                              final int requestCode,
+                                              @Nullable final org.odk.collect.android.model.Patient patient,
+                                              @Nullable final Preset fields) {
+        List<OpenMrsXformIndexEntry> entries = getLocalFormEntries();
+        OpenMrsXformIndexEntry formToShow = findUuid(entries, uuidToShow);
+        if (!formToShow.makeFileForForm().exists()) return false;
+
+        LOG.i(String.format("Using form %s from local cache.", uuidToShow));
+        showForm(callingActivity, requestCode, patient, fields, formToShow);
+
+        return true;
     }
 
     private static List<OpenMrsXformIndexEntry> getLocalFormEntries() {
