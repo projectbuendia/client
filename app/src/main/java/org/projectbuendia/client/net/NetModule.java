@@ -19,8 +19,9 @@ import com.google.gson.GsonBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.json.DateTimeDeserializer;
+import org.projectbuendia.client.json.DateTimeSerializer;
 import org.projectbuendia.client.json.LocalDateSerializer;
+import org.projectbuendia.client.json.Serializers;
 
 import javax.inject.Singleton;
 
@@ -56,10 +57,9 @@ public class NetModule {
 
     @Provides
     @Singleton Gson provideGson() {
-        return new GsonBuilder()
-            .registerTypeAdapter(LocalDate.class, new LocalDateSerializer())
-            .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
-            .create();
+        GsonBuilder builder = new GsonBuilder();
+        Serializers.registerTo(builder);
+        return builder.create();
     }
 
     @Provides
