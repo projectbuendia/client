@@ -203,7 +203,8 @@ public class OdkActivityLauncher {
         List<OpenMrsXformIndexEntry> entries = new ArrayList<>();
 
         final ContentResolver resolver = App.getInstance().getContentResolver();
-        Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, null, null, null, null);
+        Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, new String[] {Contracts.Forms.UUID,
+            Contracts.Forms.NAME}, null, null, null);
         try {
             while (c.moveToNext()) {
                 String uuid = Utils.getString(c, Contracts.Forms.UUID);
