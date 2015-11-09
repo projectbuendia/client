@@ -11,9 +11,14 @@
 
 package org.projectbuendia.client.json;
 
-/** JSON representation of a set of encounters returned by the server. */
-public class JsonEncountersResponse {
-    public JsonEncounter[] results;
+/**
+ * JSON representation of a set of patients returned by the server.
+ * <p>
+ * TODO: Generify this class and JsonEncountersResponse into e.g. an
+ * IncrementalFetchResponse<JsonEncounter>
+ */
+public class JsonPatientsResponse {
+    public JsonPatient[] results;
     // TODO(capnfabs): Rename this to syncToken.
     /** In ISO 8601 date format. */
     public String snapshotTime;
