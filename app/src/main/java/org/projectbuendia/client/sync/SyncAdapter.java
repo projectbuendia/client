@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -32,13 +33,13 @@ import com.android.volley.toolbox.RequestFuture;
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.JsonEncounter;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonConcept;
 import org.projectbuendia.client.json.JsonConceptResponse;
-import org.projectbuendia.client.json.JsonEncountersResponse;
+import org.projectbuendia.client.json.JsonObservationsResponse;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
@@ -422,13 +423,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         checkCancellation("before requesting observations");
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         // Get the charts asynchronously using volley.
-        RequestFuture<JsonEncountersResponse> listFuture = RequestFuture.newFuture();
+        RequestFuture<JsonObservationsResponse> listFuture = RequestFuture.newFuture();
 
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         checkCancellation("before updating observations");
         String lastSyncToken = getLastSyncToken(provider, Contracts.Table.OBSERVATIONS);
         String newSyncToken = updateObservations(
                 lastSyncToken, provider, syncResult, chartServer, listFuture, timingLogger);
+        timingLogger.addSplit("finished observation update");
         // This is only safe transactionally if we can rely on the entire sync being transactional.
         storeSyncToken(provider, Contracts.Table.OBSERVATIONS, newSyncToken);
 
@@ -514,43 +516,31 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     private String updateObservations(
             @Nullable String lastSyncToken, ContentProviderClient provider, SyncResult syncResult,
-            OpenMrsChartServer chartServer, RequestFuture<JsonEncountersResponse> listFuture,
+            OpenMrsChartServer chartServer, RequestFuture<JsonObservationsResponse> listFuture,
             TimingLogger timingLogger)
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting incremental encounters");
-        chartServer.getIncrementalEncounters(lastSyncToken, listFuture, listFuture);
-        ArrayList<ContentValues> toInsert = new ArrayList<>();
+        chartServer.getIncrementalObservations(lastSyncToken, listFuture, listFuture);
         LOG.d("awaiting parsed incremental response");
-        final JsonEncountersResponse response =
+        final JsonObservationsResponse response =
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Fetched incremental encounters RPC");
         checkCancellation("before processing observation RPC results");
-        for (JsonEncounter record : response.results) {
-            // Validate the encounter
-            if (!isEncounterValid(record)) {
-                LOG.e("Invalid encounter data received from server; dropping encounter.");
-                continue;
+        for (JsonObservation observation: response.results) {
+            if (observation.voided) {
+                Uri uri = Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
+                provider.delete(uri, null, null);
+                syncResult.stats.numDeletes++;
+            } else {
+                provider.insert(Observations.CONTENT_URI,
+                        DbSyncHelper.getObsValuesToInsert(observation));
+                syncResult.stats.numInserts++;
             }
             // Add the observations from the encounter.
-                toInsert.addAll(DbSyncHelper.getObsValuesToInsert(record, syncResult));
-                timingLogger.addSplit("added incremental obs to list");
-        }
-        timingLogger.addSplit("making operations");
-        if (toInsert.size() > 0) {
-            checkCancellation("before inserting incremental observations");
-            provider.bulkInsert(Observations.CONTENT_URI,
-                toInsert.toArray(new ContentValues[toInsert.size()]));
-            timingLogger.addSplit("bulk inserts");
+            timingLogger.addSplit("added incremental obs to list");
         }
         return response.snapshotTime;
-    }
-
-    /** returns {@code true} if the encounter is valid. */
-    private boolean isEncounterValid(JsonEncounter record) {
-        return record.patient_uuid != null
-                && record.uuid != null
-                && record.timestamp != null;
     }
 
     private void storeSyncToken(

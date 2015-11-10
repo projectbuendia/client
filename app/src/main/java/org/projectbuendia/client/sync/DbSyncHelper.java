@@ -30,6 +30,7 @@ import org.projectbuendia.client.json.JsonChartSection;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.json.JsonLocation;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
@@ -195,33 +196,15 @@ public class DbSyncHelper {
     }
 
     /** Converts an encounter data response into appropriate inserts in the encounters table. */
-    public static List<ContentValues> getObsValuesToInsert(
-            JsonEncounter encounter, SyncResult syncResult) {
-        List<ContentValues> cvs = new ArrayList<>();
-        ContentValues base = new ContentValues();
-        base.put(Observations.PATIENT_UUID, encounter.patient_uuid);
-        base.put(Observations.ENCOUNTER_UUID, encounter.uuid);
-        base.put(Observations.ENCOUNTER_MILLIS, encounter.timestamp.getMillis());
+    public static ContentValues getObsValuesToInsert(
+            JsonObservation observation) {
+        ContentValues cvs = new ContentValues();
+        cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
+        cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
+        cvs.put(Observations.ENCOUNTER_MILLIS, observation.timestamp.getMillis());
+        cvs.put(Observations.CONCEPT_UUID, observation.concept_uuid);
+        cvs.put(Observations.VALUE, observation.value);
 
-        if (encounter.observations != null) {
-            for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
-                final String conceptUuid = (String) entry.getKey();
-                ContentValues values = new ContentValues(base);
-                values.put(Observations.CONCEPT_UUID, conceptUuid);
-                values.put(Observations.VALUE, entry.getValue().toString());
-                cvs.add(values);
-                syncResult.stats.numInserts++;
-            }
-        }
-        if (encounter.order_uuids != null) {
-            for (String orderUuid : encounter.order_uuids) {
-                ContentValues values = new ContentValues(base);
-                values.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
-                values.put(Observations.VALUE, orderUuid);
-                cvs.add(values);
-                syncResult.stats.numInserts++;
-            }
-        }
         return cvs;
     }
 

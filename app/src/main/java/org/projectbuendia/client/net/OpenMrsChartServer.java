@@ -18,7 +18,7 @@ import com.android.volley.Response;
 
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonConceptResponse;
-import org.projectbuendia.client.json.JsonEncountersResponse;
+import org.projectbuendia.client.json.JsonObservationsResponse;
 import org.projectbuendia.client.json.Serializers;
 
 import java.util.HashMap;
@@ -45,13 +45,13 @@ public class OpenMrsChartServer {
         this.mConnectionDetails = connectionDetails;
     }
 
-    private void doEncountersRequest(
-        String url,
-        Response.Listener<JsonEncountersResponse> successListener,
-        Response.ErrorListener errorListener) {
-        GsonRequest<JsonEncountersResponse> request = new GsonRequest<>(
+    private void doObservationsRequest(
+            String url,
+            Response.Listener<JsonObservationsResponse> successListener,
+            Response.ErrorListener errorListener) {
+        GsonRequest<JsonObservationsResponse> request = new GsonRequest<>(
             url,
-            JsonEncountersResponse.class, false,
+            JsonObservationsResponse.class, false,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener);
         Serializers.registerTo(request.getGson());
@@ -67,13 +67,13 @@ public class OpenMrsChartServer {
      * @param successListener a listener to get the results on the event of success
      * @param errorListener   a (Volley) listener to get any errors
      */
-    public void getIncrementalEncounters(
-        @Nullable String lastSyncToken,
-        Response.Listener<JsonEncountersResponse> successListener,
-        Response.ErrorListener errorListener) {
+    public void getIncrementalObservations(
+            @Nullable String lastSyncToken,
+            Response.Listener<JsonObservationsResponse> successListener,
+            Response.ErrorListener errorListener) {
         // TODO: URL-encode the sync token?
-        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/encounters" +
-                (lastSyncToken != null ? "?since=" + lastSyncToken : ""),
+        doObservationsRequest(mConnectionDetails.getBuendiaApiUrl() + "/observations" +
+                        (lastSyncToken != null ? "?since=" + lastSyncToken : ""),
                 successListener, errorListener);
     }
 
