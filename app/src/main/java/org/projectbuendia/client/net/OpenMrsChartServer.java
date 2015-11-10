@@ -100,8 +100,19 @@ public class OpenMrsChartServer {
         Instant lastTime,
         Response.Listener<JsonPatientRecordResponse> successListener,
         Response.ErrorListener errorListener) {
+
+        // TODO/cleanup: Remove this fix from the client once the equivalent fix in
+        // EncounterResource.filterEncountersByModificationTime is deployed in the server.
+
+        // Even though OpenMRS getDateCreated() and getDateModified() return Date objects that
+        // have millisecond precision, it truncates away the fractional milliseconds from these
+        // values when storing them in the database!!  Bad OpenMRS.  So for example, an observation
+        // created at 12:00:00.750 will be stored with a creation time of 12:00:00 -- which means
+        // that in order to return all the observations that were created after 12:00:00.500, we
+        // actually have to check for creation times after 12:00:00.000.
+        long startMillis = (lastTime.getMillis() / 1000) * 1000;
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl()
-                + "/encounters?sm=" + lastTime.getMillis(),
+                + "/encounters?sm=" + startMillis,
             successListener, errorListener);
     }
 
