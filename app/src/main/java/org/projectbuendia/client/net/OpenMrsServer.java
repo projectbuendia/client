@@ -367,7 +367,6 @@ public class OpenMrsServer implements Server {
         GsonRequest<JsonPatientsResponse> request = new GsonRequest<>(
                 url,
                 JsonPatientsResponse.class,
-                false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 successListener,
                 wrapErrorListener(errorListener));
