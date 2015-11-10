@@ -150,7 +150,7 @@ public class DbSyncHelper {
         final ContentResolver resolver = App.getInstance().getContentResolver();
 
         RequestFuture<List<JsonPatient>> future = RequestFuture.newFuture();
-        App.getServer().listPatients("", "", "", future, future);
+        App.getServer().listPatients(future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
         for (JsonPatient patient : future.get()) {
             cvs.put(patient.id, Patient.fromJson(patient).toContentValues());

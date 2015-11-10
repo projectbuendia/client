@@ -106,10 +106,7 @@ public interface Server {
     public void updatePatientLocation(String patientId, String newLocationId);
 
     /** Lists all existing patients. */
-    public void listPatients(@Nullable String filterState,
-                             @Nullable String filterLocation,
-                             @Nullable String filterQueryTerm,
-                             Response.Listener<List<JsonPatient>> successListener,
+    public void listPatients(Response.Listener<List<JsonPatient>> successListener,
                              Response.ErrorListener errorListener);
 
     /** Lists all existing users. */
