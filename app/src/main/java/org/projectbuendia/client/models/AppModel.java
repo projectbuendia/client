@@ -301,22 +301,13 @@ public class AppModel {
         }
 
         @Override protected TypedCursor<T> doInBackground(Void... voids) {
-            Cursor cursor = null;
-            try {
-                cursor = mContentResolver.query(
-                    mContentUri,
-                    mProjection,
-                    mFilter.getSelectionString(),
-                    mFilter.getSelectionArgs(mConstraint),
-                    null);
-
+            try (Cursor cursor = mContentResolver.query(
+                mContentUri,
+                mProjection,
+                mFilter.getSelectionString(),
+                mFilter.getSelectionArgs(mConstraint),
+                null)) {
                 return new TypedCursorWithLoader<>(cursor, mLoader);
-            } catch (Exception e) {
-                if (cursor != null) {
-                    cursor.close();
-                }
-
-                throw e;
             }
         }
 

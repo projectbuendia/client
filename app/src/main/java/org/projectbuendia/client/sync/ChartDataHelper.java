@@ -107,19 +107,19 @@ public class ChartDataHelper {
 
     /** Gets all the orders for a given patient. */
     public List<Order> getOrders(String patientUuid) {
-        Cursor c = mContentResolver.query(
+        List<Order> orders = new ArrayList<>();
+        try (Cursor c = mContentResolver.query(
             Orders.CONTENT_URI, null,
             Orders.PATIENT_UUID + " = ?", new String[] {patientUuid},
-            Orders.START_MILLIS);
-        List<Order> orders = new ArrayList<>();
-        while (c.moveToNext()) {
-            orders.add(new Order(
-                Utils.getString(c, Orders.UUID, ""),
-                Utils.getString(c, Orders.INSTRUCTIONS, ""),
-                Utils.getLong(c, Orders.START_MILLIS, null),
-                Utils.getLong(c, Orders.STOP_MILLIS, null)));
+            Orders.START_MILLIS)) {
+            while (c.moveToNext()) {
+                orders.add(new Order(
+                    Utils.getString(c, Orders.UUID, ""),
+                    Utils.getString(c, Orders.INSTRUCTIONS, ""),
+                    Utils.getLong(c, Orders.START_MILLIS, null),
+                    Utils.getLong(c, Orders.STOP_MILLIS, null)));
+            }
         }
-        c.close();
         return orders;
     }
 
@@ -181,18 +181,18 @@ public class ChartDataHelper {
     public Map<String, Obs> getLatestObservationsForConcept(
         String conceptUuid, String locale) {
         loadConceptData(locale);
+        Map<String, Obs> result = new HashMap<>();
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
             Observations.CONCEPT_UUID + " = ?", new String[] {conceptUuid},
             Observations.ENCOUNTER_MILLIS + " DESC")) {
-            Map<String, Obs> result = new HashMap<>();
             while (c.moveToNext()) {
                 String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
                 if (result.containsKey(patientUuid)) continue;
                 result.put(patientUuid, obsFromCursor(c));
             }
-            return result;
         }
+        return result;
     }
 
     /** Retrieves and assembles a Chart from the local datastore. */
@@ -211,9 +211,9 @@ public class ChartDataHelper {
                 String label = Utils.getString(c, ChartItems.LABEL, "");
                 if (parentRowid == null) {
                     // Add a section.
-                    String SectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
-                    if (SectionType != null) {
-                        switch (SectionType) {
+                    String sectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
+                    if (sectionType != null) {
+                        switch (sectionType) {
                             case "TILE_ROW":
                                 ChartSection tileGroup = new ChartSection(label);
                                 tileGroups.add(tileGroup);
@@ -249,18 +249,15 @@ public class ChartDataHelper {
     }
 
     public List<Form> getForms() {
-        Cursor cursor = mContentResolver.query(
-            Contracts.Forms.CONTENT_URI, null, null, null, null);
         SortedSet<Form> forms = new TreeSet<>();
-        try {
+        try ( Cursor cursor = mContentResolver.query(
+            Contracts.Forms.CONTENT_URI, null, null, null, null)) {
             while (cursor.moveToNext()) {
                 forms.add(new Form(
                     Utils.getString(cursor, Contracts.Forms.UUID),
                     Utils.getString(cursor, Contracts.Forms.NAME),
                     Utils.getString(cursor, Contracts.Forms.VERSION)));
             }
-        } finally {
-            cursor.close();
         }
         List<Form> sortedForms = new ArrayList<>();
         sortedForms.addAll(forms);
