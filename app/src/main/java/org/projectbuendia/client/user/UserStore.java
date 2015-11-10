@@ -21,7 +21,6 @@ import android.os.RemoteException;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
-import com.google.common.collect.ImmutableSet;
 
 import net.sqlcipher.database.SQLiteException;
 
@@ -40,29 +39,14 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static java.lang.String.format;
-
 /** A store for users. */
 public class UserStore {
 
     private static final Logger LOG = Logger.create();
     private static final String USER_SYNC_SAVEPOINT_NAME = "USER_SYNC_SAVEPOINT";
 
-    /**
-     * Loads the known users from local store. Forces a sync from server, if no user was found
-     * locally.
-     * */
+    /** Loads the known users from local store. */
     public Set<JsonUser> loadKnownUsers()
-        throws InterruptedException, ExecutionException, RemoteException,
-        OperationApplicationException {
-        return loadKnownUsers(true);
-    }
-
-    /**
-     * Loads the known users from local store. If 'forceSync' param is true, this will force a sync
-     * from server if no user was found locally.
-     * */
-    public Set<JsonUser> loadKnownUsers(boolean forceSync)
         throws InterruptedException, ExecutionException, RemoteException,
         OperationApplicationException {
         Cursor cursor = null;
@@ -78,20 +62,26 @@ public class UserStore {
                 LOG.e(e, "Error retrieving users from database");
             }
 
-            Set<JsonUser> users = retrieveUsers(cursor);
-            if(users.isEmpty() && forceSync) {
-                users = syncKnownUsers();
-            }
-            LOG.i(format("Found %d users in db", users.size()));
-
-            return users;
-        } catch (SQLiteException e) {
-            LOG.w(e, "Error retrieving users from database;");
-            if(forceSync) {
+            // If no data was retrieved from database, force a sync from server.
+            if (cursor == null || cursor.getCount() == 0) {
+                LOG.i("Database contains 0 users; fetching from server");
                 return syncKnownUsers();
-            } else {
-                throw new OperationApplicationException(e); //TODO Check the proper way to handle it
             }
+            LOG.i("Found " + cursor.getCount() + " users in db");
+
+            // Initiate users from database data and return the result.
+            int fullNameColumn = cursor.getColumnIndex(Users.FULL_NAME);
+            int uuidColumn = cursor.getColumnIndex(Users.UUID);
+            Set<JsonUser> result = new HashSet<>();
+            while (cursor.moveToNext()) {
+                JsonUser user =
+                    new JsonUser(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
+                result.add(user);
+            }
+            return result;
+        } catch (SQLiteException e) {
+            LOG.w(e, "Error retrieving users from database; fetching from server");
+            return syncKnownUsers();
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -106,8 +96,6 @@ public class UserStore {
     public Set<JsonUser> syncKnownUsers()
         throws ExecutionException, InterruptedException, RemoteException,
         OperationApplicationException {
-        LOG.i("Fetching users from server");
-
         RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
         App.getServer().listUsers(null, future, future);
         List<JsonUser> users = future.get();
@@ -198,23 +186,5 @@ public class UserStore {
     /** Deletes a user, both locally and on the server. */
     public JsonUser deleteUser(JsonUser user) {
         throw new UnsupportedOperationException();
-    }
-
-    /** Retrieves a user set. If there is no user, an unmodifiable empty set is returned. */
-    private Set<JsonUser> retrieveUsers(Cursor cursor) {
-        if (cursor == null || cursor.getCount() == 0) {
-            LOG.i("Database contains 0 users");
-            return ImmutableSet.of();
-        }
-
-        final Set<JsonUser> result = new HashSet<>();
-        final int fullNameColumn = cursor.getColumnIndex(Users.FULL_NAME);
-        final int uuidColumn = cursor.getColumnIndex(Users.UUID);
-
-        while (cursor.moveToNext()) {
-            result.add(
-                new JsonUser(cursor.getString(uuidColumn), cursor.getString(fullNameColumn)));
-        }
-        return result;
     }
 }
