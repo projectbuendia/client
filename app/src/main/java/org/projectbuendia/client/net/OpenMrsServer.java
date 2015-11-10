@@ -29,6 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.json.JsonPatientsResponse;
+import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
@@ -46,6 +48,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
@@ -356,28 +359,19 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void listPatients(
-            final Response.Listener<List<JsonPatient>> successListener,
+            @Nullable String lastSyncToken,
+            final Response.Listener<JsonPatientsResponse> successListener,
             Response.ErrorListener errorListener) {
-        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails,
-            "/patients",
-            null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    ArrayList<JsonPatient> patients = new ArrayList<>();
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            patients.add(patientFromJson(results.getJSONObject(i)));
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to convert JSON response");
-                    }
-                    successListener.onResponse(patients);
-                }
-            },
-            wrapErrorListener(errorListener)
-        );
+        String url = mConnectionDetails.getBuendiaApiUrl() + "/patients" +
+                (lastSyncToken != null ? "?since=" + lastSyncToken : "");
+        GsonRequest<JsonPatientsResponse> request = new GsonRequest<>(
+                url,
+                JsonPatientsResponse.class,
+                false,
+                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+                successListener,
+                wrapErrorListener(errorListener));
+        Serializers.registerTo(request.getGson());
         request.setRetryPolicy(
             new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);

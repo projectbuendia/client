@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -33,7 +35,10 @@ import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonEncounter;
+import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.json.JsonPatientsResponse;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonConcept;
@@ -54,11 +59,13 @@ import org.projectbuendia.client.providers.Contracts.SyncTokens;
 import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -236,9 +243,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                     // Patients: Always fetch all patients.  This won't scale;
                     // incremental fetch would help a lot.
-                    // TODO: Implement incremental fetch for patients.
                     case SYNC_PATIENTS:
-                        updatePatients(syncResult);
+                        updatePatients(provider, syncResult);
                         break;
 
                     // Observations: Incremental fetch and full fetch are the same process.
@@ -406,15 +412,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ChartDataHelper.invalidateLoadedConceptData();
     }
 
-    private void updatePatients(SyncResult syncResult)
+    private void updatePatients(ContentProviderClient providerClient, SyncResult syncResult)
         throws InterruptedException, ExecutionException, RemoteException,
         OperationApplicationException {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        ops.addAll(DbSyncHelper.getPatientUpdateOps(syncResult));
+        String syncToken = getLastSyncToken(providerClient, Contracts.Table.PATIENTS);
+        RequestFuture<JsonPatientsResponse> future = RequestFuture.newFuture();
+        App.getServer().listPatients(syncToken, future, future);
+        JsonPatientsResponse response = future.get();
+        ArrayList<ContentProviderOperation> ops = getPatientUpdateOps(response.results, syncResult);
         checkCancellation("while processing patient data from server");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
         LOG.i("Finished updating patients (" + ops.size() + " db ops)");
         mContentResolver.notifyChange(Patients.CONTENT_URI, null, false);
+
+        storeSyncToken(providerClient, Contracts.Table.PATIENTS, response.snapshotTime);
     }
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult)
@@ -551,6 +562,37 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         return record.patient_uuid != null
                 && record.uuid != null
                 && record.timestamp != null;
+    }
+
+    /**
+     * Downloads all patients from the server and produces a list of the operations
+     * needed to bring the local database in sync with the server.
+     */
+    private static ArrayList<ContentProviderOperation> getPatientUpdateOps(
+            JsonPatient[] patients, SyncResult syncResult)
+            throws ExecutionException, InterruptedException {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        for (JsonPatient patient : patients) {
+            if (patient.voided) {
+                syncResult.stats.numDeletes++;
+                ops.add(makeDeleteOpForPatientUuid(patient.uuid));
+            } else {
+                syncResult.stats.numInserts++;
+                ops.add(makeInsertOpForPatient(patient));
+            }
+        }
+
+        return ops;
+    }
+
+    private static ContentProviderOperation makeInsertOpForPatient(JsonPatient patient) {
+        return ContentProviderOperation.newInsert(Patients.CONTENT_URI)
+                .withValues(Patient.fromJson(patient).toContentValues()).build();
+    }
+
+    private static ContentProviderOperation makeDeleteOpForPatientUuid(String uuid) {
+        Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(uuid).build();
+        return ContentProviderOperation.newDelete(uri).build();
     }
 
     private void storeSyncToken(
