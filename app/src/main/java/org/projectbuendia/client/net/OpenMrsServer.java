@@ -19,10 +19,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import org.json.JSONArray;
@@ -153,30 +149,10 @@ public class OpenMrsServer implements Server {
      */
     private Response.ErrorListener wrapErrorListener(
         final Response.ErrorListener errorListener) {
-        return new Response.ErrorListener() {
+        return new JsonErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
-                String message = error.getMessage();
-                try {
-                    if (error.networkResponse != null
-                        && error.networkResponse.data != null) {
-                        String text = new String(error.networkResponse.data);
-                        JsonObject result = new JsonParser().parse(text).getAsJsonObject();
-                        if (result.has("error")) {
-                            JsonObject errorObject = result.getAsJsonObject("error");
-                            JsonElement element = errorObject.get("message");
-                            if (element == null || element.isJsonNull()) {
-                                element = errorObject.get("code");
-                            }
-                            if (element != null && element.isJsonPrimitive()) {
-                                message = element.getAsString();
-                            }
-                        }
-                    }
-                } catch (JsonParseException
-                    | IllegalStateException
-                    | UnsupportedOperationException e) {
-                    e.printStackTrace();
-                }
+                String message = extractMessage(error);
+                displayErrorMessage(message);
                 errorListener.onErrorResponse(new VolleyError(message, error));
             }
         };
