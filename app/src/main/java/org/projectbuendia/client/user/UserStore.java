@@ -168,7 +168,7 @@ public class UserStore {
         RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
         App.getServer().listUsers(null, future, future);
         List<JsonUser> users = future.get();
-        LOG.i("Got %d users from server; updating local database", users.size());
+        LOG.i("Got %d users from server", users.size());
         return new HashSet<>(users);
     }
 
