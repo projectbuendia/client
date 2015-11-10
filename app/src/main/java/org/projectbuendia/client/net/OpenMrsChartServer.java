@@ -56,7 +56,7 @@ public class OpenMrsChartServer {
                               Response.ErrorListener errorListener) {
         GsonRequest<JsonPatientRecord> request = new GsonRequest<>(
             mConnectionDetails.getBuendiaApiUrl() + "/encounters?patientUuid=" + patientUuid,
-            JsonPatientRecord.class, false,
+            JsonPatientRecord.class,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener);
         Serializers.registerTo(request.getGson());
@@ -80,7 +80,7 @@ public class OpenMrsChartServer {
         Response.ErrorListener errorListener) {
         GsonRequest<JsonPatientRecordResponse> request = new GsonRequest<>(
             url,
-            JsonPatientRecordResponse.class, false,
+            JsonPatientRecordResponse.class,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener);
         Serializers.registerTo(request.getGson());
@@ -114,7 +114,7 @@ public class OpenMrsChartServer {
                             Response.ErrorListener errorListener) {
         GsonRequest<JsonConceptResponse> request = new GsonRequest<JsonConceptResponse>(
             mConnectionDetails.getBuendiaApiUrl() + "/concepts",
-            JsonConceptResponse.class, false,
+            JsonConceptResponse.class,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener) {
         };
@@ -133,7 +133,7 @@ public class OpenMrsChartServer {
         Response.ErrorListener errorListener) {
         GsonRequest<JsonChart> request = new GsonRequest<JsonChart>(
             mConnectionDetails.getBuendiaApiUrl() + "/charts/" + uuid + "?v=full",
-            JsonChart.class, false,
+            JsonChart.class,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener) {
         };
