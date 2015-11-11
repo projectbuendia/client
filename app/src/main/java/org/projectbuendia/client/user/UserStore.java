@@ -79,11 +79,6 @@ public class UserStore {
         return newUser;
     }
 
-    /** Deletes a user, both locally and on the server. */
-    public JsonUser deleteUser(JsonUser user) {
-        throw new UnsupportedOperationException();
-    }
-
     private void addUserLocally(JsonUser user) {
         LOG.i("Updating user db with newly added user");
         ContentProviderClient client = App.getInstance().getContentResolver()
