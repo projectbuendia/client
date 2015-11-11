@@ -149,9 +149,9 @@ public class OpenMrsServer implements Server {
      */
     private Response.ErrorListener wrapErrorListener(
         final Response.ErrorListener errorListener) {
-        return new JsonErrorListener() {
+        return new OpenMrsErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
-                String message = extractMessage(error);
+                String message = parseResponse(error);
                 displayErrorMessage(message);
                 errorListener.onErrorResponse(new VolleyError(message, error));
             }
