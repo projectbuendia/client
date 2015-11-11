@@ -146,6 +146,7 @@ public class DbSyncHelper {
     public static ContentValues getObsValuesToInsert(
             JsonObservation observation) {
         ContentValues cvs = new ContentValues();
+        cvs.put(Observations.UUID, observation.uuid);
         cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
         cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
         cvs.put(Observations.ENCOUNTER_MILLIS, observation.timestamp.getMillis());

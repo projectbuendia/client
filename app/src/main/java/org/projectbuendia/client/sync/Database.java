@@ -112,6 +112,7 @@ public class Database extends SQLiteOpenHelper {
             + "UNIQUE (location_uuid, locale)");
 
         SCHEMAS.put(Table.OBSERVATIONS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "patient_uuid TEXT,"
             + "encounter_uuid TEXT,"
             + "encounter_millis INTEGER,"

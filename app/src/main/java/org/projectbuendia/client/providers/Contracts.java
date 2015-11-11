@@ -163,6 +163,7 @@ public class Contracts {
         String GROUP_CONTENT_TYPE = buildGroupType("observation");
         String ITEM_CONTENT_TYPE = buildItemType("observation");
 
+        String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
         String ENCOUNTER_UUID = "encounter_uuid";
         String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch

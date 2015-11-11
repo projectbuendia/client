@@ -111,6 +111,12 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                 Table.LOCATION_NAMES,
                 null));
         registry.registerDelegate(
+            Contracts.Observations.CONTENT_URI.getPath() + "/*",
+            new ItemProviderDelegate(
+                Contracts.Observations.ITEM_CONTENT_TYPE,
+                Table.OBSERVATIONS,
+                Contracts.Observations.UUID));
+        registry.registerDelegate(
             Contracts.Orders.CONTENT_URI.getPath() + "/*",
             new InsertableItemProviderDelegate(
                 Contracts.Orders.ITEM_CONTENT_TYPE,
