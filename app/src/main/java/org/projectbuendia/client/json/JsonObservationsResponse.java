@@ -11,9 +11,9 @@
 
 package org.projectbuendia.client.json;
 
-/** JSON representation of a set of encounters returned by the server. */
-public class JsonEncountersResponse {
-    public JsonEncounter[] results;
+/** JSON representation of a set of observations returned by the server. */
+public class JsonObservationsResponse {
+    public JsonObservation[] results;
     // TODO(capnfabs): Rename this to syncToken.
     /** In ISO 8601 date format. */
     public String snapshotTime;
