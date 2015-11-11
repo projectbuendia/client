@@ -21,6 +21,7 @@ import android.os.RemoteException;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.common.collect.ImmutableSet;
 
 import net.sqlcipher.database.SQLiteException;
 
@@ -45,90 +46,56 @@ public class UserStore {
     private static final Logger LOG = Logger.create();
     private static final String USER_SYNC_SAVEPOINT_NAME = "USER_SYNC_SAVEPOINT";
 
-    /** Loads the known users from local store. */
+    /**
+     * Loads the known users from local store. If there is no user in db or the application
+     * can't retrieve from there, then it fetches the users from server
+     * */
     public Set<JsonUser> loadKnownUsers()
         throws InterruptedException, ExecutionException, RemoteException,
         OperationApplicationException {
-        Cursor cursor = null;
-        ContentProviderClient client = null;
-        try {
-            client = App.getInstance().getContentResolver()
-                .acquireContentProviderClient(Users.CONTENT_URI);
-
-            // Request users from database.
-            try {
-                cursor = client.query(Users.CONTENT_URI, null, null, null, Users.FULL_NAME);
-            } catch (RemoteException e) {
-                LOG.e(e, "Error retrieving users from database");
-            }
-
-            // If no data was retrieved from database, force a sync from server.
-            if (cursor == null || cursor.getCount() == 0) {
-                LOG.i("Database contains 0 users; fetching from server");
-                return syncKnownUsers();
-            }
-            LOG.i("Found " + cursor.getCount() + " users in db");
-
-            // Initiate users from database data and return the result.
-            int fullNameColumn = cursor.getColumnIndex(Users.FULL_NAME);
-            int uuidColumn = cursor.getColumnIndex(Users.UUID);
-            Set<JsonUser> result = new HashSet<>();
-            while (cursor.moveToNext()) {
-                JsonUser user =
-                    new JsonUser(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
-                result.add(user);
-            }
-            return result;
-        } catch (SQLiteException e) {
-            LOG.w(e, "Error retrieving users from database; fetching from server");
-            return syncKnownUsers();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            if (client != null) {
-                client.release();
-            }
+        Set<JsonUser> users = getUsersFromDb();
+        if(users.isEmpty()) {
+            LOG.i("Database contains no user; fetching from server");
+            users = syncKnownUsers();
         }
+
+        LOG.i(String.format("Found %d users in db", users.size()));
+        return users;
     }
 
     /** Syncs known users with the server. */
     public Set<JsonUser> syncKnownUsers()
         throws ExecutionException, InterruptedException, RemoteException,
         OperationApplicationException {
-        RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
-        App.getServer().listUsers(null, future, future);
-        List<JsonUser> users = future.get();
-        HashSet<JsonUser> userSet = new HashSet<>();
-        userSet.addAll(users);
-
-        LOG.i("Got %d users from server; updating local database", users.size());
-        ContentProviderClient client = App.getInstance().getContentResolver()
-            .acquireContentProviderClient(Users.CONTENT_URI);
-        BuendiaProvider buendiaProvider =
-            (BuendiaProvider) (client.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
-            buendiaProvider.getDbTransactionHelper();
-        try {
-            LOG.d("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            client.applyBatch(DbSyncHelper.getUserUpdateOps(userSet, new SyncResult()));
-        } catch (RemoteException | OperationApplicationException e) {
-            LOG.d("Rolling back savepoint %s", USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.rollbackNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            throw e;
-        } finally {
-            LOG.d("Releasing savepoint %s", USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.releaseNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.close();
-            client.release();
-        }
-
-        return userSet;
+        Set<JsonUser> users = getUsersFromServer();
+        updateDatabase(users);
+        return users;
     }
 
     /** Adds a new user, both locally and on the server. */
     public JsonUser addUser(JsonNewUser user) throws VolleyError {
+        JsonUser newUser = addUserOnServer(user);
+        addUserLocally(newUser);
+        return newUser;
+    }
+
+    private void addUserLocally(JsonUser user) {
+        LOG.i("Updating user db with newly added user");
+        ContentProviderClient client = App.getInstance().getContentResolver()
+            .acquireContentProviderClient(Users.CONTENT_URI);
+        try {
+            ContentValues values = new ContentValues();
+            values.put(Users.UUID, user.id);
+            values.put(Users.FULL_NAME, user.fullName);
+            client.insert(Users.CONTENT_URI, values);
+        } catch (RemoteException e) {
+            LOG.e(e, "Failed to update database");
+        } finally {
+            client.release();
+        }
+    }
+
+    private JsonUser addUserOnServer(JsonNewUser user) throws VolleyError {
         // Define a container for the results.
         class Result {
             public JsonUser user = null;
@@ -155,6 +122,7 @@ public class UserStore {
                     latch.countDown();
                 }
             });
+
         try {
             latch.await();
         } catch (InterruptedException e) {
@@ -164,27 +132,83 @@ public class UserStore {
         if (result.error != null) {
             throw result.error;
         }
-
-        // Write the resulting user to the database.
-        LOG.i("Updating user db with newly added user");
-        ContentProviderClient client = App.getInstance().getContentResolver()
-            .acquireContentProviderClient(Users.CONTENT_URI);
-        try {
-            ContentValues values = new ContentValues();
-            values.put(Users.UUID, result.user.id);
-            values.put(Users.FULL_NAME, result.user.fullName);
-            client.insert(Users.CONTENT_URI, values);
-        } catch (RemoteException e) {
-            LOG.e(e, "Failed to update database");
-        } finally {
-            client.release();
-        }
-
-        return result.user;
+        return  result.user;
     }
 
-    /** Deletes a user, both locally and on the server. */
-    public JsonUser deleteUser(JsonUser user) {
-        throw new UnsupportedOperationException();
+    private void  updateDatabase(Set<JsonUser> users) throws RemoteException, OperationApplicationException {
+        LOG.i("Updating local database with %d users", users.size());
+        ContentProviderClient client = App.getInstance().getContentResolver()
+            .acquireContentProviderClient(Users.CONTENT_URI);
+        BuendiaProvider buendiaProvider =
+            (BuendiaProvider) (client.getLocalContentProvider());
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+            buendiaProvider.getDbTransactionHelper();
+        try {
+            LOG.d("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
+            client.applyBatch(DbSyncHelper.getUserUpdateOps(users, new SyncResult()));
+        } catch (RemoteException | OperationApplicationException e) {
+            LOG.d("Rolling back savepoint %s", USER_SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.rollbackNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
+            throw e;
+        } finally {
+            LOG.d("Releasing savepoint %s", USER_SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.releaseNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.close();
+            client.release();
+        }
+    }
+
+    private Set<JsonUser> getUsersFromServer() throws ExecutionException, InterruptedException {
+        RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
+        App.getServer().listUsers(null, future, future);
+        List<JsonUser> users = future.get();
+        LOG.i("Got %d users from server", users.size());
+        return new HashSet<>(users);
+    }
+
+    /**
+     * Retrieves a user set. If there is no user or if an error occurs, then an unmodifiable empty
+     * set is returned.
+     * */
+    private Set<JsonUser> getUsersFromDb() {
+        Cursor cursor = null;
+        ContentProviderClient client = null;
+        try {
+            client = App.getInstance().getContentResolver()
+                .acquireContentProviderClient(Users.CONTENT_URI);
+
+            // Request users from database.
+            cursor = client.query(Users.CONTENT_URI, new String[]{Users.FULL_NAME, Users.UUID},
+                null, null, Users.FULL_NAME);
+
+            // If no data was retrieved from database
+            if (cursor == null || cursor.getCount() == 0) {
+                return ImmutableSet.of();
+            }
+
+            int fullNameColumn = cursor.getColumnIndex(Users.FULL_NAME);
+            int uuidColumn = cursor.getColumnIndex(Users.UUID);
+            Set<JsonUser> result = new HashSet<>();
+            while (cursor.moveToNext()) {
+                JsonUser user =
+                    new JsonUser(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
+                result.add(user);
+            }
+            return result;
+        } catch (SQLiteException e) {
+            LOG.w(e, "Error retrieving users from database;");
+            return ImmutableSet.of();
+        } catch (RemoteException e) {
+            LOG.w(e, "Error retrieving users from database");
+            return ImmutableSet.of();
+        }finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            if (client != null) {
+                client.release();
+            }
+        }
     }
 }
