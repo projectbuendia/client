@@ -17,6 +17,7 @@ import java.util.Map;
 
 /** JSON representation of an OpenMRS Encounter; call Serializers.registerTo before use. */
 public class JsonEncounter {
+    public String patient_uuid;
     public String uuid;
     public DateTime timestamp;
     public String enterer_id;

@@ -11,14 +11,14 @@
 
 package org.projectbuendia.client.net;
 
+import android.support.annotation.Nullable;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
-import org.joda.time.Instant;
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonConceptResponse;
-import org.projectbuendia.client.json.JsonPatientRecord;
-import org.projectbuendia.client.json.JsonPatientRecordResponse;
+import org.projectbuendia.client.json.JsonObservationsResponse;
 import org.projectbuendia.client.json.Serializers;
 
 import java.util.HashMap;
@@ -45,42 +45,13 @@ public class OpenMrsChartServer {
         this.mConnectionDetails = connectionDetails;
     }
 
-    /**
-     * Retrieves charts from the server for a given patient.
-     * @param patientUuid     the UUID of the patient
-     * @param successListener a {@link Response.Listener} that handles successful chart retrieval
-     * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
-     */
-    public void getEncounters(String patientUuid,
-                              Response.Listener<JsonPatientRecord> successListener,
-                              Response.ErrorListener errorListener) {
-        GsonRequest<JsonPatientRecord> request = new GsonRequest<>(
-            mConnectionDetails.getBuendiaApiUrl() + "/encounters?patientUuid=" + patientUuid,
-            JsonPatientRecord.class,
-            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-            successListener, errorListener);
-        Serializers.registerTo(request.getGson());
-        mConnectionDetails.getVolley().addToRequestQueue(request);
-    }
-
-    /**
-     * Retrieves all observations from the server for all patients.
-     * @param successListener a {@link Response.Listener} that handles successful chart retrieval
-     * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
-     */
-    public void getAllEncounters(Response.Listener<JsonPatientRecordResponse> successListener,
-                                 Response.ErrorListener errorListener) {
-        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/encounters",
-            successListener, errorListener);
-    }
-
-    private void doEncountersRequest(
-        String url,
-        Response.Listener<JsonPatientRecordResponse> successListener,
-        Response.ErrorListener errorListener) {
-        GsonRequest<JsonPatientRecordResponse> request = new GsonRequest<>(
+    private void doObservationsRequest(
+            String url,
+            Response.Listener<JsonObservationsResponse> successListener,
+            Response.ErrorListener errorListener) {
+        GsonRequest<JsonObservationsResponse> request = new GsonRequest<>(
             url,
-            JsonPatientRecordResponse.class,
+            JsonObservationsResponse.class,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener);
         Serializers.registerTo(request.getGson());
@@ -90,19 +61,20 @@ public class OpenMrsChartServer {
     }
 
     /**
-     * Get all observations that happened in an encounter after or on lastTime. Allows a client to
-     * do incremental cache updating.
-     * @param lastTime        a joda instant representing the start time for new observations (inclusive)
+     * Get all observations that happened in an encounter after or on {@code minCreationTime}.
+     * Allows a client to do incremental cache updating.
+     * @param lastSyncToken   a sync token provided by the server on a previous sync.
      * @param successListener a listener to get the results on the event of success
      * @param errorListener   a (Volley) listener to get any errors
      */
-    public void getIncrementalEncounters(
-        Instant lastTime,
-        Response.Listener<JsonPatientRecordResponse> successListener,
-        Response.ErrorListener errorListener) {
-        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl()
-                + "/encounters?sm=" + lastTime.getMillis(),
-            successListener, errorListener);
+    public void getIncrementalObservations(
+            @Nullable String lastSyncToken,
+            Response.Listener<JsonObservationsResponse> successListener,
+            Response.ErrorListener errorListener) {
+        // TODO: URL-encode the sync token?
+        doObservationsRequest(mConnectionDetails.getBuendiaApiUrl() + "/observations" +
+                        (lastSyncToken != null ? "?since=" + lastSyncToken : ""),
+                successListener, errorListener);
     }
 
     /**

@@ -11,8 +11,10 @@
 
 package org.projectbuendia.client.json;
 
-/** JSON representation of a single patient's set of encounters; call Serializers.registerTo before use. */
-public class JsonPatientRecord {
-    public String uuid;
-    public JsonEncounter[] encounters;
+/** JSON representation of a set of observations returned by the server. */
+public class JsonObservationsResponse {
+    public JsonObservation[] results;
+    // TODO(capnfabs): Rename this to syncToken.
+    /** In ISO 8601 date format. */
+    public String snapshotTime;
 }

@@ -30,9 +30,9 @@ import org.projectbuendia.client.json.JsonChartSection;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.json.JsonLocation;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.json.JsonPatientRecord;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Form;
@@ -142,100 +142,17 @@ public class DbSyncHelper {
         return ops;
     }
 
-    /**
-     * Downloads all patients from the server and produces a list of the operations
-     * needed to bring the local database in sync with the server.
-     */
-    public static List<ContentProviderOperation> getPatientUpdateOps(SyncResult syncResult)
-        throws ExecutionException, InterruptedException {
-        final ContentResolver resolver = App.getInstance().getContentResolver();
+    /** Converts an encounter data response into appropriate inserts in the encounters table. */
+    public static ContentValues getObsValuesToInsert(
+            JsonObservation observation) {
+        ContentValues cvs = new ContentValues();
+        cvs.put(Observations.UUID, observation.uuid);
+        cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
+        cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
+        cvs.put(Observations.ENCOUNTER_MILLIS, observation.timestamp.getMillis());
+        cvs.put(Observations.CONCEPT_UUID, observation.concept_uuid);
+        cvs.put(Observations.VALUE, observation.value);
 
-        RequestFuture<List<JsonPatient>> future = RequestFuture.newFuture();
-        App.getServer().listPatients("", "", "", future, future);
-        Map<String, ContentValues> cvs = new HashMap<>();
-        for (JsonPatient patient : future.get()) {
-            cvs.put(patient.id, Patient.fromJson(patient).toContentValues());
-        }
-
-        Cursor c = resolver.query(Patients.CONTENT_URI, null, null, null, null);
-        LOG.i("Examining patients: " + c.getCount() + " local, " + cvs.size() + " from server");
-
-        List<ContentProviderOperation> ops = new ArrayList<>();
-        try {
-            while (c.moveToNext()) {
-                String uuid = Utils.getString(c, Patients.UUID);
-                Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(uuid).build();
-                syncResult.stats.numEntries++;
-
-                ContentValues cv = cvs.remove(uuid);
-                if (cv != null) {
-                    ContentValues localCv = new ContentValues();
-                    DatabaseUtils.cursorRowToContentValues(c, localCv);
-                    if (!cv.equals(localCv)) {  // record has changed on server
-                        LOG.i("  - will update patient " + uuid);
-                        ops.add(ContentProviderOperation.newUpdate(uri).withValues(cv).build());
-                        syncResult.stats.numUpdates++;
-                    }
-                } else {  // record doesn't exist on server
-                    LOG.i("  - will delete patient " + uuid);
-                    ops.add(ContentProviderOperation.newDelete(uri).build());
-                    syncResult.stats.numDeletes++;
-                }
-            }
-        } finally {
-            c.close();
-        }
-
-        for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert patient " + values.getAsString(Patients.UUID));
-            ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
-            syncResult.stats.numInserts++;
-        }
-
-        return ops;
-    }
-
-    /** Converts a chart data response into appropriate inserts in the chart table. */
-    public static List<ContentValues> getObsValuesToInsert(
-        JsonPatientRecord response, SyncResult syncResult) {
-        List<ContentValues> cvs = new ArrayList<>();
-        final String patientUuid = response.uuid;
-        for (JsonEncounter encounter : response.encounters) {
-            if (encounter.uuid == null) {
-                LOG.e("Patient %s has an encounter with uuid = null", patientUuid);
-                continue;
-            }
-            final String encounterUuid = encounter.uuid;
-            DateTime timestamp = encounter.timestamp;
-            if (timestamp == null) {
-                LOG.e("Encounter %s has timestamp = null", encounterUuid);
-                continue;
-            }
-            ContentValues base = new ContentValues();
-            base.put(Observations.PATIENT_UUID, patientUuid);
-            base.put(Observations.ENCOUNTER_UUID, encounterUuid);
-            base.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
-
-            if (encounter.observations != null) {
-                for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
-                    final String conceptUuid = (String) entry.getKey();
-                    ContentValues values = new ContentValues(base);
-                    values.put(Observations.CONCEPT_UUID, conceptUuid);
-                    values.put(Observations.VALUE, entry.getValue().toString());
-                    cvs.add(values);
-                    syncResult.stats.numInserts++;
-                }
-            }
-            if (encounter.order_uuids != null) {
-                for (String orderUuid : encounter.order_uuids) {
-                    ContentValues values = new ContentValues(base);
-                    values.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
-                    values.put(Observations.VALUE, orderUuid);
-                    cvs.add(values);
-                    syncResult.stats.numInserts++;
-                }
-            }
-        }
         return cvs;
     }
 

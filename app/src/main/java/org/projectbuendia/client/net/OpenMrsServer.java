@@ -25,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.json.JsonPatientsResponse;
+import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
@@ -42,6 +44,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
@@ -133,9 +136,9 @@ public class OpenMrsServer implements Server {
     private JsonPatient patientFromJson(JSONObject object) throws JSONException {
         JsonPatient patient = mGson.fromJson(object.toString(), JsonPatient.class);
 
-        if (!patient.gender.matches("^[MFOU]$")) {
-            LOG.e("Invalid gender from server: " + patient.gender);
-            patient.gender = "U";
+        if (!patient.sex.matches("^[MFOU]$")) {
+            LOG.e("Invalid sex from server: " + patient.sex);
+            patient.sex = "U";
         }
         return patient;
     }
@@ -331,31 +334,19 @@ public class OpenMrsServer implements Server {
         // TODO: Implement or remove (currently handled by updatePatient).
     }
 
-    @Override public void listPatients(@Nullable String filterState, @Nullable String filterLocation,
-                             @Nullable String filterQueryTerm,
-                             final Response.Listener<List<JsonPatient>> successListener,
-                             Response.ErrorListener errorListener) {
-        String query = filterQueryTerm != null ? filterQueryTerm : "";
-        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails,
-            "/patients?q=" + Utils.urlEncode(query),
-            null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    ArrayList<JsonPatient> patients = new ArrayList<>();
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            patients.add(patientFromJson(results.getJSONObject(i)));
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to convert JSON response");
-                    }
-                    successListener.onResponse(patients);
-                }
-            },
-            wrapErrorListener(errorListener)
-        );
+    @Override public void listPatients(
+            @Nullable String lastSyncToken,
+            final Response.Listener<JsonPatientsResponse> successListener,
+            Response.ErrorListener errorListener) {
+        String url = mConnectionDetails.getBuendiaApiUrl() + "/patients" +
+                (lastSyncToken != null ? "?since=" + lastSyncToken : "");
+        GsonRequest<JsonPatientsResponse> request = new GsonRequest<>(
+                url,
+                JsonPatientsResponse.class,
+                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+                successListener,
+                wrapErrorListener(errorListener));
+        Serializers.registerTo(request.getGson());
         request.setRetryPolicy(
             new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);

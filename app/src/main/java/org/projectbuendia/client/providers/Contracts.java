@@ -35,7 +35,8 @@ public class Contracts {
         OBSERVATIONS("observations"),
         ORDERS("orders"),
         PATIENTS("patients"),
-        USERS("users");
+        USERS("users"),
+        SYNC_TOKENS("sync_tokens");
 
         public String name;
 
@@ -148,14 +149,13 @@ public class Contracts {
          */
         String FULL_SYNC_END_MILLIS = "full_sync_end_millis";
 
-        /**
-         * The "snapshot time" of the last observation sync operation, according
-         * to the server's clock.  This is used to request an incremental update
-         * of observations from the server.
-         * <p/>
-         * <p>Updated after observation sync to the snapshot time reported by the server.
-         */
-        String OBS_SYNC_END_MILLIS = "obs_sync_end_millis";
+    }
+
+    public interface SyncTokens {
+        Uri CONTENT_URI = buildContentUri("sync-tokens");
+        String ITEM_CONTENT_TYPE = buildItemType("sync-token");
+        String TABLE_NAME = "table_name";
+        String SYNC_TOKEN = "sync_token";
     }
 
     public interface Observations {
@@ -163,6 +163,7 @@ public class Contracts {
         String GROUP_CONTENT_TYPE = buildGroupType("observation");
         String ITEM_CONTENT_TYPE = buildItemType("observation");
 
+        String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
         String ENCOUNTER_UUID = "encounter_uuid";
         String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch

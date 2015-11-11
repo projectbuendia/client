@@ -24,10 +24,11 @@ public class JsonPatient implements Serializable {
     public static final int GENDER_FEMALE = 2;
 
     public String uuid;  // OpenMRS record UUID
+    public boolean voided; // true if the patient has been voided.
     public String id;  // user-specified patient ID
     public String given_name;
     public String family_name;
-    public String gender;  // must be "M" or "F"
+    public String sex; // must be "M" or "F"
     public LocalDate birthdate;
     public JsonLocation assigned_location; // TODO: make this a plain uuid; API change
 
@@ -37,10 +38,11 @@ public class JsonPatient implements Serializable {
     @Override public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("uuid", uuid)
+            .add("voided", voided)
             .add("id", id)
             .add("given_name", given_name)
             .add("family_name", family_name)
-            .add("gender", gender)
+            .add("sex", sex)
             .add("birthdate", birthdate.toString())
             .add("assigned_location", assigned_location)
             .toString();

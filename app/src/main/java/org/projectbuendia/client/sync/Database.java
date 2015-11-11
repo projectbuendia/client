@@ -112,6 +112,7 @@ public class Database extends SQLiteOpenHelper {
             + "UNIQUE (location_uuid, locale)");
 
         SCHEMAS.put(Table.OBSERVATIONS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "patient_uuid TEXT,"
             + "encounter_uuid TEXT,"
             + "encounter_millis INTEGER,"
@@ -151,8 +152,11 @@ public class Database extends SQLiteOpenHelper {
         // and a value column, not all values in one row with an ever-growing number of columns.
         SCHEMAS.put(Table.MISC, ""
             + "full_sync_start_millis INTEGER,"
-            + "full_sync_end_millis INTEGER,"
-            + "obs_sync_end_millis INTEGER");
+            + "full_sync_end_millis INTEGER");
+
+        SCHEMAS.put(Table.SYNC_TOKENS, ""
+            + "table_name TEXT PRIMARY KEY NOT NULL,"
+            + "sync_token TEXT NOT NULL");
     }
 
     public Database(Context context) {

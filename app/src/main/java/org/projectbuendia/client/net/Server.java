@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
+import org.projectbuendia.client.json.JsonPatientsResponse;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
@@ -106,11 +107,10 @@ public interface Server {
     public void updatePatientLocation(String patientId, String newLocationId);
 
     /** Lists all existing patients. */
-    public void listPatients(@Nullable String filterState,
-                             @Nullable String filterLocation,
-                             @Nullable String filterQueryTerm,
-                             Response.Listener<List<JsonPatient>> successListener,
-                             Response.ErrorListener errorListener);
+    void listPatients(
+            @Nullable String syncToken,
+            Response.Listener<JsonPatientsResponse> successListener,
+            Response.ErrorListener errorListener);
 
     /** Lists all existing users. */
     public void listUsers(@Nullable String filterQueryTerm,

@@ -42,8 +42,8 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
             .setUuid(patient.uuid)
             .setGivenName(patient.given_name)
             .setFamilyName(patient.family_name)
-            .setGender("F".equals(patient.gender) ? GENDER_FEMALE :
-                "M".equals(patient.gender) ? GENDER_MALE : GENDER_UNKNOWN)
+            .setGender("F".equals(patient.sex) ? GENDER_FEMALE :
+                "M".equals(patient.sex) ? GENDER_MALE : GENDER_UNKNOWN)
             .setBirthdate(patient.birthdate)
             .setLocationUuid(
                 patient.assigned_location == null ? null : patient.assigned_location.uuid)
