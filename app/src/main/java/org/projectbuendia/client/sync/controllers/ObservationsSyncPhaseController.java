@@ -2,6 +2,7 @@ package org.projectbuendia.client.sync.controllers;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -15,7 +16,7 @@ import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.json.JsonObservationsResponse;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.sync.DbSyncHelper;
+import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.sync.SyncAdapter;
 import org.projectbuendia.client.utils.Logger;
 
@@ -51,8 +52,8 @@ public class ObservationsSyncPhaseController implements SyncPhaseController {
         SyncAdapter.storeSyncToken(providerClient, Contracts.Table.OBSERVATIONS, newSyncToken);
 
         // Remove all temporary observations now we have the real ones
-        providerClient.delete(Contracts.Observations.CONTENT_URI,
-                Contracts.Observations.TEMP_CACHE + "!=0",
+        providerClient.delete(Observations.CONTENT_URI,
+                Observations.TEMP_CACHE + "!=0",
                 new String[0]);
         timingLogger.addSplit("delete temp observations");
         timingLogger.dumpToLog();
@@ -76,17 +77,31 @@ public class ObservationsSyncPhaseController implements SyncPhaseController {
         timingLogger.addSplit("Fetched incremental encounters RPC");
         for (JsonObservation observation: response.results) {
             if (observation.voided) {
-                Uri uri = Contracts.Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
+                Uri uri = Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
                 provider.delete(uri, null, null);
                 syncResult.stats.numDeletes++;
             } else {
-                provider.insert(Contracts.Observations.CONTENT_URI,
-                        DbSyncHelper.getObsValuesToInsert(observation));
+                provider.insert(
+                        Observations.CONTENT_URI, getObsValuesToInsert(observation));
                 syncResult.stats.numInserts++;
             }
             // Add the observations from the encounter.
             timingLogger.addSplit("added incremental obs to list");
         }
         return response.snapshotTime;
+    }
+
+    /** Converts an encounter data response into appropriate inserts in the encounters table. */
+    public static ContentValues getObsValuesToInsert(
+            JsonObservation observation) {
+        ContentValues cvs = new ContentValues();
+        cvs.put(Observations.UUID, observation.uuid);
+        cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
+        cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
+        cvs.put(Observations.ENCOUNTER_MILLIS, observation.timestamp.getMillis());
+        cvs.put(Observations.CONCEPT_UUID, observation.concept_uuid);
+        cvs.put(Observations.VALUE, observation.value);
+
+        return cvs;
     }
 }
