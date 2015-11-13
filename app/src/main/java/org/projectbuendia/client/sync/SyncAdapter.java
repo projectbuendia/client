@@ -158,7 +158,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 phases.add(phase);
             }
         }
-        if (phases.isEmpty() || extras.getBoolean(SyncOption.FULL_SYNC.name())) {
+        boolean fullSync = phases.isEmpty() || extras.getBoolean(SyncOption.FULL_SYNC.name());
+        if (fullSync) {
             Collections.addAll(phases, SyncPhase.values());
         }
 
@@ -175,27 +176,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
 
         try {
-            if (extras.getBoolean(SyncOption.FULL_SYNC.name())) {
+            if (fullSync) {
                 Instant syncStartTime = Instant.now();
                 LOG.i("Recording full sync start time: " + syncStartTime);
                 storeFullSyncStartTime(provider, syncStartTime);
             }
 
-            int progressIncrement = 100/phases.size();
+            float progressIncrement = 100.0f/phases.size();
+            int completedPhases = 0;
             for (SyncPhase phase : SyncPhase.values()) {
-                if (!phases.contains(phase)) continue;
+                if (!phases.contains(phase)) {
+                    continue;
+                }
                 checkCancellation("before " + phase);
                 LOG.i("--- Begin %s ---", phase);
-                reportProgress(0, phase.message);
+                reportProgress((int) (completedPhases * progressIncrement), phase.message);
 
                 phase.controller.sync(mContentResolver, syncResult, provider);
 
                 timings.addSplit(phase.name() + " phase completed");
-                reportProgress(progressIncrement, phase.message);
+                completedPhases++;
             }
             reportProgress(100, R.string.completing_sync);
 
-            if (extras.getBoolean(SyncOption.FULL_SYNC.name())) {
+            if (fullSync) {
                 Instant syncEndTime = Instant.now();
                 LOG.i("Recording full sync end time: " + syncEndTime);
                 storeFullSyncEndTime(provider, syncEndTime);
@@ -244,8 +248,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private void reportProgress(int progressIncrement, int stringResource) {
-        reportProgress(progressIncrement, getContext().getResources().getString(stringResource));
+    private void reportProgress(int progress, @StringRes int message) {
+        String label = getContext().getResources().getString(message);
+        Intent syncProgressIntent =
+                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS, progress);
+        syncProgressIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS);
+        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS_LABEL, label);
+        getContext().sendBroadcast(syncProgressIntent);
     }
 
     private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
@@ -265,17 +275,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
         LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
-    }
-
-    private void reportProgress(int progressIncrement, @Nullable String label) {
-        Intent syncProgressIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS, progressIncrement);
-        syncProgressIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS);
-        if (label != null) {
-            syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS_LABEL, label);
-        }
-        getContext().sendBroadcast(syncProgressIntent);
     }
 
     /** Returns the server timestamp corresponding to the last observation sync. */

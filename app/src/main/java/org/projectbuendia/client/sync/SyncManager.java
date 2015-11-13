@@ -40,7 +40,15 @@ public class SyncManager {
     static final int FAILED = 3;
     static final int IN_PROGRESS = 4;
     static final int CANCELED = 5;
+    /**
+     * Intent extras using this key are integers representing the sync progress completed so far,
+     * as a percentage.
+     */
     static final String SYNC_PROGRESS = "sync-progress";
+    /**
+     * Intent extras using this key are nullable strings representing the current sync status.
+     * They are localized and are suitable for presentation to the user.
+     */
     static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
     @Nullable private final AppSettings mSettings;
@@ -111,10 +119,10 @@ public class SyncManager {
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case IN_PROGRESS:
-                    int increment = intent.getIntExtra(SYNC_PROGRESS, 0);
+                    int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
                     String label = intent.getStringExtra(SYNC_PROGRESS_LABEL);
-                    LOG.d("Sync in progress (+ %d%%, %s)", increment, label);
-                    EventBus.getDefault().post(new SyncProgressEvent(increment, label));
+                    LOG.d("Sync in progress (%d%%, %s)", progress, label);
+                    EventBus.getDefault().post(new SyncProgressEvent(progress, label));
                     break;
                 case CANCELED:
                     LOG.i("Sync was canceled.");

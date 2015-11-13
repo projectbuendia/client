@@ -15,15 +15,12 @@ import android.support.annotation.Nullable;
 
 /** An event bus event giving details on the last-reported progress of an in-progress sync. */
 public class SyncProgressEvent {
+    /** The progress completed so far, as a percentage. */
     public int progress;
+    /** A label describing the current sync status. */
     @Nullable public String label;
 
-    public SyncProgressEvent(int progress) {
-        this.progress = progress;
-        this.label = null;
-    }
-
-    public SyncProgressEvent(int progress, String label) {
+    public SyncProgressEvent(int progress, @Nullable String label) {
         this.progress = progress;
         this.label = label;
     }
