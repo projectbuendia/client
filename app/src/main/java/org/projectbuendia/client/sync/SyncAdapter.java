@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.util.TimingLogger;
 
 import com.android.volley.toolbox.RequestFuture;
@@ -61,7 +62,6 @@ import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -79,20 +79,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /** Named used during the sync process for SQL savepoints. */
     private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
 
-    /** UI messages to show while each phase of the sync is in progress. */
-    private static final Map<SyncPhase, Integer> PHASE_MESSAGES = new HashMap<>();
-
-    static {
-        PHASE_MESSAGES.put(SyncPhase.SYNC_USERS, R.string.syncing_users);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_LOCATIONS, R.string.syncing_locations);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_CHART_ITEMS, R.string.syncing_charts);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_CONCEPTS, R.string.syncing_concepts);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_PATIENTS, R.string.syncing_patients);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_OBSERVATIONS, R.string.syncing_observations);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_ORDERS, R.string.syncing_orders);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_FORMS, R.string.syncing_forms);
-    }
-
     /** Content resolver, for performing database operations. */
     private final ContentResolver mContentResolver;
     /** Tracks whether the sync has been canceled. */
@@ -103,14 +89,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * Select a phase by setting a boolean value of true for the appropriate key.
      */
     public enum SyncPhase {
-        SYNC_USERS,
-        SYNC_LOCATIONS,
-        SYNC_CHART_ITEMS,
-        SYNC_CONCEPTS,
-        SYNC_PATIENTS,
-        SYNC_OBSERVATIONS,
-        SYNC_ORDERS,
-        SYNC_FORMS
+        SYNC_USERS(R.string.syncing_users),
+        SYNC_LOCATIONS(R.string.syncing_locations),
+        SYNC_CHART_ITEMS(R.string.syncing_charts),
+        SYNC_CONCEPTS(R.string.syncing_concepts),
+        SYNC_PATIENTS(R.string.syncing_patients),
+        SYNC_OBSERVATIONS(R.string.syncing_observations),
+        SYNC_ORDERS(R.string.syncing_orders),
+        SYNC_FORMS(R.string.syncing_forms);
+
+        @StringRes
+        public final int message;
+
+        SyncPhase(int message) {
+            this.message = message;
+        }
     }
 
     public enum SyncOption {
@@ -211,7 +204,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 if (!phases.contains(phase)) continue;
                 checkCancellation("before " + phase);
                 LOG.i("--- Begin %s ---", phase);
-                reportProgress(0, PHASE_MESSAGES.get(phase));
+                reportProgress(0, phase.message);
 
                 switch (phase) {
                     // Users: Always fetch all users.  This is okay because new users
@@ -265,7 +258,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         break;
                 }
                 timings.addSplit(phase.name() + " phase completed");
-                reportProgress(progressIncrement, PHASE_MESSAGES.get(phase));
+                reportProgress(progressIncrement, phase.message);
             }
             reportProgress(100, R.string.completing_sync);
 
