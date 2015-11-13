@@ -18,10 +18,4 @@
 
     <!-- Default setting for whether to keep XForm instances locally -->
     <bool name="keep_form_instances_locally_default">false</bool>
-
-    <!-- Default setting for whether XForm submission should update the client cache -->
-    <bool name="xform_update_client_cache_default">true</bool>
-
-    <!-- Default setting for whether observations should sync incrementally -->
-    <bool name="incremental_observation_update_default">true</bool>
 </resources>
