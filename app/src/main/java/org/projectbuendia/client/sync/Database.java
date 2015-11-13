@@ -112,7 +112,11 @@ public class Database extends SQLiteOpenHelper {
             + "UNIQUE (location_uuid, locale)");
 
         SCHEMAS.put(Table.OBSERVATIONS, ""
-            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            // uuid intentionally allows null values, because temporary observations inserted
+            // locally after submitting a form don't have UUIDs. Note that PRIMARY KEY in SQLite
+            // (and many other databases) treats all NULL values as different from all other values,
+            // so it's still ok to insert multiple records with a NULL UUID.
+            + "uuid TEXT PRIMARY KEY,"
             + "patient_uuid TEXT,"
             + "encounter_uuid TEXT,"
             + "encounter_millis INTEGER,"
