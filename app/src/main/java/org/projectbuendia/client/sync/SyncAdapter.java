@@ -14,7 +14,6 @@ package org.projectbuendia.client.sync;
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
-import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -22,60 +21,41 @@ import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.TimingLogger;
 
-import com.android.volley.toolbox.RequestFuture;
-
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.JsonChart;
-import org.projectbuendia.client.json.JsonConcept;
-import org.projectbuendia.client.json.JsonConceptResponse;
-import org.projectbuendia.client.json.JsonObservation;
-import org.projectbuendia.client.json.JsonObservationsResponse;
-import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.json.JsonPatientsResponse;
-import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.providers.Contracts.ChartItems;
-import org.projectbuendia.client.providers.Contracts.ConceptNames;
-import org.projectbuendia.client.providers.Contracts.Concepts;
-import org.projectbuendia.client.providers.Contracts.LocationNames;
-import org.projectbuendia.client.providers.Contracts.Locations;
 import org.projectbuendia.client.providers.Contracts.Misc;
-import org.projectbuendia.client.providers.Contracts.Observations;
-import org.projectbuendia.client.providers.Contracts.Orders;
-import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
 import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
-import org.projectbuendia.client.user.UserManager;
+import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.FormsSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.LocationsSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.OrdersSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.PatientsSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.SyncPhaseController;
+import org.projectbuendia.client.sync.controllers.UsersSyncPhaseController;
 import org.projectbuendia.client.utils.Logger;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /** Global sync adapter for syncing all client side database caches. */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final Logger LOG = Logger.create();
-    /** RPC timeout for getting observations. */
-    private static final int OBSERVATIONS_TIMEOUT_SECS = 180;
+
     /** Named used during the sync process for SQL savepoints. */
     private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
 
@@ -89,20 +69,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * Select a phase by setting a boolean value of true for the appropriate key.
      */
     public enum SyncPhase {
-        SYNC_USERS(R.string.syncing_users),
-        SYNC_LOCATIONS(R.string.syncing_locations),
-        SYNC_CHART_ITEMS(R.string.syncing_charts),
-        SYNC_CONCEPTS(R.string.syncing_concepts),
-        SYNC_PATIENTS(R.string.syncing_patients),
-        SYNC_OBSERVATIONS(R.string.syncing_observations),
-        SYNC_ORDERS(R.string.syncing_orders),
-        SYNC_FORMS(R.string.syncing_forms);
+        SYNC_USERS(R.string.syncing_users, new UsersSyncPhaseController()),
+        SYNC_LOCATIONS(R.string.syncing_locations, new LocationsSyncPhaseController()),
+        SYNC_CHART_ITEMS(R.string.syncing_charts, new ChartsSyncPhaseController()),
+        SYNC_CONCEPTS(R.string.syncing_concepts, new ConceptsSyncPhaseController()),
+        SYNC_PATIENTS(R.string.syncing_patients, new PatientsSyncPhaseController()),
+        SYNC_OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncPhaseController()),
+        SYNC_ORDERS(R.string.syncing_orders, new OrdersSyncPhaseController()),
+        SYNC_FORMS(R.string.syncing_forms, new FormsSyncPhaseController());
 
         @StringRes
         public final int message;
+        public final SyncPhaseController controller;
 
-        SyncPhase(int message) {
+        SyncPhase(int message, SyncPhaseController controller) {
             this.message = message;
+            this.controller = controller;
         }
     }
 
@@ -206,57 +188,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 LOG.i("--- Begin %s ---", phase);
                 reportProgress(0, phase.message);
 
-                switch (phase) {
-                    // Users: Always fetch all users.  This is okay because new users
-                    // aren't added all that often and the set of users is fairly small.
-                    case SYNC_USERS:
-                        updateUsers(provider, syncResult);
-                        break;
+                phase.controller.sync(mContentResolver, syncResult, provider);
 
-                    // Locations: Always fetch everything.  This is okay because
-                    // profiles (and hence locations) change infrequently.
-                    case SYNC_LOCATIONS:
-                        updateLocations(provider, syncResult);
-                        break;
-
-                    // Chart layouts: Always fetch everything.  This is okay because
-                    // profiles (and hence chart layouts) change infrequently.
-                    case SYNC_CHART_ITEMS:
-                        updateChartItems(provider, syncResult);
-                        break;
-
-                    // Concepts: Always fetch all concepts.  This is okay because
-                    // profiles (and hence form definitions) change infrequently.
-                    case SYNC_CONCEPTS:
-                        updateConcepts(provider, syncResult);
-                        break;
-
-                    // Patients: Always fetch all patients.  This won't scale;
-                    // incremental fetch would help a lot.
-                    case SYNC_PATIENTS:
-                        updatePatients(provider, syncResult);
-                        break;
-
-                    // Observations: Incremental fetch and full fetch are the same process.
-                    case SYNC_OBSERVATIONS:
-                        updateObservations(provider, syncResult);
-                        break;
-
-                    // Orders: Currently we always fetch all orders.  This won't scale;
-                    // incremental fetch would help a lot.  If we link orders to
-                    // encounters then we can use a common incremental sync
-                    // mechanism observations and orders.
-                    // TODO: Store and retrieve orders as associated with encounters.
-                    case SYNC_ORDERS:
-                        updateOrders(provider, syncResult);
-                        break;
-
-                    // Forms: We always fetch all forms.  This is okay because
-                    // there are only a few forms, usually less than 10.
-                    case SYNC_FORMS:
-                        updateForms(provider, syncResult);
-                        break;
-                }
                 timings.addSplit(phase.name() + " phase completed");
                 reportProgress(progressIncrement, phase.message);
             }
@@ -322,148 +255,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
-    private void updateUsers(final ContentProviderClient provider, SyncResult syncResult)
-        throws InterruptedException, ExecutionException, RemoteException,
-        OperationApplicationException, UserManager.UserSyncException {
-        App.getUserManager().syncKnownUsersSynchronously();
-    }
-
-    private void updateLocations(final ContentProviderClient provider, SyncResult syncResult)
-        throws InterruptedException, ExecutionException, RemoteException,
-        OperationApplicationException {
-        ArrayList<ContentProviderOperation> ops = DbSyncHelper.getLocationUpdateOps(syncResult);
-        checkCancellation("before applying location updates");
-        LOG.i("Applying batch update of locations.");
-        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
-        mContentResolver.notifyChange(Locations.CONTENT_URI, null, false);
-        mContentResolver.notifyChange(LocationNames.CONTENT_URI, null, false);
-    }
-
-    private void updateChartItems(final ContentProviderClient provider, SyncResult syncResult)
-        throws InterruptedException, ExecutionException, RemoteException,
-        OperationApplicationException {
-        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        RequestFuture<JsonChart> future = RequestFuture.newFuture();
-        chartServer.getChartStructure(AppModel.CHART_UUID, future, future); // errors handled by caller
-        final JsonChart chart = future.get();
-
-        // When we do a chart update, delete everything first, then insert all the new rows.
-        checkCancellation("before applying chart structure deletions");
-        provider.delete(ChartItems.CONTENT_URI, null, null);
-        syncResult.stats.numDeletes++;
-        checkCancellation("before applying chart structure insertions");
-        provider.applyBatch(DbSyncHelper.getChartUpdateOps(chart, syncResult));
-    }
-
-    private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
-        throws InterruptedException, ExecutionException, RemoteException {
-        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        RequestFuture<JsonConceptResponse> future = RequestFuture.newFuture();
-        chartServer.getConcepts(future, future); // errors handled by caller
-        ArrayList<ContentValues> conceptInserts = new ArrayList<>();
-        ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
-        for (JsonConcept concept : future.get().results) {
-            checkCancellation("while determining concepts to insert");
-            // This is safe because we have implemented insert on the content provider
-            // with replace.
-            ContentValues conceptInsert = new ContentValues();
-            conceptInsert.put(Concepts.UUID, concept.uuid);
-            conceptInsert.put(Concepts.XFORM_ID, concept.xform_id);
-            conceptInsert.put(Concepts.CONCEPT_TYPE, concept.type.name());
-            conceptInserts.add(conceptInsert);
-            syncResult.stats.numInserts++;
-            for (Map.Entry<String, String> entry : concept.names.entrySet()) {
-                checkCancellation("while determining concept names to insert");
-                String locale = entry.getKey();
-                if (locale == null) {
-                    LOG.e("null locale in concept name rpc for " + concept);
-                    continue;
-                }
-                String name = entry.getValue();
-                if (name == null) {
-                    LOG.e("null name in concept name rpc for " + concept);
-                    continue;
-                }
-                ContentValues conceptNameInsert = new ContentValues();
-                conceptNameInsert.put(ConceptNames.CONCEPT_UUID, concept.uuid);
-                conceptNameInsert.put(ConceptNames.LOCALE, locale);
-                conceptNameInsert.put(ConceptNames.NAME, name);
-                conceptNameInserts.add(conceptNameInsert);
-                syncResult.stats.numInserts++;
-            }
-        }
-        checkCancellation("before inserting concepts");
-        provider.bulkInsert(Concepts.CONTENT_URI,
-            conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
-        checkCancellation("before inserting concept names");
-        provider.bulkInsert(ConceptNames.CONTENT_URI,
-            conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
-
-        ChartDataHelper.invalidateLoadedConceptData();
-    }
-
-    private void updatePatients(ContentProviderClient providerClient, SyncResult syncResult)
-        throws InterruptedException, ExecutionException, RemoteException,
-        OperationApplicationException {
-        String syncToken = getLastSyncToken(providerClient, Contracts.Table.PATIENTS);
-        RequestFuture<JsonPatientsResponse> future = RequestFuture.newFuture();
-        App.getServer().listPatients(syncToken, future, future);
-        JsonPatientsResponse response = future.get();
-        ArrayList<ContentProviderOperation> ops = getPatientUpdateOps(response.results, syncResult);
-        checkCancellation("while processing patient data from server");
-        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
-        LOG.i("Finished updating patients (" + ops.size() + " db ops)");
-        mContentResolver.notifyChange(Patients.CONTENT_URI, null, false);
-
-        storeSyncToken(providerClient, Contracts.Table.PATIENTS, response.snapshotTime);
-    }
-
-    private void updateObservations(final ContentProviderClient provider, SyncResult syncResult)
-        throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
-        checkCancellation("before requesting observations");
-        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        // Get the charts asynchronously using volley.
-        RequestFuture<JsonObservationsResponse> listFuture = RequestFuture.newFuture();
-
-        TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
-        checkCancellation("before updating observations");
-        String lastSyncToken = getLastSyncToken(provider, Contracts.Table.OBSERVATIONS);
-        String newSyncToken = updateObservations(
-                lastSyncToken, provider, syncResult, chartServer, listFuture, timingLogger);
-        timingLogger.addSplit("finished observation update");
-        // This is only safe transactionally if we can rely on the entire sync being transactional.
-        storeSyncToken(provider, Contracts.Table.OBSERVATIONS, newSyncToken);
-
-        checkCancellation("before deleting temporary observations");
-        // Remove all temporary observations now we have the real ones
-        provider.delete(Observations.CONTENT_URI,
-            Observations.TEMP_CACHE + "!=0",
-            new String[0]);
-        timingLogger.addSplit("delete temp observations");
-        timingLogger.dumpToLog();
-    }
-
-    private void updateOrders(final ContentProviderClient provider, SyncResult syncResult)
-        throws InterruptedException, ExecutionException, RemoteException,
-        OperationApplicationException {
-        ArrayList<ContentProviderOperation> ops = DbSyncHelper.getOrderUpdateOps(syncResult);
-        checkCancellation("before applying order updates");
-        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
-        LOG.i("Finished updating orders (" + ops.size() + " db ops)");
-        mContentResolver.notifyChange(Orders.CONTENT_URI, null, false);
-    }
-
-    private void updateForms(ContentProviderClient provider, SyncResult syncResult)
-        throws InterruptedException, ExecutionException, RemoteException,
-        OperationApplicationException {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        ops.addAll(DbSyncHelper.getFormUpdateOps(syncResult));
-        checkCancellation("while downloading form list from server");
-        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
-        LOG.i("Finished updating forms (" + ops.size() + " db ops)");
-        mContentResolver.notifyChange(Contracts.Forms.CONTENT_URI, null, false);
-    }
-
     private void storeFullSyncEndTime(ContentProviderClient provider, Instant syncEndTime)
         throws RemoteException {
         ContentValues cv = new ContentValues();
@@ -489,7 +280,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     /** Returns the server timestamp corresponding to the last observation sync. */
     @Nullable
-    private String getLastSyncToken(ContentProviderClient provider, Contracts.Table table)
+    public static String getLastSyncToken(ContentProviderClient provider, Contracts.Table table)
             throws RemoteException {
         try(Cursor c = provider.query(
                 SyncTokens.CONTENT_URI.buildUpon().appendPath(table.name).build(),
@@ -510,71 +301,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    /**
-     * Updates observations, possibly incrementally.
-     * NOTE: this logic relies upon observations inserts being an upsert.
-     */
-    private String updateObservations(
-            @Nullable String lastSyncToken, ContentProviderClient provider, SyncResult syncResult,
-            OpenMrsChartServer chartServer, RequestFuture<JsonObservationsResponse> listFuture,
-            TimingLogger timingLogger)
-            throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
-        LOG.d("requesting incremental encounters");
-        chartServer.getIncrementalObservations(lastSyncToken, listFuture, listFuture);
-        LOG.d("awaiting parsed incremental response");
-        final JsonObservationsResponse response =
-                listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
-        LOG.d("got incremental response");
-        timingLogger.addSplit("Fetched incremental encounters RPC");
-        checkCancellation("before processing observation RPC results");
-        for (JsonObservation observation: response.results) {
-            if (observation.voided) {
-                Uri uri = Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
-                provider.delete(uri, null, null);
-                syncResult.stats.numDeletes++;
-            } else {
-                provider.insert(Observations.CONTENT_URI,
-                        DbSyncHelper.getObsValuesToInsert(observation));
-                syncResult.stats.numInserts++;
-            }
-            // Add the observations from the encounter.
-            timingLogger.addSplit("added incremental obs to list");
-        }
-        return response.snapshotTime;
-    }
-
-    /**
-     * Downloads all patients from the server and produces a list of the operations
-     * needed to bring the local database in sync with the server.
-     */
-    private static ArrayList<ContentProviderOperation> getPatientUpdateOps(
-            JsonPatient[] patients, SyncResult syncResult)
-            throws ExecutionException, InterruptedException {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        for (JsonPatient patient : patients) {
-            if (patient.voided) {
-                syncResult.stats.numDeletes++;
-                ops.add(makeDeleteOpForPatientUuid(patient.uuid));
-            } else {
-                syncResult.stats.numInserts++;
-                ops.add(makeInsertOpForPatient(patient));
-            }
-        }
-
-        return ops;
-    }
-
-    private static ContentProviderOperation makeInsertOpForPatient(JsonPatient patient) {
-        return ContentProviderOperation.newInsert(Patients.CONTENT_URI)
-                .withValues(Patient.fromJson(patient).toContentValues()).build();
-    }
-
-    private static ContentProviderOperation makeDeleteOpForPatientUuid(String uuid) {
-        Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(uuid).build();
-        return ContentProviderOperation.newDelete(uri).build();
-    }
-
-    private void storeSyncToken(
+    public static void storeSyncToken(
             ContentProviderClient provider, Contracts.Table table, String syncToken)
             throws RemoteException {
         ContentValues cv = new ContentValues();
