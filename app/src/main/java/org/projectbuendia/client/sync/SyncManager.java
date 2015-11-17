@@ -79,14 +79,9 @@ public class SyncManager {
         SyncAccountService.startFullSync();
     }
 
-    /**
-     * Starts an incremental sync of observations.
-     * Does nothing if incremental observation update is disabled.
-     */
-    public void startIncrementalObsSync() {
-        if (mSettings == null || mSettings.getIncrementalObservationUpdate()) {
-            SyncAccountService.startIncrementalObsSync();
-        }
+    /** Starts a sync of only observations. */
+    public void startObservationsSync() {
+        SyncAccountService.startObservationsSync();
     }
 
     /**

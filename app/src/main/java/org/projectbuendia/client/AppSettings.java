@@ -60,24 +60,6 @@ public class AppSettings {
     }
 
     /**
-     * Gets the flag that controls whether to immediately apply edits
-     * to the local database when an XForm is submitted to the server.
-     */
-    public boolean getXformUpdateClientCache() {
-        return mSharedPreferences.getBoolean("xform_update_client_cache",
-            mResources.getBoolean(R.bool.xform_update_client_cache_default));
-    }
-
-    /**
-     * Gets the flag that controls whether to update observations with
-     * an incremental fetch instead of fetching all the observations.
-     */
-    public boolean getIncrementalObservationUpdate() {
-        return mSharedPreferences.getBoolean("incremental_observation_update",
-            mResources.getBoolean(R.bool.incremental_observation_update_default));
-    }
-
-    /**
      * Gets the minimum period between checks for APK updates, in seconds.
      * Repeated calls to UpdateManager.checkForUpdate() within this period
      * will not check the package server for new updates.

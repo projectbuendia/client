@@ -221,7 +221,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
                 OdkActivityLauncher.sendOdkResultToServer(
                     PatientChartActivity.this, mSettings,
-                    patientUuid, mSettings.getXformUpdateClientCache(), resultCode, data);
+                    patientUuid, resultCode, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {

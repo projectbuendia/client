@@ -249,7 +249,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // controller is suspended the cycle stops; and also since mCurrentPhaseId can
                 // only have one value, only one such cycle can be active at any given time.
                 if (mCurrentPhaseId == phaseId) {
-                    mSyncManager.startIncrementalObsSync();
+                    mSyncManager.startObservationsSync();
                     handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
                 }
             }

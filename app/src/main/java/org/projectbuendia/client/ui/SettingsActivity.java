@@ -143,7 +143,6 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /** When the UI has two panes, this fragment shows just the general settings. */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
         @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -153,7 +152,6 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /** When the UI has two panes, this fragment shows just the advanced settings. */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class AdvancedPreferenceFragment extends PreferenceFragment {
         @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -163,7 +161,6 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /** When the UI has two panes, this fragment shows just the developer settings. */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class DeveloperPreferenceFragment extends PreferenceFragment {
         @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -247,9 +244,7 @@ public class SettingsActivity extends PreferenceActivity {
      * "simplified" settings UI should be shown.
      */
     private static boolean isSimplePreferences(Context context) {
-        return ALWAYS_SIMPLE_PREFS
-            || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
-            || !isXLargeTablet(context);
+        return !isXLargeTablet(context);
     }
 
     /** Sets up all the preferences in an activity. */

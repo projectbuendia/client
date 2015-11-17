@@ -111,7 +111,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
             Contracts.Patients.CONTENT_URI, patient.toContentValues());
 
         // Perform incremental observation sync so we get admission date.
-        SyncAccountService.startIncrementalObsSync();
+        SyncAccountService.startObservationsSync();
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(

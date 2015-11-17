@@ -91,8 +91,8 @@ public class SyncAccountService extends Service {
         return new Account(ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
     }
 
-    /** Starts an incremental sync of just the observations. */
-    public static void startIncrementalObsSync() {
+    /** Starts an sync of just the observations. */
+    public static void startObservationsSync() {
         // Start by canceling any existing syncs, which may delay this one.
         ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
 
