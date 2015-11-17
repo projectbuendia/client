@@ -316,10 +316,6 @@
   <string name="pref_title_apk_update_interval_secs">APK update check interval (seconds)</string>
   <string name="pref_title_store_form_instances">Store form instances locally</string>
   <string name="pref_desc_store_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
-  <string name="pref_title_xform_update_client_cache">Update local observations on submission</string>
-  <string name="pref_desc_xform_update_client_cache">This gives a better UI experience but is an experimental feature.</string>
-  <string name="pref_title_incremental_observation_update">Sync observations incrementally</string>
-  <string name="pref_desc_incremental_observation_update">This is much quicker but still experimental.</string>
   <string name="pref_title_require_wifi">Require wifi connection</string>
   <string name="pref_desc_require_wifi">Turn this off to allow the app to work with non-wifi (emulated or Bluetooth tethered) networking.</string>
 
