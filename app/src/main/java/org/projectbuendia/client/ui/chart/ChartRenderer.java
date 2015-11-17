@@ -1,5 +1,9 @@
 package org.projectbuendia.client.ui.chart;
 
+import android.app.AlertDialog;
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.webkit.WebChromeClient;
@@ -43,7 +47,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
-public class ChartRenderer {
+public class ChartRenderer{
     static PebbleEngine sEngine;
     private static final Logger LOG = Logger.create();
 
@@ -85,11 +89,33 @@ public class ChartRenderer {
 
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
-        mView.setWebChromeClient(new WebChromeClient());
+
+        mView.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result)
+            {
+                new AlertDialog.Builder(mView.getContext())
+                        .setTitle(mView.getContext().getString(R.string.observation))
+                        .setMessage(message)
+                        .setPositiveButton(android.R.string.ok,
+                                new AlertDialog.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int which)
+                                    {
+                                        result.confirm();
+                                    }
+                                })
+                        .setCancelable(false)
+                        .create()
+                        .show();
+                return true;
+            }
+        });
+
         String html = new GridHtmlGenerator(chart, latestObservations, observations, orders,
                                             admissionDate, firstSymptomsDate).getHtml();
         mView.loadDataWithBaseURL("file:///android_asset/", html,
-            "text/html; charset=utf-8", "utf-8", null);
+                "text/html; charset=utf-8", "utf-8", null);
         mView.setWebContentsDebuggingEnabled(true);
 
         mLastRenderedObs = observations;
