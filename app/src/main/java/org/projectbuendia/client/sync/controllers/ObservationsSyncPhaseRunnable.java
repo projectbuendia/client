@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
  * Handles syncing observations. Uses an incremental sync mechanism.
  */
 // TODO: wrap this class in something that handles the core incremental sync behaviour.
-public class ObservationsSyncPhaseController implements SyncPhaseController {
+public class ObservationsSyncPhaseRunnable implements SyncPhaseRunnable {
 
     /** RPC timeout for getting observations. */
     private static final int OBSERVATIONS_TIMEOUT_SECS = 180;

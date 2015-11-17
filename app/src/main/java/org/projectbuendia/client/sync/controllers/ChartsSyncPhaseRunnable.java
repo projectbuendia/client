@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * Handles syncing charts. Always fetches everything. This is okay because the full set of chart
  * layouts is usually fairly small in size.
  */
-public class ChartsSyncPhaseController implements SyncPhaseController {
+public class ChartsSyncPhaseRunnable implements SyncPhaseRunnable {
     private static final Logger LOG = Logger.create();
 
     @Override

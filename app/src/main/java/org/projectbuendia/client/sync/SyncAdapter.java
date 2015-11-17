@@ -35,15 +35,15 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
 import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
-import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseController;
-import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseController;
-import org.projectbuendia.client.sync.controllers.FormsSyncPhaseController;
-import org.projectbuendia.client.sync.controllers.LocationsSyncPhaseController;
-import org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseController;
-import org.projectbuendia.client.sync.controllers.OrdersSyncPhaseController;
-import org.projectbuendia.client.sync.controllers.PatientsSyncPhaseController;
-import org.projectbuendia.client.sync.controllers.SyncPhaseController;
-import org.projectbuendia.client.sync.controllers.UsersSyncPhaseController;
+import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.FormsSyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.LocationsSyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.OrdersSyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.PatientsSyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.SyncPhaseRunnable;
+import org.projectbuendia.client.sync.controllers.UsersSyncPhaseRunnable;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.Collections;
@@ -69,22 +69,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * Select a phase by setting a boolean value of true for the appropriate key.
      */
     public enum SyncPhase {
-        SYNC_USERS(R.string.syncing_users, new UsersSyncPhaseController()),
-        SYNC_LOCATIONS(R.string.syncing_locations, new LocationsSyncPhaseController()),
-        SYNC_CHART_ITEMS(R.string.syncing_charts, new ChartsSyncPhaseController()),
-        SYNC_CONCEPTS(R.string.syncing_concepts, new ConceptsSyncPhaseController()),
-        SYNC_PATIENTS(R.string.syncing_patients, new PatientsSyncPhaseController()),
-        SYNC_OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncPhaseController()),
-        SYNC_ORDERS(R.string.syncing_orders, new OrdersSyncPhaseController()),
-        SYNC_FORMS(R.string.syncing_forms, new FormsSyncPhaseController());
+        SYNC_USERS(R.string.syncing_users, new UsersSyncPhaseRunnable()),
+        SYNC_LOCATIONS(R.string.syncing_locations, new LocationsSyncPhaseRunnable()),
+        SYNC_CHART_ITEMS(R.string.syncing_charts, new ChartsSyncPhaseRunnable()),
+        SYNC_CONCEPTS(R.string.syncing_concepts, new ConceptsSyncPhaseRunnable()),
+        SYNC_PATIENTS(R.string.syncing_patients, new PatientsSyncPhaseRunnable()),
+        SYNC_OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncPhaseRunnable()),
+        SYNC_ORDERS(R.string.syncing_orders, new OrdersSyncPhaseRunnable()),
+        SYNC_FORMS(R.string.syncing_forms, new FormsSyncPhaseRunnable());
 
         @StringRes
         public final int message;
-        public final SyncPhaseController controller;
+        public final SyncPhaseRunnable runnable;
 
-        SyncPhase(int message, SyncPhaseController controller) {
+        SyncPhase(int message, SyncPhaseRunnable runnable) {
             this.message = message;
-            this.controller = controller;
+            this.runnable = runnable;
         }
     }
 
@@ -192,7 +192,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 LOG.i("--- Begin %s ---", phase);
                 reportProgress((int) (completedPhases * progressIncrement), phase.message);
 
-                phase.controller.sync(mContentResolver, syncResult, provider);
+                phase.runnable.sync(mContentResolver, syncResult, provider);
 
                 timings.addSplit(phase.name() + " phase completed");
                 completedPhases++;

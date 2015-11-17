@@ -22,7 +22,7 @@ import java.util.Map;
  * Handles syncing concepts. All concepts are fetched everytime. This is okay because concepts are
  * not a particularly huge data set.
  */
-public class ConceptsSyncPhaseController implements SyncPhaseController {
+public class ConceptsSyncPhaseRunnable implements SyncPhaseRunnable {
     private static final Logger LOG = Logger.create();
 
     @Override

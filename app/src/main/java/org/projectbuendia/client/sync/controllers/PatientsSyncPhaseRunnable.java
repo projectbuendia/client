@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutionException;
  * Handles syncing patients. Uses an incremental sync mechanism.
  */
 // TODO: wrap this class in something that handles the core incremental sync behaviour.
-public class PatientsSyncPhaseController implements SyncPhaseController {
+public class PatientsSyncPhaseRunnable implements SyncPhaseRunnable {
     private static final Logger LOG = Logger.create();
 
     @Override

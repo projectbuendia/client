@@ -23,10 +23,10 @@ import java.util.concurrent.ExecutionException;
 /**
  * Handles syncing orders. Currently we always fetch all orders. This won't scale; incremental
  * fetch would help a lot.
- * TODO: Use a similar mechanism to {@link ObservationsSyncPhaseController} to implement incremental
+ * TODO: Use a similar mechanism to {@link ObservationsSyncPhaseRunnable} to implement incremental
  * sync for orders.
  */
-public class OrdersSyncPhaseController implements SyncPhaseController {
+public class OrdersSyncPhaseRunnable implements SyncPhaseRunnable {
     private static final Logger LOG = Logger.create();
 
     @Override
