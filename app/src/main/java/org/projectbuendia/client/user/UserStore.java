@@ -12,6 +12,7 @@
 package org.projectbuendia.client.user;
 
 import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
@@ -28,12 +29,13 @@ import net.sqlcipher.database.SQLiteException;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.sync.DbSyncHelper;
 import org.projectbuendia.client.providers.BuendiaProvider;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Users;
 import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -108,20 +110,22 @@ public class UserStore {
         // returned.
         final CountDownLatch latch = new CountDownLatch(1);
         App.getServer().addUser(
-            user,
-            new Response.Listener<JsonUser>() {
-                @Override public void onResponse(JsonUser response) {
-                    result.user = response;
-                    latch.countDown();
-                }
-            },
-            new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "Unexpected error adding user");
-                    result.error = error;
-                    latch.countDown();
-                }
-            });
+                user,
+                new Response.Listener<JsonUser>() {
+                    @Override
+                    public void onResponse(JsonUser response) {
+                        result.user = response;
+                        latch.countDown();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        LOG.e(error, "Unexpected error adding user");
+                        result.error = error;
+                        latch.countDown();
+                    }
+                });
 
         try {
             latch.await();
@@ -146,7 +150,7 @@ public class UserStore {
         try {
             LOG.d("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            client.applyBatch(DbSyncHelper.getUserUpdateOps(users, new SyncResult()));
+            client.applyBatch(getUserUpdateOps(users, new SyncResult()));
         } catch (RemoteException | OperationApplicationException e) {
             LOG.d("Rolling back savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.rollbackNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
@@ -210,5 +214,22 @@ public class UserStore {
                 client.release();
             }
         }
+    }
+
+    /** Given a set of users, replaces the current set of users with users from that set. */
+    private static ArrayList<ContentProviderOperation> getUserUpdateOps(
+            Set<JsonUser> response, SyncResult syncResult) {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        // Delete all users before inserting.
+        ops.add(ContentProviderOperation.newDelete(Contracts.Users.CONTENT_URI).build());
+        // TODO: Update syncResult delete counts.
+        for (JsonUser user : response) {
+            ops.add(ContentProviderOperation.newInsert(Contracts.Users.CONTENT_URI)
+                    .withValue(Contracts.Users.UUID, user.id)
+                    .withValue(Contracts.Users.FULL_NAME, user.fullName)
+                    .build());
+            syncResult.stats.numInserts++;
+        }
+        return ops;
     }
 }
