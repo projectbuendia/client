@@ -487,6 +487,9 @@ public class OdkActivityLauncher {
         //      <value>1066^NO^99DCT</value>
 
         ContentValues common = new ContentValues();
+        // It's critical that UUID is {@code null} for temporary observations, so we make it
+        // explicit here. See {@link Contracts.Observations.UUID} for details.
+        common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
 
         TreeElement encounter = savedRoot.getChild("encounter", 0);
@@ -508,7 +511,6 @@ public class OdkActivityLauncher {
                 ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
             common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
             common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
-            common.put(Contracts.Observations.TEMP_CACHE, 1);
         } catch (IllegalArgumentException e) {
             LOG.e("Could not parse datetime" + dateTimeValue.getValue());
             return;

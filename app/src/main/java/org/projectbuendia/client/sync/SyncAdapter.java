@@ -446,7 +446,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         checkCancellation("before deleting temporary observations");
         // Remove all temporary observations now we have the real ones
         provider.delete(Observations.CONTENT_URI,
-            Observations.TEMP_CACHE + "!=0",
+            Observations.UUID + " IS NULL",
             new String[0]);
         timingLogger.addSplit("delete temp observations");
         timingLogger.dumpToLog();
