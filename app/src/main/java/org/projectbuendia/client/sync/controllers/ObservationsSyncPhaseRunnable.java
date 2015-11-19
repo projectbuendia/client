@@ -68,26 +68,30 @@ public class ObservationsSyncPhaseRunnable implements SyncPhaseRunnable {
             OpenMrsChartServer chartServer, RequestFuture<JsonObservationsResponse> listFuture,
             TimingLogger timingLogger)
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
-        LOG.d("requesting incremental encounters");
+        LOG.d("Requesting Observations");
         chartServer.getIncrementalObservations(lastSyncToken, listFuture, listFuture);
-        LOG.d("awaiting parsed incremental response");
+        LOG.d("Awaiting parsed observations response");
         final JsonObservationsResponse response =
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
-        LOG.d("got incremental response");
+        LOG.d("Got JSON Observations response");
         timingLogger.addSplit("Fetched incremental encounters RPC");
+        int deletes = 0;
+        int inserts = 0;
         for (JsonObservation observation: response.results) {
             if (observation.voided) {
                 Uri uri = Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
                 provider.delete(uri, null, null);
-                syncResult.stats.numDeletes++;
+                deletes++;
             } else {
-                provider.insert(
-                        Observations.CONTENT_URI, getObsValuesToInsert(observation));
-                syncResult.stats.numInserts++;
+                provider.insert(Observations.CONTENT_URI, getObsValuesToInsert(observation));
+                inserts++;
             }
             // Add the observations from the encounter.
             timingLogger.addSplit("added incremental obs to list");
         }
+        LOG.d("Observations done! Inserts: %d, Deletes: %d", inserts, deletes);
+        syncResult.stats.numInserts += inserts;
+        syncResult.stats.numDeletes += deletes;
         return response.snapshotTime;
     }
 
