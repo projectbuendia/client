@@ -13,6 +13,7 @@ package org.projectbuendia.client.json;
 
 public class JsonOrder {
     public String uuid;
+    public boolean voided;
     public String patient_uuid;
     public String instructions;
     public Long start_millis;

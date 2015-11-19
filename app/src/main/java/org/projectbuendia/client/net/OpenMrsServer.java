@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.json.JsonOrdersResponse;
 import org.projectbuendia.client.json.JsonPatientsResponse;
 import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.models.ConceptUuids;
@@ -497,29 +498,21 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override public void listOrders(final Response.Listener<List<JsonOrder>> successListener,
-                           Response.ErrorListener errorListener) {
-        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails, "/orders",
-            null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    ArrayList<JsonOrder> orders = new ArrayList<>();
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            JSONObject result = results.getJSONObject(i);
-                            orders.add(mGson.fromJson(result.toString(), JsonOrder.class));
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
-                    }
-                    successListener.onResponse(orders);
-                }
-            },
-            wrapErrorListener(errorListener)
-        );
-        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
+    @Override public void listOrders(
+            @Nullable String lastSyncToken,
+            final Response.Listener<JsonOrdersResponse> successListener,
+            Response.ErrorListener errorListener) {
+        String url = mConnectionDetails.getBuendiaApiUrl() + "/orders" +
+                (lastSyncToken != null ? "?since=" + lastSyncToken : "");
+        GsonRequest<JsonOrdersResponse> request = new GsonRequest<>(
+                url,
+                JsonOrdersResponse.class,
+                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+                successListener,
+                wrapErrorListener(errorListener));
+        Serializers.registerTo(request.getGson());
+        request.setRetryPolicy(
+                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 

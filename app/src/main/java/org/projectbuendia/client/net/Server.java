@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
+import org.projectbuendia.client.json.JsonOrdersResponse;
 import org.projectbuendia.client.json.JsonPatientsResponse;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
@@ -155,8 +156,10 @@ public interface Server {
                               Response.ErrorListener errorListener);
 
     /** Lists all existing orders. */
-    public void listOrders(Response.Listener<List<JsonOrder>> successListener,
-                           Response.ErrorListener errorListener);
+    void listOrders(
+            @Nullable String lastSyncToken,
+            Response.Listener<JsonOrdersResponse> successListener,
+            Response.ErrorListener errorListener);
 
     /** Adds an order for a patient. */
     void addOrder(Order order,
