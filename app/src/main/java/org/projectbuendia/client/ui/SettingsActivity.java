@@ -73,8 +73,7 @@ public class SettingsActivity extends PreferenceActivity {
     static final Preference.OnPreferenceChangeListener sPrefListener =
         new Preference.OnPreferenceChangeListener() {
             @Override public boolean onPreferenceChange(Preference pref, Object value) {
-
-
+                //Enable sync
                 Account account = new Account(BuildConfig.ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
                 ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 1);
                 ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
