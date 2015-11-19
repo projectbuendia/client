@@ -161,6 +161,8 @@ def requireWifi = project.requireWifi ?: 'false';
 // database unencrypted so that it can be easily inspected using Stetho.
 def encryptionPassword = project.encryptionPassword ?: '';
 
+def syncAccountName = "sync";
+
 logger.info('Default server hostname: ${server}')
 logger.info("Default OpenMRS root URL: ${openmrsRootUrl}")
 logger.info("Default OpenMRS user: ${openmrsUser}")
@@ -208,6 +210,7 @@ android {
         buildConfigField 'String', 'CONTENT_AUTHORITY', '"' + contentAuthority + '"'
         resValue 'string', 'account_type', appId
         buildConfigField 'String', 'ACCOUNT_TYPE', '"' + appId + '"'
+        buildConfigField 'String', 'ACCOUNT_NAME', '"' + syncAccountName + '"'
 
         // Set the SQLite database encryption password.
         buildConfigField 'String', 'ENCRYPTION_PASSWORD', '"' + encryptionPassword + '"'

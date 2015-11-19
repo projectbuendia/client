@@ -39,7 +39,6 @@ import javax.inject.Inject;
  */
 public class SyncAccountService extends Service {
 
-    public static final String ACCOUNT_NAME = "sync";
     private static final Logger LOG = Logger.create();
     private static final long SYNC_PERIOD = 5*60;  // 5 minutes (in seconds)
     @Inject static AppSettings sSettings;
@@ -88,7 +87,7 @@ public class SyncAccountService extends Service {
 
     /** Gets the app's sync account (call initialize() before using this). */
     public static Account getAccount() {
-        return new Account(ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
+        return new Account(BuildConfig.ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
     }
 
     /** Starts an sync of just the observations. */

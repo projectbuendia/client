@@ -11,7 +11,9 @@
 
 package org.projectbuendia.client.ui;
 
+import android.accounts.Account;
 import android.annotation.TargetApi;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,8 +28,10 @@ import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.ui.login.LoginActivity;
 
 import java.util.List;
@@ -69,6 +73,12 @@ public class SettingsActivity extends PreferenceActivity {
     static final Preference.OnPreferenceChangeListener sPrefListener =
         new Preference.OnPreferenceChangeListener() {
             @Override public boolean onPreferenceChange(Preference pref, Object value) {
+
+
+                Account account = new Account(BuildConfig.ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
+                ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 1);
+                ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
+
                 updatePrefSummary(pref, value);
                 if (updatingPrefValues)
                     return true; // prevent endless recursion

@@ -158,7 +158,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                             case HttpURLConnection.HTTP_FORBIDDEN:
                             case HttpURLConnection.HTTP_UNAUTHORIZED:
                                 reportIssue(HealthIssue.SERVER_AUTHENTICATION_ISSUE);
-                                mHandler.getLooper().quit();
+                                stopImpl();
                                 break;
                             case HttpURLConnection.HTTP_NOT_FOUND:
                             default:
