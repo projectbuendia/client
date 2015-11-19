@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2015 The Project Buendia Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License.  You may obtain a copy
+    of the License at: http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software distributed
+    under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+    OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+    specific language governing permissions and limitations under the License.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/order_instructions"
+        android:text="@string/Medication_and_dosage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/text.heading" />
+
+    <TextView
+        android:id="@+id/order_start_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24sp" />
+
+    <TextView
+        android:id="@+id/order_execution_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/order_execution_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="16sp"
+        android:paddingStart="16sp"
+        android:paddingEnd="16sp"
+        android:paddingBottom="0sp"
+        android:layout_marginTop="12sp"
+        android:text="11:30&#x0a;12:45"
+        android:lineSpacingMultiplier="1.5"
+        android:background="#ddd" />
+
+    <ToggleButton
+        android:id="@+id/order_execution_mark_toggle"
+        android:textOn="@string/order_execution_marked_as_given"
+        android:textOff="@string/order_execution_mark_as_given"
+        android:padding="24sp"
+        android:layout_marginTop="32sp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/toggle_button_selector"
+        android:textColor="#fff"
+        android:checked="false"/>
+
+</LinearLayout>

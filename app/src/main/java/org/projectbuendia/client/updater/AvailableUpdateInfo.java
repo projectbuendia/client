@@ -13,7 +13,7 @@ package org.projectbuendia.client.updater;
 
 import android.net.Uri;
 
-import org.projectbuendia.client.model.UpdateInfo;
+import org.projectbuendia.client.json.JsonUpdateInfo;
 import org.projectbuendia.client.utils.LexicographicVersion;
 import org.projectbuendia.client.utils.Logger;
 
@@ -22,33 +22,15 @@ import java.util.List;
 /** An object containing information about an available application update. */
 public class AvailableUpdateInfo {
 
-    private static final Logger LOG = Logger.create();
-
     public final boolean isValid;
     public final LexicographicVersion currentVersion;
     public final LexicographicVersion availableVersion;
     public final Uri updateUri;
-
-    /** Creates an instance of {@link AvailableUpdateInfo} for an invalid update. */
-    public static AvailableUpdateInfo getInvalid(LexicographicVersion currentVersion) {
-        return new AvailableUpdateInfo(
-                false /*isValid*/,
-                currentVersion,
-                UpdateManager.MINIMAL_VERSION,
-                null /*updateUri*/);
-    }
-
-    /** Converts the info as a string for display. */
-    public String toString() {
-        return "AvailableUpdateInfo(isValid=" + isValid + ", "
-                + "currentVersion=" + currentVersion + ", "
-                + "availableVersion=" + availableVersion + ", "
-                + "updateUri=" + updateUri + ")";
-    }
+    private static final Logger LOG = Logger.create();
 
     /** Creates an instance of {@link AvailableUpdateInfo} from a server response. */
     public static AvailableUpdateInfo fromResponse(
-            LexicographicVersion currentVersion, List<UpdateInfo> response) {
+        LexicographicVersion currentVersion, List<JsonUpdateInfo> response) {
         if (response == null) {
             LOG.w("The update info response is null.");
             return getInvalid(currentVersion);
@@ -61,7 +43,7 @@ public class AvailableUpdateInfo {
 
         // The package server is responsible for sorting the index in
         // order by increasing version number, so the last is the highest.
-        UpdateInfo latestUpdateInfo = response.get(response.size() - 1);
+        JsonUpdateInfo latestUpdateInfo = response.get(response.size() - 1);
 
         LexicographicVersion version = latestUpdateInfo.getParsedVersion();
         if (version == null) {
@@ -80,19 +62,36 @@ public class AvailableUpdateInfo {
         return new AvailableUpdateInfo(true /*isValid*/, currentVersion, version, updateUri);
     }
 
-    private AvailableUpdateInfo(
-            boolean isValid,
-            LexicographicVersion currentVersion,
-            LexicographicVersion availableVersion,
-            Uri updateUri) {
-        this.isValid = isValid;
-        this.currentVersion = currentVersion;
-        this.availableVersion = availableVersion;
-        this.updateUri = updateUri;
+    /** Creates an instance of {@link AvailableUpdateInfo} for an invalid update. */
+    public static AvailableUpdateInfo getInvalid(LexicographicVersion currentVersion) {
+        return new AvailableUpdateInfo(
+            false /*isValid*/,
+            currentVersion,
+            UpdateManager.MINIMAL_VERSION,
+            null /*updateUri*/);
+    }
+
+    /** Converts the info as a string for display. */
+    public String toString() {
+        return "AvailableUpdateInfo(isValid=" + isValid + ", "
+            + "currentVersion=" + currentVersion + ", "
+            + "availableVersion=" + availableVersion + ", "
+            + "updateUri=" + updateUri + ")";
     }
 
     /** Returns true if this is a valid update with a higher version number. */
     public boolean shouldUpdate() {
         return isValid && availableVersion.greaterThan(currentVersion);
+    }
+
+    private AvailableUpdateInfo(
+        boolean isValid,
+        LexicographicVersion currentVersion,
+        LexicographicVersion availableVersion,
+        Uri updateUri) {
+        this.isValid = isValid;
+        this.currentVersion = currentVersion;
+        this.availableVersion = availableVersion;
+        this.updateUri = updateUri;
     }
 }

@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.app.Instrumentation;
 import android.os.AsyncTask;
 import android.util.Pair;
@@ -22,23 +20,22 @@ import org.projectbuendia.client.utils.AsyncTaskRunner;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executor;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /** A fake {@link AsyncTaskRunner} for use in tests. */
 public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
+    private static final Executor EXECUTOR = new Executor() {
+        @Override public void execute(Runnable command) {
+            command.run();
+        }
+    };
     private final ArrayDeque<Pair<AsyncTask<Object, Object, Object>, Object[]>>
-            mQueuedTasks = new ArrayDeque<>();
-
+        mQueuedTasks = new ArrayDeque<>();
     private final Instrumentation mInstrumentation;
 
     public FakeAsyncTaskRunner(Instrumentation instrumentation) {
         mInstrumentation = checkNotNull(instrumentation);
     }
-
-    private static final Executor EXECUTOR = new Executor() {
-        @Override
-        public void execute(Runnable command) {
-            command.run();
-        }
-    };
 
     /** Blocks until all queued and running {@link AsyncTask}s are complete. */
     public void runUntilEmpty() {
@@ -52,11 +49,10 @@ public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <ParamsT, ProgressT, ResultT> void runTask(
-            AsyncTask<ParamsT, ProgressT, ResultT> asyncTask, ParamsT... params) {
+    @Override public <ParamsT, ProgressT, ResultT> void runTask(
+        AsyncTask<ParamsT, ProgressT, ResultT> asyncTask, ParamsT... params) {
         mQueuedTasks.add(Pair.create(
-                (AsyncTask<Object, Object, Object>) asyncTask,
-                (Object[]) params));
+            (AsyncTask<Object, Object, Object>) asyncTask,
+            (Object[]) params));
     }
 }

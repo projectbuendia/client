@@ -19,17 +19,15 @@ import android.os.Looper;
 public interface AsyncTaskRunner {
 
     public static final AsyncTaskRunner DEFAULT = new AsyncTaskRunner() {
-        @Override
-        @SafeVarargs
+        @Override @SafeVarargs
         public final <ParamsT, ProgressT, ResultT> void runTask(
-                final AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
-                final ParamsT... params) {
+            final AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
+            final ParamsT... params) {
             // Force the AsyncTask to start from the main thread (since using any other thread will
             // result in an exception, anyway).
             Handler mainHandler = new Handler(Looper.getMainLooper());
             mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
+                @Override public void run() {
                     asyncTask.execute(params);
                 }
             });
@@ -38,6 +36,6 @@ public interface AsyncTaskRunner {
 
     @SuppressWarnings("unchecked")
     public <ParamsT, ProgressT, ResultT> void runTask(
-            AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
-            ParamsT... params);
+        AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
+        ParamsT... params);
 }

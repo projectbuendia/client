@@ -12,4 +12,5 @@
 package org.projectbuendia.client.events.sync;
 
 /** An event bus event indicating that a sync was canceled. */
-public class SyncCanceledEvent { }
+public class SyncCanceledEvent {
+}

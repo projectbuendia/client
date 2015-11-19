@@ -13,15 +13,14 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.test.InstrumentationTestCase;
 
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.utils.Utils;
 
 /** Tests for {@link NameFilter}. */
 public class NameFilterTest extends InstrumentationTestCase {
     private NameFilter mNameFilter;
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
         mNameFilter = new NameFilter();
     }
@@ -29,6 +28,13 @@ public class NameFilterTest extends InstrumentationTestCase {
     /** Tests that name matching works when a matching full name is provided. */
     public void testMatches_exactMatchOnFullName() {
         assertTrue(mNameFilter.matches(getPatientWithName("John", "Doe"), "John Doe"));
+    }
+
+    private Patient getPatientWithName(String givenName, String familyName) {
+        return Patient.builder()
+            .setGivenName(Utils.nameOrUnknown(givenName))
+            .setFamilyName(Utils.nameOrUnknown(familyName))
+            .build();
     }
 
     /** Tests that name matching works on just the given name. */
@@ -128,12 +134,5 @@ public class NameFilterTest extends InstrumentationTestCase {
     /** Tests that a dash does not match a patient with a fully-known name. */
     public void testMatches_dashDoesNotMatchKnownName() {
         assertFalse(mNameFilter.matches(getPatientWithName("John", "Doe"), "-"));
-    }
-
-    private AppPatient getPatientWithName(String givenName, String familyName) {
-        return AppPatient.builder()
-                .setGivenName(Utils.nameOrUnknown(givenName))
-                .setFamilyName(Utils.nameOrUnknown(familyName))
-                .build();
     }
 }

@@ -11,19 +11,19 @@
 
 package org.projectbuendia.client.events.user;
 
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.json.JsonUser;
 
 /** An event bus event that indicates that the active user has been set. */
 public class ActiveUserSetEvent {
 
     /** The previous active user. */
-    public final User previousActiveUser;
+    public final JsonUser previousActiveUser;
 
     /** The current active user. */
-    public final User activeUser;
+    public final JsonUser activeUser;
 
     /** Creates a new {@link ActiveUserSetEvent}. */
-    public ActiveUserSetEvent(User previousActiveUser, User activeUser) {
+    public ActiveUserSetEvent(JsonUser previousActiveUser, JsonUser activeUser) {
         this.previousActiveUser = previousActiveUser;
         this.activeUser = activeUser;
     }

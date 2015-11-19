@@ -11,13 +11,13 @@
 
 package org.projectbuendia.client.filter.db;
 
-import org.projectbuendia.client.data.app.AppTypeBase;
+import org.projectbuendia.client.models.Base;
 
 /**
  * A container for a filter string (part of an SQL WHERE clause) and the arguments to insert into
  * that filter string.
  */
-public abstract class SimpleSelectionFilter<T extends AppTypeBase> {
+public abstract class SimpleSelectionFilter<T extends Base> {
     /**
      * A selection filter, with the syntax of a structured SQL WHERE clause.
      * For example, a selection filter could be "given_name=? AND family_name LIKE ?".
@@ -32,16 +32,15 @@ public abstract class SimpleSelectionFilter<T extends AppTypeBase> {
      */
     public abstract String[] getSelectionArgs(CharSequence constraint);
 
+    @Override public String toString() {
+        return getDescription();
+    }
+
     /**
      * Returns a localized, human-readable description for this filter for logging and display
      * purposes.
      */
     public String getDescription() {
         return getClass().getName();
-    }
-
-    @Override
-    public String toString() {
-        return getDescription();
     }
 }

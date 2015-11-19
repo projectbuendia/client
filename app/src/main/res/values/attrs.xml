@@ -11,12 +11,6 @@
     specific language governing permissions and limitations under the License.
 -->
 <resources>
-    <declare-styleable name="VitalView">
-        <attr name="textColor" format="color" />
-        <attr name="vitalName" format="string" localization="suggested" />
-        <attr name="vitalValue" format="string" />
-        <attr name="vitalValueMaxLines" format="integer" />
-    </declare-styleable>
     <declare-styleable name="SubtitledButtonView">
         <attr name="subtitledButtonIsSquare" format="boolean" />
         <attr name="subtitledButtonTextColor" format="color" />

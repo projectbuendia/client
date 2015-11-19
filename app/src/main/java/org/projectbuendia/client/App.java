@@ -14,13 +14,15 @@ package org.projectbuendia.client;
 import android.app.Application;
 import android.preference.PreferenceManager;
 
+import com.facebook.stetho.Stetho;
+
 import net.sqlcipher.database.SQLiteDatabase;
 
+import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.user.UserManager;
-import org.odk.collect.android.application.Collect;
 
 import javax.inject.Inject;
 
@@ -29,28 +31,42 @@ import dagger.ObjectGraph;
 /** An {@link Application} the represents the Android Client. */
 public class App extends Application {
 
-    private ObjectGraph mObjectGraph;
-
     /** The current instance of the application. */
     private static App sInstance;
-
     private static UserManager sUserManager;
-
     private static Server sServer;
-
     private static OpenMrsConnectionDetails sConnectionDetails;
-
+    private ObjectGraph mObjectGraph;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject Server mServer;
     @Inject HealthMonitor mHealthMonitor;
 
-    @Override
-    public void onCreate() {
+    public static synchronized App getInstance() {
+        return sInstance;
+    }
+
+    public static synchronized UserManager getUserManager() {
+        return sUserManager;
+    }
+
+    public static synchronized Server getServer() {
+        return sServer;
+    }
+
+    public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
+        return sConnectionDetails;
+    }
+
+    @Override public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
 
-        initializeSqlCipher();
+        // Enable Stetho, which lets you inspect the app's database, UI, and network activity
+        // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
+        Stetho.initializeWithDefaults(this);
+
+        SQLiteDatabase.loadLibs(this);
 
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);
@@ -69,28 +85,8 @@ public class App extends Application {
         mHealthMonitor.start();
     }
 
-    private void initializeSqlCipher() {
-        SQLiteDatabase.loadLibs(this);
-    }
-
     public void inject(Object obj) {
         mObjectGraph.inject(obj);
-    }
-
-    public static synchronized App getInstance() {
-        return sInstance;
-    }
-
-    public static synchronized UserManager getUserManager() {
-        return sUserManager;
-    }
-
-    public static synchronized Server getServer() {
-        return sServer;
-    }
-
-    public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
-        return sConnectionDetails;
     }
 
     public HealthMonitor getHealthMonitor() {

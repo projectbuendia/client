@@ -13,22 +13,21 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.support.annotation.Nullable;
 
-import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.filter.matchers.MatchingFilter;
+import org.projectbuendia.client.models.Patient;
 
 import java.util.regex.Pattern;
 
 /**
  * Filters by name.
- *
+ * <p/>
  * <p>Selects patients for whom each of the words in the parameter string prefix-match any of the
  * words in the given name or family name, even if in a different order.
  */
-public final class NameFilter implements MatchingFilter<AppPatient> {
+public final class NameFilter implements MatchingFilter<Patient> {
     private static final Pattern DASH_REGEX = Pattern.compile("^\\p{Pd}*$");
 
-    @Override
-    public boolean matches(@Nullable AppPatient patient, CharSequence constraint) {
+    @Override public boolean matches(@Nullable Patient patient, CharSequence constraint) {
         if (patient == null) {
             return false;
         }

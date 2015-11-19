@@ -14,7 +14,15 @@ package org.projectbuendia.client.sync;
 import android.content.Context;
 
 import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteException;
 import net.sqlcipher.database.SQLiteOpenHelper;
+
+import org.projectbuendia.client.BuildConfig;
+import org.projectbuendia.client.providers.Contracts.Table;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Schema definition for the app's database, which contains patient attributes,
@@ -23,10 +31,12 @@ import net.sqlcipher.database.SQLiteOpenHelper;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 15;
+    public static final int DATABASE_VERSION = 29;
 
     /** Filename for SQLite file. */
-    public static final String DATABASE_NAME = "patientscipher.db";
+    public static final String DATABASE_FILENAME = "buendia.db";
+
+    File file;
 
     /*
      * This deserves a brief comment on security. Patient data encrypted by a hardcoded key
@@ -52,142 +62,154 @@ public class Database extends SQLiteOpenHelper {
      * technically savvy enough to use adb can almost certainly find it, but at least it isn't as
      * simple as using grep or strings.
      *
-     * TODO: add something better. At the very minimum a server call and local storage
+     * TODO/security: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
      * public key based scheme to only deliver the key on login with registered user on good device.
-     *
-     * A final note - we know the quote should be brillig, not brilling. No need to correct it.
      */
-    private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
+    private static final String ENCRYPTION_PASSWORD = BuildConfig.ENCRYPTION_PASSWORD;
 
-    public static final String PATIENTS_TABLE = "patients";
-    private static final String SQL_CREATE_PATIENTS = ""
-            + " CREATE TABLE patients ("
-            + "     _id TEXT PRIMARY KEY NOT NULL,"
-            + "     given_name TEXT,"
-            + "     family_name TEXT,"
-            + "     uuid TEXT,"
-            + "     location_uuid TEXT,"
-            + "     admission_timestamp INTEGER,"
-            + "     birthdate TEXT,"
-            + "     gender TEXT"
-            + " )";
+    /**
+     * A map of SQL table schemas, with one entry per table.  The values should
+     * be strings that take the place of X in a "CREATE TABLE foo (X)" statement.
+     */
+    static final Map<Table, String> SCHEMAS = new HashMap<>();
 
-    public static final String CONCEPTS_TABLE = "concepts";
-    private static final String SQL_CREATE_CONCEPTS = ""
-            + " CREATE TABLE concepts ("
-            + "     _id TEXT PRIMARY KEY NOT NULL,"
-            + "     xform_id INTEGER UNIQUE NOT NULL,"
-            + "     concept_type TEXT"
-            + " )";
+    // For descriptions of these tables and the meanings of their columns, see Contracts.java.
+    static {
+        SCHEMAS.put(Table.PATIENTS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "id TEXT,"
+            + "given_name TEXT,"
+            + "family_name TEXT,"
+            + "location_uuid TEXT,"
+            + "birthdate TEXT,"
+            + "gender TEXT");
 
-    public static final String CONCEPT_NAMES_TABLE = "concept_names";
-    private static final String SQL_CREATE_CONCEPT_NAMES = ""
-            + " CREATE TABLE concept_names ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     concept_uuid TEXT,"
-            + "     locale TEXT,"
-            + "     name TEXT,"
-            + "     UNIQUE (concept_uuid, locale)"
-            + " )";
+        SCHEMAS.put(Table.CONCEPTS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "xform_id INTEGER UNIQUE NOT NULL,"
+            + "concept_type TEXT");
 
-    public static final String LOCATIONS_TABLE = "locations";
-    private static final String SQL_CREATE_LOCATIONS = ""
-            + " CREATE TABLE locations ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     location_uuid TEXT,"
-            + "     parent_uuid TEXT"
-            + " )";
+        SCHEMAS.put(Table.CONCEPT_NAMES, ""
+            + "concept_uuid TEXT,"
+            + "locale TEXT,"
+            + "name TEXT,"
+            + "UNIQUE (concept_uuid, locale)");
 
-    public static final String LOCATION_NAMES_TABLE = "location_names";
-    private static final String SQL_CREATE_LOCATION_NAMES = ""
-            + " CREATE TABLE location_names ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     location_uuid TEXT,"
-            + "     locale TEXT,"
-            + "     name TEXT,"
-            + "     UNIQUE (location_uuid, locale)"
-            + " )";
+        SCHEMAS.put(Table.FORMS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "name TEXT,"
+            + "version TEXT");
 
-    public static final String OBSERVATIONS_TABLE = "observations";
-    private static final String SQL_CREATE_OBSERVATIONS = ""
-            + " CREATE TABLE observations ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     patient_uuid TEXT,"
-            + "     encounter_uuid TEXT,"
-            + "     encounter_time INTEGER,"
-            + "     concept_uuid INTEGER,"
-            + "     value INTEGER,"
-            + "     temp_cache INTEGER," // really boolean
-            + "     UNIQUE (patient_uuid, encounter_uuid, concept_uuid)"
-            + " )";
+        SCHEMAS.put(Table.LOCATIONS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "parent_uuid TEXT");
 
-    public static final String CHARTS_TABLE = "charts";
-    private static final String SQL_CREATE_CHARTS = ""
-            + " CREATE TABLE charts ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     chart_uuid TEXT,"
-            + "     chart_row INTEGER,"
-            + "     group_uuid TEXT,"
-            + "     concept_uuid INTEGER,"
-            + "     UNIQUE (chart_uuid, concept_uuid)"
-            + " )";
+        SCHEMAS.put(Table.LOCATION_NAMES, ""
+            + "location_uuid TEXT,"
+            + "locale TEXT,"
+            + "name TEXT,"
+            + "UNIQUE (location_uuid, locale)");
 
-    public static final String USERS_TABLE = "users";
-    private static final String SQL_CREATE_USERS = ""
-            + " CREATE TABLE users ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     uuid TEXT,"
-            + "     full_name TEXT"
-            + " )";
+        SCHEMAS.put(Table.OBSERVATIONS, ""
+            // uuid intentionally allows null values, because temporary observations inserted
+            // locally after submitting a form don't have UUIDs. Note that PRIMARY KEY in SQLite
+            // (and many other databases) treats all NULL values as different from all other values,
+            // so it's still ok to insert multiple records with a NULL UUID.
+            + "uuid TEXT PRIMARY KEY,"
+            + "patient_uuid TEXT,"
+            + "encounter_uuid TEXT,"
+            + "encounter_millis INTEGER,"
+            + "concept_uuid INTEGER,"
+            + "value STRING,"
+            + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
-    public static final String MISC_TABLE = "misc";
-    private static final String SQL_CREATE_MISC = ""
-            + " CREATE TABLE misc ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     full_sync_start_time INTEGER,"
-            + "     full_sync_end_time INTEGER,"
-            + "     obs_sync_time INTEGER"
-            + " )";
+        SCHEMAS.put(Table.ORDERS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "patient_uuid TEXT,"
+            + "instructions TEXT,"
+            + "start_millis INTEGER,"
+            + "stop_millis INTEGER");
+
+        SCHEMAS.put(Table.CHART_ITEMS, ""
+            + "rowid INTEGER PRIMARY KEY NOT NULL,"
+            + "chart_uuid TEXT,"
+            + "weight INTEGER,"
+            + "section_type TEXT,"
+            + "parent_rowid INTEGER,"
+            + "label TEXT,"
+            + "type TEXT,"
+            + "required INTEGER,"
+            + "concept_uuids TEXT,"
+            + "format TEXT,"
+            + "caption_format TEXT,"
+            + "css_class TEXT,"
+            + "css_style TEXT,"
+            + "script TEXT");
+
+        SCHEMAS.put(Table.USERS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "full_name TEXT");
+
+        // TODO/cleanup: Store miscellaneous values in the "misc" table as rows with a key column
+        // and a value column, not all values in one row with an ever-growing number of columns.
+        SCHEMAS.put(Table.MISC, ""
+            + "full_sync_start_millis INTEGER,"
+            + "full_sync_end_millis INTEGER");
+
+        SCHEMAS.put(Table.SYNC_TOKENS, ""
+            + "table_name TEXT PRIMARY KEY NOT NULL,"
+            + "sync_token TEXT NOT NULL");
+    }
 
     public Database(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, DATABASE_FILENAME, null, DATABASE_VERSION);
+        file = context.getDatabasePath(DATABASE_FILENAME);
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_PATIENTS);
-        db.execSQL(SQL_CREATE_CONCEPTS);
-        db.execSQL(SQL_CREATE_CONCEPT_NAMES);
-        db.execSQL(SQL_CREATE_LOCATIONS);
-        db.execSQL(SQL_CREATE_LOCATION_NAMES);
-        db.execSQL(SQL_CREATE_OBSERVATIONS);
-        db.execSQL(SQL_CREATE_CHARTS);
-        db.execSQL(SQL_CREATE_USERS);
-        db.execSQL(SQL_CREATE_MISC);
+    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // This database is only a cache of data on the server, so its upgrade
+        // policy is to discard all the data and start over.
+        clear(db);
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // This database is only a cache, so its upgrade policy is
-        // to simply to discard the data and start over
-        db.execSQL("DROP TABLE IF EXISTS " + PATIENTS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + CONCEPTS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + CONCEPT_NAMES_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + LOCATIONS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + LOCATION_NAMES_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + OBSERVATIONS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + CHARTS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + MISC_TABLE);
+    public void clear(SQLiteDatabase db) {
+        for (Table table : Table.values()) {
+            db.execSQL("DROP TABLE IF EXISTS " + table);
+        }
         onCreate(db);
     }
 
-    public SQLiteDatabase getReadableDatabase() {
-        return super.getReadableDatabase(ENCRYPTION_PASSWORD);
+    @Override public void onCreate(SQLiteDatabase db) {
+        for (Table table : Table.values()) {
+            db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
+        }
+    }
+
+    public void clear() {
+        // Never call zero-argument clear() from onUpgrade, as getWritableDatabase
+        // can trigger onUpgrade, leading to endless recursion.
+        clear(getWritableDatabase());
+    }
+
+    private void deleteDatabaseIfPasswordIncorrect() {
+        try {
+            getWritableDatabase(ENCRYPTION_PASSWORD);
+        } catch (SQLiteException e) {
+            if (e.getMessage().contains("encrypt")) {
+                // Incorrect or missing encryption password; delete the database and start over.
+                file.delete();
+            }
+        }
     }
 
     public SQLiteDatabase getWritableDatabase() {
-        return super.getWritableDatabase(ENCRYPTION_PASSWORD);
+        deleteDatabaseIfPasswordIncorrect();
+        return getWritableDatabase(ENCRYPTION_PASSWORD);
+    }
+
+    public SQLiteDatabase getReadableDatabase() {
+        deleteDatabaseIfPasswordIncorrect();
+        return getReadableDatabase(ENCRYPTION_PASSWORD);
     }
 }

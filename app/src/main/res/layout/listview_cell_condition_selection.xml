@@ -25,7 +25,7 @@
         android:padding="8dp"
         android:gravity="center"
         android:textColor="@color/vital_fg_unknown"
-        android:textSize="56sp"
+        android:textAppearance="@style/text.large"
         android:maxLines="1"
         android:id="@+id/condition_selection_number"
         android:text="–"
@@ -40,11 +40,10 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
         android:gravity="center_horizontal|bottom"
-        android:textAllCaps="true"
         android:textColor="@color/vital_fg_light"
         android:textStyle="bold"
-        android:textSize="16sp"
+        android:textAppearance="@style/text.caps"
         android:text="–"
-        tools:text="Palliative"/>
+        tools:text="@string/status_palliative"/>
 
 </LinearLayout>

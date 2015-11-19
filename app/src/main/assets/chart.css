@@ -1,0 +1,105 @@
+/* Specify font sizes and scalable margins/paddings in rem (1 rem = 10 sp). */
+/* Specify scalable margins/paddings relative to the current font size in em. */
+/* Specify non-scalable margins and paddings in px (1 px = 1 dp). */
+
+body { margin: 0; }
+div, th, td { text-overflow: ellipsis; }
+table { background: #fff; } /* opaque so that frozen headers are opaque */
+th, td {
+  font-weight: normal;
+  text-align: left;
+  vertical-align: baseline;
+}
+/* TODO: Adding left/right padding >0 breaks frozen headers.  Figure out why. */
+#grid th, #grid td {
+  padding: 0.7em 0 0.8em; /* extra 0.1em on bottom for vertical centering */
+  /* Use linear-gradient to get a border thickness of 1 device pixel. */
+  background-image: linear-gradient(
+      90deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
+  background-size: 1px 100%;
+  background-repeat: no-repeat;
+  background-position: right;
+}
+#grid th[scope="row"] {
+  padding-left: 16px;
+}
+
+/* History grid: cells should match @style/text */
+#grid th[scope="row"], #grid td { font-size: 1.9rem; } /* @style/text */
+#grid-scroller { position: relative; } /* for overlays with position: absolute */
+
+/* Row and column shading */
+#grid .now { font-weight: bold; background: #e0f0ff; }
+
+/* Column headers: should match @style/text.caption */
+/* TODO: Adding left/right padding >0 breaks frozen headers.  Figure out why. */
+#grid thead th {
+  text-align: center;
+  white-space: nowrap;
+  font-size: 1.4rem;
+  padding: 0.2em 0 0.3em; /* extra 0.1em on bottom for vertical centering */
+}
+#grid .gap {
+  background: #eee;
+}
+
+/* Row headers: should match @style/text.caps */
+#grid tbody th { white-space: nowrap; }
+#grid tbody th[scope="rowgroup"] {
+  text-transform: uppercase;
+  font-size: 1.4rem;
+  font-weight: bold;
+  background: #eee;
+  padding-top: 1.6em;
+  padding-left: 16px;
+}
+#grid th:first-child { overflow: hidden; }
+/* TODO: Specifying max-width in vw doesn't work here.  Figure out why. */
+#grid th[scope="row"] div { max-width: 24rem; overflow: hidden; }
+
+/* Cells: text should match @style/text */
+.obs td, .order td { text-align: center; min-width: 3em; }
+#grid .order th { padding: 0 16px; line-height: 1.2em; vertical-align: middle; }
+.order .future { font-size: 75%; color: #999; vertical-align: middle; }
+.order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; vertical-align: middle; }
+.order .medication { font-weight: bold; }
+#grid th[scope="row"].command { /* matches @style/ActionButton */
+  color: #09e;
+  background: #fff;
+  text-transform: uppercase;
+  font-size: 1.9rem;
+  padding-bottom: 3.8rem;
+  font-weight: bold;
+}
+
+/* Tiles */
+#tiles { table-layout: fixed; width: 100%; }
+.tile { height: 3rem; overflow: hidden; white-space: nowrap; padding: 1rem 16px; }
+.tile div { width: 100%; overflow: hidden; }
+.tile .heading { /* should match @style/text.caps */
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.tile .value { /* should match @style/text.huge */
+  font-size: 3.2rem;
+  font-family: sans-serif-light;
+}
+.tile .caption { /* should match @style/text.caption */
+  font-size: 1.4rem;
+}
+
+#tiles, thead tr, #grid tr {
+  /* Use linear-gradient to get a border thickness of 1 device pixel. */
+  background-image: linear-gradient(
+      0deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: bottom;
+}
+
+/* In-range / out-of-range colours */
+.critical { color: #ff0000; }
+.abnormal { color: #ff9500; }
+.borderline { color: #aa6600; }
+.good { color: #4caf50; }

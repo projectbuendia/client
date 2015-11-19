@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -24,16 +25,22 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.ui.login.LoginActivity;
 
 import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
  * handset devices, settings are presented as a single list. On tablets,
  * settings are split by category, with category headers shown to the left of
  * the list of settings.
- *
+ * <p/>
  * <p>See <a href="http://developer.android.com/design/patterns/settings.html">
  * Android Design: Settings</a> for design guidelines and the <a
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
@@ -45,29 +52,68 @@ public class SettingsActivity extends PreferenceActivity {
      * arranged in a single list without a left navigation panel.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    static final String[] prefKeys = {
+        "server",
+        "openmrs_user",
+        "openmrs_password",
+        "openmrs_root_url",
+        "package_server_root_url",
+        "apk_update_interval_secs",
+        "keep_form_instances_locally",
+        "xform_update_client_cache",
+        "incremental_observation_update",
+        "require_wifi"
+    };
+    static boolean updatingPrefValues = false;
+    /** A listener that performs updates when any preference's value changes. */
+    static final Preference.OnPreferenceChangeListener sPrefListener =
+        new Preference.OnPreferenceChangeListener() {
+            @Override public boolean onPreferenceChange(Preference pref, Object value) {
+                updatePrefSummary(pref, value);
+                if (updatingPrefValues)
+                    return true; // prevent endless recursion
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setupActionBar();
+                SharedPreferences prefs =
+                    PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+                String server = prefs.getString("server", "");
+                String str = "" + value;
+                try {
+                    updatingPrefValues = true;
+                    switch (pref.getKey()) {
+                        case "server":
+                            if (!str.equals("")) {
+                                prefs.edit()
+                                    .putString("openmrs_root_url",
+                                        "http://" + str + ":9000/openmrs")
+                                    .putString("package_server_root_url",
+                                        "http://" + str + ":9001")
+                                    .apply();
+                            }
+                            break;
+                        case "openmrs_root_url":
+                            if (!str.equals("http://" + server + ":9000/openmrs")) {
+                                prefs.edit().putString("server", "").apply();
+                            }
+                            break;
+                        case "package_server_root_url":
+                            if (!str.equals("http://" + server + ":9001")) {
+                                prefs.edit().putString("server", "").apply();
+                            }
+                            break;
+                    }
+                } finally {
+                    updatingPrefValues = false;
+                }
+                return true;
+            }
+        };
+    @Inject AppModel mAppModel;
+
+    public static void start(Context caller) {
+        caller.startActivity(new Intent(caller, SettingsActivity.class));
     }
 
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return true;
-    }
-
-    /** Set up the {@link android.app.ActionBar}, if the API is available. */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
@@ -85,8 +131,92 @@ public class SettingsActivity extends PreferenceActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
+    @Override public boolean onIsMultiPane() {
+        return isXLargeTablet(this) && !isSimplePreferences(this);
+    }
+
+    @Override @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void onBuildHeaders(List<Header> target) {
+        if (!isSimplePreferences(this)) {
+            loadHeadersFromResource(R.xml.pref_headers, target);
+        }
+    }
+
+    /** When the UI has two panes, this fragment shows just the general settings. */
+    public static class GeneralPreferenceFragment extends PreferenceFragment {
+        @Override public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_general);
+            initPrefs(this);
+        }
+    }
+
+    /** When the UI has two panes, this fragment shows just the advanced settings. */
+    public static class AdvancedPreferenceFragment extends PreferenceFragment {
+        @Override public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_advanced);
+            initPrefs(this);
+        }
+    }
+
+    /** When the UI has two panes, this fragment shows just the developer settings. */
+    public static class DeveloperPreferenceFragment extends PreferenceFragment {
+        @Override public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_developer);
+            initPrefs(this);
+        }
+    }
+
+    /** Sets up all the preferences in a fragment. */
+    private static void initPrefs(PreferenceFragment fragment) {
+        for (String key : prefKeys) {
+            initPref(fragment.findPreference(key));
+        }
+    }
+
+    /** Sets up the listener and summary for a preference. */
+    private static void initPref(@Nullable Preference pref) {
+        if (pref != null) {
+            pref.setOnPreferenceChangeListener(sPrefListener);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+            updatePrefSummary(pref, prefs.getAll().get(pref.getKey()));
+        }
+    }
+
+    static void updatePrefSummary(Preference pref, Object value) {
+        String str = value.toString();
+        switch (pref.getKey()) {
+            case "server":
+            case "openmrs_user":
+            case "openmrs_root_url":
+            case "package_server_root_url":
+            case "apk_update_interval_secs":
+                pref.setSummary(str);
+        }
+    }
+
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        App.getInstance().inject(this);
+        setupActionBar();
+    }
+
+    /** Set up the {@link android.app.ActionBar}, if the API is available. */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setupActionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override protected boolean isValidFragment(String fragmentName) {
+        return true;
+    }
+
+    @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
         setupSimplePreferencesScreen();
@@ -97,30 +227,13 @@ public class SettingsActivity extends PreferenceActivity {
      * that a simplified, single-pane UI should be shown.
      */
     private void setupSimplePreferencesScreen() {
-        if (!isSimplePreferences(this)) {
-            return;
-        }
+        if (!isSimplePreferences(this)) return;
 
         // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
-        // Load the preference definitions.
         addPreferencesFromResource(R.xml.pref_general);
-
-        // Show the values of preferences in their summary lines, per the Android Design guidelines.
-        showValueAsSummary(findPreference("openmrs_root_url"));
-        showValueAsSummary(findPreference("openmrs_user"));
-        showValueAsSummary(findPreference("package_server_root_url"));
-        showValueAsSummary(findPreference("apk_update_interval_secs"));
-    }
-
-    @Override
-    public boolean onIsMultiPane() {
-        return isXLargeTablet(this) && !isSimplePreferences(this);
-    }
-
-    /** Checks if the screen is extra-large (e.g. a 10" tablet is extra-large). */
-    private static boolean isXLargeTablet(Context context) {
-        return (context.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        addPreferencesFromResource(R.xml.pref_advanced);
+        addPreferencesFromResource(R.xml.pref_developer);
+        initPrefs(this);
     }
 
     /**
@@ -131,62 +244,27 @@ public class SettingsActivity extends PreferenceActivity {
      * "simplified" settings UI should be shown.
      */
     private static boolean isSimplePreferences(Context context) {
-        return ALWAYS_SIMPLE_PREFS
-                || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
-                || !isXLargeTablet(context);
+        return !isXLargeTablet(context);
     }
 
-    @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void onBuildHeaders(List<Header> target) {
-        if (!isSimplePreferences(this)) {
-            loadHeadersFromResource(R.xml.pref_headers, target);
+    /** Sets up all the preferences in an activity. */
+    private static void initPrefs(PreferenceActivity activity) {
+        for (String key : prefKeys) {
+            initPref(activity.findPreference(key));
         }
     }
 
-    /** A listener that updates a preference's summary to match its value. */
-    private static final Preference.OnPreferenceChangeListener sListener =
-            new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference pref, Object value) {
-                    pref.setSummary("" + value);
-                    return true;
-                }
-            };
-
-    /**
-     * Shows a preference's string value on its summary line (below the title
-     * of the preference), and keep the summary updated when the value changes.
-     *
-     * @see #sListener
-     */
-    private static void showValueAsSummary(Preference pref) {
-        // Set the listener to watch for value changes.
-        pref.setOnPreferenceChangeListener(sListener);
-
-        // Trigger the listener immediately with the preference's current value.
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
-        sListener.onPreferenceChange(pref, prefs.getAll().get(pref.getKey()));
+    /** Checks if the screen is extra-large (e.g. a 10" tablet is extra-large). */
+    private static boolean isXLargeTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+            & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            // Load the preference definitions.
-            addPreferencesFromResource(R.xml.pref_general);
-
-            // Show the values of preferences in their summary lines.
-            showValueAsSummary(findPreference("openmrs_root_url"));
-            showValueAsSummary(findPreference("openmrs_user"));
-            showValueAsSummary(findPreference("package_server_root_url"));
-            showValueAsSummary(findPreference("apk_update_interval_secs"));
+    @Override protected void onPause() {
+        super.onPause();
+        if (!mAppModel.isFullModelAvailable()) {
+            // The database was cleared; go back to the login activity.
+            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
         }
     }
 }

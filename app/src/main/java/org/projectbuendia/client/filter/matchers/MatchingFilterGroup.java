@@ -29,8 +29,7 @@ public class MatchingFilterGroup<T> implements MatchingFilter<T> {
         mFilterType = filterType;
     }
 
-    @Override
-    public boolean matches(T object, CharSequence constraint) {
+    @Override public boolean matches(T object, CharSequence constraint) {
         if (mFilterType == FilterType.OR) {
             return matchesOr(object, constraint);
         } else {

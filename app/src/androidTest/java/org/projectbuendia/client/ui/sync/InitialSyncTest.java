@@ -11,25 +11,19 @@
 
 package org.projectbuendia.client.ui.sync;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
+import android.support.test.espresso.Espresso;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 
 import java.util.UUID;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-
 /** Test case for behavior during and immediately after an initial sync. */
 public class InitialSyncTest extends SyncTestCase {
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
-        onView(withText("Guest User")).perform(click());
+        click(viewWithText("Guest User"));
     }
 
     /** Expects zones and tents to appear within Espresso's idling period (60s). */
@@ -46,7 +40,7 @@ public class InitialSyncTest extends SyncTestCase {
         waitForProgressFragment();
         screenshot("After Sync Completed");
 
-        onView(withId(R.id.action_search)).perform(click());
+        click(viewWithId(R.id.action_search));
         screenshot("After Search Clicked");
 
         // Check that at least one patient is returned (since clicking search
@@ -59,20 +53,20 @@ public class InitialSyncTest extends SyncTestCase {
     public void testSyncCancelButton() {
         // Cancel the sync.
         EventBusIdlingResource<SyncCanceledEvent> syncCanceledResource =
-                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         // There may be a slight delay before the cancel button appears.
-        checkViewDisplayedSoon(withId(R.id.action_cancel));
-        onView(withId(R.id.action_cancel)).perform(click());
+        expectVisibleSoon(viewWithId(R.id.action_cancel));
+        click(viewWithId(R.id.action_cancel));
         Espresso.registerIdlingResources(syncCanceledResource);
 
         // Select guest user again -- give plenty of time for cancellation to occur since canceling
         // certain network operations can take an exceedingly long time.
-        checkViewDisplayedWithin(withText("Guest User"), 90000);
-        onView(withText("Guest User")).perform(click());
+        expectVisibleWithin(90000, viewWithText("Guest User"));
+        click(viewWithText("Guest User"));
 
         // The second sync should actually complete.
         waitForProgressFragment();
-        checkViewDisplayedSoon(withText("ALL PRESENT PATIENTS"));
-        checkViewDisplayedSoon(withText("S1"));
+        expectVisibleSoon(viewWithText("ALL PRESENT PATIENTS"));
+        expectVisibleSoon(viewWithText(LOCATION_NAME));
     }
 }

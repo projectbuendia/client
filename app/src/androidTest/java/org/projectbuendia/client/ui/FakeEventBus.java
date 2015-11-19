@@ -11,24 +11,24 @@
 
 package org.projectbuendia.client.ui;
 
-import static junit.framework.Assert.fail;
-
-import org.projectbuendia.client.events.CleanupSubscriber;
-import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.utils.EventBusInterface;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-import de.greenrobot.event.EventBus;
+import org.projectbuendia.client.events.CleanupSubscriber;
+import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.utils.EventBusInterface;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import de.greenrobot.event.EventBus;
+
+import static junit.framework.Assert.fail;
 
 /**
  * Fake event bus implementation. The real {@link EventBus} is not suitable for unit tests
@@ -39,13 +39,12 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
 
     private static final String METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD = "onEventMainThread";
     private static final Set<String> IGNORED_METHOD_NAMES = ImmutableSet.of(
-            "equals", "hashCode", "toString", "getClass", "notify", "notifyAll", "wait");
+        "equals", "hashCode", "toString", "getClass", "notify", "notifyAll", "wait");
 
     private final Set<Object> mRegisteredReceivers = new HashSet<>();
     private final List<Object> mEventLog = Lists.newArrayList();
 
-    @Override
-    public void register(Object receiver) {
+    @Override public void register(Object receiver) {
         for (Method method : receiver.getClass().getMethods()) {
             // We only support a subset of the event bus functionality, so we check methods on the
             // receiver match a whitelist of supported methods. This should ensure the tests fail
@@ -53,19 +52,18 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
             // we haven't implemented in this class.
             if (!IGNORED_METHOD_NAMES.contains((method.getName()))) {
                 Preconditions.checkArgument(
-                        method.getName().equals(METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD),
-                        "Method was called " + method.getName() + ". Fake event bus only supports "
+                    method.getName().equals(METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD),
+                    "Method was called " + method.getName() + ". Fake event bus only supports "
                         + "methods called " + METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD);
                 Preconditions.checkArgument(
-                        method.getParameterTypes().length == 1,
-                        "The fake event bus only supports methods with a single parameter");
+                    method.getParameterTypes().length == 1,
+                    "The fake event bus only supports methods with a single parameter");
             }
         }
         mRegisteredReceivers.add(receiver);
     }
 
-    @Override
-    public void unregister(Object receiver) {
+    @Override public void unregister(Object receiver) {
         mRegisteredReceivers.remove(receiver);
     }
 
@@ -87,8 +85,7 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
         return ImmutableList.copyOf(mEventLog);
     }
 
-    @Override
-    public void post(Object event) {
+    @Override public void post(Object event) {
         mEventLog.add(event);
         // Clone the receivers set so receivers can unregister themselves after responding to an
         // event.
@@ -111,9 +108,9 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
         }
     }
 
-    @Override
-    public void registerCleanupSubscriber(CleanupSubscriber subscriber) {}
+    @Override public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
+    }
 
-    @Override
-    public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {}
+    @Override public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {
+    }
 }

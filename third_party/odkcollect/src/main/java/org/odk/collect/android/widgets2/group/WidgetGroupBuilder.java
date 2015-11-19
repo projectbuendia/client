@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.ViewGroup;
 
 import org.javarosa.form.api.FormEntryPrompt;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.widgets2.common.Appearance;
 
 /**
@@ -30,7 +30,7 @@ public interface WidgetGroupBuilder<
             Appearance appearance,
             boolean forceReadOnly,
             int id,
-            PrepopulatableFields fields);
+            Preset fields);
 
     /**
      * Builds the widget group.

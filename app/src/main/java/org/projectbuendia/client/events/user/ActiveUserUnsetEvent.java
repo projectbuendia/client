@@ -11,14 +11,14 @@
 
 package org.projectbuendia.client.events.user;
 
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.json.JsonUser;
 
 /** An event bus event that indicates that the active user has been unset. */
 public class ActiveUserUnsetEvent {
 
     /**
      * Indicates that the reason is unknown.
-     *
+     * <p/>
      * <p>This value should not generally be used.
      */
     public static final int REASON_UNKNOWN = 0;
@@ -26,9 +26,7 @@ public class ActiveUserUnsetEvent {
     /** Indicates that the active user was unset because the unset method was invoked. */
     public static final int REASON_UNSET_INVOKED = 1;
 
-    /**
-     * Indicates that the active user was unset because the active user was deleted from the server.
-     */
+    /** Indicates that the active user was unset because the active user was deleted from the server. */
     public static final int REASON_USER_DELETED = 2;
 
     /**
@@ -36,18 +34,17 @@ public class ActiveUserUnsetEvent {
      * deleted from the server, this object will no longer be known to
      * {@link org.projectbuendia.client.user.UserManager}.
      */
-    public final User previousActiveUser;
+    public final JsonUser previousActiveUser;
 
     /** The reason why the active user was unset. */
     public final int reason;
 
     /**
      * Creates a new {@link ActiveUserUnsetEvent}.
-     *
      * @param previousActiveUser the previous active user
-     * @param reason the reason why the active user was unset
+     * @param reason             the reason why the active user was unset
      */
-    public ActiveUserUnsetEvent(User previousActiveUser, int reason) {
+    public ActiveUserUnsetEvent(JsonUser previousActiveUser, int reason) {
         this.previousActiveUser = previousActiveUser;
         this.reason = reason;
     }

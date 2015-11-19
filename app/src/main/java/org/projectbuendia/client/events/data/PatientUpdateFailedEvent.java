@@ -15,7 +15,7 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
  * An event bus event indicating that updating a patient failed.
- *
+ * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
 public class PatientUpdateFailedEvent {

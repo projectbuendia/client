@@ -64,7 +64,7 @@ import org.odk.collect.android.logic.FormController.FailedConstraint;
 import org.odk.collect.android.logic.FormTraverser;
 import org.odk.collect.android.logic.FormVisitor;
 import org.odk.collect.android.model.Patient;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.preferences.PreferencesActivity;
 import org.odk.collect.android.provider.FormsProviderAPI.FormsColumns;
 import org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns;
@@ -367,7 +367,7 @@ public class FormEntryActivity
 		} else if (data == null) {
 			if (!newForm) {
 				if (Collect.getInstance().getFormController() != null) {
-					populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
+					populateViews((Preset) getIntent().getParcelableExtra("fields"));
 				} else {
 					Log.w(TAG, "Reloading form and restoring state.");
 					// we need to launch the form loader to load the form
@@ -566,9 +566,9 @@ public class FormEntryActivity
 		}
 	}
 
-    private void populateViews(PrepopulatableFields fields) {
+    private void populateViews(Preset preset) {
         FormTraverser traverser = new FormTraverser.Builder()
-                .addVisitor(new QuestionHolderFormVisitor(fields))
+                .addVisitor(new QuestionHolderFormVisitor(preset))
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
 
@@ -681,15 +681,15 @@ public class FormEntryActivity
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
-        private final PrepopulatableFields mFields;
+        private final Preset mPreset;
 
-        public QuestionHolderFormVisitor(PrepopulatableFields fields) {
-            mFields = fields;
+        public QuestionHolderFormVisitor(Preset preset) {
+            mPreset = preset;
         }
 
         @Override
         public void visit(int event, FormController formController) {
-            View view = createView(event, false /*advancingPage*/, mFields);
+            View view = createView(event, false /*advancingPage*/, mPreset);
             if (view != null) {
                 mQuestionHolder.addView(view);
             }
@@ -1216,10 +1216,10 @@ public class FormEntryActivity
 	 * @param event
 	 * @param advancingPage
 	 *            -- true if this results from advancing through the form
-	 * @param fields
+	 * @param preset
      * @return newly created View
 	 */
-	private View createView(int event, boolean advancingPage, PrepopulatableFields fields) {
+	private View createView(int event, boolean advancingPage, Preset preset) {
 		FormController formController = Collect.getInstance()
 				.getFormController();
 //		setTitle(getString(R.string.app_name) + " > "
@@ -1442,10 +1442,10 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
-				odkv = new ODKView(this, prompts, groups, advancingPage, fields);
-                if (fields != null
-                        && fields.targetGroup != null
-                        && fields.targetGroup.equals(groups[groups.length - 1].getLongText())) {
+				odkv = new ODKView(this, prompts, groups, advancingPage, preset);
+                if (preset != null
+                        && preset.targetGroup != null
+                        && preset.targetGroup.equals(groups[groups.length - 1].getLongText())) {
                     mTargetView = odkv;
                 }
 				Log.i(TAG,
@@ -1465,7 +1465,7 @@ public class FormEntryActivity
                     Log.e(TAG, e1.getMessage(), e1);
                     createErrorDialog(e.getMessage() + "\n\n" + e1.getCause().getMessage(), DO_NOT_EXIT);
                 }
-                return createView(event, advancingPage, fields);
+                return createView(event, advancingPage, preset);
             }
 
 			// Makes a "clear answer" menu pop up on long-click
@@ -2564,7 +2564,7 @@ public class FormEntryActivity
 
 		if (pendingActivityResult) {
 			// set the current view to whatever group we were at...
-			populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
+			populateViews((Preset) getIntent().getParcelableExtra("fields"));
 			// process the pending activity request...
 			onActivityResult(requestCode, resultCode, intent);
 			return;
@@ -2626,7 +2626,7 @@ public class FormEntryActivity
             setTitle(formController.getFormTitle());
         }
 
-		populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
+		populateViews((Preset) getIntent().getParcelableExtra("fields"));
 	}
 
 	/**

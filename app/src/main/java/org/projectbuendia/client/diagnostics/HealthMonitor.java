@@ -29,17 +29,6 @@ public class HealthMonitor {
     private final Troubleshooter mTroubleshooter;
     private boolean mRunning = false;
 
-    HealthMonitor(
-            Application application,
-            EventBus healthEventBus,
-            ImmutableSet<HealthCheck> healthChecks,
-            Troubleshooter troubleshooter) {
-        mApplication = application;
-        mHealthEventBus = healthEventBus;
-        mHealthChecks = healthChecks;
-        mTroubleshooter = troubleshooter;
-    }
-
     /** Starts all health checks. */
     public void start() {
         if (!mRunning) {
@@ -87,5 +76,16 @@ public class HealthMonitor {
             }
         }
         return false;
+    }
+
+    HealthMonitor(
+        Application application,
+        EventBus healthEventBus,
+        ImmutableSet<HealthCheck> healthChecks,
+        Troubleshooter troubleshooter) {
+        mApplication = application;
+        mHealthEventBus = healthEventBus;
+        mHealthChecks = healthChecks;
+        mTroubleshooter = troubleshooter;
     }
 }

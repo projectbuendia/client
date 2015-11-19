@@ -13,7 +13,8 @@ package org.projectbuendia.client.events.sync;
 
 /**
  * An abstract event bus event indicating that a sync has finished.
- *
+ * <p/>
  * <p>Subclasses define whether the sync succeeded or failed.
  */
-public abstract class SyncFinishedEvent {}
+public abstract class SyncFinishedEvent {
+}

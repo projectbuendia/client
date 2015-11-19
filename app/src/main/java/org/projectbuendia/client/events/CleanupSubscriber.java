@@ -13,9 +13,7 @@ package org.projectbuendia.client.events;
 
 import de.greenrobot.event.NoSubscriberEvent;
 
-/**
- * A {@link CrudEventBus} subscriber that gets invoked when all subscribers have been unregistered.
- */
+/** A {@link CrudEventBus} subscriber that gets invoked when all subscribers have been unregistered. */
 public interface CleanupSubscriber {
 
     /** Called when an event is posted but no subscribers are registered for that event. */

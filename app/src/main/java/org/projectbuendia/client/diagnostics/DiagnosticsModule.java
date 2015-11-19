@@ -31,36 +31,32 @@ public class DiagnosticsModule {
 
     @Provides
     @Singleton
-    @Qualifiers.HealthEventBus
-    EventBus provideHealthEventBus() {
+    @Qualifiers.HealthEventBus EventBus provideHealthEventBus() {
         return EventBus.builder().build();
     }
 
     @Provides
-    @Singleton
-    ImmutableSet<HealthCheck> provideHealthChecks(
-            Application application,
-            OpenMrsConnectionDetails connectionDetails,
-            AppSettings settings) {
+    @Singleton ImmutableSet<HealthCheck> provideHealthChecks(
+        Application application,
+        OpenMrsConnectionDetails connectionDetails,
+        AppSettings settings) {
         return ImmutableSet.of(
-                new WifiHealthCheck(application),
-                new BuendiaApiHealthCheck(application, connectionDetails),
-                new UpdateServerHealthCheck(application, settings));
+            new WifiHealthCheck(application, settings),
+            new BuendiaApiHealthCheck(application, connectionDetails),
+            new PackageServerHealthCheck(application, settings));
     }
 
     @Provides
-    @Singleton
-    Troubleshooter provideTroubleshooter(EventBus eventBus) {
+    @Singleton Troubleshooter provideTroubleshooter(EventBus eventBus) {
         return new Troubleshooter(eventBus);
     }
 
     @Provides
-    @Singleton
-    HealthMonitor provideHealthMonitor(
-            Application application,
-            @Qualifiers.HealthEventBus EventBus healthEventBus,
-            ImmutableSet<HealthCheck> healthChecks,
-            Troubleshooter troubleshooter) {
+    @Singleton HealthMonitor provideHealthMonitor(
+        Application application,
+        @Qualifiers.HealthEventBus EventBus healthEventBus,
+        ImmutableSet<HealthCheck> healthChecks,
+        Troubleshooter troubleshooter) {
         return new HealthMonitor(application, healthEventBus, healthChecks, troubleshooter);
     }
 }

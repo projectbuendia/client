@@ -21,6 +21,9 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class LexicographicVersion implements Comparable<LexicographicVersion> {
 
+    private final String mRaw;
+    private final int[] mParts;
+
     /** Returns an instance of {@link LexicographicVersion} parsed from the specified string. */
     public static LexicographicVersion parse(String raw) {
         Preconditions.checkNotNull(raw);
@@ -33,23 +36,14 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
                 parts[i] = Integer.parseInt(stringParts[i]);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException(
-                        "'" + raw + "' is not a valid version string.", e);
+                    "'" + raw + "' is not a valid version string.", e);
             }
         }
 
         return new LexicographicVersion(raw, parts);
     }
 
-    private final String mRaw;
-    private final int[] mParts;
-
-    private LexicographicVersion(String raw, int[] parts) {
-        mRaw = raw;
-        mParts = parts;
-    }
-
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return mRaw;
     }
 
@@ -57,20 +51,7 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
         return compareTo(other) > 0;
     }
 
-    public boolean greaterThanOrEqualTo(LexicographicVersion other) {
-        return compareTo(other) >= 0;
-    }
-
-    public boolean lessThan(LexicographicVersion other) {
-        return compareTo(other) < 0;
-    }
-
-    public boolean lessThanOrEqualTo(LexicographicVersion other) {
-        return compareTo(other) <= 0;
-    }
-
-    @Override
-    public int compareTo(LexicographicVersion other) {
+    @Override public int compareTo(LexicographicVersion other) {
         Preconditions.checkNotNull(other);
         if (this == other) {
             return 0;
@@ -88,8 +69,19 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
         return mParts.length - other.mParts.length;
     }
 
-    @Override
-    public boolean equals(Object other) {
+    public boolean greaterThanOrEqualTo(LexicographicVersion other) {
+        return compareTo(other) >= 0;
+    }
+
+    public boolean lessThan(LexicographicVersion other) {
+        return compareTo(other) < 0;
+    }
+
+    public boolean lessThanOrEqualTo(LexicographicVersion other) {
+        return compareTo(other) <= 0;
+    }
+
+    @Override public boolean equals(Object other) {
         if (this == other) {
             return true;
         }
@@ -99,8 +91,12 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
         return compareTo((LexicographicVersion) other) == 0;
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return Objects.hash(mParts);
+    }
+
+    private LexicographicVersion(String raw, int[] parts) {
+        mRaw = raw;
+        mParts = parts;
     }
 }

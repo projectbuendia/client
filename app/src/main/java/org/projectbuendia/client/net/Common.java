@@ -41,5 +41,6 @@ public final class Common {
     /** If true, allow data to be provided from the sync adapter rather than the network. */
     public static final boolean OFFLINE_SUPPORT = true;
 
-    private Common() {}
+    private Common() {
+    }
 }

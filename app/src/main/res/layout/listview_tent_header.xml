@@ -22,9 +22,8 @@
         android:id="@+id/patient_list_tent_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Unknown Tent"
-        android:textStyle="bold"
-        android:textSize="24sp"
+        android:text="@string/unknown_tent"
+        android:textAppearance="@style/text.heading"
         tools:text="Probable 1 (10 patients)" />
 
 </LinearLayout>

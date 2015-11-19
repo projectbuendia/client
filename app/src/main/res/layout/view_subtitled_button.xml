@@ -22,22 +22,21 @@
         android:id="@+id/view_subtitled_button_title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_margin="12sp"
         android:gravity="center_vertical"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.Buendia.Medium"
         tools:text="Triage"/>
 
     <TextView
         android:id="@+id/view_subtitled_button_subtitle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="-10dp"
-        android:textAppearance="@style/TextAppearance.Buendia.Small"
+        android:layout_marginLeft="12sp"
+        android:layout_marginRight="12sp"
+        android:layout_marginBottom="12sp"
+        android:layout_marginTop="0sp"
+        android:textAppearance="@style/text.huge"
         android:gravity="center_vertical"
-        tools:text="89 patients" />
+        tools:text="89" />
 
 </LinearLayout>

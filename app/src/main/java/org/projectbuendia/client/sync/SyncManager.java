@@ -22,7 +22,7 @@ import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.annotation.Nullable;
@@ -40,7 +40,15 @@ public class SyncManager {
     static final int FAILED = 3;
     static final int IN_PROGRESS = 4;
     static final int CANCELED = 5;
+    /**
+     * Intent extras using this key are integers representing the sync progress completed so far,
+     * as a percentage.
+     */
     static final String SYNC_PROGRESS = "sync-progress";
+    /**
+     * Intent extras using this key are nullable strings representing the current sync status.
+     * They are localized and are suitable for presentation to the user.
+     */
     static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
     @Nullable private final AppSettings mSettings;
@@ -52,7 +60,7 @@ public class SyncManager {
     /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
         ContentResolver.cancelSync(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
 
         // If sync was pending, it should now be idle and we can consider the sync immediately
         // canceled.
@@ -62,31 +70,26 @@ public class SyncManager {
         }
     }
 
-    /** Starts a full sync as soon as possible. */
-    public void startFullSync() {
-        SyncAccountService.startFullSync();
-    }
-
-    /**
-     * Starts an incremental sync of observations.
-     * Does nothing if incremental observation update is disabled.
-     */
-    public void startIncrementalObsSync() {
-        if (mSettings == null || mSettings.getIncrementalObservationUpdate()) {
-            SyncAccountService.startIncrementalObsSync();
-        }
+    /** Returns {@code true} if a sync is pending. */
+    public boolean isSyncPending() {
+        return ContentResolver.isSyncPending(
+            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
 
     /** Returns {@code true} if a sync is active. */
     public boolean isSyncActive() {
         return ContentResolver.isSyncActive(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
 
-    /** Returns {@code true} if a sync is pending. */
-    public boolean isSyncPending() {
-        return ContentResolver.isSyncPending(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+    /** Starts a full sync as soon as possible. */
+    public void startFullSync() {
+        SyncAccountService.startFullSync();
+    }
+
+    /** Starts a sync of only observations. */
+    public void startObservationsSync() {
+        SyncAccountService.startObservationsSync();
     }
 
     /**
@@ -95,8 +98,7 @@ public class SyncManager {
      */
     public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
+        @Override public void onReceive(Context context, Intent intent) {
             int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
             switch (syncStatus) {
                 case STARTED:
@@ -112,10 +114,10 @@ public class SyncManager {
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case IN_PROGRESS:
-                    LOG.i("Sync is continuing");
-                    int syncProgress = intent.getIntExtra(SYNC_PROGRESS, 0);
-                    String syncLabel = intent.getStringExtra(SYNC_PROGRESS_LABEL);
-                    EventBus.getDefault().post(new SyncProgressEvent(syncProgress, syncLabel));
+                    int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
+                    String label = intent.getStringExtra(SYNC_PROGRESS_LABEL);
+                    LOG.d("Sync in progress (%d%%, %s)", progress, label);
+                    EventBus.getDefault().post(new SyncProgressEvent(progress, label));
                     break;
                 case CANCELED:
                     LOG.i("Sync was canceled.");
@@ -126,7 +128,7 @@ public class SyncManager {
                     break;
                 default:
                     LOG.i("Sync status broadcast intent received with unknown status %1$d.",
-                            syncStatus);
+                        syncStatus);
             }
         }
     }

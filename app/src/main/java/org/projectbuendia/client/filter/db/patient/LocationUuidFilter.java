@@ -11,21 +11,21 @@
 
 package org.projectbuendia.client.filter.db.patient;
 
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.providers.Contracts;
 
 import java.util.List;
 
 /**
  * LocationUuidFilter matches all patients who reside in the specified subtree of locations.
- *
+ * <p/>
  * <p>For example, a LocationUuidFilter given a UUID of a zone will return all patients assigned to
  * that zone, tents within that zone, beds within those tents, etc.
  */
-public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> {
+public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
 
     private final String mTentSelectionString;
     private final String[] mTentSelectionArgs;
@@ -33,12 +33,12 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> 
     private final String mDescription;
 
     /** Creates a filter that returns all patients in a valid location. */
-    public LocationUuidFilter(AppLocationTree tree) {
+    public LocationUuidFilter(LocationTree tree) {
         this(tree, tree == null ? null : tree.getRoot());
     }
 
     /** Creates a filter returning only patients under a subroot of the given location tree. */
-    public LocationUuidFilter(AppLocationTree tree, AppLocation subroot) {
+    public LocationUuidFilter(LocationTree tree, Location subroot) {
         if (tree == null || subroot == null) {
             mTentSelectionString = "";
             mTentSelectionArgs = new String[0];
@@ -46,13 +46,13 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> 
             mDescription = "";
             return;
         }
-        List<AppLocation> allPossibleLocations = tree.locationsInSubtree(subroot);
+        List<Location> allPossibleLocations = tree.locationsInSubtree(subroot);
 
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.
         StringBuilder sb = new StringBuilder()
-                .append(Contracts.Patients.LOCATION_UUID)
-                .append(" IN (");
+            .append(Contracts.Patients.LOCATION_UUID)
+            .append(" IN (");
         String prefix = "";
         for (int i = 0; i < allPossibleLocations.size(); i++) {
             sb.append(prefix).append("?");
@@ -75,18 +75,15 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> 
         return mUuid;
     }
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return mTentSelectionString;
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
         return mTentSelectionArgs;
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return mDescription;
     }
 }

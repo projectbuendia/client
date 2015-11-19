@@ -14,19 +14,21 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
 
-    <!-- the server to use for OpenMRS -->
-    <EditTextPreference
-        android:key="openmrs_root_url"
-        android:title="@string/pref_title_openmrs_root_url"
-        android:defaultValue="@string/openmrs_root_url_default"
+    <!-- The hostname to use as both OpenMRS server and package server -->
+
+    <org.projectbuendia.client.widgets.EditAndClearDataPreference
+        android:key="server"
+        android:title="@string/pref_title_server"
+        android:defaultValue="@string/server_default"
         android:selectAllOnFocus="true"
         android:inputType="text"
+        android:digits="abcdefghijklmnopqrstuvwxyz0123456789."
         android:capitalize="none"
         android:singleLine="true"
         android:maxLines="1" />
 
     <!-- The user to use for OpenMRS requests -->
-    <EditTextPreference
+    <org.projectbuendia.client.widgets.EditAndClearDataPreference
         android:key="openmrs_user"
         android:title="@string/pref_title_openmrs_user"
         android:defaultValue="@string/openmrs_user_default"
@@ -37,7 +39,7 @@
         android:maxLines="1" />
 
     <!-- The password to use for OpenMRS requests -->
-    <EditTextPreference
+    <org.projectbuendia.client.widgets.EditAndClearDataPreference
         android:key="openmrs_password"
         android:title="@string/pref_title_openmrs_password"
         android:defaultValue="@string/openmrs_password_default"
@@ -46,44 +48,5 @@
         android:capitalize="none"
         android:singleLine="true"
         android:maxLines="1" />
-
-    <!-- The server URL to use for software update packages -->
-    <EditTextPreference
-        android:key="package_server_root_url"
-        android:title="@string/pref_title_package_server_url"
-        android:defaultValue="@string/package_server_root_url_default"
-        android:selectAllOnFocus="true"
-        android:inputType="text"
-        android:capitalize="none"
-        android:singleLine="true"
-        android:maxLines="1" />
-
-    <!-- Whether to save filled in forms locally. Normally we won't want to (the file system will fill up
-     but it is useful when developing or debugging -->
-    <CheckBoxPreference
-        android:key="keep_form_instances_locally"
-        android:title="@string/pref_title_store_form_instances"
-        android:summary="@string/pref_desc_store_form_instances"
-        android:defaultValue="@bool/keep_form_instances_locally_default" />
-
-    <!-- Whether to instantly update the local cache when an xform is submitted locally -->
-    <CheckBoxPreference
-        android:key="xform_update_client_cache"
-        android:title="@string/pref_title_xform_update_client_cache"
-        android:summary="@string/pref_desc_xform_update_client_cache"
-        android:defaultValue="@bool/xform_update_client_cache_default" />
-
-    <!-- Whether to instantly update the observations cache incrementally -->
-    <CheckBoxPreference
-        android:key="incremental_observation_update"
-        android:title="@string/pref_title_incremental_observation_update"
-        android:summary="@string/pref_desc_xform_update_client_cache"
-        android:defaultValue="@bool/incremental_observation_update_default" />
-
-    <!-- The delay interval in seconds between looking for APK updates -->
-    <org.projectbuendia.client.widget.EditIntegerPreference
-        android:key="apk_update_interval_secs"
-        android:title="@string/pref_title_apk_update_interval_secs"
-        android:defaultValue="90" /> <!-- default to 1.5 minutes -->
 
 </PreferenceScreen>

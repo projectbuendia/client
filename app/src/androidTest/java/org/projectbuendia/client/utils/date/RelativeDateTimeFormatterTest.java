@@ -15,45 +15,44 @@ import android.test.InstrumentationTestCase;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 
 /** Test cases for {@link RelativeDateTimeFormatter}. */
 public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
 
     private RelativeDateTimeFormatter mFormatter;
     private DateTime mNow;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mFormatter = RelativeDateTimeFormatter.builder()
-                .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
-                .build();
-        mNow = DateTime.parse("2000-01-01T12:00Z");
-    }
+    private LocalDate mToday;
 
     public void testFormat_rightNow() throws Exception {
         assertEquals("right now", mFormatter.format(mNow, mNow));
     }
 
     public void testFormat_inTheFuture() throws Exception {
-        assertEquals("in the future", mFormatter.format(mNow, mNow.plusDays(1)));
+        assertEquals("in the future", mFormatter.format(mNow.plusDays(1), mNow));
     }
 
-    public void testFormat_today() throws Exception {
-        assertEquals("today", mFormatter.format(mNow, mNow.minusHours(1)));
+    public void testFormat_60minutesAgo() throws Exception {
+        assertEquals("60 min ago", mFormatter.format(mNow.minusHours(1), mNow));
     }
 
     public void testFormat_yesterday() throws Exception {
-        assertEquals("yesterday", mFormatter.format(mNow, mNow.minusDays(1)));
+        assertEquals("yesterday", mFormatter.format(mToday.minusDays(1), mToday));
     }
 
     public void testFormat_daysAgo() throws Exception {
-        assertEquals("2 days ago", mFormatter.format(mNow, mNow.minusDays(2)));
+        assertEquals("2 days ago", mFormatter.format(mNow.minusDays(2), mNow));
     }
 
-    /** Tests that format produces 'today' for identical {@link LocalDate} objects. */
     public void testFormatLocalDate_today() {
-        assertEquals("today", mFormatter.format(mNow.toLocalDate(), mNow.toLocalDate()));
+        assertEquals("today", mFormatter.format(mToday, mToday));
+    }
+
+    @Override protected void setUp() throws Exception {
+        super.setUp();
+
+        mFormatter = new RelativeDateTimeFormatter();
+        mNow = DateTime.parse("2000-01-01T12:00Z");
+        mToday = LocalDate.parse("2000-01-01");
     }
 }

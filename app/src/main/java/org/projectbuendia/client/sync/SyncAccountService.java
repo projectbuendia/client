@@ -24,7 +24,9 @@ import android.os.IBinder;
 
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.sync.SyncAdapter.SyncOption;
+import org.projectbuendia.client.sync.SyncAdapter.SyncPhase;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.inject.Inject;
@@ -37,9 +39,9 @@ import javax.inject.Inject;
  */
 public class SyncAccountService extends Service {
 
-    private static final Logger LOG = Logger.create();
     public static final String ACCOUNT_NAME = "sync";
-    private static final long SYNC_PERIOD = 5 * 60;  // 5 minutes (in seconds)
+    private static final Logger LOG = Logger.create();
+    private static final long SYNC_PERIOD = 5*60;  // 5 minutes (in seconds)
     @Inject static AppSettings sSettings;
 
     private Authenticator mAuthenticator;
@@ -50,50 +52,6 @@ public class SyncAccountService extends Service {
             startFullSync();
             sSettings.setSyncAccountInitialized(true);
         }
-    }
-
-    /** Gets the app's sync account (call initialize() before using this). */
-    public static Account getAccount() {
-        return new Account(ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
-    }
-
-    /** Starts a full sync. */
-    public static void startFullSync() {
-        Bundle b = new Bundle();
-        // Request aggressively that the sync should start straight away.
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-        // Fetch everything, except fetch only newly added observations if so enabled.
-        b.putBoolean(SyncAdapter.FULL_SYNC, true);
-        b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
-        b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
-        b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
-        b.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
-        b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-        b.putBoolean(SyncAdapter.SYNC_USERS, true);
-        if (sSettings.getIncrementalObservationUpdate()) {
-            b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
-        }
-        LOG.i("Requesting full sync");
-        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
-    }
-
-    /** Starts an incremental sync of just the observations. */
-    public static void startIncrementalObsSync() {
-        // Start by canceling any existing syncs, which may delay this one.
-        ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
-
-        Bundle b = new Bundle();
-        // Request aggressively that the sync should start straight away.
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-        // Fetch just the newly added observations.
-        b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-        b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
-        LOG.i("Requesting incremental observation sync");
-        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
 
     /**
@@ -108,31 +66,58 @@ public class SyncAccountService extends Service {
             ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 1);
             ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
             Bundle b = new Bundle();
-            b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
-            b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
-            b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
-            b.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
-            b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-            b.putBoolean(SyncAdapter.SYNC_USERS, true);
+            b.putBoolean(SyncOption.FULL_SYNC.name(), true);
             ContentResolver.addPeriodicSync(account, Contracts.CONTENT_AUTHORITY, b, SYNC_PERIOD);
             return true;
         }
         return false;
     }
 
-    @Override
-    public void onCreate() {
+    /** Starts a full sync. */
+    public static void startFullSync() {
+        Bundle b = new Bundle();
+        // Request aggressively that the sync should start straight away.
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        // Fetch everything, except fetch only newly added observations if so enabled.
+        b.putBoolean(SyncOption.FULL_SYNC.name(), true);
+        LOG.i("Requesting full sync");
+        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
+    }
+
+    /** Gets the app's sync account (call initialize() before using this). */
+    public static Account getAccount() {
+        return new Account(ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
+    }
+
+    /** Starts an sync of just the observations. */
+    public static void startObservationsSync() {
+        // Start by canceling any existing syncs, which may delay this one.
+        ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
+
+        Bundle b = new Bundle();
+        // Request aggressively that the sync should start straight away.
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        // Fetch just the newly added observations.
+        b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
+        b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
+        LOG.i("Requesting incremental observation sync");
+        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
+    }
+
+    @Override public void onCreate() {
         LOG.i("Service created");
         mAuthenticator = new Authenticator(this);
     }
 
-    @Override
-    public void onDestroy() {
+    @Override public void onDestroy() {
         LOG.i("Service destroyed");
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
+    @Override public IBinder onBind(Intent intent) {
         return mAuthenticator.getIBinder();
     }
 
@@ -143,7 +128,7 @@ public class SyncAccountService extends Service {
         }
 
         public Bundle addAccount(
-                AccountAuthenticatorResponse r, String s1, String s2, String[] ss, Bundle b) {
+            AccountAuthenticatorResponse r, String s1, String s2, String[] ss, Bundle b) {
             return null;
         }
 
@@ -164,7 +149,7 @@ public class SyncAccountService extends Service {
         }
 
         public Bundle updateCredentials(
-                AccountAuthenticatorResponse r, Account a, String s, Bundle b) {
+            AccountAuthenticatorResponse r, Account a, String s, Bundle b) {
             throw new UnsupportedOperationException();
         }
 
@@ -173,4 +158,3 @@ public class SyncAccountService extends Service {
         }
     }
 }
-

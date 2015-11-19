@@ -32,6 +32,13 @@ import org.javarosa.xform.parse.XFormParser;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONObject;
+import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.application.Collect;
+import org.odk.collect.android.model.Preset;
+import org.odk.collect.android.provider.FormsProviderAPI;
+import org.odk.collect.android.provider.InstanceProviderAPI;
+import org.odk.collect.android.tasks.DeleteInstancesTask;
+import org.odk.collect.android.utilities.FileUtils;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
@@ -41,19 +48,9 @@ import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
 import org.projectbuendia.client.net.OpenMrsXformsConnection;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
-import org.odk.collect.android.activities.FormEntryActivity;
-import org.odk.collect.android.activities.FormHierarchyActivity;
-import org.odk.collect.android.application.Collect;
-import org.odk.collect.android.listeners.FormLoaderListener;
-import org.odk.collect.android.logic.FormController;
-import org.odk.collect.android.model.PrepopulatableFields;
-import org.odk.collect.android.provider.FormsProviderAPI;
-import org.odk.collect.android.provider.InstanceProviderAPI;
-import org.odk.collect.android.tasks.DeleteInstancesTask;
-import org.odk.collect.android.tasks.FormLoaderTask;
-import org.odk.collect.android.utilities.FileUtils;
+import org.projectbuendia.client.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -73,9 +70,7 @@ import javax.annotation.Nullable;
 import de.greenrobot.event.EventBus;
 
 import static android.provider.BaseColumns._ID;
-import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_URI;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
-import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.JR_FORM_ID;
 
 /** Convenience class for launching ODK to display an Xform. */
 public class OdkActivityLauncher {
@@ -83,91 +78,96 @@ public class OdkActivityLauncher {
     private static final Logger LOG = Logger.create();
 
     /**
-     * Fetches all xforms from the server, caches them, and launches ODK using the requested form.
+     * Fetches all xforms from the server and caches them. If any error occurs during fetching,
+     * a failed event is triggered.
+     */
+    public static void fetchAndCacheAllXforms() {
+        new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
+            new Response.Listener<List<OpenMrsXformIndexEntry>>() {
+                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                    for (OpenMrsXformIndexEntry formEntry : response) {
+                        fetchAndCacheXForm(formEntry);
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override public void onErrorResponse(VolleyError error) {
+                    handleSyncError(error);
+                }
+            });
+    }
+
+    /**
+     * Fetches the xform specified by the form uuid.
+     *
+     * @param formEntry the {@link OpenMrsXformIndexEntry} object containing the uuid form
+     */
+    public static void fetchAndCacheXForm(OpenMrsXformIndexEntry formEntry) {
+        new OdkXformSyncTask(null).fetchAndAddXFormToDb(formEntry.uuid,
+            formEntry.makeFileForForm());
+    }
+
+    /**
+     * Loads the xform from the cache and launches ODK using it. If the cache is not available,
+     * the app tries to fetch it from the server. If no form is got, it is triggered a failed event.
      * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
      *                        will be returned to this activity
-     * @param uuidToShow UUID of the form to show
-     * @param requestCode if >= 0, this code will be returned in onActivityResult() when the
-     *                    activity exits
-     * @param patient the {@link org.odk.collect.android.model.Patient} that this form entry will
-     *                correspond to
-     * @param fields a {@link PrepopulatableFields} object with any form fields that should be
-     *               pre-populated
+     * @param uuidToShow      UUID of the form to show
+     * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
+     *                        activity exits
+     * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                        correspond to
+     * @param fields          a {@link Preset} object with any form fields that should be
+     *                        pre-populated
      */
     public static void fetchAndShowXform(
-            final Activity callingActivity,
-            final String uuidToShow,
-            final int requestCode,
-            @Nullable final org.odk.collect.android.model.Patient patient,
-            @Nullable final PrepopulatableFields fields) {
-        new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
-                new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                    @Override
-                    public void onResponse(final List<OpenMrsXformIndexEntry> response) {
-                        if (response.isEmpty()) {
-                            LOG.i("No forms found");
-                            EventBus.getDefault().post(new FetchXformFailedEvent(
-                                    FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
-                            return;
-                        }
-                        // Cache all the forms into the ODK form cache
-                        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
-                            @Override
-                            public void formWritten(File path, String uuid) {
-                                LOG.i("wrote form " + path);
-                                showOdkCollect(
-                                        callingActivity,
-                                        requestCode,
-                                        OdkDatabase.getFormIdForPath(path),
-                                        patient,
-                                        fields);
-                            }
-                        }).execute(findUuid(response, uuidToShow));
-                    }
-                }, new Response.ErrorListener() {
+        final Activity callingActivity,
+        final String uuidToShow,
+        final int requestCode,
+        @Nullable final org.odk.collect.android.model.Patient patient,
+        @Nullable final Preset fields) {
+        LOG.i("Trying to fetch it from cache.");
+        if (loadXformFromCache(callingActivity, uuidToShow, requestCode, patient, fields)) {
+            return;
+        }
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        LOG.e(error, "Fetching xform list failed.");
-                        FetchXformFailedEvent.Reason reason =
-                                FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
-                        if (error.networkResponse != null) {
-                            switch (error.networkResponse.statusCode) {
-                                case HttpURLConnection.HTTP_FORBIDDEN:
-                                case HttpURLConnection.HTTP_UNAUTHORIZED:
-                                    reason = FetchXformFailedEvent.Reason.SERVER_AUTH;
-                                    break;
-                                case HttpURLConnection.HTTP_NOT_FOUND:
-                                    reason = FetchXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
-                                    break;
-                                case HttpURLConnection.HTTP_INTERNAL_ERROR:
-                                default:
-                                    reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
-                            }
-                        }
-                        EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
+        new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
+            new Response.Listener<List<OpenMrsXformIndexEntry>>() {
+                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                    if (response.isEmpty()) {
+                        LOG.i("No forms found");
+                        EventBus.getDefault().post(new FetchXformFailedEvent(
+                            FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
+                        return;
                     }
-                });
+                    showForm(callingActivity, requestCode, patient, fields, findUuid(response,
+                        uuidToShow));
+                }
+            }, new Response.ErrorListener() {
+                @Override public void onErrorResponse(VolleyError error) {
+                    LOG.e(error, "Fetching xform list from server failed. ");
+                    handleSyncError(error);
+                }
+            });
     }
 
     /**
      * Shows the form with the given id in ODK collect.
      * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
      *                        will be returned to this activity
-     * @param requestCode if >= 0, this code will be returned in onActivityResult() when the
-     *                    activity exits
-     * @param formId the id of the form to fetch
-     * @param patient the {@link org.odk.collect.android.model.Patient} that this form entry will
-     *                correspond to
-     * @param fields a {@link PrepopulatableFields} object with any form fields that should be
-     *               pre-populated
+     * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
+     *                        activity exits
+     * @param formId          the id of the form to fetch
+     * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                        correspond to
+     * @param fields          a {@link Preset} object with any form fields that should be
+     *                        pre-populated
      */
     public static void showOdkCollect(
-            Activity callingActivity,
-            int requestCode,
-            long formId,
-            @Nullable org.odk.collect.android.model.Patient patient,
-            @Nullable PrepopulatableFields fields) {
+        Activity callingActivity,
+        int requestCode,
+        long formId,
+        @Nullable org.odk.collect.android.model.Patient patient,
+        @Nullable Preset fields) {
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
@@ -182,27 +182,132 @@ public class OdkActivityLauncher {
     }
 
     /**
+     * Loads the xform from the cache and launches ODK using it. Return true if the cache is
+     * available.
+     * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
+     *                        will be returned to this activity
+     * @param uuidToShow      UUID of the form to show
+     * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
+     *                        activity exits
+     * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                        correspond to
+     * @param fields          a {@link Preset} object with any form fields that should be
+     *                        pre-populated
+     */
+    private static boolean loadXformFromCache(final Activity callingActivity,
+                                              final String uuidToShow,
+                                              final int requestCode,
+                                              @Nullable final org.odk.collect.android.model.Patient patient,
+                                              @Nullable final Preset fields) {
+        List<OpenMrsXformIndexEntry> entries = getLocalFormEntries();
+        OpenMrsXformIndexEntry formToShow = findUuid(entries, uuidToShow);
+        if (!formToShow.makeFileForForm().exists()) return false;
+
+        LOG.i(String.format("Using form %s from local cache.", uuidToShow));
+        showForm(callingActivity, requestCode, patient, fields, formToShow);
+
+        return true;
+    }
+
+    private static List<OpenMrsXformIndexEntry> getLocalFormEntries() {
+        List<OpenMrsXformIndexEntry> entries = new ArrayList<>();
+
+        final ContentResolver resolver = App.getInstance().getContentResolver();
+        Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, new String[] {Contracts.Forms.UUID,
+            Contracts.Forms.NAME}, null, null, null);
+        try {
+            while (c.moveToNext()) {
+                String uuid = Utils.getString(c, Contracts.Forms.UUID);
+                String name = Utils.getString(c, Contracts.Forms.NAME);
+                long date = 0; // date is not important here
+                entries.add(new OpenMrsXformIndexEntry(uuid, name, date));
+            }
+        } finally {
+            c.close();
+        }
+
+        return entries;
+    }
+
+    private static void handleSyncError(VolleyError error) {
+        FetchXformFailedEvent.Reason reason =
+            FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+        if (error.networkResponse != null) {
+            switch (error.networkResponse.statusCode) {
+                case HttpURLConnection.HTTP_FORBIDDEN:
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    reason = FetchXformFailedEvent.Reason.SERVER_AUTH;
+                    break;
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    reason = FetchXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
+                    break;
+                case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                default:
+                    reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+            }
+        }
+        EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
+    }
+
+    /**
+     * Launches ODK using the requested form.
+     * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
+     *                        will be returned to this activity
+     * @param requestCode     if >= 0, this code will be returned in onActivityResult() when the
+     *                        activity exits
+     * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                        correspond to
+     * @param fields          a {@link Preset} object with any form fields that should be
+     *                        pre-populated
+     * @param formToShow    a {@link OpenMrsXformIndexEntry} object representing the form that
+     *                       should be opened
+     */
+    private static void showForm(final Activity callingActivity,
+                                 final int requestCode,
+                                 @Nullable final org.odk.collect.android.model.Patient patient,
+                                 @Nullable final Preset fields,
+                                 final OpenMrsXformIndexEntry formToShow) {
+        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
+            @Override public void formWritten(File path, String uuid) {
+                LOG.i("wrote form " + path);
+                showOdkCollect(
+                    callingActivity,
+                    requestCode,
+                    OdkDatabase.getFormIdForPath(path),
+                    patient,
+                    fields);
+            }
+        }).execute(formToShow);
+    }
+
+    // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
+    // return null if no xform is found.
+    private static OpenMrsXformIndexEntry findUuid(
+        List<OpenMrsXformIndexEntry> allEntries, String uuid) {
+        for (OpenMrsXformIndexEntry entry : allEntries) {
+            if (entry.uuid.equals(uuid)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Convenient shared code for handling an ODK activity result.
-     *
-     * @param context the application context
-     * @param settings the application settings
-     * @param patientUuid the patient to add an observation to, or null to create a new patient
-     * @param updateClientCache true if we should update the client database with temporary
- *                          observations
-     * @param resultCode the result code sent from Android activity transition
-     * @param data the incoming intent
+     * @param context           the application context
+     * @param settings          the application settings
+     * @param patientUuid       the patient to add an observation to, or null to create a new patient
+     * @param resultCode        the result code sent from Android activity transition
+     * @param data              the incoming intent
      */
     public static void sendOdkResultToServer(
-            final Context context,
-            final AppSettings settings,
-            @Nullable final String patientUuid,
-            final boolean updateClientCache,
-            int resultCode,
-            Intent data) {
+        final Context context,
+        final AppSettings settings,
+        @Nullable final String patientUuid,
+        int resultCode,
+        Intent data) {
 
-        if (resultCode == Activity.RESULT_CANCELED) {
-            return;
-        }
+        if (resultCode == Activity.RESULT_CANCELED) return;
 
         if (data == null || data.getData() == null) {
             // Cancelled.
@@ -213,39 +318,39 @@ public class OdkActivityLauncher {
         Uri uri = data.getData();
 
         if (!context.getContentResolver().getType(uri).equals(
-                InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
+            InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
             LOG.e("Tried to load a content URI of the wrong type: " + uri);
             EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
             return;
         }
 
         Cursor instanceCursor = null;
         try {
             instanceCursor = context.getContentResolver().query(uri,
-                    null, null, null, null);
+                null, null, null, null);
             if (instanceCursor.getCount() != 1) {
                 LOG.e("The form that we tried to load did not exist: " + uri);
                 EventBus.getDefault().post(
-                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
                 return;
             }
             instanceCursor.moveToFirst();
             String instancePath = instanceCursor.getString(
-                    instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
+                instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
             if (instancePath == null) {
                 LOG.e("No file path for form instance: " + uri);
                 EventBus.getDefault().post(
-                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
                 return;
 
             }
             int columnIndex = instanceCursor
-                    .getColumnIndex(_ID);
+                .getColumnIndex(_ID);
             if (columnIndex == -1) {
                 LOG.e("No id to delete for after upload: " + uri);
                 EventBus.getDefault().post(
-                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
                 return;
             }
             final long idToDelete = instanceCursor.getLong(columnIndex);
@@ -258,38 +363,94 @@ public class OdkActivityLauncher {
             final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
 
             sendFormToServer(patientUuid, readFromPath(instancePath),
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            LOG.i("Created new encounter successfully on server"
-                                    + response.toString());
+                new Response.Listener<JSONObject>() {
+                    @Override public void onResponse(JSONObject response) {
+                        LOG.i("Created new encounter successfully on server"
+                            + response.toString());
 
-                            // Only locally cache new observations, not new patients.
-                            if (patientUuid != null && updateClientCache) {
-                                updateClientCache(
-                                        patientUuid, savedRoot, context.getContentResolver());
-                            }
-
-                            if (!settings.getKeepFormInstancesLocally()) {
-                                //Code largely copied from InstanceUploaderTask to delete on upload
-                                DeleteInstancesTask dit = new DeleteInstancesTask();
-                                dit.setContentResolver(
-                                        Collect.getInstance().getApplication()
-                                                .getContentResolver());
-                                dit.execute(idToDelete);
-                            }
-                            EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                        // Only locally cache new observations, not new patients.
+                        if (patientUuid != null) {
+                            updateClientCache(
+                                patientUuid, savedRoot, context.getContentResolver());
                         }
-                    });
+
+                        if (!settings.getKeepFormInstancesLocally()) {
+                            //Code largely copied from InstanceUploaderTask to delete on upload
+                            DeleteInstancesTask dit = new DeleteInstancesTask();
+                            dit.setContentResolver(
+                                Collect.getInstance().getApplication()
+                                    .getContentResolver());
+                            dit.execute(idToDelete);
+                        }
+                        EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                    }
+                });
         } catch (IOException e) {
             LOG.e(e, "Failed to read xml form into a String " + uri);
             EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
             }
         }
+    }
+
+    private static void sendFormToServer(String patientUuid, String xml,
+                                         Response.Listener<JSONObject> successListener) {
+        OpenMrsXformsConnection connection =
+            new OpenMrsXformsConnection(App.getConnectionDetails());
+        connection.postXformInstance(patientUuid, xml,
+            successListener,
+            new Response.ErrorListener() {
+                @Override public void onErrorResponse(VolleyError error) {
+                    LOG.e(error, "Did not submit form to server successfully");
+
+                    SubmitXformFailedEvent.Reason reason =
+                        SubmitXformFailedEvent.Reason.UNKNOWN;
+                    if (error.networkResponse != null) {
+                        switch (error.networkResponse.statusCode) {
+                            case 401:
+                            case 403:
+                                reason = SubmitXformFailedEvent.Reason.SERVER_AUTH;
+                                break;
+                            case 404:
+                                reason = SubmitXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
+                                break;
+                            case 500:
+                                if (error.networkResponse.data == null) {
+                                    LOG.e("Server error, but no internal error stack trace "
+                                        + "available.");
+                                } else {
+                                    LOG.e(new String(
+                                        error.networkResponse.data, Charsets.UTF_8));
+                                    LOG.e("Server error. Internal error stack trace:\n");
+                                }
+                                reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
+                                break;
+                            default:
+                                reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
+                                break;
+                        }
+                    }
+
+                    if (error instanceof TimeoutError) {
+                        reason = SubmitXformFailedEvent.Reason.SERVER_TIMEOUT;
+                    }
+
+                    EventBus.getDefault().post(new SubmitXformFailedEvent(reason, error));
+                }
+            });
+    }
+
+    private static String readFromPath(String path) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        return sb.toString();
     }
 
     private static void updateClientCache(String patientUuid, TreeElement savedRoot,
@@ -316,6 +477,9 @@ public class OdkActivityLauncher {
         //      <value>1066^NO^99DCT</value>
 
         ContentValues common = new ContentValues();
+        // It's critical that UUID is {@code null} for temporary observations, so we make it
+        // explicit here. See {@link Contracts.Observations.UUID} for details.
+        common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
 
         TreeElement encounter = savedRoot.getChild("encounter", 0);
@@ -325,7 +489,7 @@ public class OdkActivityLauncher {
         }
 
         TreeElement encounterDatetime =
-                encounter.getChild("encounter.encounter_datetime", 0);
+            encounter.getChild("encounter.encounter_datetime", 0);
         if (encounterDatetime == null) {
             LOG.e("No encounter date time found in instance");
             return;
@@ -334,11 +498,9 @@ public class OdkActivityLauncher {
         try {
 
             DateTime encounterTime =
-                    ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
-            long secondsSinceEpoch = encounterTime.getMillis() / 1000L;
-            common.put(Contracts.Observations.ENCOUNTER_TIME, secondsSinceEpoch);
+                ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
+            common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
             common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
-            common.put(Contracts.Observations.TEMP_CACHE, 1);
         } catch (IllegalArgumentException e) {
             LOG.e("Could not parse datetime" + dateTimeValue.getValue());
             return;
@@ -348,34 +510,24 @@ public class OdkActivityLauncher {
         HashSet<Integer> xformConceptIds = new HashSet<>();
         for (int i = 0; i < savedRoot.getNumChildren(); i++) {
             TreeElement group = savedRoot.getChildAt(i);
-            if (group.getNumChildren() == 0) {
-                continue;
-            }
+            if (group.getNumChildren() == 0) continue;
             for (int j = 0; j < group.getNumChildren(); j++) {
                 TreeElement question = group.getChildAt(j);
                 TreeElement openmrsConcept = question.getAttribute(null, "openmrs_concept");
                 TreeElement openmrsDatatype = question.getAttribute(null, "openmrs_datatype");
-                if (openmrsConcept == null || openmrsDatatype == null) {
-                    continue;
-                }
+                if (openmrsConcept == null || openmrsDatatype == null) continue;
                 // Get the concept for the question.
                 // eg "5088^Temperature (C)^99DCT"
                 String encodedConcept = (String) openmrsConcept.getValue().getValue();
                 Integer id = getConceptId(xformConceptIds, encodedConcept);
-                if (id == null) {
-                    continue;
-                }
+                if (id == null) continue;
                 // Also get for the answer if a coded question
                 String value;
                 TreeElement valueChild = question.getChild("value", 0);
                 IAnswerData answer = valueChild.getValue();
-                if (answer == null) {
-                    continue;
-                }
+                if (answer == null) continue;
                 Object answerObject = answer.getValue();
-                if (answerObject == null) {
-                    continue;
-                }
+                if (answerObject == null) continue;
                 if ("CWE".equals(openmrsDatatype.getValue().getValue())) {
                     value = getConceptId(xformConceptIds, answerObject.toString()).toString();
                 } else {
@@ -391,42 +543,31 @@ public class OdkActivityLauncher {
         }
 
         String inClause = Joiner.on(",").join(xformConceptIds);
-        // Get a map from client ids to UUIDs from our local concept database.
-        HashMap<String, String> idToUuid = new HashMap<>();
+        // Get a map from XForm ids to UUIDs from our local concept database.
+        HashMap<String, String> xformIdToUuid = new HashMap<>();
         Cursor cursor = resolver.query(Contracts.Concepts.CONTENT_URI,
-                new String[]{Contracts.Concepts._ID, Contracts.Concepts.XFORM_ID},
-                Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
-                null, null);
+            new String[] {Contracts.Concepts.UUID, Contracts.Concepts.XFORM_ID},
+            Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
+            null, null);
         try {
             while (cursor.moveToNext()) {
-                idToUuid.put(cursor.getString(cursor.getColumnIndex(Contracts.Concepts.XFORM_ID)),
-                        cursor.getString(cursor.getColumnIndex(Contracts.Concepts._ID)));
+                xformIdToUuid.put(Utils.getString(cursor, Contracts.Concepts.XFORM_ID),
+                    Utils.getString(cursor, Contracts.Concepts.UUID));
             }
         } finally {
             cursor.close();
         }
 
         // Remap concept ids to uuids, skipping anything we can't remap.
-        for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext();) {
+        for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext(); ) {
             ContentValues values = i.next();
-            if (!mapIdToUuid(idToUuid, values, Contracts.Observations.CONCEPT_UUID)) {
+            if (!mapIdToUuid(xformIdToUuid, values, Contracts.Observations.CONCEPT_UUID)) {
                 i.remove();
             }
-            mapIdToUuid(idToUuid, values, Contracts.Observations.VALUE);
+            mapIdToUuid(xformIdToUuid, values, Contracts.Observations.VALUE);
         }
         resolver.bulkInsert(Contracts.Observations.CONTENT_URI,
-                toInsert.toArray(new ContentValues[toInsert.size()]));
-    }
-
-    private static boolean mapIdToUuid(
-            HashMap<String, String> idToUuid, ContentValues values, String key) {
-        String id = (String) values.get(key);
-        String uuid = idToUuid.get(id);
-        if (uuid == null) {
-            return false;
-        }
-        values.put(key, uuid);
-        return true;
+            toInsert.toArray(new ContentValues[toInsert.size()]));
     }
 
     private static Integer getConceptId(Set<Integer> accumulator, String encodedConcept) {
@@ -435,6 +576,17 @@ public class OdkActivityLauncher {
             accumulator.add(id);
         }
         return id;
+    }
+
+    private static boolean mapIdToUuid(
+        HashMap<String, String> idToUuid, ContentValues values, String key) {
+        String id = (String) values.get(key);
+        String uuid = idToUuid.get(id);
+        if (uuid == null) {
+            return false;
+        }
+        values.put(key, uuid);
+        return true;
     }
 
     private static Integer getConceptId(String encodedConcept) {
@@ -449,179 +601,5 @@ public class OdkActivityLauncher {
             LOG.w("Strangely formatted id String " + idString);
             return null;
         }
-    }
-
-    private static void sendFormToServer(String patientUuid, String xml,
-                                         Response.Listener<JSONObject> successListener) {
-        OpenMrsXformsConnection connection =
-                new OpenMrsXformsConnection(App.getConnectionDetails());
-        connection.postXformInstance(patientUuid, xml,
-                successListener,
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        LOG.e(error, "Did not submit form to server successfully");
-
-                        SubmitXformFailedEvent.Reason reason =
-                                SubmitXformFailedEvent.Reason.UNKNOWN;
-                        if (error.networkResponse != null) {
-                            switch (error.networkResponse.statusCode) {
-                                case 401:
-                                case 403:
-                                    reason = SubmitXformFailedEvent.Reason.SERVER_AUTH;
-                                    break;
-                                case 404:
-                                    reason = SubmitXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
-                                    break;
-                                case 500:
-                                    if (error.networkResponse.data == null) {
-                                        LOG.e("Server error, but no internal error stack trace "
-                                                + "available.");
-                                    } else {
-                                        LOG.e(new String(
-                                                error.networkResponse.data, Charsets.UTF_8));
-                                        LOG.e("Server error. Internal error stack trace:\n");
-                                    }
-                                    reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
-                                    break;
-                                default:
-                                    reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
-                                    break;
-                            }
-                        }
-
-                        if (error instanceof TimeoutError) {
-                            reason = SubmitXformFailedEvent.Reason.SERVER_TIMEOUT;
-                        }
-
-                        EventBus.getDefault().post(new SubmitXformFailedEvent(reason, error));
-                    }
-                });
-    }
-
-    private static String readFromPath(String path) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\n");
-        }
-        return sb.toString();
-    }
-
-    // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
-    // return null if no xform is found.
-    private static OpenMrsXformIndexEntry findUuid(
-            List<OpenMrsXformIndexEntry> allEntries, String uuid) {
-        for (OpenMrsXformIndexEntry entry : allEntries) {
-            if (entry.uuid.equals(uuid)) {
-                return entry;
-            }
-        }
-        return null;
-    }
-
-    private static Response.ErrorListener getErrorListenerForTag(final String tag) {
-        return new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                LOG.e(error.toString());
-            }
-        };
-    }
-
-    /**
-     * Show the ODK activity for viewing a saved form.
-     *
-     * @param caller the calling activity.
-     */
-    public static void showSavedXform(final Activity caller) {
-
-        // This has to be at the start of anything that uses the ODK file system.
-        Collect.getInstance().createODKDirs();
-
-        final String selection = InstanceProviderAPI.InstanceColumns.STATUS + " != ?";
-        final String[] selectionArgs = {InstanceProviderAPI.STATUS_SUBMITTED};
-        final String sortOrder = InstanceProviderAPI.InstanceColumns.STATUS + " DESC, "
-                + InstanceProviderAPI.InstanceColumns.DISPLAY_NAME + " ASC";
-
-        final Uri instanceUri;
-        final String instancePath;
-        final String jrFormId;
-        Cursor instanceCursor = null;
-        try {
-            instanceCursor = caller.getContentResolver().query(
-                    CONTENT_URI, new String[]{_ID, INSTANCE_FILE_PATH, JR_FORM_ID}, selection,
-                    selectionArgs, sortOrder);
-            if (instanceCursor.getCount() == 0) {
-                return;
-            }
-            instanceCursor.moveToFirst();
-
-            // The URI code mostly copied from InstanceChooserList.onListItemClicked()
-            instanceUri =
-                    ContentUris.withAppendedId(CONTENT_URI,
-                            instanceCursor.getLong(instanceCursor.getColumnIndex(_ID)));
-            instancePath =
-                    instanceCursor.getString(instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
-            jrFormId = instanceCursor.getString(instanceCursor.getColumnIndex(JR_FORM_ID));
-        } finally {
-            if (instanceCursor != null) {
-                instanceCursor.close();
-            }
-        }
-
-        // It looks like we need to load the form as well. Which is odd, because
-        // the main menu doesn't seem to do this, but without the FormLoaderTask run
-        // there is no form manager for the HierarchyActivity.
-        FormLoaderTask loaderTask = new FormLoaderTask(instancePath, null, null);
-
-        final String formPath;
-        Cursor formCursor = null;
-        try {
-            formCursor = caller.getContentResolver().query(
-                    FormsProviderAPI.FormsColumns.CONTENT_URI,
-                    new String[]{FormsProviderAPI.FormsColumns.FORM_FILE_PATH},
-                    FormsProviderAPI.FormsColumns.JR_FORM_ID + " = ?",
-                    new String[]{jrFormId}, null);
-            if (formCursor.getCount() == 0) {
-                LOG.e("Loading forms for displaying " + jrFormId + " and got no forms,");
-                return;
-            }
-            if (formCursor.getCount() != 1) {
-                LOG.e("Loading forms for displaying instance, expected only 1. "
-                        + "Got multiple so using first.");
-            }
-            formCursor.moveToFirst();
-            formPath = formCursor.getString(
-                    formCursor.getColumnIndex(FormsProviderAPI.FormsColumns.FORM_FILE_PATH));
-        } finally {
-            if (formCursor != null) {
-                formCursor.close();
-            }
-        }
-
-        loaderTask.setFormLoaderListener(new FormLoaderListener() {
-            @Override
-            public void loadingComplete(FormLoaderTask task) {
-                // This was extracted from FormEntryActivity.loadingComplete()
-                FormController formController = task.getFormController();
-                Collect.getInstance().setFormController(formController);
-
-                Intent intent = new Intent(caller, FormHierarchyActivity.class);
-                intent.setData(instanceUri);
-                intent.setAction(Intent.ACTION_PICK);
-                caller.startActivity(intent);
-            }
-
-            @Override
-            public void loadingError(String errorMsg) {
-            }
-
-            @Override
-            public void onProgressStep(String stepMessage) {
-            }
-        });
-        loaderTask.execute(formPath);
     }
 }

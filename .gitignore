@@ -28,18 +28,16 @@ crashlytics-build.properties
 local.properties
 
 # Android Studio files (https://intellij-support.jetbrains.com/entries/23393067)
-.idea/.name
-.idea/compiler.xml
+.idea/*
+.idea/copyright/Buendia.xml
 .idea/copyright/profiles_settings.xml
-.idea/encodings.xml
-.idea/gradle.xml
-.idea/libraries/
-.idea/misc.xml
-.idea/modules.xml
-.idea/scopes/scope_settings.xml
-.idea/tasks.xml
-.idea/vcs.xml
-.idea/workspace.xml
+.idea/inspectionProfiles/Buendia.xml
+.idea/inspectionProfiles/profiles_settings.xml
+
+
+
+!.idea/inspectionProfiles
+!.idea/copyright
 
 # User-specific configuration files
 *.iml

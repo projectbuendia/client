@@ -46,28 +46,27 @@ public class OpenMrsXformsConnection {
 
     /**
      * Get a single (full) Xform from the OpenMRS server.
-     * @param uuid the uuid of the form to fetch
+     * @param uuid           the uuid of the form to fetch
      * @param resultListener the listener to be informed of the form asynchronously
-     * @param errorListener a listener to be informed of any errors
+     * @param errorListener  a listener to be informed of any errors
      */
     public void getXform(String uuid, final Response.Listener<String> resultListener,
-                          Response.ErrorListener errorListener) {
+                         Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(mConnectionDetails,
-                "/xform/" + uuid + "?v=full",
-                null, // null implies GET
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            String xml = response.getString("xml");
-                            resultListener.onResponse(xml);
-                        } catch (JSONException e) {
-                            // The result was not in the expected format. Just log, and return
-                            // results so far.
-                            LOG.e(e, "response was in bad format: " + response);
-                        }
+            "/xforms/" + uuid + "?v=full",
+            null, // null implies GET
+            new Response.Listener<JSONObject>() {
+                @Override public void onResponse(JSONObject response) {
+                    try {
+                        String xml = response.getString("xml");
+                        resultListener.onResponse(xml);
+                    } catch (JSONException e) {
+                        // The result was not in the expected format. Just log, and return
+                        // results so far.
+                        LOG.e(e, "response was in bad format: " + response);
                     }
-                }, errorListener
+                }
+            }, errorListener
         );
         // Typical response times should be close to 10s, but as the number of users grows, this
         // number scales up quickly, so use a 30s timeout to be safe.
@@ -77,51 +76,50 @@ public class OpenMrsXformsConnection {
 
     /**
      * List all xforms on the server, but not their contents.
-     * @param listener a listener to be told about the index entries for all forms asynchronously.
+     * @param listener      a listener to be told about the index entries for all forms asynchronously.
      * @param errorListener a listener to be told about any errors.
      */
     public void listXforms(final Response.Listener<List<OpenMrsXformIndexEntry>> listener,
                            final Response.ErrorListener errorListener) {
-        Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xform", // list all forms
-                null, // null implies GET
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        LOG.i("got forms: " + response);
-                        ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
-                        try {
-                            // This seems quite code heavy (parsing manually), but is reasonably
-                            // efficient as we only look at the fields we need, so we are robust to
-                            // changes in the rest of the object.
-                            JSONArray results = response.getJSONArray("results");
-                            for (int i = 0; i < results.length(); i++) {
-                                JSONObject entry = results.getJSONObject(i);
+        Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xforms", // list all forms
+            null, // null implies GET
+            new Response.Listener<JSONObject>() {
+                @Override public void onResponse(JSONObject response) {
+                    LOG.i("got forms: " + response);
+                    ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
+                    try {
+                        // This seems quite code heavy (parsing manually), but is reasonably
+                        // efficient as we only look at the fields we need, so we are robust to
+                        // changes in the rest of the object.
+                        JSONArray results = response.getJSONArray("results");
+                        for (int i = 0; i < results.length(); i++) {
+                            JSONObject entry = results.getJSONObject(i);
 
-                                // Sometimes date_changed is not set; in this case, date_changed is
-                                // simply date_created.
-                                long dateChanged;
-                                if (entry.get("date_changed") == JSONObject.NULL) {
-                                    dateChanged = entry.getLong("date_created");
-                                } else {
-                                    dateChanged = entry.getLong("date_changed");
-                                }
-
-                                OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
-                                        entry.getString("uuid"),
-                                        entry.getString("name"),
-                                        dateChanged);
-                                result.add(indexEntry);
+                            // Sometimes date_changed is not set; in this case, date_changed is
+                            // simply date_created.
+                            long dateChanged;
+                            if (entry.get("date_changed") == JSONObject.NULL) {
+                                dateChanged = entry.getLong("date_created");
+                            } else {
+                                dateChanged = entry.getLong("date_changed");
                             }
-                        } catch (JSONException e) {
-                            // The result was not in the expected format. Just log, and return
-                            // results so far.
-                            LOG.e(e, "response was in bad format: " + response);
+
+                            OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
+                                entry.getString("uuid"),
+                                entry.getString("name"),
+                                dateChanged);
+                            result.add(indexEntry);
                         }
-                        LOG.i("returning response: " + response);
-                        listener.onResponse(result);
+                    } catch (JSONException e) {
+                        // The result was not in the expected format. Just log, and return
+                        // results so far.
+                        LOG.e(e, "response was in bad format: " + response);
                     }
-                },
-                errorListener
+                    LOG.i("returning response: " + response);
+                    listener.onResponse(result);
+                }
+            },
+            errorListener
         );
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
@@ -129,17 +127,16 @@ public class OpenMrsXformsConnection {
 
     /**
      * Send a single Xform to the OpenMRS server.
-     *
-     * @param patientUuid null if this is to add a new patient, non-null for observation on existing
-     *                  patient
+     * @param patientUuid    null if this is to add a new patient, non-null for observation on existing
+     *                       patient
      * @param resultListener the listener to be informed of the form asynchronously
-     * @param errorListener a listener to be informed of any errors
+     * @param errorListener  a listener to be informed of any errors
      */
     public void postXformInstance(
-            @Nullable String patientUuid,
-            String xform,
-            final Response.Listener<JSONObject> resultListener,
-            Response.ErrorListener errorListener) {
+        @Nullable String patientUuid,
+        String xform,
+        final Response.Listener<JSONObject> resultListener,
+        Response.ErrorListener errorListener) {
 
         // The JsonObject members in the API as written at the moment.
         // int "patient_id"
@@ -164,14 +161,13 @@ public class OpenMrsXformsConnection {
             errorListener.onErrorResponse(new VolleyError("failed to convert to JSON", e));
         }
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mConnectionDetails, "/xforminstance",
-                postBody, // non-null implies POST
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        resultListener.onResponse(response);
-                    }
-                }, errorListener
+            mConnectionDetails, "/xforminstances",
+            postBody, // non-null implies POST
+            new Response.Listener<JSONObject>() {
+                @Override public void onResponse(JSONObject response) {
+                    resultListener.onResponse(response);
+                }
+            }, errorListener
         );
         // Set a permissive timeout.
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));

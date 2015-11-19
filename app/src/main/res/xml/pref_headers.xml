@@ -17,4 +17,12 @@
         android:fragment="org.projectbuendia.client.ui.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
+    <header
+        android:fragment="org.projectbuendia.client.ui.SettingsActivity$AdvancedPreferenceFragment"
+        android:title="@string/pref_header_advanced" />
+
+    <header
+        android:fragment="org.projectbuendia.client.ui.SettingsActivity$DeveloperPreferenceFragment"
+        android:title="@string/pref_header_developer" />
+
 </preference-headers>

@@ -13,15 +13,15 @@ package org.projectbuendia.client.events.user;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.json.JsonUser;
 
 /** An event bus event indicating that the set of known users has changed. */
 public class KnownUsersChangedEvent {
 
-    public final ImmutableSet<User> addedUsers;
-    public final ImmutableSet<User> deletedUsers;
+    public final ImmutableSet<JsonUser> addedUsers;
+    public final ImmutableSet<JsonUser> deletedUsers;
 
-    public KnownUsersChangedEvent(ImmutableSet<User> addedUsers, ImmutableSet<User> deletedUsers) {
+    public KnownUsersChangedEvent(ImmutableSet<JsonUser> addedUsers, ImmutableSet<JsonUser> deletedUsers) {
         this.addedUsers = addedUsers;
         this.deletedUsers = deletedUsers;
     }

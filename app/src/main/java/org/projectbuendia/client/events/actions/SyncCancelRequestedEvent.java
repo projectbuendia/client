@@ -12,4 +12,5 @@
 package org.projectbuendia.client.events.actions;
 
 /** An event bus event indicating that the user has requested that the current sync be canceled. */
-public class SyncCancelRequestedEvent { }
+public class SyncCancelRequestedEvent {
+}

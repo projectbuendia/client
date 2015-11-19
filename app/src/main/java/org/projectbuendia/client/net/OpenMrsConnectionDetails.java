@@ -23,6 +23,16 @@ public class OpenMrsConnectionDetails {
     private final VolleySingleton mVolley;
     private final AppSettings mSettings;
 
+    /**
+     * Constructs an {@link OpenMrsConnectionDetails} object.
+     * @param volley   the {@link VolleySingleton} for making requests
+     * @param settings the application settings
+     */
+    public OpenMrsConnectionDetails(VolleySingleton volley, AppSettings settings) {
+        mVolley = volley;
+        mSettings = settings;
+    }
+
     /** Gets the Volley instance to use for network connections. */
     public VolleySingleton getVolley() {
         return mVolley;
@@ -32,26 +42,6 @@ public class OpenMrsConnectionDetails {
     public String getBuendiaApiUrl() {
         // The default value is set by setDefaultValues, not specified here.
         return mSettings.getOpenmrsUrl("/ws/rest/v1/projectbuendia");
-    }
-
-    /** Gets the OpenMRS username to use. */
-    public String getUser() {
-        return mSettings.getOpenmrsUser();
-    }
-
-    /** Gets the OpenMRS password to use. */
-    public String getPassword() {
-        return mSettings.getOpenmrsPassword();
-    }
-
-    /**
-     * Constructs an {@link OpenMrsConnectionDetails} object.
-     * @param volley the {@link VolleySingleton} for making requests
-     * @param settings the application settings
-     */
-    public OpenMrsConnectionDetails(VolleySingleton volley, AppSettings settings) {
-        mVolley = volley;
-        mSettings = settings;
     }
 
     /**
@@ -67,14 +57,24 @@ public class OpenMrsConnectionDetails {
      * Adds an authentication header to an existing map of HTTP headers.
      * @param username the username
      * @param password the password
-     * @param params the header map to be modified
+     * @param params   the header map to be modified
      * @return the modified header map, for method chaining
      */
     public static Map<String, String> addAuthHeader(
-            String username, String password, Map<String, String> params) {
+        String username, String password, Map<String, String> params) {
         String creds = String.format("%s:%s", username, password);
         String encoded = Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
         params.put("Authorization", "Basic " + encoded);
         return params;
+    }
+
+    /** Gets the OpenMRS username to use. */
+    public String getUser() {
+        return mSettings.getOpenmrsUser();
+    }
+
+    /** Gets the OpenMRS password to use. */
+    public String getPassword() {
+        return mSettings.getOpenmrsPassword();
     }
 }

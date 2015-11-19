@@ -19,7 +19,9 @@ import com.google.gson.GsonBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.utils.date.DateTimeDeserializer;
+import org.projectbuendia.client.json.DateTimeSerializer;
+import org.projectbuendia.client.json.LocalDateSerializer;
+import org.projectbuendia.client.json.Serializers;
 
 import javax.inject.Singleton;
 
@@ -28,25 +30,22 @@ import dagger.Provides;
 
 /** A Dagger module that provides bindings for network-related classes. */
 @Module(complete = false,
-        library = true)
+    library = true)
 public class NetModule {
 
     @Provides
-    @Singleton
-    VolleySingleton provideVolleySingleton(Application app) {
+    @Singleton VolleySingleton provideVolleySingleton(Application app) {
         return VolleySingleton.getInstance(app);
     }
 
     @Provides
-    @Singleton
-    OpenMrsConnectionDetails provideOpenMrsConnectionDetails(
-            VolleySingleton volley, AppSettings settings) {
+    @Singleton OpenMrsConnectionDetails provideOpenMrsConnectionDetails(
+        VolleySingleton volley, AppSettings settings) {
         return new OpenMrsConnectionDetails(volley, settings);
     }
 
     @Provides
-    @Singleton
-    RequestConfigurator provideRequestConfigurator() {
+    @Singleton RequestConfigurator provideRequestConfigurator() {
         return new RequestConfigurator(10000 /*timeout*/, 2 /*retry attempts*/, 1 /*back-off*/);
     }
 
@@ -57,20 +56,17 @@ public class NetModule {
     }
 
     @Provides
-    @Singleton
-    Gson provideGson() {
-        return new GsonBuilder()
-                .registerTypeAdapter(LocalDate.class, new LocalDateSerializer())
-                .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
-                .create();
+    @Singleton Gson provideGson() {
+        GsonBuilder builder = new GsonBuilder();
+        Serializers.registerTo(builder);
+        return builder.create();
     }
 
     @Provides
-    @Singleton
-    Server provideServer(
-            OpenMrsConnectionDetails connectionDetails,
-            RequestFactory requestFactory,
-            Gson gson) {
+    @Singleton Server provideServer(
+        OpenMrsConnectionDetails connectionDetails,
+        RequestFactory requestFactory,
+        Gson gson) {
         return new OpenMrsServer(connectionDetails, requestFactory, gson);
     }
 }

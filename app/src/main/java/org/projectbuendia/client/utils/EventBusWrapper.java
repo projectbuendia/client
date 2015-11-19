@@ -22,18 +22,15 @@ public final class EventBusWrapper implements EventBusInterface {
         mEventBus = Preconditions.checkNotNull(eventBus);
     }
 
-    @Override
-    public void register(Object receiver) {
+    @Override public void register(Object receiver) {
         mEventBus.register(receiver);
     }
 
-    @Override
-    public void unregister(Object receiver) {
+    @Override public void unregister(Object receiver) {
         mEventBus.unregister(receiver);
     }
 
-    @Override
-    public void post(Object value) {
+    @Override public void post(Object value) {
         mEventBus.post(value);
     }
 }

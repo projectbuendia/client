@@ -27,24 +27,20 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
     private final int mSectionBorderResource;
     private final LayoutInflater mInflater;
 
-    private enum ViewType {
-        SECTION_BORDER, LIST_ITEM
-    }
-
     /**
      * Instantiates a {@link SectionedSpinnerAdapter} with the given resources and contents.
-     * @param context the Application or Activity context
-     * @param collapsedResource the {@link android.graphics.drawable.Drawable} used to display the
-     *                          selected adapter item when the list is collapsed
-     * @param dropDownResource the {@link android.graphics.drawable.Drawable} used to display an
-     *                         adapter item when the list is expanded
+     * @param context               the Application or Activity context
+     * @param collapsedResource     the {@link android.graphics.drawable.Drawable} used to display the
+     *                              selected adapter item when the list is collapsed
+     * @param dropDownResource      the {@link android.graphics.drawable.Drawable} used to display an
+     *                              adapter item when the list is expanded
      * @param sectionBorderResource the {@link android.graphics.drawable.Drawable} used to display
      *                              section dividers (null items)
-     * @param items the contents of the list
+     * @param items                 the contents of the list
      */
     public SectionedSpinnerAdapter(
-            Context context, int collapsedResource, int dropDownResource,
-            int sectionBorderResource, T[] items) {
+        Context context, int collapsedResource, int dropDownResource,
+        int sectionBorderResource, T[] items) {
         super(context, collapsedResource, items);
         mItems = items;
         mSectionBorderResource = sectionBorderResource;
@@ -54,8 +50,7 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
 
     }
 
-    @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    @Override public View getDropDownView(int position, View convertView, ViewGroup parent) {
         if (isSectionBorder(position)) {
             return getSectionBorder(convertView, parent);
         }
@@ -70,40 +65,6 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
         // ordinarily support multiple view types and ignore getViewTypeCount().
         view.setTag(ViewType.LIST_ITEM);
         return view;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (isSectionBorder(position)) {
-            return getSectionBorder(convertView, parent);
-        }
-
-        resetClickable(convertView);
-        if (convertView != null && convertView.getTag() != ViewType.LIST_ITEM) {
-            convertView = null;
-        }
-
-        View view = super.getView(position, convertView, parent);
-        // Manually manage the different types of views, since Spinners don't
-        // ordinarily support multiple view types and ignore getViewTypeCount().
-        view.setTag(ViewType.LIST_ITEM);
-        return view;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 2;
-    }
-
-    /**
-     * Returns the type for the view at the given position, where valid types are ordinal values of
-     * the {@link ViewType} enum.
-     * @param position the position of the view in the adapter
-     */
-    public int getItemViewType(int position) {
-        return isSectionBorder(position)
-                ? ViewType.SECTION_BORDER.ordinal()
-                : ViewType.LIST_ITEM.ordinal();
     }
 
     private boolean isSectionBorder(int position) {
@@ -127,5 +88,41 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
         if (convertView != null) {
             convertView.setClickable(false);
         }
+    }
+
+    @Override public View getView(int position, View convertView, ViewGroup parent) {
+        if (isSectionBorder(position)) {
+            return getSectionBorder(convertView, parent);
+        }
+
+        resetClickable(convertView);
+        if (convertView != null && convertView.getTag() != ViewType.LIST_ITEM) {
+            convertView = null;
+        }
+
+        View view = super.getView(position, convertView, parent);
+        // Manually manage the different types of views, since Spinners don't
+        // ordinarily support multiple view types and ignore getViewTypeCount().
+        view.setTag(ViewType.LIST_ITEM);
+        return view;
+    }
+
+    @Override public int getViewTypeCount() {
+        return 2;
+    }
+
+    /**
+     * Returns the type for the view at the given position, where valid types are ordinal values of
+     * the {@link ViewType} enum.
+     * @param position the position of the view in the adapter
+     */
+    public int getItemViewType(int position) {
+        return isSectionBorder(position)
+            ? ViewType.SECTION_BORDER.ordinal()
+            : ViewType.LIST_ITEM.ordinal();
+    }
+
+    private enum ViewType {
+        SECTION_BORDER, LIST_ITEM
     }
 }

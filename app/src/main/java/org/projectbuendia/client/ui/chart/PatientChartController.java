@@ -16,44 +16,48 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MenuItem;
+import android.os.Looper;
 
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.odk.collect.android.model.Preset;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppEncounter;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
-import org.projectbuendia.client.data.odk.OdkConverter;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
+import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.model.Concepts;
-import org.projectbuendia.client.net.model.User;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Chart;
+import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Encounter.Observation;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.sync.ChartDataHelper;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.locationselection.AssignLocationDialog;
-import org.projectbuendia.client.utils.Utils;
-import org.projectbuendia.client.utils.date.Dates;
+import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
-import org.odk.collect.android.model.Patient;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.projectbuendia.client.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,13 +65,15 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Controller for {@link PatientChartActivity}. */
-final class PatientChartController {
+final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     private static final Logger LOG = Logger.create();
-
     private static final boolean DEBUG = true;
-
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
+
+    // Form UUIDs specific to Ebola deployments.
+    static final String OBSERVATION_FORM_UUID = "buendia-form-clinical_observation";
+    static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
 
     /**
      * Period between observation syncs while the chart view is active.  It would be nice for
@@ -78,53 +84,73 @@ final class PatientChartController {
      */
     private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
+    // TODO: Get rid of mPatientUuids, mNextIndex etc. now that we have mFormRequests.
+    /** Maximum concurrent ODK forms assigned request codes. */
+    private static final int MAX_ODK_REQUESTS = 10;
     // The ODK code for filling in a form has no way of attaching metadata to it.
     // This means we can't pass which patient is currently being edited. Instead, we keep an array
     // of up to MAX_ODK_REQUESTS patientUuids. The array is persisted through activity restart in
     // the savedInstanceState.
-
-    /** Maximum concurrent ODK forms assigned request codes. */
-    private static final int MAX_ODK_REQUESTS = 10;
-    private int mNextIndex = 0;
-
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
-    private AppPatient mPatient = AppPatient.builder().build();
-    private AppLocationTree mLocationTree;
-    private long mLastObservation = Long.MIN_VALUE;
+    private int mNextIndex = 0;
+
+    private Patient mPatient = Patient.builder().build();
+    private LocationTree mLocationTree;
     private String mPatientUuid = "";
+    private Map<String, org.projectbuendia.client.sync.Order> mOrdersByUuid;
+    private List<Obs> mObservations;
 
     // This value is incremented whenever the controller is activated or suspended.
     // A "phase" is a period of time between such transition points.
     private int mCurrentPhaseId = 0;
+    private final EventBusRegistrationInterface mDefaultEventBus;
+    private final CrudEventBus mCrudEventBus;
+    private final OdkResultSender mOdkResultSender;
+    private final Ui mUi;
+    private final ChartDataHelper mChartHelper;
+    private final AppModel mAppModel;
+    private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
+    private final SyncManager mSyncManager;
+    private final MinimalHandler mMainThreadHandler;
+    private AssignLocationDialog mAssignLocationDialog;
+    private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
+    // Every form request made by this controller is kept in this list until
+    // the form is closed.
+    List<FormRequest> mFormRequests = new ArrayList<>();
 
     public interface Ui {
         /** Sets the activity title. */
         void setTitle(String title);
 
-        /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUi(
-                Map<String, LocalizedObs> observations,
-                LocalDate admissionDate,
-                LocalDate firstSymptomsDate);
+        /** Updates the UI showing the admission date and first symptoms date for this patient. */
+        void updateAdmissionDateAndFirstSymptomsDateUi(
+            LocalDate admissionDate,
+            LocalDate firstSymptomsDate);
+
+        /** Updates the UI showing Ebola PCR lab test results for this patient. */
+        void updateEbolaPcrTestResultUi(Map<String, Obs> observations);
+
+        /** Updates the UI showing the pregnancy status and IV status for this patient. */
+        void updatePregnancyAndIvStatusUi(Map<String, Obs> observations);
 
         /** Updates the general condition UI with the patient's current condition. */
-        void updatePatientGeneralConditionUi(String generalConditionUuid);
+        void updatePatientConditionUi(String generalConditionUuid);
 
         /** Updates the UI with the patient's location. */
-        void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient);
+        void updatePatientLocationUi(LocationTree locationTree, Patient patient);
 
-        /** Updates the UI showing the historic log of observation values for this patient. */
-        void setObservationHistory(
-                List<LocalizedObs> observations,
-                LocalDate admissionDate,
-                LocalDate firstSymptomsDate);
+        /** Updates the UI showing the history of observations and orders for this patient. */
+        void updateTilesAndGrid(
+            Chart chart,
+            Map<String, Obs> latestObservations,
+            List<Obs> observations,
+            List<org.projectbuendia.client.sync.Order> orders,
+            LocalDate admissionDate,
+            LocalDate firstSymptomsDate);
 
-        /** Shows the last time a user interacted with this patient. */
-        void setLatestEncounter(long latestEncounterTimeMillis);
-
-        /** Shows the patient's personal details. */
-        void setPatient(AppPatient patient);
+        /** Updates the UI with the patient's personal details (name, gender, etc.). */
+        void updatePatientDetailsUi(Patient patient);
 
         /** Displays an error message with the given resource id. */
         void showError(int errorMessageResource);
@@ -134,40 +160,24 @@ final class PatientChartController {
 
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
-                PatientChartActivity.XForm form,
-                int code,
-                Patient patient,
-                PrepopulatableFields fields);
+            int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
+            Preset preset);
 
-        /** Re-enables fetching. */
         void reEnableFetch();
-
-        /** Shows or hides the form loading dialog. */
         void showFormLoadingDialog(boolean show);
-
-        /** Shows or hides the form submission dialog. */
         void showFormSubmissionDialog(boolean show);
+        void showNewOrderDialog(String patientUuid);
+        void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval
+            interval, List<DateTime> executionTimes);
+        void showEditPatientDialog(Patient patient);
     }
-
-    private final EventBusRegistrationInterface mDefaultEventBus;
-    private final CrudEventBus mCrudEventBus;
-    private final OdkResultSender mOdkResultSender;
-    private final Ui mUi;
-    private final LocalizedChartHelper mObservationsProvider;
-    private final AppModel mAppModel;
-    private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
-    private final SyncManager mSyncManager;
-    private final MinimalHandler mMainThreadHandler;
-
-    private AssignLocationDialog mAssignLocationDialog;
-    private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
 
     /** Sends ODK form data. */
     public interface OdkResultSender {
         void sendOdkResultToServer(
-                @Nullable String patientUuid,
-                int resultCode,
-                Intent data);
+            @Nullable String patientUuid,
+            int resultCode,
+            Intent data);
     }
 
     public interface MinimalHandler {
@@ -175,21 +185,23 @@ final class PatientChartController {
     }
 
     public PatientChartController(
-            AppModel appModel,
-            EventBusRegistrationInterface defaultEventBus,
-            CrudEventBus crudEventBus,
-            Ui ui,
-            OdkResultSender odkResultSender,
-            LocalizedChartHelper observationsProvider,
-            @Nullable Bundle savedState,
-            SyncManager syncManager,
-            MinimalHandler mainThreadHandler) {
+        AppModel appModel,
+        EventBusRegistrationInterface defaultEventBus,
+        CrudEventBus crudEventBus,
+        Ui ui,
+        String patientUuid,
+        OdkResultSender odkResultSender,
+        ChartDataHelper chartHelper,
+        @Nullable Bundle savedState,
+        SyncManager syncManager,
+        MinimalHandler mainThreadHandler) {
         mAppModel = appModel;
         mDefaultEventBus = defaultEventBus;
         mCrudEventBus = crudEventBus;
         mUi = ui;
+        mPatientUuid = patientUuid;
         mOdkResultSender = odkResultSender;
-        mObservationsProvider = observationsProvider;
+        mChartHelper = chartHelper;
         if (savedState != null) {
             mPatientUuids = savedState.getStringArray(KEY_PENDING_UUIDS);
         } else {
@@ -205,22 +217,8 @@ final class PatientChartController {
      */
     public Bundle getState() {
         Bundle bundle = new Bundle();
-        bundle.putStringArray("pendingUuids", mPatientUuids);
+        bundle.putStringArray(KEY_PENDING_UUIDS, mPatientUuids);
         return bundle;
-    }
-
-    /** Sets the current patient. This should be called before init. */
-    public void setPatient(
-            String patientUuid,
-            @Nullable String patientName,
-            @Nullable String patientId) {
-        mPatientUuid = patientUuid;
-
-        if (patientName != null && patientId != null) {
-            mUi.setTitle(patientName + " (" + patientId + ")");
-        } else {
-            mUi.setTitle("");
-        }
     }
 
     /**
@@ -238,6 +236,28 @@ final class PatientChartController {
         startObservationSync();
     }
 
+    /** Starts syncing observations more frequently while the user is viewing the chart. */
+    private void startObservationSync() {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final int phaseId = mCurrentPhaseId;
+
+        Runnable runnable = new Runnable() {
+            @Override public void run() {
+                // This runnable triggers itself in a cycle, each run calling postDelayed()
+                // to schedule the next run.  Each such cycle belongs to a phase, identified
+                // by phaseId; once the current phase is exited the cycle stops.  Thus, when the
+                // controller is suspended the cycle stops; and also since mCurrentPhaseId can
+                // only have one value, only one such cycle can be active at any given time.
+                if (mCurrentPhaseId == phaseId) {
+                    mSyncManager.startObservationsSync();
+                    handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
+                }
+            }
+        };
+
+        handler.postDelayed(runnable, 0);
+    }
+
     /** Releases any resources used by the controller. */
     public void suspend() {
         mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
@@ -249,65 +269,27 @@ final class PatientChartController {
         }
     }
 
-    /** Starts syncing observations more frequently while the user is viewing the chart. */
-    private void startObservationSync() {
-        final Handler handler = new Handler();
-        final int phaseId = mCurrentPhaseId;
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                // This runnable triggers itself in a cycle, each run calling postDelayed()
-                // to schedule the next run.  Each such cycle belongs to a phase, identified
-                // by phaseId; once the current phase is exited the cycle stops.  Thus, when the
-                // controller is suspended the cycle stops; and also since mCurrentPhaseId can
-                // only have one value, only one such cycle can be active at any given time.
-                if (mCurrentPhaseId == phaseId) {
-                    mSyncManager.startIncrementalObsSync();
-                    handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
-                }
-            }
-        };
-
-        handler.postDelayed(runnable, OBSERVATION_SYNC_PERIOD_MILLIS);
-    }
-
-    public void onXFormResult(int code, int resultCode, Intent data) {
-        PatientChartActivity.RequestCode requestCode =
-                new PatientChartActivity.RequestCode(code);
-
-        String patientUuid = getAndClearPatientUuidForRequestCode(code);
-        if (patientUuid == null) {
-            LOG.e("Received unknown request code: " + code);
+    public void onXFormResult(int requestCode, int resultCode, Intent data) {
+        FormRequest request = popFormRequest(requestCode);
+        if (request == null) {
+            LOG.e("Unknown form request code: " + requestCode);
             return;
         }
 
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
         String action = (resultCode == Activity.RESULT_CANCELED)
-                ? "form_discard_pressed" : "form_save_pressed";
-        switch (requestCode.form) {
-            case ADD_OBSERVATION:
-                Utils.logUserAction(action,
-                        "form", "round",
-                        "patient_uuid", patientUuid);
-                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
-                mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
-                break;
-            case ADD_TEST_RESULTS:
-                Utils.logUserAction(action,
-                        "form", "lab_test",
-                        "patient_uuid", patientUuid);
-                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
-                mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
-                break;
-            default:
-                LOG.e(
-                        "Received an ODK result for a form that we do not know about: '%1$s'. This "
-                                + "indicates programmer error.", requestCode.form.toString());
-                shouldShowSubmissionDialog = false;
-                break;
-        }
+            ? "form_discard_pressed" : "form_save_pressed";
+        Utils.logUserAction(action,
+            "form", request.formUuid,
+            "patient_uuid", request.patientUuid);
+        mOdkResultSender.sendOdkResultToServer(request.patientUuid, resultCode, data);
         mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
+    }
+
+    FormRequest popFormRequest(int requestIndex) {
+        FormRequest request = mFormRequests.get(requestIndex);
+        mFormRequests.set(requestIndex, null);
+        return request;
     }
 
     /** Call when the user has indicated they want to add observation data. */
@@ -322,197 +304,234 @@ final class PatientChartController {
      */
     public void onAddObservationPressed(String targetGroup) {
         // Don't acknowledge this action if a dialog is showing
-        if (dialogShowing()) {
-            return;
-        }
+        if (dialogShowing()) return;
 
-        PrepopulatableFields fields = new PrepopulatableFields();
-        fields.locationName = "Triage";
+        Preset preset = new Preset();
+        preset.locationName = "Triage"; // TODO/i18n: Several occurrences of "Triage" in this file.
 
-        User user = App.getUserManager().getActiveUser();
+        JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed",
-                "form", "round",
-                "group", targetGroup);
+            "form", "round",
+            "group", targetGroup);
         if (user != null) {
-            fields.clinicianName = user.fullName;
+            preset.clinicianName = user.fullName;
         }
 
-        Map<String, LocalizedObs> observations =
-                mObservationsProvider.getMostRecentObservations(mPatientUuid);
+        Map<String, Obs> observations =
+            mChartHelper.getLatestObservations(mPatientUuid);
 
-        if (observations.containsKey(Concepts.PREGNANCY_UUID)
-                && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
-            fields.pregnant = PrepopulatableFields.YES;
+        if (observations.containsKey(ConceptUuids.PREGNANCY_UUID)
+            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.PREGNANCY_UUID).value)) {
+            preset.pregnant = Preset.YES;
         }
 
-        if (observations.containsKey(Concepts.IV_UUID)
-                && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
-            fields.ivFitted = PrepopulatableFields.YES;
+        if (observations.containsKey(ConceptUuids.IV_UUID)
+            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.IV_UUID).value)) {
+            preset.ivFitted = Preset.YES;
         }
 
-        fields.targetGroup = targetGroup;
+        preset.targetGroup = targetGroup;
 
         mUi.showFormLoadingDialog(true);
+        FormRequest request = newFormRequest(OBSERVATION_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-                PatientChartActivity.XForm.ADD_OBSERVATION,
-                savePatientUuidForRequestCode(
-                        PatientChartActivity.XForm.ADD_OBSERVATION, mPatientUuid),
-                OdkConverter.toOdkPatient(mPatient),
-                fields);
+            request.requestIndex, request.formUuid,
+            mPatient.toOdkPatient(), preset);
+    }
+
+    public void onEditPatientPressed() {
+        Utils.logUserAction("edit_patient_pressed", "uuid", mPatientUuid);
+        mUi.showEditPatientDialog(mPatient);
+    }
+
+    private boolean dialogShowing() {
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
+            || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
+    }
+
+    FormRequest newFormRequest(String formUuid, String patientUuid) {
+        // Find an empty slot in the array of all existing form requests.
+        int requestIndex = 0;
+        while (requestIndex < mFormRequests.size() && mFormRequests.get(requestIndex) != null) {
+            requestIndex++;
+        }
+        if (requestIndex >= mFormRequests.size()) {
+            mFormRequests.add(null);
+        }
+        FormRequest request = new FormRequest(formUuid, patientUuid, requestIndex);
+        mFormRequests.set(requestIndex, request);
+        return request;
     }
 
     public void onAddTestResultsPressed() {
-        PrepopulatableFields fields = new PrepopulatableFields();
-        fields.locationName = "Triage";
+        Preset preset = new Preset();
+        preset.locationName = "Triage";
 
-        User user = App.getUserManager().getActiveUser();
+        JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed", "form", "lab_test");
         if (user != null) {
-            fields.clinicianName = user.fullName;
+            preset.clinicianName = user.fullName;
         }
 
         mUi.showFormLoadingDialog(true);
+        FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-                PatientChartActivity.XForm.ADD_TEST_RESULTS,
-                savePatientUuidForRequestCode(
-                        PatientChartActivity.XForm.ADD_TEST_RESULTS, mPatientUuid),
-                OdkConverter.toOdkPatient(mPatient),
-                fields);
+            request.requestIndex, request.formUuid,
+            mPatient.toOdkPatient(), preset);
     }
 
-    /** Retrieves the value of a date observation as a LocalDate. */
-    private LocalDate getObservedDate(
-            Map<String, LocalizedObs> observations, String conceptUuid) {
-        LocalizedObs obs = observations.get(conceptUuid);
-        return obs == null ? null : Dates.toLocalDate(obs.localizedValue);
-    }
+    public void onOpenFormPressed(String formUuid) {
+        Preset preset = new Preset();
+        preset.locationName = "Triage";
 
-    /** Gets the latest observation values and displays them on the UI. */
-    private synchronized void updatePatientUi() {
-        // Get the observations
-        // TODO: Background thread this, or make this call async-like.
-        List<LocalizedObs> observations =
-                mObservationsProvider.getObservations(mPatientUuid);
-        Map<String, LocalizedObs> conceptsToLatestObservations =
-                new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
-
-        // Update timestamp
-        for (LocalizedObs obs : observations) {
-            mLastObservation = Math.max(mLastObservation, obs.encounterTimeMillis);
+        JsonUser user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            preset.clinicianName = user.fullName;
         }
 
-        // Add in initial observation.
-        /*for (Map.Entry<String, LocalizedObservation> recentObservation :
-                conceptsToLatestObservations.entrySet()) {
-            if (!observations.contains(recentObservation.getValue())) {
-                observations.add(recentObservation.getValue());
+        Utils.logUserAction("form_opener_pressed", "form", formUuid);
+        mUi.showFormLoadingDialog(true);
+        FormRequest request = newFormRequest(formUuid, mPatientUuid);
+        mUi.fetchAndShowXform(
+            request.requestIndex, request.formUuid,
+            mPatient.toOdkPatient(), preset);
+    }
+
+    @android.webkit.JavascriptInterface
+    public void onNewOrderPressed() {
+        mUi.showNewOrderDialog(mPatientUuid);
+    }
+
+    @android.webkit.JavascriptInterface
+    public void onOrderCellPressed(String orderUuid, long startMillis) {
+        org.projectbuendia.client.sync.Order order = mOrdersByUuid.get(orderUuid);
+        DateTime start = new DateTime(startMillis);
+        Interval interval = new Interval(start, start.plusDays(1));
+        List<DateTime> executionTimes = new ArrayList<>();
+        for (Obs obs : mObservations) {
+            if (AppModel.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
+                order.uuid.equals(obs.value)) {
+                executionTimes.add(obs.time);
             }
-        }*/
-
-        if (DEBUG) {
-            LOG.d("Showing " + observations.size() + " observations and "
-                    + conceptsToLatestObservations.size() + " latest obs");
         }
-
-        LocalDate admissionDate = getObservedDate(
-                conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
-        LocalDate firstSymptomsDate = getObservedDate(
-                conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
-        mUi.setLatestEncounter(mLastObservation);
-        mUi.updatePatientVitalsUi(
-                conceptsToLatestObservations, admissionDate, firstSymptomsDate);
-        mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
-    }
-
-    /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */
-    private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {
-        mPatientUuids[mNextIndex] = patientUuid;
-        int requestCode = new PatientChartActivity.RequestCode(form, mNextIndex).getCode();
-        mNextIndex = (mNextIndex + 1) % MAX_ODK_REQUESTS;
-        return requestCode;
+        mUi.showOrderExecutionDialog(order, interval, executionTimes);
     }
 
     public void showAssignGeneralConditionDialog(
-            Context context, final String generalConditionUuid) {
+        Context context, final String generalConditionUuid) {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
-                new AssignGeneralConditionDialog.ConditionSelectedCallback() {
+            new AssignGeneralConditionDialog.ConditionSelectedCallback() {
 
-                    @Override
-                    public boolean onNewConditionSelected(String newConditionUuid) {
-                        setCondition(newConditionUuid);
-                        Utils.logUserAction("condition_assigned");
-                        return false;
-                    }
-                };
+                @Override public boolean onNewConditionSelected(String newConditionUuid) {
+                    setCondition(newConditionUuid);
+                    Utils.logUserAction("condition_assigned");
+                    return false;
+                }
+            };
         mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
-                context, generalConditionUuid, callback);
+            context, generalConditionUuid, callback);
 
         mAssignGeneralConditionDialog.show();
     }
 
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
-        AppEncounter appEncounter = new AppEncounter(
-                mPatientUuid,
-                null, // encounter UUID, which the server will generate
-                DateTime.now(),
-                new AppEncounter.AppObservation[] {
-                        new AppEncounter.AppObservation(
-                                Concepts.GENERAL_CONDITION_UUID,
-                                newConditionUuid,
-                                AppEncounter.AppObservation.Type.UUID)
-                });
-        mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
+        Encounter encounter = new Encounter(
+            mPatientUuid,
+            null, // encounter UUID, which the server will generate
+            DateTime.now(),
+            new Observation[] {
+                new Observation(
+                    ConceptUuids.GENERAL_CONDITION_UUID,
+                    newConditionUuid,
+                    Observation.Type.NON_DATE)
+            }, null);
+        mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
     }
 
-    public void showAssignLocationDialog(
-            Context context,
-            final MenuItem menuItem) {
+    public void showAssignLocationDialog(Context context) {
+        if (mAssignLocationDialog != null) return;
+
         AssignLocationDialog.LocationSelectedCallback callback =
-                new AssignLocationDialog.LocationSelectedCallback() {
+            new AssignLocationDialog.LocationSelectedCallback() {
+                @Override public boolean onLocationSelected(String locationUuid) {
+                    PatientDelta delta = new PatientDelta();
+                    delta.assignedLocationUuid = Optional.of(locationUuid);
+                    mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, delta);
+                    Utils.logUserAction("location_assigned");
+                    return false;
+                }
+            };
 
-                    @Override
-                    public boolean onNewTentSelected(String newTentUuid) {
-                        AppPatientDelta patientDelta = new AppPatientDelta();
-                        patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
-
-                        mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
-                        Utils.logUserAction("location_assigned");
-                        return false;
-                    }
-                };
-
-        Runnable reEnableButton = new Runnable() {
-            @Override
-            public void run() {
-                menuItem.setEnabled(true);
+        Runnable onDismiss = new Runnable() {
+            @Override public void run() {
+                mAssignLocationDialog = null;
             }
         };
-        mAssignLocationDialog = new AssignLocationDialog(
-                context,
-                mAppModel,
-                LocaleSelector.getCurrentLocale().getLanguage(),
-                reEnableButton,
-                mCrudEventBus,
-                Optional.of(mPatient.locationUuid),
-                callback);
 
-        menuItem.setEnabled(false);
+        mAssignLocationDialog = new AssignLocationDialog(
+            context,
+            mAppModel,
+            LocaleSelector.getCurrentLocale().getLanguage(),
+            onDismiss,
+            mCrudEventBus,
+            Optional.of(mPatient.locationUuid),
+            callback);
         mAssignLocationDialog.show();
     }
 
-    /**
-     * Converts a requestCode that was previously sent to the ODK Xform activity back to a patient
-     * UUID.
-     *
-     * <p>Also removes details of that requestCode from the controller's state.
-     */
-    @Nullable
-    private String getAndClearPatientUuidForRequestCode(int code) {
-        PatientChartActivity.RequestCode requestCode = new PatientChartActivity.RequestCode(code);
-        String patientUuid = mPatientUuids[requestCode.requestIndex];
-        mPatientUuids[requestCode.requestIndex] = null;
-        return patientUuid;
+    /** Gets the latest observation values and displays them on the UI. */
+    private synchronized void updatePatientObsUi() {
+        // Get the observations and orders
+        // TODO: Background thread this, or make this call async-like.
+        mObservations = mChartHelper.getObservations(mPatientUuid);
+        Map<String, Obs> latestObservations =
+            new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
+        List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
+        mOrdersByUuid = new HashMap<>();
+        for (org.projectbuendia.client.sync.Order order : orders) {
+            mOrdersByUuid.put(order.uuid, order);
+        }
+        LOG.d("Showing " + mObservations.size() + " observations and "
+            + orders.size() + " orders");
+
+        LocalDate admissionDate = getObservedDate(
+            latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
+        LocalDate firstSymptomsDate = getObservedDate(
+            latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
+        mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
+        mUi.updateEbolaPcrTestResultUi(latestObservations);
+        mUi.updatePregnancyAndIvStatusUi(latestObservations);
+        mUi.updateTilesAndGrid(
+            mChartHelper.getChart(AppModel.CHART_UUID),
+            latestObservations, mObservations, orders,
+            admissionDate, firstSymptomsDate);
+    }
+
+    /** Retrieves the value of a date observation as a LocalDate. */
+    private LocalDate getObservedDate(
+        Map<String, Obs> observations, String conceptUuid) {
+        Obs obs = observations.get(conceptUuid);
+        return obs == null ? null : Utils.toLocalDate(obs.valueName);
+    }
+
+    private synchronized void updatePatientLocationUi() {
+        if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
+            mUi.updatePatientLocationUi(mLocationTree, mPatient);
+        }
+    }
+
+    /** Represents an instance of a form being opened by the user. */
+    class FormRequest {
+        public final String formUuid;
+        public final String patientUuid;
+        public final int requestIndex;
+
+        public FormRequest(String formUuid, String patientUuid, int index) {
+            this.formUuid = formUuid;
+            this.patientUuid = patientUuid;
+            this.requestIndex = index;
+        }
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.
@@ -527,7 +546,7 @@ final class PatientChartController {
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientUi();
+            updatePatientObsUi();
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -552,7 +571,7 @@ final class PatientChartController {
                     messageResource = R.string.encounter_add_failed_invalid_encounter;
                     // Validation reason typically starts after the message below.
                     exceptionMessage = exceptionMessage.replaceFirst(
-                            ".*failed to validate with reason: .*: ", "");
+                        ".*failed to validate with reason: .*: ", "");
                     break;
                 case INTERRUPTED:
                     messageResource = R.string.encounter_add_failed_interrupted;
@@ -568,30 +587,33 @@ final class PatientChartController {
             mUi.showError(messageResource, exceptionMessage);
         }
 
-        public void onEventMainThread(SingleItemFetchedEvent event) {
-            if (event.item instanceof AppPatient) {
-                mPatient = (AppPatient)event.item;
-                mUi.setPatient(mPatient);
-                updatePatientLocationUi();
-
+        // We get a ItemFetchedEvent when the initial patient data is loaded
+        // from SQLite or after an edit has been successfully posted to the server.
+        public void onEventMainThread(ItemFetchedEvent event) {
+            if (event.item instanceof Patient) {
+                // When the patient's location is changed, the location dialog stays
+                // open while we wait for the patient edit to be posted to the server.
+                // Now that the patient has been posted, close the dialog.
                 if (mAssignLocationDialog != null) {
                     mAssignLocationDialog.dismiss();
                     mAssignLocationDialog = null;
                 }
-            } else if (event.item instanceof AppEncounter) {
-                AppEncounter.AppObservation[] observations =
-                        ((AppEncounter)event.item).observations;
-                for (AppEncounter.AppObservation observation : observations) {
-                    if (observation.conceptUuid.equals(Concepts.GENERAL_CONDITION_UUID)) {
-                        mUi.updatePatientGeneralConditionUi(observation.value);
-                        LOG.v("Setting general condition in UI: %s", observation.value);
-                    }
-                }
 
+                // Update the parts of the UI that use data in the Patient.
+                mPatient = (Patient) event.item;
+                mUi.updatePatientDetailsUi(mPatient);
+                updatePatientLocationUi();
+            } else if (event.item instanceof Encounter) {
+                // When the patient's condition is changed, the condition dialog stays
+                // open while we wait for the observation to be posted to the server.
+                // Now that the encounter has been posted, close the dialog.
                 if (mAssignGeneralConditionDialog != null) {
                     mAssignGeneralConditionDialog.dismiss();
                     mAssignGeneralConditionDialog = null;
                 }
+
+                // We don't need to update the UI here because updatePatientObsUi()
+                // below updates all the parts of the UI that use observation data.
             }
 
             // TODO: Displaying the observations part of the UI takes a lot of main-thread time.
@@ -601,9 +623,8 @@ final class PatientChartController {
             // should change this to use a background thread. Either an async task or using
             // CrudEventBus events.
             mMainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePatientUi();
+                @Override public void run() {
+                    updatePatientObsUi();
                 }
             });
         }
@@ -615,9 +636,8 @@ final class PatientChartController {
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {
             mMainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePatientUi();
+                @Override public void run() {
+                    updatePatientObsUi();
                     mUi.showFormSubmissionDialog(false);
                 }
             });
@@ -670,16 +690,31 @@ final class PatientChartController {
             mUi.showFormLoadingDialog(false);
             mUi.reEnableFetch();
         }
-    }
 
-    private synchronized void updatePatientLocationUi() {
-        if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
-            mUi.updatePatientLocationUi(mLocationTree, mPatient);
+        public void onEventMainThread(OrderSaveRequestedEvent event) {
+            DateTime start = DateTime.now();
+            DateTime stop = null;
+
+            if (event.durationDays != null) {
+                LocalDate stopDate = start.toLocalDate().plusDays(event.durationDays);
+                // In OpenMRS, OrderServiceImpl.saveOrderInternal() forces the
+                // order expiry (auuughhh!) to 23:59:59.999 on its specified date.
+                // We have to shift it back a bit to prevent it from being
+                // advanced almost an entire day, and even then this only works if
+                // the client's time zone matches the server's time zone, because
+                // the server's infidelity is time-zone-dependent (auggghh!!!)
+                stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
+            }
+
+            mAppModel.addOrder(mCrudEventBus, new Order(
+                null, event.patientUuid, event.instructions, start, stop));
         }
-    }
 
-    private boolean dialogShowing() {
-        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
-                || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
+        public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
+            org.projectbuendia.client.sync.Order order = mOrdersByUuid.get(event.orderUuid);
+            if (order != null) {
+                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
+            }
+        }
     }
 }

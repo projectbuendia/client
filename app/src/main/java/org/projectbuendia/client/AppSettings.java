@@ -16,20 +16,13 @@ import android.content.res.Resources;
 
 /** Type-safe access to application settings. */
 public class AppSettings {
+    static final int APK_UPDATE_INTERVAL_DEFAULT = 90; // default to 1.5 minutes.
     SharedPreferences mSharedPreferences;
     Resources mResources;
-
-    static final int APK_UPDATE_INTERVAL_DEFAULT = 90; // default to 1.5 minutes.
 
     public AppSettings(SharedPreferences sharedPreferences, Resources resources) {
         mSharedPreferences = sharedPreferences;
         mResources = resources;
-    }
-
-    /** Gets the root URL of the OpenMRS server providing the Buendia API. */
-    public String getOpenmrsUrl() {
-        return mSharedPreferences.getString("openmrs_root_url",
-                mResources.getString(R.string.openmrs_root_url_default));
     }
 
     /** Constructs the URL for a given URL path under the OpenMRS root URL. */
@@ -37,22 +30,22 @@ public class AppSettings {
         return getOpenmrsUrl().replaceAll("/*$", "") + urlPath;
     }
 
+    /** Gets the root URL of the OpenMRS server providing the Buendia API. */
+    public String getOpenmrsUrl() {
+        return mSharedPreferences.getString("openmrs_root_url",
+            mResources.getString(R.string.openmrs_root_url_default));
+    }
+
     /** Gets the OpenMRS username. */
     public String getOpenmrsUser() {
         return mSharedPreferences.getString("openmrs_user",
-                mResources.getString(R.string.openmrs_user_default));
+            mResources.getString(R.string.openmrs_user_default));
     }
 
     /** Gets the OpenMRS password. */
     public String getOpenmrsPassword() {
         return mSharedPreferences.getString("openmrs_password",
-                mResources.getString(R.string.openmrs_password_default));
-    }
-
-    /** Gets the root URL of the package server providing APK updates. */
-    public String getPackageServerUrl() {
-        return mSharedPreferences.getString("package_server_root_url",
-                mResources.getString(R.string.package_server_root_url_default));
+            mResources.getString(R.string.openmrs_password_default));
     }
 
     /** Constructs the URL for a given URL path on the package server. */
@@ -60,22 +53,10 @@ public class AppSettings {
         return getPackageServerUrl().replaceAll("/*$", "") + urlPath;
     }
 
-    /**
-     * Gets the flag that controls whether to immediately apply edits
-     * to the local database when an XForm is submitted to the server.
-     */
-    public boolean getXformUpdateClientCache() {
-        return mSharedPreferences.getBoolean("xform_update_client_cache",
-                mResources.getBoolean(R.bool.xform_update_client_cache_default));
-    }
-
-    /**
-     * Gets the flag that controls whether to update observations with
-     * an incremental fetch instead of fetching all the observations.
-     */
-    public boolean getIncrementalObservationUpdate() {
-        return mSharedPreferences.getBoolean("incremental_observation_update",
-                mResources.getBoolean(R.bool.incremental_observation_update_default));
+    /** Gets the root URL of the package server providing APK updates. */
+    public String getPackageServerUrl() {
+        return mSharedPreferences.getString("package_server_root_url",
+            mResources.getString(R.string.package_server_root_url_default));
     }
 
     /**
@@ -90,7 +71,7 @@ public class AppSettings {
     /** Gets the flag for whether to save filled-in forms locally. */
     public boolean getKeepFormInstancesLocally() {
         return mSharedPreferences.getBoolean("keep_form_instances_locally",
-                mResources.getBoolean(R.bool.keep_form_instances_locally_default));
+            mResources.getBoolean(R.bool.keep_form_instances_locally_default));
     }
 
     /** Gets the flag indicating whether the sync account has been initialized. */
@@ -102,4 +83,11 @@ public class AppSettings {
     public void setSyncAccountInitialized(boolean value) {
         mSharedPreferences.edit().putBoolean("sync_account_initialized", value).commit();
     }
+
+    /** Gets the flag controlling whether to assume no wifi means no network. */
+    public boolean getRequireWifi() {
+        return mSharedPreferences.getBoolean("require_wifi",
+            mResources.getBoolean(R.bool.require_wifi_default));
+    }
+
 }
