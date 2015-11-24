@@ -13,9 +13,16 @@ package org.projectbuendia.client.ui.login;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.TranslateAnimation;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -23,6 +30,7 @@ import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.SettingsActivity;
+import org.projectbuendia.client.ui.SnackBar;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -106,6 +114,40 @@ public class LoginActivity extends BaseActivity {
                 }
             }
         );
+
+
+
+
+
+
+
+        menu.findItem(R.id.snackbar_show).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+
+                @Override public boolean onMenuItemClick(MenuItem item) {
+
+                    snackBar("Simple message");
+
+                    return true;
+                }
+            }
+        );
+
+        menu.findItem(R.id.snackbar_hide).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+
+                @Override public boolean onMenuItemClick(MenuItem item) {
+
+                    snackBar("Message with action", "Do Something", null);
+
+                    return true;
+                }
+            }
+        );
+
+
+
+
 
         return true;
     }

@@ -21,5 +21,13 @@
       android:id="@+id/settings"
       android:showAsAction="ifRoom"
       android:title= "@string/title_activity_settings"/>
+  <item
+      android:id="@+id/snackbar_show"
+      android:showAsAction="ifRoom"
+      android:title= "SnackBar Simple"/>
 
+  <item
+      android:id="@+id/snackbar_hide"
+      android:showAsAction="ifRoom"
+      android:title= "SnackBar with Handler"/>
 </menu>

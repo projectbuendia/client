@@ -56,6 +56,7 @@ public abstract class BaseActivity extends FragmentActivity {
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
     private FrameLayout mStatusContent;
+    private SnackBar snackBar;
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
@@ -110,6 +111,18 @@ public abstract class BaseActivity extends FragmentActivity {
             (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_inner_content);
         mStatusContent =
             (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
+
+        if (snackBar == null) {
+            snackBar = new SnackBar(mWrapperView);
+        }
+    }
+
+    public void snackBar(String message) {
+        snackBar.message(message);
+    }
+
+    public void snackBar(String message, String actionMessage, View.OnClickListener listener) {
+        snackBar.message(message, actionMessage, listener);
     }
 
     @Override public void setContentView(View view) {

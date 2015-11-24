@@ -389,7 +389,7 @@ public class Utils {
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
         return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
-                resources.getString(R.string.abbrev_n_months, months + years * 12);
+                resources.getString(R.string.abbrev_n_months, months + years*12);
     }
 
     /**
@@ -453,6 +453,14 @@ public class Utils {
     public static String removeUnsafeChars(String input)
     {
         return input.replaceAll("[\\W]", "_");
+    }
+
+    public static int getPixelFromDips(float pixels) {
+        // Get the screen's density scale
+        final float scale = App.getInstance().getResources().getDisplayMetrics().density;
+
+        // Convert the dps to pixels, based on density scale
+        return (int) (pixels * scale + 0.5f);
     }
 
     private Utils() {
