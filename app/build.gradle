@@ -154,7 +154,7 @@ def openmrsUser = project.openmrsUser ?: openmrsUserDefault
 def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
 def packageServerRootUrl = project.server ? 'http://' + project.server + ':9001'
     : project.packageServerRootUrl ?: packageServerRootUrlDefault
-def requireWifi = project.requireWifi ?: 'false';
+def requireWifi = project.requireWifi ?: 'true';
 
 // This is the password used to encrypt the SQLite database on the tablet.
 // In development builds, the password is an empty string, which leaves the
