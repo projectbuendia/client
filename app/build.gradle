@@ -57,6 +57,7 @@ dependencies {
     compile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
     compile 'com.facebook.stetho:stetho-okhttp:1.2.0' // Network debugging
     compile 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
+    compile 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
     compile 'org.apache.commons:commons-lang3:3.4'
 
     // Testing
