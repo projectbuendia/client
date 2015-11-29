@@ -389,7 +389,7 @@ public class Utils {
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
         return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
-                resources.getString(R.string.abbrev_n_months, months + years*12);
+                resources.getString(R.string.abbrev_n_months, months + years * 12);
     }
 
     /**
