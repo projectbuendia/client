@@ -91,7 +91,7 @@ public class OdkActivityLauncher {
                 }
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
-                    handleSyncError(error);
+                    handleFetchSyncError(error);
                 }
             });
     }
@@ -145,7 +145,7 @@ public class OdkActivityLauncher {
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "Fetching xform list from server failed. ");
-                    handleSyncError(error);
+                    handleFetchSyncError(error);
                 }
             });
     }
@@ -227,26 +227,6 @@ public class OdkActivityLauncher {
         }
 
         return entries;
-    }
-
-    private static void handleSyncError(VolleyError error) {
-        FetchXformFailedEvent.Reason reason =
-            FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
-        if (error.networkResponse != null) {
-            switch (error.networkResponse.statusCode) {
-                case HttpURLConnection.HTTP_FORBIDDEN:
-                case HttpURLConnection.HTTP_UNAUTHORIZED:
-                    reason = FetchXformFailedEvent.Reason.SERVER_AUTH;
-                    break;
-                case HttpURLConnection.HTTP_NOT_FOUND:
-                    reason = FetchXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
-                    break;
-                case HttpURLConnection.HTTP_INTERNAL_ERROR:
-                default:
-                    reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
-            }
-        }
-        EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
     }
 
     /**
@@ -404,43 +384,62 @@ public class OdkActivityLauncher {
             successListener,
             new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "Did not submit form to server successfully");
-
-                    SubmitXformFailedEvent.Reason reason =
-                        SubmitXformFailedEvent.Reason.UNKNOWN;
-                    if (error.networkResponse != null) {
-                        switch (error.networkResponse.statusCode) {
-                            case 401:
-                            case 403:
-                                reason = SubmitXformFailedEvent.Reason.SERVER_AUTH;
-                                break;
-                            case 404:
-                                reason = SubmitXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
-                                break;
-                            case 500:
-                                if (error.networkResponse.data == null) {
-                                    LOG.e("Server error, but no internal error stack trace "
-                                        + "available.");
-                                } else {
-                                    LOG.e(new String(
-                                        error.networkResponse.data, Charsets.UTF_8));
-                                    LOG.e("Server error. Internal error stack trace:\n");
-                                }
-                                reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
-                                break;
-                            default:
-                                reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
-                                break;
-                        }
-                    }
-
-                    if (error instanceof TimeoutError) {
-                        reason = SubmitXformFailedEvent.Reason.SERVER_TIMEOUT;
-                    }
-
-                    EventBus.getDefault().post(new SubmitXformFailedEvent(reason, error));
+                    LOG.e(error, "Error submitting form to server");
+                    handleSubmitSyncError(error);
                 }
             });
+    }
+
+    private static void handleSubmitSyncError(VolleyError error) {
+        SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
+
+        if (error instanceof TimeoutError) {
+            reason = SubmitXformFailedEvent.Reason.SERVER_TIMEOUT;
+        } else if (error.networkResponse != null) {
+            switch (error.networkResponse.statusCode) {
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                case HttpURLConnection.HTTP_FORBIDDEN:
+                    reason = SubmitXformFailedEvent.Reason.SERVER_AUTH;
+                    break;
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    reason = SubmitXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
+                    break;
+                case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                    if (error.networkResponse.data == null) {
+                        LOG.e("Server error, but no internal error stack trace available.");
+                    } else {
+                        LOG.e(new String(error.networkResponse.data, Charsets.UTF_8));
+                        LOG.e("Server error. Internal error stack trace:\n");
+                    }
+                    reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
+                    break;
+                default:
+                    reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
+                    break;
+            }
+        }
+
+        EventBus.getDefault().post(new SubmitXformFailedEvent(reason, error));
+    }
+
+    private static void handleFetchSyncError(VolleyError error) {
+        FetchXformFailedEvent.Reason reason =
+            FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+        if (error.networkResponse != null) {
+            switch (error.networkResponse.statusCode) {
+                case HttpURLConnection.HTTP_FORBIDDEN:
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    reason = FetchXformFailedEvent.Reason.SERVER_AUTH;
+                    break;
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    reason = FetchXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
+                    break;
+                case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                default:
+                    reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+            }
+        }
+        EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
     }
 
     private static String readFromPath(String path) throws IOException {
