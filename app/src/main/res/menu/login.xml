@@ -30,4 +30,9 @@
       android:id="@+id/snackbar_hide"
       android:showAsAction="ifRoom"
       android:title= "SnackBar with Handler"/>
+
+  <item
+      android:id="@+id/snackbar_priority"
+      android:showAsAction="ifRoom"
+      android:title= "SnackBar Priority"/>
 </menu>

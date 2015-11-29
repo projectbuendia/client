@@ -117,12 +117,16 @@ public abstract class BaseActivity extends FragmentActivity {
         }
     }
 
-    public void snackBar(String message) {
-        snackBar.message(message);
+    public int snackBar(String message) {
+        return snackBar.message(message);
     }
 
-    public void snackBar(String message, String actionMessage, View.OnClickListener listener) {
-        snackBar.message(message, actionMessage, listener);
+    public int snackBar(String message, String actionMessage, View.OnClickListener listener) {
+        return snackBar.message(message, actionMessage, listener, 999);
+    }
+
+    public int snackBar(String message, String actionMessage, View.OnClickListener listener, int priority) {
+        return snackBar.message(message, actionMessage, listener, priority);
     }
 
     @Override public void setContentView(View view) {

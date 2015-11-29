@@ -11,9 +11,11 @@
 
 package org.projectbuendia.client.ui.login;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Menu;
@@ -22,7 +24,9 @@ import android.view.View;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -115,19 +119,20 @@ public class LoginActivity extends BaseActivity {
             }
         );
 
-
-
-
-
-
-
+        // This code bellow is only for testing purposes and will be removed
+        final Activity context = this;
         menu.findItem(R.id.snackbar_show).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
-
                 @Override public boolean onMenuItemClick(MenuItem item) {
-
-                    snackBar("Simple message");
-
+                    snackBar("Simple Message", "Action", new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            Toast.makeText(
+                                context,
+                                "This message has some action",
+                                Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    });
                     return true;
                 }
             }
@@ -135,20 +140,36 @@ public class LoginActivity extends BaseActivity {
 
         menu.findItem(R.id.snackbar_hide).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
-
                 @Override public boolean onMenuItemClick(MenuItem item) {
-
-                    snackBar("Message with action", "Do Something", null);
-
+                    snackBar("Wifi is disabled", "Enable", new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            Toast.makeText(
+                                context,
+                                "Enable WIFI NOW!",
+                                Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    });
                     return true;
                 }
             }
         );
-
-
-
-
-
+        menu.findItem(R.id.snackbar_priority).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+                @Override public boolean onMenuItemClick(MenuItem item) {
+                    snackBar("I have priority", "Selfish", new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            Toast.makeText(
+                                context,
+                                "Get out of my way! Me first!",
+                                Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }, 1);
+                    return true;
+                }
+            }
+        );
         return true;
     }
 
