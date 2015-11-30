@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -307,16 +308,11 @@ public class OdkActivityLauncher {
         final String xml = readFromPath(filePath);
         if(xml == null) return; // SubmitXformFailedEvent was already triggered
 
-        sendFormToServer(patientUuid, xml ,
+        sendFormToServer(patientUuid, xml,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
                     LOG.i("Created new encounter successfully on server" + response.toString());
-
-                    // Only locally cache new observations, not new patients.
-                    if (patientUuid != null) {
-                        updateClientCache(patientUuid, savedRoot, context.getContentResolver());
-                    }
-
+                    updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
                     if (!settings.getKeepFormInstancesLocally()) {
                         deleteLocalFormInstances(formIdToDelete);
                     }
@@ -531,28 +527,14 @@ public class OdkActivityLauncher {
         }
     }
 
-    private static void updateClientCache(String patientUuid, TreeElement savedRoot,
-                                          ContentResolver resolver) {
-        // id, fill in auto
-        // patient uuid: context
-        // encounter uuid: make one up
-        // encounter time:
-        //   <encounter>
-        //     <encounter.encounter_datetime>2014-12-15T13:33:00.000Z</encounter.encounter_datetime>
-        // concept uuid:
-        //   <vitals>
-        //     <!-- Concept UUID is 5088 -->
-        //     <temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM">
-        // value:
-        //   <vitals>
-        //     <temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM">
-        //       <value>36.0</value>
-        // temp_cache: true
-
-        // or for coded
-        // <symptoms_abinaryinvisible>
-        //   <weakness multiple="0" openmrs_concept="5226^WEAKNESS^99DCT" openmrs_datatype="CWE">
-        //      <value>1066^NO^99DCT</value>
+    /**
+     * Caches the observation changes locally for a given patient.
+     * For a new patient (patientUuid == null), no information is cached.
+     */
+    private static void updateObservationCache(@Nullable String patientUuid, TreeElement savedRoot,
+                                               ContentResolver resolver) {
+        // Only locally cache new observations, not new patients.
+        if (patientUuid == null) return;
 
         ContentValues common = new ContentValues();
         // It's critical that UUID is {@code null} for temporary observations, so we make it
@@ -560,81 +542,14 @@ public class OdkActivityLauncher {
         common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
 
-        TreeElement encounter = savedRoot.getChild("encounter", 0);
-        if (encounter == null) {
-            LOG.e("No encounter found in instance");
-            return;
-        }
+        final DateTime encounterTime = getEncounterAnswerDateTime(savedRoot);
+        if(encounterTime == null) return;
+        common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
+        common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
 
-        TreeElement encounterDatetime =
-            encounter.getChild("encounter.encounter_datetime", 0);
-        if (encounterDatetime == null) {
-            LOG.e("No encounter date time found in instance");
-            return;
-        }
-        IAnswerData dateTimeValue = encounterDatetime.getValue();
-        try {
-
-            DateTime encounterTime =
-                ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
-            common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
-            common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
-        } catch (IllegalArgumentException e) {
-            LOG.e("Could not parse datetime" + dateTimeValue.getValue());
-            return;
-        }
-
-        ArrayList<ContentValues> toInsert = new ArrayList<>();
-        HashSet<Integer> xformConceptIds = new HashSet<>();
-        for (int i = 0; i < savedRoot.getNumChildren(); i++) {
-            TreeElement group = savedRoot.getChildAt(i);
-            if (group.getNumChildren() == 0) continue;
-            for (int j = 0; j < group.getNumChildren(); j++) {
-                TreeElement question = group.getChildAt(j);
-                TreeElement openmrsConcept = question.getAttribute(null, "openmrs_concept");
-                TreeElement openmrsDatatype = question.getAttribute(null, "openmrs_datatype");
-                if (openmrsConcept == null || openmrsDatatype == null) continue;
-                // Get the concept for the question.
-                // eg "5088^Temperature (C)^99DCT"
-                String encodedConcept = (String) openmrsConcept.getValue().getValue();
-                Integer id = getConceptId(xformConceptIds, encodedConcept);
-                if (id == null) continue;
-                // Also get for the answer if a coded question
-                String value;
-                TreeElement valueChild = question.getChild("value", 0);
-                IAnswerData answer = valueChild.getValue();
-                if (answer == null) continue;
-                Object answerObject = answer.getValue();
-                if (answerObject == null) continue;
-                if ("CWE".equals(openmrsDatatype.getValue().getValue())) {
-                    value = getConceptId(xformConceptIds, answerObject.toString()).toString();
-                } else {
-                    value = answerObject.toString();
-                }
-
-                ContentValues observation = new ContentValues(common);
-                // Set to the id for now, we'll replace with uuid later
-                observation.put(Contracts.Observations.CONCEPT_UUID, id.toString());
-                observation.put(Contracts.Observations.VALUE, value);
-                toInsert.add(observation);
-            }
-        }
-
-        String inClause = Joiner.on(",").join(xformConceptIds);
-        // Get a map from XForm ids to UUIDs from our local concept database.
-        HashMap<String, String> xformIdToUuid = new HashMap<>();
-        Cursor cursor = resolver.query(Contracts.Concepts.CONTENT_URI,
-            new String[] {Contracts.Concepts.UUID, Contracts.Concepts.XFORM_ID},
-            Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
-            null, null);
-        try {
-            while (cursor.moveToNext()) {
-                xformIdToUuid.put(Utils.getString(cursor, Contracts.Concepts.XFORM_ID),
-                    Utils.getString(cursor, Contracts.Concepts.UUID));
-            }
-        } finally {
-            cursor.close();
-        }
+        Set<Integer> xformConceptIds = new HashSet<>();
+        List<ContentValues> toInsert = getAnsweredObservations(common, savedRoot, xformConceptIds);
+        Map<String, String> xformIdToUuid = mapFormConceptIdToUuid(xformConceptIds, resolver);
 
         // Remap concept ids to uuids, skipping anything we can't remap.
         for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext(); ) {
@@ -644,8 +559,109 @@ public class OdkActivityLauncher {
             }
             mapIdToUuid(xformIdToUuid, values, Contracts.Observations.VALUE);
         }
+
         resolver.bulkInsert(Contracts.Observations.CONTENT_URI,
             toInsert.toArray(new ContentValues[toInsert.size()]));
+    }
+
+    /** Get a map from XForm ids to UUIDs from our local concept database. */
+    private static Map<String, String> mapFormConceptIdToUuid(Set<Integer> xformConceptIds,
+                                                              ContentResolver resolver) {
+        String inClause = Joiner.on(",").join(xformConceptIds);
+
+        HashMap<String, String> xformIdToUuid = new HashMap<>();
+        Cursor cursor = resolver.query(Contracts.Concepts.CONTENT_URI,
+            new String[] {Contracts.Concepts.UUID, Contracts.Concepts.XFORM_ID},
+            Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
+            null, null);
+
+        try {
+            while (cursor.moveToNext()) {
+                xformIdToUuid.put(Utils.getString(cursor, Contracts.Concepts.XFORM_ID),
+                    Utils.getString(cursor, Contracts.Concepts.UUID));
+            }
+        } finally {
+            cursor.close();
+        }
+
+        return xformIdToUuid;
+    }
+
+    /**
+     * Returns a {@link ContentValues} list containing the id concept and the answer valeu from
+     * all answered observations. Returns a empty {@link List} if no observation was answered.
+     *
+     * @param common                        the current content values.
+     * @param savedRoot                     the root tree form element
+     * @param xformConceptIdsAccumulator    the set to store the form concept ids found
+     */
+    private static List<ContentValues> getAnsweredObservations(ContentValues common,
+                                                                    TreeElement savedRoot,
+                                                                    Set<Integer> xformConceptIdsAccumulator) {
+        List<ContentValues> answeredObservations = new ArrayList<>();
+        for (int i = 0; i < savedRoot.getNumChildren(); i++) {
+            TreeElement group = savedRoot.getChildAt(i);
+            if (group.getNumChildren() == 0) continue;
+            for (int j = 0; j < group.getNumChildren(); j++) {
+                TreeElement question = group.getChildAt(j);
+                TreeElement openmrsConcept = question.getAttribute(null, "openmrs_concept");
+                TreeElement openmrsDatatype = question.getAttribute(null, "openmrs_datatype");
+                if (openmrsConcept == null || openmrsDatatype == null) continue;
+
+                // Get the concept for the question.
+                // eg "5088^Temperature (C)^99DCT"
+                String encodedConcept = (String) openmrsConcept.getValue().getValue();
+                Integer id = getConceptId(xformConceptIdsAccumulator, encodedConcept);
+                if (id == null) continue;
+
+                // Also get for the answer if a coded question
+                TreeElement valueChild = question.getChild("value", 0);
+                IAnswerData answer = valueChild.getValue();
+                if (answer == null || answer.getValue() == null) continue;
+
+                Object answerObject = answer.getValue();
+                String value;
+                if ("CWE".equals(openmrsDatatype.getValue().getValue())) {
+                    value = getConceptId(xformConceptIdsAccumulator, answerObject.toString()).toString();
+                } else {
+                    value = answerObject.toString();
+                }
+
+                ContentValues observation = new ContentValues(common);
+                // Set to the id for now, we'll replace with uuid later
+                observation.put(Contracts.Observations.CONCEPT_UUID, id.toString());
+                observation.put(Contracts.Observations.VALUE, value);
+
+                answeredObservations.add(observation);
+            }
+        }
+        return answeredObservations;
+    }
+
+    /**
+     * Returns the encounter's answer date time. Returns <code>null</code> if it cannot be retrieved.
+     */
+    private static DateTime getEncounterAnswerDateTime(TreeElement root) {
+        TreeElement encounter = root.getChild("encounter", 0);
+        if (encounter == null) {
+            LOG.e("No encounter found in instance");
+            return null;
+        }
+
+        TreeElement encounterDatetime =
+            encounter.getChild("encounter.encounter_datetime", 0);
+        if (encounterDatetime == null) {
+            LOG.e("No encounter date time found in instance");
+            return null;
+        }
+
+        IAnswerData dateTimeValue = encounterDatetime.getValue();
+        try {
+         return  ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
+        } catch (IllegalArgumentException e) {
+            LOG.e("Could not parse datetime" + dateTimeValue.getValue());
+            return null;
+        }
     }
 
     private static Integer getConceptId(Set<Integer> accumulator, String encodedConcept) {
@@ -657,7 +673,7 @@ public class OdkActivityLauncher {
     }
 
     private static boolean mapIdToUuid(
-        HashMap<String, String> idToUuid, ContentValues values, String key) {
+        Map<String, String> idToUuid, ContentValues values, String key) {
         String id = (String) values.get(key);
         String uuid = idToUuid.get(id);
         if (uuid == null) {
