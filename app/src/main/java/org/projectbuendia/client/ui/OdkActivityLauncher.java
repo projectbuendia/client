@@ -318,16 +318,26 @@ public class OdkActivityLauncher {
                     }
 
                     if (!settings.getKeepFormInstancesLocally()) {
-                        //Code largely copied from InstanceUploaderTask to delete on upload
-                        DeleteInstancesTask dit = new DeleteInstancesTask();
-                        dit.setContentResolver(
-                            Collect.getInstance().getApplication()
-                                .getContentResolver());
-                        dit.execute(idToDelete);
+                        deleteFormInstances(idToDelete);
                     }
                     EventBus.getDefault().post(new SubmitXformSucceededEvent());
                 }
+
+            }, new Response.ErrorListener() {
+                @Override public void onErrorResponse(VolleyError error) {
+                    LOG.e(error, "Error submitting form to server");
+                    handleSubmitSyncError(error);
+                }
             });
+    }
+
+    private static void deleteFormInstances(Long formIdToDelete) {
+        //Code largely copied from InstanceUploaderTask to delete on upload
+        DeleteInstancesTask dit = new DeleteInstancesTask();
+        dit.setContentResolver(
+            Collect.getInstance().getApplication()
+                .getContentResolver());
+        dit.execute(formIdToDelete);
     }
 
     /**
@@ -441,17 +451,11 @@ public class OdkActivityLauncher {
     }
 
     private static void sendFormToServer(String patientUuid, String xml,
-                                         Response.Listener<JSONObject> successListener) {
+                                         Response.Listener<JSONObject> successListener,
+                                         Response.ErrorListener errorListener) {
         OpenMrsXformsConnection connection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
-        connection.postXformInstance(patientUuid, xml,
-            successListener,
-            new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "Error submitting form to server");
-                    handleSubmitSyncError(error);
-                }
-            });
+        connection.postXformInstance(patientUuid, xml, successListener, errorListener);
     }
 
     private static void handleSubmitSyncError(VolleyError error) {
