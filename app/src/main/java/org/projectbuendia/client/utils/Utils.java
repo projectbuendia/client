@@ -455,12 +455,13 @@ public class Utils {
         return input.replaceAll("[\\W]", "_");
     }
 
-    public static int getPixelFromDips(float pixels) {
+    /** calculates the dumber of pixels for a dip given the density of the display */
+    public static int getPixelFromDips(float dips) {
         // Get the screen's density scale
         final float scale = App.getInstance().getResources().getDisplayMetrics().density;
 
         // Convert the dps to pixels, based on density scale
-        return (int) (pixels * scale + 0.5f);
+        return (int) (dips * scale + 0.5f);
     }
 
     private Utils() {

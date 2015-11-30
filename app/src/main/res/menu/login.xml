@@ -35,4 +35,14 @@
       android:id="@+id/snackbar_priority"
       android:showAsAction="ifRoom"
       android:title= "SnackBar Priority"/>
+
+  <item
+      android:id="@+id/snackbar_dismiss"
+      android:showAsAction="ifRoom"
+      android:title= "SnackBar Not Dismissible"/>
+
+  <item
+      android:id="@+id/snackbar_timer"
+      android:showAsAction="ifRoom"
+      android:title= "SnackBar With 20 sec Timer"/>
 </menu>

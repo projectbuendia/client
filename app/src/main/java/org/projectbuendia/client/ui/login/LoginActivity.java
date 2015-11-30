@@ -124,15 +124,7 @@ public class LoginActivity extends BaseActivity {
         menu.findItem(R.id.snackbar_show).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
                 @Override public boolean onMenuItemClick(MenuItem item) {
-                    snackBar("Simple Message", "Action", new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            Toast.makeText(
-                                context,
-                                "This message has some action",
-                                Toast.LENGTH_LONG
-                            ).show();
-                        }
-                    });
+                    snackBar("Simple Message");
                     return true;
                 }
             }
@@ -166,6 +158,38 @@ public class LoginActivity extends BaseActivity {
                             ).show();
                         }
                     }, 1);
+                    return true;
+                }
+            }
+        );
+        menu.findItem(R.id.snackbar_dismiss).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+                @Override public boolean onMenuItemClick(MenuItem item) {
+                    snackBar("Programmatically Dismissible", "How?", new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            Toast.makeText(
+                                context,
+                                "Need to call dismiss() method.",
+                                Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }, 2, false);
+                    return true;
+                }
+            }
+        );
+        menu.findItem(R.id.snackbar_timer).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+                @Override public boolean onMenuItemClick(MenuItem item) {
+                    snackBar("I'll be gone in 20 secs", "Cool", new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            Toast.makeText(
+                                context,
+                                "Yeah, Dude!",
+                                Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }, 3, false, 20);
                     return true;
                 }
             }

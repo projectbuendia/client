@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.TranslateAnimation;
@@ -30,7 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-
+/**
+ * Snackbars provide lightweight feedback about an operation by showing a brief message at the
+ * bottom of the screen. Snackbars can contain an action button with an OnClickListener.
+ * Can be auto dismissed by a time out values in seconds and can be prioritized.
+ */
 public class SnackBar {
 
     private final ViewGroup mTargetParent;
@@ -52,6 +57,9 @@ public class SnackBar {
         buildList();
     }
 
+    /**
+     * Show the SnackBar with an slide up animation if hidden.
+     */
     public void show() {
         // TODO: discover why does not animate on the first time
         if (mList.getVisibility() != View.VISIBLE) {
@@ -59,10 +67,18 @@ public class SnackBar {
         }
     }
 
+    /**
+     * Hide the SnackBar with a slide down animation if visible.
+     */
     public void hide() {
         animate(View.GONE);
     }
 
+    /**
+     * Play the slide up / down animation depending on the list current visibility.
+     * @param visibility Defines which of the animations will be executed (up or down). Possible
+     *                   values are {@code View.VISIBLE} or {@code View.GONE}
+     */
     private void animate(int visibility) {
         TranslateAnimation animate = new TranslateAnimation(0, 0,
             visibility == View.VISIBLE ? mList.getHeight() : 0,
@@ -74,20 +90,68 @@ public class SnackBar {
         mList.setVisibility(visibility);
     }
 
+    /**
+     * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
+     * boolean, int)}.
+     * The messag won't have action button, it's priority will be 999, will be dismissable and
+     * won't have timer.
+     * @param message The message String.
+     * @return the id of the message.
+     */
     public int message(String message) {
-        return message(message, null, null, 999);
+        return message(message, null, null, 999, true, 0);
     }
 
+    /**
+     * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
+     * boolean, int)}.
+     * The messag won't have action button, will be dismissable and won't have timer.
+     * @param message The message String.
+     * @param priority The priority of the message. The param is a int and the lower the number the
+     *                 higher priority the message has. 0 is the highest.
+     * @return the id of the message.
+     */
     public int message(String message, int priority) {
-        return message(message, null, null, priority);
+        return message(message, null, null, priority, true, 0);
     }
 
+    /**
+     * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
+     * boolean, int)}.
+     * The messag will be dismissable and won't have timer.
+     * @param message The message String.
+     * @param actionMessage The label for the action button.
+     * @param actionOnClick The View.OnClickListener for the action button.
+     * @param priority The priority of the message. The param is a int and the lower the number the
+     *                 higher priority the message has. 0 is the highest.
+     * @return the id of the message
+     */
     public int message(String message, String actionMessage, View.OnClickListener actionOnClick,
-                        int priority){
-        MessageKey key = new MessageKey(++mMessageId, priority);
-        Message value = new Message(key, message, actionMessage, actionOnClick);
+                       int priority){
+        return message(message, actionMessage, actionOnClick, priority, true, 0);
+    }
+
+    /**
+     * Add to the list and display a new message. This is the method that should be used to
+     * display messages and it's being called by {@link BaseActivity#snackBar}.
+     * @param message The message String.
+     * @param actionMessage The label for the action button.
+     * @param actionOnClick The View.OnClickListener for the action button.
+     * @param priority The priority of the message. The param is a int and the lower the number the
+     *                 higher priority the message has. 0 is the highest.
+     * @param isDismissible if true the message will have a X button to remove it self from the
+     *                      list.
+     * @param secondsToTimeOut Number of seconds to message auto dismiss. 0 to never.
+     * @return the id of the message.
+     */
+    public int message(String message, String actionMessage, View.OnClickListener actionOnClick,
+                        int priority, boolean isDismissible, int secondsToTimeOut){
+        mMessageId++;
+        MessageKey key = new MessageKey(mMessageId, priority);
+        Message value = new Message(key, message, actionMessage, actionOnClick, isDismissible);
         mMessagesList.put(key, value);
         updateList();
+        setTimer(key, secondsToTimeOut);
         if (mMessagesList.size() == 0) {
             hide();
         } else {
@@ -96,11 +160,64 @@ public class SnackBar {
         return mMessageId;
     }
 
+    /**
+     * Sets the auto-dismiss timer to the message given it's key and seconds to dismiss.
+     * @param key The message key.
+     * @param seconds Seconds until dismiss.
+     */
+    private void setTimer(final MessageKey key, int seconds) {
+        if(seconds > 0) {
+            int limit = seconds*1000;
+            new CountDownTimer(limit, 1000) {
+                @Override public void onTick(long millisUntilFinished) {
+                }
+
+                @Override public void onFinish() {
+                    mMessagesList.remove(key);
+                    updateList();
+                }
+            }.start();
+        }
+    }
+
+    /**
+     * Programmatically dismiss a message by it's id.
+     * @param id The message id.
+     */
+    public void dismiss(int id) {
+        dismiss(getKey(id));
+    }
+
+    /**
+     * Programmatically dismiss a message by a MessageKey Object
+     * @param key The message Key.
+     */
     public void dismiss(MessageKey key) {
         mMessagesList.remove(key);
         updateList();
     }
 
+    /**
+     * Find message Key by it's id value.
+     * @param id The id of the message.
+     * @return The MessageKey of the message.
+     */
+    private MessageKey getKey(int id) {
+        MessageKey theKey = null;
+        for(Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
+            MessageKey key = entry.getKey();
+            if (key.id == id) {
+                theKey = key;
+                break;
+            }
+        }
+        return theKey;
+    }
+
+    /**
+     * Rearrange the message data and notify the change to the adapter so it can redraw the
+     * ExpandableListView.
+     */
     private void updateList() {
         groups.clear();
         children.clear();
@@ -117,6 +234,12 @@ public class SnackBar {
         adapter.notifyDataSetChanged();
     }
 
+    /**
+     * The main message list {@code mMessagesList} values are added to ArrayLists to be used by the
+     * SnackBarListAdapter.
+     * @param m The message to be stored.
+     * @param a The group or children ArrayList.
+     */
     private void addToHashMap(Message m, ArrayList a) {
         HashMap newMessage = new HashMap();
         newMessage.put("id", Integer.toString(m.key.id));
@@ -128,6 +251,9 @@ public class SnackBar {
         a.add(newMessage);
     }
 
+    /**
+     * Initiates the SnackBar ExpandableListView.
+     */
     private void buildList() {
         mList = new ExpandableListView(mContext);
         setListAppearance();
@@ -136,6 +262,9 @@ public class SnackBar {
         hide();
     }
 
+    /**
+     * Sets the SnackBar ExpandableListView appearance.
+     */
     private void setListAppearance() {
         mList.setDivider(null);
         mList.setChildDivider(null);
@@ -147,13 +276,16 @@ public class SnackBar {
         );
     }
 
+    /**
+     * Instantiates the SnackBarListAdapter with no messages.
+     * @return
+     */
     private SnackBarListAdapter generateAdapter() {
         groups = new ArrayList();
         children = new ArrayList();
         children.add(new ArrayList());
 
         adapter = new SnackBarListAdapter(
-            this,
             mContext,
             groups,                                                   // Creating group List.
             R.layout.snackbar_group,                                  // Group item layout XML.
@@ -177,16 +309,16 @@ public class SnackBar {
         return adapter;
     }
 
-    private class SnackBarListAdapter extends SimpleExpandableListAdapter {
+    /**
+     * The SnackBar ExpandableListView Adapter responsible to handling the message data.
+     */
+    private final class SnackBarListAdapter extends SimpleExpandableListAdapter {
 
-        private SnackBar snackBar;
-
-        public SnackBarListAdapter(SnackBar snackBar, Context context, List<? extends Map<String, ?>> groupData, int
+        public SnackBarListAdapter(Context context, List<? extends Map<String, ?>> groupData, int
             groupLayout, String[] groupFrom, int[] groupTo, List<? extends List<? extends
             Map<String, ?>>> childData, int childLayout, String[] childFrom, int[] childTo) {
             super(context, groupData, groupLayout, groupFrom, groupTo, childData, childLayout,
                 childFrom, childTo);
-            this.snackBar = snackBar;
         }
 
         @Override
@@ -194,8 +326,7 @@ public class SnackBar {
                                  View convertView, ViewGroup parent) {
             View newView = super.getChildView(groupPosition, childPosition, isLastChild,
                 convertView, parent);
-            addActonHandler(newView);
-            addDismissHandler(newView);
+            addHandlers(newView);
             return newView;
         }
 
@@ -203,42 +334,56 @@ public class SnackBar {
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
                                 ViewGroup parent) {
             View newView = super.getGroupView(groupPosition, isExpanded, convertView, parent);
-            addActonHandler(newView);
-            addDismissHandler(newView);
+            addHandlers(newView);
             return newView;
         }
 
-        private void addActonHandler(View newView) {
+        /**
+         * This method is being called by {@code #getChildView} and {@code #getGroupView} to
+         * customize the list items depending on the message specifications.
+         * It add the click handlers to the buttons or hide them if they aren't being used.
+         * @param newView the inflated view by {@code #getChildView} and {@code #getGroupView}
+         */
+        private void addHandlers(View newView) {
             TextView idView = (TextView) newView.findViewById(R.id.snackbar_id);
-            String id = idView.getText().toString();
+            final String id = idView.getText().toString();
             TextView priorityView = (TextView) newView.findViewById(R.id.snackbar_priority);
-            String priority = priorityView.getText().toString();
+            final String priority = priorityView.getText().toString();
             Message m = mMessagesList.get(new MessageKey(Integer.parseInt(id), Integer.parseInt(priority)));
+
+            // Set action handler
             TextView actionButton = (TextView) newView.findViewById(R.id.snackbar_action);
             String action = actionButton.getText().toString();
             if ((actionButton != null) && (!action.isEmpty())) {
                 if((m != null) && (m.actionHandler != null)){
                     actionButton.setOnClickListener(m.actionHandler);
+                    actionButton.setVisibility(View.VISIBLE);
                 }
+            } else {
+                actionButton.setVisibility(View.GONE);
             }
-        }
 
-        private void addDismissHandler(View newView) {
-            TextView idView = (TextView) newView.findViewById(R.id.snackbar_id);
-            final String id = idView.getText().toString();
-            TextView priorityView = (TextView) newView.findViewById(R.id.snackbar_priority);
-            final String priority = priorityView.getText().toString();
+            // Set Dismiss handler
             ImageView dismissButton = (ImageView) newView.findViewById(R.id.snackbar_dismiss);
-            dismissButton.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    snackBar.dismiss(
-                        new MessageKey(Integer.parseInt(id), Integer.parseInt(priority))
-                    );
-                }
-            });
+            if (m.isDismissible == true) {
+                dismissButton.setOnClickListener(new View.OnClickListener() {
+                    @Override public void onClick(View v) {
+                        dismiss(
+                            new MessageKey(Integer.parseInt(id), Integer.parseInt(priority))
+                        );
+                    }
+                });
+                dismissButton.setVisibility(View.VISIBLE);
+            } else {
+                dismissButton.setVisibility(View.GONE);
+            }
         }
     }
 
+    /**
+     * The key of the {@code TreeMap} used to storing the messages.
+     * Helps the {@code TreeMap} maintain it's balance using priority as a parameter.
+     */
     private class MessageKey implements Comparable<MessageKey> {
 
         protected int id;
@@ -267,19 +412,24 @@ public class SnackBar {
         }
     }
 
+    /**
+     * The message information.
+     */
     private class Message {
 
         protected MessageKey key;
         protected String message;
         protected String actionString;
         protected View.OnClickListener actionHandler;
+        protected boolean isDismissible;
 
         public Message(MessageKey key, String message, String actionString,
-                       View.OnClickListener handler) {
+                       View.OnClickListener handler, boolean isDismissible) {
             this.key = key;
             this.message = message;
             this.actionString = actionString;
             this.actionHandler = handler;
+            this.isDismissible = isDismissible;
         }
 
     }
