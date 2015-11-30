@@ -295,8 +295,8 @@ public class OdkActivityLauncher {
         if(!assertThatContentUriHasValidType(context, uri, CONTENT_ITEM_TYPE)) return;
 
         final String filePath = getFormFilePath(context, uri);
-        final Long idToDelete = getIdToDeleteAfterUpload(context, uri);
-        if(filePath == null || idToDelete == null) return; // SubmitXformFailedEvent was already triggered
+        final Long formIdToDelete = getIdToDeleteAfterUpload(context, uri);
+        if(filePath == null || formIdToDelete == null) return; // SubmitXformFailedEvent was already triggered
 
         // Temporary code for messing about with xform instance, reading values.
         byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
@@ -318,11 +318,10 @@ public class OdkActivityLauncher {
                     }
 
                     if (!settings.getKeepFormInstancesLocally()) {
-                        deleteFormInstances(idToDelete);
+                        deleteLocalFormInstances(formIdToDelete);
                     }
                     EventBus.getDefault().post(new SubmitXformSucceededEvent());
                 }
-
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "Error submitting form to server");
@@ -331,7 +330,7 @@ public class OdkActivityLauncher {
             });
     }
 
-    private static void deleteFormInstances(Long formIdToDelete) {
+    private static void deleteLocalFormInstances(Long formIdToDelete) {
         //Code largely copied from InstanceUploaderTask to delete on upload
         DeleteInstancesTask dit = new DeleteInstancesTask();
         dit.setContentResolver(
