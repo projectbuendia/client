@@ -4,8 +4,8 @@
 // use this file except in compliance with the License.  You may obtain a copy
 // of the License at: http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software distrib-
-// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.TranslateAnimation;
@@ -42,8 +43,8 @@ public class SnackBar {
     private final Context mContext;
     private ExpandableListView mList;
     private SnackBarListAdapter adapter;
-    private ArrayList groups;
-    private ArrayList children;
+    private ArrayList<HashMap<String, String>> groups;
+    private ArrayList<ArrayList<HashMap<String, String>>> children;
     private int mMessageId;
     private TreeMap<MessageKey, Message> mMessagesList;
 
@@ -53,7 +54,7 @@ public class SnackBar {
         mContext = parent.getContext();
 
         mMessagesList= new TreeMap<>();
-        children = new ArrayList();
+        children = new ArrayList<>();
         buildList();
     }
 
@@ -93,7 +94,7 @@ public class SnackBar {
     /**
      * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
      * boolean, int)}.
-     * The messag won't have action button, it's priority will be 999, will be dismissable and
+     * The message won't have action button, it's priority will be 999, will be dismissible and
      * won't have timer.
      * @param message The message String.
      * @return the id of the message.
@@ -105,7 +106,7 @@ public class SnackBar {
     /**
      * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
      * boolean, int)}.
-     * The messag won't have action button, will be dismissable and won't have timer.
+     * The message won't have action button, will be dismissible and won't have timer.
      * @param message The message String.
      * @param priority The priority of the message. The param is a int and the lower the number the
      *                 higher priority the message has. 0 is the highest.
@@ -118,7 +119,7 @@ public class SnackBar {
     /**
      * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
      * boolean, int)}.
-     * The messag will be dismissable and won't have timer.
+     * The message will be dismissible and won't have timer.
      * @param message The message String.
      * @param actionMessage The label for the action button.
      * @param actionOnClick The View.OnClickListener for the action button.
@@ -221,14 +222,14 @@ public class SnackBar {
     private void updateList() {
         groups.clear();
         children.clear();
-        children.add(new ArrayList());
+        children.add(new ArrayList<HashMap<String, String>>());
         for(Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
             Message value = entry.getValue();
 
             if (groups.size() == 0) {
                 addToHashMap(value, groups);
             } else {
-                addToHashMap(value, (ArrayList) children.get(0));
+                addToHashMap(value, children.get(0));
             }
         }
         adapter.notifyDataSetChanged();
@@ -240,8 +241,8 @@ public class SnackBar {
      * @param m The message to be stored.
      * @param a The group or children ArrayList.
      */
-    private void addToHashMap(Message m, ArrayList a) {
-        HashMap newMessage = new HashMap();
+    private void addToHashMap(Message m, ArrayList<HashMap<String, String>> a) {
+        HashMap<String, String> newMessage = new HashMap<>();
         newMessage.put("id", Integer.toString(m.key.id));
         newMessage.put("priority", Integer.toString(m.key.priority));
         newMessage.put("messages", m.message);
@@ -256,6 +257,7 @@ public class SnackBar {
      */
     private void buildList() {
         mList = new ExpandableListView(mContext);
+        mList.setId(R.id.snackbar);
         setListAppearance();
         mList.setAdapter(generateAdapter());
         mTargetParent.addView(mList);
@@ -278,12 +280,12 @@ public class SnackBar {
 
     /**
      * Instantiates the SnackBarListAdapter with no messages.
-     * @return
+     * @return SnackBarListAdapter
      */
     private SnackBarListAdapter generateAdapter() {
-        groups = new ArrayList();
-        children = new ArrayList();
-        children.add(new ArrayList());
+        groups = new ArrayList<>();
+        children = new ArrayList<>();
+        children.add(new ArrayList<HashMap<String, String>>());
 
         adapter = new SnackBarListAdapter(
             mContext,
@@ -353,19 +355,16 @@ public class SnackBar {
 
             // Set action handler
             TextView actionButton = (TextView) newView.findViewById(R.id.snackbar_action);
-            String action = actionButton.getText().toString();
-            if ((actionButton != null) && (!action.isEmpty())) {
-                if((m != null) && (m.actionHandler != null)){
-                    actionButton.setOnClickListener(m.actionHandler);
-                    actionButton.setVisibility(View.VISIBLE);
-                }
+            if ((m.actionHandler != null) && (!m.actionString.isEmpty())) {
+                actionButton.setOnClickListener(m.actionHandler);
+                actionButton.setVisibility(View.VISIBLE);
             } else {
                 actionButton.setVisibility(View.GONE);
             }
 
             // Set Dismiss handler
             ImageView dismissButton = (ImageView) newView.findViewById(R.id.snackbar_dismiss);
-            if (m.isDismissible == true) {
+            if (m.isDismissible) {
                 dismissButton.setOnClickListener(new View.OnClickListener() {
                     @Override public void onClick(View v) {
                         dismiss(
@@ -394,7 +393,7 @@ public class SnackBar {
             this.priority = priority;
         }
 
-        @Override public int compareTo(MessageKey another) {
+        @Override public int compareTo(@NonNull MessageKey another) {
             int equal = 0;
             int result;
             int idCompare = Integer.compare(this.id, another.id);
