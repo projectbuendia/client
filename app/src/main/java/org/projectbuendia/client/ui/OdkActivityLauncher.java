@@ -36,7 +36,6 @@ import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.provider.FormsProviderAPI;
-import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.utilities.FileUtils;
 import org.projectbuendia.client.App;
@@ -70,6 +69,9 @@ import javax.annotation.Nullable;
 import de.greenrobot.event.EventBus;
 
 import static android.provider.BaseColumns._ID;
+import static java.lang.String.format;
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns
+    .CONTENT_ITEM_TYPE;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
 /** Convenience class for launching ODK to display an Xform. */
@@ -203,7 +205,7 @@ public class OdkActivityLauncher {
         OpenMrsXformIndexEntry formToShow = findUuid(entries, uuidToShow);
         if (!formToShow.makeFileForForm().exists()) return false;
 
-        LOG.i(String.format("Using form %s from local cache.", uuidToShow));
+        LOG.i(format("Using form %s from local cache.", uuidToShow));
         showForm(callingActivity, requestCode, patient, fields, formToShow);
 
         return true;
@@ -287,93 +289,149 @@ public class OdkActivityLauncher {
         int resultCode,
         Intent data) {
 
-        if (resultCode == Activity.RESULT_CANCELED) return;
-
-        if (data == null || data.getData() == null) {
-            // Cancelled.
-            LOG.i("No data for form result, probably cancelled.");
-            return;
-        }
+        if(isActivityCanceled(resultCode, data)) return;
 
         Uri uri = data.getData();
+        if(!assertThatContentUriHasValidType(context, uri, CONTENT_ITEM_TYPE)) return;
 
-        if (!context.getContentResolver().getType(uri).equals(
-            InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
-            LOG.e("Tried to load a content URI of the wrong type: " + uri);
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-            return;
-        }
+        final String filePath = getFormFilePath(context, uri);
+        final Long idToDelete = getIdToDeleteAfterUpload(context, uri);
+        if(filePath == null || idToDelete == null) return; // SubmitXformFailedEvent was already triggered
 
+        // Temporary code for messing about with xform instance, reading values.
+        byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
+
+        // get the root of the saved and template instances
+        final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
+
+        final String xml = readFromPath(filePath);
+        if(xml == null) return; // SubmitXformFailedEvent was already triggered
+
+        sendFormToServer(patientUuid, xml ,
+            new Response.Listener<JSONObject>() {
+                @Override public void onResponse(JSONObject response) {
+                    LOG.i("Created new encounter successfully on server" + response.toString());
+
+                    // Only locally cache new observations, not new patients.
+                    if (patientUuid != null) {
+                        updateClientCache(patientUuid, savedRoot, context.getContentResolver());
+                    }
+
+                    if (!settings.getKeepFormInstancesLocally()) {
+                        //Code largely copied from InstanceUploaderTask to delete on upload
+                        DeleteInstancesTask dit = new DeleteInstancesTask();
+                        dit.setContentResolver(
+                            Collect.getInstance().getApplication()
+                                .getContentResolver());
+                        dit.execute(idToDelete);
+                    }
+                    EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                }
+            });
+    }
+
+    /**
+     * Returns the form file path queried from the given {@link Uri}. If no file path was found,
+     * it triggers a {@link SubmitXformFailedEvent} event and returns <code>null</code>.
+     * @param context           the application context
+     * @param uri               the URI containing the form file path
+     */
+    private static String getFormFilePath(final Context context, final Uri uri) {
         Cursor instanceCursor = null;
         try {
-            instanceCursor = context.getContentResolver().query(uri,
-                null, null, null, null);
-            if (instanceCursor.getCount() != 1) {
-                LOG.e("The form that we tried to load did not exist: " + uri);
-                EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-                return;
-            }
-            instanceCursor.moveToFirst();
-            String instancePath = instanceCursor.getString(
+            instanceCursor = getCursorAtRightPosition(context, uri);
+            if(instanceCursor == null) return null;
+
+            String filePath = instanceCursor.getString(
                 instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
-            if (instancePath == null) {
+            if (filePath == null) {
                 LOG.e("No file path for form instance: " + uri);
                 EventBus.getDefault().post(
                     new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-                return;
+                return null;
 
             }
-            int columnIndex = instanceCursor
-                .getColumnIndex(_ID);
-            if (columnIndex == -1) {
-                LOG.e("No id to delete for after upload: " + uri);
-                EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-                return;
-            }
-            final long idToDelete = instanceCursor.getLong(columnIndex);
 
-            // Temporary code for messing about with xform instance, reading values.
-            //
-            byte[] fileBytes = FileUtils.getFileAsBytes(new File(instancePath));
-
-            // get the root of the saved and template instances
-            final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
-
-            sendFormToServer(patientUuid, readFromPath(instancePath),
-                new Response.Listener<JSONObject>() {
-                    @Override public void onResponse(JSONObject response) {
-                        LOG.i("Created new encounter successfully on server"
-                            + response.toString());
-
-                        // Only locally cache new observations, not new patients.
-                        if (patientUuid != null) {
-                            updateClientCache(
-                                patientUuid, savedRoot, context.getContentResolver());
-                        }
-
-                        if (!settings.getKeepFormInstancesLocally()) {
-                            //Code largely copied from InstanceUploaderTask to delete on upload
-                            DeleteInstancesTask dit = new DeleteInstancesTask();
-                            dit.setContentResolver(
-                                Collect.getInstance().getApplication()
-                                    .getContentResolver());
-                            dit.execute(idToDelete);
-                        }
-                        EventBus.getDefault().post(new SubmitXformSucceededEvent());
-                    }
-                });
-        } catch (IOException e) {
-            LOG.e(e, "Failed to read xml form into a String " + uri);
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return filePath;
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
             }
         }
+    }
+
+    /**
+     * Returns the id to be deleted after the form upload, which was queried from the given
+     * {@link Uri}. If no id was found, it triggers a {@link SubmitXformFailedEvent} event and
+     * returns <code>null</code>.
+     * @param context           the application context
+     * @param uri               the URI containing the id to be deleted
+     */
+    private static Long getIdToDeleteAfterUpload(final Context context, final Uri uri) {
+        Cursor instanceCursor = null;
+        try {
+            instanceCursor = getCursorAtRightPosition(context, uri);
+            if(instanceCursor == null) return null;
+
+            int columnIndex = instanceCursor.getColumnIndex(_ID);
+            if (columnIndex == -1) {
+                LOG.e("No id to delete for after upload: " + uri);
+                EventBus.getDefault().post(
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+                return null;
+            }
+
+           return instanceCursor.getLong(columnIndex);
+        } finally {
+            if (instanceCursor != null) {
+                instanceCursor.close();
+            }
+        }
+    }
+
+    private static Cursor getCursorAtRightPosition(final Context context, final Uri uri) {
+        Cursor instanceCursor = context.getContentResolver().query(uri, null, null, null, null);
+        if (instanceCursor.getCount() != 1) {
+            LOG.e("The form that we tried to load did not exist: " + uri);
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return null;
+        }
+        instanceCursor.moveToFirst();
+
+        return instanceCursor;
+    }
+
+    /**
+     * Checks if the URI has a valid type. If so, returns <code>true</code>. Otherwise, triggers a
+     *  SubmitXformFailedEvent event and returns <code>false</code>
+     * @param context           the application context
+     * @param uri               the URI to be checked
+     * @param validType         the accepted type for URI
+     */
+    private static boolean assertThatContentUriHasValidType(final Context context, final Uri uri,
+                                                            final String validType) {
+        if (!context.getContentResolver().getType(uri).equals(validType)) {
+            LOG.e("Tried to load a content URI of the wrong type: " + uri);
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if the activity was canceled
+     * @param resultCode        the result code sent from Android activity transition
+     * @param data              the incoming intent
+     */
+    private static boolean isActivityCanceled(int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_CANCELED) return true;
+        if (data == null || data.getData() == null) {
+            LOG.i("No data for form result, probably cancelled.");
+            return true;
+        }
+        return false;
     }
 
     private static void sendFormToServer(String patientUuid, String xml,
@@ -442,14 +500,26 @@ public class OdkActivityLauncher {
         EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
     }
 
-    private static String readFromPath(String path) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\n");
+    /**
+     * Returns the xml form as a String from the path. If for any reason, the file couldn't be read,
+     * it triggers {@link SubmitXformFailedEvent} and returns <code>null</code>
+     * @param path      the path to be read
+     */
+    private static String readFromPath(String path) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new FileReader(path));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            LOG.e(e, format("Failed to read xml form into a String. FilePath=  ", path));
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return null;
         }
-        return sb.toString();
     }
 
     private static void updateClientCache(String patientUuid, TreeElement savedRoot,
