@@ -389,6 +389,12 @@ public class OdkActivityLauncher {
         }
     }
 
+    /**
+     * Returns the form {@link Cursor} ready to be used. If no form was found, it triggers a
+     * {@link SubmitXformFailedEvent} event and returns <code>null</code>.
+     * @param context           the application context
+     * @param uri               the URI to be queried
+     */
     private static Cursor getCursorAtRightPosition(final Context context, final Uri uri) {
         Cursor instanceCursor = context.getContentResolver().query(uri, null, null, null, null);
         if (instanceCursor.getCount() != 1) {
