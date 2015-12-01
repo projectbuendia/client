@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.net;
 
+import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -339,10 +340,13 @@ public class OpenMrsServer implements Server {
             @Nullable String lastSyncToken,
             final Response.Listener<JsonPatientsResponse> successListener,
             Response.ErrorListener errorListener) {
-        String url = mConnectionDetails.getBuendiaApiUrl() + "/patients" +
-                (lastSyncToken != null ? "?since=" + lastSyncToken : "");
+        Uri.Builder url = Uri.parse(mConnectionDetails.getBuendiaApiUrl()).buildUpon();
+        url.appendPath("/patients");
+        if (lastSyncToken != null) {
+            url.appendQueryParameter("since", lastSyncToken);
+        }
         GsonRequest<JsonPatientsResponse> request = new GsonRequest<>(
-                url,
+                url.build().toString(),
                 JsonPatientsResponse.class,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 successListener,

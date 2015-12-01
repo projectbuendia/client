@@ -19,7 +19,6 @@ package org.projectbuendia.client.json;
  */
 public class JsonPatientsResponse {
     public JsonPatient[] results;
-    // TODO(capnfabs): Rename this to syncToken.
-    /** In ISO 8601 date format. */
-    public String snapshotTime;
+    public String syncToken;
+    public boolean more;
 }

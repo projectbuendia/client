@@ -27,17 +27,27 @@ public class PatientsSyncPhaseRunnable implements SyncPhaseRunnable {
     private static final Logger LOG = Logger.create();
 
     @Override
-    public void sync(ContentResolver contentResolver, SyncResult syncResult, ContentProviderClient providerClient) throws Throwable {
+    public void sync(ContentResolver contentResolver, SyncResult syncResult,
+            ContentProviderClient providerClient) throws Throwable {
         String syncToken = SyncAdapter.getLastSyncToken(providerClient, Contracts.Table.PATIENTS);
-        RequestFuture<JsonPatientsResponse> future = RequestFuture.newFuture();
-        App.getServer().listPatients(syncToken, future, future);
-        JsonPatientsResponse response = future.get();
-        ArrayList<ContentProviderOperation> ops = getPatientUpdateOps(response.results, syncResult);
-        providerClient.applyBatch(ops);
-        LOG.i("Finished updating patients (" + ops.size() + " db ops)");
-        contentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
 
-        SyncAdapter.storeSyncToken(providerClient, Contracts.Table.PATIENTS, response.snapshotTime);
+        JsonPatientsResponse response;
+
+        do {
+            RequestFuture<JsonPatientsResponse> future = RequestFuture.newFuture();
+            App.getServer().listPatients(syncToken, future, future);
+            response = future.get();
+            ArrayList<ContentProviderOperation> ops =
+                    getPatientUpdateOps(response.results, syncResult);
+            providerClient.applyBatch(ops);
+            LOG.i("Updated page of patients (" + ops.size() + " db ops)");
+            contentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
+
+            // Update sync token
+            syncToken = response.syncToken;
+        } while (response.more);
+
+        SyncAdapter.storeSyncToken(providerClient, Contracts.Table.PATIENTS, response.syncToken);
     }
 
     /**
