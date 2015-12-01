@@ -129,14 +129,14 @@ public class OpenMrsXformsConnection {
      * Send a single Xform to the OpenMRS server.
      * @param patientUuid    null if this is to add a new patient, non-null for observation on existing
      *                       patient
-     * @param resultListener the listener to be informed of the form asynchronously
+     * @param successListener the listener to be informed of the form asynchronously
      * @param errorListener  a listener to be informed of any errors
      */
     public void postXformInstance(
-        @Nullable String patientUuid,
-        String xform,
-        final Response.Listener<JSONObject> resultListener,
-        Response.ErrorListener errorListener) {
+        final @Nullable String patientUuid,
+        final String xform,
+        final Response.Listener<JSONObject> successListener,
+        final Response.ErrorListener errorListener) {
 
         // The JsonObject members in the API as written at the moment.
         // int "patient_id"
@@ -163,11 +163,8 @@ public class OpenMrsXformsConnection {
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
             mConnectionDetails, "/xforminstances",
             postBody, // non-null implies POST
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    resultListener.onResponse(response);
-                }
-            }, errorListener
+            successListener,
+            errorListener
         );
         // Set a permissive timeout.
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
