@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.net;
 
+import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -71,10 +72,12 @@ public class OpenMrsChartServer {
             @Nullable String lastSyncToken,
             Response.Listener<JsonObservationsResponse> successListener,
             Response.ErrorListener errorListener) {
-        // TODO: URL-encode the sync token?
-        doObservationsRequest(mConnectionDetails.getBuendiaApiUrl() + "/observations" +
-                        (lastSyncToken != null ? "?since=" + lastSyncToken : ""),
-                successListener, errorListener);
+        Uri.Builder url = Uri.parse(mConnectionDetails.getBuendiaApiUrl()).buildUpon();
+        url.appendPath("observations");
+        if (lastSyncToken != null) {
+            url.appendQueryParameter("since", lastSyncToken);
+        }
+        doObservationsRequest(url.build().toString(), successListener, errorListener);
     }
 
     /**

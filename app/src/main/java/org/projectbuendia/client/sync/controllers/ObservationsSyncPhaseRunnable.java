@@ -1,13 +1,13 @@
 package org.projectbuendia.client.sync.controllers;
 
 import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.support.annotation.Nullable;
-import android.util.TimingLogger;
 
 import com.android.volley.toolbox.RequestFuture;
 
@@ -20,6 +20,7 @@ import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.sync.SyncAdapter;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -38,61 +39,62 @@ public class ObservationsSyncPhaseRunnable implements SyncPhaseRunnable {
     public void sync(ContentResolver contentResolver,
             SyncResult syncResult, ContentProviderClient providerClient)
             throws Throwable {
-        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        // Get the charts asynchronously using volley.
-        RequestFuture<JsonObservationsResponse> listFuture = RequestFuture.newFuture();
-
-        TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         String lastSyncToken =
                 SyncAdapter.getLastSyncToken(providerClient, Contracts.Table.OBSERVATIONS);
-        String newSyncToken = updateObservations(
-                lastSyncToken, providerClient, syncResult, chartServer, listFuture, timingLogger);
-        timingLogger.addSplit("finished observation update");
+
+        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
+
+        JsonObservationsResponse response;
+        do {
+            RequestFuture<JsonObservationsResponse> listFuture = RequestFuture.newFuture();
+            chartServer.getIncrementalObservations(lastSyncToken, listFuture, listFuture);
+            response = listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
+            ArrayList<ContentProviderOperation> ops =
+                    getObservationUpdateOps(response.results, syncResult);
+            providerClient.applyBatch(ops);
+            LOG.i("Updated page of observations (" + ops.size() + " db ops)");
+
+            // Update the sync token
+            lastSyncToken = response.syncToken;
+        } while (response.more);
+
         // This is only safe transactionally if we can rely on the entire sync being transactional.
-        SyncAdapter.storeSyncToken(providerClient, Contracts.Table.OBSERVATIONS, newSyncToken);
+        SyncAdapter.storeSyncToken(
+                providerClient, Contracts.Table.OBSERVATIONS, response.syncToken);
 
         // Remove all temporary observations now we have the real ones
         providerClient.delete(Observations.CONTENT_URI,
                 Observations.UUID + " IS NULL",
                 new String[0]);
-        timingLogger.addSplit("delete temp observations");
-        timingLogger.dumpToLog();
     }
 
     /**
      * Updates observations, possibly incrementally.
      * NOTE: this logic relies upon observations inserts being an upsert.
      */
-    private String updateObservations(
-            @Nullable String lastSyncToken, ContentProviderClient provider, SyncResult syncResult,
-            OpenMrsChartServer chartServer, RequestFuture<JsonObservationsResponse> listFuture,
-            TimingLogger timingLogger)
-            throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
-        LOG.d("Requesting Observations");
-        chartServer.getIncrementalObservations(lastSyncToken, listFuture, listFuture);
-        LOG.d("Awaiting parsed observations response");
-        final JsonObservationsResponse response =
-                listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
-        LOG.d("Got JSON Observations response");
-        timingLogger.addSplit("Fetched incremental encounters RPC");
+    private ArrayList<ContentProviderOperation> getObservationUpdateOps(
+            JsonObservation[] obs, SyncResult syncResult)
+            throws RemoteException, InterruptedException, ExecutionException, TimeoutException,
+            OperationApplicationException {
+
         int deletes = 0;
         int inserts = 0;
-        for (JsonObservation observation: response.results) {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        for (JsonObservation observation: obs) {
             if (observation.voided) {
                 Uri uri = Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
-                provider.delete(uri, null, null);
+                ops.add(ContentProviderOperation.newDelete(uri).build());
                 deletes++;
             } else {
-                provider.insert(Observations.CONTENT_URI, getObsValuesToInsert(observation));
+                ops.add(ContentProviderOperation.newInsert(Observations.CONTENT_URI)
+                        .withValues(getObsValuesToInsert(observation)).build());
                 inserts++;
             }
-            // Add the observations from the encounter.
-            timingLogger.addSplit("added incremental obs to list");
         }
-        LOG.d("Observations done! Inserts: %d, Deletes: %d", inserts, deletes);
+        LOG.d("Observations processed! Inserts: %d, Deletes: %d", inserts, deletes);
         syncResult.stats.numInserts += inserts;
         syncResult.stats.numDeletes += deletes;
-        return response.snapshotTime;
+        return ops;
     }
 
     /** Converts an encounter data response into appropriate inserts in the encounters table. */
