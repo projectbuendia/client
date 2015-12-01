@@ -15,20 +15,18 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.TranslateAnimation;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -43,8 +41,6 @@ public class SnackBar {
     private final Context mContext;
     private ExpandableListView mList;
     private SnackBarListAdapter adapter;
-    private ArrayList<HashMap<String, String>> groups;
-    private ArrayList<ArrayList<HashMap<String, String>>> children;
     private int mMessageId;
     private TreeMap<MessageKey, Message> mMessagesList;
 
@@ -52,9 +48,7 @@ public class SnackBar {
     public SnackBar(ViewGroup parent) {
         mTargetParent = parent;
         mContext = parent.getContext();
-
         mMessagesList= new TreeMap<>();
-        children = new ArrayList<>();
         buildList();
     }
 
@@ -151,7 +145,7 @@ public class SnackBar {
         MessageKey key = new MessageKey(mMessageId, priority);
         Message value = new Message(key, message, actionMessage, actionOnClick, isDismissible);
         mMessagesList.put(key, value);
-        updateList();
+        adapter.notifyDataSetChanged();
         if(secondsToTimeOut > 0) {
             setTimer(key, secondsToTimeOut);
         }
@@ -175,7 +169,7 @@ public class SnackBar {
 
             @Override public void onFinish() {
                 mMessagesList.remove(key);
-                updateList();
+                adapter.notifyDataSetChanged();
             }
         }.start();
     }
@@ -194,7 +188,7 @@ public class SnackBar {
      */
     public void dismiss(MessageKey key) {
         mMessagesList.remove(key);
-        updateList();
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -215,50 +209,14 @@ public class SnackBar {
     }
 
     /**
-     * Rearrange the message data and notify the change to the adapter so it can redraw the
-     * ExpandableListView.
-     */
-    private void updateList() {
-        groups.clear();
-        children.clear();
-        children.add(new ArrayList<HashMap<String, String>>());
-        for(Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
-            Message value = entry.getValue();
-
-            if (groups.size() == 0) {
-                addToHashMap(value, groups);
-            } else {
-                addToHashMap(value, children.get(0));
-            }
-        }
-        adapter.notifyDataSetChanged();
-    }
-
-    /**
-     * The main message list {@code mMessagesList} values are added to ArrayLists to be used by the
-     * SnackBarListAdapter.
-     * @param m The message to be stored.
-     * @param a The group or children ArrayList.
-     */
-    private void addToHashMap(Message m, ArrayList<HashMap<String, String>> a) {
-        HashMap<String, String> newMessage = new HashMap<>();
-        newMessage.put("id", Integer.toString(m.key.id));
-        newMessage.put("priority", Integer.toString(m.key.priority));
-        newMessage.put("messages", m.message);
-        if (m.actionString != null) {
-            newMessage.put("actions", m.actionString);
-        }
-        a.add(newMessage);
-    }
-
-    /**
      * Initiates the SnackBar ExpandableListView.
      */
     private void buildList() {
         mList = new ExpandableListView(mContext);
         mList.setId(R.id.snackbar);
         setListAppearance();
-        mList.setAdapter(generateAdapter());
+        adapter = new SnackBarListAdapter(mContext);
+        mList.setAdapter(adapter);
         mTargetParent.addView(mList);
         hide();
     }
@@ -278,65 +236,58 @@ public class SnackBar {
     }
 
     /**
-     * Instantiates the SnackBarListAdapter with no messages.
-     * @return SnackBarListAdapter
-     */
-    private SnackBarListAdapter generateAdapter() {
-        groups = new ArrayList<>();
-        children = new ArrayList<>();
-        children.add(new ArrayList<HashMap<String, String>>());
-
-        adapter = new SnackBarListAdapter(
-            mContext,
-            groups,                                                   // Creating group List.
-            R.layout.snackbar_group,                                  // Group item layout XML.
-            new String[] {"id", "priority", "messages", "actions"},   // the key of group item.
-            new int[] {                                               // Data under the key goes into this TextView.
-                R.id.snackbar_id,
-                R.id.snackbar_priority,
-                R.id.snackbar_message,
-                R.id.snackbar_action
-            },
-            children,                                                 // childData describes second-level entries.
-            R.layout.snackbar_item,                                   // Layout for sub-level entries(second level).
-            new String[] {"id", "priority", "messages", "actions"},   // Keys in childData maps to display.
-            new int[] {                                               // Data under the keys above go into these TextViews.
-                R.id.snackbar_id,
-                R.id.snackbar_priority,
-                R.id.snackbar_message,
-                R.id.snackbar_action
-            }
-        );
-        return adapter;
-    }
-
-    /**
      * The SnackBar ExpandableListView Adapter responsible to handling the message data.
      */
-    private final class SnackBarListAdapter extends SimpleExpandableListAdapter {
+    private final class SnackBarListAdapter extends BaseExpandableListAdapter {
 
-        public SnackBarListAdapter(Context context, List<? extends Map<String, ?>> groupData, int
-            groupLayout, String[] groupFrom, int[] groupTo, List<? extends List<? extends
-            Map<String, ?>>> childData, int childLayout, String[] childFrom, int[] childTo) {
-            super(context, groupData, groupLayout, groupFrom, groupTo, childData, childLayout,
-                childFrom, childTo);
+        private LayoutInflater mInflater;
+
+        public SnackBarListAdapter(Context context) {
+            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override public int getGroupCount() {
+            return 1;
+        }
+
+        @Override public int getChildrenCount(int groupPosition) {
+            return mMessagesList.size() - 1;
+        }
+
+        @Override public Object getGroup(int groupPosition) {
+            return mMessagesList.values().toArray()[groupPosition];
+        }
+
+        @Override public Object getChild(int groupPosition, int childPosition) {
+            return mMessagesList.values().toArray()[childPosition + 1];
+        }
+
+        @Override public long getGroupId(int groupPosition) {
+            return groupPosition;
+        }
+
+        @Override public long getChildId(int groupPosition, int childPosition) {
+            return childPosition;
+        }
+
+        @Override public boolean hasStableIds() {
+            return false;
+        }
+
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
+                                 ViewGroup parent) {
+            return getView(convertView, parent, groupPosition);
         }
 
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild,
                                  View convertView, ViewGroup parent) {
-            View newView = super.getChildView(groupPosition, childPosition, isLastChild,
-                convertView, parent);
-            addHandlers(newView);
-            return newView;
+            return getView(convertView, parent, (childPosition + 1));
         }
 
-        @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
-                                ViewGroup parent) {
-            View newView = super.getGroupView(groupPosition, isExpanded, convertView, parent);
-            addHandlers(newView);
-            return newView;
+        @Override public boolean isChildSelectable(int groupPosition, int childPosition) {
+            return true;
         }
 
         /**
@@ -345,20 +296,25 @@ public class SnackBar {
          * It add the click handlers to the buttons or hide them if they aren't being used.
          * @param newView the inflated view by {@code #getChildView} and {@code #getGroupView}
          */
-        private void addHandlers(View newView) {
-            TextView idView = (TextView) newView.findViewById(R.id.snackbar_id);
-            final String id = idView.getText().toString();
-            TextView priorityView = (TextView) newView.findViewById(R.id.snackbar_priority);
-            final String priority = priorityView.getText().toString();
-            Message m = mMessagesList.get(new MessageKey(Integer.parseInt(id), Integer.parseInt(priority)));
+        private View getView(View newView, ViewGroup parent, int position) {
+            final Message m = (Message) mMessagesList.values().toArray()[position];
+
+            if (newView == null) {
+                newView = mInflater.inflate(R.layout.snackbar_item, parent, false);
+            }
+
+            TextView message = (TextView) newView.findViewById(R.id.snackbar_message);
+            message.setText(m.message);
+
+            TextView action = (TextView) newView.findViewById(R.id.snackbar_action);
+            action.setText(m.actionString);
 
             // Set action handler
-            TextView actionButton = (TextView) newView.findViewById(R.id.snackbar_action);
             if ((m.actionHandler != null) && (!m.actionString.isEmpty())) {
-                actionButton.setOnClickListener(m.actionHandler);
-                actionButton.setVisibility(View.VISIBLE);
+                action.setOnClickListener(m.actionHandler);
+                action.setVisibility(View.VISIBLE);
             } else {
-                actionButton.setVisibility(View.GONE);
+                action.setVisibility(View.GONE);
             }
 
             // Set Dismiss handler
@@ -366,16 +322,16 @@ public class SnackBar {
             if (m.isDismissible) {
                 dismissButton.setOnClickListener(new View.OnClickListener() {
                     @Override public void onClick(View v) {
-                        dismiss(
-                            new MessageKey(Integer.parseInt(id), Integer.parseInt(priority))
-                        );
+                        dismiss(m.key);
                     }
                 });
                 dismissButton.setVisibility(View.VISIBLE);
             } else {
                 dismissButton.setVisibility(View.GONE);
             }
+            return newView;
         }
+
     }
 
     /**
