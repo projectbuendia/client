@@ -78,7 +78,7 @@ public class SnackBar {
     /**
      * Play the slide up / down animation depending on the list current visibility.
      * @param visibility Defines which of the animations will be executed (up or down). Possible
-     *                   values are {@code View.VISIBLE} or {@code View.GONE}
+     *                   values are {@link View#VISIBLE} or {@link View#GONE}
      */
     private void animate(int visibility) {
         TranslateAnimation animate = new TranslateAnimation(0, 0,
@@ -152,7 +152,9 @@ public class SnackBar {
         Message value = new Message(key, message, actionMessage, actionOnClick, isDismissible);
         mMessagesList.put(key, value);
         updateList();
-        setTimer(key, secondsToTimeOut);
+        if(secondsToTimeOut > 0) {
+            setTimer(key, secondsToTimeOut);
+        }
         if (mMessagesList.size() == 0) {
             hide();
         } else {
@@ -167,18 +169,15 @@ public class SnackBar {
      * @param seconds Seconds until dismiss.
      */
     private void setTimer(final MessageKey key, int seconds) {
-        if(seconds > 0) {
-            int limit = seconds*1000;
-            new CountDownTimer(limit, 1000) {
-                @Override public void onTick(long millisUntilFinished) {
-                }
+        int limit = seconds*1000;
+        new CountDownTimer(limit, limit) {
+            @Override public void onTick(long millisUntilFinished) {}
 
-                @Override public void onFinish() {
-                    mMessagesList.remove(key);
-                    updateList();
-                }
-            }.start();
-        }
+            @Override public void onFinish() {
+                mMessagesList.remove(key);
+                updateList();
+            }
+        }.start();
     }
 
     /**
@@ -393,6 +392,12 @@ public class SnackBar {
             this.priority = priority;
         }
 
+        /**
+         * Used to TreeMap balancing and ordering by priority but also used by TreeMap get() method.
+         * It matches the key with the same id disregarding it's priority.
+         * @param another The key to compare
+         * @return 0 to equal, > 0 to greater than and < 0 to less than.
+         */
         @Override public int compareTo(@NonNull MessageKey another) {
             int equal = 0;
             int result;

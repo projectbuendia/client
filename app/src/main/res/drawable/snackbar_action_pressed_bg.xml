@@ -14,5 +14,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
 
-    <solid android:color="#4C4C4C" />
+    <solid android:color="@color/snackbar_action_pressed" />
 </shape>

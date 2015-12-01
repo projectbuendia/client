@@ -117,11 +117,12 @@ public abstract class BaseActivity extends FragmentActivity {
         }
     }
 
+    // Methods for Displaying SnackBar Messages
     public int snackBar(String message) {
         return snackBar.message(message);
     }
 
-    public int message(String message, int priority) {
+    public int snackBar(String message, int priority) {
         return snackBar.message(message, priority);
     }
 
@@ -143,6 +144,11 @@ public abstract class BaseActivity extends FragmentActivity {
                        int priority, boolean isDismissible, int secondsToTimeOut){
         return snackBar.message(message, actionMessage, actionOnClick, priority,
             isDismissible, secondsToTimeOut);
+    }
+
+    // Use it to programmatically dismiss a SnackBar message.
+    public void snackBarDismiss(int id) {
+        snackBar.dismiss(id);
     }
 
     @Override public void setContentView(View view) {

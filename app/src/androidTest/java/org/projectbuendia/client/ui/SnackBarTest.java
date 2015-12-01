@@ -13,19 +13,16 @@ package org.projectbuendia.client.ui;
 
 import android.support.test.espresso.NoMatchingViewException;
 import android.view.View;
-import android.widget.Toast;
 
 import junit.framework.Assert;
 
 import org.projectbuendia.client.R;
 
-import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsNot.not;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class SnackBarTest extends FunctionalTestCase {
     public void testSimpleMessageSnackBar() {
@@ -40,30 +37,19 @@ public class SnackBarTest extends FunctionalTestCase {
     }
 
     public void testSnackBarWithAction() {
+        final View.OnClickListener mockListener = mock(View.OnClickListener.class);
         final BaseActivity activity = getActivity();
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                activity.snackBar("This is a SnackBar with action Test!", "Action", new View
-                    .OnClickListener() {
-                    @Override public void onClick(View v) {
-                        Toast.makeText(
-                            activity,
-                            "What?",
-                            Toast.LENGTH_LONG
-                        ).show();
-                    }
-                });
+                activity.snackBar("This is a SnackBar with action Test!", "Action", mockListener);
             }
         });
         expectVisibleSoon(viewWithText("This is a SnackBar with action Test!"));
         expectVisible(viewWithId(R.id.snackbar_action));
         expectVisible(viewThat(hasText("Action")));
         click(viewWithText("Action"));
-        onView(withText("What?"))
-            .inRoot(withDecorView(not(is(
-                getActivity().getWindow().getDecorView())))
-            ).check(matches(isDisplayed()));
+        verify(mockListener).onClick(any(View.class));
     }
 
     public void testSnackBarDismiss() {
