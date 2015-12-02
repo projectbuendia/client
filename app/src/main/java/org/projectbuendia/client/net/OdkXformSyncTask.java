@@ -128,7 +128,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             new OpenMrsXformsConnection(App.getConnectionDetails());
         openMrsXformsConnection.getXform(uuid, new Response.Listener<String>() {
             @Override public void onResponse(String response) {
-                LOG.i("adding form to db " + response);
+                LOG.i("adding form '%s' to db", uuid);
                 new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
                     .execute(new FormToWrite(response, proposedPath));
             }
