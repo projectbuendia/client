@@ -1,86 +1,54 @@
+/*
+ * Copyright 2015 The Project Buendia Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at: http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distrib-
+ * uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+ * OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+ * specific language governing permissions and limitations under the License.
+ */
+
 package org.projectbuendia.client.sync.controllers;
 
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.RemoteException;
 
-import com.android.volley.toolbox.RequestFuture;
-
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonObservation;
-import org.projectbuendia.client.json.JsonObservationsResponse;
-import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Observations;
-import org.projectbuendia.client.sync.SyncAdapter;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
- * Handles syncing observations. Uses an incremental sync mechanism.
+ * Handles syncing observations. Uses an incremental sync mechanism - see
+ * {@link IncrementalSyncPhaseRunnable} for details.
  */
-// TODO: wrap this class in something that handles the core incremental sync behaviour.
-public class ObservationsSyncPhaseRunnable implements SyncPhaseRunnable {
-
-    /** RPC timeout for getting observations. */
-    private static final int OBSERVATIONS_TIMEOUT_SECS = 180;
+public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonObservation> {
     private static final Logger LOG = Logger.create();
 
-    @Override
-    public void sync(ContentResolver contentResolver,
-            SyncResult syncResult, ContentProviderClient providerClient)
-            throws Throwable {
-        String lastSyncToken =
-                SyncAdapter.getLastSyncToken(providerClient, Contracts.Table.OBSERVATIONS);
-
-        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-
-        JsonObservationsResponse response;
-        do {
-            RequestFuture<JsonObservationsResponse> listFuture = RequestFuture.newFuture();
-            chartServer.getIncrementalObservations(lastSyncToken, listFuture, listFuture);
-            response = listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
-            ArrayList<ContentProviderOperation> ops =
-                    getObservationUpdateOps(response.results, syncResult);
-            providerClient.applyBatch(ops);
-            LOG.i("Updated page of observations (" + ops.size() + " db ops)");
-
-            // Update the sync token
-            lastSyncToken = response.syncToken;
-        } while (response.more);
-
-        // This is only safe transactionally if we can rely on the entire sync being transactional.
-        SyncAdapter.storeSyncToken(
-                providerClient, Contracts.Table.OBSERVATIONS, response.syncToken);
-
-        // Remove all temporary observations now we have the real ones
-        providerClient.delete(Observations.CONTENT_URI,
-                Observations.UUID + " IS NULL",
-                new String[0]);
+    public ObservationsSyncPhaseRunnable() {
+        super(
+                "observations",
+                Contracts.Table.OBSERVATIONS,
+                JsonObservation.class);
     }
 
-    /**
-     * Updates observations, possibly incrementally.
-     * NOTE: this logic relies upon observations inserts being an upsert.
-     */
-    private ArrayList<ContentProviderOperation> getObservationUpdateOps(
-            JsonObservation[] obs, SyncResult syncResult)
-            throws RemoteException, InterruptedException, ExecutionException, TimeoutException,
-            OperationApplicationException {
-
+    @Override
+    protected ArrayList<ContentProviderOperation> getUpdateOps(
+            JsonObservation[] list, SyncResult syncResult) {
         int deletes = 0;
         int inserts = 0;
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        for (JsonObservation observation: obs) {
+        for (JsonObservation observation: list) {
             if (observation.voided) {
                 Uri uri = Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
                 ops.add(ContentProviderOperation.newDelete(uri).build());
@@ -109,5 +77,16 @@ public class ObservationsSyncPhaseRunnable implements SyncPhaseRunnable {
         cvs.put(Observations.VALUE, observation.value);
 
         return cvs;
+    }
+
+    @Override
+    protected void afterSyncFinished(
+            ContentResolver contentResolver,
+            SyncResult syncResult,
+            ContentProviderClient providerClient) throws RemoteException {
+        // Remove all temporary observations now we have the real ones
+        providerClient.delete(Observations.CONTENT_URI,
+                Observations.UUID + " IS NULL",
+                new String[0]);
     }
 }
