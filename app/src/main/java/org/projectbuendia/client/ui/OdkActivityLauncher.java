@@ -369,7 +369,7 @@ public class OdkActivityLauncher {
      * Validates the id to be deleted after the form upload. If id is valid, it returns
      * <code>true</code>. Otherwise, it triggers * {@link SubmitXformFailedEvent} event and
      * returns <code>false</code>.
-     * @param context           the application context
+     * @param id           the id to be deleted
      * @param uri               the URI containing the id to be deleted
      */
     private static boolean validateIdToDeleteAfterUpload(final Long id, Uri uri) {
