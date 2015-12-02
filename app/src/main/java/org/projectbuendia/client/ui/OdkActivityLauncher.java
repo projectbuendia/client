@@ -94,7 +94,7 @@ public class OdkActivityLauncher {
                 }
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
-                    handleFetchSyncError(error);
+                    handleFetchError(error);
                 }
             });
     }
@@ -148,7 +148,7 @@ public class OdkActivityLauncher {
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "Fetching xform list from server failed. ");
-                    handleFetchSyncError(error);
+                    handleFetchError(error);
                 }
             });
     }
@@ -293,11 +293,13 @@ public class OdkActivityLauncher {
         if(isActivityCanceled(resultCode, data)) return;
 
         Uri uri = data.getData();
-        if(!assertThatContentUriHasValidType(context, uri, CONTENT_ITEM_TYPE)) return;
+        if(!validateContentUriType(context, uri, CONTENT_ITEM_TYPE)) return;
 
         final String filePath = getFormFilePath(context, uri);
+        if(!validateFilePath(filePath, uri)) return;
+
         final Long formIdToDelete = getIdToDeleteAfterUpload(context, uri);
-        if(filePath == null || formIdToDelete == null) return; // SubmitXformFailedEvent was already triggered
+        if(!validateIdToDeleteAfterUpload(formIdToDelete, uri)) return;
 
         // Temporary code for messing about with xform instance, reading values.
         byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
@@ -306,13 +308,16 @@ public class OdkActivityLauncher {
         final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
 
         final String xml = readFromPath(filePath);
-        if(xml == null) return; // SubmitXformFailedEvent was already triggered
+        if(!validateXml(xml)) return;
 
         sendFormToServer(patientUuid, xml,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
                     LOG.i("Created new encounter successfully on server" + response.toString());
-                    updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
+                    // Only locally cache new observations, not new patients.
+                    if (patientUuid != null) {
+                        updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
+                    }
                     if (!settings.getKeepFormInstancesLocally()) {
                         deleteLocalFormInstances(formIdToDelete);
                     }
@@ -321,9 +326,74 @@ public class OdkActivityLauncher {
             }, new Response.ErrorListener() {
                 @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "Error submitting form to server");
-                    handleSubmitSyncError(error);
+                    handleSubmitError(error);
                 }
             });
+    }
+
+    /**
+     * Checks if the file path is valid. If so, it returns <code>true</code>. Otherwise
+     * it triggers a {@link SubmitXformFailedEvent} event and returns <code>false</code>.
+     * @param filePath               the file path to be validated
+     * @param uri                    the form uri
+     */
+    private static boolean validateFilePath(String filePath, Uri uri) {
+        if (filePath == null) {
+            LOG.e("No file path for form instance: " + uri);
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the URI has a valid type. If so, returns <code>true</code>. Otherwise, triggers a
+     *  SubmitXformFailedEvent event and returns <code>false</code>
+     * @param context           the application context
+     * @param uri               the URI to be checked
+     * @param validType         the accepted type for URI
+     */
+    private static boolean validateContentUriType(final Context context, final Uri uri,
+                                                  final String validType) {
+        if (!context.getContentResolver().getType(uri).equals(validType)) {
+            LOG.e("Tried to load a content URI of the wrong type: " + uri);
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validates the id to be deleted after the form upload. If id is valid, it returns
+     * <code>true</code>. Otherwise, it triggers * {@link SubmitXformFailedEvent} event and
+     * returns <code>false</code>.
+     * @param context           the application context
+     * @param uri               the URI containing the id to be deleted
+     */
+    private static boolean validateIdToDeleteAfterUpload(final Long id, Uri uri) {
+        if (id == null) {
+            LOG.e("No id to delete for after upload: " + uri);
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validates the xml. Returns <code>true</code> if it is valid. Otherwise, it triggers
+     * {@link SubmitXformFailedEvent} and returns <code>false</code>
+     */
+    private static boolean validateXml(String xml) {
+        if(xml == null) {
+            LOG.e("Xml form is not valid.");
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return false;
+        }
+        return true;
     }
 
     private static void deleteLocalFormInstances(Long formIdToDelete) {
@@ -337,7 +407,7 @@ public class OdkActivityLauncher {
 
     /**
      * Returns the form file path queried from the given {@link Uri}. If no file path was found,
-     * it triggers a {@link SubmitXformFailedEvent} event and returns <code>null</code>.
+     * it returns <code>null</code>.
      * @param context           the application context
      * @param uri               the URI containing the form file path
      */
@@ -347,17 +417,7 @@ public class OdkActivityLauncher {
             instanceCursor = getCursorAtRightPosition(context, uri);
             if(instanceCursor == null) return null;
 
-            String filePath = instanceCursor.getString(
-                instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
-            if (filePath == null) {
-                LOG.e("No file path for form instance: " + uri);
-                EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-                return null;
-
-            }
-
-            return filePath;
+            return instanceCursor.getString(instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
@@ -367,8 +427,7 @@ public class OdkActivityLauncher {
 
     /**
      * Returns the id to be deleted after the form upload, which was queried from the given
-     * {@link Uri}. If no id was found, it triggers a {@link SubmitXformFailedEvent} event and
-     * returns <code>null</code>.
+     * {@link Uri}. If no id was found, it returns <code>null</code>.
      * @param context           the application context
      * @param uri               the URI containing the id to be deleted
      */
@@ -379,12 +438,7 @@ public class OdkActivityLauncher {
             if(instanceCursor == null) return null;
 
             int columnIndex = instanceCursor.getColumnIndex(_ID);
-            if (columnIndex == -1) {
-                LOG.e("No id to delete for after upload: " + uri);
-                EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-                return null;
-            }
+            if (columnIndex == -1) return  null;
 
            return instanceCursor.getLong(columnIndex);
         } finally {
@@ -414,24 +468,6 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Checks if the URI has a valid type. If so, returns <code>true</code>. Otherwise, triggers a
-     *  SubmitXformFailedEvent event and returns <code>false</code>
-     * @param context           the application context
-     * @param uri               the URI to be checked
-     * @param validType         the accepted type for URI
-     */
-    private static boolean assertThatContentUriHasValidType(final Context context, final Uri uri,
-                                                            final String validType) {
-        if (!context.getContentResolver().getType(uri).equals(validType)) {
-            LOG.e("Tried to load a content URI of the wrong type: " + uri);
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Returns true if the activity was canceled
      * @param resultCode        the result code sent from Android activity transition
      * @param data              the incoming intent
@@ -453,7 +489,7 @@ public class OdkActivityLauncher {
         connection.postXformInstance(patientUuid, xml, successListener, errorListener);
     }
 
-    private static void handleSubmitSyncError(VolleyError error) {
+    private static void handleSubmitError(VolleyError error) {
         SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
 
         if (error instanceof TimeoutError) {
@@ -485,7 +521,7 @@ public class OdkActivityLauncher {
         EventBus.getDefault().post(new SubmitXformFailedEvent(reason, error));
     }
 
-    private static void handleFetchSyncError(VolleyError error) {
+    private static void handleFetchError(VolleyError error) {
         FetchXformFailedEvent.Reason reason =
             FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
         if (error.networkResponse != null) {
@@ -507,7 +543,7 @@ public class OdkActivityLauncher {
 
     /**
      * Returns the xml form as a String from the path. If for any reason, the file couldn't be read,
-     * it triggers {@link SubmitXformFailedEvent} and returns <code>null</code>
+     * it returns <code>null</code>
      * @param path      the path to be read
      */
     private static String readFromPath(String path) {
@@ -521,21 +557,15 @@ public class OdkActivityLauncher {
             return sb.toString();
         } catch (IOException e) {
             LOG.e(e, format("Failed to read xml form into a String. FilePath=  ", path));
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
             return null;
         }
     }
 
     /**
      * Caches the observation changes locally for a given patient.
-     * For a new patient (patientUuid == null), no information is cached.
      */
-    private static void updateObservationCache(@Nullable String patientUuid, TreeElement savedRoot,
+    private static void updateObservationCache(String patientUuid, TreeElement savedRoot,
                                                ContentResolver resolver) {
-        // Only locally cache new observations, not new patients.
-        if (patientUuid == null) return;
-
         ContentValues common = new ContentValues();
         // It's critical that UUID is {@code null} for temporary observations, so we make it
         // explicit here. See {@link Contracts.Observations.UUID} for details.
