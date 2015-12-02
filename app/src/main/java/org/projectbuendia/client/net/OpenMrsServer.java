@@ -39,6 +39,7 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -263,6 +264,36 @@ public class OpenMrsServer implements Server {
             wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+    public void voidObservation(VoidObs voidObs,
+                                       final Response.Listener<JsonEncounter> successListener,
+                                       final Response.ErrorListener errorListener) {
+        JSONObject json = voidObs.toJson();
+
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/voidobs",
+                json,
+                new Response.Listener<JSONObject>() {
+                    @Override public void onResponse(JSONObject response) {
+                        try {
+                            successListener.onResponse(voidobsFromJson(response));
+                        } catch (JSONException e) {
+                            LOG.e(e, "Failed to parse response");
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+
+    private JsonEncounter voidobsFromJson(JSONObject object) throws JSONException {
+        return mGson.fromJson(object.toString(), JsonEncounter.class);
     }
 
     private JsonEncounter encounterFromJson(JSONObject object) throws JSONException {

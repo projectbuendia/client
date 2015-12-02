@@ -33,6 +33,7 @@ import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
@@ -45,9 +46,11 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.SyncManager;
@@ -170,6 +173,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
+        void showObservationsDialog(ArrayList<ObsRow> obs);
     }
 
     /** Sends ODK form data. */
@@ -335,8 +339,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(OBSERVATION_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-            request.requestIndex, request.formUuid,
-            mPatient.toOdkPatient(), preset);
+                request.requestIndex, request.formUuid,
+                mPatient.toOdkPatient(), preset);
     }
 
     public void onEditPatientPressed() {
@@ -376,8 +380,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-            request.requestIndex, request.formUuid,
-            mPatient.toOdkPatient(), preset);
+                request.requestIndex, request.formUuid,
+                mPatient.toOdkPatient(), preset);
     }
 
     public void onOpenFormPressed(String formUuid) {
@@ -393,8 +397,27 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(formUuid, mPatientUuid);
         mUi.fetchAndShowXform(
-            request.requestIndex, request.formUuid,
-            mPatient.toOdkPatient(), preset);
+                request.requestIndex, request.formUuid,
+                mPatient.toOdkPatient(), preset);
+    }
+
+    @android.webkit.JavascriptInterface
+    public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
+        ArrayList<ObsRow> observations = null;
+        if (!conceptUuid.isEmpty()){
+            if (!startMillis.isEmpty()){
+                observations = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
+            }
+            else{
+                observations = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
+            }
+        }
+        else if (!startMillis.isEmpty()){
+            observations = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
+        }
+        if ((observations != null) && (!observations.isEmpty())){
+            mUi.showObservationsDialog(observations);
+        }
     }
 
     @android.webkit.JavascriptInterface
@@ -623,7 +646,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             // should change this to use a background thread. Either an async task or using
             // CrudEventBus events.
             mMainThreadHandler.post(new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     updatePatientObsUi();
                 }
             });
@@ -636,7 +660,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {
             mMainThreadHandler.post(new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     updatePatientObsUi();
                     mUi.showFormSubmissionDialog(false);
                 }
@@ -707,7 +732,15 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             }
 
             mAppModel.addOrder(mCrudEventBus, new Order(
-                null, event.patientUuid, event.instructions, start, stop));
+                    null, event.patientUuid, event.instructions, start, stop));
+        }
+
+        public void onEventMainThread(VoidObservationsRequestEvent event) {
+            DateTime dateVoided = DateTime.now();
+            String voidedBy = App.getUserManager().getActiveUser().id;
+            for( String uuid : event.Uuids){
+                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid,dateVoided.toString(),voidedBy));
+            }
         }
 
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {

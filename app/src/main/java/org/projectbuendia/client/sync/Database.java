@@ -118,6 +118,9 @@ public class Database extends SQLiteOpenHelper {
             + "encounter_millis INTEGER,"
             + "concept_uuid INTEGER,"
             + "value STRING,"
+            + "voided INTEGER,"
+            + "voided_by STRING,"
+            + "date_voided STRING,"
             + "temp_cache INTEGER,"  // 0 or 1
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 

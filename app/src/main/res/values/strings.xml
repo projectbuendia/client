@@ -333,4 +333,6 @@
   <string name="observation">Observation</string>
   <string name="Medication_and_dosage">Medication and dosage</string>
   <string name="string_with_paren">%1$s (%2$s)</string>
+  <string name="voiding">Void</string>
+  <string name="void_observations">Void Observations</string>
 </resources>

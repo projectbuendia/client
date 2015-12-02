@@ -168,8 +168,11 @@ public class Contracts {
         String ENCOUNTER_UUID = "encounter_uuid";
         String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch
         String CONCEPT_UUID = "concept_uuid";
+        String CONCEPT_NAME = "concept_name";
         String VALUE = "value";  // concept value or order UUID
-
+        String VOIDED = "voided";
+        String VOIDED_BY = "voided_by";
+        String DATE_VOIDED = "date_voided";
         /**
          * temp_cache is 1 if this observation was written locally as a cached
          * value from a submitted XForm, or 0 if it was loaded from the server.

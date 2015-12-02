@@ -327,4 +327,6 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="Medication_and_dosage">Médicaments et posologie</string>
   <string name="title_new_user">Nouvel utilisateur</string>
   <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
+  <string name="voiding">vide</string>
+  <string name="void_observations">Observations Vides</string>
 </resources>

@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -72,7 +73,7 @@ public class AppModel {
         // last operations of a complete sync. If both of these fields are present, and the last
         // end time is greater than the last start time, then a full sync must have completed.
         try (Cursor c = mContentResolver.query(
-            Contracts.Misc.CONTENT_URI, null, null, null, null)) {
+                Contracts.Misc.CONTENT_URI, null, null, null, null)) {
             LOG.d("Sync timing result count: %d", c.getCount());
             if (c.moveToNext()) {
                 DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_MILLIS);
@@ -85,6 +86,14 @@ public class AppModel {
             }
             return null;
         }
+    }
+
+    public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
+        String conditions = Contracts.Observations.UUID + " = " + voidObs.Uuid;
+        ContentValues values = new ContentValues();
+        values.put(Contracts.Observations.VOIDED, "1");
+        mContentResolver.update(Contracts.Observations.CONTENT_URI, values, conditions, null);
+        mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
     /**
