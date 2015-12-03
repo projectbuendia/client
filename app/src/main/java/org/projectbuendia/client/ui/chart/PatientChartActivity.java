@@ -218,10 +218,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mChartRenderer = new ChartRenderer(mGridWebView, getResources());
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(
-                    PatientChartActivity.this, mSettings,
-                    patientUuid, resultCode, data);
+            @Override public boolean sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
+                return OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this,
+                    mSettings, patientUuid, resultCode, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {

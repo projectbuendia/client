@@ -24,6 +24,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static java.lang.String.format;
+
 /**
  * Handles syncing observations. Uses an incremental sync mechanism.
  */
@@ -53,7 +55,7 @@ public class ObservationsSyncPhaseRunnable implements SyncPhaseRunnable {
 
         // Remove all temporary observations now we have the real ones
         providerClient.delete(Observations.CONTENT_URI,
-                Observations.UUID + " IS NULL",
+                format("%s IS NULL AND %s == 1", Observations.UUID, Observations.SUBMITTED),
                 new String[0]);
         timingLogger.addSplit("delete temp observations");
         timingLogger.dumpToLog();
