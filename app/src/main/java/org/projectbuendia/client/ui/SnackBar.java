@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -21,12 +20,10 @@ import android.view.ViewGroup;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.utils.Utils;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,31 +35,21 @@ import java.util.TreeMap;
  */
 public class SnackBar {
 
-    private static SnackBar sInstance;
-    private static ViewGroup mTargetParent;
-    private final Context mContext;
-    private static ExpandableListView mList;
+    private ViewGroup mTargetParent;
+    private Context mContext;
+    private SnackBarListView mList;
     private SnackBarListAdapter adapter;
     private int mMessageId;
-    private TreeMap<MessageKey, Message> mMessagesList;
+    private static TreeMap<MessageKey, Message> mMessagesList;
 
 
     public SnackBar(ViewGroup parent) {
         mTargetParent = parent;
         mContext = parent.getContext();
-        mMessagesList= new TreeMap<>();
-        buildList();
-    }
-
-    public static synchronized SnackBar getInstance(ViewGroup parent) {
-        if(sInstance == null){
-            sInstance = new SnackBar(parent);
-        } else {
-            mTargetParent.removeView(mList);
-            mTargetParent = parent;
-            mTargetParent.addView(mList);
+        if(mMessagesList == null) {
+            mMessagesList = new TreeMap<>();
         }
-        return sInstance;
+        buildList();
     }
 
     /**
@@ -225,13 +212,17 @@ public class SnackBar {
      * Initiates the SnackBar ExpandableListView.
      */
     private void buildList() {
-        mList = new ExpandableListView(mContext);
+        mList = new SnackBarListView(mContext);
         mList.setId(R.id.snackbar);
         setListAppearance();
         adapter = new SnackBarListAdapter(mContext);
         mList.setAdapter(adapter);
         mTargetParent.addView(mList);
-        hide();
+        if (mMessagesList.size() > 0) {
+            show();
+        } else {
+            hide();
+        }
     }
 
     /**
@@ -240,6 +231,26 @@ public class SnackBar {
     private void setListAppearance() {
         mList.setDivider(null);
         mList.setChildDivider(null);
+    }
+
+    /**
+     * The Custom ExpansibleListView used by the SnackBar
+     */
+    private final class SnackBarListView extends ExpandableListView {
+
+        public SnackBarListView(Context context) {
+            super(context);
+        }
+
+        /**
+         * Updates the SnackBar with the current messages.
+         * @param visibility
+         */
+        @Override protected void onWindowVisibilityChanged(int visibility) {
+            super.onWindowVisibilityChanged(visibility);
+            adapter.notifyDataSetChanged();
+        }
+
     }
 
     /**

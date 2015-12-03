@@ -114,8 +114,8 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     private void initializeSnackBar() {
-        if (mWrapperView != null) {
-            snackBar = SnackBar.getInstance(mWrapperView);
+        if ((mWrapperView != null) && (snackBar == null)) {
+            snackBar = new SnackBar(mWrapperView);
         }
     }
 
