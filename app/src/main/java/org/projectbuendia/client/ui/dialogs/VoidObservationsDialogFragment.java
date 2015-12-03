@@ -7,27 +7,18 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.CheckBox;
 import android.widget.ListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
-import org.projectbuendia.client.events.actions.VoidObservationRequestEvent;
-import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
 import org.projectbuendia.client.models.ObsRow;
-import org.projectbuendia.client.models.VoidObs;
-import org.projectbuendia.client.ui.lists.ObsRowAdapter;
 import org.projectbuendia.client.ui.lists.VoidObsRowAdapter;
 
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
-import de.greenrobot.event.EventBus;
 
 
 public class VoidObservationsDialogFragment extends DialogFragment {
