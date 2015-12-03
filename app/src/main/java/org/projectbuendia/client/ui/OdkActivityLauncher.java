@@ -292,101 +292,58 @@ public class OdkActivityLauncher {
 
         if(isActivityCanceled(resultCode, data)) return;
 
-        final Uri uri = data.getData();
-        if(!validateContentUriType(context, uri, CONTENT_ITEM_TYPE)) {
-            LOG.e("Tried to load a content URI of the wrong type: " + uri);
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-            return;
-        }
+        try {
+            final Uri uri = data.getData();
+            if(!context.getContentResolver().getType(uri).equals(CONTENT_ITEM_TYPE)) {
+                throw new IllegalStateException("Tried to load a content URI of the wrong type: "
+                    + uri);
+            }
 
-        final String filePath = getFormFilePath(context, uri);
-        if(!validateFilePath(filePath, uri)) {
-            LOG.e("No file path for form instance: " + uri);
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-            return;
-        }
+            final String filePath = getFormFilePath(context, uri);
+            if(filePath == null) {
+                throw new IllegalStateException("No file path for form instance: " + uri);
+            }
 
-        final Long formIdToDelete = getIdToDeleteAfterUpload(context, uri);
-        if(!validateIdToDeleteAfterUpload(formIdToDelete, uri)) {
-            LOG.e("No id to delete for after upload: " + uri);
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-            return;
-        }
+            final Long formIdToDelete = getIdToDeleteAfterUpload(context, uri);
+            if(formIdToDelete == null) {
+                throw new IllegalStateException("No id to delete for after upload: " + uri);
+            }
 
-        // Temporary code for messing about with xform instance, reading values.
-        byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
+            // Temporary code for messing about with xform instance, reading values.
+            byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
 
-        // get the root of the saved and template instances
-        final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
+            // get the root of the saved and template instances
+            final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
 
-        final String xml = readFromPath(filePath);
-        if(!validateXml(xml)) {
-            LOG.e("Xml form is not valid.");
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
-            return;
-        }
+            final String xml = readFromPath(filePath);
+            if(xml == null) {
+                throw new IllegalStateException("Xml form is not valid for uri: " + uri);
+            }
 
-        sendFormToServer(patientUuid, xml,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    LOG.i("Created new encounter successfully on server" + response.toString());
-                    // Only locally cache new observations, not new patients.
-                    if (patientUuid != null) {
-                        updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
+            sendFormToServer(patientUuid, xml,
+                new Response.Listener<JSONObject>() {
+                    @Override public void onResponse(JSONObject response) {
+                        LOG.i("Created new encounter successfully on server" + response.toString());
+                        // Only locally cache new observations, not new patients.
+                        if (patientUuid != null) {
+                            updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
+                        }
+                        if (!settings.getKeepFormInstancesLocally()) {
+                            deleteLocalFormInstances(formIdToDelete);
+                        }
+                        EventBus.getDefault().post(new SubmitXformSucceededEvent());
                     }
-                    if (!settings.getKeepFormInstancesLocally()) {
-                        deleteLocalFormInstances(formIdToDelete);
+                }, new Response.ErrorListener() {
+                    @Override public void onErrorResponse(VolleyError error) {
+                        LOG.e(error, "Error submitting form to server");
+                        handleSubmitError(error);
                     }
-                    EventBus.getDefault().post(new SubmitXformSucceededEvent());
-                }
-            }, new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "Error submitting form to server");
-                    handleSubmitError(error);
-                }
-            });
-    }
-
-    /**
-     * Checks if the file path is valid. If so, it returns {@code true}. Otherwise returns
-     * <code>false</code>.
-     * @param filePath               the file path to be validated
-     * @param uri                    the form uri
-     */
-    private static boolean validateFilePath(String filePath, Uri uri) {
-        return filePath != null;
-    }
-
-    /**
-     * Checks if the URI has a valid type. If so, returns {@code true}. Otherwise,  returns {@code false}
-     * @param context           the application context
-     * @param uri               the URI to be checked
-     * @param validType         the accepted type for URI
-     */
-    private static boolean validateContentUriType(final Context context, final Uri uri,
-                                                  final String validType) {
-        return context.getContentResolver().getType(uri).equals(validType);
-    }
-
-    /**
-     * Validates the id to be deleted after the form upload. If id is valid, it returns
-     * {@code true}. Otherwise, returns {@code false}.
-     * @param id           the id to be deleted
-     * @param uri               the URI containing the id to be deleted
-     */
-    private static boolean validateIdToDeleteAfterUpload(final Long id, Uri uri) {
-       return id != null;
-    }
-
-    /**
-     * Validates the xml. Returns {@code true} if it is valid. Otherwise, returns {@code false}
-     */
-    private static boolean validateXml(String xml) {
-       return xml != null;
+                });
+        } catch(IllegalStateException ise) {
+            LOG.e(ise.getMessage());
+            EventBus.getDefault().post(
+                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+        }
     }
 
     private static void deleteLocalFormInstances(Long formIdToDelete) {
