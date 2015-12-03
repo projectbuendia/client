@@ -69,7 +69,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if ((adapter.mCheckedItems != null) && (!adapter.mCheckedItems.isEmpty())) {
-                            EventBus.getDefault().post(new VoidObservationsRequestEvent(adapter.mCheckedItems));
+                            //EventBus.getDefault().post(new VoidObservationsRequestEvent(adapter.mCheckedItems));
                         }
                         dialogInterface.dismiss();
                     }

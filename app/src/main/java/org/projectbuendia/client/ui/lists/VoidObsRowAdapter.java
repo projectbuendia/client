@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class VoidObsRowAdapter  extends ArrayAdapter<ObsRow> {
 
-    public ArrayList<String> mCheckedItems;
+    public final ArrayList<String> mCheckedItems = new ArrayList<>();
 
     public VoidObsRowAdapter (Context context, ArrayList<ObsRow> observations) {
         super(context, 0, observations);
@@ -44,9 +44,9 @@ public class VoidObsRowAdapter  extends ArrayAdapter<ObsRow> {
                 String uuid = obsrow.uuid;
 
                 if (isChecked) {
-                    //mCheckedItems.add(uuid);
+                    mCheckedItems.add(uuid);
                 } else {
-                    //mCheckedItems.remove(uuid);
+                    mCheckedItems.remove(uuid);
                 }
             }
         });
