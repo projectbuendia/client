@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,9 +38,10 @@ import java.util.TreeMap;
  */
 public class SnackBar {
 
-    private final ViewGroup mTargetParent;
+    private static SnackBar sInstance;
+    private static ViewGroup mTargetParent;
     private final Context mContext;
-    private ExpandableListView mList;
+    private static ExpandableListView mList;
     private SnackBarListAdapter adapter;
     private int mMessageId;
     private TreeMap<MessageKey, Message> mMessagesList;
@@ -50,6 +52,17 @@ public class SnackBar {
         mContext = parent.getContext();
         mMessagesList= new TreeMap<>();
         buildList();
+    }
+
+    public static synchronized SnackBar getInstance(ViewGroup parent) {
+        if(sInstance == null){
+            sInstance = new SnackBar(parent);
+        } else {
+            mTargetParent.removeView(mList);
+            mTargetParent = parent;
+            mTargetParent.addView(mList);
+        }
+        return sInstance;
     }
 
     /**
@@ -227,12 +240,6 @@ public class SnackBar {
     private void setListAppearance() {
         mList.setDivider(null);
         mList.setChildDivider(null);
-        Drawable icon = mContext.getResources().getDrawable(R.drawable.snackbar_group_indicator);
-        mList.setGroupIndicator(icon);
-        mList.setIndicatorBounds(
-            1200 - Utils.getPixelFromDips(60),
-            1200 - Utils.getPixelFromDips(32)
-        );
     }
 
     /**
@@ -277,7 +284,18 @@ public class SnackBar {
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
                                  ViewGroup parent) {
-            return getView(convertView, parent, groupPosition);
+            View header = getView(convertView, parent, groupPosition);
+            TextView count = (TextView) header.findViewById(R.id.snackbar_count);
+            View indicator = header.findViewById(R.id.snackbar_indicator);
+            if (mMessagesList.size() > 1) {
+                indicator.setVisibility(View.VISIBLE);
+                count.setText(String.valueOf(mMessagesList.size()));
+                count.setVisibility(View.VISIBLE);
+            } else {
+                indicator.setVisibility(View.INVISIBLE);
+                count.setVisibility(View.INVISIBLE);
+            }
+            return header;
         }
 
         @Override
@@ -297,37 +315,41 @@ public class SnackBar {
          * @param newView the inflated view by {@code #getChildView} and {@code #getGroupView}
          */
         private View getView(View newView, ViewGroup parent, int position) {
-            final Message m = (Message) mMessagesList.values().toArray()[position];
+            Object[] messagesArray = mMessagesList.values().toArray();
 
             if (newView == null) {
                 newView = mInflater.inflate(R.layout.snackbar_item, parent, false);
             }
 
-            TextView message = (TextView) newView.findViewById(R.id.snackbar_message);
-            message.setText(m.message);
+            if((position >= 0) && (position < messagesArray.length)) {
+                final Message m = (Message) messagesArray[position];
 
-            TextView action = (TextView) newView.findViewById(R.id.snackbar_action);
-            action.setText(m.actionString);
+                TextView message = (TextView) newView.findViewById(R.id.snackbar_message);
+                message.setText(m.message);
 
-            // Set action handler
-            if ((m.actionHandler != null) && (!m.actionString.isEmpty())) {
-                action.setOnClickListener(m.actionHandler);
-                action.setVisibility(View.VISIBLE);
-            } else {
-                action.setVisibility(View.GONE);
-            }
+                TextView action = (TextView) newView.findViewById(R.id.snackbar_action);
+                action.setText(m.actionString);
 
-            // Set Dismiss handler
-            ImageView dismissButton = (ImageView) newView.findViewById(R.id.snackbar_dismiss);
-            if (m.isDismissible) {
-                dismissButton.setOnClickListener(new View.OnClickListener() {
-                    @Override public void onClick(View v) {
-                        dismiss(m.key);
-                    }
-                });
-                dismissButton.setVisibility(View.VISIBLE);
-            } else {
-                dismissButton.setVisibility(View.GONE);
+                // Set action handler
+                if ((m.actionHandler != null) && (!m.actionString.isEmpty())) {
+                    action.setOnClickListener(m.actionHandler);
+                    action.setVisibility(View.VISIBLE);
+                } else {
+                    action.setVisibility(View.GONE);
+                }
+
+                // Set Dismiss handler
+                ImageView dismissButton = (ImageView) newView.findViewById(R.id.snackbar_dismiss);
+                if (m.isDismissible) {
+                    dismissButton.setOnClickListener(new View.OnClickListener() {
+                        @Override public void onClick(View v) {
+                            dismiss(m.key);
+                        }
+                    });
+                    dismissButton.setVisibility(View.VISIBLE);
+                } else {
+                    dismissButton.setVisibility(View.GONE);
+                }
             }
             return newView;
         }

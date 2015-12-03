@@ -111,9 +111,11 @@ public abstract class BaseActivity extends FragmentActivity {
             (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_inner_content);
         mStatusContent =
             (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
+    }
 
-        if (snackBar == null) {
-            snackBar = new SnackBar(mWrapperView);
+    private void initializeSnackBar() {
+        if (mWrapperView != null) {
+            snackBar = SnackBar.getInstance(mWrapperView);
         }
     }
 
@@ -379,7 +381,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override protected void onResume() {
         super.onResume();
-
+        initializeSnackBar();
         if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
             // If the font scale was changed while this activity was paused, force a refresh.
             restartWithFontScale(sScaleStep);

@@ -10,13 +10,8 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<selector
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/snackbar_action_bg">
-    <item
-        android:drawable="@drawable/ic_list"
-        android:state_empty="true" />
-    <item
-        android:drawable="@drawable/ic_clear_all_black_24dp"
-        android:state_expanded="true" />
-</selector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/red"/>
+    <corners android:radius="20px"/>
+    <size android:height="20dp" android:width="20dp" />
+</shape>
