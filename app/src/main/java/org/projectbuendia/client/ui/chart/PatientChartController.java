@@ -276,14 +276,14 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             return;
         }
 
-        boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
-        String action = (resultCode == Activity.RESULT_CANCELED)
-            ? "form_discard_pressed" : "form_save_pressed";
-        Utils.logUserAction(action,
-            "form", request.formUuid,
-            "patient_uuid", request.patientUuid);
+        boolean isSubmissionCanceled = (resultCode == Activity.RESULT_CANCELED);
+        Utils.logUserAction(isSubmissionCanceled ? "form_discard_pressed" : "form_save_pressed",
+            "form", request.formUuid, "patient_uuid", request.patientUuid);
+
+        if(isSubmissionCanceled) return;
+
         mOdkResultSender.sendOdkResultToServer(request.patientUuid, resultCode, data);
-        mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
+        mUi.showFormSubmissionDialog(true);
     }
 
     FormRequest popFormRequest(int requestIndex) {
