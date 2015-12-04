@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.net;
 
-import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -27,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonOrdersResponse;
-import org.projectbuendia.client.json.JsonPatientsResponse;
 import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
@@ -152,7 +150,7 @@ public class OpenMrsServer implements Server {
      * @return A new error listener that tries to pass a more meaningful message
      * to the original errorListener.
      */
-    private Response.ErrorListener wrapErrorListener(
+    public static Response.ErrorListener wrapErrorListener(
         final Response.ErrorListener errorListener) {
         return new OpenMrsErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
@@ -334,27 +332,6 @@ public class OpenMrsServer implements Server {
 
     @Override public void updatePatientLocation(String patientId, String newLocationId) {
         // TODO: Implement or remove (currently handled by updatePatient).
-    }
-
-    @Override public void listPatients(
-            @Nullable String lastSyncToken,
-            final Response.Listener<JsonPatientsResponse> successListener,
-            Response.ErrorListener errorListener) {
-        Uri.Builder url = Uri.parse(mConnectionDetails.getBuendiaApiUrl()).buildUpon();
-        url.appendPath("/patients");
-        if (lastSyncToken != null) {
-            url.appendQueryParameter("since", lastSyncToken);
-        }
-        GsonRequest<JsonPatientsResponse> request = new GsonRequest<>(
-                url.build().toString(),
-                JsonPatientsResponse.class,
-                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-                successListener,
-                wrapErrorListener(errorListener));
-        Serializers.registerTo(request.getGson());
-        request.setRetryPolicy(
-            new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     @Override public void listUsers(@Nullable String searchQuery,
