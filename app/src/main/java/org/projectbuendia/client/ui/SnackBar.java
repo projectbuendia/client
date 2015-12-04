@@ -12,8 +12,10 @@
 package org.projectbuendia.client.ui;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +49,7 @@ public class SnackBar {
     public SnackBar(ViewGroup parent) {
         mTargetParent = parent;
         mContext = parent.getContext();
-        if(mMessagesList == null) {
+        if (mMessagesList == null) {
             mMessagesList = new TreeMap<>();
         }
         buildList();
@@ -87,67 +89,65 @@ public class SnackBar {
     }
 
     /**
-     * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
-     * boolean, int)}.
+     * Wrapper to the full message method {@link #message(int, int, View.OnClickListener, int,
+     * boolean, int)}
      * The message won't have action button, it's priority will be 999, will be dismissible and
      * won't have timer.
      * @param message The message String.
-     * @return the id of the message.
      */
-    public int message(String message) {
-        return message(message, null, null, 999, true, 0);
+    public void message(@StringRes int message) {
+        message(message, 0, null, 999, true, 0);
     }
 
     /**
-     * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
-     * boolean, int)}.
+     * Wrapper to the full message method {@link #message(int, int, View.OnClickListener, int,
+     * boolean, int)}
      * The message won't have action button, will be dismissible and won't have timer.
-     * @param message The message String.
+     * @param message  The message String resource id.
      * @param priority The priority of the message. The param is a int and the lower the number the
      *                 higher priority the message has. 0 is the highest.
-     * @return the id of the message.
      */
-    public int message(String message, int priority) {
-        return message(message, null, null, priority, true, 0);
+    public void message(@StringRes int message, int priority) {
+        message(message, 0, null, priority, true, 0);
     }
 
     /**
-     * Wrapper to the full message method {@link #message(String, String, View.OnClickListener, int,
-     * boolean, int)}.
+     * Wrapper to the full message method {@link #message(int, int, View.OnClickListener, int,
+     * boolean, int)}
      * The message will be dismissible and won't have timer.
-     * @param message The message String.
-     * @param actionMessage The label for the action button.
+     * @param message       The message String resource id.
+     * @param actionMessage The resource id of the label for the action button.
      * @param actionOnClick The View.OnClickListener for the action button.
-     * @param priority The priority of the message. The param is a int and the lower the number the
-     *                 higher priority the message has. 0 is the highest.
-     * @return the id of the message
+     * @param priority      The priority of the message. The param is a int and the lower the
+     *                      number the
+     *                      higher priority the message has. 0 is the highest.
      */
-    public int message(String message, String actionMessage, View.OnClickListener actionOnClick,
-                       int priority){
-        return message(message, actionMessage, actionOnClick, priority, true, 0);
+    public void message(@StringRes int message, @StringRes int actionMessage, View.OnClickListener
+        actionOnClick, int priority) {
+        message(message, actionMessage, actionOnClick, priority, true, 0);
     }
 
     /**
      * Add to the list and display a new message. This is the method that should be used to
      * display messages and it's being called by {@link BaseActivity#snackBar}.
-     * @param message The message String.
-     * @param actionMessage The label for the action button.
-     * @param actionOnClick The View.OnClickListener for the action button.
-     * @param priority The priority of the message. The param is a int and the lower the number the
-     *                 higher priority the message has. 0 is the highest.
-     * @param isDismissible if true the message will have a X button to remove it self from the
-     *                      list.
+     * @param message          The message String resource id.
+     * @param actionMessage    The resource id of the label for the action button.
+     * @param actionOnClick    The View.OnClickListener for the action button.
+     * @param priority         The priority of the message. The param is a int and the lower the
+     *                         number the
+     *                         higher priority the message has. 0 is the highest.
+     * @param isDismissible    if true the message will have a X button to remove it self from the
+     *                         list.
      * @param secondsToTimeOut Number of seconds to message auto dismiss. 0 to never.
-     * @return the id of the message.
      */
-    public int message(String message, String actionMessage, View.OnClickListener actionOnClick,
-                        int priority, boolean isDismissible, int secondsToTimeOut){
+    public void message(@StringRes int message, @StringRes int actionMessage, View.OnClickListener
+        actionOnClick, int priority, boolean isDismissible, int secondsToTimeOut) {
         mMessageId++;
         MessageKey key = new MessageKey(mMessageId, priority);
         Message value = new Message(key, message, actionMessage, actionOnClick, isDismissible);
-        mMessagesList.put(key, value);
+        addToQueueWithoutDuplicate(key, value);
         adapter.notifyDataSetChanged();
-        if(secondsToTimeOut > 0) {
+        if (secondsToTimeOut > 0) {
             setTimer(key, secondsToTimeOut);
         }
         if (mMessagesList.size() == 0) {
@@ -155,18 +155,29 @@ public class SnackBar {
         } else {
             show();
         }
-        return mMessageId;
+    }
+
+    /**
+     * Checks if a message has duplicate
+     */
+    private void addToQueueWithoutDuplicate(MessageKey key, Message value) {
+        Message existingMessage = getMessage(value.message);
+        if (existingMessage != null) {
+            mMessagesList.remove(existingMessage.key);
+        }
+        mMessagesList.put(key, value);
     }
 
     /**
      * Sets the auto-dismiss timer to the message given it's key and seconds to dismiss.
-     * @param key The message key.
+     * @param key     The message key.
      * @param seconds Seconds until dismiss.
      */
     private void setTimer(final MessageKey key, int seconds) {
         int limit = seconds*1000;
         new CountDownTimer(limit, limit) {
-            @Override public void onTick(long millisUntilFinished) {}
+            @Override public void onTick(long millisUntilFinished) {
+            }
 
             @Override public void onFinish() {
                 mMessagesList.remove(key);
@@ -199,7 +210,7 @@ public class SnackBar {
      */
     private MessageKey getKey(int id) {
         MessageKey theKey = null;
-        for(Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
+        for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
             MessageKey key = entry.getKey();
             if (key.id == id) {
                 theKey = key;
@@ -207,6 +218,18 @@ public class SnackBar {
             }
         }
         return theKey;
+    }
+
+    private Message getMessage(@StringRes int message){
+        Message theMessage = null;
+        for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
+            MessageKey key = entry.getKey();
+            Message value = entry.getValue();
+            if (value.message == message) {
+                theMessage = value;
+            }
+        }
+        return theMessage;
     }
 
     /**
@@ -333,17 +356,20 @@ public class SnackBar {
                 newView = mInflater.inflate(R.layout.snackbar_item, parent, false);
             }
 
-            if((position >= 0) && (position < messagesArray.length)) {
+            if ((position >= 0) && (position < messagesArray.length)) {
                 final Message m = (Message) messagesArray[position];
+                Resources res = mContext.getResources();
+                String messageString = res.getString(m.message);
+                String actionString = res.getString(m.actionString);
 
                 TextView message = (TextView) newView.findViewById(R.id.snackbar_message);
-                message.setText(m.message);
+                message.setText(messageString);
 
                 TextView action = (TextView) newView.findViewById(R.id.snackbar_action);
-                action.setText(m.actionString);
+                action.setText(actionString);
 
                 // Set action handler
-                if ((m.actionHandler != null) && (!m.actionString.isEmpty())) {
+                if ((m.actionHandler != null) && (!actionString.isEmpty())) {
                     action.setOnClickListener(m.actionHandler);
                     action.setVisibility(View.VISIBLE);
                 } else {
@@ -377,7 +403,7 @@ public class SnackBar {
         protected int id;
         protected int priority;
 
-        public MessageKey(int id, int priority){
+        public MessageKey(@StringRes int id, int priority) {
             this.id = id;
             this.priority = priority;
         }
@@ -415,12 +441,12 @@ public class SnackBar {
     private class Message {
 
         protected MessageKey key;
-        protected String message;
-        protected String actionString;
+        protected int message;
+        protected int actionString;
         protected View.OnClickListener actionHandler;
         protected boolean isDismissible;
 
-        public Message(MessageKey key, String message, String actionString,
+        public Message(MessageKey key, @StringRes int message, @StringRes int actionString,
                        View.OnClickListener handler, boolean isDismissible) {
             this.key = key;
             this.message = message;

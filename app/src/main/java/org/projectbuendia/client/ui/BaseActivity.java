@@ -16,9 +16,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -55,7 +57,6 @@ public abstract class BaseActivity extends FragmentActivity {
     private Long pausedScaleStep = null; // this activity's scale step when last paused
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
-    private FrameLayout mStatusContent;
     private SnackBar snackBar;
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
@@ -109,8 +110,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
         mInnerContent =
             (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_inner_content);
-        mStatusContent =
-            (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
     }
 
     private void initializeSnackBar() {
@@ -120,32 +119,33 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     // Methods for Displaying SnackBar Messages
-    public int snackBar(String message) {
-        return snackBar.message(message);
+    public void snackBar(@StringRes int message) {
+        snackBar.message(message);
     }
 
-    public int snackBar(String message, int priority) {
-        return snackBar.message(message, priority);
+    public void snackBar(@StringRes int message, int priority) {
+        snackBar.message(message, priority);
     }
 
-    public int snackBar(String message, String actionMessage, View.OnClickListener listener) {
-        return snackBar.message(message, actionMessage, listener, 999);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener listener) {
+        snackBar.message(message, actionMessage, listener, 999);
     }
 
-    public int snackBar(String message, String actionMessage, View.OnClickListener listener,
-                        int priority) {
-        return snackBar.message(message, actionMessage, listener, priority);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener listener, int priority) {
+        snackBar.message(message, actionMessage, listener, priority);
     }
 
-    public int snackBar(String message, String actionMessage, View.OnClickListener actionOnClick,
-                       int priority, boolean isDismissible){
-        return snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener actionOnClick, int priority, boolean isDismissible) {
+        snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
     }
 
-    public int snackBar(String message, String actionMessage, View.OnClickListener actionOnClick,
-                       int priority, boolean isDismissible, int secondsToTimeOut){
-        return snackBar.message(message, actionMessage, actionOnClick, priority,
-            isDismissible, secondsToTimeOut);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener actionOnClick, int priority, boolean isDismissible, int secondsToTimeOut) {
+        snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible,
+            secondsToTimeOut);
     }
 
     // Use it to programmatically dismiss a SnackBar message.
@@ -167,193 +167,138 @@ public abstract class BaseActivity extends FragmentActivity {
         mInnerContent.addView(view, params);
     }
 
-    /** Gets the visibility of the status bar. */
-    public int getStatusVisibility() {
-        return mStatusContent.getVisibility();
-    }
-
-    /** Sets the visibility of the status bar. */
-    public void setStatusVisibility(int visibility) {
-        mStatusContent.setVisibility(visibility);
-    }
-
     /** Called when the set of troubleshooting actions changes. */
     public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
         if (event.actions.isEmpty()) {
-            setStatusView(null);
-            setStatusVisibility(View.GONE);
-
             return;
         }
 
         TroubleshootingAction troubleshootingAction = event.actions.iterator().next();
 
-        View view = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
-        final TextView message = (TextView) view.findViewById(R.id.status_bar_default_message);
-        final TextView action = (TextView) view.findViewById(R.id.status_bar_default_action);
-
         switch (troubleshootingAction) {
             case ENABLE_WIFI:
-                message.setText(R.string.troubleshoot_wifi_disabled);
-                action.setText(R.string.troubleshoot_wifi_disabled_action_enable);
-                action.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        action.setEnabled(false);
-                        ((WifiManager) getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true);
-                    }
-                });
+                snackBar(R.string.troubleshoot_wifi_disabled,
+                    R.string.troubleshoot_wifi_disabled_action_enable,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            ((WifiManager) getSystemService(Context.WIFI_SERVICE)).setWifiEnabled
+                                (true);
+                        }
+                    });
                 break;
             case CONNECT_WIFI:
-                message.setText(R.string.troubleshoot_wifi_disconnected);
-                action.setText(R.string.troubleshoot_wifi_disconnected_action_connect);
-                action.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        action.setEnabled(false);
-                        startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-                    }
-                });
+                snackBar(R.string.troubleshoot_wifi_disconnected,
+                    R.string.troubleshoot_wifi_disconnected_action_connect,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                        }
+                    });
                 break;
             case CHECK_SERVER_AUTH:
-                message.setText(R.string.troubleshoot_server_auth);
-                action.setText(R.string.troubleshoot_server_auth_action_check);
-                action.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        action.setEnabled(false);
-                        SettingsActivity.start(BaseActivity.this);
-                    }
-                });
+                snackBar(R.string.troubleshoot_server_auth,
+                    R.string.troubleshoot_server_auth_action_check,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            SettingsActivity.start(BaseActivity.this);
+                        }
+                    });
                 break;
             case CHECK_SERVER_CONFIGURATION:
-                message.setText(R.string.troubleshoot_server_address);
-                action.setText(R.string.troubleshoot_server_address_action_check);
-                action.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        action.setEnabled(false);
-                        SettingsActivity.start(BaseActivity.this);
-                    }
-                });
+                snackBar(R.string.troubleshoot_server_address,
+                    R.string.troubleshoot_server_address_action_check,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            SettingsActivity.start(BaseActivity.this);
+                        }
+                    });
                 break;
             case CHECK_SERVER_REACHABILITY:
-                message.setText(R.string.troubleshoot_server_unreachable);
-                action.setText(R.string.troubleshoot_action_more_info);
-                action.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        // TODO: Display the actual server URL that couldn't be reached in
-                        // this message. This will require that injection be hooked up through to
-                        // this inner class, which may be complicated.
-                        showMoreInfoDialog(
-                            action,
-                            getString(R.string.troubleshoot_server_unreachable),
-                            getString(R.string.troubleshoot_server_unreachable_details),
-                            true);
-                    }
-                });
+                snackBar(R.string.troubleshoot_server_unreachable,
+                    R.string.troubleshoot_action_more_info,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            // TODO: Display the actual server URL that couldn't be reached in
+                            // this message. This will require that injection be hooked up
+                            // through to
+                            // this inner class, which may be complicated.
+                            showMoreInfoDialog(
+                                getString(R.string.troubleshoot_server_unreachable),
+                                getString(R.string.troubleshoot_server_unreachable_details),
+                                true);
+                        }
+                    });
                 break;
             case CHECK_SERVER_SETUP:
-                message.setText(R.string.troubleshoot_server_unstable);
-                action.setText(R.string.troubleshoot_action_more_info);
-                action.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        // TODO: Display the actual server URL that couldn't be reached in
-                        // this message. This will require that injection be hooked up through to
-                        // this inner class, which may be complicated.
-                        showMoreInfoDialog(
-                            action,
-                            getString(R.string.troubleshoot_server_unstable),
-                            getString(R.string.troubleshoot_server_unstable_details),
-                            false);
-                    }
-                });
+                snackBar(R.string.troubleshoot_server_unstable,
+                    R.string.troubleshoot_action_more_info,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            // TODO: Display the actual server URL that couldn't be reached in
+                            // this message. This will require that injection be hooked up
+                            // through to
+                            // this inner class, which may be complicated.
+                            showMoreInfoDialog(
+                                getString(R.string.troubleshoot_server_unstable),
+                                getString(R.string.troubleshoot_server_unstable_details),
+                                false);
+                        }
+                    });
                 break;
             case CHECK_SERVER_STATUS:
-                message.setText(R.string.troubleshoot_server_not_responding);
-                action.setText(R.string.troubleshoot_action_more_info);
-                action.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        // TODO: Display the actual server URL that couldn't be reached in
-                        // this message. This will require that injection be hooked up through to
-                        // this inner class, which may be complicated.
-                        showMoreInfoDialog(
-                            action,
-                            getString(R.string.troubleshoot_server_not_responding),
-                            getString(R.string.troubleshoot_server_not_responding_details),
-                            false);
-                    }
-                });
+                snackBar(R.string.troubleshoot_server_not_responding,
+                    R.string.troubleshoot_action_more_info,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            // TODO: Display the actual server URL that couldn't be reached in
+                            // this message. This will require that injection be hooked up
+                            // through to
+                            // this inner class, which may be complicated.
+                            showMoreInfoDialog(
+                                getString(R.string.troubleshoot_server_not_responding),
+                                getString(R.string.troubleshoot_server_not_responding_details),
+                                false);
+                        }
+                    });
                 break;
             case CHECK_PACKAGE_SERVER_REACHABILITY:
-                message.setText(R.string.troubleshoot_package_server_unreachable);
-                action.setText(R.string.troubleshoot_action_more_info);
-                action.setOnClickListener(new View.OnClickListener() {
-                    @Override public void onClick(View v) {
-                        showMoreInfoDialog(
-                            action,
-                            getString(R.string.troubleshoot_package_server_unreachable),
-                            getString(R.string.troubleshoot_update_server_unreachable_details),
-                            true);
-                    }
-                });
+                snackBar(R.string.troubleshoot_package_server_unreachable,
+                    R.string.troubleshoot_action_more_info,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            showMoreInfoDialog(
+                                getString(R.string.troubleshoot_package_server_unreachable),
+                                getString(R.string.troubleshoot_update_server_unreachable_details),
+                                true);
+                        }
+                    });
                 break;
             case CHECK_PACKAGE_SERVER_CONFIGURATION:
-                message.setText(R.string.troubleshoot_package_server_misconfigured);
-                action.setText(R.string.troubleshoot_action_more_info);
-                action.setOnClickListener(new View.OnClickListener() {
-                    @Override public void onClick(View v) {
-                        showMoreInfoDialog(
-                            action,
-                            getString(R.string.troubleshoot_package_server_misconfigured),
-                            getString(
-                                R.string.troubleshoot_update_server_misconfigured_details),
-                            true);
-                    }
-                });
+                snackBar(R.string.troubleshoot_package_server_misconfigured,
+                    R.string.troubleshoot_action_more_info,
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            showMoreInfoDialog(
+                                getString(R.string.troubleshoot_package_server_misconfigured),
+                                getString(
+                                    R.string.troubleshoot_update_server_misconfigured_details),
+                                true);
+                        }
+                    });
                 break;
             default:
                 LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
                 return;
         }
-
-        setStatusView(view);
-        setStatusVisibility(View.VISIBLE);
     }
 
-    /**
-     * Sets the view to be shown in the status bar.
-     * <p/>
-     * <p>The status bar is always a fixed height (80dp). Any view passed to this method should fit
-     * that height.
-     */
-    public void setStatusView(View view) {
-        initializeWrapperView();
-
-        mStatusContent.removeAllViews();
-
-        if (view != null) {
-            mStatusContent.addView(view);
-        }
-    }
-
-    private void showMoreInfoDialog(final View triggeringView, String title, String message,
+    private void showMoreInfoDialog(String title, String message,
                                     boolean includeSettingsButton) {
-        triggeringView.setEnabled(false);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this)
             .setIcon(android.R.drawable.ic_dialog_info)
             .setTitle(title)
             .setMessage(message)
-            .setNeutralButton(android.R.string.ok, null)
-            .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override public void onDismiss(DialogInterface dialog) {
-                    triggeringView.setEnabled(true);
-                }
-            });
+            .setNeutralButton(android.R.string.ok, null);
         if (includeSettingsButton) {
             builder.setPositiveButton(R.string.troubleshoot_action_check_settings,
                 new DialogInterface.OnClickListener() {
@@ -401,48 +346,33 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
 
-        final View mStatusView;
-        final TextView mUpdateMessage;
-        final TextView mUpdateAction;
-
-        public UpdateNotificationUi() {
-            mStatusView = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
-            mUpdateMessage = (TextView) mStatusView.findViewById(R.id.status_bar_default_message);
-            mUpdateAction = (TextView) mStatusView.findViewById(R.id.status_bar_default_action);
-        }
+        public UpdateNotificationUi() {}
 
         @Override public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
-            mUpdateMessage.setText(R.string.snackbar_update_available);
-            mUpdateAction.setText(R.string.snackbar_action_download);
-            setStatusView(mStatusView);
-            setStatusVisibility(View.VISIBLE);
-
-            mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View view) {
-                    Utils.logEvent("download_update_button_pressed");
-                    setStatusVisibility(View.GONE);
-                    EventBus.getDefault().post(new DownloadRequestedEvent());
-                }
-            });
+            snackBar(R.string.snackbar_update_available,
+                R.string.snackbar_action_download,
+                new View.OnClickListener() {
+                    @Override public void onClick(View view) {
+                        Utils.logEvent("download_update_button_pressed");
+                        //TODO: programatically dismiss the snackbar message
+                        EventBus.getDefault().post(new DownloadRequestedEvent());
+                    }
+                });
         }
 
         @Override public void showUpdateReadyToInstall(DownloadedUpdateInfo updateInfo) {
-            mUpdateMessage.setText(R.string.snackbar_update_downloaded);
-            mUpdateAction.setText(R.string.snackbar_action_install);
-            setStatusView(mStatusView);
-            setStatusVisibility(View.VISIBLE);
-
-            mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View view) {
-                    Utils.logEvent("install_update_button_pressed");
-                    setStatusVisibility(View.GONE);
-                    EventBus.getDefault().post(new InstallationRequestedEvent());
-                }
-            });
+            snackBar(R.string.snackbar_update_downloaded,
+                R.string.snackbar_action_install,
+                new View.OnClickListener() {
+                    @Override public void onClick(View view) {
+                        Utils.logEvent("install_update_button_pressed");
+                        //TODO: programatically dismiss the snackbar message
+                        EventBus.getDefault().post(new InstallationRequestedEvent());
+                    }
+                });
         }
 
         @Override public void hideSoftwareUpdateNotifications() {
-            setStatusVisibility(View.GONE);
         }
     }
 }
