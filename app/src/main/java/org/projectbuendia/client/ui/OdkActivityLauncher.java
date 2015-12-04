@@ -326,15 +326,15 @@ public class OdkActivityLauncher {
                 throw new IllegalStateException("Xml form is not valid for uri: " + uri);
             }
 
-            // Only locally cache new observations, not new patients.
-            if (patientUuid != null) {
-                updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
-            }
-
             sendFormToServer(patientUuid, xml,
                 new Response.Listener<JSONObject>() {
                     @Override public void onResponse(JSONObject response) {
                         LOG.i("Created new encounter successfully on server" + response.toString());
+                        // Only locally cache new observations, not new patients.
+                        if (patientUuid != null) {
+                            updateObservationCache(patientUuid, savedRoot,
+                                context.getContentResolver(), true /*submitted*/);
+                        }
                         if (!settings.getKeepFormInstancesLocally()) {
                             deleteLocalFormInstances(formIdToDelete);
                         }
@@ -343,6 +343,11 @@ public class OdkActivityLauncher {
                 }, new Response.ErrorListener() {
                     @Override public void onErrorResponse(VolleyError error) {
                         LOG.e(error, "Error submitting form to server");
+                        // Only locally cache new observations, not new patients.
+                        if (patientUuid != null) {
+                            updateObservationCache(patientUuid, savedRoot,
+                                context.getContentResolver(), false /*submitted*/);
+                        }
                         handleSubmitError(error);
                     }
                 });
@@ -524,14 +529,14 @@ public class OdkActivityLauncher {
      * Caches the observation changes locally for a given patient.
      */
     private static void updateObservationCache(String patientUuid, TreeElement savedRoot,
-                                               ContentResolver resolver) {
+                                               ContentResolver resolver, boolean wasSubmitted) {
         ContentValues common = new ContentValues();
         // It's critical that UUID is {@code null} and SUBMITTED is {@code false} for temporary
         // observations, so we make it  explicit here. See {@link Contracts.Observations.UUID}
         // and {@link Contracts.Observations.SUBMITTED}  for details.
         common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
-        common.put(Contracts.Observations.SUBMITTED, false);
+        common.put(Contracts.Observations.SUBMITTED, wasSubmitted);
 
         final DateTime encounterTime = getEncounterAnswerDateTime(savedRoot);
         if(encounterTime == null) return;
