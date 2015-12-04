@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import org.projectbuendia.client.R;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -384,6 +385,8 @@ public class SnackBar {
         /**
          * Used to TreeMap balancing and ordering by priority but also used by TreeMap get() method.
          * It matches the key with the same id disregarding it's priority.
+         * The ordering is Priority first, Most recent second. Most recent messages appear on top
+         * unless exists a higher priority message.
          * @param another The key to compare
          * @return 0 to equal, > 0 to greater than and < 0 to less than.
          */
@@ -394,6 +397,7 @@ public class SnackBar {
             if (idCompare == equal) {
                 result = equal;
             } else {
+                idCompare = -idCompare; //Reverse the order.
                 int priorityCompare = Integer.compare(this.priority, another.priority);
                 if (priorityCompare == equal) {
                     result = idCompare;
