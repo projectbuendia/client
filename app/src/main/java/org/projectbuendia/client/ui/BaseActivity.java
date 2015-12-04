@@ -349,49 +349,31 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
 
-        final View mStatusView;
-        final TextView mUpdateMessage;
-        final TextView mUpdateAction;
-
-        public UpdateNotificationUi() {
-            mStatusView = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
-            mUpdateMessage = (TextView) mStatusView.findViewById(R.id.status_bar_default_message);
-            mUpdateAction = (TextView) mStatusView.findViewById(R.id.status_bar_default_action);
-        }
-
         @Override public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
-            mUpdateMessage.setText(R.string.snackbar_update_available);
-            mUpdateAction.setText(R.string.snackbar_action_download);
-            //setStatusView(mStatusView);
-            //setStatusVisibility(View.VISIBLE);
-
-            mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View view) {
-                    Utils.logEvent("download_update_button_pressed");
-                    //setStatusVisibility(View.GONE);
-                    EventBus.getDefault().post(new DownloadRequestedEvent());
-                }
-            });
+            snackBar(R.string.snackbar_update_available,
+                R.string.snackbar_action_download,
+                new View.OnClickListener() {
+                    @Override public void onClick(View view) {
+                        Utils.logEvent("download_update_button_pressed");
+                        //setStatusVisibility(View.GONE);
+                        EventBus.getDefault().post(new DownloadRequestedEvent());
+                    }
+                });
         }
 
         @Override public void showUpdateReadyToInstall(DownloadedUpdateInfo updateInfo) {
-            mUpdateMessage.setText(R.string.snackbar_update_downloaded);
-            mUpdateAction.setText(R.string.snackbar_action_install);
-            //setStatusView(mStatusView);
-            //setStatusVisibility(View.VISIBLE);
-
-            mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View view) {
-                    Utils.logEvent("install_update_button_pressed");
-                    //setStatusVisibility(View.GONE);
-                    EventBus.getDefault().post(new InstallationRequestedEvent());
-                }
-            });
+            snackBar(R.string.snackbar_update_downloaded,
+                R.string.snackbar_action_install,
+                new View.OnClickListener() {
+                    @Override public void onClick(View view) {
+                        Utils.logEvent("install_update_button_pressed");
+                        //setStatusVisibility(View.GONE);
+                        EventBus.getDefault().post(new InstallationRequestedEvent());
+                    }
+                });
         }
 
-        @Override public void hideSoftwareUpdateNotifications() {
-            //setStatusVisibility(View.GONE);
-        }
+        @Override public void hideSoftwareUpdateNotifications() {}
     }
 }
 
