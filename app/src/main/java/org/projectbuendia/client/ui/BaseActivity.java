@@ -16,9 +16,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -117,38 +119,33 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     // Methods for Displaying SnackBar Messages
-    public int snackBar(String message) {
-        return snackBar.message(message);
+    public void snackBar(@StringRes int message) {
+        snackBar.message(message);
     }
 
-    public int snackBar(String message, int priority) {
-        return snackBar.message(message, priority);
+    public void snackBar(@StringRes int message, int priority) {
+        snackBar.message(message, priority);
     }
 
-    public int snackBar(String message, String actionMessage, View.OnClickListener listener) {
-        return snackBar.message(message, actionMessage, listener, 999);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener listener) {
+        snackBar.message(message, actionMessage, listener, 999);
     }
 
-    public int snackBar(int resourceIdMessage, int resourceIdActionMessage, View.OnClickListener
-        listener) {
-        return snackBar.message(getResources().getString(resourceIdMessage), getResources()
-            .getString(resourceIdActionMessage), listener, 999);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener listener, int priority) {
+        snackBar.message(message, actionMessage, listener, priority);
     }
 
-    public int snackBar(String message, String actionMessage, View.OnClickListener listener,
-                        int priority) {
-        return snackBar.message(message, actionMessage, listener, priority);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener actionOnClick, int priority, boolean isDismissible) {
+        snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
     }
 
-    public int snackBar(String message, String actionMessage, View.OnClickListener actionOnClick,
-                       int priority, boolean isDismissible){
-        return snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
-    }
-
-    public int snackBar(String message, String actionMessage, View.OnClickListener actionOnClick,
-                       int priority, boolean isDismissible, int secondsToTimeOut){
-        return snackBar.message(message, actionMessage, actionOnClick, priority,
-            isDismissible, secondsToTimeOut);
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
+        .OnClickListener actionOnClick, int priority, boolean isDismissible, int secondsToTimeOut) {
+        snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible,
+            secondsToTimeOut);
     }
 
     // Use it to programmatically dismiss a SnackBar message.
@@ -349,13 +346,15 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
 
+        public UpdateNotificationUi() {}
+
         @Override public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
             snackBar(R.string.snackbar_update_available,
                 R.string.snackbar_action_download,
                 new View.OnClickListener() {
                     @Override public void onClick(View view) {
                         Utils.logEvent("download_update_button_pressed");
-                        //setStatusVisibility(View.GONE);
+                        //TODO: programatically dismiss the snackbar message
                         EventBus.getDefault().post(new DownloadRequestedEvent());
                     }
                 });
@@ -367,13 +366,14 @@ public abstract class BaseActivity extends FragmentActivity {
                 new View.OnClickListener() {
                     @Override public void onClick(View view) {
                         Utils.logEvent("install_update_button_pressed");
-                        //setStatusVisibility(View.GONE);
+                        //TODO: programatically dismiss the snackbar message
                         EventBus.getDefault().post(new InstallationRequestedEvent());
                     }
                 });
         }
 
-        @Override public void hideSoftwareUpdateNotifications() {}
+        @Override public void hideSoftwareUpdateNotifications() {
+        }
     }
 }
 
