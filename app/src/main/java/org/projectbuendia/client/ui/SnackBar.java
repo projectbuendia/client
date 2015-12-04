@@ -145,7 +145,7 @@ public class SnackBar {
         mMessageId++;
         MessageKey key = new MessageKey(mMessageId, priority);
         Message value = new Message(key, message, actionMessage, actionOnClick, isDismissible);
-        mMessagesList.put(key, value);
+        addToQueueWithoutDuplicate(key, value);
         adapter.notifyDataSetChanged();
         if (secondsToTimeOut > 0) {
             setTimer(key, secondsToTimeOut);
@@ -155,6 +155,17 @@ public class SnackBar {
         } else {
             show();
         }
+    }
+
+    /**
+     * Checks if a message has duplicate
+     */
+    private void addToQueueWithoutDuplicate(MessageKey key, Message value) {
+        Message existingMessage = getMessage(value.message);
+        if (existingMessage != null) {
+            mMessagesList.remove(existingMessage.key);
+        }
+        mMessagesList.put(key, value);
     }
 
     /**
@@ -207,6 +218,18 @@ public class SnackBar {
             }
         }
         return theKey;
+    }
+
+    private Message getMessage(@StringRes int message){
+        Message theMessage = null;
+        for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
+            MessageKey key = entry.getKey();
+            Message value = entry.getValue();
+            if (value.message == message) {
+                theMessage = value;
+            }
+        }
+        return theMessage;
     }
 
     /**
