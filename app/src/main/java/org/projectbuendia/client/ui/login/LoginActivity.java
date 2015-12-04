@@ -11,22 +11,11 @@
 
 package org.projectbuendia.client.ui.login;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.TranslateAnimation;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -34,7 +23,6 @@ import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.SettingsActivity;
-import org.projectbuendia.client.ui.SnackBar;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -119,81 +107,6 @@ public class LoginActivity extends BaseActivity {
             }
         );
 
-        // This code bellow is only for testing purposes and will be removed
-        final Activity context = this;
-        menu.findItem(R.id.snackbar_show).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    snackBar("Simple Message");
-                    return true;
-                }
-            }
-        );
-
-        menu.findItem(R.id.snackbar_hide).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    snackBar("Wifi is disabled", "Enable", new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            Toast.makeText(
-                                context,
-                                "Enable WIFI NOW!",
-                                Toast.LENGTH_LONG
-                            ).show();
-                        }
-                    });
-                    return true;
-                }
-            }
-        );
-        menu.findItem(R.id.snackbar_priority).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    snackBar("I have priority", "Selfish", new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            Toast.makeText(
-                                context,
-                                "Get out of my way! Me first!",
-                                Toast.LENGTH_LONG
-                            ).show();
-                        }
-                    }, 1);
-                    return true;
-                }
-            }
-        );
-        menu.findItem(R.id.snackbar_dismiss).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    snackBar("Programmatically Dismissible", "How?", new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            Toast.makeText(
-                                context,
-                                "Need to call dismiss() method.",
-                                Toast.LENGTH_LONG
-                            ).show();
-                        }
-                    }, 2, false);
-                    return true;
-                }
-            }
-        );
-        menu.findItem(R.id.snackbar_timer).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    snackBar("I'll be gone in 20 secs", "Cool", new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            Toast.makeText(
-                                context,
-                                "Yeah, Dude!",
-                                Toast.LENGTH_LONG
-                            ).show();
-                        }
-                    }, 3, false, 20);
-                    return true;
-                }
-            }
-        );
         return true;
     }
 
