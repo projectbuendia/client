@@ -28,7 +28,6 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.models.VoidObs;
 
 import java.util.List;
 
@@ -90,15 +89,9 @@ public interface Server {
         Response.Listener<JsonEncounter> successListener,
         Response.ErrorListener errorListener);
 
-    void voidObservation(
-            VoidObs obs,
-            Response.Listener<JsonVoidObs> successListener,
-            Response.ErrorListener errorListener);
-
     void deleteObservation(
             String Uuid,
-            final Response.ErrorListener errorListener);
-
+            Response.ErrorListener errorListener);
 
     /**
      * Get the patient record for an existing patient. Currently we are just using a String-String

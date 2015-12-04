@@ -44,38 +44,12 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
         mBus = bus;
     }
 
-
     @Override protected VoidObsFailedEvent doInBackground(Void... params) {
 
-        RequestFuture<String> future = RequestFuture.newFuture();
+        RequestFuture future = RequestFuture.newFuture();
         mServer.deleteObservation(mVoidObs.Uuid, future);
 
-        try {
-            String test = future.get();
-        } catch (Exception e) {
-
-        }
-
-        /*RequestFuture<JsonVoidObs> future = RequestFuture.newFuture();
-        mServer.voidObservation(mVoidObs, future, future);
-
-        JsonVoidObs json;
-        try {
-            json = future.get();
-        } catch (InterruptedException e) {
-            return new VoidObsFailedEvent(VoidObsFailedEvent.Reason.INTERRUPTED, e);
-        } catch (ExecutionException e) {
-            return new VoidObsFailedEvent(VoidObsFailedEvent.Reason.UNKNOWN_SERVER_ERROR, e);
-        }
-
-        if (json == null) {
-            return new VoidObsFailedEvent(
-                    VoidObsFailedEvent.Reason.CLIENT_ERROR, null);
-        }
-        */
         return null;
 
-
     }
-
 }

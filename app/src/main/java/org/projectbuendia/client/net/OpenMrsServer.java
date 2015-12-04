@@ -26,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonPatientsResponse;
-import org.projectbuendia.client.json.JsonVoidObs;
 import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
@@ -40,7 +39,6 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -267,42 +265,16 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-
     @Override public void deleteObservation(String Uuid,
                                          final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
                 mConnectionDetails,
-                Request.Method.DELETE, "/observations/" + Uuid,
+                Request.Method.DELETE,
+                mConnectionDetails.getRestApiUrl() + "/obs/" + Uuid,
                 null,
                 null,
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request);
-    }
-
-
-    @Override public void voidObservation(VoidObs voidObs,
-                                       final Response.Listener<JsonVoidObs> successListener,
-                                       final Response.ErrorListener errorListener) {
-
-        JSONObject json;
-
-        try {
-            json = voidObs.toJson();
-        } catch (JSONException e) {
-            throw new IllegalArgumentException("Unable to serialize the order to JSON.", e);
-        }
-
-        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-                mConnectionDetails,
-                "/voidobs",
-                json,
-                new Response.Listener<JSONObject>() {
-                    @Override public void onResponse(JSONObject response) {
-                    }
-                },
-                wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
