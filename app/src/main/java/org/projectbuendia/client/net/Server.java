@@ -95,6 +95,11 @@ public interface Server {
             Response.Listener<JsonVoidObs> successListener,
             Response.ErrorListener errorListener);
 
+    void deleteObservation(
+            String Uuid,
+            final Response.ErrorListener errorListener);
+
+
     /**
      * Get the patient record for an existing patient. Currently we are just using a String-String
      * map for parameters, but this is a bit close in implementation details to the old Buendia UI

@@ -16,6 +16,8 @@ import com.android.volley.toolbox.RequestFuture;
 
 import java.util.concurrent.ExecutionException;
 
+import javax.xml.transform.ErrorListener;
+
 public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
 
     private static final Logger LOG = Logger.create();
@@ -45,9 +47,18 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
 
     @Override protected VoidObsFailedEvent doInBackground(Void... params) {
 
-        RequestFuture<JsonVoidObs> future = RequestFuture.newFuture();
+        RequestFuture<String> future = RequestFuture.newFuture();
+        mServer.deleteObservation(mVoidObs.Uuid, future);
 
+        try {
+            String test = future.get();
+        } catch (Exception e) {
+
+        }
+
+        /*RequestFuture<JsonVoidObs> future = RequestFuture.newFuture();
         mServer.voidObservation(mVoidObs, future, future);
+
         JsonVoidObs json;
         try {
             json = future.get();
@@ -61,7 +72,7 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
             return new VoidObsFailedEvent(
                     VoidObsFailedEvent.Reason.CLIENT_ERROR, null);
         }
-
+        */
         return null;
 
 

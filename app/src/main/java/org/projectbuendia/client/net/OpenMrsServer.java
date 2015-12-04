@@ -267,6 +267,21 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
+
+    @Override public void deleteObservation(String Uuid,
+                                         final Response.ErrorListener errorListener) {
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                Request.Method.DELETE, "/observations/" + Uuid,
+                null,
+                null,
+                wrapErrorListener(errorListener)
+        );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+
     @Override public void voidObservation(VoidObs voidObs,
                                        final Response.Listener<JsonVoidObs> successListener,
                                        final Response.ErrorListener errorListener) {
