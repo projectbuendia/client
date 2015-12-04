@@ -56,6 +56,7 @@ public abstract class BaseActivity extends FragmentActivity {
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
     private FrameLayout mStatusContent;
+    private SnackBar snackBar;
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
@@ -110,6 +111,46 @@ public abstract class BaseActivity extends FragmentActivity {
             (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_inner_content);
         mStatusContent =
             (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
+    }
+
+    private void initializeSnackBar() {
+        if ((mWrapperView != null) && (snackBar == null)) {
+            snackBar = new SnackBar(mWrapperView);
+        }
+    }
+
+    // Methods for Displaying SnackBar Messages
+    public int snackBar(String message) {
+        return snackBar.message(message);
+    }
+
+    public int snackBar(String message, int priority) {
+        return snackBar.message(message, priority);
+    }
+
+    public int snackBar(String message, String actionMessage, View.OnClickListener listener) {
+        return snackBar.message(message, actionMessage, listener, 999);
+    }
+
+    public int snackBar(String message, String actionMessage, View.OnClickListener listener,
+                        int priority) {
+        return snackBar.message(message, actionMessage, listener, priority);
+    }
+
+    public int snackBar(String message, String actionMessage, View.OnClickListener actionOnClick,
+                       int priority, boolean isDismissible){
+        return snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
+    }
+
+    public int snackBar(String message, String actionMessage, View.OnClickListener actionOnClick,
+                       int priority, boolean isDismissible, int secondsToTimeOut){
+        return snackBar.message(message, actionMessage, actionOnClick, priority,
+            isDismissible, secondsToTimeOut);
+    }
+
+    // Use it to programmatically dismiss a SnackBar message.
+    public void snackBarDismiss(int id) {
+        snackBar.dismiss(id);
     }
 
     @Override public void setContentView(View view) {
@@ -340,7 +381,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override protected void onResume() {
         super.onResume();
-
+        initializeSnackBar();
         if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
             // If the font scale was changed while this activity was paused, force a refresh.
             restartWithFontScale(sScaleStep);

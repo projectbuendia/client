@@ -63,4 +63,6 @@
     <color name="zone_location_selected_padding">@android:color/black</color>
     <color name="general_condition_selected_padding">@android:color/black</color>
 
+    <!-- SnackBar -->
+    <color name="snackbar_action_pressed">#4C4C4C</color>
 </resources>
