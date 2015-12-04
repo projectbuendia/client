@@ -89,10 +89,10 @@ public class AppModel {
     }
 
     public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
-        String conditions = Contracts.Observations.UUID + " = " + voidObs.Uuid;
+        String conditions = Contracts.Observations.UUID + " = ?";
         ContentValues values = new ContentValues();
-        values.put(Contracts.Observations.VOIDED, "1");
-        mContentResolver.update(Contracts.Observations.CONTENT_URI, values, conditions, null);
+        values.put(Contracts.Observations.VOIDED,1);
+        mContentResolver.update(Contracts.Observations.CONTENT_URI, values, conditions, new String[]{voidObs.Uuid});
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
@@ -140,8 +140,8 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         mTaskFactory.newFetchItemTask(
-            Contracts.Patients.CONTENT_URI, null, new UuidFilter(), uuid,
-            mLoaderSet.patientLoader, bus).execute();
+                Contracts.Patients.CONTENT_URI, null, new UuidFilter(), uuid,
+                mLoaderSet.patientLoader, bus).execute();
     }
 
     /**
@@ -191,7 +191,7 @@ public class AppModel {
      */
     public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
         addEncounter(bus, patient, new Encounter(
-            patient.uuid, null, DateTime.now(), null, new String[] {orderUuid}
+                patient.uuid, null, DateTime.now(), null, new String[]{orderUuid}
         ));
     }
 
@@ -209,6 +209,10 @@ public class AppModel {
         mContentResolver = contentResolver;
         mLoaderSet = loaderSet;
         mTaskFactory = taskFactory;
+    }
+
+    public void voidObservation(CrudEventBus bus, VoidObs obs) {
+        mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
     }
 
     /** A subscriber that handles error events posted to {@link CrudEventBus}es. */

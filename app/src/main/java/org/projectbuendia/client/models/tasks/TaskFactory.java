@@ -77,6 +77,13 @@ public class TaskFactory {
             this, mLoaderSet, mServer, mContentResolver, patient, encounter, bus);
     }
 
+    public VoidObsTask newVoidObsAsyncTask(
+            VoidObs obs, CrudEventBus bus) {
+        return new VoidObsTask(
+                this, mLoaderSet, mServer, mContentResolver, obs, bus);
+    }
+
+
     /** Creates a new {@link AddOrderTask}. */
     public AddOrderTask newAddOrderAsyncTask(
         Order order, CrudEventBus bus) {

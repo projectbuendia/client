@@ -13,12 +13,14 @@ import android.widget.ListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.ui.lists.VoidObsRowAdapter;
 
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 
 public class VoidObservationsDialogFragment extends DialogFragment {
@@ -60,7 +62,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if ((adapter.mCheckedItems != null) && (!adapter.mCheckedItems.isEmpty())) {
-                            //EventBus.getDefault().post(new VoidObservationsRequestEvent(adapter.mCheckedItems));
+                            EventBus.getDefault().post(new VoidObservationsRequestEvent(adapter.mCheckedItems));
                         }
                         dialogInterface.dismiss();
                     }

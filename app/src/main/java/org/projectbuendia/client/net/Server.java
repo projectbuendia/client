@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import com.android.volley.Response;
 
 import org.projectbuendia.client.json.JsonPatientsResponse;
+import org.projectbuendia.client.json.JsonVoidObs;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
@@ -27,6 +28,7 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.VoidObs;
 
 import java.util.List;
 
@@ -87,6 +89,11 @@ public interface Server {
         Encounter encounter,
         Response.Listener<JsonEncounter> successListener,
         Response.ErrorListener errorListener);
+
+    void voidObservation(
+            VoidObs obs,
+            Response.Listener<JsonVoidObs> successListener,
+            Response.ErrorListener errorListener);
 
     /**
      * Get the patient record for an existing patient. Currently we are just using a String-String

@@ -739,7 +739,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             DateTime dateVoided = DateTime.now();
             String voidedBy = App.getUserManager().getActiveUser().id;
             for( String uuid : event.Uuids){
-                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid,dateVoided.toString(),voidedBy));
+                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid,voidedBy,dateVoided.toString()));
             }
         }
 

@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonPatientsResponse;
+import org.projectbuendia.client.json.JsonVoidObs;
 import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
@@ -266,10 +267,17 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    public void voidObservation(VoidObs voidObs,
-                                       final Response.Listener<JsonEncounter> successListener,
+    @Override public void voidObservation(VoidObs voidObs,
+                                       final Response.Listener<JsonVoidObs> successListener,
                                        final Response.ErrorListener errorListener) {
-        JSONObject json = voidObs.toJson();
+
+        JSONObject json;
+
+        try {
+            json = voidObs.toJson();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Unable to serialize the order to JSON.", e);
+        }
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
                 mConnectionDetails,
@@ -277,23 +285,11 @@ public class OpenMrsServer implements Server {
                 json,
                 new Response.Listener<JSONObject>() {
                     @Override public void onResponse(JSONObject response) {
-                        try {
-                            successListener.onResponse(voidobsFromJson(response));
-                        } catch (JSONException e) {
-                            LOG.e(e, "Failed to parse response");
-                            errorListener.onErrorResponse(
-                                    new VolleyError("Failed to parse response", e));
-                        }
                     }
                 },
                 wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
-    }
-
-
-    private JsonEncounter voidobsFromJson(JSONObject object) throws JSONException {
-        return mGson.fromJson(object.toString(), JsonEncounter.class);
     }
 
     private JsonEncounter encounterFromJson(JSONObject object) throws JSONException {

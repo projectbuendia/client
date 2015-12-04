@@ -1,5 +1,6 @@
 package org.projectbuendia.client.models;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class VoidObs {
@@ -14,7 +15,12 @@ public class VoidObs {
         this.DateVoided = dateVoided;
     }
 
-    public JSONObject toJson(){
-        return new JSONObject();
+    public JSONObject toJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("uuid", Uuid);
+        json.put("by", VoidedBy);
+        json.put("date", DateVoided);
+
+        return json;
     }
 }

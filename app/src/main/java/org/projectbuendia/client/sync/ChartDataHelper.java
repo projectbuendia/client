@@ -176,7 +176,9 @@ public class ChartDataHelper {
         List<Obs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-            Observations.PATIENT_UUID + " = ?", new String[] {patientUuid}, null)) {
+            Observations.PATIENT_UUID + " = ? and "
+                    + Observations.VOIDED + " IS NOT ?",
+            new String[] {patientUuid,"1"},null)) {
             while (c.moveToNext()) {
                 results.add(obsFromCursor(c));
             }
@@ -191,10 +193,11 @@ public class ChartDataHelper {
                 Cursor c = mContentResolver.query(
                 Observations.CONTENT_URI,
                 null,
-                Observations.PATIENT_UUID + " = ? and "
+                Observations.VOIDED + " IS NOT ? and "
+                        + Observations.PATIENT_UUID + " = ? and "
                         + Observations.CONCEPT_UUID + " = ?",
-                new String[] {patientUuid,conceptUuid},
-                Observations.ENCOUNTER_MILLIS + " DESC"
+                new String[] {"1",patientUuid,conceptUuid},
+                Observations.ENCOUNTER_MILLIS + " ASC"
         )) {
             while (c.moveToNext()) {
                 ObsRow row = obsrowFromCursor(c);
@@ -207,12 +210,13 @@ public class ChartDataHelper {
     public ArrayList<ObsRow> getPatientObservationsByMillis(String patientUuid, String startMillis,String stopMillis) {
         loadConceptData(ENGLISH_LOCALE);
         ArrayList<ObsRow> results = new ArrayList<>();
-        String conditions = Observations.PATIENT_UUID + " = ? and "
+        String conditions = Observations.VOIDED + " IS NOT ? and "
+                + Observations.PATIENT_UUID + " = ? and "
                 + Observations.ENCOUNTER_MILLIS + " >= ? and "
                 + Observations.ENCOUNTER_MILLIS + " <= ?";
 
-        String[] values = new String[]{patientUuid, startMillis,stopMillis};
-        String order = Observations.ENCOUNTER_MILLIS + " DESC";
+        String[] values = new String[]{"1",patientUuid, startMillis,stopMillis};
+        String order = Observations.ENCOUNTER_MILLIS + " ASC";
 
         try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
         {
@@ -227,13 +231,14 @@ public class ChartDataHelper {
     public ArrayList<ObsRow> getPatientObservationsByConceptMillis(String patientUuid, String conceptUuid, String StartMillis, String StopMillis) {
         loadConceptData(ENGLISH_LOCALE);
         ArrayList<ObsRow> results = new ArrayList<>();
-        String conditions = Observations.PATIENT_UUID + " = ? and "
+        String conditions = Observations.VOIDED + " IS NOT ? and "
+                + Observations.PATIENT_UUID + " = ? and "
                 + Observations.CONCEPT_UUID + " = ? and "
                 + Observations.ENCOUNTER_MILLIS + " >= ? and "
                 + Observations.ENCOUNTER_MILLIS + " <= ?";
 
-        String[] values = new String[]{patientUuid, conceptUuid, StartMillis,StopMillis};
-        String order = Observations.ENCOUNTER_MILLIS + " DESC";
+        String[] values = new String[]{"1",patientUuid, conceptUuid, StartMillis,StopMillis};
+        String order = Observations.ENCOUNTER_MILLIS + " ASC";
 
         try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
         {
@@ -271,7 +276,9 @@ public class ChartDataHelper {
         loadConceptData(locale);
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-            Observations.CONCEPT_UUID + " = ?", new String[] {conceptUuid},
+                Observations.VOIDED + " IS NOT ? and "
+                    + Observations.CONCEPT_UUID + " = ?",
+                new String[] {"1",conceptUuid},
             Observations.ENCOUNTER_MILLIS + " DESC")) {
             Map<String, Obs> result = new HashMap<>();
             while (c.moveToNext()) {
