@@ -536,7 +536,7 @@ public class OdkActivityLauncher {
         // and {@link Contracts.Observations.SUBMITTED}  for details.
         common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
-        common.put(Contracts.Observations.SUBMITTED, wasSubmitted);
+        common.put(Contracts.Observations.SUBMITTED, wasSubmitted? 1 : 0);
 
         final DateTime encounterTime = getEncounterAnswerDateTime(savedRoot);
         if(encounterTime == null) return;
@@ -584,7 +584,7 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Returns a {@link ContentValues} list containing the id concept and the answer valeu from
+     * Returns a {@link ContentValues} list containing the id concept and the answer value from
      * all answered observations. Returns a empty {@link List} if no observation was answered.
      *
      * @param common                        the current content values.
