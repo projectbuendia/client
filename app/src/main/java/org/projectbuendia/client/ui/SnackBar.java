@@ -289,7 +289,7 @@ public class SnackBar {
         }
 
         @Override public int getGroupCount() {
-            return 1;
+            return (mMessagesList.size() == 0) ? 0 : 1;
         }
 
         @Override public int getChildrenCount(int groupPosition) {
