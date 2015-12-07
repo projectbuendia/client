@@ -15,11 +15,6 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
-import org.projectbuendia.client.json.JsonPatientsResponse;
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.json.JsonLocation;
@@ -27,6 +22,10 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 
 import java.util.List;
 
@@ -106,12 +105,6 @@ public interface Server {
      */
     public void updatePatientLocation(String patientId, String newLocationId);
 
-    /** Lists all existing patients. */
-    void listPatients(
-            @Nullable String syncToken,
-            Response.Listener<JsonPatientsResponse> successListener,
-            Response.ErrorListener errorListener);
-
     /** Lists all existing users. */
     public void listUsers(@Nullable String filterQueryTerm,
                           Response.Listener<List<JsonUser>> successListener,
@@ -153,10 +146,6 @@ public interface Server {
     /** Lists all locations. */
     public void listLocations(Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener);
-
-    /** Lists all existing orders. */
-    public void listOrders(Response.Listener<List<JsonOrder>> successListener,
-                           Response.ErrorListener errorListener);
 
     /** Adds an order for a patient. */
     void addOrder(Order order,

@@ -1,3 +1,16 @@
+/*
+ * Copyright 2015 The Project Buendia Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at: http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distrib-
+ * uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+ * OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+ * specific language governing permissions and limitations under the License.
+ */
+
 package org.projectbuendia.client.sync.controllers;
 
 import android.content.ContentProviderClient;
@@ -6,49 +19,30 @@ import android.content.ContentResolver;
 import android.content.SyncResult;
 import android.net.Uri;
 
-import com.android.volley.toolbox.RequestFuture;
-
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.json.JsonPatientsResponse;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.sync.SyncAdapter;
-import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 /**
- * Handles syncing patients. Uses an incremental sync mechanism.
+ * Handles syncing patients. Uses an incremental sync mechanism - see
+ * {@link IncrementalSyncPhaseRunnable} for details.
  */
-// TODO: wrap this class in something that handles the core incremental sync behaviour.
-public class PatientsSyncPhaseRunnable implements SyncPhaseRunnable {
-    private static final Logger LOG = Logger.create();
+public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonPatient> {
 
-    @Override
-    public void sync(ContentResolver contentResolver, SyncResult syncResult, ContentProviderClient providerClient) throws Throwable {
-        String syncToken = SyncAdapter.getLastSyncToken(providerClient, Contracts.Table.PATIENTS);
-        RequestFuture<JsonPatientsResponse> future = RequestFuture.newFuture();
-        App.getServer().listPatients(syncToken, future, future);
-        JsonPatientsResponse response = future.get();
-        ArrayList<ContentProviderOperation> ops = getPatientUpdateOps(response.results, syncResult);
-        providerClient.applyBatch(ops);
-        LOG.i("Finished updating patients (" + ops.size() + " db ops)");
-        contentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
-
-        SyncAdapter.storeSyncToken(providerClient, Contracts.Table.PATIENTS, response.snapshotTime);
+    public PatientsSyncPhaseRunnable() {
+        super(
+                "patients",
+                Contracts.Table.PATIENTS,
+                JsonPatient.class);
     }
 
-    /**
-     * Downloads all patients from the server and produces a list of the operations
-     * needed to bring the local database in sync with the server.
-     */
-    private static ArrayList<ContentProviderOperation> getPatientUpdateOps(
-            JsonPatient[] patients, SyncResult syncResult)
-            throws ExecutionException, InterruptedException {
+    @Override
+    protected ArrayList<ContentProviderOperation> getUpdateOps(
+            JsonPatient[] list, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        for (JsonPatient patient : patients) {
+        for (JsonPatient patient : list) {
             if (patient.voided) {
                 syncResult.stats.numDeletes++;
                 ops.add(makeDeleteOpForPatientUuid(patient.uuid));
@@ -69,5 +63,13 @@ public class PatientsSyncPhaseRunnable implements SyncPhaseRunnable {
     private static ContentProviderOperation makeDeleteOpForPatientUuid(String uuid) {
         Uri uri = Contracts.Patients.CONTENT_URI.buildUpon().appendPath(uuid).build();
         return ContentProviderOperation.newDelete(uri).build();
+    }
+
+    @Override
+    protected void afterSyncFinished(
+            ContentResolver contentResolver,
+            SyncResult syncResult,
+            ContentProviderClient providerClient) throws Throwable {
+        contentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
     }
 }
