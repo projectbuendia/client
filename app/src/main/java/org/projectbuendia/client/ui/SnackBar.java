@@ -359,21 +359,22 @@ public class SnackBar {
             if ((position >= 0) && (position < messagesArray.length)) {
                 final Message m = (Message) messagesArray[position];
                 Resources res = mContext.getResources();
-                String messageString = res.getString(m.message);
-                String actionString = res.getString(m.actionString);
 
+                String messageString = res.getString(m.message);
                 TextView message = (TextView) newView.findViewById(R.id.snackbar_message);
                 message.setText(messageString);
 
                 TextView action = (TextView) newView.findViewById(R.id.snackbar_action);
-                action.setText(actionString);
-
-                // Set action handler
-                if ((m.actionHandler != null) && (!actionString.isEmpty())) {
-                    action.setOnClickListener(m.actionHandler);
-                    action.setVisibility(View.VISIBLE);
+                if (m.actionString != 0) {
+                    String actionString = res.getString(m.actionString);
+                    action.setText(actionString);
+                    // Set action handler
+                    if (m.actionHandler != null) {
+                        action.setOnClickListener(m.actionHandler);
+                        action.setVisibility(View.VISIBLE);
+                    }
                 } else {
-                    action.setVisibility(View.GONE);
+                    action.setVisibility(View.INVISIBLE);
                 }
 
                 // Set Dismiss handler
@@ -386,7 +387,7 @@ public class SnackBar {
                     });
                     dismissButton.setVisibility(View.VISIBLE);
                 } else {
-                    dismissButton.setVisibility(View.GONE);
+                    dismissButton.setVisibility(View.INVISIBLE);
                 }
             }
             return newView;
