@@ -118,7 +118,7 @@ public abstract class BaseActivity extends FragmentActivity {
         }
     }
 
-    // Methods for Displaying SnackBar Messages
+    /** Methods for Displaying SnackBar Messages */
     public void snackBar(@StringRes int message) {
         snackBar.message(message);
     }
@@ -148,8 +148,13 @@ public abstract class BaseActivity extends FragmentActivity {
             secondsToTimeOut);
     }
 
-    // Use it to programmatically dismiss a SnackBar message.
+    /** Use it to programmatically dismiss a SnackBar message. */
     public void snackBarDismiss(int id) {
+        snackBar.dismiss(id);
+    }
+
+    /** Programmatically dismiss multiple messages at once. */
+    public void snackBarDismiss(int[] id) {
         snackBar.dismiss(id);
     }
 
@@ -170,6 +175,17 @@ public abstract class BaseActivity extends FragmentActivity {
     /** Called when the set of troubleshooting actions changes. */
     public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
         if (event.actions.isEmpty()) {
+            snackBarDismiss(new int[]{
+                R.string.troubleshoot_wifi_disabled,
+                R.string.troubleshoot_wifi_disconnected,
+                R.string.troubleshoot_server_auth,
+                R.string.troubleshoot_server_address,
+                R.string.troubleshoot_server_unreachable,
+                R.string.troubleshoot_server_unstable,
+                R.string.troubleshoot_server_not_responding,
+                R.string.troubleshoot_package_server_unreachable,
+                R.string.troubleshoot_package_server_misconfigured
+            });
             return;
         }
 

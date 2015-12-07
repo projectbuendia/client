@@ -187,6 +187,24 @@ public class SnackBar {
     }
 
     /**
+     * Programmatically dismiss multiple messages by an array of ids.
+     * @param id The message id array.
+     */
+    public void dismiss(int[] id) {
+        boolean changed = false;
+        for (int i = 0; i < id.length; i++) {
+            MessageKey key = getKey(id[i]);
+            if (key != null) {
+                mMessagesList.remove(key);
+                changed = true;
+            }
+        }
+        if (changed) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
      * Programmatically dismiss a message by it's id.
      * @param id The message id.
      */
@@ -205,14 +223,15 @@ public class SnackBar {
 
     /**
      * Find message Key by it's id value.
-     * @param id The id of the message.
+     * @param message The StringRes of the message.
      * @return The MessageKey of the message.
      */
-    private MessageKey getKey(int id) {
+    private MessageKey getKey(@StringRes int message) {
         MessageKey theKey = null;
         for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
             MessageKey key = entry.getKey();
-            if (key.id == id) {
+            Message value = entry.getValue();
+            if (value.message == message) {
                 theKey = key;
                 break;
             }
@@ -223,7 +242,6 @@ public class SnackBar {
     private Message getMessage(@StringRes int message){
         Message theMessage = null;
         for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
-            MessageKey key = entry.getKey();
             Message value = entry.getValue();
             if (value.message == message) {
                 theMessage = value;
