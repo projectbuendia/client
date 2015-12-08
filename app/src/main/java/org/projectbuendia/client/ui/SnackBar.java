@@ -208,7 +208,7 @@ public class SnackBar {
      * Programmatically dismiss a message by it's id.
      * @param id The message id.
      */
-    public void dismiss(int id) {
+    public void dismiss(@StringRes int id) {
         dismiss(getKey(id));
     }
 
