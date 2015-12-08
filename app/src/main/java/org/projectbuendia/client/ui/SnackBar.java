@@ -187,10 +187,28 @@ public class SnackBar {
     }
 
     /**
+     * Programmatically dismiss multiple messages by an array of ids.
+     * @param id The message id array.
+     */
+    public void dismiss(int[] id) {
+        boolean changed = false;
+        for (int i = 0; i < id.length; i++) {
+            MessageKey key = getKey(id[i]);
+            if (key != null) {
+                mMessagesList.remove(key);
+                changed = true;
+            }
+        }
+        if (changed) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
      * Programmatically dismiss a message by it's id.
      * @param id The message id.
      */
-    public void dismiss(int id) {
+    public void dismiss(@StringRes int id) {
         dismiss(getKey(id));
     }
 
@@ -205,14 +223,15 @@ public class SnackBar {
 
     /**
      * Find message Key by it's id value.
-     * @param id The id of the message.
+     * @param message The StringRes of the message.
      * @return The MessageKey of the message.
      */
-    private MessageKey getKey(int id) {
+    private MessageKey getKey(@StringRes int message) {
         MessageKey theKey = null;
         for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
             MessageKey key = entry.getKey();
-            if (key.id == id) {
+            Message value = entry.getValue();
+            if (value.message == message) {
                 theKey = key;
                 break;
             }
@@ -223,7 +242,6 @@ public class SnackBar {
     private Message getMessage(@StringRes int message){
         Message theMessage = null;
         for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
-            MessageKey key = entry.getKey();
             Message value = entry.getValue();
             if (value.message == message) {
                 theMessage = value;
@@ -289,7 +307,7 @@ public class SnackBar {
         }
 
         @Override public int getGroupCount() {
-            return 1;
+            return (mMessagesList.size() == 0) ? 0 : 1;
         }
 
         @Override public int getChildrenCount(int groupPosition) {
@@ -359,21 +377,22 @@ public class SnackBar {
             if ((position >= 0) && (position < messagesArray.length)) {
                 final Message m = (Message) messagesArray[position];
                 Resources res = mContext.getResources();
-                String messageString = res.getString(m.message);
-                String actionString = res.getString(m.actionString);
 
+                String messageString = res.getString(m.message);
                 TextView message = (TextView) newView.findViewById(R.id.snackbar_message);
                 message.setText(messageString);
 
                 TextView action = (TextView) newView.findViewById(R.id.snackbar_action);
-                action.setText(actionString);
-
-                // Set action handler
-                if ((m.actionHandler != null) && (!actionString.isEmpty())) {
-                    action.setOnClickListener(m.actionHandler);
-                    action.setVisibility(View.VISIBLE);
+                if (m.actionString != 0) {
+                    String actionString = res.getString(m.actionString);
+                    action.setText(actionString);
+                    // Set action handler
+                    if (m.actionHandler != null) {
+                        action.setOnClickListener(m.actionHandler);
+                        action.setVisibility(View.VISIBLE);
+                    }
                 } else {
-                    action.setVisibility(View.GONE);
+                    action.setVisibility(View.INVISIBLE);
                 }
 
                 // Set Dismiss handler
@@ -386,7 +405,7 @@ public class SnackBar {
                     });
                     dismissButton.setVisibility(View.VISIBLE);
                 } else {
-                    dismissButton.setVisibility(View.GONE);
+                    dismissButton.setVisibility(View.INVISIBLE);
                 }
             }
             return newView;

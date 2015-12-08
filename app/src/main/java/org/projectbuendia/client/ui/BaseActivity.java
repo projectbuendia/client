@@ -118,38 +118,74 @@ public abstract class BaseActivity extends FragmentActivity {
         }
     }
 
-    // Methods for Displaying SnackBar Messages
+    /**
+     * Adds a message to the SnackBar. Priority defaults to 999.
+     * @see "SnackBar Documentation." {@link SnackBar#message(int)}
+     */
     public void snackBar(@StringRes int message) {
         snackBar.message(message);
     }
 
+    /**
+     * Adds a message to the SnackBar with informed priority.
+     * @see "SnackBar Documentation." {@link SnackBar#message(int, int)}
+     */
     public void snackBar(@StringRes int message, int priority) {
         snackBar.message(message, priority);
     }
 
+    /**
+     * Adds a message to the SnackBar. Priority defaults to 999.
+     * @see "SnackBar Documentation." {@link SnackBar#message(int, int, View.OnClickListener, int)}
+     */
     public void snackBar(@StringRes int message, @StringRes int actionMessage, View
         .OnClickListener listener) {
         snackBar.message(message, actionMessage, listener, 999);
     }
 
+    /**
+     * Adds a message to the SnackBar with informed priority.
+     * @see "SnackBar Documentation." {@link SnackBar#message(int, int, View.OnClickListener, int)}
+     */
     public void snackBar(@StringRes int message, @StringRes int actionMessage, View
         .OnClickListener listener, int priority) {
         snackBar.message(message, actionMessage, listener, priority);
     }
 
+    /**
+     * Adds a message to the SnackBar with all parameters except for secondsToTimeout.
+     * @see "SnackBar Documentation."
+     * {@link SnackBar#message(int, int, View.OnClickListener, int, boolean, int)}
+     */
     public void snackBar(@StringRes int message, @StringRes int actionMessage, View
         .OnClickListener actionOnClick, int priority, boolean isDismissible) {
         snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
     }
 
+    /**
+     * Adds a message to the SnackBar with all parameters.
+     * @see "SnackBar Documentation."
+     * {@link SnackBar#message(int, int, View.OnClickListener, int, boolean, int)}
+     */
     public void snackBar(@StringRes int message, @StringRes int actionMessage, View
         .OnClickListener actionOnClick, int priority, boolean isDismissible, int secondsToTimeOut) {
         snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible,
             secondsToTimeOut);
     }
 
-    // Use it to programmatically dismiss a SnackBar message.
-    public void snackBarDismiss(int id) {
+    /**
+     * Use it to programmatically dismiss a SnackBar message.
+     * @param id The @StringRes for the message.
+     */
+    public void snackBarDismiss(@StringRes int id) {
+        snackBar.dismiss(id);
+    }
+
+    /**
+     * Programmatically dismiss multiple messages at once
+     * @param id a @StringRes message Array
+     */
+    public void snackBarDismiss(@StringRes int[] id) {
         snackBar.dismiss(id);
     }
 
@@ -170,6 +206,17 @@ public abstract class BaseActivity extends FragmentActivity {
     /** Called when the set of troubleshooting actions changes. */
     public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
         if (event.actions.isEmpty()) {
+            snackBarDismiss(new int[]{
+                R.string.troubleshoot_wifi_disabled,
+                R.string.troubleshoot_wifi_disconnected,
+                R.string.troubleshoot_server_auth,
+                R.string.troubleshoot_server_address,
+                R.string.troubleshoot_server_unreachable,
+                R.string.troubleshoot_server_unstable,
+                R.string.troubleshoot_server_not_responding,
+                R.string.troubleshoot_package_server_unreachable,
+                R.string.troubleshoot_package_server_misconfigured
+            });
             return;
         }
 

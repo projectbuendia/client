@@ -30,10 +30,10 @@ public class SnackBarTest extends FunctionalTestCase {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                activity.snackBar("This is a SnackBar Test!");
+                activity.snackBar(R.string.troubleshoot_wifi_disabled);
             }
         });
-        expectVisibleSoon(viewWithText("This is a SnackBar Test!"));
+        expectVisibleSoon(viewWithText("Wifi is disabled"));
     }
 
     public void testSnackBarWithAction() {
@@ -42,13 +42,13 @@ public class SnackBarTest extends FunctionalTestCase {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                activity.snackBar("This is a SnackBar with action Test!", "Action", mockListener);
+                activity.snackBar(R.string.troubleshoot_wifi_disabled, R.string.troubleshoot_wifi_disabled_action_enable, mockListener);
             }
         });
-        expectVisibleSoon(viewWithText("This is a SnackBar with action Test!"));
+        expectVisibleSoon(viewWithText("Wifi is disabled"));
         expectVisible(viewWithId(R.id.snackbar_action));
-        expectVisible(viewThat(hasText("Action")));
-        click(viewWithText("Action"));
+        expectVisible(viewThat(hasText("Enable")));
+        click(viewWithText("Enable"));
         verify(mockListener).onClick(any(View.class));
     }
 
@@ -57,15 +57,15 @@ public class SnackBarTest extends FunctionalTestCase {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                activity.snackBar("This is a Dismissible SnackBar Test!", null, null, 1, true, 0);
+                activity.snackBar(R.string.troubleshoot_wifi_disabled, 0, null, 1, true, 0);
             }
         });
-        expectVisibleSoon(viewWithText("This is a Dismissible SnackBar Test!"));
+        expectVisibleSoon(viewWithText("Wifi is disabled"));
         expectVisible(viewWithId(R.id.snackbar_dismiss));
         click(viewWithId(R.id.snackbar_dismiss));
 
         try {
-            viewWithText("This is a Dismissible SnackBar Test!").check(matches(isDisplayed()));
+            viewWithText("Wifi is disabled").check(matches(isDisplayed()));
             Assert.fail("Should have thrown NoMatchingViewException.");
         } catch(NoMatchingViewException e) {}
 
