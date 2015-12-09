@@ -11,12 +11,18 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
+import android.app.Activity;
+import android.support.annotation.IdRes;
+import android.view.View;
+
+import org.hamcrest.Matcher;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormat;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
@@ -61,5 +67,42 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         expectVisibleWithin(399999, viewThat(
             hasAncestorThat(withId(R.id.attribute_admission_days)),
             hasText("Day 1")));
+    }
+
+    public void testPatientCreation() throws Throwable {
+        inUserLoginGoToPatientCreation();
+        screenshot("Test Start");
+        String id = generateId();
+        // Populate the patient info
+        screenshot("Before Patient Populated");
+        String given = "Giv" + id.substring(id.length() - 2);
+        String family = "Fam" + id.substring(id.length() - 4, id.length() - 2);
+        type(id, viewWithId(R.id.patient_id));
+        type(given, viewWithId(R.id.patient_given_name));
+        type(family, viewWithId(R.id.patient_family_name));
+        type(4, viewWithId(R.id.patient_age_years));
+        type(2, viewWithId(R.id.patient_age_months));
+        boolean female = Integer.parseInt(id) % 2 == 0;
+        @IdRes int sexButton = female ? R.id.patient_sex_female : R.id.patient_sex_male;
+        click(viewWithId(sexButton));
+        screenshot("After Patient Populated");
+        click(viewWithText("OK"));
+        waitForProgressFragment();
+        screenshot("On Patient Chart");
+        Activity activity = getCurrentActivity();
+
+        // Now read off the patient info and check that it's all there.
+        // It should all be in the action bar.
+        assertTrue("Expected PatientChartActivity, got something else",
+                activity instanceof PatientChartActivity);
+        expectVisible(viewThat(hasTextContaining(id + ".")));
+        expectVisible(viewThat(hasTextContaining(given)));
+        expectVisible(viewThat(hasTextContaining(family)));
+        if (female) {
+            expectVisible(viewThat(hasTextContaining("F,")));
+        } else {
+            expectVisible(viewThat(hasTextContaining("M,")));
+        }
+        expectVisible(viewThat(hasTextContaining((4 * 12 + 2) + " mo")));
     }
 }
