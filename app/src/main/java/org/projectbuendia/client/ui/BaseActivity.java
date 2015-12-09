@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -27,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -37,6 +35,9 @@ import org.projectbuendia.client.updater.AvailableUpdateInfo;
 import org.projectbuendia.client.updater.DownloadedUpdateInfo;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
@@ -206,17 +207,7 @@ public abstract class BaseActivity extends FragmentActivity {
     /** Called when the set of troubleshooting actions changes. */
     public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
         if (event.actions.isEmpty()) {
-            snackBarDismiss(new int[]{
-                R.string.troubleshoot_wifi_disabled,
-                R.string.troubleshoot_wifi_disconnected,
-                R.string.troubleshoot_server_auth,
-                R.string.troubleshoot_server_address,
-                R.string.troubleshoot_server_unreachable,
-                R.string.troubleshoot_server_unstable,
-                R.string.troubleshoot_server_not_responding,
-                R.string.troubleshoot_package_server_unreachable,
-                R.string.troubleshoot_package_server_misconfigured
-            });
+            displayProblemSolvedMessage();
             return;
         }
 
@@ -336,6 +327,38 @@ public abstract class BaseActivity extends FragmentActivity {
             default:
                 LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
                 return;
+        }
+    }
+
+    private void displayProblemSolvedMessage() {
+        Map<Integer, Integer> troubleshootingMessages = new HashMap<>();
+        troubleshootingMessages.put(R.string.troubleshoot_wifi_disabled,
+            R.string.troubleshoot_wifi_disabled_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_wifi_disconnected,
+            R.string.troubleshoot_wifi_disconnected_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_server_auth,
+            R.string.troubleshoot_server_auth_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_server_address,
+            R.string.troubleshoot_server_address_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_server_unreachable,
+            R.string.troubleshoot_server_unreachable_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_server_unstable,
+            R.string.troubleshoot_server_unstable_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_server_not_responding,
+            R.string.troubleshoot_server_not_responding_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_package_server_unreachable,
+            R.string.troubleshoot_package_server_unreachable_solved);
+        troubleshootingMessages.put(R.string.troubleshoot_package_server_misconfigured,
+            R.string.troubleshoot_package_server_misconfigured_solved);
+
+        for (Map.Entry<Integer, Integer> entry : troubleshootingMessages.entrySet()) {
+            int message = entry.getKey();
+            int solution = entry.getValue();
+            SnackBar.Message snackBarMessage = snackBar.getMessage(message);
+            if (snackBarMessage != null) {
+                snackBar.dismiss(snackBarMessage.key);
+                snackBar.message(solution, 0, null, 999, true, 10);
+            }
         }
     }
 

@@ -226,7 +226,7 @@ public class SnackBar {
      * @param message The StringRes of the message.
      * @return The MessageKey of the message.
      */
-    private MessageKey getKey(@StringRes int message) {
+    public MessageKey getKey(@StringRes int message) {
         MessageKey theKey = null;
         for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
             MessageKey key = entry.getKey();
@@ -239,7 +239,7 @@ public class SnackBar {
         return theKey;
     }
 
-    private Message getMessage(@StringRes int message){
+    public Message getMessage(@StringRes int message){
         Message theMessage = null;
         for (Map.Entry<MessageKey, Message> entry : mMessagesList.entrySet()) {
             Message value = entry.getValue();
@@ -417,7 +417,7 @@ public class SnackBar {
      * The key of the {@code TreeMap} used to storing the messages.
      * Helps the {@code TreeMap} maintain it's balance using priority as a parameter.
      */
-    private class MessageKey implements Comparable<MessageKey> {
+    public class MessageKey implements Comparable<MessageKey> {
 
         protected int id;
         protected int priority;
@@ -457,7 +457,7 @@ public class SnackBar {
     /**
      * The message information.
      */
-    private class Message {
+    public class Message {
 
         protected MessageKey key;
         protected int message;
