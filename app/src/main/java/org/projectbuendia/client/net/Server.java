@@ -147,10 +147,6 @@ public interface Server {
     public void listLocations(Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener);
 
-    /** Lists all existing orders. */
-    public void listOrders(Response.Listener<List<JsonOrder>> successListener,
-                           Response.ErrorListener errorListener);
-
     /** Adds or updates an order. */
     void saveOrder(Order order,
                    Response.Listener<JsonOrder> successListener,
