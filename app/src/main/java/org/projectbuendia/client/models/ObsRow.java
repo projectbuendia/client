@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 public class ObsRow implements Parcelable {
 
     public String uuid;
+    public String day;
     public String time;
-    public String conceptType;
     public String conceptName;
     public @Nullable String value;
     public @Nullable String valueName;
@@ -24,8 +24,13 @@ public class ObsRow implements Parcelable {
                @Nullable String Value,
                @Nullable String ValueName) {
         conceptName = ConceptName;
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("MM/dd/yyyy HH:MM");
-        time =  fmt.print(new DateTime(Millis));
+
+        DateTimeFormatter fmtDay = DateTimeFormat.forPattern("dd MMM yyyy");
+        day =  fmtDay.print(new DateTime(Millis));
+
+        DateTimeFormatter fmtTime = DateTimeFormat.forPattern("HH:MM");
+        time =  fmtTime.print(new DateTime(Millis));
+
         uuid = Uuid;
         value = Value;
         valueName = ValueName;
@@ -45,6 +50,7 @@ public class ObsRow implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         uuid = in.readString();
+        day = in.readString();
         time = in.readString();
         conceptName = in.readString();
         value = in.readString();
@@ -56,6 +62,7 @@ public class ObsRow implements Parcelable {
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(uuid);
+        dest.writeString(day);
         dest.writeString(time);
         dest.writeString(conceptName);
         dest.writeString(value);

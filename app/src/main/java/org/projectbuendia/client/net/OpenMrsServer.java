@@ -273,7 +273,7 @@ public class OpenMrsServer implements Server {
                 mConnectionDetails.getRestApiUrl() + "/obs/" + Uuid,
                 null,
                 null,
-                wrapErrorListener(errorListener)
+                errorListener
         );
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);

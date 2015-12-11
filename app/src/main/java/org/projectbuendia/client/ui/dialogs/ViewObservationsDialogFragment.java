@@ -9,21 +9,28 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CompoundButton;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Switch;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import org.projectbuendia.client.models.ObsRow;
-import org.projectbuendia.client.ui.lists.ObsRowAdapter;
+import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
 
 public class ViewObservationsDialogFragment extends DialogFragment {
 
     private LayoutInflater mInflater;
+    private ExpandableListAdapter listAdapter;
+    private ExpandableListView expListView;
+    private List<String> listDataHeader;
+    private HashMap<String, List<String>> listDataChild;
 
     public static ViewObservationsDialogFragment newInstance(ArrayList<ObsRow> observations) {
         Bundle args = new Bundle();
@@ -38,14 +45,66 @@ public class ViewObservationsDialogFragment extends DialogFragment {
         mInflater = LayoutInflater.from(getActivity());
     }
 
+    private boolean isExistingHeader(String check){
+
+        for (String header:listDataHeader)
+            if (header.equals(check)) return true;
+
+        return false;
+    }
+
+    private void prepareData(ArrayList<ObsRow> rows){
+
+        List<String> child;
+        String verifyTitle;
+        String Title;
+
+        listDataHeader = new ArrayList<>();
+        listDataChild = new HashMap<String, List<String>>();
+
+        for (ObsRow row: rows) {
+
+            Title = row.conceptName + " " + row.day;
+
+            if(!isExistingHeader(Title)){
+                listDataHeader.add(Title);
+            }
+
+        }
+
+        for (String header: listDataHeader){
+
+            child = new ArrayList<>();
+
+            for (ObsRow row: rows){
+
+                verifyTitle = row.conceptName + " " + row.day;
+
+                if (verifyTitle.equals(header)){
+                    child.add(row.time + " " + row.valueName);
+                }
+            }
+
+            if (!child.isEmpty()){
+                listDataChild.put(header, child);
+            }
+        }
+    }
+
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.view_observations_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
         final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList("obsrows");
-        ObsRowAdapter adapter = new ObsRowAdapter(App.getInstance().getApplicationContext(), obsrows);
-        ListView listView = (ListView) fragment.findViewById(R.id.lvObs);
-        listView.setAdapter(adapter);
+        prepareData(obsrows);
+
+        listAdapter = new ExpandableObsRowAdapter(App.getInstance().getApplicationContext(), listDataHeader, listDataChild);
+        ExpandableListView listView = (ExpandableListView) fragment.findViewById(R.id.lvObs);
+        listView.setAdapter(listAdapter);
+
+        for(int i=0; i < listAdapter.getGroupCount(); i++)
+            listView.expandGroup(i);
+
         LinearLayout listFooterView = (LinearLayout)mInflater.inflate(R.layout.void_observations_switch, null);
         listView.addFooterView(listFooterView);
         final Switch swVoid = (Switch) fragment.findViewById(R.id.swVoid);

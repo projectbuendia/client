@@ -736,10 +736,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(VoidObservationsRequestEvent event) {
-            DateTime dateVoided = DateTime.now();
-            String voidedBy = App.getUserManager().getActiveUser().id;
             for( String uuid : event.Uuids){
-                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid,voidedBy,dateVoided.toString()));
+                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
             }
             updatePatientObsUi();
         }
