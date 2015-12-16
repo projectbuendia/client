@@ -222,7 +222,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             ((WifiManager) getSystemService(Context.WIFI_SERVICE)).setWifiEnabled
                                 (true);
                         }
-                    });
+                    }, 995);
                 break;
             case CONNECT_WIFI:
                 snackBar(R.string.troubleshoot_wifi_disconnected,
@@ -231,7 +231,7 @@ public abstract class BaseActivity extends FragmentActivity {
                         @Override public void onClick(View view) {
                             startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
                         }
-                    });
+                    }, 996);
                 break;
             case CHECK_SERVER_AUTH:
                 snackBar(R.string.troubleshoot_server_auth,
@@ -265,7 +265,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                 getString(R.string.troubleshoot_server_unreachable_details),
                                 true);
                         }
-                    });
+                    }, 997);
                 break;
             case CHECK_SERVER_SETUP:
                 snackBar(R.string.troubleshoot_server_unstable,
@@ -309,7 +309,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                 getString(R.string.troubleshoot_update_server_unreachable_details),
                                 true);
                         }
-                    });
+                    }, 998);
                 break;
             case CHECK_PACKAGE_SERVER_CONFIGURATION:
                 snackBar(R.string.troubleshoot_package_server_misconfigured,
