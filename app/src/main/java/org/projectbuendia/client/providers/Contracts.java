@@ -165,9 +165,11 @@ public class Contracts {
 
         /**
          * UUID is populated if the record was retrieved from the server. If this observation was
-         * written locally as a cached value from a submitted XForm, UUID is null. As part of every
-         * successful sync, all observations with null UUIDs are deleted, on the basis that an
-         * authoritative version for each has been obtained from the server.
+         * written locally as a cached value, UUID is null. But the cached record may not be
+         * submitted to the server yet. So SUBMITTED flags if it was submitted indeed. As part of
+         * every successful sync, all observations with **null UUIDs and SUBMITTED == true** are
+         * deleted, on the basis that an authoritative version for each has been obtained from the
+         * server.
          */
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
@@ -175,6 +177,7 @@ public class Contracts {
         String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch
         String CONCEPT_UUID = "concept_uuid";
         String VALUE = "value";  // concept value or order UUID
+        String SUBMITTED = "submitted"; //indicates if the record was already submitted to the server
     }
 
     public interface Orders {

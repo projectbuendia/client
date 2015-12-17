@@ -276,30 +276,36 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Convenient shared code for handling an ODK activity result.
+     * Convenient shared code for handling an ODK activity result. This method submits the ODK form
+     * to the server and saves it locally, whether or not the form was successfully submitted.
+     * If an error occurs over the submission, the form is kept to be resubmitted later.
+     * See link(TODO:which?). This method returns {@code true} if it tries to send a request
+     * to the server, successfully or not. If any error occurs before submission, it returns
+     * {@code false}.
+     *
      * @param context           the application context
      * @param settings          the application settings
      * @param patientUuid       the patient to add an observation to, or null to create a new patient
      * @param resultCode        the result code sent from Android activity transition
      * @param data              the incoming intent
      */
-    public static void sendOdkResultToServer(
+    public static boolean sendOdkResultToServer(
         final Context context,
         final AppSettings settings,
         @Nullable final String patientUuid,
         int resultCode,
         Intent data) {
 
-        if(isActivityCanceled(resultCode, data)) return;
+        if(isActivityCanceled(resultCode, data)) return false;
 
         Uri uri = data.getData();
-        if(!validateContentUriType(context, uri, CONTENT_ITEM_TYPE)) return;
+        if(!validateContentUriType(context, uri, CONTENT_ITEM_TYPE)) return false;
 
         final String filePath = getFormFilePath(context, uri);
-        if(!validateFilePath(filePath, uri)) return;
+        if(!validateFilePath(filePath, uri)) return false;
 
         final Long formIdToDelete = getIdToDeleteAfterUpload(context, uri);
-        if(!validateIdToDeleteAfterUpload(formIdToDelete, uri)) return;
+        if(!validateIdToDeleteAfterUpload(formIdToDelete, uri)) return false;
 
         // Temporary code for messing about with xform instance, reading values.
         byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
@@ -308,16 +314,18 @@ public class OdkActivityLauncher {
         final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
 
         final String xml = readFromPath(filePath);
-        if(!validateXml(xml)) return;
+        if(!validateXml(xml)) return false;
+
+        // Only locally cache new observations, not new patients.
+        if (patientUuid != null) {
+            updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
+            return false;
+        }
 
         sendFormToServer(patientUuid, xml,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
                     LOG.i("Created new encounter successfully on server" + response.toString());
-                    // Only locally cache new observations, not new patients.
-                    if (patientUuid != null) {
-                        updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
-                    }
                     if (!settings.getKeepFormInstancesLocally()) {
                         deleteLocalFormInstances(formIdToDelete);
                     }
@@ -329,6 +337,7 @@ public class OdkActivityLauncher {
                     handleSubmitError(error);
                 }
             });
+        return true;
     }
 
     /**
@@ -567,10 +576,12 @@ public class OdkActivityLauncher {
     private static void updateObservationCache(String patientUuid, TreeElement savedRoot,
                                                ContentResolver resolver) {
         ContentValues common = new ContentValues();
-        // It's critical that UUID is {@code null} for temporary observations, so we make it
-        // explicit here. See {@link Contracts.Observations.UUID} for details.
+        // It's critical that UUID is {@code null} and SUBMITTED is {@code false} for temporary
+        // observations, so we make it  explicit here. See {@link Contracts.Observations.UUID}
+        // and {@link Contracts.Observations.SUBMITTED}  for details.
         common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
+        common.put(Contracts.Observations.SUBMITTED, false);
 
         final DateTime encounterTime = getEncounterAnswerDateTime(savedRoot);
         if(encounterTime == null) return;
