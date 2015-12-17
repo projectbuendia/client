@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
@@ -206,158 +207,165 @@ public abstract class BaseActivity extends FragmentActivity {
 
     /** Called when the set of troubleshooting actions changes. */
     public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
+        if (event.solvedIssue != null) {
+            displayProblemSolvedMessage(event.solvedIssue);
+        }
+
         if (event.actions.isEmpty()) {
-            displayProblemSolvedMessage();
             return;
         }
 
-        TroubleshootingAction troubleshootingAction = event.actions.iterator().next();
-
-        switch (troubleshootingAction) {
-            case ENABLE_WIFI:
-                snackBar(R.string.troubleshoot_wifi_disabled,
-                    R.string.troubleshoot_wifi_disabled_action_enable,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            ((WifiManager) getSystemService(Context.WIFI_SERVICE)).setWifiEnabled
-                                (true);
-                        }
-                    }, 995);
-                break;
-            case CONNECT_WIFI:
-                snackBar(R.string.troubleshoot_wifi_disconnected,
-                    R.string.troubleshoot_wifi_disconnected_action_connect,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-                        }
-                    }, 996);
-                break;
-            case CHECK_SERVER_AUTH:
-                snackBar(R.string.troubleshoot_server_auth,
-                    R.string.troubleshoot_server_auth_action_check,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            SettingsActivity.start(BaseActivity.this);
-                        }
-                    });
-                break;
-            case CHECK_SERVER_CONFIGURATION:
-                snackBar(R.string.troubleshoot_server_address,
-                    R.string.troubleshoot_server_address_action_check,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            SettingsActivity.start(BaseActivity.this);
-                        }
-                    });
-                break;
-            case CHECK_SERVER_REACHABILITY:
-                snackBar(R.string.troubleshoot_server_unreachable,
-                    R.string.troubleshoot_action_more_info,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            // TODO: Display the actual server URL that couldn't be reached in
-                            // this message. This will require that injection be hooked up
-                            // through to
-                            // this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_unreachable),
-                                getString(R.string.troubleshoot_server_unreachable_details),
-                                true);
-                        }
-                    }, 997);
-                break;
-            case CHECK_SERVER_SETUP:
-                snackBar(R.string.troubleshoot_server_unstable,
-                    R.string.troubleshoot_action_more_info,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            // TODO: Display the actual server URL that couldn't be reached in
-                            // this message. This will require that injection be hooked up
-                            // through to
-                            // this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_unstable),
-                                getString(R.string.troubleshoot_server_unstable_details),
-                                false);
-                        }
-                    });
-                break;
-            case CHECK_SERVER_STATUS:
-                snackBar(R.string.troubleshoot_server_not_responding,
-                    R.string.troubleshoot_action_more_info,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            // TODO: Display the actual server URL that couldn't be reached in
-                            // this message. This will require that injection be hooked up
-                            // through to
-                            // this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_not_responding),
-                                getString(R.string.troubleshoot_server_not_responding_details),
-                                false);
-                        }
-                    });
-                break;
-            case CHECK_PACKAGE_SERVER_REACHABILITY:
-                snackBar(R.string.troubleshoot_package_server_unreachable,
-                    R.string.troubleshoot_action_more_info,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_package_server_unreachable),
-                                getString(R.string.troubleshoot_update_server_unreachable_details),
-                                true);
-                        }
-                    }, 998);
-                break;
-            case CHECK_PACKAGE_SERVER_CONFIGURATION:
-                snackBar(R.string.troubleshoot_package_server_misconfigured,
-                    R.string.troubleshoot_action_more_info,
-                    new View.OnClickListener() {
-                        @Override public void onClick(View view) {
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_package_server_misconfigured),
-                                getString(
-                                    R.string.troubleshoot_update_server_misconfigured_details),
-                                true);
-                        }
-                    });
-                break;
-            default:
-                LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
-                return;
+        for (TroubleshootingAction troubleshootingAction: event.actions) {
+            switch (troubleshootingAction) {
+                case ENABLE_WIFI:
+                    snackBar(R.string.troubleshoot_wifi_disabled,
+                        R.string.troubleshoot_wifi_disabled_action_enable,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                ((WifiManager) getSystemService(Context.WIFI_SERVICE)).setWifiEnabled
+                                    (true);
+                            }
+                        }, 995, false);
+                    break;
+                case CONNECT_WIFI:
+                    snackBar(R.string.troubleshoot_wifi_disconnected,
+                        R.string.troubleshoot_wifi_disconnected_action_connect,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                            }
+                        }, 996);
+                    break;
+                case CHECK_SERVER_AUTH:
+                    snackBar(R.string.troubleshoot_server_auth,
+                        R.string.troubleshoot_server_auth_action_check,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                SettingsActivity.start(BaseActivity.this);
+                            }
+                        });
+                    break;
+                case CHECK_SERVER_CONFIGURATION:
+                    snackBar(R.string.troubleshoot_server_address,
+                        R.string.troubleshoot_server_address_action_check,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                SettingsActivity.start(BaseActivity.this);
+                            }
+                        });
+                    break;
+                case CHECK_SERVER_REACHABILITY:
+                    snackBar(R.string.troubleshoot_server_unreachable,
+                        R.string.troubleshoot_action_more_info,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                // TODO: Display the actual server URL that couldn't be reached in
+                                // this message. This will require that injection be hooked up
+                                // through to
+                                // this inner class, which may be complicated.
+                                showMoreInfoDialog(
+                                    getString(R.string.troubleshoot_server_unreachable),
+                                    getString(R.string.troubleshoot_server_unreachable_details),
+                                    true);
+                            }
+                        }, 997);
+                    break;
+                case CHECK_SERVER_SETUP:
+                    snackBar(R.string.troubleshoot_server_unstable,
+                        R.string.troubleshoot_action_more_info,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                // TODO: Display the actual server URL that couldn't be reached in
+                                // this message. This will require that injection be hooked up
+                                // through to
+                                // this inner class, which may be complicated.
+                                showMoreInfoDialog(
+                                    getString(R.string.troubleshoot_server_unstable),
+                                    getString(R.string.troubleshoot_server_unstable_details),
+                                    false);
+                            }
+                        });
+                    break;
+                case CHECK_SERVER_STATUS:
+                    snackBar(R.string.troubleshoot_server_not_responding,
+                        R.string.troubleshoot_action_more_info,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                // TODO: Display the actual server URL that couldn't be reached in
+                                // this message. This will require that injection be hooked up
+                                // through to
+                                // this inner class, which may be complicated.
+                                showMoreInfoDialog(
+                                    getString(R.string.troubleshoot_server_not_responding),
+                                    getString(R.string.troubleshoot_server_not_responding_details),
+                                    false);
+                            }
+                        });
+                    break;
+                case CHECK_PACKAGE_SERVER_REACHABILITY:
+                    snackBar(R.string.troubleshoot_package_server_unreachable,
+                        R.string.troubleshoot_action_more_info,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                showMoreInfoDialog(
+                                    getString(R.string.troubleshoot_package_server_unreachable),
+                                    getString(R.string.troubleshoot_update_server_unreachable_details),
+                                    true);
+                            }
+                        }, 998);
+                    break;
+                case CHECK_PACKAGE_SERVER_CONFIGURATION:
+                    snackBar(R.string.troubleshoot_package_server_misconfigured,
+                        R.string.troubleshoot_action_more_info,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                showMoreInfoDialog(
+                                    getString(R.string.troubleshoot_package_server_misconfigured),
+                                    getString(
+                                        R.string.troubleshoot_update_server_misconfigured_details),
+                                    true);
+                            }
+                        });
+                    break;
+                default:
+                    LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
+                    return;
+            }
         }
     }
 
-    private void displayProblemSolvedMessage() {
-        Map<Integer, Integer> troubleshootingMessages = new HashMap<>();
-        troubleshootingMessages.put(R.string.troubleshoot_wifi_disabled,
-            R.string.troubleshoot_wifi_disabled_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_wifi_disconnected,
-            R.string.troubleshoot_wifi_disconnected_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_server_auth,
-            R.string.troubleshoot_server_auth_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_server_address,
-            R.string.troubleshoot_server_address_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_server_unreachable,
-            R.string.troubleshoot_server_unreachable_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_server_unstable,
-            R.string.troubleshoot_server_unstable_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_server_not_responding,
-            R.string.troubleshoot_server_not_responding_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_package_server_unreachable,
-            R.string.troubleshoot_package_server_unreachable_solved);
-        troubleshootingMessages.put(R.string.troubleshoot_package_server_misconfigured,
-            R.string.troubleshoot_package_server_misconfigured_solved);
+    private void displayProblemSolvedMessage(HealthIssue solvedIssue) {
+        Map<HealthIssue, Integer[]> troubleshootingMessages = new HashMap<>();
 
-        for (Map.Entry<Integer, Integer> entry : troubleshootingMessages.entrySet()) {
-            int message = entry.getKey();
-            int solution = entry.getValue();
-            SnackBar.Message snackBarMessage = snackBar.getMessage(message);
+        troubleshootingMessages.put(HealthIssue.WIFI_DISABLED, new Integer[] {R.string
+            .troubleshoot_wifi_disabled, R.string.troubleshoot_wifi_disabled_solved});
+        troubleshootingMessages.put(HealthIssue.WIFI_NOT_CONNECTED, new Integer[] {R.string
+            .troubleshoot_wifi_disconnected, R.string.troubleshoot_wifi_disconnected_solved});
+        troubleshootingMessages.put(HealthIssue.SERVER_AUTHENTICATION_ISSUE, new Integer[] {R
+            .string.troubleshoot_server_auth, R.string.troubleshoot_server_auth_solved});
+        troubleshootingMessages.put(HealthIssue.SERVER_CONFIGURATION_INVALID, new Integer[] {R
+            .string.troubleshoot_server_address, R.string.troubleshoot_server_address_solved});
+        troubleshootingMessages.put(HealthIssue.SERVER_HOST_UNREACHABLE, new Integer[] {R.string
+            .troubleshoot_server_unreachable, R.string.troubleshoot_server_unreachable_solved});
+        troubleshootingMessages.put(HealthIssue.SERVER_INTERNAL_ISSUE, new Integer[] {R.string
+            .troubleshoot_server_unstable, R.string.troubleshoot_server_unstable_solved});
+        troubleshootingMessages.put(HealthIssue.SERVER_NOT_RESPONDING, new Integer[] {R.string
+            .troubleshoot_server_not_responding, R.string
+            .troubleshoot_server_not_responding_solved});
+        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE, new Integer[] {R
+            .string.troubleshoot_package_server_unreachable, R.string
+            .troubleshoot_package_server_unreachable_solved});
+        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_INDEX_NOT_FOUND, new Integer[] {R
+            .string.troubleshoot_package_server_misconfigured, R.string
+            .troubleshoot_package_server_misconfigured_solved});
+
+        Integer[] messages = troubleshootingMessages.get(solvedIssue);
+
+        if (messages != null) {
+            SnackBar.Message snackBarMessage = snackBar.getMessage(messages[0]);
             if (snackBarMessage != null) {
                 snackBar.dismiss(snackBarMessage.key);
-                snackBar.message(solution, 0, null, 999, true, 10);
+                snackBar.message(messages[1], 0, null, 994, true, 10);
             }
         }
     }

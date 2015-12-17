@@ -13,14 +13,18 @@ package org.projectbuendia.client.events.diagnostics;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 
 /** An event bus event indicating that the set of troubleshooting actions required has changed. */
 public class TroubleshootingActionsChangedEvent {
 
     public final ImmutableSet<TroubleshootingAction> actions;
+    public final HealthIssue solvedIssue;
 
-    public TroubleshootingActionsChangedEvent(ImmutableSet<TroubleshootingAction> actions) {
+    public TroubleshootingActionsChangedEvent(ImmutableSet<TroubleshootingAction> actions,
+                                              HealthIssue solvedIssue) {
         this.actions = actions;
+        this.solvedIssue = solvedIssue;
     }
 }
