@@ -453,6 +453,7 @@ public class OdkActivityLauncher {
         connection.postXformInstance(patientUuid, xml, successListener, errorListener);
     }
 
+
     private static void handleSubmitError(VolleyError error) {
         SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
 
