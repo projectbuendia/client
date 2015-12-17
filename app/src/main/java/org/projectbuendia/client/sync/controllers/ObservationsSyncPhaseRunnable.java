@@ -30,6 +30,8 @@ import java.util.ArrayList;
 
 import static java.lang.String.format;
 
+import static java.lang.String.format;
+
 /**
  * Handles syncing observations. Uses an incremental sync mechanism - see
  * {@link IncrementalSyncPhaseRunnable} for details.

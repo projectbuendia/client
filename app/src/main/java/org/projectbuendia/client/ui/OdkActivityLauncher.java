@@ -622,11 +622,7 @@ public class OdkActivityLauncher {
     }
 
     /**
-     <<<<<<< HEAD
      * Returns a {@link ContentValues} list containing the id concept and the answer value from
-     =======
-     * Returns a {@link ContentValues} list containing the id concept and the answer valeu from
-     >>>>>>> e299aa54862b5a954f23fb252adc8ce9c9092ab0
      * all answered observations. Returns a empty {@link List} if no observation was answered.
      *
      * @param common                        the current content values.
