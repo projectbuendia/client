@@ -43,6 +43,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
+import org.projectbuendia.client.exception.ValidationException;
 import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
@@ -300,19 +301,19 @@ public class OdkActivityLauncher {
 
         try {
             final Uri uri = data.getData();
-            if(!context.getContentResolver().getType(uri).equals(CONTENT_ITEM_TYPE)) {
-                throw new IllegalStateException("Tried to load a content URI of the wrong type: "
+            if(!validateContentUriType(context, uri, CONTENT_ITEM_TYPE)) {
+                throw new ValidationException("Tried to load a content URI of the wrong type: "
                     + uri);
             }
 
             final String filePath = getFormFilePath(context, uri);
-            if(filePath == null) {
-                throw new IllegalStateException("No file path for form instance: " + uri);
+            if(!validateFilePath(filePath, uri)) {
+                throw new ValidationException("No file path for form instance: " + uri);
             }
 
             final Long formIdToDelete = getIdToDeleteAfterUpload(context, uri);
-            if(formIdToDelete == null) {
-                throw new IllegalStateException("No id to delete for after upload: " + uri);
+            if(!validateIdToDeleteAfterUpload(formIdToDelete, uri)) {
+                throw new ValidationException("No id to delete for after upload: " + uri);
             }
 
             // Temporary code for messing about with xform instance, reading values.
@@ -322,8 +323,8 @@ public class OdkActivityLauncher {
             final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
 
             final String xml = readFromPath(filePath);
-            if(xml == null) {
-                throw new IllegalStateException("Xml form is not valid for uri: " + uri);
+            if(!validateXml(xml)) {
+                throw new ValidationException("Xml form is not valid for uri: " + uri);
             }
 
             sendFormToServer(patientUuid, xml,
@@ -352,12 +353,49 @@ public class OdkActivityLauncher {
                     }
                 });
             return true;
-        } catch(IllegalStateException ise) {
-            LOG.e(ise.getMessage());
+        } catch(ValidationException ve) {
+            LOG.e(ve.getMessage());
             EventBus.getDefault().post(
                 new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
             return false;
         }
+    }
+
+    /**
+     * Checks if the file path is valid. If so, it returns {@code true}. Otherwise returns
+     * {@code false}
+     * @param filePath               the file path to be validated
+     * @param uri                    the form uri
+     */
+    private static boolean validateFilePath(String filePath, Uri uri) {
+        return filePath != null;
+    }
+
+    /** Checks if the URI has a valid type. If so, returns {@code true}. Otherwise,  returns {@code false}
+     * @param context           the application context
+     * @param uri               the URI to be checked
+     * @param validType         the accepted type for URI
+     */
+    private static boolean validateContentUriType(final Context context, final Uri uri,
+                                                  final String validType) {
+        return context.getContentResolver().getType(uri).equals(validType);
+    }
+
+    /**
+     * Validates the id to be deleted after the form upload. If id is valid, it returns
+     * {@code true}. Otherwise, returns {@code false}.
+     * @param id           the id to be deleted
+     * @param uri               the URI containing the id to be deleted
+     */
+    private static boolean validateIdToDeleteAfterUpload(final Long id, Uri uri) {
+        return id != null;
+    }
+
+    /**
+     * Validates the xml. Returns {@code true} if it is valid. Otherwise, returns {@code false}
+     */
+    private static boolean validateXml(String xml) {
+        return xml != null;
     }
 
     private static void deleteLocalFormInstances(Long formIdToDelete) {
@@ -404,7 +442,7 @@ public class OdkActivityLauncher {
             int columnIndex = instanceCursor.getColumnIndex(_ID);
             if (columnIndex == -1) return  null;
 
-           return instanceCursor.getLong(columnIndex);
+            return instanceCursor.getLong(columnIndex);
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
@@ -452,7 +490,6 @@ public class OdkActivityLauncher {
             new OpenMrsXformsConnection(App.getConnectionDetails());
         connection.postXformInstance(patientUuid, xml, successListener, errorListener);
     }
-
 
     private static void handleSubmitError(VolleyError error) {
         SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
@@ -585,7 +622,11 @@ public class OdkActivityLauncher {
     }
 
     /**
+     <<<<<<< HEAD
      * Returns a {@link ContentValues} list containing the id concept and the answer value from
+     =======
+     * Returns a {@link ContentValues} list containing the id concept and the answer valeu from
+     >>>>>>> e299aa54862b5a954f23fb252adc8ce9c9092ab0
      * all answered observations. Returns a empty {@link List} if no observation was answered.
      *
      * @param common                        the current content values.
@@ -593,8 +634,8 @@ public class OdkActivityLauncher {
      * @param xformConceptIdsAccumulator    the set to store the form concept ids found
      */
     private static List<ContentValues> getAnsweredObservations(ContentValues common,
-                                                                    TreeElement savedRoot,
-                                                                    Set<Integer> xformConceptIdsAccumulator) {
+                                                               TreeElement savedRoot,
+                                                               Set<Integer> xformConceptIdsAccumulator) {
         List<ContentValues> answeredObservations = new ArrayList<>();
         for (int i = 0; i < savedRoot.getNumChildren(); i++) {
             TreeElement group = savedRoot.getChildAt(i);
@@ -654,7 +695,7 @@ public class OdkActivityLauncher {
 
         IAnswerData dateTimeValue = encounterDatetime.getValue();
         try {
-         return  ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
+            return  ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
         } catch (IllegalArgumentException e) {
             LOG.e("Could not parse datetime" + dateTimeValue.getValue());
             return null;
