@@ -58,6 +58,9 @@ public class ChartRenderer {
 
         @android.webkit.JavascriptInterface
         void onOrderCellPressed(String orderUuid, long startMillis);
+
+        @android.webkit.JavascriptInterface
+        void onPageUnload(int scrollX, int scrollY);
     }
 
     public ChartRenderer(WebView view, Resources resources) {
