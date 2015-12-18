@@ -184,8 +184,13 @@
 
   $(document).ready(function() {
     $('#grid').freezeHeader({top: true, left: true});
-    $('#grid-scroller').scrollLeft(1e6);
   });
+
+  $( window ).unload(function() {
+      console.log("Window => v=" + $(window).scrollTop() + " - h=" + $(window).scrollLeft());
+      console.log("grid-scroller => v=" + $('#grid-scroller').scrollTop() + " - h=" + $('#grid-scroller').scrollLeft());
+      controller.onPageUnload($('#grid-scroller').scrollLeft(), $(window).scrollTop());
+    });
 </script>
 </body>
 </html>
