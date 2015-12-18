@@ -337,27 +337,56 @@ public abstract class BaseActivity extends FragmentActivity {
     private void displayProblemSolvedMessage(HealthIssue solvedIssue) {
         Map<HealthIssue, Integer[]> troubleshootingMessages = new HashMap<>();
 
-        troubleshootingMessages.put(HealthIssue.WIFI_DISABLED, new Integer[] {R.string
-            .troubleshoot_wifi_disabled, R.string.troubleshoot_wifi_disabled_solved});
-        troubleshootingMessages.put(HealthIssue.WIFI_NOT_CONNECTED, new Integer[] {R.string
-            .troubleshoot_wifi_disconnected, R.string.troubleshoot_wifi_disconnected_solved});
-        troubleshootingMessages.put(HealthIssue.SERVER_AUTHENTICATION_ISSUE, new Integer[] {R
-            .string.troubleshoot_server_auth, R.string.troubleshoot_server_auth_solved});
-        troubleshootingMessages.put(HealthIssue.SERVER_CONFIGURATION_INVALID, new Integer[] {R
-            .string.troubleshoot_server_address, R.string.troubleshoot_server_address_solved});
-        troubleshootingMessages.put(HealthIssue.SERVER_HOST_UNREACHABLE, new Integer[] {R.string
-            .troubleshoot_server_unreachable, R.string.troubleshoot_server_unreachable_solved});
-        troubleshootingMessages.put(HealthIssue.SERVER_INTERNAL_ISSUE, new Integer[] {R.string
-            .troubleshoot_server_unstable, R.string.troubleshoot_server_unstable_solved});
-        troubleshootingMessages.put(HealthIssue.SERVER_NOT_RESPONDING, new Integer[] {R.string
-            .troubleshoot_server_not_responding, R.string
-            .troubleshoot_server_not_responding_solved});
-        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE, new Integer[] {R
-            .string.troubleshoot_package_server_unreachable, R.string
-            .troubleshoot_package_server_unreachable_solved});
-        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_INDEX_NOT_FOUND, new Integer[] {R
-            .string.troubleshoot_package_server_misconfigured, R.string
-            .troubleshoot_package_server_misconfigured_solved});
+        // The troubleShootingMessages Map have the issue as the key and an integer array as
+        // value. This array is composed by:
+        // 0 - The message string id triggered by the issue.
+        // 1 - The new message string id (solved message).
+        // 2 - The timeout count for the solved message.
+        troubleshootingMessages.put(HealthIssue.WIFI_DISABLED, new Integer[] {
+            R.string.troubleshoot_wifi_disabled,
+            R.string.troubleshoot_wifi_disabled_solved,
+            10
+        });
+        troubleshootingMessages.put(HealthIssue.WIFI_NOT_CONNECTED, new Integer[] {
+            R.string.troubleshoot_wifi_disconnected,
+            R.string.troubleshoot_wifi_disconnected_solved,
+            10
+        });
+        troubleshootingMessages.put(HealthIssue.SERVER_AUTHENTICATION_ISSUE, new Integer[] {
+            R.string.troubleshoot_server_auth,
+            R.string.troubleshoot_server_auth_solved,
+            10
+        });
+        troubleshootingMessages.put(HealthIssue.SERVER_CONFIGURATION_INVALID, new Integer[] {
+            R.string.troubleshoot_server_address,
+            R.string.troubleshoot_server_address_solved,
+            10
+        });
+        troubleshootingMessages.put(HealthIssue.SERVER_HOST_UNREACHABLE, new Integer[] {
+            R.string.troubleshoot_server_unreachable,
+            R.string.troubleshoot_server_unreachable_solved,
+            10
+        });
+        troubleshootingMessages.put(HealthIssue.SERVER_INTERNAL_ISSUE, new Integer[] {
+            R.string.troubleshoot_server_unstable,
+            R.string.troubleshoot_server_unstable_solved,
+            10
+        });
+        troubleshootingMessages.put(HealthIssue.SERVER_NOT_RESPONDING, new Integer[] {
+            R.string.troubleshoot_server_not_responding,
+            R.string.troubleshoot_server_not_responding_solved,
+            10
+        });
+        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE, new Integer[] {
+            R.string.troubleshoot_package_server_unreachable,
+            R.string.troubleshoot_package_server_unreachable_solved,
+            5
+        });
+        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_INDEX_NOT_FOUND, new Integer[] {
+            R.string.troubleshoot_package_server_misconfigured,
+            R.string.troubleshoot_package_server_misconfigured_solved,
+            10
+        });
 
         Integer[] messages = troubleshootingMessages.get(solvedIssue);
 
@@ -365,7 +394,7 @@ public abstract class BaseActivity extends FragmentActivity {
             SnackBar.Message snackBarMessage = snackBar.getMessage(messages[0]);
             if (snackBarMessage != null) {
                 snackBar.dismiss(snackBarMessage.key);
-                snackBar.message(messages[1], 0, null, 994, true, 10);
+                snackBar.message(messages[1], 0, null, 994, true, messages[2]);
             }
         }
     }
