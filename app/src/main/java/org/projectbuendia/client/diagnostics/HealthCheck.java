@@ -41,7 +41,7 @@ public abstract class HealthCheck {
     private final Object mLock = new Object();
 
     protected final Application mApplication;
-    protected final Set<HealthIssue> mActiveIssues;
+    protected final HashSet<HealthIssue> mActiveIssues;
 
     @Nullable private EventBus mHealthEventBus;
 
@@ -161,5 +161,14 @@ public abstract class HealthCheck {
         if (wasIssueActive) {
             eventBus.post(healthIssue.resolved);
         }
+    }
+
+    protected final boolean hasIssue(HealthIssue healthIssue) {
+        for (HealthIssue issue : mActiveIssues) {
+            if (issue.equals(healthIssue)){
+                return true;
+            }
+        }
+        return false;
     }
 }
