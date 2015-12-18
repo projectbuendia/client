@@ -187,10 +187,8 @@
   });
 
   $( window ).unload(function() {
-      console.log("Window => v=" + $(window).scrollTop() + " - h=" + $(window).scrollLeft());
-      console.log("grid-scroller => v=" + $('#grid-scroller').scrollTop() + " - h=" + $('#grid-scroller').scrollLeft());
-      controller.onPageUnload($('#grid-scroller').scrollLeft(), $(window).scrollTop());
-    });
+    controller.onPageUnload($('#grid-scroller').scrollLeft(), $(window).scrollTop());
+  });
 </script>
 </body>
 </html>

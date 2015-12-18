@@ -89,7 +89,6 @@ public class ChartRenderer {
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
-
         String html = new GridHtmlGenerator(chart, latestObservations, observations, orders,
                                             admissionDate, firstSymptomsDate).getHtml();
         mView.loadDataWithBaseURL("file:///android_asset/", html,
