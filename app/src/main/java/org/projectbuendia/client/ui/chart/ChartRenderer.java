@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
@@ -59,6 +58,9 @@ public class ChartRenderer {
 
         @android.webkit.JavascriptInterface
         void onOrderCellPressed(String orderUuid, long startMillis);
+
+        @android.webkit.JavascriptInterface
+        void onPageUnload(int scrollX, int scrollY);
     }
 
     public ChartRenderer(WebView view, Resources resources) {
@@ -87,16 +89,6 @@ public class ChartRenderer {
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
-
-        // Remembering scroll position and applying it after the chart finished loading.
-        final int x = mView.getScrollX();
-        final int y = mView.getScrollY();
-        mView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                view.scrollTo(x, y);
-            }
-        });
-
         String html = new GridHtmlGenerator(chart, latestObservations, observations, orders,
                                             admissionDate, firstSymptomsDate).getHtml();
         mView.loadDataWithBaseURL("file:///android_asset/", html,
