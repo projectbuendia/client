@@ -234,7 +234,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             @Override public void onClick(View view) {
                                 startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
                             }
-                        }, 996);
+                        }, 996, false);
                     break;
                 case CHECK_SERVER_AUTH:
                     snackBar(R.string.troubleshoot_server_auth,
@@ -243,7 +243,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             @Override public void onClick(View view) {
                                 SettingsActivity.start(BaseActivity.this);
                             }
-                        });
+                        }, 999, false);
                     break;
                 case CHECK_SERVER_CONFIGURATION:
                     snackBar(R.string.troubleshoot_server_address,
@@ -252,7 +252,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             @Override public void onClick(View view) {
                                 SettingsActivity.start(BaseActivity.this);
                             }
-                        });
+                        }, 999, false);
                     break;
                 case CHECK_SERVER_REACHABILITY:
                     snackBar(R.string.troubleshoot_server_unreachable,
@@ -268,7 +268,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                     getString(R.string.troubleshoot_server_unreachable_details),
                                     true);
                             }
-                        }, 997);
+                        }, 997, false);
                     break;
                 case CHECK_SERVER_SETUP:
                     snackBar(R.string.troubleshoot_server_unstable,
@@ -284,7 +284,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                     getString(R.string.troubleshoot_server_unstable_details),
                                     false);
                             }
-                        });
+                        }, 999, false);
                     break;
                 case CHECK_SERVER_STATUS:
                     snackBar(R.string.troubleshoot_server_not_responding,
@@ -300,7 +300,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                     getString(R.string.troubleshoot_server_not_responding_details),
                                     false);
                             }
-                        });
+                        }, 999, false);
                     break;
                 case CHECK_PACKAGE_SERVER_REACHABILITY:
                     snackBar(R.string.troubleshoot_package_server_unreachable,
@@ -312,7 +312,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                     getString(R.string.troubleshoot_update_server_unreachable_details),
                                     true);
                             }
-                        }, 998);
+                        }, 998, false);
                     break;
                 case CHECK_PACKAGE_SERVER_CONFIGURATION:
                     snackBar(R.string.troubleshoot_package_server_misconfigured,
@@ -325,7 +325,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                         R.string.troubleshoot_update_server_misconfigured_details),
                                     true);
                             }
-                        });
+                        }, 999, false);
                     break;
                 default:
                     LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
