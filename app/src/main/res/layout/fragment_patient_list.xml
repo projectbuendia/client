@@ -10,7 +10,7 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -30,4 +30,11 @@
             android:childDivider="#00000000"
             android:dividerHeight="2dp"/>
     </android.support.v4.widget.SwipeRefreshLayout>
-</LinearLayout>
+
+    <TextView android:id="@+id/empty"
+              style="@style/text.huge"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="@string/no_patients"
+              android:gravity="center_vertical|center_horizontal"/>
+</FrameLayout>
