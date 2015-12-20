@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
@@ -107,21 +108,32 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
         LinearLayout listFooterView = (LinearLayout)mInflater.inflate(R.layout.void_observations_switch, null);
         listView.addFooterView(listFooterView);
-        final Switch swVoid = (Switch) fragment.findViewById(R.id.swVoid);
+
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        if (swVoid.isChecked()){
-                            VoidObservationsDialogFragment.newInstance(obsrows)
-                                    .show(getActivity().getSupportFragmentManager(), null);
-                        }
                         dialogInterface.dismiss();
                     }
                 })
                 .setView(fragment);
-        return builder.create();
+
+        final Dialog dialog = builder.create();
+
+        final Switch swVoid = (Switch) fragment.findViewById(R.id.swVoid);
+        swVoid.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (swVoid.isChecked()){
+                    VoidObservationsDialogFragment.newInstance(obsrows)
+                            .show(getActivity().getSupportFragmentManager(), null);
+                }
+                dialog.dismiss();
+            }
+        });
+
+        return dialog;
     }
 
     @Override

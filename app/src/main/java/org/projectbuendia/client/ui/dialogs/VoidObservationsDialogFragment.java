@@ -112,7 +112,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
-                        if ((listAdapter. mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
+                        if ((listAdapter.mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
                             EventBus.getDefault().post(new VoidObservationsRequestEvent(listAdapter.mCheckedItems));
                         }
 
