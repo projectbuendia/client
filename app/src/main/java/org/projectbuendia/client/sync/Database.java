@@ -122,7 +122,6 @@ public class Database extends SQLiteOpenHelper {
             + "encounter_millis INTEGER,"
             + "concept_uuid INTEGER,"
             + "value STRING,"
-            + "submitted INTEGER,"
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
         SCHEMAS.put(Table.ORDERS, ""
@@ -161,6 +160,12 @@ public class Database extends SQLiteOpenHelper {
         SCHEMAS.put(Table.SYNC_TOKENS, ""
             + "table_name TEXT PRIMARY KEY NOT NULL,"
             + "sync_token TEXT NOT NULL");
+
+        SCHEMAS.put(Table.UNSYNC_TOKENS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "patient_uuid TEXT,"
+            + "xml");
+
     }
 
     public Database(Context context) {

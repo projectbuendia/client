@@ -162,6 +162,18 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                         Table.SYNC_TOKENS,
                         Contracts.SyncTokens.TABLE_NAME));
 
+        registry.registerDelegate(
+            Contracts.UnsyncForms.CONTENT_URI.getPath(),
+            new GroupProviderDelegate(
+                Contracts.UnsyncForms.ITEM_CONTENT_TYPE,
+                Table.UNSYNC_TOKENS));
+        registry.registerDelegate(
+            Contracts.UnsyncForms.CONTENT_URI.getPath() + "/*",
+            new ItemProviderDelegate(
+                Contracts.UnsyncForms.GROUP_CONTENT_TYPE,
+                Table.UNSYNC_TOKENS,
+                Contracts.UnsyncForms.UUID));
+
         return registry;
     }
 }

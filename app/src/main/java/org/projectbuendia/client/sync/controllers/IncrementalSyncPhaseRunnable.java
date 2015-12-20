@@ -85,7 +85,12 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
     public final void sync(ContentResolver contentResolver, SyncResult syncResult,
         ContentProviderClient providerClient) throws Throwable {
 
-        beforeSyncStarted(contentResolver, syncResult, providerClient);
+        boolean okToProceedSync = beforeSyncStarted(contentResolver, syncResult, providerClient);
+
+        if(!okToProceedSync) {
+            LOG.w("Skipping synchronization for %s", this.getClass().getName());
+            return;
+        }
 
         String syncToken = SyncAdapter.getLastSyncToken(providerClient, dbTable);
 
@@ -119,11 +124,14 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
 
     // Optional callbacks
 
-    /** Called before any records have been synced from the server. */
-    protected void beforeSyncStarted(
+    /**
+     * Called before any records have been synced from the server. Returns {@code true}
+     * if the sync phase is good to proceed. Otherwise, returns {@code false} to skip the sync
+     * phase */
+    protected boolean   beforeSyncStarted(
             ContentResolver contentResolver,
             SyncResult syncResult,
-            ContentProviderClient providerClient) throws Throwable {}
+            ContentProviderClient providerClient) throws Throwable {return true;}
 
     /**
      * Called after all records have been synced from the server, even if the number of synced

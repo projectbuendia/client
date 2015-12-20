@@ -44,11 +44,13 @@ import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.exception.ValidationException;
+import org.projectbuendia.client.models.UnsyncForm;
 import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
 import org.projectbuendia.client.net.OpenMrsXformsConnection;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.UnsyncForms;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -280,9 +282,9 @@ public class OdkActivityLauncher {
      * Convenient shared code for handling an ODK activity result. This method submits the ODK form
      * to the server and saves it locally, whether or not the form was successfully submitted.
      * If an error occurs over the submission, the form is kept to be resubmitted later.
-     * See link(TODO:which?). This method returns {@code true} if it tries to send a request
-     * to the server, successfully or not. If any error occurs before submission, it returns
-     * {@code false}.
+     * (See {@link #updateObservationCache(String, TreeElement, ContentResolver)})
+     * This method returns {@code true} if it tries to send a request to the server, successfully
+     * or not. If any error occurs before submission, it returns {@code false}.
      *
      * @param context           the application context
      * @param settings          the application settings
@@ -327,15 +329,16 @@ public class OdkActivityLauncher {
                 throw new ValidationException("Xml form is not valid for uri: " + uri);
             }
 
+            // Always cache new observations, whether or not it is successfully sent to the server.
+            if (patientUuid != null) {
+                updateObservationCache(patientUuid, savedRoot,
+                    context.getContentResolver());
+            }
+
             sendFormToServer(patientUuid, xml,
                 new Response.Listener<JSONObject>() {
                     @Override public void onResponse(JSONObject response) {
                         LOG.i("Created new encounter successfully on server" + response.toString());
-                        // Only locally cache new observations, not new patients.
-                        if (patientUuid != null) {
-                            updateObservationCache(patientUuid, savedRoot,
-                                context.getContentResolver(), true /*submitted*/);
-                        }
                         if (!settings.getKeepFormInstancesLocally()) {
                             deleteLocalFormInstances(formIdToDelete);
                         }
@@ -344,11 +347,7 @@ public class OdkActivityLauncher {
                 }, new Response.ErrorListener() {
                     @Override public void onErrorResponse(VolleyError error) {
                         LOG.e(error, "Error submitting form to server");
-                        // Only locally cache new observations, not new patients.
-                        if (patientUuid != null) {
-                            updateObservationCache(patientUuid, savedRoot,
-                                context.getContentResolver(), false /*submitted*/);
-                        }
+                        saveUnsentForm(patientUuid, xml, context.getContentResolver());
                         handleSubmitError(error);
                     }
                 });
@@ -491,6 +490,52 @@ public class OdkActivityLauncher {
         connection.postXformInstance(patientUuid, xml, successListener, errorListener);
     }
 
+    /** Tries to submit to the server all unsent forms. Returns {@code true} if there are no more
+     * unsent forms. Otherwise returns {@code false}.
+     */
+    public static final boolean resendFormsToServer(final ContentResolver contentResolver) {
+        final boolean hasUnsubmittedForms[] = new boolean[]{false};
+        for(final UnsyncForm unsyncForm : getUnsyncForms(contentResolver)) {
+            sendFormToServer(unsyncForm.patientUuid, unsyncForm.xml,
+                new Response.Listener<JSONObject>() {
+                    @Override public void onResponse(JSONObject response) {
+                        LOG.i("Created new encounter successfully on server. " + response.toString());
+                        deleteUnsyncForm(unsyncForm.uuid, contentResolver);
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override public void onErrorResponse(VolleyError error) {
+                        //Just log it and flag as not synchronized, this form is already persisted.
+                        LOG.e(error, format("Error resubmitting %s form to server ", unsyncForm.uuid));
+                        hasUnsubmittedForms[0] = true;
+                    }
+                });
+        }
+        return !hasUnsubmittedForms[0];
+    }
+
+    public static void deleteUnsyncForm(final String uuid, final ContentResolver contentResolver) {
+        LOG.i("Removing the unsynchronized form from the db");
+        contentResolver.delete(UnsyncForms.CONTENT_URI, format("%s='%s'", UnsyncForms.UUID, uuid),
+            null);
+    }
+
+    /** Returns all local forms which were NOT submitted to the server yet*/
+    public static List<UnsyncForm> getUnsyncForms(final ContentResolver contentResolver) {
+        try (Cursor cursor = contentResolver.query(UnsyncForms.CONTENT_URI,
+            new String[]{UnsyncForms.UUID, UnsyncForms.PATIENT_UUID, UnsyncForms.XML}, null, null,
+            null)) {
+            List<UnsyncForm> unsyncForms = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                unsyncForms.add(UnsyncForm.builder()
+                    .setUuid(Utils.getString(cursor, UnsyncForms.UUID, null))
+                    .setPatientUuid(Utils.getString(cursor, UnsyncForms.PATIENT_UUID, ""))
+                    .setXml( Utils.getString(cursor, UnsyncForms.XML, "")).build());
+            }
+            return unsyncForms;
+        }
+    }
+
     private static void handleSubmitError(VolleyError error) {
         SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
 
@@ -545,7 +590,7 @@ public class OdkActivityLauncher {
 
     /**
      * Returns the xml form as a String from the path. If for any reason, the file couldn't be read,
-     * it returns <code>null</code>
+     * it returns {@code null}
      * @param path      the path to be read
      */
     private static String readFromPath(String path) {
@@ -564,17 +609,36 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Caches the observation changes locally for a given patient.
+     * Saves the forms which couldn't be submitted to server into the local db. So that, when the
+     * application connects to server again, it can try to resend the form again. Note that this
+     * method just save the data as it is required to be resend to the server. Please, check
+     * {@link #updateObservationCache} to see how the observation itself is saved into db.
+     * The {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable}
+     * will check if there are unsent observations, and if is the case, it will try to resend it
+     * prior to pull new ones (See {@link #resendFormsToServer}).
+     */
+    private static void saveUnsentForm(String patientUuid, String xml, ContentResolver resolver) {
+        resolver.insert(Contracts.UnsyncForms.CONTENT_URI,
+            UnsyncForm.builder().setUuid(UUID.randomUUID().toString()).setPatientUuid(patientUuid)
+                .setXml(xml).build().toContentValues());
+    }
+
+    /**
+     * Caches the observation changes locally for a given patient. Saving the observations locally
+     * allows them to be used by users even it the application is connected to the server at that
+     * time. In this case, when the app becomes online and synchronizes with the server, this
+     * temporary observations are deleted. Please, see {@link #saveUnsentForm} and
+     * {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable} for more
+     * details.
      */
     private static void updateObservationCache(String patientUuid, TreeElement savedRoot,
-                                               ContentResolver resolver, boolean wasSubmitted) {
+                                               ContentResolver resolver) {
         ContentValues common = new ContentValues();
         // It's critical that UUID is {@code null} and SUBMITTED is {@code false} for temporary
         // observations, so we make it  explicit here. See {@link Contracts.Observations.UUID}
         // and {@link Contracts.Observations.SUBMITTED}  for details.
         common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
-        common.put(Contracts.Observations.SUBMITTED, wasSubmitted? 1 : 0);
 
         final DateTime encounterTime = getEncounterAnswerDateTime(savedRoot);
         if(encounterTime == null) return;

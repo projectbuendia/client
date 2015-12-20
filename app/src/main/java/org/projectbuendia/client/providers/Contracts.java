@@ -36,7 +36,8 @@ public class Contracts {
         ORDERS("orders"),
         PATIENTS("patients"),
         USERS("users"),
-        SYNC_TOKENS("sync_tokens");
+        SYNC_TOKENS("sync_tokens"),
+        UNSYNC_TOKENS("unsync_forms");
 
         public String name;
 
@@ -165,11 +166,13 @@ public class Contracts {
 
         /**
          * UUID is populated if the record was retrieved from the server. If this observation was
-         * written locally as a cached value, UUID is null. But the cached record may not be
-         * submitted to the server yet. So SUBMITTED flags if it was submitted indeed. As part of
-         * every successful sync, all observations with **null UUIDs and SUBMITTED == true** are
-         * deleted, on the basis that an authoritative version for each has been obtained from the
-         * server.
+         * written locally as a cached value from a submitted XForm, UUID is null. For further
+         * details please check
+         * {@link org.projectbuendia.client.ui.OdkActivityLauncher#updateObservationCache}.
+         * As part of every successful sync, all observations with null UUIDs are  deleted,
+         * on the basis that an authoritative version for each has been obtained from the server.
+         * For further details, please check
+         * {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable}
          */
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
@@ -177,7 +180,6 @@ public class Contracts {
         String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch
         String CONCEPT_UUID = "concept_uuid";
         String VALUE = "value";  // concept value or order UUID
-        String SUBMITTED = "submitted"; //indicates if the record was already submitted to the server
     }
 
     public interface Orders {
@@ -238,6 +240,16 @@ public class Contracts {
 
         String LOCATION_UUID = "location_uuid";
         String PATIENT_COUNT = "patient_count";
+    }
+
+    public interface UnsyncForms {
+        Uri CONTENT_URI = buildContentUri("unsync-forms");
+        String GROUP_CONTENT_TYPE = buildGroupType("unsync-form");
+        String ITEM_CONTENT_TYPE = buildItemType("unsync-form");
+
+        String UUID = "uuid";
+        String PATIENT_UUID = "patient_uuid";
+        String XML = "xml";
     }
 
     public static Uri buildContentUri(String path) {

@@ -24,13 +24,10 @@ import android.os.RemoteException;
 import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
-
-import static java.lang.String.format;
-
-import static java.lang.String.format;
 
 /**
  * Handles syncing observations. Uses an incremental sync mechanism - see
@@ -47,8 +44,8 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
     }
 
     @Override
-    protected ArrayList<ContentProviderOperation> getUpdateOps(
-        JsonObservation[] list, SyncResult syncResult) {
+    protected ArrayList<ContentProviderOperation> getUpdateOps(JsonObservation[] list,
+            SyncResult syncResult) {
         int deletes = 0;
         int inserts = 0;
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
@@ -70,8 +67,7 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
     }
 
     /** Converts an encounter data response into appropriate inserts in the encounters table. */
-    public static ContentValues getObsValuesToInsert(
-        JsonObservation observation) {
+    public static ContentValues getObsValuesToInsert(JsonObservation observation) {
         ContentValues cvs = new ContentValues();
         cvs.put(Observations.UUID, observation.uuid);
         cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
@@ -84,13 +80,19 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
     }
 
     @Override
+    protected boolean beforeSyncStarted(ContentResolver contentResolver, SyncResult syncResult,
+            ContentProviderClient providerClient) throws Throwable {
+        return OdkActivityLauncher.resendFormsToServer(contentResolver);
+    }
+
+    @Override
     protected void afterSyncFinished(
         ContentResolver contentResolver,
         SyncResult syncResult,
         ContentProviderClient providerClient) throws RemoteException {
         // Remove all temporary observations now we have the real ones
         providerClient.delete(Observations.CONTENT_URI,
-            format("%s IS NULL AND %s == 1", Observations.UUID, Observations.SUBMITTED),
+            Observations.UUID + " IS NULL",
             new String[0]);
     }
 }
