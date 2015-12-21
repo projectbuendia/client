@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.chart;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -122,6 +123,12 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     // the form is closed.
     List<FormRequest> mFormRequests = new ArrayList<>();
 
+    // Store chart's last scroll position
+    private Point mLastScrollPosition;
+    public Point getLastScrollPosition() {
+        return mLastScrollPosition;
+    }
+
     public interface Ui {
         /** Sets the activity title. */
         void setTitle(String title);
@@ -213,6 +220,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
         mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
+        mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
     }
 
     /**
@@ -253,7 +261,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // controller is suspended the cycle stops; and also since mCurrentPhaseId can
                 // only have one value, only one such cycle can be active at any given time.
                 if (mCurrentPhaseId == phaseId) {
-                    mSyncManager.startIncrementalObsSync();
+                    mSyncManager.startObservationsSync();
                     handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
                 }
             }
@@ -438,6 +446,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             }
         }
         mUi.showOrderExecutionDialog(order, interval, executionTimes);
+    }
+
+    @android.webkit.JavascriptInterface
+    public void onPageUnload(int scrollX, int scrollY) {
+        mLastScrollPosition.set(scrollX, scrollY);
     }
 
     public void showAssignGeneralConditionDialog(

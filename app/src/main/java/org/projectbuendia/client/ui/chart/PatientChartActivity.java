@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.chart;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -22,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -217,13 +219,23 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
+        // Remembering scroll position and applying it after the chart finished loading.
+        mGridWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                Point scrollPosition = mController.getLastScrollPosition();
+                if (scrollPosition != null) {
+                    view.loadUrl("javascript:$('#grid-scroller').scrollLeft(" + scrollPosition.x + ");");
+                    view.loadUrl("javascript:$(window).scrollTop(" + scrollPosition.y + ");");
+                }
+            }
+        });
         mChartRenderer = new ChartRenderer(mGridWebView, getResources());
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
             @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
                 OdkActivityLauncher.sendOdkResultToServer(
                     PatientChartActivity.this, mSettings,
-                    patientUuid, mSettings.getXformUpdateClientCache(), resultCode, data);
+                    patientUuid, resultCode, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {

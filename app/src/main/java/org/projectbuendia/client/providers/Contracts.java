@@ -163,6 +163,12 @@ public class Contracts {
         String GROUP_CONTENT_TYPE = buildGroupType("observation");
         String ITEM_CONTENT_TYPE = buildItemType("observation");
 
+        /**
+         * UUID is populated if the record was retrieved from the server. If this observation was
+         * written locally as a cached value from a submitted XForm, UUID is null. As part of every
+         * successful sync, all observations with null UUIDs are deleted, on the basis that an
+         * authoritative version for each has been obtained from the server.
+         */
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
         String ENCOUNTER_UUID = "encounter_uuid";
@@ -170,11 +176,6 @@ public class Contracts {
         String CONCEPT_UUID = "concept_uuid";
         String VALUE = "value";  // concept value or order UUID
         String VOIDED = "voided";
-        /**
-         * temp_cache is 1 if this observation was written locally as a cached
-         * value from a submitted XForm, or 0 if it was loaded from the server.
-         */
-        String TEMP_CACHE = "temp_cache";
     }
 
     public interface Orders {

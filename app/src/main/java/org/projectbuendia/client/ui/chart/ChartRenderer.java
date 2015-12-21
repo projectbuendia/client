@@ -62,6 +62,9 @@ public class ChartRenderer {
 
         @android.webkit.JavascriptInterface
         void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
+
+        @android.webkit.JavascriptInterface
+        void onPageUnload(int scrollX, int scrollY);
     }
 
     public ChartRenderer(WebView view, Resources resources) {

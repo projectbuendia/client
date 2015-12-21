@@ -35,24 +35,17 @@ android {
 }
 dependencies {
     // Build plugins
-    // TODO: Figure out why removing this causes a Dagger error.
-    provided 'com.github.frankiesardo:auto-parcel-processor:0.2' // Automatic Parcelables
     provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
-    // provided 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1' // Test multiplexing/selection
 
     // Local .jar dependencies
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
     compile project(':third_party:odkcollect')
-    compile project(':third_party:AutoFitTextView')
 
     // External dependencies
-    compile 'com.android.support:appcompat-v7:21.0.0'
-    compile 'com.android.support:cardview-v7:21.0.0'
-    compile 'com.android.support:recyclerview-v7:21.0.0'
-    compile 'com.android.support:support-v4:22.2.0'
-    compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:support-annotations:22.2.0'
     compile 'com.google.code.gson:gson:2.3' // JSON parser
     compile 'com.google.guava:guava:18.0' // Google common libraries
     compile 'com.jakewharton:butterknife:5.1.2' // View injection
@@ -63,19 +56,21 @@ dependencies {
     compile 'joda-time:joda-time:2.5' // Better dates and times
     compile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
     compile 'com.facebook.stetho:stetho-okhttp:1.2.0' // Network debugging
+    compile 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
+    compile 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
+    compile 'org.apache.commons:commons-lang3:3.4'
 
     // Testing
+    androidTestCompile 'com.android.support.test:runner:0.3'
+    // Espresso
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
     androidTestCompile 'com.android.support.test.espresso:espresso-web:2.2'
-    androidTestCompile 'com.android.support.test:runner:0.3'
-    androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
-    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    // Screenshots, multiple android devices on same computer support
     androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
+    // Mockito
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
-    androidTestCompile 'com.google.code.findbugs:jsr305:2.0.3'
-    compile 'com.mitchellbosecke:pebble:1.5.1'
-    compile 'org.slf4j:slf4j-simple:1.7.12'
-    compile 'org.apache.commons:commons-lang3:3.4'
 }
 
 apply plugin: 'spoon'

@@ -25,8 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.json.JsonPatientsResponse;
-import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
@@ -44,7 +42,6 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
@@ -150,7 +147,7 @@ public class OpenMrsServer implements Server {
      * @return A new error listener that tries to pass a more meaningful message
      * to the original errorListener.
      */
-    private Response.ErrorListener wrapErrorListener(
+    public static Response.ErrorListener wrapErrorListener(
         final Response.ErrorListener errorListener) {
         return new OpenMrsErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
@@ -348,24 +345,6 @@ public class OpenMrsServer implements Server {
         // TODO: Implement or remove (currently handled by updatePatient).
     }
 
-    @Override public void listPatients(
-            @Nullable String lastSyncToken,
-            final Response.Listener<JsonPatientsResponse> successListener,
-            Response.ErrorListener errorListener) {
-        String url = mConnectionDetails.getBuendiaApiUrl() + "/patients" +
-                (lastSyncToken != null ? "?since=" + lastSyncToken : "");
-        GsonRequest<JsonPatientsResponse> request = new GsonRequest<>(
-                url,
-                JsonPatientsResponse.class,
-                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-                successListener,
-                wrapErrorListener(errorListener));
-        Serializers.registerTo(request.getGson());
-        request.setRetryPolicy(
-            new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request);
-    }
-
     @Override public void listUsers(@Nullable String searchQuery,
                           final Response.Listener<List<JsonUser>> successListener,
                           Response.ErrorListener errorListener) {
@@ -503,32 +482,6 @@ public class OpenMrsServer implements Server {
                         LOG.e(e, "Failed to parse response");
                     }
                     successListener.onResponse(result);
-                }
-            },
-            wrapErrorListener(errorListener)
-        );
-        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request);
-    }
-
-    @Override public void listOrders(final Response.Listener<List<JsonOrder>> successListener,
-                           Response.ErrorListener errorListener) {
-        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails, "/orders",
-            null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    ArrayList<JsonOrder> orders = new ArrayList<>();
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            JSONObject result = results.getJSONObject(i);
-                            orders.add(mGson.fromJson(result.toString(), JsonOrder.class));
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
-                    }
-                    successListener.onResponse(orders);
                 }
             },
             wrapErrorListener(errorListener)

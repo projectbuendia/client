@@ -59,30 +59,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         this.mFormWrittenListener = formWrittenListener;
     }
 
-    private static boolean writeStringToFile(String response, File proposedPath) {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(proposedPath);
-            writer.write(response);
-            return true;
-        } catch (IOException e) {
-            LOG.e(e, "failed to write downloaded xform to ODK forms directory");
-            return false;
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    LOG.e(e, "failed to close writer into ODK directory");
-                }
-            }
-        }
-    }
-
     @Override protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
-
-        OpenMrsXformsConnection openMrsXformsConnection =
-            new OpenMrsXformsConnection(App.getConnectionDetails());
 
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
             final File proposedPath = formInfo.makeFileForForm();
@@ -90,7 +67,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // Check if the uuid already exists in the database.
             Cursor cursor = null;
             boolean isNew;
-            final boolean isUpdate;
             final boolean usersHaveChanged = App.getUserManager().isDirty();
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[] {
@@ -107,7 +83,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     cursor.moveToNext();
                     long existingTimestamp = cursor.getLong(0);
                     isNew = (existingTimestamp < formInfo.dateChanged);
-                    isUpdate = true;
 
                     if (isNew || usersHaveChanged) {
                         LOG.i("Form " + formInfo.uuid + " requires an update."
@@ -118,7 +93,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 } else {
                     LOG.i("Form " + formInfo.uuid + " not found in database.");
                     isNew = true;
-                    isUpdate = false;
                 }
             } finally {
                 if (cursor != null) {
@@ -135,24 +109,36 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 continue;
             }
 
-            LOG.i("fetching " + formInfo.uuid);
-            // Doesn't exist, so insert it
-            // Fetch the file from OpenMRS
-            openMrsXformsConnection.getXform(formInfo.uuid, new Response.Listener<String>() {
-                @Override public void onResponse(String response) {
-                    LOG.i("adding form to db " + response);
-                    new AddFormToDbAsyncTask(mFormWrittenListener, formInfo.uuid, isUpdate)
-                        .execute(new FormToWrite(response, proposedPath));
-                }
-            }, new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "failed to fetch file");
-                    EventBus.getDefault().post(new FetchXformFailedEvent(
-                        FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
-                }
-            });
+            // Doesn't exist, so insert it. Fetch the file from OpenMRS
+            fetchAndAddXFormToDb(formInfo.uuid, proposedPath);
         }
         return null;
+    }
+
+    /**
+     * Fetches the requested xform from the server and adds it into db.
+     * @param uuid      UUID of the form to be fetched
+     * @param proposedPath          a {@link File} containing the form fields that should be
+     *                        added
+     */
+    public void fetchAndAddXFormToDb(final String uuid, final File proposedPath) {
+        LOG.i("fetching form " + uuid);
+
+        OpenMrsXformsConnection openMrsXformsConnection =
+            new OpenMrsXformsConnection(App.getConnectionDetails());
+        openMrsXformsConnection.getXform(uuid, new Response.Listener<String>() {
+            @Override public void onResponse(String response) {
+                LOG.i("adding form '%s' to db", uuid);
+                new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
+                    .execute(new FormToWrite(response, proposedPath));
+            }
+        }, new Response.ErrorListener() {
+            @Override public void onErrorResponse(VolleyError error) {
+                LOG.e(error, "failed to fetch file");
+                EventBus.getDefault().post(new FetchXformFailedEvent(
+                    FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
+            }
+        });
     }
 
     /**
@@ -188,15 +174,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
         private final FormWrittenListener mFormWrittenListener;
         private final String mUuid;
-        private final boolean mUpdate;
 
         private AddFormToDbAsyncTask(
             @Nullable FormWrittenListener formWrittenListener,
-            String uuid,
-            boolean update) {
+            String uuid) {
             mFormWrittenListener = formWrittenListener;
             mUuid = uuid;
-            mUpdate = update;
         }
 
         @Override protected File doInBackground(FormToWrite[] params) {
@@ -242,6 +225,29 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             EventBus.getDefault().post(new FetchXformSucceededEvent());
 
             App.getUserManager().setDirty(false);
+        }
+
+        private static boolean writeStringToFile(String response, File proposedPath) {
+            //Create OKD dirs if necessary
+            Collect.getInstance().createODKDirs();
+
+            FileWriter writer = null;
+            try {
+                writer = new FileWriter(proposedPath);
+                writer.write(response);
+                return true;
+            } catch (IOException e) {
+                LOG.e(e, "failed to write downloaded xform to ODK forms directory");
+                return false;
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (IOException e) {
+                        LOG.e(e, "failed to close writer into ODK directory");
+                    }
+                }
+            }
         }
     }
 }

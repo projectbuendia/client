@@ -54,15 +54,13 @@
         <provider
             android:name="org.odk.collect.android.provider.FormsProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.forms"
-            android:exported="true"
-            tools:ignore="ExportedContentProvider" /> <!-- need to export to Buendia app -->
+            android:exported="false" />
 
         <!-- Content Provider for ODK form instances. -->
         <provider
             android:name="org.odk.collect.android.provider.InstanceProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.instances"
-            android:exported="true"
-            tools:ignore="ExportedContentProvider" /> <!-- need to export to Buendia app -->
+            android:exported="false" />
 
         <!-- Content Provider for medical records. -->
         <provider

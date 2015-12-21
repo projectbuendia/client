@@ -11,15 +11,11 @@
 
 package org.projectbuendia.client.net;
 
-import android.support.annotation.Nullable;
-
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonConceptResponse;
-import org.projectbuendia.client.json.JsonObservationsResponse;
-import org.projectbuendia.client.json.Serializers;
 
 import java.util.HashMap;
 
@@ -43,38 +39,6 @@ public class OpenMrsChartServer {
 
     public OpenMrsChartServer(OpenMrsConnectionDetails connectionDetails) {
         this.mConnectionDetails = connectionDetails;
-    }
-
-    private void doObservationsRequest(
-            String url,
-            Response.Listener<JsonObservationsResponse> successListener,
-            Response.ErrorListener errorListener) {
-        GsonRequest<JsonObservationsResponse> request = new GsonRequest<>(
-            url,
-            JsonObservationsResponse.class,
-            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-            successListener, errorListener);
-        Serializers.registerTo(request.getGson());
-        request.setRetryPolicy(
-            new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request);
-    }
-
-    /**
-     * Get all observations that happened in an encounter after or on {@code minCreationTime}.
-     * Allows a client to do incremental cache updating.
-     * @param lastSyncToken   a sync token provided by the server on a previous sync.
-     * @param successListener a listener to get the results on the event of success
-     * @param errorListener   a (Volley) listener to get any errors
-     */
-    public void getIncrementalObservations(
-            @Nullable String lastSyncToken,
-            Response.Listener<JsonObservationsResponse> successListener,
-            Response.ErrorListener errorListener) {
-        // TODO: URL-encode the sync token?
-        doObservationsRequest(mConnectionDetails.getBuendiaApiUrl() + "/observations" +
-                        (lastSyncToken != null ? "?since=" + lastSyncToken : ""),
-                successListener, errorListener);
     }
 
     /**

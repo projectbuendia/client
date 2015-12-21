@@ -174,7 +174,10 @@
 
   $(document).ready(function() {
     $('#grid').freezeHeader({top: true, left: true});
-    $('#grid-scroller').scrollLeft(1e6);
+  });
+
+  $( window ).unload(function() {
+    controller.onPageUnload($('#grid-scroller').scrollLeft(), $(window).scrollTop());
   });
 
   function od(concept_uuid, startmillis, stopmillis){

@@ -28,13 +28,10 @@ import javax.inject.Inject;
 
 /** A list of patients with a choice of several filters in a dropdown menu. */
 public class FilteredPatientListActivity extends BaseSearchablePatientListActivity {
-
-    private static final int ODK_ACTIVITY_REQUEST = 1;
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 
     private PatientFilterController mFilterController;
     private int mSelectedFilter = 0;
-    @Inject AppSettings mSettings;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, FilteredPatientListActivity.class));
@@ -61,13 +58,6 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
     @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(SELECTED_FILTER_KEY, getActionBar().getSelectedNavigationIndex());
-    }
-
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != ODK_ACTIVITY_REQUEST) return;
-        OdkActivityLauncher.sendOdkResultToServer(
-            this, mSettings, /* create a new patient */ null,
-            false, resultCode, data);
     }
 
     private final class FilterUi implements PatientFilterController.Ui {

@@ -120,7 +120,7 @@ public final class LocationListFragment extends ProgressFragment {
         }
 
         @Override public void showIncrementalSyncProgress(int progress, @Nullable String label) {
-            incrementProgressBy(progress);
+            setProgress(progress);
             if (label != null) {
                 setProgressLabel(label);
             }
