@@ -85,15 +85,15 @@
                        {% endif %}
                        {% endif %}">
             {% if points is not empty %}
-            {% if row.item.type == 'text_icon' %}
-            <div>&#x1f4dd;</div>
-            {% else %}
-            {% set output = summaryValue | format_value(row.item.format) %}
-            {% if output is empty %}
-            {% set output = summaryValue | format_value(row.item.captionFormat) %}
-            {% endif %}
-            {{output}}
-            {% endif %}
+              {% if row.item.type == 'text_icon' %}
+                <div>&#x1f4dd;</div>
+              {% else %}
+                {% set output = summaryValue | format_value(row.item.format) %}
+                {% if output is empty %}
+                  {% set output = summaryValue | format_value(row.item.captionFormat) %}
+                {% endif %}
+              {{output}}
+              {% endif %}
             {% endif %}
           </td>
           {% endfor %}
