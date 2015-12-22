@@ -235,7 +235,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_wifi_disconnected_solved">Reseau retabli</string>
   <string name="troubleshoot_wifi_disconnected_action_connect">Connectez</string>
   <string name="troubleshoot_server_auth">Serveur nom d\'utilisateur / mot de passe peut être incorrect</string>
-  <string name="troubleshoot_server_auth_solved">Nom d'utilisateur/mot de passe corrigé</string>
+  <string name="troubleshoot_server_auth_solved">Nom d\'utilisateur/mot de passe corrigé</string>
   <string name="troubleshoot_server_auth_action_check">Vérifier</string>
   <string name="troubleshoot_server_address">Adresse du serveur peut être incorrecte</string>
   <string name="troubleshoot_server_address_solved">Adresse du serveur correcte</string>
