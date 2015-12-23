@@ -262,6 +262,23 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
+    @Override public void deleteObservation(String Uuid,
+                                         final Response.ErrorListener errorListener) {
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+            mConnectionDetails,
+            Request.Method.DELETE,
+            mConnectionDetails.getRestApiUrl() + "/obs/" + Uuid,
+            null,
+            new Response.Listener<JSONObject>() {
+                @Override public void onResponse(JSONObject response) {
+                    LOG.i("Voided observation");
+                }
+            },
+            wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
     private JsonEncounter encounterFromJson(JSONObject object) throws JSONException {
         return mGson.fromJson(object.toString(), JsonEncounter.class);
     }
