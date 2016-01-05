@@ -25,6 +25,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.CursorLoader;
 import org.projectbuendia.client.models.LoaderSet;
+import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 
 /**
@@ -57,6 +58,11 @@ public class TaskFactory {
             this, mLoaderSet, mServer, mContentResolver, patientId, bus);
     }
 
+    public VoidObsTask voidObsTask(CrudEventBus bus, VoidObs voidObs) {
+        return new VoidObsTask(
+                this, mLoaderSet, mServer, mContentResolver, voidObs, bus);
+    }
+
     /** Creates a new {@link AppUpdatePatientTask}. */
     public AppUpdatePatientTask newUpdatePatientAsyncTask(
         String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
@@ -70,6 +76,13 @@ public class TaskFactory {
         return new AddEncounterTask(
             this, mLoaderSet, mServer, mContentResolver, patient, encounter, bus);
     }
+
+    public VoidObsTask newVoidObsAsyncTask(
+            VoidObs obs, CrudEventBus bus) {
+        return new VoidObsTask(
+                this, mLoaderSet, mServer, mContentResolver, obs, bus);
+    }
+
 
     /** Creates a new {@link AddOrderTask}. */
     public AddOrderTask newAddOrderAsyncTask(

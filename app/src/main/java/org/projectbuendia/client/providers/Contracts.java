@@ -175,6 +175,7 @@ public class Contracts {
         String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch
         String CONCEPT_UUID = "concept_uuid";
         String VALUE = "value";  // concept value or order UUID
+        String VOIDED = "voided";
     }
 
     public interface Orders {

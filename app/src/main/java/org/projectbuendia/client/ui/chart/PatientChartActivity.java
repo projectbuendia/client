@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.chart;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -22,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -42,6 +44,7 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.models.Obs;
@@ -56,6 +59,7 @@ import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -215,6 +219,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
+        // Remembering scroll position and applying it after the chart finished loading.
+        mGridWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                Point scrollPosition = mController.getLastScrollPosition();
+                if (scrollPosition != null) {
+                    view.loadUrl("javascript:$('#grid-scroller').scrollLeft(" + scrollPosition.x + ");");
+                    view.loadUrl("javascript:$(window).scrollTop(" + scrollPosition.y + ");");
+                }
+            }
+        });
         mChartRenderer = new ChartRenderer(mGridWebView, getResources());
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
@@ -303,7 +317,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mSymptomOnsetDaysView.setValue(
-                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
         }
 
         // TODO/cleanup: We don't need this special logic for the Ebola PCR test results
@@ -317,9 +331,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
             mPcr.setIconDrawable(
-                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
-                    .color(0x00000000)
-                    .sizeDp(36));
+                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
+                            .color(0x00000000)
+                            .sizeDp(36));
             if ((pcrLObservation == null || pcrLObservation.valueName == null)
                 && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
@@ -406,9 +420,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIconDrawable(
-                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
-                    .color(0x00000000)
-                    .sizeDp(36));
+                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
+                            .color(0x00000000)
+                            .sizeDp(36));
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {
@@ -424,7 +438,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null ? "age unknown"
-                : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
+                    : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
             PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
         }
@@ -444,7 +458,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                PatientChartActivity.this, formUuid, requestCode, patient, preset);
+                    PatientChartActivity.this, formUuid, requestCode, patient, preset);
         }
 
         @Override public void reEnableFetch() {
@@ -462,6 +476,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void showNewOrderDialog(String patientUuid) {
             OrderDialogFragment.newInstance(patientUuid, null)
                 .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showObservationsDialog(ArrayList<ObsRow> observations) {
+            ViewObservationsDialogFragment.newInstance(observations)
+                    .show(getSupportFragmentManager(), null);
         }
 
         @Override public void showOrderExecutionDialog(

@@ -54,10 +54,17 @@ public class ChartRenderer {
     private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
 
     public interface GridJsInterface {
-        @android.webkit.JavascriptInterface void onNewOrderPressed();
+        @android.webkit.JavascriptInterface
+        void onNewOrderPressed();
 
         @android.webkit.JavascriptInterface
         void onOrderCellPressed(String orderUuid, long startMillis);
+
+        @android.webkit.JavascriptInterface
+        void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
+
+        @android.webkit.JavascriptInterface
+        void onPageUnload(int scrollX, int scrollY);
     }
 
     public ChartRenderer(WebView view, Resources resources) {

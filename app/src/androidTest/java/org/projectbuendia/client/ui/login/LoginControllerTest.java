@@ -18,7 +18,6 @@ import com.google.common.collect.ImmutableSet;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
@@ -190,8 +189,7 @@ public class LoginControllerTest extends AndroidTestCase {
         // WHEN server becomes healthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(true);
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
-            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION),
-            HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE));
+            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION), null));
         // THEN users are reloaded
         // Note: already called once in init()
         verify(mMockUserManager, times(2)).loadKnownUsers();
@@ -207,8 +205,7 @@ public class LoginControllerTest extends AndroidTestCase {
         // WHEN server becomes healthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(true);
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
-            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION),
-            HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE));
+            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION), null));
         // THEN users are not reloaded
         verify(mMockUserManager, times(1)).loadKnownUsers();
     }
@@ -223,8 +220,7 @@ public class LoginControllerTest extends AndroidTestCase {
         mController.init();
         // WHEN TroubleshootingActions change but server is still unhealthy
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
-            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION),
-            HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE));
+            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION), null));
         // THEN users are not reloaded
         // Note: this function is called once during init(), so expect it to be called once, but
         //       only once.
