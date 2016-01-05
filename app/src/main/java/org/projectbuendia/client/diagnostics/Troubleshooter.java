@@ -48,14 +48,14 @@ public class Troubleshooter {
     }
 
     /**
-     * Returns true if the given issue is current active.
+     * Returns true iff the given issue is current active.
      * @param issue {@link HealthIssue} to check for
      */
     public boolean hasIssue(HealthIssue issue) {
         return mActiveIssues.contains(issue);
     }
 
-    /** Returns true if no active issues exist. */
+    /** Returns true iff no active issues exist. */
     public boolean isHealthy() {
         return mActiveIssues.isEmpty();
     }
