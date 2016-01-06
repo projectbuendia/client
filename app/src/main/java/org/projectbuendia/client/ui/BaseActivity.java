@@ -335,66 +335,72 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     private void displayProblemSolvedMessage(HealthIssue solvedIssue) {
-        Map<HealthIssue, Integer[]> troubleshootingMessages = new HashMap<>();
+        // The troubleShootingMessages Map have the issue as the key and the TroubleshootingMessage
+        // object as it's value.
+        Map<HealthIssue, TroubleshootingMessage> troubleshootingMessages = new HashMap<>();
 
-        // The troubleShootingMessages Map have the issue as the key and an integer array as
-        // value. This array is composed by:
-        // 0 - The message string id triggered by the issue.
-        // 1 - The new message string id (solved message).
-        // 2 - The timeout count for the solved message.
-        troubleshootingMessages.put(HealthIssue.WIFI_DISABLED, new Integer[] {
-            R.string.troubleshoot_wifi_disabled,
-            R.string.troubleshoot_wifi_disabled_solved,
-            10
-        });
-        troubleshootingMessages.put(HealthIssue.WIFI_NOT_CONNECTED, new Integer[] {
-            R.string.troubleshoot_wifi_disconnected,
-            R.string.troubleshoot_wifi_disconnected_solved,
-            10
-        });
-        troubleshootingMessages.put(HealthIssue.SERVER_AUTHENTICATION_ISSUE, new Integer[] {
-            R.string.troubleshoot_server_auth,
-            R.string.troubleshoot_server_auth_solved,
-            10
-        });
-        troubleshootingMessages.put(HealthIssue.SERVER_CONFIGURATION_INVALID, new Integer[] {
-            R.string.troubleshoot_server_address,
-            R.string.troubleshoot_server_address_solved,
-            10
-        });
-        troubleshootingMessages.put(HealthIssue.SERVER_HOST_UNREACHABLE, new Integer[] {
-            R.string.troubleshoot_server_unreachable,
-            R.string.troubleshoot_server_unreachable_solved,
-            10
-        });
-        troubleshootingMessages.put(HealthIssue.SERVER_INTERNAL_ISSUE, new Integer[] {
-            R.string.troubleshoot_server_unstable,
-            R.string.troubleshoot_server_unstable_solved,
-            10
-        });
-        troubleshootingMessages.put(HealthIssue.SERVER_NOT_RESPONDING, new Integer[] {
-            R.string.troubleshoot_server_not_responding,
-            R.string.troubleshoot_server_not_responding_solved,
-            10
-        });
-        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE, new Integer[] {
-            R.string.troubleshoot_package_server_unreachable,
-            R.string.troubleshoot_package_server_unreachable_solved,
-            5
-        });
-        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_INDEX_NOT_FOUND, new Integer[] {
-            R.string.troubleshoot_package_server_misconfigured,
-            R.string.troubleshoot_package_server_misconfigured_solved,
-            10
-        });
+        troubleshootingMessages.put(HealthIssue.WIFI_DISABLED,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_wifi_disabled,
+                R.string.troubleshoot_wifi_disabled_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.WIFI_NOT_CONNECTED,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_wifi_disconnected,
+                R.string.troubleshoot_wifi_disconnected_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.SERVER_AUTHENTICATION_ISSUE,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_server_auth,
+                R.string.troubleshoot_server_auth_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.SERVER_CONFIGURATION_INVALID,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_server_address,
+                R.string.troubleshoot_server_address_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.SERVER_HOST_UNREACHABLE,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_server_unreachable,
+                R.string.troubleshoot_server_unreachable_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.SERVER_INTERNAL_ISSUE,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_server_unstable,
+                R.string.troubleshoot_server_unstable_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.SERVER_NOT_RESPONDING,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_server_not_responding,
+                R.string.troubleshoot_server_not_responding_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_package_server_unreachable,
+                R.string.troubleshoot_package_server_unreachable_solved,
+                5
+        ));
+        troubleshootingMessages.put(HealthIssue.PACKAGE_SERVER_INDEX_NOT_FOUND,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_package_server_misconfigured,
+                R.string.troubleshoot_package_server_misconfigured_solved,
+                10
+        ));
 
-        Integer[] messages = troubleshootingMessages.get(solvedIssue);
+        TroubleshootingMessage messages = troubleshootingMessages.get(solvedIssue);
 
         if (messages != null) {
-            SnackBar.Message snackBarMessage = snackBar.getMessage(messages[0]);
+            SnackBar.Message snackBarMessage = snackBar.getMessage(messages.messageId);
             if (snackBarMessage != null) {
                 snackBar.dismiss(snackBarMessage.key);
-                snackBar.message(messages[1], 0, null, 994, true, messages[2]);
+                snackBar.message(messages.resolvedMessageId, 0, null, 994, true, messages.timeout);
             }
         }
     }
@@ -480,6 +486,29 @@ public abstract class BaseActivity extends FragmentActivity {
         }
 
         @Override public void hideSoftwareUpdateNotifications() {
+        }
+    }
+
+    /**
+     * The TroubleshootingMessage object relates the error message with the solved message and
+     * for how many seconds the solved message is displayed.
+     */
+    private static class TroubleshootingMessage {
+        @StringRes public final int messageId;
+        @StringRes public final int resolvedMessageId;
+        public final int timeout;
+
+        /**
+         *
+         * @param messageId The message string id triggered by the issue.
+         * @param resolvedMessageId The new message string id (solved message).
+         * @param timeout The timeout count (in seconds) for the solved message.
+         */
+        public TroubleshootingMessage(@StringRes int messageId, @StringRes int resolvedMessageId,
+                                      int timeout) {
+            this.messageId = messageId;
+            this.resolvedMessageId = resolvedMessageId;
+            this.timeout = timeout;
         }
     }
 }
