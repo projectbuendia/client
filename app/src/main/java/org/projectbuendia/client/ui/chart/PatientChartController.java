@@ -251,7 +251,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // controller is suspended the cycle stops; and also since mCurrentPhaseId can
                 // only have one value, only one such cycle can be active at any given time.
                 if (mCurrentPhaseId == phaseId) {
-                    mSyncManager.startObservationsSync();
+                    mSyncManager.startObservationsAndOrdersSync();
                     handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
                 }
             }
@@ -717,7 +717,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // We have to shift it back a bit to prevent it from being
                 // advanced almost an entire day, and even then this only works if
                 // the client's time zone matches the server's time zone, because
-                // the server's infidelity is time-zone-dependent (auggghh!!!)
+                // the server's fidelity is time-zone-dependent (auggghh!!!)
                 stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
             }
 

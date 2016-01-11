@@ -76,7 +76,7 @@ public class TaskFactory {
 
     /** Creates a new {@link DeleteOrderTask}. */
     public DeleteOrderTask newDeleteOrderTask(String orderUuid, CrudEventBus bus) {
-        return new DeleteOrderTask(this, mLoaderSet, mServer, mContentResolver, orderUuid, bus);
+        return new DeleteOrderTask(mServer, mContentResolver, orderUuid, bus);
     }
 
     /** Creates a new {@link FetchItemTask}. */

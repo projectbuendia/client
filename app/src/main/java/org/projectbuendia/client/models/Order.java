@@ -32,6 +32,7 @@ import javax.annotation.concurrent.Immutable;
 /** An order in the app model. */
 @Immutable
 public final class Order extends Base<String> implements Comparable<Order> {
+    public static final char NON_BREAKING_SPACE = '\u00a0';
     public final
     @Nullable String uuid;
     public final String patientUuid;
@@ -46,7 +47,13 @@ public final class Order extends Base<String> implements Comparable<Order> {
     }
 
     // TODO/robustness: Store medication, dosage, and frequency as separate fields instead of
-    // mashing them into one free-text instructions field.  This will also enable internationalization.
+    // mashing them into one free-text instructions field.  This will also enable
+    // internationalization.
+
+    // [Any amount of non-whitespace][space][any text][space][more than one digit]x[space][any text]
+    // OR [Any amount of non-whitespace][an optional space][any text]
+    // Note that the second branch will match everything - even the empty string - and shoehorn
+    // the order instructions into the medication and dosage fields.
     public static final Pattern INSTRUCTIONS_PATTERN = Pattern.compile(
         "([^ ]*) (.*) ([0-9]+)x .*|([^ ]*) ?(.*)");
 
@@ -57,14 +64,16 @@ public final class Order extends Base<String> implements Comparable<Order> {
         if (!frequency.isEmpty()) {
             frequency += "x daily";
         }
-        return (medication.replace(' ', '\u00a0') + " " + dosage + " " + frequency).trim();
+        return (medication.replace(' ', NON_BREAKING_SPACE) + " " + dosage + " " + frequency)
+                .trim();
     }
 
     public static String getMedication(String instructions) {
         Matcher matcher = INSTRUCTIONS_PATTERN.matcher(Utils.valueOrDefault(instructions, ""));
         if (matcher.matches()) {
+            // These groups are the "([^ ]*)" in each branch of the regex above.
             String group = Utils.valueOrDefault(matcher.group(1), matcher.group(4));
-            return group.replace('\u00a0', ' ');
+            return group.replace(NON_BREAKING_SPACE, ' ');
         }
         return null;
     }
@@ -72,6 +81,7 @@ public final class Order extends Base<String> implements Comparable<Order> {
     public static String getDosage(String instructions) {
         Matcher matcher = INSTRUCTIONS_PATTERN.matcher(Utils.valueOrDefault(instructions, ""));
         if (matcher.matches()) {
+            // These groups are the `(.*)` in each branch of the regex.
             return Utils.valueOrDefault(matcher.group(2), matcher.group(5));
         }
         return null;

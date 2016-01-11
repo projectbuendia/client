@@ -17,12 +17,8 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
  * Indicates that a single item has been deleted on the server.  Should
  * only be posted on a {@link DefaultCrudEventBus}.
  */
-public class ItemDeletedEvent<T> {
+public class ItemDeletedEvent {
     public final String uuid;
-
-    public ItemDeletedEvent() {
-        this(null);
-    }
 
     public ItemDeletedEvent(String uuid) {
         this.uuid = uuid;

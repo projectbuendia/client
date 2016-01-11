@@ -85,11 +85,12 @@ public class OrderDialogFragment extends DialogFragment {
         // Replace the existing button listener so we can control whether the dialog is dismissed.
         final AlertDialog dialog = (AlertDialog) getDialog();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
-            new View.OnClickListener() {
-                @Override public void onClick(View view) {
-                    onSubmit(dialog);
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onSubmit(dialog);
+                    }
                 }
-            }
         );
     }
 
@@ -138,25 +139,27 @@ public class OrderDialogFragment extends DialogFragment {
             "instructions", instructions,
             "durationDays", "" + durationDays);
 
-        if (valid) {
-            dialog.dismiss();
-
-            DateTime now = Utils.getDateTime(getArguments(), "now_millis");
-            DateTime start = Utils.getDateTime(getArguments(), "start_millis");
-            start = Utils.valueOrDefault(start, now);
-
-            if (durationDays != null) {
-                // Adjust durationDays to account for a start date in the past.  Entering "2"
-                // always means two more days, stopping after tomorrow, regardless of start date.
-                LocalDate firstDay = start.toLocalDate();
-                LocalDate lastDay = now.toLocalDate().plusDays(durationDays - 1);
-                durationDays = Days.daysBetween(firstDay, lastDay).getDays() + 1;
-            }
-
-            // Post an event that triggers the PatientChartController to save the order.
-            EventBus.getDefault().post(new OrderSaveRequestedEvent(
-                uuid, patientUuid, instructions, start, durationDays));
+        if (!valid) {
+            return;
         }
+
+        dialog.dismiss();
+
+        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
+        DateTime start = Utils.getDateTime(getArguments(), "start_millis");
+        start = Utils.valueOrDefault(start, now);
+
+        if (durationDays != null) {
+            // Adjust durationDays to account for a start date in the past.  Entering "2"
+            // always means two more days, stopping after tomorrow, regardless of start date.
+            LocalDate firstDay = start.toLocalDate();
+            LocalDate lastDay = now.toLocalDate().plusDays(durationDays - 1);
+            durationDays = Days.daysBetween(firstDay, lastDay).getDays() + 1;
+        }
+
+        // Post an event that triggers the PatientChartController to save the order.
+        EventBus.getDefault().post(new OrderSaveRequestedEvent(
+            uuid, patientUuid, instructions, start, durationDays));
     }
 
     public void onDelete(Dialog dialog, final String orderUuid) {
@@ -187,7 +190,7 @@ public class OrderDialogFragment extends DialogFragment {
 
         Bundle args = getArguments();
         boolean newOrder = args.getBoolean("new");
-        String title = newOrder ? getString(R.string.title_new_order) : getString(R.string.title_edit_order);
+        String title = getString(newOrder ? R.string.title_new_order : R.string.title_edit_order);
         final String orderUuid = args.getString("uuid");
         populateFields(args);
 

@@ -20,10 +20,8 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.OrderDeleteFailedEvent;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
 
@@ -36,27 +34,17 @@ import java.util.concurrent.ExecutionException;
  */
 public class DeleteOrderTask extends AsyncTask<Void, Void, OrderDeleteFailedEvent> {
 
-    private static final Logger LOG = Logger.create();
-
-    private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mOrderUuid;
     private final CrudEventBus mBus;
 
-    private String mUuid;
-
     /** Creates a new {@link DeleteOrderTask}. */
     public DeleteOrderTask(
-        TaskFactory taskFactory,
-        LoaderSet loaderSet,
-        Server server,
-        ContentResolver contentResolver,
-        String orderUuid,
-        CrudEventBus bus) {
-        mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
+            Server server,
+            ContentResolver contentResolver,
+            String orderUuid,
+            CrudEventBus bus) {
         mServer = server;
         mContentResolver = contentResolver;
         mOrderUuid = orderUuid;
