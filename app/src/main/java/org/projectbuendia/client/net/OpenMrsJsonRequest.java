@@ -13,12 +13,12 @@ package org.projectbuendia.client.net;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +83,15 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-        if (getMethod() == Request.Method.DELETE) return Response.success(null, null);
+        try {
+            if (response.data.length == 0) {
+                byte[] responseData = "{}".getBytes("UTF8");
+                response = new NetworkResponse(
+                        response.statusCode, responseData, response.headers, response.notModified);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Should never occur");
+        }
         return super.parseNetworkResponse(response);
     }
 }

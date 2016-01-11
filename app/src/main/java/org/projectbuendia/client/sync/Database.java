@@ -122,6 +122,7 @@ public class Database extends SQLiteOpenHelper {
             + "encounter_millis INTEGER,"
             + "concept_uuid INTEGER,"
             + "value STRING,"
+            + "voided INTEGER,"
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
         SCHEMAS.put(Table.ORDERS, ""

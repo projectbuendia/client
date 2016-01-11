@@ -18,7 +18,7 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-        <td id="tile-{{id}}" class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
+        <td id="tile-{{id}}" class="tile concept-{{id}} {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -38,7 +38,7 @@
           {% if prevColumn is not null and column.start != prevColumn.stop %}
             <th class="gap" scope="col">&nbsp;</th>
           {% endif %}
-          <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col">
+          <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
             {{column.headingHtml | raw}}
           </th>
           {% set prevColumn = column %}
@@ -60,9 +60,9 @@
         {% endfor %}
       </tr>
       {% for row in rows %}
-        {% set id = row.item.conceptIds | first %}
-        <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
-          <th scope="row">
+      {% set id = row.item.conceptIds | first %}
+      <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
+          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
             {{row.item.label}}
           </th>
           {% for column in columns %}
@@ -77,35 +77,25 @@
             {% set class = summaryValue | format_values(row.item.cssClass) %}
             {% set style = summaryValue | format_values(row.item.cssStyle) %}
             <td id="cell-{{id}}-{{column.start.millis}}"
-                class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
-                style="{{style}}" onclick="popup({{row.item.label | js}},
-              {% if points is empty %}
-                []
+              class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
+              style="{{style}}"
+              onclick="{% if points is not empty%}
+                       {% if (row.item.type).string != 'text_icon' %}
+                       od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
+                       {% endif %}
+                       {% endif %}">
+            {% if points is not empty %}
+              {% if row.item.type == 'text_icon' %}
+                <div>&#x1f4dd;</div>
               {% else %}
-                [ {%- for point in points -%}
-                  [{{point.value | format_value(row.item.captionFormat) | js}},
-                   {{point.time | format_time('HH:mm') | js}}],
-                {%- endfor -%} ]
-              {% endif %} )">
-              {% if points is not empty %}
-                {% if row.item.type == 'text_icon' %}
-                  <div onclick="alert(''
-                        {%- for point in points -%}
-                          + '---- '
-                          + {{point.time | format_time('dd MMM \'at\' HH:mm') | js}}
-                          + ' ----\n'
-                          + {{point.value.text | js}}
-                          + '\n\n'
-                        {%- endfor -%}); event.stopPropagation();">&#x1f4dd;</div>
-                {% else %}
-                  {% set output = summaryValue | format_value(row.item.format) %}
-                  {% if output is empty %}
-                    {% set output = summaryValue | format_value(row.item.captionFormat) %}
-                  {% endif %}
-                  {{output}}
+                {% set output = summaryValue | format_value(row.item.format) %}
+                {% if output is empty %}
+                  {% set output = summaryValue | format_value(row.item.captionFormat) %}
                 {% endif %}
+              {{output}}
               {% endif %}
-            </td>
+            {% endif %}
+          </td>
           {% endfor %}
         </tr>
       {% endfor %}
@@ -184,8 +174,16 @@
 
   $(document).ready(function() {
     $('#grid').freezeHeader({top: true, left: true});
-    $('#grid-scroller').scrollLeft(1e6);
   });
+
+  $( window ).unload(function() {
+    controller.onPageUnload($('#grid-scroller').scrollLeft(), $(window).scrollTop());
+  });
+
+  function od(concept_uuid, startmillis, stopmillis){
+    controller.onObsDialog(concept_uuid, startmillis, stopmillis);
+  }
+
 </script>
 </body>
 </html>

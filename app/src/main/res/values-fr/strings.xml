@@ -230,14 +230,19 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="cancelling_sync">Annulation de la synchronisation…</string>
   <string name="sync_starting">Synchronisation partir…</string>
   <string name="troubleshoot_wifi_disabled">Wifi est désactivé</string>
+  <string name="troubleshoot_wifi_disabled_solved">Reseau activé</string>
   <string name="troubleshoot_wifi_disabled_action_enable">Activer</string>
   <string name="troubleshoot_wifi_disconnected">Wifi est déconnecté</string>
+  <string name="troubleshoot_wifi_disconnected_solved">Reseau retabli</string>
   <string name="troubleshoot_wifi_disconnected_action_connect">Connectez</string>
   <string name="troubleshoot_server_auth">Serveur nom d\'utilisateur / mot de passe peut être incorrect</string>
+  <string name="troubleshoot_server_auth_solved">Nom d\'utilisateur/mot de passe corrigé</string>
   <string name="troubleshoot_server_auth_action_check">Vérifier</string>
   <string name="troubleshoot_server_address">Adresse du serveur peut être incorrecte</string>
+  <string name="troubleshoot_server_address_solved">Adresse du serveur correcte</string>
   <string name="troubleshoot_server_address_action_check">Vérifier</string>
   <string name="troubleshoot_server_unreachable">Serveur inaccessible</string>
+  <string name="troubleshoot_server_unreachable_solved">Connexion au serveur rétabli</string>
   <string name="troubleshoot_action_more_info">Plus d\'information</string>
   <string name="troubleshoot_server_unreachable_details">
       Le serveur n\'a pas pu être atteint. Cela peut être parce que:
@@ -249,11 +254,13 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
       \n S\'il vous plaît contacter un administrateur.
   </string>
   <string name="troubleshoot_server_unstable">Server peut être instable</string>
+  <string name="troubleshoot_server_unstable_solved">Serveur stable</string>
   <string name="troubleshoot_server_unstable_details">
       Le serveur répond actuellement avec le code d\'erreur 500, indiquant que le serveur peut être dans un état d\'erreur.
       \n
       \n S\'il vous plaît contacter un administrateur.</string>
   <string name="troubleshoot_server_not_responding">Serveur ne répond pas</string>
+  <string name="troubleshoot_server_not_responding_solved">Serveur répond</string>
   <string name="troubleshoot_server_not_responding_details">
       Le serveur est actuellement ne répond pas aux demandes. Cela peut être parce que:\n
       \n • Le serveur est momentanément indisponible.
@@ -265,6 +272,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_location_error_network">Erreur de mise à jour du patient; s\'il vous plaît vérifier que vous êtes connecté au serveur.</string>
   <string name="patient_location_error_no_such_patient">Mise à jour de localisation d\'un patient Erreur: ce patient ne existe pas sur le serveur.</string>
   <string name="troubleshoot_package_server_unreachable">Serveur de Package inaccessible</string>
+  <string name="troubleshoot_package_server_unreachable_solved">Connexion au serveur de paquets rétabli</string>
   <string name="troubleshoot_update_server_unreachable_details">
       Le serveur de package n\'a pas pu être atteint. Cela peut être parce que:
       \n
@@ -274,6 +282,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
       \n S\'il vous plaît corriger les paramètres du serveur de package ou consulter un administrateur de l\'aide.
   </string>
   <string name="troubleshoot_package_server_misconfigured">Paramètre de serveur de package peut être incorrect</string>
+  <string name="troubleshoot_package_server_misconfigured_solved">Paramètres de serveur de paquets corrigé</string>
   <string name="troubleshoot_update_server_misconfigured_details">
       S\'il vous plaît vérifier que les paramètres du serveur de package est correct ou consultez un administrateur de l\'aide.
   </string>
@@ -327,4 +336,6 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="title_dashboard">Console</string>
   <string name="order_stop_now">Arrêter maintenant</string>
   <string name="order_delete">Supprimer cette traitement</string>
+  <string name="voiding">vide</string>
+  <string name="void_observations">Observations Vides</string>
 </resources>

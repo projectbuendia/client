@@ -18,7 +18,7 @@ package org.projectbuendia.client.diagnostics;
  * problematic event): when a new issue is discovered, it will be reported to an instance of
  * {@link HealthMonitor}, which will consider that issue active until the issue is resolved.
  */
-enum HealthIssue {
+public enum HealthIssue {
     WIFI_DISABLED,
     WIFI_NOT_CONNECTED,
     SERVER_AUTHENTICATION_ISSUE,

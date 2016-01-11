@@ -25,6 +25,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.CursorLoader;
 import org.projectbuendia.client.models.LoaderSet;
+import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 
 /**
@@ -55,6 +56,11 @@ public class TaskFactory {
             this, mLoaderSet, mServer, mContentResolver, patientId, bus);
     }
 
+    public VoidObsTask voidObsTask(CrudEventBus bus, VoidObs voidObs) {
+        return new VoidObsTask(
+                this, mLoaderSet, mServer, mContentResolver, voidObs, bus);
+    }
+
     /** Creates a new {@link UpdatePatientTask}. */
     public UpdatePatientTask newUpdatePatientTask(
         String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
@@ -72,6 +78,13 @@ public class TaskFactory {
     /** Creates a new {@link SaveOrderTask}. */
     public SaveOrderTask newSaveOrderTask(Order order, CrudEventBus bus) {
         return new SaveOrderTask(this, mLoaderSet, mServer, mContentResolver, order, bus);
+    }
+
+    // DO NOT SUBMIT: work out why there's two of these.
+    public VoidObsTask newVoidObsAsyncTask(
+            VoidObs obs, CrudEventBus bus) {
+        return new VoidObsTask(
+                this, mLoaderSet, mServer, mContentResolver, obs, bus);
     }
 
     /** Creates a new {@link DeleteOrderTask}. */
