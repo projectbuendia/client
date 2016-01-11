@@ -16,11 +16,16 @@ import java.util.List;
 /** A chart definition. */
 public class Chart {
     public final String uuid;  // UUID of the OpenMRS Form containing this chart definition
-    public final List<ChartSection> tileGroups;
-    public final List<ChartSection> rowGroups;
+    public List<ChartSection> tileGroups;
+    public List<ChartSection> rowGroups;
+    public String name;
+
+    public Chart(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Chart(String uuid, List<ChartSection> tileGroups, List<ChartSection> rowGroups) {
-        this.uuid = uuid;
+        this(uuid);
         this.tileGroups = tileGroups;
         this.rowGroups = rowGroups;
     }

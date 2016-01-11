@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,6 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -95,6 +98,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
+    private ArrayAdapter<String> mAdapter;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -109,6 +113,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
+    @InjectView(R.id.patient_chart_root) DrawerLayout mDrawerLayout;
+    @InjectView(R.id.navList) ListView mDrawerList;
+
     ChartRenderer mChartRenderer;
 
     private static final String EN_DASH = "\u2013";
@@ -271,6 +278,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mController.onAddTestResultsPressed();
             }
         });
+
+        addDrawerItems();
+    }
+
+    private void addDrawerItems() {
+        String[] osArray = { "Android", "iOS", "Windows", "OS X", "Linux" };
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+        mDrawerList.setAdapter(mAdapter);
     }
 
     @Override protected void onStartImpl() {

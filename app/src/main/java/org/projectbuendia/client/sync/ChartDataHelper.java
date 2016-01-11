@@ -291,11 +291,13 @@ public class ChartDataHelper {
     }
 
     /** Retrieves and assembles a Chart from the local datastore. */
-    public Chart getChart(String uuid) {
+    public List<Chart> getCharts(String uuid) {
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();
         Map<Long, ChartSection> rowGroupsById = new HashMap<>();
-        List<ChartSection> tileGroups = new ArrayList<>();
-        List<ChartSection> rowGroups = new ArrayList<>();
+        List<Chart> Charts = new ArrayList<>();
+        Chart currentChart = new Chart(uuid);
+        currentChart.tileGroups = new ArrayList<>();
+        currentChart.rowGroups = new ArrayList<>();
 
         try (Cursor c = mContentResolver.query(
             ChartItems.CONTENT_URI, null,
@@ -309,14 +311,23 @@ public class ChartDataHelper {
                     String SectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
                     if (SectionType != null) {
                         switch (SectionType) {
+                            case "CHART_DIVIDER":
+                                if((currentChart.tileGroups.size() != 0)
+                                    || (currentChart.rowGroups.size() != 0)) {
+                                    Charts.add(currentChart);
+                                    currentChart = new Chart(uuid);
+                                    currentChart.tileGroups = new ArrayList<>();
+                                    currentChart.rowGroups = new ArrayList<>();
+                                }
+                                break;
                             case "TILE_ROW":
                                 ChartSection tileGroup = new ChartSection(label);
-                                tileGroups.add(tileGroup);
+                                currentChart.tileGroups.add(tileGroup);
                                 tileGroupsById.put(rowid, tileGroup);
                                 break;
                             case "GRID_SECTION":
                                 ChartSection rowGroup = new ChartSection(label);
-                                rowGroups.add(rowGroup);
+                                currentChart.rowGroups.add(rowGroup);
                                 rowGroupsById.put(rowid, rowGroup);
                                 break;
                         }
@@ -336,11 +347,17 @@ public class ChartDataHelper {
                             Utils.getString(c, ChartItems.CSS_STYLE),
                             Utils.getString(c, ChartItems.SCRIPT));
                         section.items.add(item);
+                    } else if (Utils.getString(c, ChartItems.TYPE).equals("CHART_DIVIDER")) {
+                        currentChart.name = label;
                     }
                 }
             }
         }
-        return new Chart(uuid, tileGroups, rowGroups);
+        if((currentChart.tileGroups.size() != 0)
+            || (currentChart.rowGroups.size() != 0)) {
+            Charts.add(currentChart);
+        }
+        return Charts;
     }
 
     public List<Form> getForms() {
