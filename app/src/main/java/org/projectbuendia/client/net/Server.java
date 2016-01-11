@@ -88,6 +88,14 @@ public interface Server {
         Response.ErrorListener errorListener);
 
     /**
+     * Remove an observation by it's UUID.
+     * @param Uuid The observation UUID.
+     */
+    void deleteObservation(
+            String Uuid,
+            Response.ErrorListener errorListener);
+
+    /**
      * Get the patient record for an existing patient. Currently we are just using a String-String
      * map for parameters, but this is a bit close in implementation details to the old Buendia UI
      * so it will probably need to be generalized in future.

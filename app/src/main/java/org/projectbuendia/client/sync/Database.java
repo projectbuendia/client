@@ -19,6 +19,7 @@ import net.sqlcipher.database.SQLiteOpenHelper;
 
 import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.providers.Contracts.Table;
+import org.projectbuendia.client.utils.Logger;
 
 import java.io.File;
 import java.util.HashMap;
@@ -29,6 +30,8 @@ import java.util.Map;
  * active patients, locations, and chart information.
  */
 public class Database extends SQLiteOpenHelper {
+
+    private static final Logger LOG = Logger.create();
 
     /** Schema version. */
     public static final int DATABASE_VERSION = 29;
@@ -122,6 +125,7 @@ public class Database extends SQLiteOpenHelper {
             + "encounter_millis INTEGER,"
             + "concept_uuid INTEGER,"
             + "value STRING,"
+            + "voided INTEGER,"
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
         SCHEMAS.put(Table.ORDERS, ""
@@ -180,6 +184,7 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public void clear(SQLiteDatabase db) {
+        LOG.i("Clearing database.");
         for (Table table : Table.values()) {
             db.execSQL("DROP TABLE IF EXISTS " + table);
         }
@@ -187,6 +192,7 @@ public class Database extends SQLiteOpenHelper {
     }
 
     @Override public void onCreate(SQLiteDatabase db) {
+        LOG.i("Initializing database");
         for (Table table : Table.values()) {
             db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
         }

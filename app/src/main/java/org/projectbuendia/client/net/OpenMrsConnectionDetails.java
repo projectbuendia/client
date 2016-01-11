@@ -44,6 +44,10 @@ public class OpenMrsConnectionDetails {
         return mSettings.getOpenmrsUrl("/ws/rest/v1/projectbuendia");
     }
 
+    public String getRestApiUrl() {
+        return mSettings.getOpenmrsUrl("/ws/rest/v1");
+    }
+
     /**
      * Adds an authentication header to an existing map of HTTP headers.
      * @param params the header map to be modified

@@ -93,6 +93,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
         }
 
         String syncToken = SyncAdapter.getLastSyncToken(providerClient, dbTable);
+        LOG.i("Using sync token `%s`", syncToken);
 
         IncrementalSyncResponse<T> response;
 
@@ -109,6 +110,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
             syncToken = response.syncToken;
         } while (response.more);
 
+        LOG.i("Saving new sync token `%s`", syncToken);
         SyncAdapter.storeSyncToken(providerClient, dbTable, response.syncToken);
 
         afterSyncFinished(contentResolver, syncResult, providerClient);

@@ -96,6 +96,7 @@ public class PatientListFragment extends ProgressFragment implements
         super.onViewCreated(view, savedInstanceState);
 
         mListView = (ExpandableListView) view.findViewById(R.id.fragment_patient_list);
+        mListView.setEmptyView(view.findViewById(R.id.empty));
         mListView.setOnChildClickListener(this);
         // The list view adapter will be set once locations are available.
 

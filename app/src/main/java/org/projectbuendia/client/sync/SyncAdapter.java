@@ -207,7 +207,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         } catch (CancellationException e) {
             rollbackSavepoint(dbTransactionHelper);
             // Reset canceled state so that it doesn't interfere with next sync.
-            LOG.e(e, "Sync canceled");
+            LOG.i(e, "Sync canceled");
             getContext().sendBroadcast(syncCanceledIntent);
             return;
         } catch (OperationApplicationException e) {
