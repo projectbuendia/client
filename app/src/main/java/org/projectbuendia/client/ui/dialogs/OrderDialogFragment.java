@@ -47,7 +47,6 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
-    @InjectView(R.id.order_stop) Button mStop;
     @InjectView(R.id.order_delete) Button mDelete;
     private LayoutInflater mInflater;
 
@@ -218,7 +217,6 @@ public class OrderDialogFragment extends DialogFragment {
         // Hide or show the "Stop" and "Delete" buttons appropriately.
         Long stopMillis = Utils.getLong(args, "stop_millis");
         Long nowMillis = Utils.getLong(args, "now_millis");
-        Utils.showIf(mStop, !newOrder && (stopMillis == null || stopMillis > nowMillis));
         Utils.showIf(mDelete, !newOrder);
 
         // Open the keyboard, ready to type into the medication field.
