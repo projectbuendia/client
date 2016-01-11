@@ -140,7 +140,8 @@ public final class Order extends Base<String> implements Comparable<Order> {
         json.put("patient_uuid", patientUuid);
         json.put("instructions", instructions);
         json.put("start_millis", start.getMillis());
-        json.put("stop_millis", stop == null ? null : stop.getMillis());
+        // Use `JSONObject.NULL` instead of `null` so that the value is actually set.
+        json.put("stop_millis", stop == null ? JSONObject.NULL : stop.getMillis());
         return json;
     }
 
