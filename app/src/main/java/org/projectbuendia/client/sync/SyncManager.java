@@ -79,17 +79,17 @@ public class SyncManager {
     /** Returns {@code true} if a sync is active. */
     public boolean isSyncActive() {
         return ContentResolver.isSyncActive(
-            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
 
     /** Starts a full sync as soon as possible. */
-    public void startFullSync() {
+    public static void startFullSync() {
         SyncAccountService.startFullSync();
     }
 
-    /** Starts a sync of only observations. */
-    public void startObservationsSync() {
-        SyncAccountService.startObservationsSync();
+    /** Starts a sync of only observations and orders. */
+    public static void startObservationsAndOrdersSync() {
+        SyncAccountService.startObservationsAndOrdersSync();
     }
 
     /**

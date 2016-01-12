@@ -13,24 +13,28 @@ package org.projectbuendia.client.events.actions;
 
 import android.support.annotation.Nullable;
 
+import org.joda.time.DateTime;
+
 /**
  * Event indicating that the user has entered an order that needs to be saved
  * (both stored locally on the client and posted to the server's order API).
  */
 public class OrderSaveRequestedEvent {
-    // If previousOrderUuid is set, the event indicates a revision of an existing
+    // If orderUuid is set, the event indicates a revision of an existing
     // order; otherwise, the event indicates a creation of a new order.
-    public final String previousOrderUuid;
+    public final String orderUuid;
     public final String patientUuid;
     public final String instructions;
+    public final DateTime start;
     public final Integer durationDays;
 
     public OrderSaveRequestedEvent(
-        @Nullable String previousOrderUuid, String patientUuid,
-        String instructions, @Nullable Integer durationDays) {
-        this.previousOrderUuid = previousOrderUuid;
+        @Nullable String orderUuid, String patientUuid,
+        String instructions, DateTime start, @Nullable Integer durationDays) {
+        this.orderUuid = orderUuid;
         this.patientUuid = patientUuid;
         this.instructions = instructions;
+        this.start = start;
         this.durationDays = durationDays;
     }
 }

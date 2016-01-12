@@ -21,12 +21,13 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
-import org.projectbuendia.client.events.data.OrderAddFailedEvent;
+import org.projectbuendia.client.events.data.ItemUpdatedEvent;
+import org.projectbuendia.client.events.data.OrderSaveFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
-import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.LoaderSet;
-import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonOrder;
+import org.projectbuendia.client.models.LoaderSet;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
@@ -37,9 +38,9 @@ import java.util.concurrent.ExecutionException;
  * <p/>
  * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the
  * given {@link CrudEventBus} with the added order. If the operation fails, an
- * {@link OrderAddFailedEvent} is posted instead.
+ * {@link OrderSaveFailedEvent} is posted instead.
  */
-public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
+public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
@@ -52,8 +53,8 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
     private String mUuid;
 
-    /** Creates a new {@link AddOrderTask}. */
-    public AddOrderTask(
+    /** Creates a new {@link SaveOrderTask}. */
+    public SaveOrderTask(
         TaskFactory taskFactory,
         LoaderSet loaderSet,
         Server server,
@@ -68,65 +69,53 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
         mBus = bus;
     }
 
-    @Override protected OrderAddFailedEvent doInBackground(Void... params) {
-        RequestFuture<JsonOrder> future = RequestFuture.newFuture();
+    @SuppressWarnings("unused") // called by reflection from EventBus
+    public void onEventMainThread(ItemFetchedEvent<Order> event) {
+        mBus.post(mOrder.uuid == null ? new ItemCreatedEvent<>(event.item)
+            : new ItemUpdatedEvent<>(mOrder.uuid, event.item));
+        mBus.unregister(this);
+    }
 
-        mServer.addOrder(mOrder, future, future);
+    @SuppressWarnings("unused") // called by reflection from EventBus
+    public void onEventMainThread(ItemFetchFailedEvent event) {
+        mBus.post(new OrderSaveFailedEvent(
+            OrderSaveFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
+        mBus.unregister(this);
+    }
+
+    @Override protected OrderSaveFailedEvent doInBackground(Void... params) {
+        RequestFuture<JsonOrder> future = RequestFuture.newFuture();
+        mServer.saveOrder(mOrder, future, future);
         JsonOrder json;
         try {
             json = future.get();
         } catch (InterruptedException e) {
-            return new OrderAddFailedEvent(OrderAddFailedEvent.Reason.INTERRUPTED, e);
+            return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
-            return new OrderAddFailedEvent(OrderAddFailedEvent.Reason.UNKNOWN_SERVER_ERROR, e);
+            return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.UNKNOWN_SERVER_ERROR, e);
         }
 
-        Order order = Order.fromJson(json);
+        // insert() is implemented as insert or replace, so we use it for both adding and updating.
         Uri uri = mContentResolver.insert(
-            Contracts.Orders.CONTENT_URI, order.toContentValues());
-
+            Contracts.Orders.CONTENT_URI, Order.fromJson(json).toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
-            return new OrderAddFailedEvent(
-                OrderAddFailedEvent.Reason.CLIENT_ERROR, null);
+            return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.CLIENT_ERROR, null);
         }
 
         mUuid = json.uuid;
-        return null;
+        return null;  // no error means success
     }
 
-    @Override protected void onPostExecute(OrderAddFailedEvent event) {
-        // If an error occurred, post the error event.
-        if (event != null) {
+    @Override protected void onPostExecute(OrderSaveFailedEvent event) {
+        if (event != null) {  // an error occurred
             mBus.post(event);
             return;
         }
 
-        // Otherwise, start a fetch task to fetch the order from the database.
-        mBus.register(new CreationEventSubscriber());
-        FetchItemTask<Order> task = mTaskFactory.newFetchItemTask(
-            Contracts.Orders.CONTENT_URI,
-            null,
-            new UuidFilter(),
-            mUuid,
-            mLoaderSet.orderLoader,
-            mBus);
-        task.execute();
-    }
-
-    // After adding an order, we fetch it back from the database. The result of the fetch
-    // determines if the add was truly successful and propagates a new event to report
-    // success/failure.
-    @SuppressWarnings("unused") // Called by reflection from EventBus.
-    private final class CreationEventSubscriber {
-        public void onEventMainThread(ItemFetchedEvent<Order> event) {
-            mBus.post(new ItemCreatedEvent<>(event.item));
-            mBus.unregister(this);
-        }
-
-        public void onEventMainThread(ItemFetchFailedEvent event) {
-            mBus.post(new OrderAddFailedEvent(
-                OrderAddFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
-            mBus.unregister(this);
-        }
+        // We use the fetch event to trigger UI updates, both for initial load and for this update.
+        mBus.register(this);
+        mTaskFactory.newFetchItemTask(
+            Contracts.Orders.CONTENT_URI, null, new UuidFilter(), mUuid,
+            mLoaderSet.orderLoader, mBus).execute();
     }
 }
