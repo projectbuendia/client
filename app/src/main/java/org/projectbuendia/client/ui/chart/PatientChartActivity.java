@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.chart;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -59,6 +61,7 @@ import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
@@ -114,7 +117,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
     @InjectView(R.id.patient_chart_root) DrawerLayout mDrawerLayout;
-    @InjectView(R.id.navList) ListView mDrawerList;
+    @InjectView(R.id.chart_list) ListView mDrawerList;
 
     ChartRenderer mChartRenderer;
 
@@ -279,13 +282,27 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         });
 
-        addDrawerItems();
+        initChartMenu();
     }
 
-    private void addDrawerItems() {
-        String[] osArray = { "Android", "iOS", "Windows", "OS X", "Linux" };
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+    private void initChartMenu() {
+        List<Chart> charts = mController.getCharts();
+        String[] menuArray = new String[charts.size()];
+        int i = 0;
+        for (Chart chart : charts) {
+            menuArray[i] = chart.name;
+            i++;
+        }
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuArray);
         mDrawerList.setAdapter(mAdapter);
+        final Activity that = this;
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mController.updatePatientObsUi(position);
+                mDrawerLayout.closeDrawer(mDrawerList);
+            }
+        });
     }
 
     @Override protected void onStartImpl() {

@@ -19,13 +19,6 @@
     android:orientation="vertical"
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
-  <ListView
-      android:id="@+id/navList"
-      android:layout_width="200dp"
-      android:layout_height="match_parent"
-      android:layout_gravity="left|start"
-      android:background="#ffeeeeee" />
-
   <LinearLayout
       android:id="@+id/patient_chart_status_section"
       android:layout_width="fill_parent"
@@ -92,5 +85,12 @@
       android:layout_width="match_parent"
       android:layout_height="fill_parent"
       android:layout_below="@+id/patient_chart_last_update_section"/>
+
+  <ListView
+    android:id="@+id/chart_list"
+    android:layout_width="200dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="left|start"
+    android:background="#ffeeeeee" />
 
 </android.support.v4.widget.DrawerLayout>

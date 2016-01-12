@@ -347,16 +347,19 @@ public class ChartDataHelper {
                             Utils.getString(c, ChartItems.CSS_STYLE),
                             Utils.getString(c, ChartItems.SCRIPT));
                         section.items.add(item);
-                    } else if (Utils.getString(c, ChartItems.TYPE).equals("CHART_DIVIDER")) {
-                        currentChart.name = label;
+                    } else {
+                        String type = Utils.getString(c, ChartItems.TYPE);
+                        if ((type != null) && (type.equals("CHART_DIVIDER"))) {
+                            currentChart.name = label;
+                        }
                     }
                 }
             }
         }
-        if((currentChart.tileGroups.size() != 0)
-            || (currentChart.rowGroups.size() != 0)) {
+        /*if((currentChart.tileGroups.size() != 0)
+            || (currentChart.rowGroups.size() != 0)) {*/
             Charts.add(currentChart);
-        }
+        //}
         return Charts;
     }
 

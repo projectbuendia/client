@@ -119,6 +119,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     private final MinimalHandler mMainThreadHandler;
     private AssignLocationDialog mAssignLocationDialog;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
+    private List<Chart> mCharts;
+    private int lastChartIndex = 0;
     // Every form request made by this controller is kept in this list until
     // the form is closed.
     List<FormRequest> mFormRequests = new ArrayList<>();
@@ -221,6 +223,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
         mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
+        mCharts = mChartHelper.getCharts(AppModel.CHART_UUID);
     }
 
     /**
@@ -517,7 +520,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     /** Gets the latest observation values and displays them on the UI. */
-    private synchronized void updatePatientObsUi() {
+    public synchronized void updatePatientObsUi(int chartNum) {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
         mObservations = mChartHelper.getObservations(mPatientUuid);
@@ -539,12 +542,15 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
 
-        List<Chart> Charts = mChartHelper.getCharts(AppModel.CHART_UUID);
-
+        lastChartIndex = chartNum;
         mUi.updateTilesAndGrid(
-            Charts.get(0),
+            mCharts.get(chartNum),
             latestObservations, mObservations, orders,
             admissionDate, firstSymptomsDate);
+    }
+
+    public List<Chart> getCharts(){
+        return mCharts;
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
@@ -585,7 +591,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientObsUi();
+            updatePatientObsUi(0);
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -664,7 +670,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientObsUi();
+                    updatePatientObsUi(0);
                 }
             });
         }
@@ -678,7 +684,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientObsUi();
+                    updatePatientObsUi(lastChartIndex);
                     mUi.showFormSubmissionDialog(false);
                 }
             });
@@ -755,7 +761,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             for( String uuid : event.Uuids){
                 mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
             }
-            updatePatientObsUi();
+            updatePatientObsUi(lastChartIndex);
         }
 
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
