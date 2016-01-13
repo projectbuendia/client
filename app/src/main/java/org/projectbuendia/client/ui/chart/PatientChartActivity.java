@@ -288,14 +288,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private void initChartMenu() {
         List<Chart> charts = mController.getCharts();
         String[] menuArray = new String[charts.size()];
-        int i = 0;
-        for (Chart chart : charts) {
-            menuArray[i] = chart.name;
-            i++;
+        for (int i = 0; i < charts.size(); i++) {
+            menuArray[i] = charts.get(i).name;
         }
         mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuArray);
         mDrawerList.setAdapter(mAdapter);
-        final Activity that = this;
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
