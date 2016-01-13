@@ -295,9 +295,7 @@ public class ChartDataHelper {
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();
         Map<Long, ChartSection> rowGroupsById = new HashMap<>();
         List<Chart> Charts = new ArrayList<>();
-        Chart currentChart = new Chart(uuid);
-        currentChart.tileGroups = new ArrayList<>();
-        currentChart.rowGroups = new ArrayList<>();
+        Chart currentChart = null;
 
         try (Cursor c = mContentResolver.query(
             ChartItems.CONTENT_URI, null,
@@ -312,12 +310,10 @@ public class ChartDataHelper {
                     if (SectionType != null) {
                         switch (SectionType) {
                             case "CHART_DIVIDER":
-                                if((currentChart.tileGroups.size() != 0)
-                                    || (currentChart.rowGroups.size() != 0)) {
+                                if ((currentChart != null) &&
+                                    ((currentChart.tileGroups.size() != 0)
+                                    || (currentChart.rowGroups.size() != 0))) {
                                     Charts.add(currentChart);
-                                    currentChart = new Chart(uuid);
-                                    currentChart.tileGroups = new ArrayList<>();
-                                    currentChart.rowGroups = new ArrayList<>();
                                 }
                                 break;
                             case "TILE_ROW":
@@ -350,16 +346,13 @@ public class ChartDataHelper {
                     } else {
                         String type = Utils.getString(c, ChartItems.TYPE);
                         if ((type != null) && (type.equals("CHART_DIVIDER"))) {
-                            currentChart.name = label;
+                            currentChart = new Chart(uuid, label);
                         }
                     }
                 }
             }
         }
-        /*if((currentChart.tileGroups.size() != 0)
-            || (currentChart.rowGroups.size() != 0)) {*/
-            Charts.add(currentChart);
-        //}
+        Charts.add(currentChart);
         return Charts;
     }
 
