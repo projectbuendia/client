@@ -12,20 +12,12 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,9 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -56,10 +46,10 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
@@ -67,11 +57,10 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
+import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
-import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
-import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
@@ -108,7 +97,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
-    private ArrayAdapter<String> mAdapter;
+    private ChartRenderer mChartRenderer;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -123,10 +112,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
-    //@InjectView(R.id.patient_chart_root) DrawerLayout mDrawerLayout;
-    //@InjectView(R.id.chart_list) ListView mDrawerList;
-
-    ChartRenderer mChartRenderer;
 
     private static final String EN_DASH = "\u2013";
 
@@ -292,8 +277,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         initChartMenu();
     }
 
-    ViewPager mViewPager;
-
     private void initChartMenu() {
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -317,31 +300,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     .setText(charts.get(i).name)
                     .setTabListener(tabListener));
         }
-
-//        for (int i = 0; i < 3; i++) {
-//            actionBar.addTab(
-//                actionBar.newTab()
-//                    .setText("Tab xyz " + (i + 1))
-//                    .setTabListener(tabListener));
-//        }
     }
-
-//    private void initChartMenu() {
-//        List<Chart> charts = mController.getCharts();
-//        String[] menuArray = new String[charts.size()];
-//        for (int i = 0; i < charts.size(); i++) {
-//            menuArray[i] = charts.get(i).name;
-//        }
-//        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuArray);
-//        mDrawerList.setAdapter(mAdapter);
-//        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                mController.updatePatientObsUi(position);
-//                mDrawerLayout.closeDrawer(mDrawerList);
-//            }
-//        });
-//    }
 
     @Override protected void onStartImpl() {
         super.onStartImpl();
