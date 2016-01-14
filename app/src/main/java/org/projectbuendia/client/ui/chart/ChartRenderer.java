@@ -52,6 +52,7 @@ public class ChartRenderer {
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
     private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
+    private String lastChart = "";
 
     public interface GridJsInterface {
         @android.webkit.JavascriptInterface
@@ -81,9 +82,11 @@ public class ChartRenderer {
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
 
-        if (observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders)) {
+        if ((observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders))
+            && (lastChart.equals(chart.name))){
             return;  // nothing has changed; no need to render again
         }
+        lastChart = chart.name;
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.

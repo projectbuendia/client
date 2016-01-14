@@ -84,6 +84,6 @@
       android:id="@+id/chart_webview"
       android:layout_width="match_parent"
       android:layout_height="fill_parent"
-      android:layout_below="@+id/patient_chart_last_update_section"/>
+      android:layout_below="@+id/patient_chart_last_update_section" />
 
 </RelativeLayout>

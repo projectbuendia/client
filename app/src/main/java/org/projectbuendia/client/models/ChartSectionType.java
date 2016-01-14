@@ -13,6 +13,7 @@ package org.projectbuendia.client.models;
 
 /** Chart section type identifiers, used in the ChartItems.SECTION_TYPE column. */
 public enum ChartSectionType {
+    CHART_DIVIDER,
     TILE_ROW,
     GRID_SECTION
 }
