@@ -9,7 +9,7 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<android.support.v4.widget.DrawerLayout
+<RelativeLayout
     android:id="@+id/patient_chart_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -19,83 +19,71 @@
     android:orientation="vertical"
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
-  <RelativeLayout
+  <LinearLayout
+      android:id="@+id/patient_chart_status_section"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="16dp"
+      android:layout_marginRight="16dp"
+      android:layout_marginTop="16dp"
+      android:orientation="horizontal">
+
+    <org.projectbuendia.client.widgets.PatientAttributeView
+        android:id="@+id/attribute_admission_days"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.2"
+        app:attributeName="@string/since_admission"
+        app:attributeValue="–"/>
+
+    <org.projectbuendia.client.widgets.PatientAttributeView
+        android:id="@+id/attribute_symptoms_onset_days"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.2"
+        app:attributeName="@string/since_symptom_onset"
+        app:attributeValue="–"/>
+
+    <org.projectbuendia.client.widgets.PatientAttributeView
+        android:id="@+id/attribute_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.2"
+        app:attributeName="@string/location"
+        app:attributeValue="–"/>
+
+    <org.projectbuendia.client.widgets.PatientAttributeView
+        android:id="@+id/attribute_pcr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.2"
+        app:attributeName="@string/latest_pcr_label"
+        app:attributeValue="–"/>
+
+    <TextView
+        android:id="@+id/patient_chart_pregnant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.2"
+        android:gravity="end"
+        android:textColor="@color/red"
+        tools:text="Pregnant&#10;IV Fitted"/>
+  </LinearLayout>
+
+  <FrameLayout
+      android:id="@+id/patient_chart_last_update_section"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/patient_chart_status_section"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginBottom="8dp">
+  </FrameLayout>
+
+  <WebView
+      android:id="@+id/chart_webview"
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+      android:layout_height="fill_parent"
+      android:layout_below="@+id/patient_chart_last_update_section" />
 
-    <LinearLayout
-        android:id="@+id/patient_chart_status_section"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal">
-
-      <org.projectbuendia.client.widgets.PatientAttributeView
-          android:id="@+id/attribute_admission_days"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="0.2"
-          app:attributeName="@string/since_admission"
-          app:attributeValue="–"/>
-
-      <org.projectbuendia.client.widgets.PatientAttributeView
-          android:id="@+id/attribute_symptoms_onset_days"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="0.2"
-          app:attributeName="@string/since_symptom_onset"
-          app:attributeValue="–"/>
-
-      <org.projectbuendia.client.widgets.PatientAttributeView
-          android:id="@+id/attribute_location"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="0.2"
-          app:attributeName="@string/location"
-          app:attributeValue="–"/>
-
-      <org.projectbuendia.client.widgets.PatientAttributeView
-          android:id="@+id/attribute_pcr"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="0.2"
-          app:attributeName="@string/latest_pcr_label"
-          app:attributeValue="–"/>
-
-      <TextView
-          android:id="@+id/patient_chart_pregnant"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="0.2"
-          android:gravity="end"
-          android:textColor="@color/red"
-          tools:text="Pregnant&#10;IV Fitted"/>
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/patient_chart_last_update_section"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/patient_chart_status_section"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp">
-    </FrameLayout>
-
-    <WebView
-        android:id="@+id/chart_webview"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/patient_chart_last_update_section"/>
-  </RelativeLayout>
-
-  <ListView
-    android:id="@+id/chart_list"
-    android:layout_width="200dp"
-    android:layout_height="match_parent"
-    android:layout_gravity="start"
-    android:background="@color/white" />
-
-</android.support.v4.widget.DrawerLayout>
+</RelativeLayout>

@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.chart;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -18,7 +19,13 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -116,8 +123,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
-    @InjectView(R.id.patient_chart_root) DrawerLayout mDrawerLayout;
-    @InjectView(R.id.chart_list) ListView mDrawerList;
+    //@InjectView(R.id.patient_chart_root) DrawerLayout mDrawerLayout;
+    //@InjectView(R.id.chart_list) ListView mDrawerList;
 
     ChartRenderer mChartRenderer;
 
@@ -285,22 +292,56 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         initChartMenu();
     }
 
+    ViewPager mViewPager;
+
     private void initChartMenu() {
+        final ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+            @Override
+            public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                mController.updatePatientObsUi(tab.getPosition());
+            }
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {}
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {}
+        };
+
         List<Chart> charts = mController.getCharts();
         String[] menuArray = new String[charts.size()];
         for (int i = 0; i < charts.size(); i++) {
             menuArray[i] = charts.get(i).name;
+            actionBar.addTab(
+                actionBar.newTab()
+                    .setText(charts.get(i).name)
+                    .setTabListener(tabListener));
         }
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuArray);
-        mDrawerList.setAdapter(mAdapter);
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mController.updatePatientObsUi(position);
-                mDrawerLayout.closeDrawer(mDrawerList);
-            }
-        });
+
+//        for (int i = 0; i < 3; i++) {
+//            actionBar.addTab(
+//                actionBar.newTab()
+//                    .setText("Tab xyz " + (i + 1))
+//                    .setTabListener(tabListener));
+//        }
     }
+
+//    private void initChartMenu() {
+//        List<Chart> charts = mController.getCharts();
+//        String[] menuArray = new String[charts.size()];
+//        for (int i = 0; i < charts.size(); i++) {
+//            menuArray[i] = charts.get(i).name;
+//        }
+//        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuArray);
+//        mDrawerList.setAdapter(mAdapter);
+//        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                mController.updatePatientObsUi(position);
+//                mDrawerLayout.closeDrawer(mDrawerList);
+//            }
+//        });
+//    }
 
     @Override protected void onStartImpl() {
         super.onStartImpl();
@@ -346,7 +387,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mSymptomOnsetDaysView.setValue(
-                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
         }
 
         // TODO/cleanup: We don't need this special logic for the Ebola PCR test results
@@ -360,9 +401,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
             mPcr.setIconDrawable(
-                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
-                            .color(0x00000000)
-                            .sizeDp(36));
+                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
+                    .color(0x00000000)
+                    .sizeDp(36));
             if ((pcrLObservation == null || pcrLObservation.valueName == null)
                 && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
@@ -449,16 +490,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIconDrawable(
-                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
-                            .color(0x00000000)
-                            .sizeDp(36));
+                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
+                    .color(0x00000000)
+                    .sizeDp(36));
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
             String id = Utils.valueOrDefault(patient.id, EN_DASH);
             String fullName = Utils.valueOrDefault(patient.givenName, EN_DASH) + " " +
-                    Utils.valueOrDefault(patient.familyName, EN_DASH);
+                Utils.valueOrDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
@@ -467,7 +508,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null ? "age unknown"
-                    : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
+                : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
             PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
         }
@@ -487,7 +528,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                    PatientChartActivity.this, formUuid, requestCode, patient, preset);
+                PatientChartActivity.this, formUuid, requestCode, patient, preset);
         }
 
         @Override public void reEnableFetch() {
@@ -509,7 +550,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void showObservationsDialog(ArrayList<ObsRow> observations) {
             ViewObservationsDialogFragment.newInstance(observations)
-                    .show(getSupportFragmentManager(), null);
+                .show(getSupportFragmentManager(), null);
         }
 
         @Override public void showOrderExecutionDialog(
