@@ -46,10 +46,8 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link AddPatientTask}. */
-    public AddPatientTask newAddPatientAsyncTask(
-        PatientDelta patientDelta, CrudEventBus bus) {
-        return new AddPatientTask(
-            this, mLoaderSet, mServer, mContentResolver, patientDelta, bus);
+    public AddPatientTask newAddPatientTask(PatientDelta patientDelta, CrudEventBus bus) {
+        return new AddPatientTask(this, mLoaderSet, mServer, mContentResolver, patientDelta, bus);
     }
 
     public DownloadSinglePatientTask newDownloadSinglePatientTask(
@@ -63,34 +61,36 @@ public class TaskFactory {
                 this, mLoaderSet, mServer, mContentResolver, voidObs, bus);
     }
 
-    /** Creates a new {@link AppUpdatePatientTask}. */
-    public AppUpdatePatientTask newUpdatePatientAsyncTask(
+    /** Creates a new {@link UpdatePatientTask}. */
+    public UpdatePatientTask newUpdatePatientTask(
         String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
-        return new AppUpdatePatientTask(
+        return new UpdatePatientTask(
             this, mLoaderSet, mServer, mContentResolver, patientUuid, patientDelta, bus);
     }
 
     /** Creates a new {@link AddEncounterTask}. */
-    public AddEncounterTask newAddEncounterAsyncTask(
+    public AddEncounterTask newAddEncounterTask(
         Patient patient, Encounter encounter, CrudEventBus bus) {
         return new AddEncounterTask(
             this, mLoaderSet, mServer, mContentResolver, patient, encounter, bus);
     }
 
+    /** Creates a new {@link SaveOrderTask}. */
+    public SaveOrderTask newSaveOrderTask(Order order, CrudEventBus bus) {
+        return new SaveOrderTask(this, mLoaderSet, mServer, mContentResolver, order, bus);
+    }
+
+    // DO NOT SUBMIT: work out why there's two of these.
     public VoidObsTask newVoidObsAsyncTask(
             VoidObs obs, CrudEventBus bus) {
         return new VoidObsTask(
                 this, mLoaderSet, mServer, mContentResolver, obs, bus);
     }
 
-
-    /** Creates a new {@link AddOrderTask}. */
-    public AddOrderTask newAddOrderAsyncTask(
-        Order order, CrudEventBus bus) {
-        return new AddOrderTask(
-            this, mLoaderSet, mServer, mContentResolver, order, bus);
+    /** Creates a new {@link DeleteOrderTask}. */
+    public DeleteOrderTask newDeleteOrderTask(String orderUuid, CrudEventBus bus) {
+        return new DeleteOrderTask(mServer, mContentResolver, orderUuid, bus);
     }
-
 
     /** Creates a new {@link FetchItemTask}. */
     public <T extends Base<?>> FetchItemTask<T> newFetchItemTask(
@@ -101,7 +101,6 @@ public class TaskFactory {
         CursorLoader<T> loader,
         CrudEventBus bus) {
         return new FetchItemTask<>(
-            mContentResolver, contentUri, projectionColumns, filter, constraint, loader,
-            bus);
+            mContentResolver, contentUri, projectionColumns, filter, constraint, loader, bus);
     }
 }

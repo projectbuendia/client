@@ -16,10 +16,15 @@ import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.utils.Utils;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -27,6 +32,7 @@ import javax.annotation.concurrent.Immutable;
 /** An order in the app model. */
 @Immutable
 public final class Order extends Base<String> implements Comparable<Order> {
+    public static final char NON_BREAKING_SPACE = '\u00a0';
     public final
     @Nullable String uuid;
     public final String patientUuid;
@@ -34,6 +40,60 @@ public final class Order extends Base<String> implements Comparable<Order> {
     public final DateTime start;
     public final
     @Nullable DateTime stop;
+
+    public static Order fromJson(JsonOrder order) {
+        return new Order(order.uuid, order.patient_uuid, order.instructions,
+            order.start_millis, order.stop_millis);
+    }
+
+    // TODO/robustness: Store medication, dosage, and frequency as separate fields instead of
+    // mashing them into one free-text instructions field.  This will also enable
+    // internationalization.
+
+    // [Any amount of non-whitespace][space][any text][space][more than one digit]x[space][any text]
+    // OR [Any amount of non-whitespace][an optional space][any text]
+    // Note that the second branch will match everything - even the empty string - and shoehorn
+    // the order instructions into the medication and dosage fields.
+    public static final Pattern INSTRUCTIONS_PATTERN = Pattern.compile(
+        "([^ ]*) (.*) ([0-9]+)x .*|([^ ]*) ?(.*)");
+
+    public static String getInstructions(String medication, String dosage, String frequency) {
+        medication = Utils.valueOrDefault(medication, "");
+        dosage = Utils.valueOrDefault(dosage, "");
+        frequency = Utils.valueOrDefault(frequency, "");
+        if (!frequency.isEmpty()) {
+            frequency += "x daily";
+        }
+        return (medication.replace(' ', NON_BREAKING_SPACE) + " " + dosage + " " + frequency)
+                .trim();
+    }
+
+    public static String getMedication(String instructions) {
+        Matcher matcher = INSTRUCTIONS_PATTERN.matcher(Utils.valueOrDefault(instructions, ""));
+        if (matcher.matches()) {
+            // These groups are the "([^ ]*)" in each branch of the regex above.
+            String group = Utils.valueOrDefault(matcher.group(1), matcher.group(4));
+            return group.replace(NON_BREAKING_SPACE, ' ');
+        }
+        return null;
+    }
+
+    public static String getDosage(String instructions) {
+        Matcher matcher = INSTRUCTIONS_PATTERN.matcher(Utils.valueOrDefault(instructions, ""));
+        if (matcher.matches()) {
+            // These groups are the `(.*)` in each branch of the regex.
+            return Utils.valueOrDefault(matcher.group(2), matcher.group(5));
+        }
+        return null;
+    }
+
+    public static String getFrequency(String instructions) {
+        Matcher matcher = INSTRUCTIONS_PATTERN.matcher(Utils.valueOrDefault(instructions, ""));
+        if (matcher.matches()) {
+            return matcher.group(3);
+        }
+        return null;
+    }
 
     public Order(@Nullable String uuid, String patientUuid,
                  String instructions, DateTime start, @Nullable DateTime stop) {
@@ -53,9 +113,20 @@ public final class Order extends Base<String> implements Comparable<Order> {
         this.stop = stopMillis == null ? null : new DateTime(stopMillis);
     }
 
-    public static Order fromJson(JsonOrder order) {
-        return new Order(order.uuid, order.patient_uuid, order.instructions,
-            order.start_millis, order.stop_millis);
+    public String getMedication() {
+        return getMedication(instructions);
+    }
+
+    public String getDosage() {
+        return getDosage(instructions);
+    }
+
+    public String getFrequency() {
+        return getFrequency(instructions);
+    }
+
+    public Interval getInterval() {
+        return Utils.toInterval(start, stop);
     }
 
     @Override public int compareTo(@NonNull Order other) {
@@ -69,9 +140,8 @@ public final class Order extends Base<String> implements Comparable<Order> {
         json.put("patient_uuid", patientUuid);
         json.put("instructions", instructions);
         json.put("start_millis", start.getMillis());
-        if (stop != null) {
-            json.put("stop_millis", stop.getMillis());
-        }
+        // Use `JSONObject.NULL` instead of `null` so that the value is actually set.
+        json.put("stop_millis", stop == null ? JSONObject.NULL : stop.getMillis());
         return json;
     }
 

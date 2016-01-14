@@ -24,7 +24,7 @@ import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
-import org.projectbuendia.client.sync.Order;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -57,6 +57,8 @@ public class ChartRenderer {
     public interface GridJsInterface {
         @android.webkit.JavascriptInterface
         void onNewOrderPressed();
+
+        @android.webkit.JavascriptInterface void onOrderHeadingPressed(String orderUuid);
 
         @android.webkit.JavascriptInterface
         void onOrderCellPressed(String orderUuid, long startMillis);

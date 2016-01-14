@@ -25,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -48,9 +47,9 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
@@ -502,8 +501,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             Utils.showDialogIf(mFormSubmissionDialog, show);
         }
 
-        @Override public void showNewOrderDialog(String patientUuid) {
-            OrderDialogFragment.newInstance(patientUuid, null)
+        @Override public void showOrderDialog(String patientUuid, Order order) {
+            OrderDialogFragment.newInstance(patientUuid, order)
                 .show(getSupportFragmentManager(), null);
         }
 

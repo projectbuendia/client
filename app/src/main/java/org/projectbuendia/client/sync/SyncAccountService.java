@@ -19,8 +19,11 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SyncStatusObserver;
 import android.os.Bundle;
 import android.os.IBinder;
+
+import com.google.common.eventbus.EventBus;
 
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
@@ -80,7 +83,7 @@ public class SyncAccountService extends Service {
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
-        // Fetch everything, except fetch only newly added observations if so enabled.
+        // Fetch everything
         b.putBoolean(SyncOption.FULL_SYNC.name(), true);
         LOG.i("Requesting full sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
@@ -91,8 +94,8 @@ public class SyncAccountService extends Service {
         return new Account(ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
     }
 
-    /** Starts an sync of just the observations. */
-    public static void startObservationsSync() {
+    /** Starts an sync of just the observations and orders. */
+    public static void startObservationsAndOrdersSync() {
         // Start by canceling any existing syncs, which may delay this one.
         ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
 
@@ -104,7 +107,7 @@ public class SyncAccountService extends Service {
         // Fetch just the newly added observations.
         b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
         b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
-        LOG.i("Requesting incremental observation sync");
+        LOG.i("Requesting incremental observations / orders sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
 
