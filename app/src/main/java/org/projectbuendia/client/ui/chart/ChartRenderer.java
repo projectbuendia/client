@@ -81,7 +81,10 @@ public class ChartRenderer {
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
-
+        if (chart == null) {
+            renderError();
+            return;
+        }
         if ((observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders))
             && (lastChart.equals(chart.name))){
             return;  // nothing has changed; no need to render again
@@ -106,6 +109,10 @@ public class ChartRenderer {
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
+    }
+
+    private void renderError() {
+        mView.loadUrl("file:///android_asset/no_chart.html");
     }
 
     class GridHtmlGenerator {
