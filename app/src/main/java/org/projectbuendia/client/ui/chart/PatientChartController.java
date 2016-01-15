@@ -598,7 +598,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientObsUi(0);
+            updatePatientObsUi(lastChartIndex);
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -677,7 +677,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientObsUi(0);
+                    updatePatientObsUi(lastChartIndex);
                 }
             });
         }

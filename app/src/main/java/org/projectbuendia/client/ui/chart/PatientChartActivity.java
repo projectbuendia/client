@@ -277,27 +277,33 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     private void initChartMenu() {
-        final ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-            @Override
-            public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
-                mController.updatePatientObsUi(tab.getPosition());
-            }
-            @Override
-            public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {}
-            @Override
-            public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {}
-        };
-
         List<Chart> charts = mController.getCharts();
-        String[] menuArray = new String[charts.size()];
-        for (int i = 0; i < charts.size(); i++) {
-            menuArray[i] = charts.get(i).name;
-            actionBar.addTab(
-                actionBar.newTab()
-                    .setText(charts.get(i).name)
-                    .setTabListener(tabListener));
+        if (charts.size() > 1) {
+            final ActionBar actionBar = getActionBar();
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+                @Override
+                public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                    mController.updatePatientObsUi(tab.getPosition());
+                }
+
+                @Override
+                public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                }
+
+                @Override
+                public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                }
+            };
+
+            String[] menuArray = new String[charts.size()];
+            for (int i = 0; i < charts.size(); i++) {
+                menuArray[i] = charts.get(i).name;
+                actionBar.addTab(
+                    actionBar.newTab()
+                        .setText(charts.get(i).name)
+                        .setTabListener(tabListener));
+            }
         }
     }
 
