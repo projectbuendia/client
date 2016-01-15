@@ -82,7 +82,7 @@ public class ChartRenderer {
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
         if (chart == null) {
-            renderError();
+            mView.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
         if ((observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders))
@@ -109,10 +109,6 @@ public class ChartRenderer {
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
-    }
-
-    private void renderError() {
-        mView.loadUrl("file:///android_asset/no_chart.html");
     }
 
     class GridHtmlGenerator {
