@@ -83,7 +83,7 @@ public class SyncManager {
     }
 
     /** Starts a full sync as soon as possible. */
-    public static void startFullSync() {
+    public void startFullSync() {
         SyncAccountService.startFullSync();
     }
 
