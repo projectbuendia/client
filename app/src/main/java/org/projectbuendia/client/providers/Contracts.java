@@ -37,7 +37,7 @@ public class Contracts {
         PATIENTS("patients"),
         USERS("users"),
         SYNC_TOKENS("sync_tokens"),
-        UNSYNC_TOKENS("unsync_forms");
+        UNSENT_FORMS("unset_forms");
 
         public String name;
 
@@ -243,14 +243,14 @@ public class Contracts {
         String PATIENT_COUNT = "patient_count";
     }
 
-    public interface UnsyncForms {
-        Uri CONTENT_URI = buildContentUri("unsync-forms");
-        String GROUP_CONTENT_TYPE = buildGroupType("unsync-form");
-        String ITEM_CONTENT_TYPE = buildItemType("unsync-form");
+    public interface UnsentForms {
+        Uri CONTENT_URI = buildContentUri("unsent-forms");
+        String GROUP_CONTENT_TYPE = buildGroupType("unsent-form");
+        String ITEM_CONTENT_TYPE = buildItemType("unsent-form");
 
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
-        String XML = "xml";
+        String FORM_CONTENTS = "form_contents";
     }
 
     public static Uri buildContentUri(String path) {

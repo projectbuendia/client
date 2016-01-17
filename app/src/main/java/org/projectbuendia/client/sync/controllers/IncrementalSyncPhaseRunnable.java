@@ -88,7 +88,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
         boolean okToProceedSync = beforeSyncStarted(contentResolver, syncResult, providerClient);
 
         if(!okToProceedSync) {
-            LOG.w("Skipping synchronization for %s", this.getClass().getName());
+            LOG.w("Skipping synchronization for %s", this.getClass().getSimpleName());
             return;
         }
 

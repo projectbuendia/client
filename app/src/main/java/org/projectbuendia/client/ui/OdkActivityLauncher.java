@@ -44,13 +44,12 @@ import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.exception.ValidationException;
-import org.projectbuendia.client.models.UnsyncForm;
+import org.projectbuendia.client.models.UnsentForm;
 import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
 import org.projectbuendia.client.net.OpenMrsXformsConnection;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.providers.Contracts.UnsyncForms;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -67,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.Nullable;
 
@@ -77,6 +77,8 @@ import static java.lang.String.format;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns
     .CONTENT_ITEM_TYPE;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
+
+import static org.projectbuendia.client.providers.Contracts.UnsentForms;
 
 /** Convenience class for launching ODK to display an Xform. */
 public class OdkActivityLauncher {
@@ -289,17 +291,13 @@ public class OdkActivityLauncher {
      * @param context           the application context
      * @param settings          the application settings
      * @param patientUuid       the patient to add an observation to, or null to create a new patient
-     * @param resultCode        the result code sent from Android activity transition
      * @param data              the incoming intent
      */
     public static boolean sendOdkResultToServer(
         final Context context,
         final AppSettings settings,
         @Nullable final String patientUuid,
-        int resultCode,
         Intent data) {
-
-        if(isActivityCanceled(resultCode, data)) return false;
 
         try {
             final Uri uri = data.getData();
@@ -318,7 +316,6 @@ public class OdkActivityLauncher {
                 throw new ValidationException("No id to delete for after upload: " + uri);
             }
 
-            // Temporary code for messing about with xform instance, reading values.
             byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
 
             // get the root of the saved and template instances
@@ -399,10 +396,8 @@ public class OdkActivityLauncher {
 
     private static void deleteLocalFormInstances(Long formIdToDelete) {
         //Code largely copied from InstanceUploaderTask to delete on upload
-        DeleteInstancesTask dit = new DeleteInstancesTask();
-        dit.setContentResolver(
-            Collect.getInstance().getApplication()
-                .getContentResolver());
+        DeleteInstancesTask dit = new DeleteInstancesTask(Collect.getInstance().getApplication()
+            .getContentResolver());
         dit.execute(formIdToDelete);
     }
 
@@ -468,20 +463,6 @@ public class OdkActivityLauncher {
         return instanceCursor;
     }
 
-    /**
-     * Returns true if the activity was canceled
-     * @param resultCode        the result code sent from Android activity transition
-     * @param data              the incoming intent
-     */
-    private static boolean isActivityCanceled(int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_CANCELED) return true;
-        if (data == null || data.getData() == null) {
-            LOG.i("No data for form result, probably cancelled.");
-            return true;
-        }
-        return false;
-    }
-
     private static void sendFormToServer(String patientUuid, String xml,
                                          Response.Listener<JSONObject> successListener,
                                          Response.ErrorListener errorListener) {
@@ -490,49 +471,62 @@ public class OdkActivityLauncher {
         connection.postXformInstance(patientUuid, xml, successListener, errorListener);
     }
 
-    /** Tries to submit to the server all unsent forms. Returns {@code true} if there are no more
+    /** Tries to submit all unsent forms to the server . Returns {@code true} if there are no more
      * unsent forms. Otherwise returns {@code false}.
      */
     public static final boolean resendFormsToServer(final ContentResolver contentResolver) {
         final boolean hasUnsubmittedForms[] = new boolean[]{false};
-        for(final UnsyncForm unsyncForm : getUnsyncForms(contentResolver)) {
-            sendFormToServer(unsyncForm.patientUuid, unsyncForm.xml,
+        final List<UnsentForm> forms = getUnsetForms(contentResolver);
+
+        //A sync barrier to wait for all returning async submissions
+        final CountDownLatch countDownLatch = new CountDownLatch(forms.size());
+        for(final UnsentForm unsentForm : forms) {
+            sendFormToServer(unsentForm.patientUuid, unsentForm.formContents,
                 new Response.Listener<JSONObject>() {
                     @Override public void onResponse(JSONObject response) {
                         LOG.i("Created new encounter successfully on server. " + response.toString());
-                        deleteUnsyncForm(unsyncForm.uuid, contentResolver);
+                        deleteUnsentForm(unsentForm.uuid, contentResolver);
+                        countDownLatch.countDown();
 
                     }
                 }, new Response.ErrorListener() {
                     @Override public void onErrorResponse(VolleyError error) {
-                        //Just log it and flag as not synchronized, this form is already persisted.
-                        LOG.e(error, format("Error resubmitting %s form to server ", unsyncForm.uuid));
+                        //Just log it and flag returning valeue as pendent. It is not necessary to
+                        // keep its content, since this form is already persisted.
+                        LOG.e(error, format("Error resubmitting %s form to server ", unsentForm.uuid));
                         hasUnsubmittedForms[0] = true;
+                        countDownLatch.countDown();
                     }
                 });
         }
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            LOG.e("Interrupted whilst waiting for unsubmitted forms to be uploaded", e);
+            return false;
+        }
+
         return !hasUnsubmittedForms[0];
     }
 
-    public static void deleteUnsyncForm(final String uuid, final ContentResolver contentResolver) {
-        LOG.i("Removing the unsynchronized form from the db");
-        contentResolver.delete(UnsyncForms.CONTENT_URI, format("%s='%s'", UnsyncForms.UUID, uuid),
+    public static void deleteUnsentForm(final String uuid, final ContentResolver contentResolver) {
+        LOG.i("Removing the unsent form from the db");
+        contentResolver.delete(UnsentForms.CONTENT_URI, format("%s='%s'", UnsentForms.UUID, uuid),
             null);
     }
 
     /** Returns all local forms which were NOT submitted to the server yet*/
-    public static List<UnsyncForm> getUnsyncForms(final ContentResolver contentResolver) {
-        try (Cursor cursor = contentResolver.query(UnsyncForms.CONTENT_URI,
-            new String[]{UnsyncForms.UUID, UnsyncForms.PATIENT_UUID, UnsyncForms.XML}, null, null,
-            null)) {
-            List<UnsyncForm> unsyncForms = new ArrayList<>();
+    public static List<UnsentForm> getUnsetForms(final ContentResolver contentResolver) {
+        try (Cursor cursor = contentResolver.query(UnsentForms.CONTENT_URI,
+            new String[]{UnsentForms.UUID, UnsentForms.PATIENT_UUID, UnsentForms.FORM_CONTENTS},
+                null, null, null)) {
+            List<UnsentForm> unsentForms = new ArrayList<>();
             while (cursor.moveToNext()) {
-                unsyncForms.add(UnsyncForm.builder()
-                    .setUuid(Utils.getString(cursor, UnsyncForms.UUID, null))
-                    .setPatientUuid(Utils.getString(cursor, UnsyncForms.PATIENT_UUID, ""))
-                    .setXml( Utils.getString(cursor, UnsyncForms.XML, "")).build());
+                unsentForms.add(new UnsentForm(Utils.getString(cursor, UnsentForms.UUID, null),
+                    Utils.getString(cursor, UnsentForms.PATIENT_UUID, ""),
+                    Utils.getString(cursor, UnsentForms.FORM_CONTENTS, "")));
             }
-            return unsyncForms;
+            return unsentForms;
         }
     }
 
@@ -611,16 +605,15 @@ public class OdkActivityLauncher {
     /**
      * Saves the forms which couldn't be submitted to server into the local db. So that, when the
      * application connects to server again, it can try to resend the form again. Note that this
-     * method just save the data as it is required to be resend to the server. Please, check
+     * method just save the data as is required to be resend to the server. Please, check
      * {@link #updateObservationCache} to see how the observation itself is saved into db.
      * The {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable}
      * will check if there are unsent observations, and if is the case, it will try to resend it
      * prior to pull new ones (See {@link #resendFormsToServer}).
      */
     private static void saveUnsentForm(String patientUuid, String xml, ContentResolver resolver) {
-        resolver.insert(Contracts.UnsyncForms.CONTENT_URI,
-            UnsyncForm.builder().setUuid(UUID.randomUUID().toString()).setPatientUuid(patientUuid)
-                .setXml(xml).build().toContentValues());
+        resolver.insert(UnsentForms.CONTENT_URI, new UnsentForm(UUID.randomUUID().toString(),
+            patientUuid, xml).toContentValues());
     }
 
     /**

@@ -165,10 +165,10 @@ public class Database extends SQLiteOpenHelper {
             + "table_name TEXT PRIMARY KEY NOT NULL,"
             + "sync_token TEXT NOT NULL");
 
-        SCHEMAS.put(Table.UNSYNC_TOKENS, ""
+        SCHEMAS.put(Table.UNSENT_FORMS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
-            + "patient_uuid TEXT,"
-            + "xml");
+            + "patient_uuid TEXT NOT NULL,"
+            + "form_contents TEXT NOT NULL");
 
     }
 

@@ -187,7 +187,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     public interface OdkResultSender {
         boolean sendOdkResultToServer(
             @Nullable String patientUuid,
-            int resultCode,
             Intent data);
     }
 
@@ -294,7 +293,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         if(isSubmissionCanceled) return;
 
         final boolean isSubmittingForm = mOdkResultSender.sendOdkResultToServer(request.patientUuid,
-            resultCode, data);
+            data);
         mUi.showFormSubmissionDialog(isSubmittingForm);
     }
 
