@@ -81,7 +81,10 @@ public class ChartRenderer {
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
-
+        if (chart == null) {
+            mView.loadUrl("file:///android_asset/no_chart.html");
+            return;
+        }
         if ((observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders))
             && (lastChart.equals(chart.name))){
             return;  // nothing has changed; no need to render again
