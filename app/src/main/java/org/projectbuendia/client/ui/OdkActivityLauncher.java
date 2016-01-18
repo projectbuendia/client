@@ -332,7 +332,20 @@ public class OdkActivityLauncher {
                     context.getContentResolver());
             }
 
-            sendFormToServer(patientUuid, xml,
+            /* We should prevent application to submit new forms if there are still unsent forms.
+             * In a scenario where an user tries to submit an form 'A' unsuccessfully, this form is
+             * saved to be sent later. Then, if the user tries to submit another form 'B',
+             * the latter can only be submitted if the former was submitted first.
+             * In the case of the former still can't be resent, the latter form will be saved to be
+             * sent all together in a future moment.
+             *
+             */
+            if(!submitUnsetFormsToServer(App.getInstance().getContentResolver())) {
+                saveUnsentForm(patientUuid, xml, context.getContentResolver());
+                return false;
+            }
+
+            submitFormToServer(patientUuid, xml,
                 new Response.Listener<JSONObject>() {
                     @Override public void onResponse(JSONObject response) {
                         LOG.i("Created new encounter successfully on server" + response.toString());
@@ -354,6 +367,68 @@ public class OdkActivityLauncher {
             EventBus.getDefault().post(
                 new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
             return false;
+        }
+    }
+
+    /** Tries to submit all unsent forms to the server . Returns {@code true} if there are no more
+     * unsent forms. Otherwise returns {@code false}.
+     */
+    public static final boolean submitUnsetFormsToServer(final ContentResolver contentResolver) {
+        final boolean hasUnsubmittedForms[] = new boolean[]{false};
+        final List<UnsentForm> forms = getUnsetForms(contentResolver);
+
+        //Creating a sync barrier to wait for all returning async submissions
+        final CountDownLatch countDownLatch = new CountDownLatch(forms.size());
+        for(final UnsentForm unsentForm : forms) {
+            submitFormToServer(unsentForm.patientUuid, unsentForm.formContents,
+                new Response.Listener<JSONObject>() {
+                    @Override public void onResponse(JSONObject response) {
+                        LOG.i("Created new encounter successfully on server. " + response
+                            .toString());
+                        deleteUnsentForm(unsentForm.uuid, contentResolver);
+                        countDownLatch.countDown();
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override public void onErrorResponse(VolleyError error) {
+                        //Just log it and flag returning value as pendent. It is not necessary to
+                        // keep its content, since this form is already persisted.
+                        LOG.e(error, format("Error resubmitting %s form to server ", unsentForm
+                            .uuid));
+                        hasUnsubmittedForms[0] = true;
+                        countDownLatch.countDown();
+                    }
+                });
+        }
+        try {
+            //Waiting until all forms submissions return from server
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            LOG.e("Interrupted whilst waiting for unsubmitted forms to be uploaded", e);
+            return false;
+        }
+
+        return !hasUnsubmittedForms[0];
+    }
+
+    public static void deleteUnsentForm(final String uuid, final ContentResolver contentResolver) {
+        LOG.i("Removing the unsent form from the db");
+        contentResolver.delete(UnsentForms.CONTENT_URI, format("%s='%s'", UnsentForms.UUID, uuid),
+            null);
+    }
+
+    /** Returns all local forms which were NOT submitted to the server yet*/
+    public static List<UnsentForm> getUnsetForms(final ContentResolver contentResolver) {
+        try (Cursor cursor = contentResolver.query(UnsentForms.CONTENT_URI,
+            new String[]{UnsentForms.UUID, UnsentForms.PATIENT_UUID, UnsentForms.FORM_CONTENTS},
+            null, null, null)) {
+            List<UnsentForm> unsentForms = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                unsentForms.add(new UnsentForm(Utils.getString(cursor, UnsentForms.UUID, null),
+                    Utils.getString(cursor, UnsentForms.PATIENT_UUID, ""),
+                    Utils.getString(cursor, UnsentForms.FORM_CONTENTS, "")));
+            }
+            return unsentForms;
         }
     }
 
@@ -462,72 +537,13 @@ public class OdkActivityLauncher {
 
         return instanceCursor;
     }
-
-    private static void sendFormToServer(String patientUuid, String xml,
-                                         Response.Listener<JSONObject> successListener,
-                                         Response.ErrorListener errorListener) {
+    
+    private static void submitFormToServer(String patientUuid, String xml,
+                                           Response.Listener<JSONObject> successListener,
+                                           Response.ErrorListener errorListener) {
         OpenMrsXformsConnection connection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
         connection.postXformInstance(patientUuid, xml, successListener, errorListener);
-    }
-
-    /** Tries to submit all unsent forms to the server . Returns {@code true} if there are no more
-     * unsent forms. Otherwise returns {@code false}.
-     */
-    public static final boolean resendFormsToServer(final ContentResolver contentResolver) {
-        final boolean hasUnsubmittedForms[] = new boolean[]{false};
-        final List<UnsentForm> forms = getUnsetForms(contentResolver);
-
-        //A sync barrier to wait for all returning async submissions
-        final CountDownLatch countDownLatch = new CountDownLatch(forms.size());
-        for(final UnsentForm unsentForm : forms) {
-            sendFormToServer(unsentForm.patientUuid, unsentForm.formContents,
-                new Response.Listener<JSONObject>() {
-                    @Override public void onResponse(JSONObject response) {
-                        LOG.i("Created new encounter successfully on server. " + response.toString());
-                        deleteUnsentForm(unsentForm.uuid, contentResolver);
-                        countDownLatch.countDown();
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override public void onErrorResponse(VolleyError error) {
-                        //Just log it and flag returning valeue as pendent. It is not necessary to
-                        // keep its content, since this form is already persisted.
-                        LOG.e(error, format("Error resubmitting %s form to server ", unsentForm.uuid));
-                        hasUnsubmittedForms[0] = true;
-                        countDownLatch.countDown();
-                    }
-                });
-        }
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            LOG.e("Interrupted whilst waiting for unsubmitted forms to be uploaded", e);
-            return false;
-        }
-
-        return !hasUnsubmittedForms[0];
-    }
-
-    public static void deleteUnsentForm(final String uuid, final ContentResolver contentResolver) {
-        LOG.i("Removing the unsent form from the db");
-        contentResolver.delete(UnsentForms.CONTENT_URI, format("%s='%s'", UnsentForms.UUID, uuid),
-            null);
-    }
-
-    /** Returns all local forms which were NOT submitted to the server yet*/
-    public static List<UnsentForm> getUnsetForms(final ContentResolver contentResolver) {
-        try (Cursor cursor = contentResolver.query(UnsentForms.CONTENT_URI,
-            new String[]{UnsentForms.UUID, UnsentForms.PATIENT_UUID, UnsentForms.FORM_CONTENTS},
-                null, null, null)) {
-            List<UnsentForm> unsentForms = new ArrayList<>();
-            while (cursor.moveToNext()) {
-                unsentForms.add(new UnsentForm(Utils.getString(cursor, UnsentForms.UUID, null),
-                    Utils.getString(cursor, UnsentForms.PATIENT_UUID, ""),
-                    Utils.getString(cursor, UnsentForms.FORM_CONTENTS, "")));
-            }
-            return unsentForms;
-        }
     }
 
     private static void handleSubmitError(VolleyError error) {
@@ -609,9 +625,10 @@ public class OdkActivityLauncher {
      * {@link #updateObservationCache} to see how the observation itself is saved into db.
      * The {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable}
      * will check if there are unsent observations, and if is the case, it will try to resend it
-     * prior to pull new ones (See {@link #resendFormsToServer}).
+     * prior to pull new ones (See {@link #submitUnsetFormsToServer}).
      */
     private static void saveUnsentForm(String patientUuid, String xml, ContentResolver resolver) {
+        //FIXME: Add snackbar alerting user
         resolver.insert(UnsentForms.CONTENT_URI, new UnsentForm(UUID.randomUUID().toString(),
             patientUuid, xml).toContentValues());
     }

@@ -82,7 +82,7 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
     @Override
     protected boolean beforeSyncStarted(ContentResolver contentResolver, SyncResult syncResult,
             ContentProviderClient providerClient) throws Throwable {
-        return OdkActivityLauncher.resendFormsToServer(contentResolver);
+        return OdkActivityLauncher.submitUnsetFormsToServer(contentResolver);
     }
 
     @Override
