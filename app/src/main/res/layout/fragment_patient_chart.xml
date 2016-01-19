@@ -23,9 +23,7 @@
       android:id="@+id/patient_chart_status_section"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:layout_marginLeft="16dp"
-      android:layout_marginRight="16dp"
-      android:layout_marginTop="16dp"
+      android:layout_margin="16dp"
       android:orientation="horizontal">
 
     <org.projectbuendia.client.widgets.PatientAttributeView
@@ -70,20 +68,10 @@
         tools:text="Pregnant&#10;IV Fitted"/>
   </LinearLayout>
 
-  <FrameLayout
-      android:id="@+id/patient_chart_last_update_section"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/patient_chart_status_section"
-      android:layout_marginStart="16dp"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="8dp">
-  </FrameLayout>
-
   <WebView
       android:id="@+id/chart_webview"
       android:layout_width="match_parent"
       android:layout_height="fill_parent"
-      android:layout_below="@+id/patient_chart_last_update_section" />
+      android:layout_below="@+id/patient_chart_status_section" />
 
 </RelativeLayout>
