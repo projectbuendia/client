@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client.json;
 
-import com.google.common.base.MoreObjects;
-
 import org.joda.time.LocalDate;
 
 import java.io.Serializable;
@@ -33,18 +31,5 @@ public class JsonPatient implements Serializable {
     public JsonLocation assigned_location; // TODO: make this a plain uuid; API change
 
     public JsonPatient() {
-    }
-
-    @Override public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("uuid", uuid)
-            .add("voided", voided)
-            .add("id", id)
-            .add("given_name", given_name)
-            .add("family_name", family_name)
-            .add("sex", sex)
-            .add("birthdate", birthdate.toString())
-            .add("assigned_location", assigned_location)
-            .toString();
     }
 }

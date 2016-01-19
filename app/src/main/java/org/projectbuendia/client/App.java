@@ -12,7 +12,9 @@
 package org.projectbuendia.client;
 
 import android.app.Application;
+import android.content.Context;
 import android.preference.PreferenceManager;
+import android.support.multidex.MultiDex;
 
 import com.facebook.stetho.Stetho;
 
@@ -83,6 +85,13 @@ public class App extends Application {
         }
 
         mHealthMonitor.start();
+    }
+
+    @Override
+    public void attachBaseContext(Context base) {
+        // Set up Multidex.
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     public void inject(Object obj) {
