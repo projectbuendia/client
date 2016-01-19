@@ -289,6 +289,10 @@ public class OpenMrsServer implements Server {
         JSONObject json;
         try {
             json = order.toJson();
+            JsonUser user = App.getUserManager().getActiveUser();
+            if (user != null) {
+                json.put("orderer_uuid", user.id);
+            }
         } catch (Exception e) {
             errorListener.onErrorResponse(new VolleyError("failed to serialize request", e));
             return;
