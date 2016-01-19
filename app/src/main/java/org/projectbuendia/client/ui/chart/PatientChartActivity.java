@@ -11,9 +11,11 @@
 
 package org.projectbuendia.client.ui.chart;
 
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -22,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -42,20 +45,22 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
+import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
-import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -91,6 +96,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
+    private ChartRenderer mChartRenderer;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -105,7 +111,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
-    ChartRenderer mChartRenderer;
 
     private static final String EN_DASH = "\u2013";
 
@@ -215,6 +220,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
+        // Remembering scroll position and applying it after the chart finished loading.
+        mGridWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                Point scrollPosition = mController.getLastScrollPosition();
+                if (scrollPosition != null) {
+                    view.loadUrl("javascript:$('#grid-scroller').scrollLeft(" + scrollPosition.x + ");");
+                    view.loadUrl("javascript:$(window).scrollTop(" + scrollPosition.y + ");");
+                }
+            }
+        });
         mChartRenderer = new ChartRenderer(mGridWebView, getResources());
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
@@ -257,6 +272,39 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mController.onAddTestResultsPressed();
             }
         });
+
+        initChartMenu();
+    }
+
+    private void initChartMenu() {
+        List<Chart> charts = mController.getCharts();
+        if (charts.size() > 1) {
+            final ActionBar actionBar = getActionBar();
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+                @Override
+                public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                    mController.updatePatientObsUi(tab.getPosition());
+                }
+
+                @Override
+                public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                }
+
+                @Override
+                public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                }
+            };
+
+            String[] menuArray = new String[charts.size()];
+            for (int i = 0; i < charts.size(); i++) {
+                menuArray[i] = charts.get(i).name;
+                actionBar.addTab(
+                    actionBar.newTab()
+                        .setText(charts.get(i).name)
+                        .setTabListener(tabListener));
+            }
+        }
     }
 
     @Override protected void onStartImpl() {
@@ -415,7 +463,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // TODO: Localize everything below.
             String id = Utils.valueOrDefault(patient.id, EN_DASH);
             String fullName = Utils.valueOrDefault(patient.givenName, EN_DASH) + " " +
-                    Utils.valueOrDefault(patient.familyName, EN_DASH);
+                Utils.valueOrDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
@@ -459,8 +507,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             Utils.showDialogIf(mFormSubmissionDialog, show);
         }
 
-        @Override public void showNewOrderDialog(String patientUuid) {
-            OrderDialogFragment.newInstance(patientUuid, null)
+        @Override public void showOrderDialog(String patientUuid, Order order) {
+            OrderDialogFragment.newInstance(patientUuid, order)
+                .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showObservationsDialog(ArrayList<ObsRow> observations) {
+            ViewObservationsDialogFragment.newInstance(observations)
                 .show(getSupportFragmentManager(), null);
         }
 

@@ -23,6 +23,8 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
@@ -38,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -115,6 +119,7 @@ public class ChartDataHelper {
         while (c.moveToNext()) {
             orders.add(new Order(
                 Utils.getString(c, Orders.UUID, ""),
+                patientUuid,
                 Utils.getString(c, Orders.INSTRUCTIONS, ""),
                 Utils.getLong(c, Orders.START_MILLIS, null),
                 Utils.getLong(c, Orders.STOP_MILLIS, null)));
@@ -141,6 +146,26 @@ public class ChartDataHelper {
         return new Obs(millis, conceptUuid, conceptType, value, localizedValue);
     }
 
+    private @Nullable ObsRow obsrowFromCursor(Cursor c) {
+        String uuid = c.getString(c.getColumnIndex(Observations.UUID));
+        long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
+        String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
+        ConceptType conceptType = sConceptTypes.get(conceptUuid);
+        String value = c.getString(c.getColumnIndex(Observations.VALUE));
+        String localizedValue = value;
+        if (ConceptType.CODED.equals(conceptType)) {
+            localizedValue = sConceptNames.get(value);
+        }
+        String conceptName = sConceptNames.get(conceptUuid);
+        if (conceptName == null){
+            return null;
+        }
+        else {
+            return new ObsRow(uuid, millis, conceptName, value, localizedValue);
+        }
+    }
+
+
     /** Gets all observations for a given patient, localized for a given locale. */
     // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
     public List<Obs> getObservations(String patientUuid, String locale) {
@@ -148,7 +173,9 @@ public class ChartDataHelper {
         List<Obs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-            Observations.PATIENT_UUID + " = ?", new String[] {patientUuid}, null)) {
+            Observations.PATIENT_UUID + " = ? and "
+                    + Observations.VOIDED + " IS NOT ?",
+            new String[] {patientUuid,"1"},null)) {
             while (c.moveToNext()) {
                 results.add(obsFromCursor(c));
             }
@@ -156,6 +183,69 @@ public class ChartDataHelper {
         return results;
     }
 
+    public ArrayList<ObsRow> getPatientObservationsByConcept(String patientUuid, String conceptUuid) {
+        loadConceptData(ENGLISH_LOCALE);
+        ArrayList<ObsRow> results = new ArrayList<>();
+        try (
+                Cursor c = mContentResolver.query(
+                Observations.CONTENT_URI,
+                null,
+                Observations.VOIDED + " IS NOT ? and "
+                        + Observations.PATIENT_UUID + " = ? and "
+                        + Observations.CONCEPT_UUID + " = ?",
+                new String[] {"1",patientUuid,conceptUuid},
+                Observations.ENCOUNTER_MILLIS + " ASC"
+        )) {
+            while (c.moveToNext()) {
+                ObsRow row = obsrowFromCursor(c);
+                if (row !=null){results.add(row);}
+            }
+        }
+        return results;
+    }
+
+    public ArrayList<ObsRow> getPatientObservationsByMillis(String patientUuid, String startMillis,String stopMillis) {
+        loadConceptData(ENGLISH_LOCALE);
+        ArrayList<ObsRow> results = new ArrayList<>();
+        String conditions = Observations.VOIDED + " IS NOT ? and "
+                + Observations.PATIENT_UUID + " = ? and "
+                + Observations.ENCOUNTER_MILLIS + " >= ? and "
+                + Observations.ENCOUNTER_MILLIS + " <= ?";
+
+        String[] values = new String[]{"1",patientUuid, startMillis,stopMillis};
+        String order = Observations.ENCOUNTER_MILLIS + " ASC";
+
+        try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
+        {
+            while (c.moveToNext()) {
+                ObsRow row = obsrowFromCursor(c);
+                if (row !=null){results.add(row);}
+            }
+        }
+        return results;
+    }
+
+    public ArrayList<ObsRow> getPatientObservationsByConceptMillis(String patientUuid, String conceptUuid, String StartMillis, String StopMillis) {
+        loadConceptData(ENGLISH_LOCALE);
+        ArrayList<ObsRow> results = new ArrayList<>();
+        String conditions = Observations.VOIDED + " IS NOT ? and "
+                + Observations.PATIENT_UUID + " = ? and "
+                + Observations.CONCEPT_UUID + " = ? and "
+                + Observations.ENCOUNTER_MILLIS + " >= ? and "
+                + Observations.ENCOUNTER_MILLIS + " <= ?";
+
+        String[] values = new String[]{"1",patientUuid, conceptUuid, StartMillis,StopMillis};
+        String order = Observations.ENCOUNTER_MILLIS + " ASC";
+
+        try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
+        {
+            while (c.moveToNext()) {
+                ObsRow row = obsrowFromCursor(c);
+                if (row !=null){results.add(row);}
+            }
+        }
+        return results;
+    }
     /** Gets the latest observation of each concept for a given patient, localized to English. */
     // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservations(String patientUuid) {
@@ -183,7 +273,9 @@ public class ChartDataHelper {
         loadConceptData(locale);
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-            Observations.CONCEPT_UUID + " = ?", new String[] {conceptUuid},
+                Observations.VOIDED + " IS NOT ? and "
+                    + Observations.CONCEPT_UUID + " = ?",
+                new String[] {"1",conceptUuid},
             Observations.ENCOUNTER_MILLIS + " DESC")) {
             Map<String, Obs> result = new HashMap<>();
             while (c.moveToNext()) {
@@ -196,11 +288,11 @@ public class ChartDataHelper {
     }
 
     /** Retrieves and assembles a Chart from the local datastore. */
-    public Chart getChart(String uuid) {
+    public List<Chart> getCharts(String uuid) {
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();
         Map<Long, ChartSection> rowGroupsById = new HashMap<>();
-        List<ChartSection> tileGroups = new ArrayList<>();
-        List<ChartSection> rowGroups = new ArrayList<>();
+        List<Chart> Charts = new ArrayList<>();
+        Chart currentChart = null;
 
         try (Cursor c = mContentResolver.query(
             ChartItems.CONTENT_URI, null,
@@ -214,14 +306,21 @@ public class ChartDataHelper {
                     String SectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
                     if (SectionType != null) {
                         switch (SectionType) {
+                            case "CHART_DIVIDER":
+                                if ((currentChart != null) &&
+                                    ((currentChart.tileGroups.size() != 0)
+                                    || (currentChart.rowGroups.size() != 0))) {
+                                    Charts.add(currentChart);
+                                }
+                                break;
                             case "TILE_ROW":
                                 ChartSection tileGroup = new ChartSection(label);
-                                tileGroups.add(tileGroup);
+                                currentChart.tileGroups.add(tileGroup);
                                 tileGroupsById.put(rowid, tileGroup);
                                 break;
                             case "GRID_SECTION":
                                 ChartSection rowGroup = new ChartSection(label);
-                                rowGroups.add(rowGroup);
+                                currentChart.rowGroups.add(rowGroup);
                                 rowGroupsById.put(rowid, rowGroup);
                                 break;
                         }
@@ -241,11 +340,17 @@ public class ChartDataHelper {
                             Utils.getString(c, ChartItems.CSS_STYLE),
                             Utils.getString(c, ChartItems.SCRIPT));
                         section.items.add(item);
+                    } else {
+                        String type = Utils.getString(c, ChartItems.TYPE);
+                        if ((type != null) && (type.equals("CHART_DIVIDER"))) {
+                            currentChart = new Chart(uuid, label);
+                        }
                     }
                 }
             }
         }
-        return new Chart(uuid, tileGroups, rowGroups);
+        Charts.add(currentChart);
+        return Charts;
     }
 
     public List<Form> getForms() {

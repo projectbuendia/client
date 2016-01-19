@@ -108,10 +108,10 @@ public class Troubleshooter {
         // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
-        postTroubleshootingEvents();
+        postTroubleshootingEvents(null);
     }
 
-    private void postTroubleshootingEvents() {
+    private void postTroubleshootingEvents(HealthIssue solvedIssue) {
         synchronized (mTroubleshootingLock) {
             ImmutableSet.Builder<TroubleshootingAction> actionsBuilder = ImmutableSet.builder();
 
@@ -129,7 +129,7 @@ public class Troubleshooter {
             }
 
             mLastTroubleshootingActionsChangedEvent =
-                new TroubleshootingActionsChangedEvent(actions);
+                new TroubleshootingActionsChangedEvent(actions, solvedIssue);
             mEventBus.postSticky(mLastTroubleshootingActionsChangedEvent);
         }
     }
@@ -158,6 +158,6 @@ public class Troubleshooter {
         // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
-        postTroubleshootingEvents();
+        postTroubleshootingEvents(healthIssue);
     }
 }

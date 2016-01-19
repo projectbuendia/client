@@ -9,17 +9,18 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.json;
+package org.projectbuendia.client.events.data;
+
+import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
- * JSON representation of a set of patients returned by the server.
- * <p>
- * TODO: Generify this class and JsonEncountersResponse into e.g. an
- * IncrementalFetchResponse<JsonEncounter>
+ * Indicates that a single item has been deleted on the server.  Should
+ * only be posted on a {@link DefaultCrudEventBus}.
  */
-public class JsonPatientsResponse {
-    public JsonPatient[] results;
-    // TODO(capnfabs): Rename this to syncToken.
-    /** In ISO 8601 date format. */
-    public String snapshotTime;
+public class ItemDeletedEvent {
+    public final String uuid;
+
+    public ItemDeletedEvent(String uuid) {
+        this.uuid = uuid;
+    }
 }

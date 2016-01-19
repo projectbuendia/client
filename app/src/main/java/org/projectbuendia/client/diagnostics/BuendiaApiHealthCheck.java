@@ -164,6 +164,9 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                                 reportIssue(HealthIssue.SERVER_NOT_RESPONDING);
                                 break;
                         }
+                        if (hasIssue(HealthIssue.SERVER_HOST_UNREACHABLE)){
+                            resolveIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
+                        }
                         return;
                     }
                 } catch (UnknownHostException | IllegalArgumentException e) {

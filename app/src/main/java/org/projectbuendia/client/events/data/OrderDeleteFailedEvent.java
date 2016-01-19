@@ -14,11 +14,11 @@ package org.projectbuendia.client.events.data;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
- * An event bus event indicating that adding an order failed.
+ * An event bus event indicating that deleting an order failed.
  * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class OrderAddFailedEvent {
+public class OrderDeleteFailedEvent {
     public final Reason reason;
     public final Exception exception;
 
@@ -29,7 +29,7 @@ public class OrderAddFailedEvent {
         INTERRUPTED
     }
 
-    public OrderAddFailedEvent(Reason reason, Exception exception) {
+    public OrderDeleteFailedEvent(Reason reason, Exception exception) {
         this.reason = reason;
         this.exception = exception;
     }

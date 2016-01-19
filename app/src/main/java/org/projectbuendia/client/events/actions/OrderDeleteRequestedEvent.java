@@ -9,12 +9,13 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.json;
+package org.projectbuendia.client.events.actions;
 
-/** JSON representation of a set of observations returned by the server. */
-public class JsonObservationsResponse {
-    public JsonObservation[] results;
-    // TODO(capnfabs): Rename this to syncToken.
-    /** In ISO 8601 date format. */
-    public String snapshotTime;
+/** Event indicating that the user has requested to delete an order. */
+public class OrderDeleteRequestedEvent {
+    public final String orderUuid;
+
+    public OrderDeleteRequestedEvent(String orderUuid) {
+        this.orderUuid = orderUuid;
+    }
 }

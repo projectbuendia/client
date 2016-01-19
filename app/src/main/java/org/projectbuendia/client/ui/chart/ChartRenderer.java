@@ -24,7 +24,7 @@ import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
-import org.projectbuendia.client.sync.Order;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -52,12 +52,22 @@ public class ChartRenderer {
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
     private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
+    private String lastChart = "";
 
     public interface GridJsInterface {
-        @android.webkit.JavascriptInterface void onNewOrderPressed();
+        @android.webkit.JavascriptInterface
+        void onNewOrderPressed();
+
+        @android.webkit.JavascriptInterface void onOrderHeadingPressed(String orderUuid);
 
         @android.webkit.JavascriptInterface
         void onOrderCellPressed(String orderUuid, long startMillis);
+
+        @android.webkit.JavascriptInterface
+        void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
+
+        @android.webkit.JavascriptInterface
+        void onPageUnload(int scrollX, int scrollY);
     }
 
     public ChartRenderer(WebView view, Resources resources) {
@@ -71,10 +81,15 @@ public class ChartRenderer {
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
-
-        if (observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders)) {
+        if (chart == null) {
+            mView.loadUrl("file:///android_asset/no_chart.html");
+            return;
+        }
+        if ((observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders))
+            && (lastChart.equals(chart.name))){
             return;  // nothing has changed; no need to render again
         }
+        lastChart = chart.name;
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.

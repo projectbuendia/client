@@ -10,14 +10,15 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
   <TableLayout
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:padding="16dp">
 
@@ -137,4 +138,21 @@
           android:text="@string/order_duration_unspecified"/>
     </TableRow>
   </TableLayout>
-</FrameLayout>
+
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      >
+
+  <Button
+      android:id="@+id/order_delete"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="16sp"
+      android:padding="24sp"
+      android:text="@string/order_delete"
+  />
+  </LinearLayout>
+
+</LinearLayout>

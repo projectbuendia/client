@@ -70,6 +70,7 @@
   <string name="abbrev_n_years_n_months">%1$d y %2$d mo</string>
 
   <string name="title_new_order">New treatment</string>
+  <string name="title_edit_order">Edit treatment</string>
   <string name="order_medication">Medication</string>
   <string name="order_dosage">Dosage</string>
   <string name="order_frequency">Frequency</string>
@@ -82,8 +83,13 @@
   <string name="order_duration_stop_after_tomorrow">(stop after tomorrow)</string>
   <string name="order_duration_stop_after_date">(stop after %s)</string>
   <string name="order_duration_unspecified">(no specific duration)</string>
-  <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
+  <string name="enter_medication">Enter a medication</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
+  <string name="order_stop_now">Stop now</string>
+  <string name="order_delete">Delete this treatment</string>
+  <string name="title_confirmation">Confirmation</string>
+  <string name="confirm_order_delete">Really delete?</string>
+  <string name="delete">Delete</string>
 
   <string name="order_execution_title">Treatment history</string>
   <string name="order_execution_historical_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time on %2$s</string>
@@ -230,14 +236,19 @@
   <string name="cancelling_sync">Cancelling sync…</string>
   <string name="sync_starting">Starting sync…</string>
   <string name="troubleshoot_wifi_disabled">Wifi is disabled</string>
+  <string name="troubleshoot_wifi_disabled_solved">Wifi enabled</string>
   <string name="troubleshoot_wifi_disabled_action_enable">Enable</string>
   <string name="troubleshoot_wifi_disconnected">Wifi is disconnected</string>
+  <string name="troubleshoot_wifi_disconnected_solved">Wifi connection restored</string>
   <string name="troubleshoot_wifi_disconnected_action_connect">Connect</string>
   <string name="troubleshoot_server_auth">Server username/password may be incorrect</string>
+  <string name="troubleshoot_server_auth_solved">Server username/password corrected</string>
   <string name="troubleshoot_server_auth_action_check">Check</string>
   <string name="troubleshoot_server_address">Server address may be incorrect</string>
+  <string name="troubleshoot_server_address_solved">Server address is now correct</string>
   <string name="troubleshoot_server_address_action_check">Check</string>
   <string name="troubleshoot_server_unreachable">Server unreachable</string>
+  <string name="troubleshoot_server_unreachable_solved">Connection with Server reestablished</string>
   <string name="troubleshoot_action_more_info">More Info</string>
   <string name="troubleshoot_server_unreachable_details">
       The server could not be reached. This may be because:
@@ -249,11 +260,13 @@
       \nPlease contact an administrator.
   </string>
   <string name="troubleshoot_server_unstable">Server may be unstable</string>
+  <string name="troubleshoot_server_unstable_solved">Server is stable</string>
   <string name="troubleshoot_server_unstable_details">
       The server is currently responding with error code 500, indicating that the server may be in an error state.
       \n
       \nPlease contact an administrator.</string>
   <string name="troubleshoot_server_not_responding">Server not responding</string>
+  <string name="troubleshoot_server_not_responding_solved">Server is responsive</string>
   <string name="troubleshoot_server_not_responding_details">
       The server is currently not responding to requests. This may be because:
       \n
@@ -266,6 +279,7 @@
   <string name="patient_location_error_network">Error updating patient; please check that you are connected to the server.</string>
   <string name="patient_location_error_no_such_patient">Error updating patient location: this patient does not exist on the server.</string>
   <string name="troubleshoot_package_server_unreachable">Package server unreachable</string>
+  <string name="troubleshoot_package_server_unreachable_solved">Connection with Package server reestablished</string>
   <string name="troubleshoot_update_server_unreachable_details">
       The package server could not be reached. This may be because:
       \n
@@ -275,6 +289,7 @@
       \nPlease correct the package server setting or consult an administrator for help.
   </string>
   <string name="troubleshoot_package_server_misconfigured">Package server setting may be incorrect</string>
+  <string name="troubleshoot_package_server_misconfigured_solved">Package server settings corrected</string>
   <string name="troubleshoot_update_server_misconfigured_details">
       Please check that the package server setting is correct or consult an administrator for help.
   </string>
@@ -329,4 +344,6 @@
   <string name="observation">Observation</string>
   <string name="Medication_and_dosage">Medication and dosage</string>
   <string name="string_with_paren">%1$s (%2$s)</string>
+  <string name="voiding">Void</string>
+  <string name="void_observations">Void Observations</string>
 </resources>

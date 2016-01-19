@@ -65,7 +65,7 @@ final class LocationListController {
     // button). Sync operations may be cancelled and rescheduled by Android without the user
     // requesting a sync cancellation. In these cases, this flag will remain false.
     private boolean mWaitingOnSyncCancel = false;
-    private Object mSyncCancelLock = new Object();
+    private final Object mSyncCancelLock = new Object();
 
     public interface Ui {
 
