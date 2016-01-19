@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Looper;
 
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
@@ -340,10 +341,11 @@ public class OdkActivityLauncher {
              * sent all together in a future moment.
              *
              */
-            if(!submitUnsetFormsToServer(App.getInstance().getContentResolver())) {
-                saveUnsentForm(patientUuid, xml, context.getContentResolver());
-                return false;
-            }
+            //FIXME: Figure out a way to call submitUnsetFormsToServer without blocking the main thread
+//            if(!submitUnsetFormsToServer(App.getInstance().getContentResolver())) {
+//                saveUnsentForm(patientUuid, xml, context.getContentResolver());
+//                return false;
+//            }
 
             submitFormToServer(patientUuid, xml,
                 new Response.Listener<JSONObject>() {
@@ -374,6 +376,11 @@ public class OdkActivityLauncher {
      * unsent forms. Otherwise returns {@code false}.
      */
     public static final boolean submitUnsetFormsToServer(final ContentResolver contentResolver) {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            // We're on the main thread
+            throw new RuntimeException("This call is blocking, you should not call it from the main thread");
+        }
+
         final boolean hasUnsubmittedForms[] = new boolean[]{false};
         final List<UnsentForm> forms = getUnsetForms(contentResolver);
 
@@ -401,7 +408,7 @@ public class OdkActivityLauncher {
                 });
         }
         try {
-            //Waiting until all forms submissions return from server
+            //Waiting until all form submissions return from server
             countDownLatch.await();
         } catch (InterruptedException e) {
             LOG.e("Interrupted whilst waiting for unsubmitted forms to be uploaded", e);
