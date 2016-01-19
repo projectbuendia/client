@@ -38,6 +38,7 @@ import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
@@ -74,7 +75,6 @@ import javax.annotation.Nullable;
 final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     private static final Logger LOG = Logger.create();
-    private static final boolean DEBUG = true;
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
     // Form UUIDs specific to Ebola deployments.
@@ -99,7 +99,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     // the savedInstanceState.
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
-    private int mNextIndex = 0;
 
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
@@ -129,6 +128,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     // Store chart's last scroll position
     private Point mLastScrollPosition;
+    private Encounter mPendingNotesEncounter;
+
     public Point getLastScrollPosition() {
         return mLastScrollPosition;
     }
@@ -185,6 +186,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
         void showObservationsDialog(ArrayList<ObsRow> obs);
+        void indicateNoteSubmitted();
+        void indicateNoteSubmissionFailed();
     }
 
     /** Sends ODK form data. */
@@ -361,6 +364,25 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showEditPatientDialog(mPatient);
     }
 
+    public void addNote(String note) {
+        Observation observation = new Observation(
+                ConceptUuids.NOTES_UUID,
+                note);
+        JsonUser user = App.getUserManager().getActiveUser();
+        String userId = user == null ? null : user.id;
+        mPendingNotesEncounter = new Encounter(
+                mPatientUuid,
+                null, // Encounter UUID
+                DateTime.now(),
+                new Observation[]{observation},
+                null, // Order UUIDs
+                userId);
+        mAppModel.addEncounter(
+                mCrudEventBus,
+                mPatient,
+                mPendingNotesEncounter);
+    }
+
     private boolean dialogShowing() {
         return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
             || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
@@ -482,6 +504,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
+        JsonUser user = App.getUserManager().getActiveUser();
+        String userId = user == null ? null : user.id;
         Encounter encounter = new Encounter(
             mPatientUuid,
             null, // encounter UUID, which the server will generate
@@ -489,9 +513,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             new Observation[] {
                 new Observation(
                     ConceptUuids.GENERAL_CONDITION_UUID,
-                    newConditionUuid,
-                    Observation.Type.NON_DATE)
-            }, null);
+                    newConditionUuid)
+            }, null, userId);
         mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
     }
 
@@ -602,6 +625,12 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
+            if (event.encounter == mPendingNotesEncounter) {
+                mUi.indicateNoteSubmissionFailed();
+                mPendingNotesEncounter = null;
+                return;
+            }
+
             if (mAssignGeneralConditionDialog != null) {
                 mAssignGeneralConditionDialog.dismiss();
                 mAssignGeneralConditionDialog = null;
@@ -637,6 +666,27 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                     messageResource = R.string.encounter_add_failed_unknown_reason;
             }
             mUi.showError(messageResource, exceptionMessage);
+        }
+
+        public void onEventMainThread(ItemCreatedEvent<Encounter> event) {
+            if (objectIsNoteCreationEncounter(event.item)) {
+                mUi.indicateNoteSubmitted();
+                mPendingNotesEncounter = null;
+            }
+        }
+
+        /**
+         * There's no reference equality after an item has been created, and our data model
+         * is a mess so we can't use .equals(), so we do a "close enough" comparison to work out
+         * if a note was submitted.
+         */
+        private boolean objectIsNoteCreationEncounter(Object object) {
+            if (!(object instanceof Encounter)) {
+                return false;
+            }
+            Encounter encounter = (Encounter) object;
+            return encounter.observations.length != 0
+                    && ConceptUuids.NOTES_UUID.equals(encounter.observations[0].conceptUuid);
         }
 
         // We get a ItemFetchedEvent when the initial patient data is loaded
@@ -787,7 +837,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
             Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
-                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
+                JsonUser user = App.getUserManager().getActiveUser();
+                String userId = user == null ? null : user.id;
+                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid, userId);
             }
         }
     }

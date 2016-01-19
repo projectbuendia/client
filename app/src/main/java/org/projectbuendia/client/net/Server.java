@@ -42,9 +42,9 @@ public interface Server {
     public static final String ENCOUNTER_OBSERVATIONS_KEY = "observations";
     public static final String ENCOUNTER_TIMESTAMP = "timestamp";
     public static final String ENCOUNTER_ORDER_UUIDS = "order_uuids";
+    public static final String ENCOUNTER_USER_UUID = "enterer_uuid";
     public static final String OBSERVATION_QUESTION_UUID = "question_uuid";
-    public static final String OBSERVATION_ANSWER_DATE = "answer_date";
-    public static final String OBSERVATION_ANSWER_UUID = "answer_uuid";
+    public static final String OBSERVATION_ANSWER = "answer_value";
 
     /**
      * Logs an event by sending a dummy request to the server.  (The server logs

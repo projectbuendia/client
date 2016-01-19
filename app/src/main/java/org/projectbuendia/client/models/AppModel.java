@@ -36,6 +36,8 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
+import javax.annotation.Nullable;
+
 import de.greenrobot.event.NoSubscriberEvent;
 
 /**
@@ -194,10 +196,10 @@ public class AppModel {
      * Asynchronously adds an encounter that records an order as executed, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
+    public void addOrderExecutedEncounter(
+            CrudEventBus bus, Patient patient, String orderUuid, @Nullable String userUuid) {
         addEncounter(bus, patient, new Encounter(
-                patient.uuid, null, DateTime.now(), null, new String[]{orderUuid}
-        ));
+                patient.uuid, null, DateTime.now(), null, new String[]{orderUuid}, userUuid));
     }
 
     /**
