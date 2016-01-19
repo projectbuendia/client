@@ -41,6 +41,7 @@ import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.utilities.FileUtils;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
@@ -295,7 +296,7 @@ public class OdkActivityLauncher {
      * @param data              the incoming intent
      */
     public static boolean sendOdkResultToServer(
-        final Context context,
+        final BaseActivity  context,
         final AppSettings settings,
         @Nullable final String patientUuid,
         Intent data) {
@@ -553,7 +554,7 @@ public class OdkActivityLauncher {
         connection.postXformInstance(patientUuid, xml, successListener, errorListener);
     }
 
-    private static void handleSubmitError(VolleyError error) {
+    private static void handleSubmitError(final VolleyError error) {
         SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
 
         if (error instanceof TimeoutError) {
@@ -634,10 +635,10 @@ public class OdkActivityLauncher {
      * will check if there are unsent observations, and if is the case, it will try to resend it
      * prior to pull new ones (See {@link #submitUnsetFormsToServer}).
      */
-    private static void saveUnsentForm(String patientUuid, String xml, ContentResolver resolver) {
-        //FIXME: Add snackbar alerting user
-        resolver.insert(UnsentForms.CONTENT_URI, new UnsentForm(UUID.randomUUID().toString(),
-            patientUuid, xml).toContentValues());
+    private static void saveUnsentForm(final String patientUuid, final String xml,
+                                       final ContentResolver contentResolver) {
+        contentResolver.insert(UnsentForms.CONTENT_URI, new UnsentForm(
+            UUID.randomUUID().toString(), patientUuid, xml).toContentValues());
     }
 
     /**

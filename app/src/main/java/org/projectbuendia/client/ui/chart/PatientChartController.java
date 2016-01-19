@@ -168,6 +168,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         /** Displays an error with the given resource and optional substitution args. */
         void showError(int errorResource, Object... args);
 
+        void showFormSubmissionError(int errorMessageResource);
+
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
             int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
@@ -693,7 +695,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 default:
                     errorMessageResource = R.string.submit_xform_failed_unknown_reason;
             }
-            mUi.showError(errorMessageResource);
+            mUi.showFormSubmissionError(errorMessageResource);
         }
 
         public void onEventMainThread(FetchXformSucceededEvent event) {

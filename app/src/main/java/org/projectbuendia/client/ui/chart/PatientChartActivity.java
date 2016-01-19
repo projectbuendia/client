@@ -316,7 +316,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mSymptomOnsetDaysView.setValue(
-                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
         }
 
         // TODO/cleanup: We don't need this special logic for the Ebola PCR test results
@@ -330,9 +330,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
             mPcr.setIconDrawable(
-                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
-                            .color(0x00000000)
-                            .sizeDp(36));
+                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
+                    .color(0x00000000)
+                    .sizeDp(36));
             if ((pcrLObservation == null || pcrLObservation.valueName == null)
                 && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
@@ -419,9 +419,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIconDrawable(
-                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
-                            .color(0x00000000)
-                            .sizeDp(36));
+                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
+                    .color(0x00000000)
+                    .sizeDp(36));
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {
@@ -437,7 +437,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null ? "age unknown"
-                    : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
+                : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
             PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
         }
@@ -448,6 +448,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void showError(int errorMessageResource) {
             BigToast.show(PatientChartActivity.this, errorMessageResource);
+        }
+
+        @Override public void showFormSubmissionError(int errorMessageResource) {
+            PatientChartActivity.this.snackBar(errorMessageResource,
+                R.string.submit_xform_resubmit,
+                new View.OnClickListener() {
+                    @Override public void onClick(View view) {
+                        OdkActivityLauncher.submitUnsetFormsToServer(
+                            PatientChartActivity.this.getContentResolver());
+                    }
+                }, 995, false); //TODO: Define proper priority
         }
 
         @Override public synchronized void fetchAndShowXform(
