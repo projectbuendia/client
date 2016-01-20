@@ -32,6 +32,11 @@ android {
         preDexLibraries = false
         javaMaxHeapSize = '4g'
     }
+
+    // Enable multidex support.
+    defaultConfig {
+        multiDexEnabled true
+    }
 }
 dependencies {
     // Build plugins
@@ -44,10 +49,9 @@ dependencies {
     compile project(':third_party:odkcollect')
 
     // External dependencies
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:support-annotations:22.2.0'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:support-annotations:23.1.1'
     compile 'com.google.code.gson:gson:2.3' // JSON parser
-    compile 'com.google.guava:guava:18.0' // Google common libraries
     compile 'com.jakewharton:butterknife:5.1.2' // View injection
     compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
     compile 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
@@ -62,6 +66,9 @@ dependencies {
 
     // Testing
     androidTestCompile 'com.android.support.test:runner:0.3'
+    // Explicitly add this dep at 23.1.1, because the above entry depends on 22.2.0, and the
+    // discrepancy can introduce differences in behaviour between prod and test.
+    androidTestCompile 'com.android.support:support-annotations:23.1.1'
     // Espresso
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
     androidTestCompile 'com.android.support.test.espresso:espresso-web:2.2'
@@ -71,6 +78,11 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
     androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
+
+    // Multidex.
+    // NOTE: This is temporary only! See https://slack-files.com/T02T5LNM4-F0JQ1UDRV-716ebe431f
+    // for more information.
+    compile 'com.android.support:multidex:1.0.1'
 }
 
 apply plugin: 'spoon'
@@ -170,8 +182,11 @@ logger.info("Default package server root URL: ${packageServerRootUrl}")
 logger.info("Database encryption password: ${encryptionPassword}")
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '19.1.0'
+    compileSdkVersion 23
+    buildToolsVersion '23.0.2'
+    // TODO: Port the various health checks to use HttpURLConnection instead and remove this
+    // dependency.
+    useLibrary 'org.apache.http.legacy'
 
     sourceSets.main {
         jniLibs.srcDir 'libs'
