@@ -12,9 +12,11 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -95,6 +97,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
+    private Ui mUi;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -231,10 +234,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mChartRenderer = new ChartRenderer(mGridWebView, getResources());
 
+        mUi = new Ui();
+
         final OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override public boolean sendOdkResultToServer(String patientUuid, Intent data) {
-                return OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this,
-                    mSettings, patientUuid, data);
+            @Override public void sendOdkResultToServer(String patientUuid, Intent data) {
+                new SubmitOdkFormAsyncTask().execute(patientUuid, data, mUi);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {
@@ -248,7 +252,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mAppModel,
             new EventBusWrapper(mEventBus),
             mCrudEventBusProvider.get(),
-            new Ui(),
+            mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
             mChartDataHelper,
@@ -296,6 +300,32 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
             getResources().getString(R.string.pcr_negative) :
             String.format("%1$.1f", pcrValue);
+    }
+
+    private class SubmitOdkFormAsyncTask extends AsyncTask<Object, Void, Boolean> {
+        private Ui ui;
+
+        @Override protected Boolean doInBackground(Object... params) {
+            this.ui = (Ui) params[2];
+            return OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this,
+                mSettings, (String)params[0] /**patientUuid*/, (Intent)params[1] /**data*/);
+        }
+
+        protected void onPostExecute(Boolean result) {
+            ui.showFormSubmissionDialog(result);
+        }
+    }
+
+    private class submitUnsetFormsAsyncTask extends AsyncTask<ContentResolver, Void, Boolean> {
+        @Override protected Boolean doInBackground(ContentResolver... params) {
+            return OdkActivityLauncher.submitUnsetFormsToServer((ContentResolver)params[0]);
+        }
+
+        protected void onPostExecute(Boolean result) {
+           if(result) {
+               PatientChartActivity.this.snackBarDismiss(R.string.submit_xform_resubmit);
+           }
+        }
     }
 
     private final class Ui implements PatientChartController.Ui {
@@ -455,8 +485,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 R.string.submit_xform_resubmit,
                 new View.OnClickListener() {
                     @Override public void onClick(View view) {
-                        OdkActivityLauncher.submitUnsetFormsToServer(
-                            PatientChartActivity.this.getContentResolver());
+                        new submitUnsetFormsAsyncTask().execute(PatientChartActivity.this.getContentResolver());
                     }
                 }, 995, false); //TODO: Define proper priority
         }

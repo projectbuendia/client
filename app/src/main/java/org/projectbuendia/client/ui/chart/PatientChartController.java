@@ -187,7 +187,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     /** Sends ODK form data. */
     public interface OdkResultSender {
-        boolean sendOdkResultToServer(
+        void sendOdkResultToServer(
             @Nullable String patientUuid,
             Intent data);
     }
@@ -294,9 +294,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             "form", request.formUuid, "patient_uuid", request.patientUuid);
         if(isSubmissionCanceled) return;
 
-        final boolean isSubmittingForm = mOdkResultSender.sendOdkResultToServer(request.patientUuid,
-            data);
-        mUi.showFormSubmissionDialog(isSubmittingForm);
+        mOdkResultSender.sendOdkResultToServer(request.patientUuid, data);
     }
 
     FormRequest popFormRequest(int requestIndex) {
@@ -691,6 +689,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                     break;
                 case SERVER_TIMEOUT:
                     errorMessageResource = R.string.submit_xform_failed_server_timeout;
+                    break;
+                case PENDENT_FORM_SUBMISSION:
+                    errorMessageResource = R.string.submit_xform_failed_pendent_form_submission;
                     break;
                 default:
                     errorMessageResource = R.string.submit_xform_failed_unknown_reason;

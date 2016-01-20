@@ -80,6 +80,8 @@ import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColum
     .CONTENT_ITEM_TYPE;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
+
+import static org.projectbuendia.client.events.SubmitXformFailedEvent.Reason.PENDENT_FORM_SUBMISSION;
 import static org.projectbuendia.client.providers.Contracts.UnsentForms;
 
 /** Convenience class for launching ODK to display an Xform. */
@@ -342,11 +344,11 @@ public class OdkActivityLauncher {
              * sent all together in a future moment.
              *
              */
-            //FIXME: Figure out a way to call submitUnsetFormsToServer without blocking the main thread
-//            if(!submitUnsetFormsToServer(App.getInstance().getContentResolver())) {
-//                saveUnsentForm(patientUuid, xml, context.getContentResolver());
-//                return false;
-//            }
+            if(!submitUnsetFormsToServer(App.getInstance().getContentResolver())) {
+                saveUnsentForm(patientUuid, xml, context.getContentResolver());
+                EventBus.getDefault().post(new SubmitXformFailedEvent(PENDENT_FORM_SUBMISSION, null));
+                return false;
+            }
 
             submitFormToServer(patientUuid, xml,
                 new Response.Listener<JSONObject>() {
