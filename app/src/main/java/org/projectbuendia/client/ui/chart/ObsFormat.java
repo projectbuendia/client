@@ -236,8 +236,10 @@ public class ObsFormat extends Format {
             int abbrevLength = name.indexOf('.');
             if (abbrevLength >= 1 && abbrevLength <= MAX_ABBR_CHARS) {
                 return name.substring(0, abbrevLength);
-            } else {
+            } else if (name.length() > MAX_ABBR_CHARS) {
                 return name.substring(0, MAX_ABBR_CHARS) + ELLIPSIS;
+            } else {
+                return name;
             }
         }
     }
