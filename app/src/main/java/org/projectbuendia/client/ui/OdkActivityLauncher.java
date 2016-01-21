@@ -374,8 +374,11 @@ public class OdkActivityLauncher {
         }
     }
 
-    /** Tries to submit all unsent forms to the server . Returns {@code true} if there are no more
-     * unsent forms. Otherwise returns {@code false}.
+    /** Tries to submit all unsent forms to the server . This method has a synchronization barrier
+     * which blocks the current thread waiting until all requests return prior to proceed its own flow.
+     * As Volley's {@link com.android.volley.RequestQueue} response event calls back the Main thread,
+     * the main thread must not be the method caller, otherwise it will be in deadlock state.
+     * Returns {@code true} if there are no more unsent forms. Otherwise returns {@code false}.
      */
     public static final boolean submitUnsetFormsToServer(final ContentResolver contentResolver) {
         if (Looper.getMainLooper() == Looper.myLooper()) {
