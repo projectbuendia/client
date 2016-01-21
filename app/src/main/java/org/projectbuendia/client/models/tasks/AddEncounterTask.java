@@ -90,7 +90,8 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         try {
             jsonEncounter = future.get();
         } catch (InterruptedException e) {
-            return new EncounterAddFailedEvent(EncounterAddFailedEvent.Reason.INTERRUPTED, e);
+            return new EncounterAddFailedEvent(
+                    mEncounter, EncounterAddFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
             LOG.e(e, "Server error while adding encounter");
 
@@ -106,7 +107,8 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             }
             LOG.e("Error response: %s", ((VolleyError) e.getCause()).networkResponse);
 
-            return new EncounterAddFailedEvent(reason, (VolleyError) e.getCause());
+            return new EncounterAddFailedEvent(
+                    mEncounter, reason, (VolleyError) e.getCause());
         }
 
         if (jsonEncounter.uuid == null) {
@@ -114,10 +116,16 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
                 "Although the server reported an encounter successfully added, it did not "
                     + "return a UUID for that encounter. This indicates a server error.");
 
-            return new EncounterAddFailedEvent(
-                EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
+            return new EncounterAddFailedEvent(mEncounter,
+                    EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
         }
 
+        // TODO: the encounter database saving code here doesn't correctly attribute observations to
+        // the user that created them, despite the fact that this data is sent from the server.
+        // This will be remedied on the next sync.
+        // Instead of adding a workaround here, we should unify the code that deals with
+        // observations as part of encounters and the code that deals with observations as entities
+        // that get synced.
         Encounter encounter = Encounter.fromJson(mPatient.uuid, jsonEncounter);
         ContentValues[] values = encounter.toContentValuesArray();
         if (values.length > 0) {
@@ -126,9 +134,9 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             if (inserted != values.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
                     inserted, encounter.observations.length);
-                return new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.Reason.INVALID_NUMBER_OF_OBSERVATIONS_SAVED,
-                    null /*exception*/);
+                return new EncounterAddFailedEvent(mEncounter,
+                        EncounterAddFailedEvent.Reason.INVALID_NUMBER_OF_OBSERVATIONS_SAVED,
+                        null /*exception*/);
             }
         } else {
             LOG.w("Encounter was sent to the server but contained no observations.");
@@ -151,8 +159,8 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
                 "Although an encounter add ostensibly succeeded, no UUID was set for the newly-"
                     + "added encounter. This indicates a programming error.");
 
-            mBus.post(new EncounterAddFailedEvent(
-                EncounterAddFailedEvent.Reason.UNKNOWN, null /*exception*/));
+            mBus.post(new EncounterAddFailedEvent(mEncounter,
+                    EncounterAddFailedEvent.Reason.UNKNOWN, null /*exception*/));
             return;
         }
 
@@ -179,9 +187,9 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         }
 
         public void onEventMainThread(ItemFetchFailedEvent event) {
-            mBus.post(new EncounterAddFailedEvent(
-                EncounterAddFailedEvent.Reason.FAILED_TO_FETCH_SAVED_OBSERVATION,
-                new Exception(event.error)));
+            mBus.post(new EncounterAddFailedEvent(mEncounter,
+                    EncounterAddFailedEvent.Reason.FAILED_TO_FETCH_SAVED_OBSERVATION,
+                    new Exception(event.error)));
             mBus.unregister(this);
         }
     }

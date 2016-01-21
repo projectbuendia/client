@@ -12,24 +12,34 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.app.ActionBar;
+import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.base.Joiner;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -104,13 +114,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject SyncManager mSyncManager;
     @Inject ChartDataHelper mChartDataHelper;
     @Inject AppSettings mSettings;
-    @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
+    @InjectView(R.id.patient_chart_root) SlidingUpPanelLayout mRootView;
     @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
     @InjectView(R.id.attribute_admission_days) PatientAttributeView mAdmissionDaysView;
     @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
+    @InjectView(R.id.notes_panel_list) ListView mNotesList;
+    @InjectView(R.id.notes_panel_text_entry) EditText mAddNoteEntryText;
+    @InjectView(R.id.notes_panel_btn_save) View mAddNoteButton;
+    @InjectView(R.id.notes_panel_submit_spinner) View mAddNoteWaitingSpinner;
 
     private static final String EN_DASH = "\u2013";
 
@@ -194,6 +208,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        // If the notes view is open, collapse it before navigating back up to the parent activity.
+        if (mRootView.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            mRootView.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
@@ -274,6 +298,72 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
 
         initChartMenu();
+
+        // Hide IME if the notes panel closes.
+        mRootView.setPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
+            @Override
+            public void onPanelCollapsed(View panel) {
+                View view = getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager imm =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            }
+        });
+        // Set up an adapter for the notes list, and register callbacks with the LoaderManager
+        // so that the list updates automatically.
+        PatientObservationsListAdapter adapter = new PatientObservationsListAdapter(this);
+        mNotesList.setAdapter(adapter);
+        getLoaderManager().initLoader(0, null,
+                new PatientObservationsListAdapter.ObservationsListLoaderCallbacks(
+                        this,
+                        getIntent().getStringExtra("uuid"),
+                        ConceptUuids.NOTES_UUID,
+                        adapter));
+
+        mNotesList.setEmptyView(findViewById(R.id.notes_panel_list_empty));
+        mAddNoteEntryText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mAddNoteButton.setEnabled(s.length() > 0);
+            }
+        });
+        // Trigger the text changed listener.
+        mAddNoteEntryText.setText("");
+        setNoteSubmissionState(false);
+
+        mAddNoteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mController.addNote(mAddNoteEntryText.getText().toString());
+                // Lock out the text box and the button.
+                setNoteSubmissionState(true);
+            }
+        });
+    }
+
+    private void setNoteSubmissionState(boolean isSubmitting) {
+        if (isSubmitting) {
+            // Replace the "Submit" button with a spinner
+            mAddNoteButton.setVisibility(View.INVISIBLE);
+            mAddNoteWaitingSpinner.setVisibility(View.VISIBLE);
+            // Disable text entry.
+            mAddNoteEntryText.setEnabled(false);
+        } else {
+            mAddNoteButton.setVisibility(View.VISIBLE);
+            mAddNoteWaitingSpinner.setVisibility(View.INVISIBLE);
+            // Enable text entry.
+            mAddNoteEntryText.setEnabled(true);
+        }
     }
 
     private void initChartMenu() {
@@ -515,6 +605,22 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void showObservationsDialog(ArrayList<ObsRow> observations) {
             ViewObservationsDialogFragment.newInstance(observations)
                 .show(getSupportFragmentManager(), null);
+        }
+
+        @Override
+        public void indicateNoteSubmitted() {
+            setNoteSubmissionState(false);
+            mAddNoteEntryText.setText("");
+            //TODO: scroll to bottom to show the newly added note.
+        }
+
+        @Override
+        public void indicateNoteSubmissionFailed() {
+            setNoteSubmissionState(false);
+            Toast.makeText(
+                    PatientChartActivity.this,
+                    "Failed to submit note.",
+                    Toast.LENGTH_SHORT).show();
         }
 
         @Override public void showOrderExecutionDialog(

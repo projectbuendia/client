@@ -12,6 +12,7 @@
 package org.projectbuendia.client.events.data;
 
 import org.projectbuendia.client.events.DefaultCrudEventBus;
+import org.projectbuendia.client.models.Encounter;
 
 /**
  * An event bus event indicating that adding an encounter failed.
@@ -21,6 +22,7 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
 public class EncounterAddFailedEvent {
     public final Reason reason;
     public final Exception exception;
+    public final Encounter encounter;
 
     public enum Reason {
         UNKNOWN,
@@ -33,7 +35,8 @@ public class EncounterAddFailedEvent {
         FAILED_TO_FETCH_SAVED_OBSERVATION
     }
 
-    public EncounterAddFailedEvent(Reason reason, Exception exception) {
+    public EncounterAddFailedEvent(Encounter encounter, Reason reason, Exception exception) {
+        this.encounter = encounter;
         this.reason = reason;
         this.exception = exception;
     }

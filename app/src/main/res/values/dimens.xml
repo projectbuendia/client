@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="notes_panel_collapsed_height">68dp</dimen>
+    <dimen name="notes_panel_padding">16dp</dimen>
+    <!-- 68 (notes_panel_collapsed_height) - 16x2 (padding) = 36 -->
+    <dimen name="notes_panel_header_height">36dp</dimen>
+
+    <dimen name="notes_panel_horiz_spacer">8dp</dimen>
+    <dimen name="notes_panel_entry_padding">8dp</dimen>
+
+    <dimen name="notes_panel_vert_spacer">8dp</dimen>
+    <dimen name="notes_panel_vert_2x_spacer">16dp</dimen>
+    <dimen name="notes_panel_vert_3x_spacer">24dp</dimen>
+</resources>
