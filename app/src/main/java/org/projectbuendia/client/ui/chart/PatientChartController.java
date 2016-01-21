@@ -690,8 +690,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 case SERVER_TIMEOUT:
                     errorMessageResource = R.string.submit_xform_failed_server_timeout;
                     break;
-                case PENDENT_FORM_SUBMISSION:
-                    errorMessageResource = R.string.submit_xform_failed_pendent_form_submission;
+                case PENDING_FORM_SUBMISSION:
+                    errorMessageResource = R.string.submit_xform_failed_pending_form_submission;
                     break;
                 default:
                     errorMessageResource = R.string.submit_xform_failed_unknown_reason;

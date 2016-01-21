@@ -26,7 +26,7 @@ public class SubmitXformFailedEvent {
         SERVER_TIMEOUT,
         SERVER_ERROR,
         CLIENT_ERROR,
-        PENDENT_FORM_SUBMISSION
+        PENDING_FORM_SUBMISSION
     }
 
     public SubmitXformFailedEvent(Reason reason, @Nullable Exception exception) {

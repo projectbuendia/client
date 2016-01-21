@@ -41,7 +41,6 @@ import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.utilities.FileUtils;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
@@ -81,7 +80,7 @@ import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColum
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
 
-import static org.projectbuendia.client.events.SubmitXformFailedEvent.Reason.PENDENT_FORM_SUBMISSION;
+import static org.projectbuendia.client.events.SubmitXformFailedEvent.Reason.PENDING_FORM_SUBMISSION;
 import static org.projectbuendia.client.providers.Contracts.UnsentForms;
 
 /** Convenience class for launching ODK to display an Xform. */
@@ -346,7 +345,7 @@ public class OdkActivityLauncher {
              */
             if(!submitUnsetFormsToServer(App.getInstance().getContentResolver())) {
                 saveUnsentForm(patientUuid, xml, context.getContentResolver());
-                EventBus.getDefault().post(new SubmitXformFailedEvent(PENDENT_FORM_SUBMISSION, null));
+                EventBus.getDefault().post(new SubmitXformFailedEvent(PENDING_FORM_SUBMISSION, null));
                 return false;
             }
 
