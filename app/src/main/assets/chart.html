@@ -77,6 +77,8 @@
             {% set class = summaryValue | format_values(row.item.cssClass) %}
             {% set style = summaryValue | format_values(row.item.cssStyle) %}
             <td id="cell-{{id}}-{{column.start.millis}}"
+              data-start="{{column.start.millis}}"
+              data-stop="{{column.stop.millis}}"
               class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
               style="{{style}}"
               onclick="{% if points is not empty%}
