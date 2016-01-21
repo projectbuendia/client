@@ -14,6 +14,7 @@ package org.projectbuendia.client.utils;
 import android.app.Dialog;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.view.View;
 
 import com.google.common.collect.Lists;
@@ -327,6 +328,18 @@ public class Utils {
         // causing an NPE when defaultValue is null.  The correct superset of (Long) and
         // (long) is obviously (Long); the Java specification (15.25) is incorrect.
         return c.isNull(index) ? defaultValue : (Long) c.getLong(index);
+    }
+
+    /** Gets a nullable Long value from a Bundle.  Always use this instead of getLong() directly. */
+    public static Long getLong(Bundle bundle, String key) {
+        // getLong never returns null; we have to check explicitly.
+        return bundle.containsKey(key) ? bundle.getLong(key) : null;
+    }
+
+    /** Gets a nullable DateTime value from a Bundle.  Always use this instead of getLong() directly. */
+    public static DateTime getDateTime(Bundle bundle, String key) {
+        // getLong never returns null; we have to check explicitly.
+        return bundle.containsKey(key) ? new DateTime(bundle.getLong(key)) : null;
     }
 
     /** Converts a nullable LocalDate to a yyyy-mm-dd String. */

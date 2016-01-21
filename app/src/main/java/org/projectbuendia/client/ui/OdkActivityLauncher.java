@@ -45,6 +45,7 @@ import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.exception.ValidationException;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.UnsentForm;
 import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
@@ -75,8 +76,7 @@ import de.greenrobot.event.EventBus;
 
 import static android.provider.BaseColumns._ID;
 import static java.lang.String.format;
-import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns
-    .CONTENT_ITEM_TYPE;
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
 
@@ -552,7 +552,9 @@ public class OdkActivityLauncher {
                                            Response.ErrorListener errorListener) {
         OpenMrsXformsConnection connection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
-        connection.postXformInstance(patientUuid, xml, successListener, errorListener);
+        JsonUser activeUser = App.getUserManager().getActiveUser();
+        connection.postXformInstance(
+                patientUuid, activeUser.id, xml, successListener, errorListener);
     }
 
     private static void handleSubmitError(final VolleyError error) {

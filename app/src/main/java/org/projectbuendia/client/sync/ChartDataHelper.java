@@ -16,10 +16,6 @@ import android.database.Cursor;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
@@ -28,6 +24,7 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
@@ -42,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeSet;
 
 import javax.annotation.Nullable;
@@ -123,6 +119,7 @@ public class ChartDataHelper {
         while (c.moveToNext()) {
             orders.add(new Order(
                 Utils.getString(c, Orders.UUID, ""),
+                patientUuid,
                 Utils.getString(c, Orders.INSTRUCTIONS, ""),
                 Utils.getLong(c, Orders.START_MILLIS, null),
                 Utils.getLong(c, Orders.STOP_MILLIS, null)));
@@ -291,11 +288,11 @@ public class ChartDataHelper {
     }
 
     /** Retrieves and assembles a Chart from the local datastore. */
-    public Chart getChart(String uuid) {
+    public List<Chart> getCharts(String uuid) {
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();
         Map<Long, ChartSection> rowGroupsById = new HashMap<>();
-        List<ChartSection> tileGroups = new ArrayList<>();
-        List<ChartSection> rowGroups = new ArrayList<>();
+        List<Chart> Charts = new ArrayList<>();
+        Chart currentChart = null;
 
         try (Cursor c = mContentResolver.query(
             ChartItems.CONTENT_URI, null,
@@ -309,14 +306,21 @@ public class ChartDataHelper {
                     String SectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
                     if (SectionType != null) {
                         switch (SectionType) {
+                            case "CHART_DIVIDER":
+                                if ((currentChart != null) &&
+                                    ((currentChart.tileGroups.size() != 0)
+                                    || (currentChart.rowGroups.size() != 0))) {
+                                    Charts.add(currentChart);
+                                }
+                                break;
                             case "TILE_ROW":
                                 ChartSection tileGroup = new ChartSection(label);
-                                tileGroups.add(tileGroup);
+                                currentChart.tileGroups.add(tileGroup);
                                 tileGroupsById.put(rowid, tileGroup);
                                 break;
                             case "GRID_SECTION":
                                 ChartSection rowGroup = new ChartSection(label);
-                                rowGroups.add(rowGroup);
+                                currentChart.rowGroups.add(rowGroup);
                                 rowGroupsById.put(rowid, rowGroup);
                                 break;
                         }
@@ -336,11 +340,17 @@ public class ChartDataHelper {
                             Utils.getString(c, ChartItems.CSS_STYLE),
                             Utils.getString(c, ChartItems.SCRIPT));
                         section.items.add(item);
+                    } else {
+                        String type = Utils.getString(c, ChartItems.TYPE);
+                        if ((type != null) && (type.equals("CHART_DIVIDER"))) {
+                            currentChart = new Chart(uuid, label);
+                        }
                     }
                 }
             }
         }
-        return new Chart(uuid, tileGroups, rowGroups);
+        Charts.add(currentChart);
+        return Charts;
     }
 
     public List<Form> getForms() {

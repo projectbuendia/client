@@ -9,11 +9,13 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.models;
+package org.projectbuendia.client.events.actions;
 
-/** Chart section type identifiers, used in the ChartItems.SECTION_TYPE column. */
-public enum ChartSectionType {
-    CHART_DIVIDER,
-    TILE_ROW,
-    GRID_SECTION
+/** Event indicating that the user has requested to delete an order. */
+public class OrderDeleteRequestedEvent {
+    public final String orderUuid;
+
+    public OrderDeleteRequestedEvent(String orderUuid) {
+        this.orderUuid = orderUuid;
+    }
 }

@@ -134,6 +134,7 @@ public class OpenMrsXformsConnection {
      */
     public void postXformInstance(
         final @Nullable String patientUuid,
+        final String entererUuid,
         final String xform,
         final Response.Listener<JSONObject> successListener,
         final Response.ErrorListener errorListener) {
@@ -149,8 +150,7 @@ public class OpenMrsXformsConnection {
         if (patientUuid != null) {
             post.addProperty("patient_uuid", patientUuid);
         }
-        // TODO: get the enterer from the user login
-        post.addProperty("enterer_id", 1);
+        post.addProperty("enterer_uuid", entererUuid);
 
         post.addProperty("date_entered", ISODateTimeFormat.dateTime().print(new DateTime()));
         JSONObject postBody = null;

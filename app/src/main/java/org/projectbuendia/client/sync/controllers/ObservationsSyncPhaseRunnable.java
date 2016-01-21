@@ -74,6 +74,7 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
         cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
         cvs.put(Observations.ENCOUNTER_MILLIS, observation.timestamp.getMillis());
         cvs.put(Observations.CONCEPT_UUID, observation.concept_uuid);
+        cvs.put(Observations.ENTERER_UUID, observation.enterer_uuid);
         cvs.put(Observations.VALUE, observation.value);
 
         return cvs;

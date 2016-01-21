@@ -32,11 +32,13 @@ import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
+import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
+import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
@@ -47,13 +49,13 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -102,7 +104,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
     private String mPatientUuid = "";
-    private Map<String, org.projectbuendia.client.sync.Order> mOrdersByUuid;
+    private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
 
     // This value is incremented whenever the controller is activated or suspended.
@@ -119,6 +121,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     private final MinimalHandler mMainThreadHandler;
     private AssignLocationDialog mAssignLocationDialog;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
+    private List<Chart> mCharts;
+    private int lastChartIndex = 0;
     // Every form request made by this controller is kept in this list until
     // the form is closed.
     List<FormRequest> mFormRequests = new ArrayList<>();
@@ -155,7 +159,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             Chart chart,
             Map<String, Obs> latestObservations,
             List<Obs> observations,
-            List<org.projectbuendia.client.sync.Order> orders,
+            List<Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate);
 
@@ -178,8 +182,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void reEnableFetch();
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
-        void showNewOrderDialog(String patientUuid);
-        void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval
+        void showOrderDialog(String patientUuid, Order order);
+        void showOrderExecutionDialog(Order order, Interval
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
         void showObservationsDialog(ArrayList<ObsRow> obs);
@@ -222,6 +226,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
         mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
+        mCharts = mChartHelper.getCharts(AppModel.CHART_UUID);
     }
 
     /**
@@ -262,7 +267,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // controller is suspended the cycle stops; and also since mCurrentPhaseId can
                 // only have one value, only one such cycle can be active at any given time.
                 if (mCurrentPhaseId == phaseId) {
-                    mSyncManager.startObservationsSync();
+                    mSyncManager.startObservationsAndOrdersSync();
                     handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
                 }
             }
@@ -387,8 +392,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-                request.requestIndex, request.formUuid,
-                mPatient.toOdkPatient(), preset);
+            request.requestIndex, request.formUuid,
+            mPatient.toOdkPatient(), preset);
     }
 
     public void onOpenFormPressed(String formUuid) {
@@ -429,12 +434,17 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     @android.webkit.JavascriptInterface
     public void onNewOrderPressed() {
-        mUi.showNewOrderDialog(mPatientUuid);
+        mUi.showOrderDialog(mPatientUuid, null);
+    }
+
+    @android.webkit.JavascriptInterface
+    public void onOrderHeadingPressed(String orderUuid) {
+        mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid));
     }
 
     @android.webkit.JavascriptInterface
     public void onOrderCellPressed(String orderUuid, long startMillis) {
-        org.projectbuendia.client.sync.Order order = mOrdersByUuid.get(orderUuid);
+        Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
         List<DateTime> executionTimes = new ArrayList<>();
@@ -516,15 +526,15 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     /** Gets the latest observation values and displays them on the UI. */
-    private synchronized void updatePatientObsUi() {
+    public synchronized void updatePatientObsUi(int chartNum) {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
         mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, Obs> latestObservations =
             new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
-        List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
+        List<Order> orders = mChartHelper.getOrders(mPatientUuid);
         mOrdersByUuid = new HashMap<>();
-        for (org.projectbuendia.client.sync.Order order : orders) {
+        for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
         LOG.d("Showing " + mObservations.size() + " observations and "
@@ -537,10 +547,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
+
+        lastChartIndex = chartNum;
         mUi.updateTilesAndGrid(
-            mChartHelper.getChart(AppModel.CHART_UUID),
+            mCharts.get(chartNum),
             latestObservations, mObservations, orders,
             admissionDate, firstSymptomsDate);
+    }
+
+    public List<Chart> getCharts(){
+        return mCharts;
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
@@ -581,7 +597,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientObsUi();
+            updatePatientObsUi(lastChartIndex);
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -660,7 +676,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientObsUi();
+                    updatePatientObsUi(lastChartIndex);
+                }
+            });
+        }
+
+        public void onEventMainThread(ItemDeletedEvent event) {
+            mMainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updatePatientObsUi(lastChartIndex);
                 }
             });
         }
@@ -674,7 +699,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientObsUi();
+                    updatePatientObsUi(lastChartIndex);
                     mUi.showFormSubmissionDialog(false);
                 }
             });
@@ -732,7 +757,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(OrderSaveRequestedEvent event) {
-            DateTime start = DateTime.now();
+            DateTime start = event.start;
             DateTime stop = null;
 
             if (event.durationDays != null) {
@@ -742,23 +767,27 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // We have to shift it back a bit to prevent it from being
                 // advanced almost an entire day, and even then this only works if
                 // the client's time zone matches the server's time zone, because
-                // the server's infidelity is time-zone-dependent (auggghh!!!)
+                // the server's fidelity is time-zone-dependent (auggghh!!!)
                 stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
             }
 
-            mAppModel.addOrder(mCrudEventBus, new Order(
-                    null, event.patientUuid, event.instructions, start, stop));
+            mAppModel.saveOrder(mCrudEventBus, new Order(
+                event.orderUuid, event.patientUuid, event.instructions, start, stop));
+        }
+
+        public void onEventMainThread(OrderDeleteRequestedEvent event) {
+            mAppModel.deleteOrder(mCrudEventBus, event.orderUuid);
         }
 
         public void onEventMainThread(VoidObservationsRequestEvent event) {
-            for( String uuid : event.Uuids){
+            for (String uuid : event.Uuids) {
                 mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
             }
-            updatePatientObsUi();
+            updatePatientObsUi(lastChartIndex);
         }
 
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
-            org.projectbuendia.client.sync.Order order = mOrdersByUuid.get(event.orderUuid);
+            Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
                 mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
             }

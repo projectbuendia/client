@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** A chart definition. */
@@ -18,10 +19,12 @@ public class Chart {
     public final String uuid;  // UUID of the OpenMRS Form containing this chart definition
     public final List<ChartSection> tileGroups;
     public final List<ChartSection> rowGroups;
+    public final String name;
 
-    public Chart(String uuid, List<ChartSection> tileGroups, List<ChartSection> rowGroups) {
+    public Chart(String uuid, String name) {
         this.uuid = uuid;
-        this.tileGroups = tileGroups;
-        this.rowGroups = rowGroups;
+        this.name = name;
+        this.tileGroups = new ArrayList<>();
+        this.rowGroups = new ArrayList<>();
     }
 }
