@@ -12,13 +12,9 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.app.ActionBar;
-import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +24,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -101,6 +99,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
+    private static final float PANEL_HEIGHT_FRAC = 0.5f;
 
     private PatientChartController mController;
     private boolean mIsFetchingXform = false;
@@ -121,6 +120,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
+    @InjectView(R.id.slide_up_notes_panel) View mSlideUpNotesPanel;
     @InjectView(R.id.notes_panel_list) ListView mNotesList;
     @InjectView(R.id.notes_panel_text_entry) EditText mAddNoteEntryText;
     @InjectView(R.id.notes_panel_btn_save) View mAddNoteButton;
@@ -292,12 +292,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         });
         mPcr.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
                 mController.onAddTestResultsPressed();
             }
         });
 
         initChartMenu();
+
+        // Notes panel
+
+        setNotesPanelMaxHeightToFracOfParent(PANEL_HEIGHT_FRAC);
 
         // Hide IME if the notes panel closes.
         mRootView.setPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
@@ -347,6 +352,36 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mController.addNote(mAddNoteEntryText.getText().toString());
                 // Lock out the text box and the button.
                 setNoteSubmissionState(true);
+            }
+        });
+    }
+
+    /**
+     *  Set the margin_top to 50% of the height of the root view. Here's why:
+     *  - If we set a layout_weight on the notes panel, we can ensure that the notes panel
+     *    takes up that fraction of the height of its parent.
+     *  - When the keyboard is displayed, however, the panel height adjusts to (weight *
+     *    new parent height).
+     *  - For small values of layout_weight (e.g. < 0.5) this makes the notes panel noticeably
+     *    larger when the keyboard is expanded.
+     *  - So we compute the height at a time when we know the keyboard isn't showing, and assign
+     *    (weight * parent height) to the margin, so that much of the underlying view will always
+     *    be visible.
+     *
+     * @param panelHeightFrac the height to which the notes panel should be set at.
+     */
+    private void setNotesPanelMaxHeightToFracOfParent(final float panelHeightFrac) {
+        mRootView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mRootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                int height = (int) (mRootView.getHeight() * panelHeightFrac);
+                ViewGroup.MarginLayoutParams lp =
+                        (ViewGroup.MarginLayoutParams) mSlideUpNotesPanel.getLayoutParams();
+                lp.setMargins(0, height, 0, 0);
+                mSlideUpNotesPanel.setLayoutParams(lp);
             }
         });
     }

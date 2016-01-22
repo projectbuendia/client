@@ -20,7 +20,8 @@
     app:umanoPanelHeight="@dimen/notes_panel_collapsed_height"
     app:umanoShadowHeight="8dp"
     app:umanoScrollableView="@+id/notes_panel_list"
-    app:umanoFadeColor="@color/overlay_fade_color_notes_panel"
+    app:umanoFadeColor="@android:color/transparent"
+    app:umanoOverlay="true"
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
     <!-- The actual patient chart. -->
@@ -86,9 +87,9 @@
     </RelativeLayout>
     <!-- The slide-up notes panel -->
     <LinearLayout
+        android:id="@+id/slide_up_notes_panel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.7"
         android:orientation="vertical"
         android:padding="@dimen/padding_standard"
         android:background="@color/chart_background_light" >
