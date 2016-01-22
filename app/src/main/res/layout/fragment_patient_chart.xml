@@ -9,69 +9,173 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<RelativeLayout
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
     android:id="@+id/patient_chart_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:gravity="bottom"
+    app:umanoPanelHeight="@dimen/notes_panel_collapsed_height"
+    app:umanoShadowHeight="8dp"
+    app:umanoScrollableView="@+id/notes_panel_list"
+    app:umanoFadeColor="@color/overlay_fade_color_notes_panel"
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
-  <LinearLayout
-      android:id="@+id/patient_chart_status_section"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      android:orientation="horizontal">
+    <!-- The actual patient chart. -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/attribute_admission_days"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/since_admission"
-        app:attributeValue="–"/>
+        <LinearLayout
+            android:id="@+id/patient_chart_status_section"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:orientation="horizontal">
 
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/attribute_symptoms_onset_days"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/since_symptom_onset"
-        app:attributeValue="–"/>
+            <org.projectbuendia.client.widgets.PatientAttributeView
+                android:id="@+id/attribute_admission_days"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                app:attributeName="@string/since_admission"
+                app:attributeValue="–"/>
 
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/attribute_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/location"
-        app:attributeValue="–"/>
+            <org.projectbuendia.client.widgets.PatientAttributeView
+                android:id="@+id/attribute_symptoms_onset_days"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                app:attributeName="@string/since_symptom_onset"
+                app:attributeValue="–"/>
 
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/attribute_pcr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/latest_pcr_label"
-        app:attributeValue="–"/>
+            <org.projectbuendia.client.widgets.PatientAttributeView
+                android:id="@+id/attribute_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                app:attributeName="@string/location"
+                app:attributeValue="–"/>
 
-    <TextView
-        android:id="@+id/patient_chart_pregnant"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        android:gravity="end"
-        android:textColor="@color/red"
-        tools:text="Pregnant&#10;IV Fitted"/>
-  </LinearLayout>
+            <org.projectbuendia.client.widgets.PatientAttributeView
+                android:id="@+id/attribute_pcr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                app:attributeName="@string/latest_pcr_label"
+                app:attributeValue="–"/>
 
-  <WebView
-      android:id="@+id/chart_webview"
-      android:layout_width="match_parent"
-      android:layout_height="fill_parent"
-      android:layout_below="@+id/patient_chart_status_section" />
+            <TextView
+                android:id="@+id/patient_chart_pregnant"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:gravity="end"
+                android:textColor="@color/red"
+                tools:text="Pregnant&#10;IV Fitted"/>
+        </LinearLayout>
 
-</RelativeLayout>
+        <WebView
+            android:id="@+id/chart_webview"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/patient_chart_status_section" />
+
+    </RelativeLayout>
+    <!-- The slide-up notes panel -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.7"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_standard"
+        android:background="@color/chart_background_light" >
+
+        <TextView
+            android:id="@+id/notes_panel_title"
+            style="@style/TextAppearance.AppCompat.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/notes_panel_header_height"
+            android:layout_marginBottom="@dimen/notes_panel_padding"
+            android:gravity="center_vertical"
+            android:text="@string/notes_panel_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textAllCaps="true"/>
+
+        <!--
+        The actual observations.
+        Note we set listSelector to transparent to remove the highlight when tapping on entries.
+        -->
+        <ListView
+            android:id="@+id/notes_panel_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="@dimen/notes_panel_padding"
+            android:listSelector="@android:color/transparent"
+            android:fadeScrollbars="false"
+            android:divider="@null"
+            android:dividerHeight="@dimen/notes_panel_vert_3x_spacer" />
+
+        <!-- This will be shown if the ListView is empty. -->
+        <TextView
+            android:id="@+id/notes_panel_list_empty"
+            style="@style/text.large"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="top"
+            android:text="@string/notes_list_empty" />
+
+        <!--
+        We set clickable on this so that mis-clicks on the textbox don't close the sliding panel.
+        Note: this is a quick solution, not a robust one - a better solution would be to remove the
+        padding from the panel and create a view that extends right to the edges that fulfils the
+        same function.
+        That's fiddly and complex implementation-wise, however, so we'll avoid it unless our users
+        are finding it difficult the way things are at the moment.
+        -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/white"
+            android:clickable="true"
+            android:padding="8dp">
+
+            <EditText
+                android:id="@+id/notes_panel_text_entry"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:padding="@dimen/notes_panel_entry_padding"
+                android:background="@android:color/transparent"
+                android:hint="@string/add_note_hint" />
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <ProgressBar
+                    android:id="@+id/notes_panel_submit_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:indeterminate="true" />
+
+                <Button
+                    android:id="@+id/notes_panel_btn_save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/notes_panel_horiz_spacer"
+                    android:padding="@dimen/notes_panel_entry_padding"
+                    android:text="@string/notes_panel_button_add" />
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

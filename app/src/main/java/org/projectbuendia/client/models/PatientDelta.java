@@ -15,13 +15,12 @@ import android.content.ContentValues;
 
 import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -103,24 +102,24 @@ public class PatientDelta {
 
             JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
-                JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.ADMISSION_DATE_UUID);
-                observation.put(
-                    Server.OBSERVATION_ANSWER_DATE,
-                    Utils.toString(admissionDate.get()));
-                observations.put(observation);
+                JSONObject jsonObs =
+                        new Encounter.Observation(
+                                ConceptUuids.ADMISSION_DATE_UUID,
+                                Utils.toString(admissionDate.get()))
+                        .toJson();
+
+                observations.put(jsonObs);
             }
             if (firstSymptomDate.isPresent()) {
-                JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
-                observation.put(
-                    Server.OBSERVATION_ANSWER_DATE,
-                    Utils.toString(firstSymptomDate.get()));
-                observations.put(observation);
+                JSONObject jsonObs =
+                        new Encounter.Observation(
+                                ConceptUuids.FIRST_SYMPTOM_DATE_UUID,
+                                Utils.toString(firstSymptomDate.get()))
+                        .toJson();
+
+                observations.put(jsonObs);
             }
-            if (observations != null) {
-                json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observations);
-            }
+            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observations);
 
             if (assignedLocationUuid.isPresent()) {
                 json.put(
@@ -140,9 +139,5 @@ public class PatientDelta {
         JSONObject location = new JSONObject();
         location.put("uuid", assignedLocationUuid);
         return location;
-    }
-
-    private static long getTimestamp(DateTime dateTime) {
-        return dateTime.toInstant().getMillis()/1000;
     }
 }

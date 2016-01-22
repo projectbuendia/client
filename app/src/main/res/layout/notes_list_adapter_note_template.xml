@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/notes_panel_vert_2x_spacer">
+    <TextView
+        android:id="@+id/meta"
+        style="@style/text.caps"
+        android:textColor="@color/gray_600"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/notes_panel_vert_spacer"
+        tools:text="Wednesday, 12 August • 07:15 • Fabian Tamp" />
+    <TextView
+        android:id="@+id/observation_content"
+        style="@style/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Alert and mobile\nGood appetite for PPN"/>
+</LinearLayout>

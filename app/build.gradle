@@ -63,6 +63,8 @@ dependencies {
     compile 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
     compile 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
     compile 'org.apache.commons:commons-lang3:3.4'
+    // Magic sliding panel that we use for the notes view.
+    compile 'com.sothree.slidinguppanel:library:3.2.1'
 
     // Testing
     androidTestCompile 'com.android.support.test:runner:0.3'

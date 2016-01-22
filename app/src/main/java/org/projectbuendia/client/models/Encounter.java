@@ -18,14 +18,13 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonEncounter;
+import org.projectbuendia.client.json.JsonObservation;
+import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
-import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -37,10 +36,6 @@ import javax.annotation.concurrent.Immutable;
  * <a href="https://wiki.openmrs.org/display/docs/Encounters+and+observations">
  * https://wiki.openmrs.org/display/docs/Encounters+and+observations"
  * </a>
- * <p/>
- * <p>NOTE: Because of lack of typing info from the server, {@link Encounter} attempts to
- * determine the most appropriate type, but this typing is not guaranteed to succeed; also,
- * currently only <code>DATE</code> and <code>UUID</code> (coded) types are supported.
  */
 @Immutable
 public class Encounter extends Base<String> {
@@ -50,7 +45,7 @@ public class Encounter extends Base<String> {
     public final DateTime timestamp;
     public final Observation[] observations;
     public final String[] orderUuids;
-    private static final Logger LOG = Logger.create();
+    public final @Nullable String userUuid;
 
     /**
      * Creates a new Encounter for the given patient.
@@ -65,13 +60,15 @@ public class Encounter extends Base<String> {
         @Nullable String encounterUuid,
         DateTime timestamp,
         Observation[] observations,
-        String[] orderUuids) {
+        String[] orderUuids,
+        @Nullable String userUuid) {
         id = encounterUuid;
         this.patientUuid = patientUuid;
         this.encounterUuid = id;
         this.timestamp = timestamp;
         this.observations = observations == null ? new Observation[] {} : observations;
         this.orderUuids = orderUuids == null ? new String[] {} : orderUuids;
+        this.userUuid = userUuid;
     }
 
     /**
@@ -79,18 +76,17 @@ public class Encounter extends Base<String> {
      * {@link JsonEncounter} object and corresponding patient UUID.
      */
     public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
-        List<Observation> observations = new ArrayList<Observation>();
+        List<Observation> observations = new ArrayList<>();
         if (encounter.observations != null) {
-            for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
+            for (JsonObservation observation : encounter.observations) {
                 observations.add(new Observation(
-                    (String) observation.getKey(),
-                    (String) observation.getValue(),
-                    Observation.estimatedTypeFor((String) observation.getValue())
+                    observation.concept_uuid,
+                    observation.value
                 ));
             }
         }
         return new Encounter(patientUuid, encounter.uuid, encounter.timestamp,
-            observations.toArray(new Observation[observations.size()]), encounter.order_uuids);
+            observations.toArray(new Observation[observations.size()]), encounter.order_uuids, null);
     }
 
     /** Serializes this into a {@link JSONObject}. */
@@ -101,12 +97,8 @@ public class Encounter extends Base<String> {
         if (observations.length > 0) {
             JSONArray observationsJson = new JSONArray();
             for (Observation obs : observations) {
-                JSONObject observationJson = new JSONObject();
-                observationJson.put(Server.OBSERVATION_QUESTION_UUID, obs.conceptUuid);
-                String valueKey = obs.type == Observation.Type.DATE ?
-                    Server.OBSERVATION_ANSWER_DATE : Server.OBSERVATION_ANSWER_UUID;
-                observationJson.put(valueKey, obs.value);
-                observationsJson.put(observationJson);
+
+                observationsJson.put(obs.toJson());
             }
             json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observationsJson);
         }
@@ -117,6 +109,7 @@ public class Encounter extends Base<String> {
             }
             json.put(Server.ENCOUNTER_ORDER_UUIDS, orderUuidsJson);
         }
+        json.put(Server.ENCOUNTER_USER_UUID, userUuid);
         return json;
     }
 
@@ -153,31 +146,23 @@ public class Encounter extends Base<String> {
     public static final class Observation {
         public final String conceptUuid;
         public final String value;
-        public final Type type;
 
-        /** Data type of the observation. */
-        public enum Type {
-            DATE,
-            NON_DATE
-        }
-
-        public Observation(String conceptUuid, String value, Type type) {
+        public Observation(String conceptUuid, String value) {
             this.conceptUuid = conceptUuid;
             this.value = value;
-            this.type = type;
         }
 
-        /**
-         * Produces a best guess for the type of a given value, since the server doesn't give us
-         * typing information.
-         */
-        public static Type estimatedTypeFor(String value) {
+        public JSONObject toJson() {
+            JSONObject observationJson = new JSONObject();
             try {
-                new DateTime(Long.parseLong(value));
-                return Type.DATE;
-            } catch (Exception e) {
-                return Type.NON_DATE;
+                observationJson.put(Server.OBSERVATION_QUESTION_UUID, conceptUuid);
+                observationJson.put(Server.OBSERVATION_ANSWER, value);
+            } catch (JSONException jsonException) {
+                // Should never occur, JSONException is only thrown for a null key or an invalid
+                // numeric value, neither of which will occur in this API.
+                throw new RuntimeException(jsonException);
             }
+            return observationJson;
         }
     }
 
@@ -208,11 +193,11 @@ public class Encounter extends Base<String> {
                 String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
                 observations.add(new Observation(
                     cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
-                    value, Observation.estimatedTypeFor(value)
+                    value
                 ));
             }
             return new Encounter(mPatientUuid, encounterUuid, new DateTime(millis),
-                observations.toArray(new Observation[observations.size()]), null);
+                observations.toArray(new Observation[observations.size()]), null, null);
         }
     }
 }

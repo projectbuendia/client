@@ -351,4 +351,16 @@
   <string name="string_with_paren">%1$s (%2$s)</string>
   <string name="voiding">Void</string>
   <string name="void_observations">Void Observations</string>
+
+  <!-- Notes panel -->
+  <string name="notes_panel_title">Notes</string>
+  <string name="add_note_hint">Add note…</string>
+  <string name="notes_panel_button_add">Save</string>
+  <!--
+    %1: the timestamp of the observation.
+    %2: the initials of the user who entered the observation.
+  -->
+  <string name="notes_list_metadata_format">%1$tA, %1$td %1$tB • %1$tR • %2$s</string>
+  <string name="notes_list_metadata_format_no_user_info">%1$tA, %1$td %1$tB • %1$tR</string>
+  <string name="notes_list_empty">No recorded observations.</string>
 </resources>

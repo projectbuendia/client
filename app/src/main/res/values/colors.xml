@@ -56,6 +56,7 @@
 
     <color name="gray_400">#BDBDBD</color>
     <color name="gray_600">#757575</color>
+    <color name="gray_800">#424242</color>
 
     <color name="chart_background_light">#e1e1e1</color>
     <color name="chart_background_dark">#cccccc</color>
@@ -65,4 +66,7 @@
 
     <!-- SnackBar -->
     <color name="snackbar_action_pressed">#4C4C4C</color>
+
+    <!-- Default is #99000000 -->
+    <color name="overlay_fade_color_notes_panel">#66000000</color>
 </resources>
