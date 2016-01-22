@@ -1448,13 +1448,13 @@ public class FormEntryActivity
                         && preset.targetGroup.equals(groups[groups.length - 1].getLongText())) {
                     mTargetView = odkv;
                 }
-				Log.i(TAG,
+				/*Log.i(TAG,
 						"created view for group "
 								+ (groups.length > 0 ? groups[groups.length - 1]
 										.getLongText() : "[top]")
 								+ " "
 								+ (prompts.length > 0 ? prompts[0]
-										.getQuestionText() : "[no question]"));
+										.getQuestionText() : "[no question]"));*/
 			} catch (RuntimeException e) {
 				Log.e(TAG, e.getMessage(), e);
 				// this is badness to avoid a crash.

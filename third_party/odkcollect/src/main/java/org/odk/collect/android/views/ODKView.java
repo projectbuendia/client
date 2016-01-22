@@ -108,6 +108,12 @@ public class ODKView extends LinearLayout {
 
         addGroupText(groups);
 
+        // Fix for empty sections
+        if((questionPrompts.length > 0) && (questionPrompts[0] == null)) {
+            addView(mView);
+            return;
+        }
+
         // when the grouped fields are populated by an external app, this will get true.
         boolean readOnlyOverride = false;
 
