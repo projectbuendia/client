@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Looper;
 
 import com.android.volley.Response;
@@ -342,30 +343,45 @@ public class OdkActivityLauncher {
              * In the case of the former still can't be resent, the latter form will be saved to be
              * sent all together in a future moment.
              *
+             * Note that OdkActivityLauncher#submitUnsetFormsToServer is a blocking method and
+             * it must not be called by main thread.
              */
-            if(!submitUnsetFormsToServer(App.getInstance().getContentResolver())) {
-                saveUnsentForm(patientUuid, xml, context.getContentResolver());
-                EventBus.getDefault().post(new SubmitXformFailedEvent(PENDING_FORM_SUBMISSION, null));
-                return false;
-            }
+            final boolean result[] = new boolean[1];
+            new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... params) {
+                    return submitUnsetFormsToServer(App.getInstance().getContentResolver());
+                }
 
-            submitFormToServer(patientUuid, xml,
-                new Response.Listener<JSONObject>() {
-                    @Override public void onResponse(JSONObject response) {
-                        LOG.i("Created new encounter successfully on server" + response.toString());
-                        if (!settings.getKeepFormInstancesLocally()) {
-                            deleteLocalFormInstances(formIdToDelete);
-                        }
-                        EventBus.getDefault().post(new SubmitXformSucceededEvent());
-                    }
-                }, new Response.ErrorListener() {
-                    @Override public void onErrorResponse(VolleyError error) {
-                        LOG.e(error, "Error submitting form to server");
+                @Override
+                protected void onPostExecute(Boolean proceed) {
+                    if (proceed) {
+                        submitFormToServer(patientUuid, xml,
+                            new Response.Listener<JSONObject>() {
+                                @Override public void onResponse(JSONObject response) {
+                                    LOG.i("Created new encounter successfully on server" + response.toString());
+                                    if (!settings.getKeepFormInstancesLocally()) {
+                                        deleteLocalFormInstances(formIdToDelete);
+                                    }
+                                    EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override public void onErrorResponse(VolleyError error) {
+                                    LOG.e(error, "Error submitting form to server");
+                                    saveUnsentForm(patientUuid, xml, context.getContentResolver());
+                                    handleSubmitError(error);
+                                }
+                            });
+                        result[0] = true;
+                    } else {
                         saveUnsentForm(patientUuid, xml, context.getContentResolver());
-                        handleSubmitError(error);
+                        EventBus.getDefault().post(new SubmitXformFailedEvent(PENDING_FORM_SUBMISSION, null));
+                        result[0] = false;
                     }
-                });
-            return true;
+                }
+            }.execute();
+
+            return result[0];
         } catch(ValidationException ve) {
             LOG.e(ve.getMessage());
             EventBus.getDefault().post(

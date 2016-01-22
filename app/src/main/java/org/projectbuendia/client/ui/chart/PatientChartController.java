@@ -192,7 +192,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     /** Sends ODK form data. */
     public interface OdkResultSender {
-        void sendOdkResultToServer(
+        boolean sendOdkResultToServer(
             @Nullable String patientUuid,
             Intent data);
     }
@@ -300,7 +300,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             "form", request.formUuid, "patient_uuid", request.patientUuid);
         if(isSubmissionCanceled) return;
 
-        mOdkResultSender.sendOdkResultToServer(request.patientUuid, data);
+        final boolean isSubmittingForm = mOdkResultSender.sendOdkResultToServer(request.patientUuid,
+            data);
+        mUi.showFormSubmissionDialog(isSubmittingForm);
     }
 
     FormRequest popFormRequest(int requestIndex) {

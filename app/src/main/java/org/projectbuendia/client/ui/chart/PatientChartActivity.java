@@ -262,8 +262,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mUi = new Ui();
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override public void sendOdkResultToServer(String patientUuid, Intent data) {
-                new SubmitOdkFormAsyncTask().execute(patientUuid, data, mUi);
+            @Override public boolean sendOdkResultToServer(String patientUuid, Intent data) {
+                return OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this,
+                    mSettings, patientUuid, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {
@@ -424,20 +425,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
             getResources().getString(R.string.pcr_negative) :
             String.format("%1$.1f", pcrValue);
-    }
-
-    private class SubmitOdkFormAsyncTask extends AsyncTask<Object, Void, Boolean> {
-        private Ui ui;
-
-        @Override protected Boolean doInBackground(Object... params) {
-            this.ui = (Ui) params[2];
-            return OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this,
-                mSettings, (String)params[0] /**patientUuid*/, (Intent)params[1] /**data*/);
-        }
-
-        protected void onPostExecute(Boolean result) {
-            ui.showFormSubmissionDialog(result);
-        }
     }
 
     private final class Ui implements PatientChartController.Ui {
@@ -635,8 +622,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void indicateNoteSubmissionFailed() {
             setNoteSubmissionState(false);
             Toast.makeText(
-                    PatientChartActivity.this,
-                    "Failed to submit note.",
+                PatientChartActivity.this,
+                "Failed to submit note.",
                     Toast.LENGTH_SHORT).show();
         }
 

@@ -39,7 +39,7 @@ public class UnsentFormHealthCheck extends HealthCheck {
     private static final Logger LOG = Logger.create();
 
     /** Check for issues with this frequency. */
-    private static final int CHECK_PERIOD_MS = 20000;
+    private static final int CHECK_PERIOD_MS = 10000;
 
     private final Object mLock = new Object();
 
