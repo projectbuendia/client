@@ -228,8 +228,7 @@
   <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
   <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
   <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
-  <string name="submit_xform_failed_resend_later">Error submitting form to the server: It will be saved to be resent later.</string> <!-- TODO: Use a better msg -->
-  <string name="submit_xform_failed_pending_form_submission">There are still pending forms to be submitted.</string> <!-- TODO: Use a better msg -->
+  <string name="submit_xform_failed_pending_form_submission">There are still pending forms to be submitted.</string>
   <string name="submit_xform_resubmit">Resubmit</string>
   <string name="submitting_encounter_form_title">Submitting form</string>
   <string name="submitting_encounter_form_message">Please wait while the form data is submitted.</string>
@@ -238,6 +237,9 @@
   <string name="cancel_sync">Cancel Sync</string>
   <string name="cancelling_sync">Cancelling sync…</string>
   <string name="sync_starting">Starting sync…</string>
+  <string name="troubleshoot_pending_form_submission">There are still pending forms to be submitted.</string>
+  <string name="troubleshoot_pending_form_submission_solved">All pending forms have been submitted.</string>
+  <string name="troubleshoot_pending_form_submission_action_resubmit">Resubmit</string>
   <string name="troubleshoot_wifi_disabled">Wifi is disabled</string>
   <string name="troubleshoot_wifi_disabled_solved">Wifi enabled</string>
   <string name="troubleshoot_wifi_disabled_action_enable">Enable</string>

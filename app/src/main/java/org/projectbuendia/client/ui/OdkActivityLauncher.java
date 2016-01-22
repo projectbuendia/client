@@ -556,8 +556,11 @@ public class OdkActivityLauncher {
         OpenMrsXformsConnection connection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
         JsonUser activeUser = App.getUserManager().getActiveUser();
+        //TODO: Define what to do if there is no logged user and app tries do resubmit the form
+        // (i.e. using SnackBar prior to login)
+        String entererId = (activeUser != null)? activeUser.id : null;
         connection.postXformInstance(
-                patientUuid, activeUser.id, xml, successListener, errorListener);
+                patientUuid, entererId, xml, successListener, errorListener);
     }
 
     private static void handleSubmitError(final VolleyError error) {

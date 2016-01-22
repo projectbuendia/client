@@ -87,6 +87,16 @@ public class Troubleshooter {
         return actions;
     }
 
+    private Set<TroubleshootingAction> getSynchronizationTroubleshootingActions() {
+        Set<TroubleshootingAction> actions = new HashSet<>();
+
+        if (mActiveIssues.contains(HealthIssue.PENDING_FORM_SUBMISSION)) {
+            actions.add(TroubleshootingAction.RESUBMIT_PENDING_FORM);
+        }
+
+        return actions;
+    }
+
     private Set<TroubleshootingAction> getConfigurationTroubleshootingActions() {
         Set<TroubleshootingAction> actions = new HashSet<>();
 
@@ -118,7 +128,7 @@ public class Troubleshooter {
             actionsBuilder.addAll(getNetworkConnectivityTroubleshootingActions());
             actionsBuilder.addAll(getConfigurationTroubleshootingActions());
             actionsBuilder.addAll(getPackageServerTroubleshootingActions());
-
+            actionsBuilder.addAll(getSynchronizationTroubleshootingActions());
             ImmutableSet<TroubleshootingAction> actions = actionsBuilder.build();
 
             if (mLastTroubleshootingActionsChangedEvent != null) {

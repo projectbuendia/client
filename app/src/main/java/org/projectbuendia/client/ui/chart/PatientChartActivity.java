@@ -350,18 +350,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
-    private class submitUnsetFormsAsyncTask extends AsyncTask<ContentResolver, Void, Boolean> {
-        @Override protected Boolean doInBackground(ContentResolver... params) {
-            return OdkActivityLauncher.submitUnsetFormsToServer((ContentResolver)params[0]);
-        }
-
-        protected void onPostExecute(Boolean result) {
-           if(result) {
-               PatientChartActivity.this.snackBarDismiss(R.string.submit_xform_resubmit);
-           }
-        }
-    }
-
     private final class Ui implements PatientChartController.Ui {
         @Override public void setTitle(String title) {
             PatientChartActivity.this.setTitle(title);
@@ -512,16 +500,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void showError(int errorMessageResource) {
             BigToast.show(PatientChartActivity.this, errorMessageResource);
-        }
-
-        @Override public void showFormSubmissionError(int errorMessageResource) {
-            PatientChartActivity.this.snackBar(errorMessageResource,
-                R.string.submit_xform_resubmit,
-                new View.OnClickListener() {
-                    @Override public void onClick(View view) {
-                        new submitUnsetFormsAsyncTask().execute(PatientChartActivity.this.getContentResolver());
-                    }
-                }, 995, false); //TODO: Define proper priority
         }
 
         @Override public synchronized void fetchAndShowXform(

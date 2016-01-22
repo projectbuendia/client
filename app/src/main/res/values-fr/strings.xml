@@ -222,8 +222,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="submit_xform_failed_unknown_reason">Echec de soumission de formulaire.</string>
   <string name="submit_xform_failed_server_auth">Echec de soumission - erreur d\'authentication.</string>
   <string name="submit_xform_failed_server_timeout">Connexion interrompue après le délai envoyant formulaire au serveur.</string>
-  <string name="submit_xform_failed_resend_later">Error submitting form to the server: It will be saved to be resent later.</string> <!-- TODO: Use a better msg and translate to french -->
-  <string name="submit_xform_failed_pending_form_submission">There are still pending forms to be submitted.</string> <!-- TODO: Use a better msg and translate to french-->
+  <string name="submit_xform_failed_pending_form_submission">Il y à encore des suspens formulaires pour soumettre.</string>
   <string name="submit_xform_resubmit">Resoumettre</string>
   <string name="submitting_encounter_form_title">Envoi de formulaire</string>
   <string name="submitting_encounter_form_message">S\'il vous plaît patienter pendant que les données du formulaire sont soumis.</string>
@@ -232,6 +231,9 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="cancel_sync">Annuler synchronisation</string>
   <string name="cancelling_sync">Annulation de la synchronisation…</string>
   <string name="sync_starting">Synchronisation partir…</string>
+  <string name="troubleshoot_pending_form_submission">Il y à encore des suspens formulaires pour soumettre.</string>
+  <string name="troubleshoot_pending_form_submission_solved">Tous les suspens formulaires ont été soumis.</string>
+  <string name="troubleshoot_pending_form_submission_action_resubmit">Resoumettre</string>
   <string name="troubleshoot_wifi_disabled">Wifi est désactivé</string>
   <string name="troubleshoot_wifi_disabled_solved">Reseau activé</string>
   <string name="troubleshoot_wifi_disabled_action_enable">Activer</string>
