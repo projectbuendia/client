@@ -28,8 +28,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:digits="0123456789"
+                android:inputType="textCapCharacters"
                 android:ems="12"
                 android:id="@+id/go_to_patient_id"
                 android:layout_column="1"
