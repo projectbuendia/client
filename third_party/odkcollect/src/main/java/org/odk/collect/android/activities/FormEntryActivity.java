@@ -1438,35 +1438,22 @@ public class FormEntryActivity
 		case FormEntryController.EVENT_REPEAT:
 			ODKView odkv = null;
 			// should only be a group here if the event_group is a field-list
-			try {
-				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
-				FormEntryCaption[] groups = formController
-						.getGroupsForCurrentIndex();
-				odkv = new ODKView(this, prompts, groups, advancingPage, preset);
-                if (preset != null
-                        && preset.targetGroup != null
-                        && preset.targetGroup.equals(groups[groups.length - 1].getLongText())) {
-                    mTargetView = odkv;
-                }
-				Log.i(TAG,
-						"created view for group "
-								+ (groups.length > 0 ? groups[groups.length - 1]
-										.getLongText() : "[top]")
-								+ " "
-								+ (prompts.length > 0 ? prompts[0]
-										.getQuestionText() : "[no question]"));
-			} catch (RuntimeException e) {
-				Log.e(TAG, e.getMessage(), e);
-				// this is badness to avoid a crash.
-                try {
-                    event = formController.stepToNextScreenEvent();
-                    createErrorDialog(e.getMessage(), DO_NOT_EXIT);
-                } catch (JavaRosaException e1) {
-                    Log.e(TAG, e1.getMessage(), e1);
-                    createErrorDialog(e.getMessage() + "\n\n" + e1.getCause().getMessage(), DO_NOT_EXIT);
-                }
-                return createView(event, advancingPage, preset);
-            }
+			FormEntryPrompt[] prompts = formController.getQuestionPrompts();
+			FormEntryCaption[] groups = formController
+					.getGroupsForCurrentIndex();
+			odkv = new ODKView(this, prompts, groups, advancingPage, preset);
+			if (preset != null
+					&& preset.targetGroup != null
+					&& preset.targetGroup.equals(groups[groups.length - 1].getLongText())) {
+				mTargetView = odkv;
+			}
+			Log.i(TAG,
+					"created view for group "
+							+ (groups.length > 0 ? groups[groups.length - 1]
+									.getLongText() : "[top]")
+							+ " "
+							+ (prompts.length > 0 ? prompts[0]
+									.getQuestionText() : "[no question]"));
 
 			// Makes a "clear answer" menu pop up on long-click
 			for (QuestionWidget qw : odkv.getWidgets()) {
