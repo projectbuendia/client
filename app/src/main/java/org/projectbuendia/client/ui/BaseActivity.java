@@ -341,7 +341,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             @Override public void onClick(View view) {
                                 new submitUnsentFormsAsyncTask().execute(App.getInstance().getContentResolver());
                             }
-                        }, 999, false); //TODO: Define priority
+                        }, 994, false);
                     break;
                 default:
                     LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
