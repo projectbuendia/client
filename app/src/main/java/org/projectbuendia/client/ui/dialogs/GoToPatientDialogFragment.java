@@ -137,8 +137,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 mPatientUuid = null;
                 mPatientSearchResult.setText("");
             } else {
-                try (Cursor cursor = getActivity().getContentResolver().query(
-                    Patients.CONTENT_URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
+                try (Cursor cursor = getActivity().getContentResolver().query(Patients.CONTENT_URI,
+                    null, Patients.ID + " LIKE ?", new String[] {"%" + id + "%"}, null)) {
                     if (cursor.moveToNext()) {
                         String uuid = Utils.getString(cursor, Patients.UUID, null);
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
