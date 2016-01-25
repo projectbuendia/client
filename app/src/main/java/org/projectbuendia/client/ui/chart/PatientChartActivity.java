@@ -99,7 +99,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
-    private static final float PANEL_HEIGHT_FRAC = 0.5f;
+    private static final float PANEL_HEIGHT_FRAC = 0.6f;
 
     private PatientChartController mController;
     private boolean mIsFetchingXform = false;
@@ -125,6 +125,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.notes_panel_text_entry) EditText mAddNoteEntryText;
     @InjectView(R.id.notes_panel_btn_save) View mAddNoteButton;
     @InjectView(R.id.notes_panel_submit_spinner) View mAddNoteWaitingSpinner;
+    @InjectView(R.id.patient_chart_container) View mPatientChartContainer;
 
     private static final String EN_DASH = "\u2013";
 
@@ -304,10 +305,34 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         setNotesPanelMaxHeightToFracOfParent(PANEL_HEIGHT_FRAC);
 
-        // Hide IME if the notes panel closes.
         mRootView.setPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
+            // true if the chart height has been shrunk so that the notes panel doesn't obscure it.
+            public boolean mChartHeightShrunk;
+
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                // If the panel has only just started to close, then set the chart height to fill
+                // the available space
+                if (slideOffset < 1 && mChartHeightShrunk) {
+                    mChartHeightShrunk = false;
+                    setChartHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+                }
+            }
+
+            @Override
+            public void onPanelExpanded(View panel) {
+                // Once the panel opens, shrink the chart height so that it's possible to scroll
+                // all the way to the bottom.
+                mChartHeightShrunk = true;
+                // The collapsed panel height is excluded from the measure, so we can exclude it
+                // from the padding when the notes panel is expanded.
+                int chartHeight = mRootView.getHeight() - mSlideUpNotesPanel.getHeight();
+                setChartHeight(chartHeight);
+            }
+
             @Override
             public void onPanelCollapsed(View panel) {
+                // Dismiss the IME once the panel is collapsed.
                 View view = getCurrentFocus();
                 if (view != null) {
                     InputMethodManager imm =
@@ -357,7 +382,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     /**
-     *  Set the margin_top to 50% of the height of the root view. Here's why:
+     *  Set the margin_top to a percentage of the height of the root view. Here's why:
      *  - If we set a layout_weight on the notes panel, we can ensure that the notes panel
      *    takes up that fraction of the height of its parent.
      *  - When the keyboard is displayed, however, the panel height adjusts to (weight *
@@ -377,13 +402,21 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             public void onGlobalLayout() {
                 mRootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                int height = (int) (mRootView.getHeight() * panelHeightFrac);
+                int panelHeight = (int) (mRootView.getHeight() * panelHeightFrac);
+                int marginHeight = mRootView.getHeight() - panelHeight;
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) mSlideUpNotesPanel.getLayoutParams();
-                lp.setMargins(0, height, 0, 0);
+                lp.setMargins(0, marginHeight, 0, 0);
                 mSlideUpNotesPanel.setLayoutParams(lp);
             }
         });
+    }
+
+    private void setChartHeight(int height) {
+        ViewGroup.LayoutParams lp = mPatientChartContainer.getLayoutParams();
+        lp.height = height;
+        // Re-set the chart height to trigger a measure.
+        mPatientChartContainer.setLayoutParams(lp);
     }
 
     private void setNoteSubmissionState(boolean isSubmitting) {

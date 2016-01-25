@@ -21,11 +21,11 @@
     app:umanoShadowHeight="8dp"
     app:umanoScrollableView="@+id/notes_panel_list"
     app:umanoFadeColor="@android:color/transparent"
-    app:umanoOverlay="true"
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
     <!-- The actual patient chart. -->
     <RelativeLayout
+        android:id="@+id/patient_chart_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -81,7 +81,7 @@
         <WebView
             android:id="@+id/chart_webview"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_below="@+id/patient_chart_status_section" />
 
     </RelativeLayout>
