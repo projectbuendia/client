@@ -1,3 +1,13 @@
+function isRowEmpty(parentNode) {
+  var rowEmpty = true;
+  $(parentNode).find('td').each(function(index, element) {
+    var innerHtml = element.innerHTML.trim();
+    if ( innerHtml != "" ) {
+      rowEmpty = false;
+    }
+  });
+  return rowEmpty;
+}
 
 function popup(name, pairs) {
   // var dialog = document.getElementById('obs-dialog');

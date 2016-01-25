@@ -7,18 +7,6 @@
 <script src="jquery-1.5.1.min.js"></script>
 <script src="freezeheader.js"></script>
 <script src="chart.js"></script>
-<script>
-  function isRowEmpty(parentNode) {
-    var rowEmpty = true;
-    $(parentNode).find('td').each(function(index, element) {
-      var innerHtml = element.innerHTML.trim();
-      if ( innerHtml != "" ) {
-        rowEmpty = false;
-      }
-    });
-    return rowEmpty;
-  }
-</script>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 <body>
