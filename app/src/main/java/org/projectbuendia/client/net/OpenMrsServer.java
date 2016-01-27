@@ -152,7 +152,8 @@ public class OpenMrsServer implements Server {
         return new OpenMrsErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
                 String message = parseResponse(error);
-                displayErrorMessage(message);
+                // TODO: re-enable this for dev, and for all users once its polished up a bit.
+                //displayErrorMessage(message);
                 errorListener.onErrorResponse(new VolleyError(message, error));
             }
         };

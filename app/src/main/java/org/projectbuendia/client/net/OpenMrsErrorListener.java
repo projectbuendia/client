@@ -46,7 +46,8 @@ public class OpenMrsErrorListener implements ErrorListener {
      */
     @Override
     public void onErrorResponse(VolleyError error) {
-        displayErrorMessage(parseResponse(error));
+        // TODO: re-enable this for dev, and for all users once its polished up a bit.
+        //displayErrorMessage(parseResponse(error));
     }
 
 
