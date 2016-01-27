@@ -16,6 +16,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,20 +36,33 @@ import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.Date;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
 /** A {@link DialogFragment} for adding a new user. */
 public class OrderDialogFragment extends DialogFragment {
+
+    /** For a duration < 3 days, provides strings expressing the duration in a friendly way. */
+    private static final @StringRes int[] GIVE_FOR_DAYS_STATIC_STRINGS = new int[] {
+            R.string.order_duration_unspecified,
+            R.string.order_duration_stop_after_today,
+            R.string.order_duration_stop_after_tomorrow
+    };
+
     @InjectView(R.id.order_medication) EditText mMedication;
     @InjectView(R.id.order_dosage) EditText mDosage;
     @InjectView(R.id.order_frequency) EditText mFrequency;
     @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
+    @InjectView(R.id.order_start_date) TextView mStartDateView;
+    @InjectView(R.id.order_start_date_change_button) View mStartDateChangeButton;
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_delete) Button mDelete;
     private LayoutInflater mInflater;
+    private DateTime mStartDate;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderDialogFragment newInstance(String patientUuid, Order order) {
@@ -99,15 +113,26 @@ public class OrderDialogFragment extends DialogFragment {
         mDosage.setText(Order.getDosage(instructions));
         mFrequency.setText(Order.getFrequency(instructions));
         DateTime now = Utils.getDateTime(args, "now_millis");
+        Long startMillis = Utils.getLong(args, "start_millis");
+        mStartDate = (startMillis == null ? now : new DateTime(startMillis));
         Long stopMillis = Utils.getLong(args, "stop_millis");
         if (stopMillis != null) {
             LocalDate lastDay = new DateTime(stopMillis).toLocalDate();
-            int days = Days.daysBetween(now.toLocalDate(), lastDay).getDays();
-            if (days >= 0) {
-                mGiveForDays.setText("" + (days + 1));  // 1 day means stop after today
-            }
+            int days = Days.daysBetween(mStartDate.toLocalDate(), lastDay).getDays();
+            // 1 day means stop after today, so we have to increment by 1.
+            mGiveForDays.setText(String.format("%d", days + 1));
         }
         updateLabels();
+    }
+
+    private String formatDate(DateTime startDate) {
+        // If the start date is the current date, return "Today"
+        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
+        if (startDate.withTimeAtStartOfDay().equals(now.withTimeAtStartOfDay())) {
+            return getResources().getString(R.string.today);
+        }
+
+        return getResources().getString(R.string.day_of_week_and_medium_date, startDate.toDate());
     }
 
     public void onSubmit(Dialog dialog) {
@@ -144,21 +169,9 @@ public class OrderDialogFragment extends DialogFragment {
 
         dialog.dismiss();
 
-        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
-        DateTime start = Utils.getDateTime(getArguments(), "start_millis");
-        start = Utils.valueOrDefault(start, now);
-
-        if (durationDays != null) {
-            // Adjust durationDays to account for a start date in the past.  Entering "2"
-            // always means two more days, stopping after tomorrow, regardless of start date.
-            LocalDate firstDay = start.toLocalDate();
-            LocalDate lastDay = now.toLocalDate().plusDays(durationDays - 1);
-            durationDays = Days.daysBetween(firstDay, lastDay).getDays() + 1;
-        }
-
         // Post an event that triggers the PatientChartController to save the order.
         EventBus.getDefault().post(new OrderSaveRequestedEvent(
-            uuid, patientUuid, instructions, start, durationDays));
+            uuid, patientUuid, instructions, mStartDate, durationDays));
     }
 
     public void onDelete(Dialog dialog, final String orderUuid) {
@@ -214,10 +227,19 @@ public class OrderDialogFragment extends DialogFragment {
             }
         });
 
-        // Hide or show the "Stop" and "Delete" buttons appropriately.
-        Long stopMillis = Utils.getLong(args, "stop_millis");
-        Long nowMillis = Utils.getLong(args, "now_millis");
+        mStartDateChangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatePickerDialogFragment dlg = DatePickerDialogFragment.create(mStartDate.toDate());
+                dlg.setListener(mDateChosenListener);
+                dlg.show(getFragmentManager(), "DatePicker");
+
+            }
+        });
+
+        // Hide or show the "Delete" and "Change start date" buttons appropriately.
         Utils.showIf(mDelete, !newOrder);
+        Utils.showIf(mStartDateChangeButton, newOrder);
 
         // Open the keyboard, ready to type into the medication field.
         dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -227,20 +249,25 @@ public class OrderDialogFragment extends DialogFragment {
 
     /** Updates the various labels in the form that react to changes in input fields. */
     void updateLabels() {
-        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
+        // Start Date
+        mStartDateView.setText(formatDate(mStartDate));
+
+        // Duration
         String text = mGiveForDays.getText().toString().trim();
         int days = text.isEmpty() ? 0 : Integer.parseInt(text);
-        LocalDate lastDay = now.toLocalDate().plusDays(days - 1);
+        LocalDate lastDay = mStartDate.toLocalDate().plusDays(days - 1);
+        // TODO: use R.plurals instead.
         mGiveForDaysLabel.setText(
             days == 0 ? R.string.order_give_for_days :
                 days == 1 ? R.string.order_give_for_day :
                     R.string.order_give_for_days);
-        mDurationLabel.setText(getResources().getString(
-            days == 0 ? R.string.order_duration_unspecified :
-                days == 1 ? R.string.order_duration_stop_after_today :
-                    days == 2 ? R.string.order_duration_stop_after_tomorrow :
-                        R.string.order_duration_stop_after_date
-        ).replace("%s", Utils.toShortString(lastDay)));
+        if (days < GIVE_FOR_DAYS_STATIC_STRINGS.length) {
+            mDurationLabel.setText(GIVE_FOR_DAYS_STATIC_STRINGS[days]);
+        } else {
+            mDurationLabel.setText(getResources().getString(
+                    R.string.order_duration_stop_after_date,
+                    Utils.toShortString(lastDay)));
+        }
     }
 
     class DurationDaysWatcher implements TextWatcher {
@@ -254,4 +281,14 @@ public class OrderDialogFragment extends DialogFragment {
             updateLabels();
         }
     }
+
+    private final DatePickerDialogFragment.DateChosenListener mDateChosenListener =
+            new DatePickerDialogFragment.DateChosenListener() {
+        @Override
+        public void onDateChosen(Date date) {
+            mStartDate = new DateTime(date);
+            updateLabels();
+        }
+    };
+
 }
