@@ -65,7 +65,7 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
         for (ObsRow row: rows) {
 
-            Title = row.conceptName + " " + mResources.getString(R.string.observation_on_day) + " " + row.day;
+            Title = row.conceptName + " " + getResources().getString(R.string.observation_on_day) + " " + row.day;
 
             if(!isExistingHeader(Title)){
                 listDataHeader.add(Title);
@@ -79,7 +79,7 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
             for (ObsRow row: rows){
 
-                verifyTitle = row.conceptName + " " + mResources.getString(R.string.observation_on_day) + " " + row.day;
+                verifyTitle = row.conceptName + " " + getResources().getString(R.string.observation_on_day) + " " + row.day;
 
                 if (verifyTitle.equals(header)){
                     child.add(row.time + "    " + row.valueName);
