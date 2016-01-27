@@ -8,12 +8,9 @@ import android.webkit.WebView;
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
 
-import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
-import org.joda.time.chrono.ISOChronology;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -51,7 +49,6 @@ public class ChartRenderer {
     Resources mResources;  // resources used for localizing the rendering
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
-    private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
     private String lastChart = "";
 
     public interface GridJsInterface {
@@ -85,8 +82,10 @@ public class ChartRenderer {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
-        if ((observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders))
-            && (lastChart.equals(chart.name))){
+
+        if (observations.equals(mLastRenderedObs)
+                && orders.equals(mLastRenderedOrders)
+                && Objects.equals(lastChart, chart.name)) {
             return;  // nothing has changed; no need to render again
         }
         lastChart = chart.name;
@@ -105,15 +104,13 @@ public class ChartRenderer {
                                             admissionDate, firstSymptomsDate).getHtml();
         mView.loadDataWithBaseURL("file:///android_asset/", html,
             "text/html; charset=utf-8", "utf-8", null);
-        mView.setWebContentsDebuggingEnabled(true);
+        WebView.setWebContentsDebuggingEnabled(true);
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
     }
 
     class GridHtmlGenerator {
-        List<String> mTileConceptUuids;
-        List<String> mGridConceptUuids;
         List<Order> mOrders;
         DateTime mNow;
         Column mNowColumn;

@@ -99,6 +99,14 @@
             {% endif %}
           </td>
           {% endfor %}
+          <script>
+            // Hides the row if not required and no observation is recorded.
+            if (!{{row.item.required}}) {
+              if (isRowEmpty(document.currentScript.parentNode)) {
+                document.currentScript.parentNode.style.display = 'none';
+              }
+            }
+          </script>
         </tr>
       {% endfor %}
     </tbody>

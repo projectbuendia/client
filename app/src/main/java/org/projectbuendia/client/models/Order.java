@@ -23,6 +23,7 @@ import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -133,6 +134,19 @@ public final class Order extends Base<String> implements Comparable<Order> {
         int result = start.compareTo(other.start);
         result = result != 0 ? result : instructions.compareTo(other.instructions);
         return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Order)) {
+            return false;
+        }
+        Order o = (Order) obj;
+        return Objects.equals(uuid, o.uuid) &&
+                Objects.equals(patientUuid, o.patientUuid) &&
+                Objects.equals(instructions, o.instructions) &&
+                Objects.equals(start, o.start) &&
+                Objects.equals(stop, o.stop);
     }
 
     public JSONObject toJson() throws JSONException {

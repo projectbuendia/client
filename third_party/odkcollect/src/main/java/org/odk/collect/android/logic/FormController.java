@@ -599,8 +599,13 @@ public class FormController {
         }
 
         // jump to the end of the group
-        mFormEntryController.jumpToIndex(indicies.get(indicies.size() - 1));
-        return stepToNextEvent(STEP_OVER_GROUP);
+        if (indicies.size() > 0) {
+            mFormEntryController.jumpToIndex(indicies.get(indicies.size() - 1));
+            return stepToNextEvent(STEP_OVER_GROUP);
+        } else {
+            FormIndex idx = mFormEntryController.getModel().incrementIndex(getFormIndex());
+            return mFormEntryController.jumpToIndex(idx);
+        }
     }
 
     /**
@@ -912,7 +917,7 @@ public class FormController {
 
         // For questions, there is only one.
         // For groups, there could be many, but we set that below
-        FormEntryPrompt[] questions = new FormEntryPrompt[1];
+        FormEntryPrompt[] questions = new FormEntryPrompt[0];
 
     	IFormElement element = mFormEntryController.getModel().getForm().getChild(currentIndex);
         if (element instanceof GroupDef) {
@@ -965,7 +970,7 @@ public class FormController {
             }
         } else {
             // We have a quesion, so just get the one prompt
-            questions[0] = getQuestionPrompt();
+            questions = new FormEntryPrompt[] {getQuestionPrompt()};
         }
 
         return questions;
