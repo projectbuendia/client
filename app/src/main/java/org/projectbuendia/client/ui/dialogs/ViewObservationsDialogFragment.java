@@ -79,10 +79,10 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
             for (ObsRow row: rows){
 
-                verifyTitle = row.conceptName + " " + row.day;
+                verifyTitle = row.conceptName + " " + R.string.observation_on_day + " " + row.day;
 
                 if (verifyTitle.equals(header)){
-                    child.add(row.time + " " + row.valueName);
+                    child.add(row.time + "    " + row.valueName);
                 }
             }
 

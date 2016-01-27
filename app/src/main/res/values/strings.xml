@@ -347,6 +347,9 @@
   <string name="voiding">Void</string>
   <string name="void_observations">Void Observations</string>
 
+  <!-- View Observations dialog -->
+  <string name="observation_on_day">on</string>  
+
   <!-- Notes panel -->
   <string name="notes_panel_title">Notes</string>
   <string name="add_note_hint">Add note…</string>
