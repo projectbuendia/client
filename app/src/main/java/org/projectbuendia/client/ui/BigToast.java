@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui;
 
 import android.content.Context;
+import android.support.annotation.StringRes;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,7 +26,7 @@ public final class BigToast {
      * @param context         the Application or Activity context to use
      * @param messageResource the message to display
      */
-    public static void show(Context context, int messageResource) {
+    public static void show(Context context, @StringRes int messageResource) {
         show(context, context.getResources().getString(messageResource));
     }
 
@@ -38,6 +39,7 @@ public final class BigToast {
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
         LinearLayout layout = (LinearLayout) toast.getView();
         TextView view = (TextView) layout.getChildAt(0);
+        //noinspection deprecation: The new method was only introduced in API 23.
         view.setTextAppearance(context, R.style.text_large_white);
         toast.show();
     }
