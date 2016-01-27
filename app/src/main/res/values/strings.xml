@@ -351,6 +351,7 @@
   <string name="observation_on_day">on</string>  
 
   <!-- Notes panel -->
+  <string name="error_failed_to_submit_note">Failed to submit note.</string>
   <string name="notes_panel_title">Notes</string>
   <string name="add_note_hint">Add note…</string>
   <string name="notes_panel_button_add">Save</string>
