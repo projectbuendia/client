@@ -75,6 +75,7 @@ public class Encounter extends Base<String> {
      * Creates an instance of {@link Encounter} from a network
      * {@link JsonEncounter} object and corresponding patient UUID.
      */
+    // TODO: JsonEncounter includes a patient_uuid field, use that instead of passing it separately.
     public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
         List<Observation> observations = new ArrayList<>();
         if (encounter.observations != null) {
