@@ -31,6 +31,7 @@ import org.javarosa.core.model.instance.TreeElement;
 import org.javarosa.xform.parse.XFormParser;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.application.Collect;
@@ -87,17 +88,19 @@ public class OdkActivityLauncher {
      */
     public static void fetchAndCacheAllXforms() {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
-            new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
-                    for (OpenMrsXformIndexEntry formEntry : response) {
-                        fetchAndCacheXForm(formEntry);
+                new Response.Listener<List<OpenMrsXformIndexEntry>>() {
+                    @Override
+                    public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                        for (OpenMrsXformIndexEntry formEntry : response) {
+                            fetchAndCacheXForm(formEntry);
+                        }
                     }
-                }
-            }, new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    handleFetchError(error);
-                }
-            });
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        handleFetchError(error);
+                    }
+                });
     }
 
     /**
@@ -107,7 +110,7 @@ public class OdkActivityLauncher {
      */
     public static void fetchAndCacheXForm(OpenMrsXformIndexEntry formEntry) {
         new OdkXformSyncTask(null).fetchAndAddXFormToDb(formEntry.uuid,
-            formEntry.makeFileForForm());
+                formEntry.makeFileForForm());
     }
 
     /**
@@ -135,23 +138,25 @@ public class OdkActivityLauncher {
         }
 
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
-            new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
-                    if (response.isEmpty()) {
-                        LOG.i("No forms found");
-                        EventBus.getDefault().post(new FetchXformFailedEvent(
-                            FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
-                        return;
+                new Response.Listener<List<OpenMrsXformIndexEntry>>() {
+                    @Override
+                    public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                        if (response.isEmpty()) {
+                            LOG.i("No forms found");
+                            EventBus.getDefault().post(new FetchXformFailedEvent(
+                                    FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
+                            return;
+                        }
+                        showForm(callingActivity, requestCode, patient, fields, findUuid(response,
+                                uuidToShow));
                     }
-                    showForm(callingActivity, requestCode, patient, fields, findUuid(response,
-                        uuidToShow));
-                }
-            }, new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "Fetching xform list from server failed. ");
-                    handleFetchError(error);
-                }
-            });
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        LOG.e(error, "Fetching xform list from server failed. ");
+                        handleFetchError(error);
+                    }
+                });
     }
 
     /**
@@ -326,8 +331,22 @@ public class OdkActivityLauncher {
                     @Override public void onResponse(JSONObject response) {
                         LOG.i("Created new encounter successfully on server" + response.toString());
                         // Only locally cache new observations, not new patients.
-                        if (patientUuid != null) {
-                            updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
+                        try {
+                            Object dateEntered = response.get("date_entered");
+                            if (dateEntered != null) {
+                                DateTime encounterDateTime =
+                                        ISODateTimeFormat.dateTime().parseDateTime(
+                                                (String) dateEntered);
+                                if (patientUuid != null) {
+                                    updateObservationCache(
+                                            patientUuid,
+                                            encounterDateTime,
+                                            savedRoot,
+                                            context.getContentResolver());
+                                }
+                            }
+                        } catch (JSONException ignore) {
+                            // Just keep going.
                         }
                         if (!settings.getKeepFormInstancesLocally()) {
                             deleteLocalFormInstances(formIdToDelete);
@@ -447,7 +466,7 @@ public class OdkActivityLauncher {
         if (instanceCursor.getCount() != 1) {
             LOG.e("The form that we tried to load did not exist: " + uri);
             EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
             return null;
         }
         instanceCursor.moveToFirst();
@@ -554,16 +573,15 @@ public class OdkActivityLauncher {
     /**
      * Caches the observation changes locally for a given patient.
      */
-    private static void updateObservationCache(String patientUuid, TreeElement savedRoot,
-                                               ContentResolver resolver) {
+    private static void updateObservationCache(
+            String patientUuid, DateTime encounterTime, TreeElement savedRoot,
+            ContentResolver resolver) {
         ContentValues common = new ContentValues();
         // It's critical that UUID is {@code null} for temporary observations, so we make it
         // explicit here. See {@link Contracts.Observations.UUID} for details.
         common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
 
-        final DateTime encounterTime = getEncounterAnswerDateTime(savedRoot);
-        if(encounterTime == null) return;
         common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
         common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
 
@@ -656,32 +674,6 @@ public class OdkActivityLauncher {
             }
         }
         return answeredObservations;
-    }
-
-    /**
-     * Returns the encounter's answer date time. Returns <code>null</code> if it cannot be retrieved.
-     */
-    private static DateTime getEncounterAnswerDateTime(TreeElement root) {
-        TreeElement encounter = root.getChild("encounter", 0);
-        if (encounter == null) {
-            LOG.e("No encounter found in instance");
-            return null;
-        }
-
-        TreeElement encounterDatetime =
-            encounter.getChild("encounter.encounter_datetime", 0);
-        if (encounterDatetime == null) {
-            LOG.e("No encounter date time found in instance");
-            return null;
-        }
-
-        IAnswerData dateTimeValue = encounterDatetime.getValue();
-        try {
-         return  ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
-        } catch (IllegalArgumentException e) {
-            LOG.e("Could not parse datetime" + dateTimeValue.getValue());
-            return null;
-        }
     }
 
     private static Integer getConceptId(Set<Integer> accumulator, String encodedConcept) {

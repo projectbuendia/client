@@ -32,7 +32,6 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.base.Joiner;
 import com.joanzapata.android.iconify.IconDrawable;
