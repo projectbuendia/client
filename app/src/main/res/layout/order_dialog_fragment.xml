@@ -12,6 +12,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -92,6 +93,36 @@
           android:layout_marginStart="4sp"
           android:text="@string/order_times_per_day"/>
     </TableRow>
+
+      <TableRow
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
+
+          <TextView
+              style="@style/field_label"
+              android:text="@string/order_start_date"
+              android:layout_marginEnd="12sp" />
+
+          <LinearLayout
+              android:layout_column="1"
+              android:layout_span="2">
+
+              <TextView
+                  style="@style/field_label"
+                  android:id="@+id/order_start_date"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  tools:text="01 Jan, 2016" />
+
+              <Button
+                  android:id="@+id/order_start_date_change_button"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/order_start_date_change_label" />
+
+          </LinearLayout>
+
+      </TableRow>
 
     <TableRow
         android:layout_width="fill_parent"

@@ -52,6 +52,7 @@ public class DateTimeWidget extends QuestionWidget {
     private boolean hideMonth = false;
     private boolean showCalendar = false;
 	private HorizontalScrollView scrollView = null;
+    private int mSeconds;
 
     public DateTimeWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
@@ -82,6 +83,9 @@ public class DateTimeWidget extends QuestionWidget {
                 if (mPrompt.isReadOnly()) {
                     setAnswer();
                 } else {
+                    // Once the date's been changed, we don't use the starting times' seconds any
+                    // more, as that's not relevant to the user's input.
+                    mSeconds = 0;
                     // handle leap years and number of days in month
                     // TODO
                     // http://code.google.com/p/android/issues/detail?id=2081
@@ -231,7 +235,7 @@ public class DateTimeWidget extends QuestionWidget {
                 mDateListener);
             mTimePicker.setCurrentHour(ldt.getHourOfDay());
             mTimePicker.setCurrentMinute(ldt.getMinuteOfHour());
-
+            mSeconds = ldt.getSecondOfMinute();
         } else {
             // create time widget with current time as of right now
             clearAnswer();
@@ -252,6 +256,7 @@ public class DateTimeWidget extends QuestionWidget {
                 mDateListener);
         mTimePicker.setCurrentHour(typedAnswer.getHourOfDay());
         mTimePicker.setCurrentMinute(typedAnswer.getMinuteOfHour());
+        mSeconds = typedAnswer.getSecondOfMinute();
 
         return true;
     }
@@ -266,6 +271,7 @@ public class DateTimeWidget extends QuestionWidget {
             mDateListener);
         mTimePicker.setCurrentHour(ldt.getHourOfDay());
         mTimePicker.setCurrentMinute(ldt.getMinuteOfHour());
+        mSeconds = ldt.getSecondOfMinute();
     }
 
 
@@ -278,7 +284,7 @@ public class DateTimeWidget extends QuestionWidget {
         DateTime ldt =
             new DateTime(mDatePicker.getYear(), mDatePicker.getMonth() + 1,
                     mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(),
-                    mTimePicker.getCurrentMinute(), 0);
+                    mTimePicker.getCurrentMinute(), mSeconds);
         //DateTime utc = ldt.withZone(DateTimeZone.forID("UTC"));
         return new DateTimeData(ldt.toDate());
     }

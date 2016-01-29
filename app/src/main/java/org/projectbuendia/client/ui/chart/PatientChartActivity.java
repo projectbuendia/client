@@ -689,10 +689,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override
         public void indicateNoteSubmissionFailed() {
             setNoteSubmissionState(false);
-            Toast.makeText(
-                PatientChartActivity.this,
-                "Failed to submit note.",
-                    Toast.LENGTH_SHORT).show();
+            BigToast.show(
+                    PatientChartActivity.this,
+                    R.string.error_failed_to_submit_note);
         }
 
         @Override public void showOrderExecutionDialog(

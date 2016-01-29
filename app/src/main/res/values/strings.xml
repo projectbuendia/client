@@ -352,7 +352,11 @@
   <string name="voiding">Void</string>
   <string name="void_observations">Void Observations</string>
 
+  <!-- View Observations dialog -->
+  <string name="observation_on_day">on</string>  
+
   <!-- Notes panel -->
+  <string name="error_failed_to_submit_note">Failed to submit note.</string>
   <string name="notes_panel_title">Notes</string>
   <string name="add_note_hint">Add note…</string>
   <string name="notes_panel_button_add">Save</string>
@@ -363,4 +367,9 @@
   <string name="notes_list_metadata_format">%1$tA, %1$td %1$tB • %1$tR • %2$s</string>
   <string name="notes_list_metadata_format_no_user_info">%1$tA, %1$td %1$tB • %1$tR</string>
   <string name="notes_list_empty">No recorded observations.</string>
+  <string name="order_start_date">Start Date</string>
+  <!-- The button that says "Change" next to the start date -->
+  <string name="order_start_date_change_label">Change</string>
+  <!-- The day of week plus "medium" date format. e.g. Tues, 26 Jan 2015 -->
+  <string name="day_of_week_and_medium_date">%1$tA, %1$td %1$tb %1$tY</string>
 </resources>

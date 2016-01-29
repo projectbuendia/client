@@ -327,6 +327,9 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_require_wifi">Exiger connexion wifi</string>
   <string name="pref_desc_require_wifi">Désactivez cette option pour permettre l\'application de travailler avec des non-wifi (ou émulé captif Bluetooth) en réseau.</string>
 
+  <!-- View Observations dialog -->
+  <string name="observation_on_day">le</string>  
+
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Appliquer et effacer les données locales</string>
   <string name="discharged">Libéré</string>
