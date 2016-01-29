@@ -36,7 +36,8 @@ public class Contracts {
         ORDERS("orders"),
         PATIENTS("patients"),
         USERS("users"),
-        SYNC_TOKENS("sync_tokens");
+        SYNC_TOKENS("sync_tokens"),
+        UNSENT_FORMS("unset_forms");
 
         public String name;
 
@@ -165,9 +166,13 @@ public class Contracts {
 
         /**
          * UUID is populated if the record was retrieved from the server. If this observation was
-         * written locally as a cached value from a submitted XForm, UUID is null. As part of every
-         * successful sync, all observations with null UUIDs are deleted, on the basis that an
-         * authoritative version for each has been obtained from the server.
+         * written locally as a cached value from a submitted XForm, UUID is null. For further
+         * details please check
+         * {@link org.projectbuendia.client.ui.OdkActivityLauncher#updateObservationCache}.
+         * As part of every successful sync, all observations with null UUIDs are  deleted,
+         * on the basis that an authoritative version for each has been obtained from the server.
+         * For further details, please check
+         * {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable}
          */
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
@@ -237,6 +242,16 @@ public class Contracts {
 
         String LOCATION_UUID = "location_uuid";
         String PATIENT_COUNT = "patient_count";
+    }
+
+    public interface UnsentForms {
+        Uri CONTENT_URI = buildContentUri("unsent-forms");
+        String GROUP_CONTENT_TYPE = buildGroupType("unsent-form");
+        String ITEM_CONTENT_TYPE = buildItemType("unsent-form");
+
+        String UUID = "uuid";
+        String PATIENT_UUID = "patient_uuid";
+        String FORM_CONTENTS = "form_contents";
     }
 
     public static Uri buildContentUri(String path) {

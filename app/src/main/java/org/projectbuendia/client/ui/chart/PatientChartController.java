@@ -192,9 +192,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     /** Sends ODK form data. */
     public interface OdkResultSender {
-        void sendOdkResultToServer(
+        boolean sendOdkResultToServer(
             @Nullable String patientUuid,
-            int resultCode,
             Intent data);
     }
 
@@ -289,21 +288,21 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
     }
 
-    public void onXFormResult(int requestCode, int resultCode, Intent data) {
-        FormRequest request = popFormRequest(requestCode);
-        if (request == null) {
+    public void onXFormResult(final int requestCode, final int resultCode, final Intent data) {
+        final FormRequest request = popFormRequest(requestCode);
+         if (request == null) {
             LOG.e("Unknown form request code: " + requestCode);
             return;
         }
 
-        boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
-        String action = (resultCode == Activity.RESULT_CANCELED)
-            ? "form_discard_pressed" : "form_save_pressed";
-        Utils.logUserAction(action,
-            "form", request.formUuid,
-            "patient_uuid", request.patientUuid);
-        mOdkResultSender.sendOdkResultToServer(request.patientUuid, resultCode, data);
-        mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
+        final boolean isSubmissionCanceled = (resultCode == Activity.RESULT_CANCELED);
+        Utils.logUserAction(isSubmissionCanceled ? "form_discard_pressed" : "form_save_pressed",
+            "form", request.formUuid, "patient_uuid", request.patientUuid);
+        if(isSubmissionCanceled) return;
+
+        final boolean isSubmittingForm = mOdkResultSender.sendOdkResultToServer(request.patientUuid,
+            data);
+        mUi.showFormSubmissionDialog(isSubmittingForm);
     }
 
     FormRequest popFormRequest(int requestIndex) {
@@ -765,6 +764,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                     break;
                 case SERVER_TIMEOUT:
                     errorMessageResource = R.string.submit_xform_failed_server_timeout;
+                    break;
+                case PENDING_FORM_SUBMISSION:
+                    errorMessageResource = R.string.submit_xform_failed_pending_form_submission;
                     break;
                 default:
                     errorMessageResource = R.string.submit_xform_failed_unknown_reason;

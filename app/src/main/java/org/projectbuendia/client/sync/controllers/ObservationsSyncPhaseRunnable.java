@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
@@ -37,14 +38,14 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
 
     public ObservationsSyncPhaseRunnable() {
         super(
-                "observations",
-                Contracts.Table.OBSERVATIONS,
-                JsonObservation.class);
+            "observations",
+            Contracts.Table.OBSERVATIONS,
+            JsonObservation.class);
     }
 
     @Override
-    protected ArrayList<ContentProviderOperation> getUpdateOps(
-            JsonObservation[] list, SyncResult syncResult) {
+    protected ArrayList<ContentProviderOperation> getUpdateOps(JsonObservation[] list,
+            SyncResult syncResult) {
         int deletes = 0;
         int inserts = 0;
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
@@ -55,7 +56,7 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
                 deletes++;
             } else {
                 ops.add(ContentProviderOperation.newInsert(Observations.CONTENT_URI)
-                        .withValues(getObsValuesToInsert(observation)).build());
+                    .withValues(getObsValuesToInsert(observation)).build());
                 inserts++;
             }
         }
@@ -66,8 +67,7 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
     }
 
     /** Converts an encounter data response into appropriate inserts in the encounters table. */
-    public static ContentValues getObsValuesToInsert(
-            JsonObservation observation) {
+    public static ContentValues getObsValuesToInsert(JsonObservation observation) {
         ContentValues cvs = new ContentValues();
         cvs.put(Observations.UUID, observation.uuid);
         cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
@@ -81,13 +81,19 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
     }
 
     @Override
+    protected boolean beforeSyncStarted(ContentResolver contentResolver, SyncResult syncResult,
+            ContentProviderClient providerClient) throws Throwable {
+        return OdkActivityLauncher.submitUnsetFormsToServer(contentResolver);
+    }
+
+    @Override
     protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws RemoteException {
+        ContentResolver contentResolver,
+        SyncResult syncResult,
+        ContentProviderClient providerClient) throws RemoteException {
         // Remove all temporary observations now we have the real ones
         providerClient.delete(Observations.CONTENT_URI,
-                Observations.UUID + " IS NULL",
-                new String[0]);
+            Observations.UUID + " IS NULL",
+            new String[0]);
     }
 }

@@ -12,11 +12,13 @@
 package org.projectbuendia.client.ui;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.StringRes;
@@ -31,7 +33,9 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
+import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
 import org.projectbuendia.client.updater.DownloadedUpdateInfo;
 import org.projectbuendia.client.utils.Logger;
@@ -41,6 +45,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
+
+import static org.projectbuendia.client.events.SubmitXformFailedEvent.Reason
+    .PENDING_FORM_SUBMISSION;
 
 /**
  * An abstract {@link FragmentActivity} that is the base for all activities, providing a "content
@@ -327,9 +334,30 @@ public abstract class BaseActivity extends FragmentActivity {
                             }
                         }, 999, false);
                     break;
+                case RESUBMIT_PENDING_FORM:
+                    snackBar(R.string.troubleshoot_pending_form_submission,
+                        R.string.troubleshoot_pending_form_submission_action_resubmit,
+                        new View.OnClickListener() {
+                            @Override public void onClick(View view) {
+                                new submitUnsentFormsAsyncTask().execute(App.getInstance().getContentResolver());
+                            }
+                        }, 994, false);
+                    break;
                 default:
                     LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
                     return;
+            }
+        }
+    }
+
+    private class submitUnsentFormsAsyncTask extends AsyncTask<ContentResolver, Void, Boolean> {
+        @Override protected Boolean doInBackground(ContentResolver... params) {
+            return OdkActivityLauncher.submitUnsetFormsToServer((ContentResolver)params[0]);
+        }
+
+        protected void onPostExecute(Boolean result) {
+            if(!result) {
+                BigToast.show(BaseActivity.this, R.string.submit_xform_failed_unknown_reason);
             }
         }
     }
@@ -391,6 +419,12 @@ public abstract class BaseActivity extends FragmentActivity {
             new TroubleshootingMessage(
                 R.string.troubleshoot_package_server_misconfigured,
                 R.string.troubleshoot_package_server_misconfigured_solved,
+                10
+        ));
+        troubleshootingMessages.put(HealthIssue.PENDING_FORM_SUBMISSION,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_pending_form_submission,
+                R.string.troubleshoot_pending_form_submission_solved,
                 10
         ));
 

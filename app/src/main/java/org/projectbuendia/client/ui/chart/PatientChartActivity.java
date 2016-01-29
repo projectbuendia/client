@@ -13,9 +13,11 @@ package org.projectbuendia.client.ui.chart;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -105,6 +107,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
+    private Ui mUi;
     private ChartRenderer mChartRenderer;
 
     @Inject AppModel mAppModel;
@@ -257,11 +260,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mChartRenderer = new ChartRenderer(mGridWebView, getResources());
 
+        mUi = new Ui();
+
         final OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(
-                    PatientChartActivity.this, mSettings,
-                    patientUuid, resultCode, data);
+            @Override public boolean sendOdkResultToServer(String patientUuid, Intent data) {
+                return OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this,
+                    mSettings, patientUuid, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {
@@ -275,7 +279,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mAppModel,
             new EventBusWrapper(mEventBus),
             mCrudEventBusProvider.get(),
-            new Ui(),
+            mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
             mChartDataHelper,

@@ -165,6 +165,12 @@ public class Database extends SQLiteOpenHelper {
         SCHEMAS.put(Table.SYNC_TOKENS, ""
             + "table_name TEXT PRIMARY KEY NOT NULL,"
             + "sync_token TEXT NOT NULL");
+
+        SCHEMAS.put(Table.UNSENT_FORMS, ""
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "patient_uuid TEXT NOT NULL,"
+            + "form_contents TEXT NOT NULL");
+
     }
 
     public Database(Context context) {

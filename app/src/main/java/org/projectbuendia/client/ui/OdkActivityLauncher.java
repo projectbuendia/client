@@ -19,6 +19,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Looper;
 
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
@@ -45,6 +47,7 @@ import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.exception.ValidationException;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.UnsentForm;
 import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
@@ -66,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.Nullable;
 
@@ -75,6 +79,10 @@ import static android.provider.BaseColumns._ID;
 import static java.lang.String.format;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
+
+
+import static org.projectbuendia.client.events.SubmitXformFailedEvent.Reason.PENDING_FORM_SUBMISSION;
+import static org.projectbuendia.client.providers.Contracts.UnsentForms;
 
 /** Convenience class for launching ODK to display an Xform. */
 public class OdkActivityLauncher {
@@ -277,21 +285,23 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Convenient shared code for handling an ODK activity result.
+     * Convenient shared code for handling an ODK activity result. This method submits the ODK form
+     * to the server and saves it locally, whether or not the form was successfully submitted.
+     * If an error occurs over the submission, the form is kept to be resubmitted later.
+     * (See {@link #updateObservationCache(String, TreeElement, ContentResolver)})
+     * This method returns {@code true} if it tries to send a request to the server, successfully
+     * or not. If any error occurs before submission, it returns {@code false}.
+     *
      * @param context           the application context
      * @param settings          the application settings
      * @param patientUuid       the patient to add an observation to, or null to create a new patient
-     * @param resultCode        the result code sent from Android activity transition
      * @param data              the incoming intent
      */
-    public static void sendOdkResultToServer(
-        final Context context,
+    public static boolean sendOdkResultToServer(
+        final BaseActivity  context,
         final AppSettings settings,
         @Nullable final String patientUuid,
-        int resultCode,
         Intent data) {
-
-        if(isActivityCanceled(resultCode, data)) return;
 
         try {
             final Uri uri = data.getData();
@@ -310,7 +320,6 @@ public class OdkActivityLauncher {
                 throw new ValidationException("No id to delete for after upload: " + uri);
             }
 
-            // Temporary code for messing about with xform instance, reading values.
             byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
 
             // get the root of the saved and template instances
@@ -321,29 +330,133 @@ public class OdkActivityLauncher {
                 throw new ValidationException("Xml form is not valid for uri: " + uri);
             }
 
-            sendFormToServer(patientUuid, xml,
-                new Response.Listener<JSONObject>() {
-                    @Override public void onResponse(JSONObject response) {
-                        LOG.i("Created new encounter successfully on server" + response.toString());
-                        // Only locally cache new observations, not new patients.
-                        if (patientUuid != null) {
-                            updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
-                        }
-                        if (!settings.getKeepFormInstancesLocally()) {
-                            deleteLocalFormInstances(formIdToDelete);
-                        }
-                        EventBus.getDefault().post(new SubmitXformSucceededEvent());
+            // Always cache new observations, whether or not it is successfully sent to the server.
+            if (patientUuid != null) {
+                updateObservationCache(patientUuid, savedRoot,
+                    context.getContentResolver());
+            }
+
+            /* We should prevent application to submit new forms if there are still unsent forms.
+             * In a scenario where an user tries to submit an form 'A' unsuccessfully, this form is
+             * saved to be sent later. Then, if the user tries to submit another form 'B',
+             * the latter can only be submitted if the former was submitted first.
+             * In the case of the former still can't be resent, the latter form will be saved to be
+             * sent all together in a future moment.
+             *
+             * Note that OdkActivityLauncher#submitUnsetFormsToServer is a blocking method and
+             * it must not be called by main thread.
+             */
+            final boolean result[] = new boolean[1];
+            new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... params) {
+                    return submitUnsetFormsToServer(App.getInstance().getContentResolver());
+                }
+
+                @Override
+                protected void onPostExecute(Boolean proceed) {
+                    if (proceed) {
+                        submitFormToServer(patientUuid, xml,
+                            new Response.Listener<JSONObject>() {
+                                @Override public void onResponse(JSONObject response) {
+                                    LOG.i("Created new encounter successfully on server" + response.toString());
+                                    if (!settings.getKeepFormInstancesLocally()) {
+                                        deleteLocalFormInstances(formIdToDelete);
+                                    }
+                                    EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override public void onErrorResponse(VolleyError error) {
+                                    LOG.e(error, "Error submitting form to server");
+                                    saveUnsentForm(patientUuid, xml, context.getContentResolver());
+                                    handleSubmitError(error);
+                                }
+                            });
+                        result[0] = true;
+                    } else {
+                        saveUnsentForm(patientUuid, xml, context.getContentResolver());
+                        EventBus.getDefault().post(new SubmitXformFailedEvent(PENDING_FORM_SUBMISSION, null));
+                        result[0] = false;
                     }
-                }, new Response.ErrorListener() {
-                    @Override public void onErrorResponse(VolleyError error) {
-                        LOG.e(error, "Error submitting form to server");
-                        handleSubmitError(error);
-                    }
-                });
+                }
+            }.execute();
+
+            return result[0];
         } catch(ValidationException ve) {
             LOG.e(ve.getMessage());
             EventBus.getDefault().post(
                 new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            return false;
+        }
+    }
+
+    /** Tries to submit all unsent forms to the server . This method has a synchronization barrier
+     * which blocks the current thread waiting until all requests return prior to proceed its own flow.
+     * As Volley's {@link com.android.volley.RequestQueue} response event calls back the Main thread,
+     * the main thread must not be the method caller, otherwise it will be in deadlock state.
+     * Returns {@code true} if there are no more unsent forms. Otherwise returns {@code false}.
+     */
+    public static final boolean submitUnsetFormsToServer(final ContentResolver contentResolver) {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            // We're on the main thread
+            throw new RuntimeException("This call is blocking, you should not call it from the main thread");
+        }
+
+        final boolean hasUnsubmittedForms[] = new boolean[]{false};
+        final List<UnsentForm> forms = getUnsetForms(contentResolver);
+
+        //Creating a sync barrier to wait for all returning async submissions
+        final CountDownLatch countDownLatch = new CountDownLatch(forms.size());
+        for(final UnsentForm unsentForm : forms) {
+            submitFormToServer(unsentForm.patientUuid, unsentForm.formContents,
+                new Response.Listener<JSONObject>() {
+                    @Override public void onResponse(JSONObject response) {
+                        LOG.i("Created new encounter successfully on server. " + response
+                            .toString());
+                        deleteUnsentForm(unsentForm.uuid, contentResolver);
+                        countDownLatch.countDown();
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override public void onErrorResponse(VolleyError error) {
+                        //Just log it and flag returning value as pendent. It is not necessary to
+                        // keep its content, since this form is already persisted.
+                        LOG.e(error, format("Error resubmitting %s form to server ", unsentForm
+                            .uuid));
+                        hasUnsubmittedForms[0] = true;
+                        countDownLatch.countDown();
+                    }
+                });
+        }
+        try {
+            //Waiting until all form submissions return from server
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            LOG.e("Interrupted whilst waiting for unsubmitted forms to be uploaded", e);
+            return false;
+        }
+
+        return !hasUnsubmittedForms[0];
+    }
+
+    public static void deleteUnsentForm(final String uuid, final ContentResolver contentResolver) {
+        LOG.i("Removing the unsent form from the db");
+        contentResolver.delete(UnsentForms.CONTENT_URI, format("%s='%s'", UnsentForms.UUID, uuid),
+            null);
+    }
+
+    /** Returns all local forms which were NOT submitted to the server yet*/
+    public static List<UnsentForm> getUnsetForms(final ContentResolver contentResolver) {
+        try (Cursor cursor = contentResolver.query(UnsentForms.CONTENT_URI,
+            new String[]{UnsentForms.UUID, UnsentForms.PATIENT_UUID, UnsentForms.FORM_CONTENTS},
+            null, null, null)) {
+            List<UnsentForm> unsentForms = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                unsentForms.add(new UnsentForm(Utils.getString(cursor, UnsentForms.UUID, null),
+                    Utils.getString(cursor, UnsentForms.PATIENT_UUID, ""),
+                    Utils.getString(cursor, UnsentForms.FORM_CONTENTS, "")));
+            }
+            return unsentForms;
         }
     }
 
@@ -386,10 +499,8 @@ public class OdkActivityLauncher {
 
     private static void deleteLocalFormInstances(Long formIdToDelete) {
         //Code largely copied from InstanceUploaderTask to delete on upload
-        DeleteInstancesTask dit = new DeleteInstancesTask();
-        dit.setContentResolver(
-            Collect.getInstance().getApplication()
-                .getContentResolver());
+        DeleteInstancesTask dit = new DeleteInstancesTask(Collect.getInstance().getApplication()
+            .getContentResolver());
         dit.execute(formIdToDelete);
     }
 
@@ -428,7 +539,7 @@ public class OdkActivityLauncher {
             int columnIndex = instanceCursor.getColumnIndex(_ID);
             if (columnIndex == -1) return  null;
 
-           return instanceCursor.getLong(columnIndex);
+            return instanceCursor.getLong(columnIndex);
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
@@ -454,32 +565,21 @@ public class OdkActivityLauncher {
 
         return instanceCursor;
     }
-
-    /**
-     * Returns true if the activity was canceled
-     * @param resultCode        the result code sent from Android activity transition
-     * @param data              the incoming intent
-     */
-    private static boolean isActivityCanceled(int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_CANCELED) return true;
-        if (data == null || data.getData() == null) {
-            LOG.i("No data for form result, probably cancelled.");
-            return true;
-        }
-        return false;
-    }
-
-    private static void sendFormToServer(String patientUuid, String xml,
-                                         Response.Listener<JSONObject> successListener,
-                                         Response.ErrorListener errorListener) {
+    
+    private static void submitFormToServer(String patientUuid, String xml,
+                                           Response.Listener<JSONObject> successListener,
+                                           Response.ErrorListener errorListener) {
         OpenMrsXformsConnection connection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
         JsonUser activeUser = App.getUserManager().getActiveUser();
+        //TODO: Define what to do if there is no logged user and app tries do resubmit the form
+        // (i.e. using SnackBar prior to login)
+        String entererId = (activeUser != null)? activeUser.id : null;
         connection.postXformInstance(
-                patientUuid, activeUser.id, xml, successListener, errorListener);
+                patientUuid, entererId, xml, successListener, errorListener);
     }
 
-    private static void handleSubmitError(VolleyError error) {
+    private static void handleSubmitError(final VolleyError error) {
         SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
 
         if (error instanceof TimeoutError) {
@@ -533,7 +633,7 @@ public class OdkActivityLauncher {
 
     /**
      * Returns the xml form as a String from the path. If for any reason, the file couldn't be read,
-     * it returns <code>null</code>
+     * it returns {@code null}
      * @param path      the path to be read
      */
     private static String readFromPath(String path) {
@@ -552,13 +652,34 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Caches the observation changes locally for a given patient.
+     * Saves the forms which couldn't be submitted to server into the local db. So that, when the
+     * application connects to server again, it can try to resend the form again. Note that this
+     * method just save the data as is required to be resend to the server. Please, check
+     * {@link #updateObservationCache} to see how the observation itself is saved into db.
+     * The {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable}
+     * will check if there are unsent observations, and if is the case, it will try to resend it
+     * prior to pull new ones (See {@link #submitUnsetFormsToServer}).
+     */
+    private static void saveUnsentForm(final String patientUuid, final String xml,
+                                       final ContentResolver contentResolver) {
+        contentResolver.insert(UnsentForms.CONTENT_URI, new UnsentForm(
+            UUID.randomUUID().toString(), patientUuid, xml).toContentValues());
+    }
+
+    /**
+     * Caches the observation changes locally for a given patient. Saving the observations locally
+     * allows them to be used by users even it the application is connected to the server at that
+     * time. In this case, when the app becomes online and synchronizes with the server, this
+     * temporary observations are deleted. Please, see {@link #saveUnsentForm} and
+     * {@link org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable} for more
+     * details.
      */
     private static void updateObservationCache(String patientUuid, TreeElement savedRoot,
                                                ContentResolver resolver) {
         ContentValues common = new ContentValues();
-        // It's critical that UUID is {@code null} for temporary observations, so we make it
-        // explicit here. See {@link Contracts.Observations.UUID} for details.
+        // It's critical that UUID is {@code null} and SUBMITTED is {@code false} for temporary
+        // observations, so we make it  explicit here. See {@link Contracts.Observations.UUID}
+        // and {@link Contracts.Observations.SUBMITTED}  for details.
         common.put(Contracts.Observations.UUID, (String) null);
         common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
 
@@ -608,7 +729,7 @@ public class OdkActivityLauncher {
     }
 
     /**
-     * Returns a {@link ContentValues} list containing the id concept and the answer valeu from
+     * Returns a {@link ContentValues} list containing the id concept and the answer value from
      * all answered observations. Returns a empty {@link List} if no observation was answered.
      *
      * @param common                        the current content values.
@@ -616,8 +737,8 @@ public class OdkActivityLauncher {
      * @param xformConceptIdsAccumulator    the set to store the form concept ids found
      */
     private static List<ContentValues> getAnsweredObservations(ContentValues common,
-                                                                    TreeElement savedRoot,
-                                                                    Set<Integer> xformConceptIdsAccumulator) {
+                                                               TreeElement savedRoot,
+                                                               Set<Integer> xformConceptIdsAccumulator) {
         List<ContentValues> answeredObservations = new ArrayList<>();
         for (int i = 0; i < savedRoot.getNumChildren(); i++) {
             TreeElement group = savedRoot.getChildAt(i);
@@ -677,7 +798,7 @@ public class OdkActivityLauncher {
 
         IAnswerData dateTimeValue = encounterDatetime.getValue();
         try {
-         return  ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
+            return  ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
         } catch (IllegalArgumentException e) {
             LOG.e("Could not parse datetime" + dateTimeValue.getValue());
             return null;
