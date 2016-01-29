@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import org.joda.time.DateTime;
 import org.odk.collect.android.utilities.Parcels;
 
+import java.util.ArrayList;
+
 /**
  * An object that contains the prepopulatable fields
  */
@@ -19,8 +21,7 @@ public class Preset implements Parcelable {
     public DateTime encounterTime;
     public String locationName;
     public String clinicianName;
-    public int pregnant = UNSPECIFIED;
-    public int ivFitted = UNSPECIFIED;
+    public ArrayList<String> persistentFieldsSelected = new ArrayList<String>();
     public String targetGroup;
 
     public Preset() {}
@@ -29,8 +30,7 @@ public class Preset implements Parcelable {
         encounterTime = Parcels.readNullableDateTime(in);
         locationName = Parcels.readNullableString(in);
         clinicianName = Parcels.readNullableString(in);
-        pregnant = in.readInt();
-        ivFitted = in.readInt();
+        in.readList(persistentFieldsSelected, Integer.class.getClassLoader());
         targetGroup = Parcels.readNullableString(in);
     }
 
@@ -44,8 +44,7 @@ public class Preset implements Parcelable {
         Parcels.writeNullableDateTime(dest, encounterTime);
         Parcels.writeNullableString(dest, locationName);
         Parcels.writeNullableString(dest, clinicianName);
-        dest.writeInt(pregnant);
-        dest.writeInt(ivFitted);
+        dest.writeList(persistentFieldsSelected);
         Parcels.writeNullableString(dest, targetGroup);
     }
 

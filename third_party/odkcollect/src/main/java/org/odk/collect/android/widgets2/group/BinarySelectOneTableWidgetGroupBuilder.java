@@ -59,13 +59,9 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
             return this;
         }
 
-        // TODO: Remove this workaround.
         String questionText = prompt.getQuestionText().toLowerCase();
-        if (questionText.equals("pregnant")) {
-            widget.forceSetAnswer(preset.pregnant);
-        }
-        if (questionText.equals("iv access present")) {
-            widget.forceSetAnswer(preset.ivFitted);
+        if (preset.persistentFieldsSelected.contains(questionText)) {
+            widget.forceSetAnswer(preset.YES);
         }
 
         widget.setId(id);
