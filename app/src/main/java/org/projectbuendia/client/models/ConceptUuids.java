@@ -20,10 +20,7 @@ import java.util.HashMap;
  * client.
  */
 public class ConceptUuids {
-    public static final String CONSCIOUS_STATE_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String FLUIDS_UUID = "e96f504e-229a-4933-84d1-358abbd687e3";
     public static final String GENERAL_CONDITION_UUID = "a3657203-cfed-44b8-8e3f-960f8d4cf3b3";
-    public static final String HYDRATION_UUID = "162653AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String IV_UUID = "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07";
     public static final String PREGNANCY_UUID = "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -142,18 +139,7 @@ public class ConceptUuids {
         PERSISTENT_FIELDS.put("1777000642AAAAAAAAAAAAAAAAAAAAAAAAAA", "child behavioural problems");
     }
 
-    public static final String PHASE_UUID = "UUID";
-    public static final String BREASTFEEDING_UUID = "UUID";
-    public static final String NG_FEEDING_UUID = "UUID";
-    public static final String TYPE_OF_LIQUID_FOOD_UUID = "UUID";
-    public static final String LIQUID_FOOD_SERVINGS_UUID = "UUID";
-    public static final String LIQUID_FOOD_ML_PER_SERVING_UUID = "UUID";
-    public static final String TYPE_OF_SOLID_FOOD_UUID = "UUID";
-    public static final String RUTF_SERVINGS_UUID = "UUID";
-    public static final String RUTF_SACHETS_UUID = "UUID";
-
     public static final String PULSE_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String RESPIRATION_UUID = "5242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String PCR_NP_UUID = "162826AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String PCR_L_UUID = "162827AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String FIRST_SYMPTOM_DATE_UUID = "1730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -192,37 +178,6 @@ public class ConceptUuids {
     /** UUID for the (question) concept for the temperature. */
     public static final String TEMPERATURE_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    /** UUID for the (question) concept for the weight. */
-    public static final String WEIGHT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for Diarrhea. */
-    public static final String DIARRHEA_UUID = "1aa247f3-2d83-4efc-94bc-123b1a71b19f";
-
-    /** UUID for the (question) concept for (any) bleeding. */
-    public static final String BLEEDING_UUID = "147241AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    // TODO: This may break localization.
-    /** Group name for Bleeding Sites section. */
-    public static final String BLEEDING_SITES_NAME = "Bleeding site";
-
-    /** UUID for the (question) concept for Vomiting. */
-    public static final String VOMITING_UUID = "405ad95d-f6e1-4023-a459-28cffdb055c5";
-
-    /** UUID for the (question) concept for pain. */
-    public static final String PAIN_UUID = "f75da5de-404c-42d0-b484-b69a4896e093";
-
-    /** UUID for the (question) concept for best conscious state (AVPU). */
-    public static final String RESPONSIVENESS_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for (severe) weakness. */
-    public static final String WEAKNESS_UUID = "5226AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for appetite. */
-    public static final String APPETITE_UUID = "777000003AAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for oedema. */
-    public static final String OEDEMA_UUID = "460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
     /** UUID for the (question) concept for the notes field. */
     public static final String NOTES_UUID = "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -237,9 +192,6 @@ public class ConceptUuids {
 
     /** UUID for the (answer) concept Severe. */
     public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for Mobility. */
-    public static final String MOBILITY_UUID = "30143d74-f654-4427-bb92-685f68f92c15";
 
     /** UUID for the (answer) concept of Yes. */
     public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
