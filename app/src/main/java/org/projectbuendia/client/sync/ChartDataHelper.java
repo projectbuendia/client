@@ -80,6 +80,13 @@ public class ChartDataHelper {
         sLoadedLocale = null;
     }
 
+    /** Returns the loaded concept name for the specified concept UUID */
+    public String getConceptNameByUuid(String uuid) {
+        if(sConceptNames == null) return "";
+
+        return sConceptNames.get(uuid);
+    }
+
     /** Loads concept names and types from the app db into HashMaps in memory. */
     public void loadConceptData(String locale) {
         synchronized (sLoadingLock) {

@@ -340,14 +340,12 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         Map<String, Obs> observations =
             mChartHelper.getLatestObservations(mPatientUuid);
 
-        if (observations.containsKey(ConceptUuids.PREGNANCY_UUID)
-            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.PREGNANCY_UUID).value)) {
-            preset.pregnant = Preset.YES;
-        }
-
-        if (observations.containsKey(ConceptUuids.IV_UUID)
-            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.IV_UUID).value)) {
-            preset.ivFitted = Preset.YES;
+        // TODO: Refactor this as it's repeated in two methods
+        for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
+            if (observations.containsKey(uuid)
+                    && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
+                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
+            }
         }
 
         preset.targetGroup = targetGroup;
@@ -430,6 +428,18 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
         Utils.logUserAction("form_opener_pressed", "form", formUuid);
         mUi.showFormLoadingDialog(true);
+
+        Map<String, Obs> observations =
+                mChartHelper.getLatestObservations(mPatientUuid);
+
+        // TODO: Refactor this as it's repeated in two methods (this is the one we're using!)
+        for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
+            if (observations.containsKey(uuid)
+                    && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
+                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
+            }
+        }
+
         FormRequest request = newFormRequest(formUuid, mPatientUuid);
         mUi.fetchAndShowXform(
                 request.requestIndex, request.formUuid,
