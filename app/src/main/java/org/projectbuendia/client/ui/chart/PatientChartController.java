@@ -341,10 +341,10 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mChartHelper.getLatestObservations(mPatientUuid);
 
         // TODO: Refactor this as it's repeated in two methods
-        for(String uuid : ConceptUuids.PERSISTENT_FIELDS.keySet()) {
+        for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
             if (observations.containsKey(uuid)
                     && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
-                preset.persistentFieldsSelected.add(ConceptUuids.PERSISTENT_FIELDS.get(uuid).toLowerCase());
+                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
             }
         }
 
@@ -432,11 +432,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         Map<String, Obs> observations =
                 mChartHelper.getLatestObservations(mPatientUuid);
 
-        // TODO: Refactor this as it's repeated in two methods
-        for(String uuid : ConceptUuids.PERSISTENT_FIELDS.keySet()) {
+        // TODO: Refactor this as it's repeated in two methods (this is the one we're using!)
+        for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
             if (observations.containsKey(uuid)
                     && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
-                preset.persistentFieldsSelected.add(ConceptUuids.PERSISTENT_FIELDS.get(uuid).toLowerCase());
+                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
             }
         }
 
