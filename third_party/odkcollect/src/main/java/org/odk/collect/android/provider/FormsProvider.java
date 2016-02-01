@@ -379,16 +379,35 @@ public class FormsProvider extends ContentProvider {
 
 		SQLiteDatabase db = getDbHelper().getWritableDatabase();
 
-        long rowId;
-        if (replace) {
-            // If we want this insert to always replace, then do a transactional delete followed
-            // by an insert. The primary key is _ID, which we can't know in advance.
-            try {
-                db.beginTransaction();
-                db.delete(
-                        FORMS_TABLE_NAME, FormsColumns.FORM_FILE_PATH + "=?",
-                        new String[]{filePath});
-                rowId = db.insert(FORMS_TABLE_NAME, null, values);
+		long rowId;
+		if (replace) {
+			// If we want this insert to always replace, then lookup the primary key _ID and add it
+			// to the content values.
+			try {
+				db.beginTransaction();
+				Cursor cursor = null;
+				try {
+					cursor = db.query(
+							FORMS_TABLE_NAME,
+							new String[]{FormsColumns._ID},
+							FormsColumns.FORM_FILE_PATH + "=?",
+							new String[]{filePath},
+							null,
+							null,
+							null);
+					if (cursor.moveToNext()) {
+						values.put(FormsColumns._ID, cursor.getInt(0));
+					}
+				} finally {
+					if (cursor != null) {
+						cursor.close();
+					}
+				}
+				rowId = db.insertWithOnConflict(
+						FORMS_TABLE_NAME,
+						null,
+						values,
+						SQLiteDatabase.CONFLICT_REPLACE);
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
