@@ -827,6 +827,15 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // the client's time zone matches the server's time zone, because
                 // the server's fidelity is time-zone-dependent (auggghh!!!)
                 stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
+                // If we end up with a zero-duration day, then stop < start with the current logic.
+                // We correct that case here.
+                // TODO: Just add durationDays to startTime and use that instead, which should
+                // result in a more stable model all around. I'm not sure how the Chart rendering
+                // code would cope with that (there's an open bug for it) so for the pilot we
+                // only correct this case instead of all cases.
+                if (stop.isBefore(start)) {
+                    stop = start;
+                }
             }
 
             mAppModel.saveOrder(mCrudEventBus, new Order(
