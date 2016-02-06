@@ -44,3 +44,6 @@ local.properties
 .classpath
 .settings
 .project
+
+# OpenMRS password file.
+.openmrs_password
