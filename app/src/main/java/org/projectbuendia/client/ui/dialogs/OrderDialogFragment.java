@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -20,6 +21,7 @@ import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
@@ -46,11 +48,13 @@ import de.greenrobot.event.EventBus;
 public class OrderDialogFragment extends DialogFragment {
 
     /** For a duration < 3 days, provides strings expressing the duration in a friendly way. */
-    private static final @StringRes int[] GIVE_FOR_DAYS_STATIC_STRINGS = new int[] {
-            R.string.order_duration_unspecified,
-            R.string.order_duration_stop_after_today,
-            R.string.order_duration_stop_after_tomorrow
-    };
+    private static final SparseIntArray GIVE_FOR_DAYS_STATIC_STRINGS = new SparseIntArray(4);
+    static {
+        GIVE_FOR_DAYS_STATIC_STRINGS.put(-1, R.string.order_duration_stop_yesterday);
+        GIVE_FOR_DAYS_STATIC_STRINGS.put(0, R.string.order_duration_stop_immediately);
+        GIVE_FOR_DAYS_STATIC_STRINGS.put(1, R.string.order_duration_stop_after_today);
+        GIVE_FOR_DAYS_STATIC_STRINGS.put(2, R.string.order_duration_stop_after_tomorrow);
+    }
 
     @InjectView(R.id.order_medication) EditText mMedication;
     @InjectView(R.id.order_dosage) EditText mDosage;
@@ -61,6 +65,7 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_delete) Button mDelete;
+    @InjectView(R.id.order_stop_immediately) Button mStopNowButton;
     private LayoutInflater mInflater;
     private DateTime mStartDate;
 
@@ -107,6 +112,8 @@ public class OrderDialogFragment extends DialogFragment {
         );
     }
 
+    // We're populating fields on behalf of the user so we don't want to format them
+    @SuppressLint("SetTextI18n")
     private void populateFields(Bundle args) {
         String instructions = args.getString("instructions");
         mMedication.setText(Order.getMedication(instructions));
@@ -119,8 +126,13 @@ public class OrderDialogFragment extends DialogFragment {
         if (stopMillis != null) {
             LocalDate lastDay = new DateTime(stopMillis).toLocalDate();
             int days = Days.daysBetween(mStartDate.toLocalDate(), lastDay).getDays();
-            // 1 day means stop after today, so we have to increment by 1.
-            mGiveForDays.setText(String.format("%d", days + 1));
+            // 1 day means stop after today, so we have to increment by 1, unless the duration is
+            // zero.
+            if (! mStartDate.toLocalDate().equals(lastDay)) {
+                days += 1;
+            }
+
+            mGiveForDays.setText(Integer.toString(days));
         }
         updateLabels();
     }
@@ -150,7 +162,9 @@ public class OrderDialogFragment extends DialogFragment {
             setError(mMedication, R.string.enter_medication);
             valid = false;
         }
-        if (durationDays != null && durationDays == 0) {
+        // It's ok for duration to be 0 days if this is an edit, because that means that we're
+        // essentially cancelling the order shortly after creating it.
+        if (durationDays != null && durationDays == 0 && getArguments().getBoolean("new")) {
             setError(mGiveForDays, R.string.order_give_for_days_cannot_be_zero);
             valid = false;
         }
@@ -237,8 +251,20 @@ public class OrderDialogFragment extends DialogFragment {
             }
         });
 
+        mStopNowButton.setOnClickListener(new View.OnClickListener() {
+            // It's ok to suppress lint here because we're filling in text on behalf of the user.
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View v) {
+                mGiveForDays.setText(Integer.toString(Days.daysBetween(
+                        mStartDate.toLocalDate(), new LocalDate()).getDays()));
+                // Labels should update automatically because of the TextWatcher.
+            }
+        });
+
         // Hide or show the "Delete" and "Change start date" buttons appropriately.
         Utils.showIf(mDelete, !newOrder);
+        Utils.showIf(mStopNowButton, !newOrder);
         Utils.showIf(mStartDateChangeButton, newOrder);
 
         // Open the keyboard, ready to type into the medication field.
@@ -254,19 +280,26 @@ public class OrderDialogFragment extends DialogFragment {
 
         // Duration
         String text = mGiveForDays.getText().toString().trim();
-        int days = text.isEmpty() ? 0 : Integer.parseInt(text);
-        LocalDate lastDay = mStartDate.toLocalDate().plusDays(days - 1);
+        int daysDuration = text.isEmpty() ? -1 : Integer.parseInt(text);
+        LocalDate endDate = mStartDate.toLocalDate().plusDays(daysDuration);
+        LocalDate lastDateGiven = endDate.plusDays(-1);
         // TODO: use R.plurals instead.
         mGiveForDaysLabel.setText(
-            days == 0 ? R.string.order_give_for_days :
-                days == 1 ? R.string.order_give_for_day :
+                daysDuration == 0 ? R.string.order_give_for_days :
+                daysDuration == 1 ? R.string.order_give_for_day :
                     R.string.order_give_for_days);
-        if (days < GIVE_FOR_DAYS_STATIC_STRINGS.length) {
-            mDurationLabel.setText(GIVE_FOR_DAYS_STATIC_STRINGS[days]);
+        if (daysDuration == -1) {
+            mDurationLabel.setText(R.string.order_duration_unspecified);
         } else {
+            LocalDate now = new LocalDate();
+            Days daysSinceNow = Days.daysBetween(now, endDate);
+            @StringRes int labelResource = GIVE_FOR_DAYS_STATIC_STRINGS.get(
+                    daysSinceNow.getDays(),
+                    R.string.order_duration_stop_after_date);
+
             mDurationLabel.setText(getResources().getString(
-                    R.string.order_duration_stop_after_date,
-                    Utils.toShortString(lastDay)));
+                    labelResource,
+                    Utils.toShortString(lastDateGiven)));
         }
     }
 

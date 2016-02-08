@@ -183,6 +183,12 @@ public class ChartRenderer {
         void addOrders(List<Order> orders) {
             for (Order order : orders) {
                 if (order.stop != null) {
+                    // Special case: order is for a single day.
+                    // TODO: remove this, fix up the order timestamp-handling logic.
+                    if (order.start.toLocalDate().equals(order.stop.toLocalDate())) {
+                        getColumnContainingTime(order.start);
+                        continue;
+                    }
                     for (DateTime dt = order.start; !dt.isAfter(order.stop.plusDays(1)); dt = dt.plusDays(1)) {
                         getColumnContainingTime(dt); // creates the column if it doesn't exist
                     }
