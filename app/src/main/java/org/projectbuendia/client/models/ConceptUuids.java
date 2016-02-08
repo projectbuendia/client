@@ -28,7 +28,7 @@ public class ConceptUuids {
     public static final String PREGNANCY_UUID = "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     // Persistent fields
-    public static HashSet<String> PERSISTENT_FIELDS = new HashSet<String>();
+    public static final HashSet<String> PERSISTENT_FIELDS = new HashSet<>();
 
     static {
         // TODO: Determine from the profile which fields should be persistent (on a per form basis), instead of here
