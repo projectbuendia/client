@@ -340,16 +340,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             preset.clinicianName = user.fullName;
         }
 
-        Map<String, Obs> observations =
-            mChartHelper.getLatestObservations(mPatientUuid);
-
-        // TODO: Refactor this as it's repeated in two methods
-        for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
-            if (observations.containsKey(uuid)
-                    && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
-                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
-            }
-        }
+        // TODO: implement persistent fields here, if we keep this code.
 
         preset.targetGroup = targetGroup;
 
@@ -439,7 +430,14 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
             if (observations.containsKey(uuid)
                     && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
-                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
+                // TODO: Ideally, we'd know how to determine whether a field was in a form, which
+                // would make this more efficent. But we can't at the moment.
+                String conceptName = mChartHelper.getConceptNameByUuid(uuid);
+                // The concept name could be null if there's an observation whose concept isn't in
+                // use in the profile.
+                if (conceptName != null) {
+                    preset.persistentFieldsSelected.add(conceptName.toLowerCase());
+                }
             }
         }
 
