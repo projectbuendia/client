@@ -93,6 +93,7 @@ public interface Server {
      */
     void deleteObservation(
             String Uuid,
+            Response.Listener<Void> successListener,
             Response.ErrorListener errorListener);
 
     /**

@@ -90,6 +90,7 @@
   <string name="order_give_for_days_cannot_be_zero">Doit être vide ou supérieure à 0</string>
   <string name="order_stop_now">Arrêter maintenant</string>
   <string name="order_delete">Supprimer cette traitement</string>
+  <string name="order_delete_failed">Traitement n\'etait pas supprimer.</string>
   <string name="title_confirmation">Confirmation</string>
   <string name="confirm_order_delete">Vramient supprimer?</string>
   <string name="delete">Supprimer</string>
@@ -369,6 +370,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <!-- View Observations dialog -->
   <string name="observation_on_day">le</string>
   <string name="delete_observations">Supprimer observations…</string>
+  <string name="observation_delete_failed">Observation n\'etait pas supprimer.</string>
 
   <!-- Notes panel -->
   <string name="error_failed_to_submit_note">Remarque n\'est pas submit.</string>
@@ -386,5 +388,4 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <!-- The day of week plus "medium" date format. e.g. Tues, 26 Jan 2015 -->
   <string name="day_of_week_and_medium_date">%1$tA, %1$td %1$tb %1$tY</string>
   <string name="age_unknown">age pas connu</string>
-
 </resources>

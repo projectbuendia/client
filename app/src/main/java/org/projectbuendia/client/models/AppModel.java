@@ -91,10 +91,6 @@ public class AppModel {
     }
 
     public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
-        String conditions = Contracts.Observations.UUID + " = ?";
-        ContentValues values = new ContentValues();
-        values.put(Contracts.Observations.VOIDED,1);
-        mContentResolver.update(Contracts.Observations.CONTENT_URI, values, conditions, new String[]{voidObs.Uuid});
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
@@ -216,10 +212,6 @@ public class AppModel {
         mContentResolver = contentResolver;
         mLoaderSet = loaderSet;
         mTaskFactory = taskFactory;
-    }
-
-    public void voidObservation(CrudEventBus bus, VoidObs obs) {
-        mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
     }
 
     /** A subscriber that handles error events posted to {@link CrudEventBus}es. */
