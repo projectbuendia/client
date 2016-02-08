@@ -624,12 +624,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
-                labels.add("M");
+                labels.add("M"); // TODO: i18n
             } else if (patient.gender == Patient.GENDER_FEMALE) {
-                labels.add("F");
+                labels.add("F"); // TODO: i18n
             }
-            labels.add(patient.birthdate == null ? "age unknown"
-                : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
+            labels.add(patient.birthdate == null
+                    ? getResources().getString(R.string.age_unknown)
+                    : Utils.birthdateToAge(patient.birthdate, getResources()));
             String sexAge = Joiner.on(", ").join(labels);
             PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
         }

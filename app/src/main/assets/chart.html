@@ -49,7 +49,7 @@
     <tbody>
       <tr>
         <th scope="rowgroup">
-          Observations
+          {{ string_resource("observations") }}
         </th>
         {% for column in columns %}
           {% if prevColumn is not null and column.start != prevColumn.stop %}
@@ -114,7 +114,7 @@
     <tbody>
       <tr>
         <th scope="rowgroup">
-          Treatment Plan
+          {{ string_resource("treatment_plan_title") }}
         </th>
         {% for column in columns %}
           {% if prevColumn is not null and column.start != prevColumn.stop %}
@@ -128,7 +128,8 @@
         <tr class="order">
           <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
             <div class="medication">{{order.medication}}</div>
-            <div>{{order.dosage}}&nbsp;{{order.frequency != null ? order.frequency + 'x daily' : ''}}</div>
+            <!-- TODO: make string_resource take format strings and args so we don't need to manually concatenate like this. -->
+            <div>{{order.dosage}}&nbsp;{{order.frequency != null ? order.frequency + string_resource("times_daily") : ''}}</div>
           </th>
           {% set previousActive = false %}
           {% set future = false %}
@@ -158,7 +159,7 @@
 
       <tr>
         <th scope="row" class="command" onclick="controller.onNewOrderPressed()">
-          Add a New Treatment
+          {{ string_resource("treatment_add_new") }}
         </th>
       </tr>
     </tbody>

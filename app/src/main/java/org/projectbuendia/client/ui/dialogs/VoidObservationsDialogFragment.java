@@ -108,7 +108,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                         dialogInterface.dismiss();
                     }
                 })
-                .setPositiveButton(R.string.voiding, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -118,7 +118,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
                         dialogInterface.dismiss();
                     }
-                }).setTitle(getResources().getString(R.string.void_observations))
+                }).setTitle(getResources().getString(R.string.delete_observations))
                 .setView(fragment);
         return builder.create();
     }
