@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 /** A {@link HealthCheck} that checks whether the package server is up and running. */
+// TODO: restore PackageServerHealthCheck, we'll probably want it again once the packages are
+// working on the server.
+@SuppressWarnings("unused")
 public class PackageServerHealthCheck extends HealthCheck {
 
     private static final Logger LOG = Logger.create();
