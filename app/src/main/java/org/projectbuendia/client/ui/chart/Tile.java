@@ -17,6 +17,7 @@ public class Tile {
     static {
         DEFAULTS.put("select_one", new ChartItem("", "", false, null, "{1,abbr}", "{1,name}", "", "", ""));
         DEFAULTS.put("yes_no", new ChartItem("", "", false, null, "{1,yes_no,Yes;No}", "", "", "", ""));
+        DEFAULTS.put("yes_no_unknown", new ChartItem("", "", false, null, "{1,yes_no_unknown,Yes;No;Unknown}", "", "", "", ""));
         DEFAULTS.put("number", new ChartItem("", "", false, null, "0", "", "", "", ""));
         DEFAULTS.put("text", new ChartItem("", "", false, null, "{1,text,60}", "", "", "", ""));
         DEFAULTS.put("date", new ChartItem("", "", false, null, "{1,date,YYYY-MM-dd}", "", "", "", ""));

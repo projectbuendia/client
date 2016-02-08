@@ -6,6 +6,9 @@ import org.apache.commons.lang3.text.ExtendedMessageFormat;
 import org.apache.commons.lang3.text.FormatFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.utils.Utils;
@@ -51,6 +54,7 @@ public class ObsFormat extends Format {
 
     private static final Map<String, Class<? extends Format>> FORMAT_CLASSES = new HashMap<>();
     static {
+        FORMAT_CLASSES.put("yes_no_unknown", ObsYesNoUnknownFormat.class);
         FORMAT_CLASSES.put("yes_no", ObsYesNoFormat.class);
         FORMAT_CLASSES.put("abbr", ObsAbbrFormat.class);
         FORMAT_CLASSES.put("name", ObsNameFormat.class);
@@ -219,6 +223,37 @@ public class ObsFormat extends Format {
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return mNullText;
             return value.asBoolean() ? mYesText : mNoText;
+        }
+    }
+
+    /** "yes_no" format for values of any type.  Typical use: {1,yes_no,Present;Not present} */
+    class ObsYesNoUnknownFormat extends ObsOutputFormat {
+        String mYesText;
+        String mNoText;
+        String mUnknownText;
+        String mNullText;
+
+        public ObsYesNoUnknownFormat(String pattern) {
+            String[] parts = pattern.split(";");
+            mYesText = parts.length >= 1 ? parts[0] : "";
+            mNoText = parts.length >= 2 ? parts[1] : "";
+            mUnknownText = parts.length >= 3 ? parts[2] : App.getInstance().getResources().getString(R.string.unknown);
+            mNullText = parts.length >= 4 ? parts[3] : EN_DASH;
+        }
+
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null || value.uuid == null) return mNullText;
+            switch (value.uuid) {
+                case ConceptUuids.YES_UUID:
+                    return mYesText;
+                case ConceptUuids.NO_UUID:
+                    return mNoText;
+                case ConceptUuids.UNKNOWN_UUID:
+                    return mUnknownText;
+                default:
+                    throw new IllegalArgumentException(
+                            "Expected YES/NO/UNKNOWN, got concept " + value.uuid);
+            }
         }
     }
 
