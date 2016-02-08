@@ -41,7 +41,9 @@ import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.OrderDeleteFailedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
+import org.projectbuendia.client.events.data.VoidObsFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
@@ -58,6 +60,7 @@ import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.LocaleSelector;
@@ -842,6 +845,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
             }
             updatePatientObsUi(lastChartIndex);
+        }
+
+        public void onEventMainThread(OrderDeleteFailedEvent event) {
+            // TODO: don't use App.getInstance for this.
+            BigToast.show(App.getInstance(), R.string.order_delete_failed);
+        }
+
+        public void onEventMainThread(VoidObsFailedEvent event) {
+            // TODO: don't use App.getInstance for this.
+            BigToast.show(App.getInstance(), R.string.observation_delete_failed);
         }
 
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
