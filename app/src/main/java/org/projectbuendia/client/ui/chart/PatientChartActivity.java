@@ -99,6 +99,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
     private static final float PANEL_HEIGHT_FRAC = 0.6f;
+    private static final String BOTTOM_SHEET_CONCEPT_UUID = ConceptUuids.NOTES_UUID;
 
     private PatientChartController mController;
     private boolean mIsFetchingXform = false;
@@ -125,6 +126,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.notes_panel_btn_save) View mAddNoteButton;
     @InjectView(R.id.notes_panel_submit_spinner) View mAddNoteWaitingSpinner;
     @InjectView(R.id.patient_chart_container) View mPatientChartContainer;
+    @InjectView(R.id.notes_panel_title) TextView mNotesPanelTitle;
 
     private static final String EN_DASH = "\u2013";
 
@@ -301,6 +303,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         initChartMenu();
 
         // Notes panel
+        mNotesPanelTitle.setText(mChartDataHelper.getConceptNameByUuid(BOTTOM_SHEET_CONCEPT_UUID));
 
         setNotesPanelMaxHeightToFracOfParent(PANEL_HEIGHT_FRAC);
 
@@ -348,7 +351,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 new PatientObservationsListAdapter.ObservationsListLoaderCallbacks(
                         this,
                         getIntent().getStringExtra("uuid"),
-                        ConceptUuids.NOTES_UUID,
+                        BOTTOM_SHEET_CONCEPT_UUID,
                         adapter));
 
         mNotesList.setEmptyView(findViewById(R.id.notes_panel_list_empty));
