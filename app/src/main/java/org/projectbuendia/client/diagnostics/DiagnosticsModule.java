@@ -40,10 +40,10 @@ public class DiagnosticsModule {
         Application application,
         OpenMrsConnectionDetails connectionDetails,
         AppSettings settings) {
+        // TODO: restore PackageServerHealthCheck, we'll probably want that again in the future.
         return ImmutableSet.of(
             new WifiHealthCheck(application, settings),
-            new BuendiaApiHealthCheck(application, connectionDetails),
-            new PackageServerHealthCheck(application, settings));
+            new BuendiaApiHealthCheck(application, connectionDetails));
     }
 
     @Provides
