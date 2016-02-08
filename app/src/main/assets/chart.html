@@ -18,7 +18,14 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-        <td id="tile-{{id}}" class="tile concept-{{id}} {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}" width="{{100.0 / tileRow.size}}%">
+        <td
+          id="tile-{{id}}"
+          class="tile concept-{{id}} {{class}}"
+          {% if tile.item.conceptUuids.length == 1 %}
+            onclick="od('{{tile.item.conceptUuids | first }}','','');"
+          {% endif %}
+          style="{{style}}"
+          width="{{100.0 / tileRow.size}}%" >
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
