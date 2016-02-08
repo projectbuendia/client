@@ -13,13 +13,10 @@
 
 package org.projectbuendia.client.sync.controllers;
 
-import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.SyncResult;
 import android.net.Uri;
-import android.os.RemoteException;
 
 import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.providers.Contracts;
@@ -56,13 +53,29 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
             } else {
                 ops.add(ContentProviderOperation.newInsert(Observations.CONTENT_URI)
                         .withValues(getObsValuesToInsert(observation)).build());
+                // HACK: Delete any temporary observation with a matching Patient UUID and Concept
+                // UUID and null UUID. The proper way to do this is by supplying a JSON encounter
+                // on the server when an Xform is populated.
+                ops.add(createDeleteTemporaryOp(observation));
                 inserts++;
+
             }
         }
         LOG.d("Observations processed! Inserts: %d, Deletes: %d", inserts, deletes);
         syncResult.stats.numInserts += inserts;
         syncResult.stats.numDeletes += deletes;
         return ops;
+    }
+
+    private static ContentProviderOperation createDeleteTemporaryOp(JsonObservation observation) {
+        return ContentProviderOperation
+                .newDelete(Observations.CONTENT_URI)
+                .withSelection(
+                        Observations.PATIENT_UUID + " =? AND " +
+                        Observations.CONCEPT_UUID + " =? AND " +
+                        Observations.UUID + " IS NULL",
+                        new String[] { observation.patient_uuid, observation.concept_uuid })
+                .build();
     }
 
     /** Converts an encounter data response into appropriate inserts in the encounters table. */
@@ -78,16 +91,5 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
         cvs.put(Observations.VALUE, observation.value);
 
         return cvs;
-    }
-
-    @Override
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws RemoteException {
-        // Remove all temporary observations now we have the real ones
-        providerClient.delete(Observations.CONTENT_URI,
-                Observations.UUID + " IS NULL",
-                new String[0]);
     }
 }

@@ -30,6 +30,7 @@ import com.google.gson.GsonBuilder;
 
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.core.model.instance.TreeElement;
+import org.javarosa.xform.parse.XFormParser;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONObject;
@@ -38,6 +39,7 @@ import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.tasks.DeleteInstancesTask;
+import org.odk.collect.android.utilities.FileUtils;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
@@ -322,15 +324,29 @@ public class OdkActivityLauncher {
                 throw new ValidationException("Xml form is not valid for uri: " + uri);
             }
 
+            byte[] fileBytes = FileUtils.getFileAsBytes(new File(filePath));
+            // get the root of the saved and template instances
+            final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
+
             sendFormToServer(patientUuid, xml,
                 new Response.Listener<JSONObject>() {
                     @Override public void onResponse(JSONObject response) {
                         LOG.i("Created new encounter successfully on server" + response.toString());
                         // Only locally cache new observations, not new patients.
                         if (patientUuid != null) {
-                            updateObservationCache(
+                            if (!updateObservationCache(
                                     response,
-                                    context.getContentResolver());
+                                    context.getContentResolver())) {
+                                LOG.w("Couldn't update observations from Xforms response, " +
+                                        "updating from local form instance instead.");
+                                updateObservationCacheFromXformData(
+                                        patientUuid,
+                                        savedRoot,
+                                        context.getContentResolver());
+                            }
+                        } else {
+                            LOG.i("Didn't update observations cache, encounter didn't have a " +
+                                    "patient UUID.");
                         }
                         if (!settings.getKeepFormInstancesLocally()) {
                             deleteLocalFormInstances(formIdToDelete);
@@ -554,9 +570,11 @@ public class OdkActivityLauncher {
         }
     }
 
-    /** Updates observations locally from a JSON response. */
-    private static void updateObservationCache(JSONObject response, ContentResolver resolver) {
-
+    /**
+     * Updates observations locally from a JSON response. Returns {@code true} if any observations
+     * were added.
+     */
+    private static boolean updateObservationCache(JSONObject response, ContentResolver resolver) {
         // TODO: don't parse this here or do a roundtrip text --> JSON --> text --> GSON conversion
         GsonBuilder gsonBuilder = new GsonBuilder();
         Serializers.registerTo(gsonBuilder);
@@ -566,13 +584,14 @@ public class OdkActivityLauncher {
         ContentValues[] values = encounter.toContentValuesArray();
         if (values.length > 0) {
             resolver.bulkInsert(Contracts.Observations.CONTENT_URI, values);
-            
         }
+        return values.length > 0;
     }
 
     /**
      * Updates observations locally from an Xforms XML document. Use this when observations need to
      * be updated locally, and haven't been sent to a server yet.
+     * TODO: remove this once the server reliably sends Encounter data back with Xform submission.
      */
     private static void updateObservationCacheFromXformData(
             String patientUuid, TreeElement savedRoot, ContentResolver resolver) {
