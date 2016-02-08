@@ -241,7 +241,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="syncing_concepts">Synchronisation des concepts…</string>
   <string name="syncing_charts">Synchronisation des graphiques…</string>
   <string name="syncing_observations">Synchronisation des observations…</string>
-  <string name="syncing_orders">Synchronisation des commandes…</string>
+  <string name="syncing_orders">Synchronisation des traitements…</string>
   <string name="syncing_forms">Synchronisation des formes…</string>
   <string name="syncing_locations">Synchronisation des emplacements…</string>
   <string name="syncing_users">Synchronisation des utilisateurs…</string>
