@@ -21,8 +21,8 @@
         <td
           id="tile-{{id}}"
           class="tile concept-{{id}} {{class}}"
-          {% if tile.item.conceptUuids.length == 1 %}
-            onclick="od('{{tile.item.conceptUuids | first }}','','');"
+          {% if tile.item.conceptUuids.size == 1 %}
+            onclick="od('{{tile.item.conceptUuids[0] }}','','');"
           {% endif %}
           style="{{style}}"
           width="{{100.0 / tileRow.size}}%" >

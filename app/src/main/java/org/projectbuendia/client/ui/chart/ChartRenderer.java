@@ -28,7 +28,6 @@ import org.projectbuendia.client.utils.Utils;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -135,16 +134,16 @@ public class ChartRenderer {
             for (ChartSection tileGroup : chart.tileGroups) {
                 List<Tile> tileRow = new ArrayList<>();
                 for (ChartItem item : tileGroup.items) {
-                    ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
+                    ObsPoint[] points = new ObsPoint[item.conceptUuids.size()];
                     for (int i = 0; i < points.length; i++) {
-                        Obs obs = latestObservations.get(item.conceptUuids[i]);
+                        Obs obs = latestObservations.get(item.conceptUuids.get(i));
                         if (obs != null) {
                             points[i] = obs.getObsPoint();
                         }
                     }
                     tileRow.add(new Tile(item, points));
                     if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                        mConceptsToDump.addAll(item.conceptUuids);
                     }
                 }
                 mTileRows.add(tileRow);
@@ -153,9 +152,9 @@ public class ChartRenderer {
                 for (ChartItem item : section.items) {
                     Row row = new Row(item);
                     mRows.add(row);
-                    mRowsByUuid.put(item.conceptUuids[0], row);
+                    mRowsByUuid.put(item.conceptUuids.get(0), row);
                     if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                        mConceptsToDump.addAll(item.conceptUuids);
                     }
                 }
             }

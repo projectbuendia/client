@@ -35,6 +35,7 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -340,7 +341,8 @@ public class ChartDataHelper {
                         ChartItem item = new ChartItem(label,
                             Utils.getString(c, ChartItems.TYPE),
                             Utils.getLong(c, ChartItems.REQUIRED, 0L) > 0L,
-                            Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(","),
+                            Arrays.asList
+                                    (Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(",")),
                             Utils.getString(c, ChartItems.FORMAT),
                             Utils.getString(c, ChartItems.CAPTION_FORMAT),
                             Utils.getString(c, ChartItems.CSS_CLASS),
