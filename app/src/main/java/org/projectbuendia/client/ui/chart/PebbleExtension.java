@@ -294,7 +294,7 @@ public class PebbleExtension extends AbstractExtension {
             // TODO/robustness: Check types before casting.
             Row row = (Row) args.get("row");
             Column column = (Column) args.get("column");
-            return column.pointSetByConceptUuid.get(row.item.conceptUuids[0]);
+            return column.pointSetByConceptUuid.get(row.item.conceptUuids.get(0));
         }
     }
 
@@ -308,7 +308,8 @@ public class PebbleExtension extends AbstractExtension {
             // TODO/robustness: Check types before casting.
             Row row = (Row) args.get("row");
             Column column = (Column) args.get("column");
-            SortedSet<ObsPoint> obsSet = column.pointSetByConceptUuid.get(row.item.conceptUuids[0]);
+            SortedSet<ObsPoint> obsSet =
+                    column.pointSetByConceptUuid.get(row.item.conceptUuids.get(0));
             return obsSet.isEmpty() ? null : obsSet.last();
         }
     }
