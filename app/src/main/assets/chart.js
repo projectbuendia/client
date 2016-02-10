@@ -1,8 +1,10 @@
-function isRowEmpty(parentNode) {
+function isRowEmpty(parentNode, fieldType) {
   var rowEmpty = true;
   $(parentNode).find('td').each(function(index, element) {
     var innerHtml = element.innerHTML.trim();
-    if ( innerHtml != "" ) {
+    // if innerHtml is empty, or (innerHtml is the empty dot and the field type is yes_no), then
+    // this might be a blank row. Otherwise, it is definitely not.
+    if (!(innerHtml == "" || (innerHtml == "○" && fieldType == "yes_no"))) {
       rowEmpty = false;
     }
   });
