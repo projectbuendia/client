@@ -146,6 +146,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             LocalDate admissionDate,
             LocalDate firstSymptomsDate);
 
+        /** Updates the UI showing the weight for the patient in the top part */
+        void updateWeightUi(Map<String, Obs> observations);
+
         /** Updates the UI showing Ebola PCR lab test results for this patient. */
         void updateEbolaPcrTestResultUi(Map<String, Obs> observations);
 
@@ -580,6 +583,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         LocalDate firstSymptomsDate = getObservedDate(
             latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
+        mUi.updateWeightUi(latestObservations);
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
 

@@ -116,7 +116,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_root) SlidingUpPanelLayout mRootView;
     @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
     @InjectView(R.id.attribute_admission_days) PatientAttributeView mAdmissionDaysView;
-    @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
+    @InjectView(R.id.attribute_weight) PatientAttributeView mWeightView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
@@ -510,10 +510,23 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // TODO: Localize strings in this function.
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
             mAdmissionDaysView.setValue(
-                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+            /*
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mSymptomOnsetDaysView.setValue(
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+             */
+        }
+
+        // TODO/cleanup: This is specific to Nutrition
+        // Having the top row be defined in the profile would be better
+        @Override public void updateWeightUi(Map<String, Obs> observations) {
+            Obs weightObs = observations.get(ConceptUuids.WEIGHT_UUID);
+            if (weightObs == null || weightObs.valueName == null) {
+                mWeightView.setValue("–");
+            } else {
+                mWeightView.setValue(weightObs.valueName);
+            }
         }
 
         // TODO/cleanup: We don't need this special logic for the Ebola PCR test results

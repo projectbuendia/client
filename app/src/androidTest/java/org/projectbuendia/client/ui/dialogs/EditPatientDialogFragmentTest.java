@@ -59,7 +59,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
         // The symptom onset date should not be assigned a default value.
         expectVisible(viewThat(
-            hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
+            hasAncestorThat(withId(R.id.attribute_weight)),
             hasText("–")));
 
         // The admission date should be visible right after adding a patient.
