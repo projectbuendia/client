@@ -107,6 +107,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         verify(mMockUi).updateTilesAndGrid(
             null, recentObservations, allObservations, ImmutableList.<Order> of(), null, null);
         verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
+        verify(mMockUi).updateWeightUi(recentObservations);
         verify(mMockUi).updateEbolaPcrTestResultUi(recentObservations);
         verify(mMockUi).updatePregnancyAndIvStatusUi(recentObservations);
     }

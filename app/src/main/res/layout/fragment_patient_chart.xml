@@ -45,11 +45,11 @@
                 app:attributeValue="–"/>
 
             <org.projectbuendia.client.widgets.PatientAttributeView
-                android:id="@+id/attribute_symptoms_onset_days"
+                android:id="@+id/attribute_weight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
-                app:attributeName="@string/since_symptom_onset"
+                app:attributeName="@string/weight"
                 app:attributeValue="–"/>
 
             <org.projectbuendia.client.widgets.PatientAttributeView

@@ -142,6 +142,7 @@
 
   <string name="since_admission">Since admission</string>
   <string name="since_symptom_onset">Since symptom onset</string>
+  <string name="weight">Weight</string>
   <string name="location">Location</string>
   <string name="id">ID</string>
   <string name="id_prefix">ID prefix</string>
