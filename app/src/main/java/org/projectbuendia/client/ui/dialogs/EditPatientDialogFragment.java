@@ -192,7 +192,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         for (EditText field : fields) {
             if (field.getText().toString().isEmpty()) {
                 field.requestFocus();
-                break;
+                return;
             }
         }
 
