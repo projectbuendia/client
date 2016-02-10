@@ -90,6 +90,11 @@ public class ObsFormat extends Format {
         }
         mPattern = pattern;
         // Allow plain numeric formats like "#0.00" as a shorthand for "{1,number,#0.00}".
+        // TODO: This breaks format strings for CSS that contain colours specified in hex or dec
+        // e.g. color:#ccc or color:rgb(204,204,204) as it considers them to be numerical formats
+        // We need a good way to detect this without breaking other nested formats that
+        // do contain numerical formating and we want to support e.g. {1,select,<10:#.00 kg;#.0 kg}
+        // For now, workaround is just to use named colours rather than hex / rgb
         if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
             try {
                 new DecimalFormat(pattern);  // check if it's a valid numeric format
