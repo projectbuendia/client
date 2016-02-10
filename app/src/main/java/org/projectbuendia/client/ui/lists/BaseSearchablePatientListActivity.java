@@ -84,6 +84,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                 }
             });
 
+        /*
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
@@ -94,6 +95,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                     return true;
                 }
             });
+        */
 
         MenuItem search = menu.findItem(R.id.action_search);
         search.setIcon(
