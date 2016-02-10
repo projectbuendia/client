@@ -29,6 +29,7 @@
 
       <TextView
           style="@style/field_label"
+          android:labelFor="@+id/order_medication"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
           android:text="@string/order_medication"/>
@@ -50,6 +51,7 @@
 
       <TextView
           style="@style/field_label"
+          android:labelFor="@+id/order_dosage"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
           android:text="@string/order_dosage"/>
@@ -73,6 +75,7 @@
           style="@style/field_label"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
+          android:labelFor="@+id/order_frequency"
           android:text="@string/order_frequency"/>
 
       <EditText
@@ -131,8 +134,8 @@
       <TextView
           style="@style/field_label"
           android:layout_column="0"
-          android:layout_marginEnd="12sp"
           android:gravity="center_vertical"
+          android:labelFor="@+id/order_give_for_days"
           android:text="@string/order_give_for"/>
 
       <EditText
@@ -145,13 +148,24 @@
           android:inputType="numberDecimal"
           android:maxLength="3"/>
 
-      <TextView
-          android:id="@+id/order_give_for_days_label"
-          android:layout_width="600sp"
-          android:layout_column="2"
-          android:layout_gravity="top|start"
-          android:layout_marginStart="4sp"
-          android:text="@string/order_give_for_days"/>
+        <LinearLayout
+            android:layout_column="2" >
+
+          <TextView
+              style="@style/field_label"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/order_give_for_days_label"
+              android:text="@string/order_give_for_days"/>
+
+          <Button
+              android:id="@+id/order_stop_immediately"
+              android:text="@string/order_stop_now"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
     </TableRow>
 
     <TableRow
@@ -170,20 +184,12 @@
     </TableRow>
   </TableLayout>
 
-  <LinearLayout
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      >
-
   <Button
       android:id="@+id/order_delete"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_margin="16sp"
       android:padding="24sp"
-      android:text="@string/order_delete"
-  />
-  </LinearLayout>
+      android:text="@string/order_delete" />
 
 </LinearLayout>

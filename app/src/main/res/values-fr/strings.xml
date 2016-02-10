@@ -22,6 +22,7 @@
   <string name="status_discharged_cured">Déchargée guéri</string>
   <string name="status_suspected_dead">Susceptible morte</string>
   <string name="status_confirmed_dead">Confirmé mort</string>
+
   <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>
   <string name="title_patient_chart">Dossier du patient</string>
@@ -41,7 +42,9 @@
   <string name="title_edit_patient_location">Modifier l\'emplacement du patient</string>
   <string name="given_name">Prénom</string>
   <string name="family_name">Nom de famille</string>
+  <string name="title_new_user">Nouvel utilisateur</string>
   <string name="action_search">Rechercher</string>
+  <string name="action_edit">Modifier</string>
   <string name="action_go_to">Recherche ID</string>
   <string name="title_location_list">Emplacements</string>
   <string name="today">Aujourd\'hui</string>
@@ -63,9 +66,9 @@
   <string name="n_present_patients">%d patients présents</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
 
-  <string name="abbrev_n_months">%d mo</string>
+  <string name="abbrev_n_months">%d m</string>
   <string name="abbrev_n_years">%d a</string>
-  <string name="abbrev_n_years_n_months">%1$d a %2$d mo</string>
+  <string name="abbrev_n_years_n_months">%1$d a %2$d m</string>
 
   <string name="title_new_order">Nouveau traitement</string>
   <string name="title_edit_order">Modifier traitement</string>
@@ -77,12 +80,23 @@
   <string name="order_give_for">Donne pour</string>
   <string name="order_give_for_days">jours</string>
   <string name="order_give_for_day">jour</string>
+  <string name="order_duration_stop_yesterday">(arrêter heir)</string>
+  <string name="order_duration_stop_immediately">(arrêter immediatement)</string>
   <string name="order_duration_stop_after_today">(arrêter après aujourd\'hui)</string>
   <string name="order_duration_stop_after_tomorrow">(arrêter après demain)</string>
   <string name="order_duration_stop_after_date">(arrêter après %s)</string>
   <string name="order_duration_unspecified">(pas de durée spécifique)</string>
   <string name="enter_medication">Entrez le médicament</string>
   <string name="order_give_for_days_cannot_be_zero">Doit être vide ou supérieure à 0</string>
+  <string name="order_stop_now">Arrêter maintenant</string>
+  <string name="order_delete">Supprimer cette traitement</string>
+  <string name="order_delete_failed">Traitement n\'etait pas supprimer.</string>
+  <string name="title_confirmation">Confirmation</string>
+  <string name="confirm_order_delete">Vramient supprimer?</string>
+  <string name="delete">Supprimer</string>
+  <string name="order_start_date">Date de connencement</string>
+  <!-- The button that says "Change" next to the start date -->
+  <string name="order_start_date_change_label">Changer</string>
 
   <string name="order_execution_title">L\'historique de traitement</string>
   <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; foi on %2$s</string>
@@ -92,8 +106,22 @@
   <string name="order_execution_mark_as_given">Marquer comme donnée maintenant</string>
   <string name="order_execution_marked_as_given">&#x2714; Marqué comme donné maintenant</string>
   <string name="order_started_on_date_at_time">Commencé le %1$s à %2$s</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <string name="treatment_plan_title">Plan de traitement</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <!-- Max length: 21 chars -->
+  <string name="treatment_add_new">Adjouter un traitement</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <string name="observations">Observations</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <!--
+  We have to use \u0020 here because &#32; gets interpreted by XML, and thus stripped, because it's
+  whitespace, whereas \u0020 gets interpreted correctly as the space character.
+  -->
+  <!-- TODO: make this a format string instead of just concatenating it onto the end. -->
+  <string name="times_daily">\u0020fois par jour</string>
 
-  <string name="string_with_paren">%1$s (%2$s)</string>
+  <string name="heading_with_patient_count">%1$s&#xa0;&#xa0;&#xb7;&#xa0;&#xa0;%2$s</string>
   <string name="unknown_tent">Tente inconnu</string>
   <string name="unknown_zone">Zone inconnue</string>
   <string name="mild_symptom">Légère</string>
@@ -212,8 +240,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="syncing_patients">Synchronisation des patients…</string>
   <string name="syncing_concepts">Synchronisation des concepts…</string>
   <string name="syncing_charts">Synchronisation des graphiques…</string>
-  <string name="syncing_observations">Synchronisation observations…</string>
-  <string name="syncing_orders">Synchronisation des commandes…</string>
+  <string name="syncing_observations">Synchronisation des observations…</string>
+  <string name="syncing_orders">Synchronisation des traitements…</string>
   <string name="syncing_forms">Synchronisation des formes…</string>
   <string name="syncing_locations">Synchronisation des emplacements…</string>
   <string name="syncing_users">Synchronisation des utilisateurs…</string>
@@ -262,7 +290,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_server_not_responding">Serveur ne répond pas</string>
   <string name="troubleshoot_server_not_responding_solved">Serveur répond</string>
   <string name="troubleshoot_server_not_responding_details">
-      Le serveur est actuellement ne répond pas aux demandes. Cela peut être parce que:\n
+      Le serveur est actuellement ne répond pas aux demandes. Cela peut être parce que:
+      \n
       \n • Le serveur est momentanément indisponible.
       \n • Le serveur est en cours de démarrage.
       \n
@@ -286,6 +315,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_update_server_misconfigured_details">
       S\'il vous plaît vérifier que les paramètres du serveur de package est correct ou consultez un administrateur de l\'aide.
   </string>
+  <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
 
   <string name="present_filter_description">Tous les patients présents</string>
   <string name="age_filter_description">Moins de %d ans</string>
@@ -300,6 +330,10 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_validation_future_admission_date">Date d\'admission ne peut pas être dans l\'avenir.</string>
   <string name="patient_validation_future_onset_date">Symptôme date de début ne peut pas être dans l\'avenir.</string>
   <string name="patient_creation_clear_symptom_onset_date">Nettoyer</string>
+  <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
+  <string name="family_name_hint_unknown">–</string>
+  <string name="given_name_hint_unknown">–</string>
+  <string name="unknown_name">–</string>
 
   <!-- UI strings related to settings (see default_settings.xml for default values) -->
   <string name="title_activity_settings">Paramètres</string>
@@ -322,23 +356,36 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_require_wifi">Exiger connexion wifi</string>
   <string name="pref_desc_require_wifi">Désactivez cette option pour permettre l\'application de travailler avec des non-wifi (ou émulé captif Bluetooth) en réseau.</string>
 
-  <!-- View Observations dialog -->
-  <string name="observation_on_day">le</string>  
-
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Appliquer et effacer les données locales</string>
+
+  <!-- Some miscellaneous patient stuff that we'd missed previously -->
   <string name="discharged">Libéré</string>
-  <string name="action_edit">Modifier</string>
   <string name="admission">depuis l\'admission</string>
-  <string name="loading">Chargement...</string>
-  <string name="no_such_patient_as_of_48_min_ago">Aucun patient d\'il y a 48 min</string>
+  <string name="loading">Chargement…</string>
   <string name="observation">Observation</string>
   <string name="Medication_and_dosage">Médicaments et posologie</string>
-  <string name="title_new_user">Nouvel utilisateur</string>
-  <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
-  <string name="title_dashboard">Console</string>
-  <string name="order_stop_now">Arrêter maintenant</string>
-  <string name="order_delete">Supprimer cette traitement</string>
-  <string name="voiding">vide</string>
-  <string name="void_observations">Observations Vides</string>
+  <string name="string_with_paren">%1$s (%2$s)</string>
+
+  <!-- View Observations dialog -->
+  <string name="observation_on_day">le</string>
+  <string name="delete_observations">Supprimer observations…</string>
+  <string name="observation_delete_failed">Observation n\'etait pas supprimer.</string>
+
+  <!-- Notes panel -->
+  <string name="error_failed_to_submit_note">Remarque n\'est pas submit.</string>
+  <string name="notes_panel_title">Remarques</string>
+  <string name="add_note_hint">Ajoute remarque…</string>
+  <string name="notes_panel_button_add">Sauvegarder</string>
+  <!--
+    %1: the timestamp of the observation.
+    %2: the initials of the user who entered the observation.
+  -->
+  <string name="notes_list_metadata_format">%1$tA, %1$td %1$tB • %1$tR • %2$s</string>
+  <string name="notes_list_metadata_format_no_user_info">%1$tA, %1$td %1$tB • %1$tR</string>
+  <string name="notes_list_empty">Ne pas des observations.</string>
+
+  <!-- The day of week plus "medium" date format. e.g. Tues, 26 Jan 2015 -->
+  <string name="day_of_week_and_medium_date">%1$tA, %1$td %1$tb %1$tY</string>
+  <string name="age_unknown">age pas connu</string>
 </resources>

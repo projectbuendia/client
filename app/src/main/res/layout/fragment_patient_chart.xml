@@ -101,10 +101,10 @@
             android:layout_height="@dimen/notes_panel_header_height"
             android:layout_marginBottom="@dimen/notes_panel_padding"
             android:gravity="center_vertical"
-            android:text="@string/notes_panel_title"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textAllCaps="true"/>
+            android:textAllCaps="true"
+            tools:text="Notes" />
 
         <!--
         The actual observations.

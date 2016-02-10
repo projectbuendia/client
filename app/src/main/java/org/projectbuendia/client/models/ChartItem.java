@@ -16,6 +16,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.text.Format;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -26,7 +27,7 @@ public class ChartItem {
     public final @Nonnull String label;
     public final @Nonnull String type;
     public final boolean required;
-    public final @Nonnull String[] conceptUuids;
+    public final @Nonnull List<String> conceptUuids;
     public final @Nonnull List<Object> conceptIds;
     public final @Nullable Format format;
     public final @Nullable Format captionFormat;
@@ -35,7 +36,7 @@ public class ChartItem {
     public final @Nonnull String script;
 
     public ChartItem(@Nullable String label, @Nullable String type, boolean required,
-                     @Nullable String[] conceptUuids, @Nullable String format,
+                     @Nullable List<String> conceptUuids, @Nullable String format,
                      @Nullable String captionFormat, @Nullable String cssClass,
                      @Nullable String cssStyle, @Nullable String script) {
         this(label, type, required, conceptUuids,
@@ -44,13 +45,15 @@ public class ChartItem {
     }
 
     public ChartItem(@Nullable String label, @Nullable String type, boolean required,
-                     @Nullable String[] conceptUuids, @Nullable Format format,
+                     @Nullable List<String> conceptUuids, @Nullable Format format,
                      @Nullable Format captionFormat, @Nullable Format cssClass,
                      @Nullable Format cssStyle, @Nullable String script) {
         this.label = label == null ? "" : label;
         this.type = type == null ? "" : type;
         this.required = required;
-        this.conceptUuids = conceptUuids == null ? new String[0] : conceptUuids;
+        this.conceptUuids = conceptUuids == null
+                ? Collections.<String>emptyList()
+                : conceptUuids;
         this.format = format;
         this.captionFormat = captionFormat;
         this.cssClass = cssClass;

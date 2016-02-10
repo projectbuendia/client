@@ -12,11 +12,13 @@
 package org.projectbuendia.client.net;
 
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -263,19 +265,26 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override public void deleteObservation(String Uuid,
-                                         final Response.ErrorListener errorListener) {
-        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails,
-            Request.Method.DELETE,
-            mConnectionDetails.getRestApiUrl() + "/obs/" + Uuid,
-            null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    LOG.i("Voided observation");
-                }
-            },
-            wrapErrorListener(errorListener));
+    @Override
+    public void deleteObservation(
+            String Uuid,
+            final Response.Listener<Void> successListener,
+            final Response.ErrorListener errorListener) {
+        StringRequest request = new OpenMrsStringRequest(
+                Request.Method.DELETE,
+                "/obs/" + Uuid,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (!TextUtils.isEmpty(response)) {
+                            // TODO: Didn't expect this, pass it through to the client.
+                            LOG.w("Delete observation response returned a non-blank response.");
+                        } else {
+                            successListener.onResponse(null);
+                        }
+                    }
+                },
+                wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }

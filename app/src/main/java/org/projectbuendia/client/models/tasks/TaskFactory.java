@@ -58,7 +58,7 @@ public class TaskFactory {
 
     public VoidObsTask voidObsTask(CrudEventBus bus, VoidObs voidObs) {
         return new VoidObsTask(
-                this, mLoaderSet, mServer, mContentResolver, voidObs, bus);
+                mServer, mContentResolver, voidObs, bus);
     }
 
     /** Creates a new {@link UpdatePatientTask}. */
@@ -84,7 +84,7 @@ public class TaskFactory {
     public VoidObsTask newVoidObsAsyncTask(
             VoidObs obs, CrudEventBus bus) {
         return new VoidObsTask(
-                this, mLoaderSet, mServer, mContentResolver, obs, bus);
+                mServer, mContentResolver, obs, bus);
     }
 
     /** Creates a new {@link DeleteOrderTask}. */

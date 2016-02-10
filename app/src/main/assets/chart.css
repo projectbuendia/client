@@ -70,6 +70,15 @@ th, td {
   font-size: 1.9rem;
   padding-bottom: 3.8rem;
   font-weight: bold;
+  overflow: visible;
+}
+/*
+HACK: freezepanes.js puts a div inside our th, which (because of the rest of our CSS) triggers
+overflow: hidden. We don't want this for command buttons, because they're usually rows, so we
+explicitly turn it on for the div inside "command" cells.
+*/
+#grid th[scope="row"].command > div {
+  overflow: visible;
 }
 
 /* Tiles */

@@ -41,7 +41,9 @@ import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.OrderDeleteFailedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
+import org.projectbuendia.client.events.data.VoidObsFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
@@ -58,6 +60,7 @@ import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.LocaleSelector;
@@ -337,16 +340,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             preset.clinicianName = user.fullName;
         }
 
-        Map<String, Obs> observations =
-            mChartHelper.getLatestObservations(mPatientUuid);
-
-        // TODO: Refactor this as it's repeated in two methods
-        for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
-            if (observations.containsKey(uuid)
-                    && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
-                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
-            }
-        }
+        // TODO: implement persistent fields here, if we keep this code.
 
         preset.targetGroup = targetGroup;
 
@@ -436,7 +430,14 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         for(String uuid : ConceptUuids.PERSISTENT_FIELDS) {
             if (observations.containsKey(uuid)
                     && ConceptUuids.YES_UUID.equals(observations.get(uuid).value)) {
-                preset.persistentFieldsSelected.add(mChartHelper.getConceptNameByUuid(uuid).toLowerCase());
+                // TODO: Ideally, we'd know how to determine whether a field was in a form, which
+                // would make this more efficent. But we can't at the moment.
+                String conceptName = mChartHelper.getConceptNameByUuid(uuid);
+                // The concept name could be null if there's an observation whose concept isn't in
+                // use in the profile.
+                if (conceptName != null) {
+                    preset.persistentFieldsSelected.add(conceptName.toLowerCase());
+                }
             }
         }
 
@@ -827,6 +828,15 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // the client's time zone matches the server's time zone, because
                 // the server's fidelity is time-zone-dependent (auggghh!!!)
                 stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
+                // If we end up with a zero-duration day, then stop < start with the current logic.
+                // We correct that case here.
+                // TODO: Just add durationDays to startTime and use that instead, which should
+                // result in a more stable model all around. I'm not sure how the Chart rendering
+                // code would cope with that (there's an open bug for it) so for the pilot we
+                // only correct this case instead of all cases.
+                if (stop.isBefore(start)) {
+                    stop = start;
+                }
             }
 
             mAppModel.saveOrder(mCrudEventBus, new Order(
@@ -842,6 +852,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
             }
             updatePatientObsUi(lastChartIndex);
+        }
+
+        public void onEventMainThread(OrderDeleteFailedEvent event) {
+            // TODO: don't use App.getInstance for this.
+            BigToast.show(App.getInstance(), R.string.order_delete_failed);
+        }
+
+        public void onEventMainThread(VoidObsFailedEvent event) {
+            // TODO: don't use App.getInstance for this.
+            BigToast.show(App.getInstance(), R.string.observation_delete_failed);
         }
 
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {

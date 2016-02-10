@@ -1,5 +1,9 @@
 package org.projectbuendia.client.ui.chart;
 
+import android.app.Application;
+import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
+
 import com.google.common.collect.ImmutableList;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
@@ -11,6 +15,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.utils.Logger;
@@ -36,7 +41,7 @@ import javax.annotation.Nullable;
 public class PebbleExtension extends AbstractExtension {
     private static final Logger LOG = Logger.create();
 
-    static Map<String, Filter> filters = new HashMap<>();
+    private static final Map<String, Filter> filters = new HashMap<>();
 
     static {
         filters.put("min", new MinFilter());
@@ -52,13 +57,14 @@ public class PebbleExtension extends AbstractExtension {
         filters.put("tosafechars", new toSafeCharsFilter());
     }
 
-    static Map<String, Function> functions = new HashMap<>();
+    private static final Map<String, Function> functions = new HashMap<>();
 
     static {
         functions.put("get_latest_point", new GetLatestPointFunction());
         functions.put("get_all_points", new GetAllPointsFunction());
         functions.put("get_order_execution_count", new GetOrderExecutionCountFunction());
         functions.put("intervals_overlap", new IntervalsOverlapFunction());
+        functions.put("string_resource", new StringResourceFunction());
     }
 
     public static final String TYPE_ERROR = "?";
@@ -77,7 +83,7 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
-    static class MinFilter extends ZeroArgFilter {
+    private static class MinFilter extends ZeroArgFilter {
         @Override public @Nullable Object apply(Object input, Map<String, Object> args) {
             if (input instanceof Collection) {
                 return ((Collection) input).isEmpty() ? null : Collections.min((Collection) input);
@@ -85,7 +91,7 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
-    static class MaxFilter extends ZeroArgFilter {
+    private static class MaxFilter extends ZeroArgFilter {
         @Override public @Nullable Object apply(Object input, Map<String, Object> args) {
             if (input instanceof Collection) {
                 return ((Collection) input).isEmpty() ? null : Collections.max((Collection) input);
@@ -94,7 +100,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** Computes the average of a set of numbers or numeric ObsValues. */
-    static class AvgFilter extends ZeroArgFilter {
+    private static class AvgFilter extends ZeroArgFilter {
         @Override public @Nullable Object apply(Object input, Map<String, Object> args) {
             double sum = 0;
             int count = 0;
@@ -117,7 +123,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** Converts a Java null, boolean, integer, double, string, or DateTime to a JS expression. */
-    static class JsFilter extends ZeroArgFilter {
+    private static class JsFilter extends ZeroArgFilter {
         @Override public Object apply(Object input, Map<String, Object> args) {
             if (input == null) {
                 return "null";
@@ -137,7 +143,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** points | values -> a list of the ObsValues in the given list of ObsPoints */
-    static class ValuesFilter extends ZeroArgFilter {
+    private static class ValuesFilter extends ZeroArgFilter {
         @Override public Object apply(Object input, Map<String, Object> args) {
             List<ObsValue> values = new ArrayList<>();
             // The input is a tuple, so we must ensure that values has the same number of elements.
@@ -155,7 +161,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** Formats a single value. */
-    static class FormatValueFilter implements Filter {
+    private static class FormatValueFilter implements Filter {
         @Override
         public List<String> getArgumentNames() {
             return ImmutableList.of("format");
@@ -175,7 +181,7 @@ public class PebbleExtension extends AbstractExtension {
      * in the profile.  This is for formatting values of different concepts together in one
      * string (e.g. systolic / diastolic blood pressure), not a series of values over time.
      */
-    static class FormatValuesFilter implements Filter {
+    private static class FormatValuesFilter implements Filter {
         @Override
         public List<String> getArgumentNames() {
             return ImmutableList.of("format");
@@ -200,11 +206,11 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
-    static Format asFormat(Object arg) {
+    private static Format asFormat(Object arg) {
         return arg instanceof Format ? (Format) arg : arg == null ? null : new ObsFormat("" + arg);
     }
 
-    static String formatValues(List<ObsValue> values, Format format) {
+    private static String formatValues(List<ObsValue> values, Format format) {
         if (format == null) return "";  // we use null to represent an empty format
 
         // ObsFormat expects an array of Obs instances with a 1-based index.
@@ -230,7 +236,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** Formats a LocalDate.  (For times, use format_time, not format_date.) */
-    static class FormatDateFilter implements Filter {
+    private static class FormatDateFilter implements Filter {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("pattern");
         }
@@ -244,7 +250,7 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
-    static class toSafeCharsFilter implements Filter {
+    private static class toSafeCharsFilter implements Filter {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("input");
         }
@@ -255,6 +261,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** Formats an Instant or DateTime.  (For dates, use format_date, not format_time.) */
+    @VisibleForTesting
     static class FormatTimeFilter implements Filter {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("pattern");
@@ -271,14 +278,14 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** line_break_html(text) -> HTML for the given text with newlines replaced by <br> */
-    static class LineBreakHtmlFilter extends ZeroArgFilter {
+    private static class LineBreakHtmlFilter extends ZeroArgFilter {
         @Override public Object apply(Object input, Map<String, Object> args) {
             return ("" + input).replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
         }
     }
 
     /** get_all_points(row, column) -> all ObsPoints for concept 1 in a given cell, in time order */
-    static class GetAllPointsFunction implements Function {
+    private static class GetAllPointsFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("row", "column");
         }
@@ -287,12 +294,12 @@ public class PebbleExtension extends AbstractExtension {
             // TODO/robustness: Check types before casting.
             Row row = (Row) args.get("row");
             Column column = (Column) args.get("column");
-            return column.pointSetByConceptUuid.get(row.item.conceptUuids[0]);
+            return column.pointSetByConceptUuid.get(row.item.conceptUuids.get(0));
         }
     }
 
     /** get_latest_point(row, column) -> the latest ObsPoint for concept 1 in a given cell, or null */
-    static class GetLatestPointFunction implements Function {
+    private static class GetLatestPointFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("row", "column");
         }
@@ -301,12 +308,13 @@ public class PebbleExtension extends AbstractExtension {
             // TODO/robustness: Check types before casting.
             Row row = (Row) args.get("row");
             Column column = (Column) args.get("column");
-            SortedSet<ObsPoint> obsSet = column.pointSetByConceptUuid.get(row.item.conceptUuids[0]);
+            SortedSet<ObsPoint> obsSet =
+                    column.pointSetByConceptUuid.get(row.item.conceptUuids.get(0));
             return obsSet.isEmpty() ? null : obsSet.last();
         }
     }
 
-    static class GetOrderExecutionCountFunction implements Function {
+    private static class GetOrderExecutionCountFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("order_uuid", "column");
         }
@@ -320,7 +328,7 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
-    static class IntervalsOverlapFunction implements Function {
+    private static class IntervalsOverlapFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("a", "b");
         }
@@ -330,6 +338,30 @@ public class PebbleExtension extends AbstractExtension {
             Interval a = (Interval) args.get("a");
             Interval b = (Interval) args.get("b");
             return a.overlaps(b);
+        }
+    }
+
+    /** Retrieves a string resource by ID. */
+    private static class StringResourceFunction implements Function {
+
+        private static final String RESOURCE_ID = "resource_id";
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of(RESOURCE_ID);
+        }
+
+        @Override
+        public Object execute(Map<String, Object> args) {
+            Application app = App.getInstance();
+            String resourceName = (String) args.get(RESOURCE_ID);
+            @StringRes int id =
+                    app.getResources().getIdentifier(resourceName, "string", app.getPackageName());
+            if (id == 0) {
+                throw new IllegalArgumentException(
+                        "Couldn't find string with resource ID \"" + resourceName + "\"");
+            }
+            return app.getResources().getString(id);
         }
     }
 }

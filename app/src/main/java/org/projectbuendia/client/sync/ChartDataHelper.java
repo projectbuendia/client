@@ -35,6 +35,7 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class ChartDataHelper {
     private static final Logger LOG = Logger.create();
 
     /** When non-null, sConceptNames and sConceptTypes contain valid data for this locale. */
-    private static Object sLoadingLock = new Object();
+    private static final Object sLoadingLock = new Object();
     private static String sLoadedLocale;
 
     private static Map<String, String> sConceptNames;
@@ -81,7 +82,7 @@ public class ChartDataHelper {
     }
 
     /** Returns the loaded concept name for the specified concept UUID */
-    public String getConceptNameByUuid(String uuid) {
+    public @Nullable String getConceptNameByUuid(String uuid) {
         if(sConceptNames == null) return "";
 
         return sConceptNames.get(uuid);
@@ -340,7 +341,8 @@ public class ChartDataHelper {
                         ChartItem item = new ChartItem(label,
                             Utils.getString(c, ChartItems.TYPE),
                             Utils.getLong(c, ChartItems.REQUIRED, 0L) > 0L,
-                            Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(","),
+                            Arrays.asList
+                                    (Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(",")),
                             Utils.getString(c, ChartItems.FORMAT),
                             Utils.getString(c, ChartItems.CAPTION_FORMAT),
                             Utils.getString(c, ChartItems.CSS_CLASS),
