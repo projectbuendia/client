@@ -151,6 +151,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
             });
 
+        /*
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
@@ -161,6 +162,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     return true;
                 }
             });
+        */
 
         MenuItem updateChart = menu.findItem(R.id.action_update_chart);
         updateChart.setIcon(
