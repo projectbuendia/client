@@ -30,11 +30,9 @@ import android.util.TimingLogger;
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
-import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.FormsSyncPhaseRunnable;
@@ -55,9 +53,6 @@ import java.util.concurrent.CancellationException;
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final Logger LOG = Logger.create();
-
-    /** Named used during the sync process for SQL savepoints. */
-    private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
 
     /** Content resolver, for performing database operations. */
     private final ContentResolver mContentResolver;
@@ -166,13 +161,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("Requested phases are: %s", phases);
         reportProgress(0, R.string.sync_in_progress);
 
-        BuendiaProvider buendiaProvider =
-            (BuendiaProvider) (provider.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
-            buendiaProvider.getDbTransactionHelper();
-        LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
-        dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
-
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
 
         try {
@@ -205,27 +193,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 storeFullSyncEndTime(provider, syncEndTime);
             }
         } catch (CancellationException e) {
-            rollbackSavepoint(dbTransactionHelper);
             // Reset canceled state so that it doesn't interfere with next sync.
             LOG.i(e, "Sync canceled");
             getContext().sendBroadcast(syncCanceledIntent);
             return;
         } catch (OperationApplicationException e) {
-            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error updating database during sync");
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (Throwable e) {
-            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error during sync");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } finally {
-            LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.releaseNamedTransaction(SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.close();
         }
         timings.dumpToLog();
 
@@ -270,11 +251,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ContentValues cv = new ContentValues();
         cv.put(Misc.FULL_SYNC_END_MILLIS, syncEndTime.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
-    }
-
-    private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
-        LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
-        dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
     }
 
     /** Returns the server timestamp corresponding to the last observation sync. */

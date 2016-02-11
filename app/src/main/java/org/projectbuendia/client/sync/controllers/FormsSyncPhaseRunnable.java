@@ -14,7 +14,6 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -40,8 +39,6 @@ public class FormsSyncPhaseRunnable implements SyncPhaseRunnable {
         providerClient.applyBatch(ops);
         LOG.i("Finished updating forms (" + ops.size() + " db ops)");
         contentResolver.notifyChange(Contracts.Forms.CONTENT_URI, null, false);
-
-        OdkActivityLauncher.fetchAndCacheAllXforms();
     }
 
     private static List<ContentProviderOperation> getFormUpdateOps(SyncResult syncResult)
