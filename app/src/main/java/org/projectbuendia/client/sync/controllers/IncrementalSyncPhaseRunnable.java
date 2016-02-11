@@ -101,12 +101,12 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
             providerClient.applyBatch(ops);
             LOG.i("Updated page of %s (%d db ops)", resourceType, ops.size());
 
+            LOG.i("Saving new sync token `%s`", syncToken);
+            SyncAdapter.storeSyncToken(providerClient, dbTable, response.syncToken);
+
             // Update sync token
             syncToken = response.syncToken;
         } while (response.more);
-
-        LOG.i("Saving new sync token `%s`", syncToken);
-        SyncAdapter.storeSyncToken(providerClient, dbTable, response.syncToken);
 
         afterSyncFinished(contentResolver, syncResult, providerClient);
     }
@@ -154,7 +154,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
                 wrapErrorListener(errorListener));
         Serializers.registerTo(request.getGson());
         request.setRetryPolicy(
-                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
+                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
         connectionDetails.getVolley().addToRequestQueue(request);
     }
 
