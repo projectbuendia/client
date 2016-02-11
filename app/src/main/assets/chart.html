@@ -147,6 +147,15 @@
               {% if order.stop == null and previousActive %}
                 <div class="future">&nbsp;</div>
               {% elseif order.stop != null and previousActive and not active %}
+              <!--
+              You can have a count on a stop day as well, but we should only display the count if
+              there is one on stop days because there's visual clutter.
+              Note that we disabled clicking on STOP days because it's confusing.
+              -->
+              {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
+              {% if count != 0 %}
+                <div class="past active">{{count}}</div>
+              {% endif %}
                 <div class="stop">Stop</div>
               {% elseif active %}
                 {% if future %}
