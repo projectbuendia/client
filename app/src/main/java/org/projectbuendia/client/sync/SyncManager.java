@@ -88,8 +88,8 @@ public class SyncManager {
     }
 
     /** Starts a sync of only observations and orders. */
-    public static void startObservationsAndOrdersSync() {
-        SyncAccountService.startObservationsAndOrdersSync();
+    public static void startIncrementalSync() {
+        SyncAccountService.startIncrementalSync();
     }
 
     /**

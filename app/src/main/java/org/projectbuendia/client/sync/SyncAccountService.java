@@ -95,7 +95,7 @@ public class SyncAccountService extends Service {
     }
 
     /** Starts an sync of just the observations and orders. */
-    public static void startObservationsAndOrdersSync() {
+    public static void startIncrementalSync() {
         // Start by canceling any existing syncs, which may delay this one.
         ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
 
@@ -104,10 +104,11 @@ public class SyncAccountService extends Service {
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
-        // Fetch just the newly added observations.
+        // Fetch just the newly added patients, observations, and orders.
+        b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
         b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
         b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
-        LOG.i("Requesting incremental observations / orders sync");
+        LOG.i("Requesting incremental patients / observations / orders sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
 

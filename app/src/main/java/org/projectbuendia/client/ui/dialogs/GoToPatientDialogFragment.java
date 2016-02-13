@@ -112,7 +112,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
 
             // Perform incremental observation sync to get the patient's admission date
             // and any other recent observations.
-            SyncAccountService.startObservationsAndOrdersSync();
+            SyncAccountService.startIncrementalSync();
         }
     }
 

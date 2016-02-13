@@ -76,7 +76,7 @@ public class PatientListController {
             mUi.showApiHealthProblem();
         } else if (!mInitiatedFullSync) {
             LOG.d("onRefreshRequested");
-            mSyncManager.startFullSync();
+            SyncManager.startIncrementalSync();
             mInitiatedFullSync = true;
         }
     }
