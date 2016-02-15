@@ -1,272 +1,385 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2015 The Project Buendia Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License.  You may obtain a copy
+  of the License at: http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed
+  under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+  OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+  specific language governing permissions and limitations under the License.
+-->
 <resources>
-    <string name="app_name">Buendia</string>
-    <string name="Medication_and_dosage">Medicação e dosagem</string>
-    <string name="abbrev_n_months">%d m</string>
-    <string name="abbrev_n_years">%d a</string>
-    <string name="abbrev_n_years_n_months">%1$d a %2$d m</string>
-    <string name="account_type"></string>
-    <string name="action_add_test_result">Adicionar resultado de teste</string>
-    <string name="action_assign_condition">Condição</string>
-    <string name="action_assign_location">Atribuir localização</string>
-    <string name="action_edit">Editar</string>
-    <string name="action_edit_patient">Editar paciente</string>
-    <string name="action_go_to">Pesquisar por ID</string>
-    <string name="action_new_patient">+ Criar novo paciente</string>
-    <string name="action_new_round">Novo turno</string>
-    <string name="action_search">Pesquisar</string>
-    <string name="action_update_chart">Atualizar quadro</string>
-    <string name="action_view_round_archive">Arquivo de turnos</string>
-    <string name="action_view_xform">+ Vizualisar primeiro xform salvo</string>
-    <string name="add_patient">Criar</string>
-    <string name="add_user_connection_error">Erro ao conectar com o servidor</string>
-    <string name="add_user_invalid_user">Usuário inválido</string>
-    <string name="add_user_unknown_error">Erro desconhecido</string>
-    <string name="add_user_user_exists_locally">Usuário já existe no tablet</string>
-    <string name="add_user_user_exists_on_server">Nome de usuário já existe no servidor</string>
-    <string name="admission">Desde a admissão</string>
-    <string name="admission_date_label">Data de admissão</string>
-    <string name="admission_date_picker_title">Definir data de admissão</string>
-    <string name="age">Idade</string>
-    <string name="age_filter_description">Menos de %d anos</string>
-    <string name="all_present_patients">TODOS PACIENTES ATUAIS</string>
-    <string name="api_health_problem">Impossível conectar-se com o servidor. Por favor verifique a barra na base da tela para mais informações sobre o problema.</string>
-    <string name="avpu_alert">A</string>
-    <string name="avpu_pain">D</string>
-    <string name="avpu_unknown">\?</string>
-    <string name="avpu_unresponsive">I</string>
-    <string name="avpu_voice">V</string>
-    <string name="cancel">Cancelar</string>
-    <string name="cancel_sync">Cancelar sincronização</string>
-    <string name="cancelling_sync">Cancelando sincronização...</string>
-    <string name="chart_last_updated">"Último quadro atualizado: "</string>
-    <string name="clear_data_button">Concluir e limpar dados locais</string>
-    <string name="completing_sync">Completando sincronização...</string>
-    <string name="condition">Condição</string>
-    <string name="consciousness">Estado de consiência</string>
-    <string name="day_n">Dia %d</string>
-    <string name="discharged">Liberado</string>
-    <string name="encounter_add_failed_interrupted">Requisição de tede interrompida.</string>
-    <string name="encounter_add_failed_invalid_encounter">O servidor rejeitou a nova observação. Motivo: %s</string>
-    <string name="encounter_add_failed_to_authenticate">Nome de usuário ou senha inválidos</string>
-    <string name="encounter_add_failed_to_fetch_saved">Observações foram atualizadas, dados locais podem ficar temporariamente fora de sincronia.</string>
-    <string name="encounter_add_failed_to_saved_on_server">O servidor falhou em processar essa atualização.</string>
-    <string name="encounter_add_failed_unknown_reason">Erro desconhecido</string>
-    <string name="encounter_add_failed_unknown_server_error">Erro desconhecido no servidor.</string>
-    <string name="error_setting_location">Ocorreu um erro desconhecio ao definir a localização do paciente. Por favor tente novamente.</string>
-    <string name="family_name">Sobrenome</string>
-    <string name="family_name_cannot_be_null">Sobrenome não pode ser nulo</string>
-    <string name="female">Feminino</string>
-    <string name="fetch_xform_failed_no_forms_found">O formulário não foi encontrado no servidor.</string>
-    <string name="fetch_xform_failed_server_auth">Incapaz de acessar o servidor. Por favor verifique se seu nome de usuário e senha estão corretos.</string>
-    <string name="fetch_xform_failed_server_bad_endpoint">Erro ao recuperar a lista de formulários do servidor.</string>
-    <string name="fetch_xform_failed_server_failed_to_fetch">Falha ao buscar o formulário no servior.</string>
-    <string name="fetch_xform_failed_server_unknown">Erro ao recuperar o formulário do servidor.</string>
-    <string name="fetch_xform_failed_unknown_reason">Erro desconhecido.</string>
-    <string name="filter_group_default_name">Múltiplos filtros</string>
-    <string name="given_name">Nome</string>
-    <string name="given_name_cannot_be_null">Nome não pode ser nulo</string>
-    <string name="go_to_patient_go">Ir para quadro</string>
-    <string name="go_to_patient_id_label">ID do paciente</string>
-    <string name="go_to_patient_no_data">Nenhum dado carregado do servidor ainda</string>
-    <string name="go_to_patient_not_found">Paciente não encontrado no servidor</string>
-    <string name="go_to_patient_not_found_as_of_time">Nenhum paciente como %s encontrado.</string>
-    <string name="go_to_patient_title">Ir para quadro do paciente</string>
-    <string name="id">ID</string>
-    <string name="invalid_username">Nome de usuário deve ter entre 2 e 50 caracteresl. Apenas letras, dígitos ".", "-" e "_" são permitidos.</string>
-    <string name="iv_fitted">Catéter intravenoso aplicado</string>
-    <string name="years">anos</string>
-    <string name="last_observation_none">Nenhuma observação</string>
-    <string name="latest_pcr_label">Teste de Ebola</string>
-    <string name="latest_pcr_label_with_date">Teste de Ebola (%s)</string>
-    <string name="loading">Carregando...</string>
-    <string name="location">Localização</string>
-    <string name="location_load_error">Erro ao carregar recursos de localização</string>
-    <string name="male">Masculino</string>
-    <string name="mild_symptom">Leve</string>
-    <string name="mobility_assisted">As</string>
-    <string name="mobility_bed_bound">BB (?)</string>
-    <string name="mobility_unknown">\?</string>
-    <string name="mobility_walking">C</string>
-    <string name="moderate_symptom">Moderado</string>
-    <string name="mobility_walking_with_difficulty">Cd</string>
-    <string name="months">meses</string>
-    <string name="n_patients">%d pacientes</string>
-    <string name="n_present_patients">%d pacientes presentes</string>
-    <string name="no_patients">Nenhum paciente</string>
-    <string name="no_present_patients">Nenhum paciente presente</string>
-    <string name="no_such_patient_as_of_48_min_ago">Nenhum paciente, como há 48 min </string>
-    <string name="observation">Observação</string>
-    <string name="one_patient">1 paciente</string>
-    <string name="one_present_patient">1 paciente presente</string>
-    <string name="order_dosage">Dosagem</string>
-    <string name="order_duration_stop_after_date">(parar depois de %s)</string>
-    <string name="order_duration_stop_after_today">(parar depois de hoje)</string>
-    <string name="order_duration_stop_after_tomorrow">(parar depois de amanhã)</string>
-    <string name="order_duration_unspecified">(sem duração específica)</string>
-    <string name="order_execution_historical_plural_html">Dado &lt;b&gt;%1$d&lt;/b&gt; vezes em %2$s</string>
-    <string name="order_execution_historical_singular_html">Dado &lt;b&gt;%1$d&lt;/b&gt; vez em %2$s</string>
-    <string name="order_execution_mark_as_given">Marcar como dado agora</string>
-    <string name="order_execution_marked_as_given">&#x2714; Marcar como dado agora</string>
-    <string name="order_execution_title">Histórico de tratamento</string>
-    <string name="order_execution_today_plural_html">Dado &lt;b&gt;%1$d&lt;/b&gt; vezes hoje, %2$s</string>
-    <string name="order_execution_today_singular_html">Dado &lt;b&gt;%1$d&lt;/b&gt; vez hoje, %2$s</string>
-    <string name="order_frequency">Frequência</string>
-    <string name="order_give_for">Dar para</string>
-    <string name="order_give_for_day">dia</string>
-    <string name="order_give_for_days">dias</string>
-    <string name="order_give_for_days_cannot_be_zero">Deve ser vazio ou maior que 0</string>
-    <string name="order_medication">Medicação</string>
-    <string name="order_medication_cannot_be_blank">Madicação não pode ficar em branco</string>
-    <string name="order_started_on_date_at_time">Começo em %1$s as %2$s</string>
-    <string name="order_time_per_day">vez por dia</string>
-    <string name="order_times_per_day">vezes por dia</string>
-    <string name="patient_creation_cancel">Cancelar</string>
-    <string name="patient_creation_clear_symptom_onset_date">Limpar</string>
-    <string name="patient_creation_client_error">Impossível adicionar paciente no bando de dados local</string>
-    <string name="patient_creation_create_busy">Trabalhando&#8230;</string>
-    <string name="patient_creation_duplicate_id_error">Outro paciente existe com o mesmo ID</string>
-    <string name="patient_creation_error">Incapaz de adicionar paciente: %s</string>
-    <string name="patient_creation_family_name_label">Sobrenome</string>
-    <string name="patient_creation_given_name_label">Nome</string>
-    <string name="patient_creation_interrupted_error">Requisição ao servidor interrompida</string>
-    <string name="patient_creation_invalid_family_name_error">sobrenome inválido</string>
-    <string name="patient_creation_invalid_given_name_error">nome inválido</string>
-    <string name="patient_creation_invalid_id_error">ID do paciente inválido</string>
-    <string name="patient_creation_location_assign">Atribuir localização</string>
-    <string name="patient_creation_location_label">Localização</string>
-    <string name="patient_creation_network_error">falha ao completar a requisição ao servidor</string>
-    <string name="patient_creation_network_error_with_reason">falha ao completar a requisição ao servido (motivo: %s)</string>
-    <string name="patient_creation_server_error">o servidor não retornou corretamente os dados do paciente</string>
-    <string name="patient_creation_success">Novo paciente adicionado.</string>
-    <string name="patient_creation_unknown_error">erro desconhecido</string>
-    <string name="patient_list_fragment_sync_error">Erro ao sincronizar dados do paciente. Por favor verifique as configurações ou tente novamente.</string>
-    <string name="patient_location_error_interrupted">A atualização da localização do paciente foi interrompida. Por favor tente novamente.</string>
-    <string name="patient_location_error_network">Erro ao atualizar o paciente; por favor verifique se você está conectado ao servidor.</string>
-    <string name="patient_location_error_no_such_patient">Erro ao atualizar a localização do paciente: este paciente não existe no servidor.</string>
-    <string name="patient_location_error_unknown">Erro desconhecido ao atualizar a localização do paciente. Por favor tente novamente.</string>
-    <string name="patient_missing_age">Insira a idade (use anos, meses ou os dois)</string>
-    <string name="patient_missing_gender">Por favor selecione Masculino ou Feminino.</string>
-    <string name="patient_sync_failed">Falha na sincronização do paciente</string>
-    <string name="patient_validation_future_admission_date">Data de admissão não pode ser no futuro.</string>
-    <string name="patient_validation_future_onset_date">Data de início do sintoma não pode ser no futuro.</string>
-    <string name="patient_validation_missing_admission_date">Insira a data de admissão</string>
-    <string name="patient_validation_missing_family_name">Insira o sobrenome</string>
-    <string name="patient_validation_missing_given_name">Insita o nome</string>
-    <string name="patient_validation_missing_id">Insira o ID do paciente</string>
-    <string name="pcr_negative">NEG</string>
-    <string name="please_wait">Por favor aguarde&#8230;</string>
-    <string name="pref_desc_incremental_observation_update">Isto é mais rápido mas ainda é experimental.</string>
-    <string name="pref_desc_require_wifi">Desative isso para permitir que o app funcione com redes não-wifi (emuladas ou via Bluetooth).</string>
-    <string name="pref_desc_store_form_instances">Normalmente os fomulários são apagados depois de enviados para o servidor. Selecione esta opção para mantê-los para debugging.</string>
-    <string name="pref_desc_xform_update_client_cache">Isto fornece uma melhor experiência de UI, mas é um aspecto experimental.</string>
-    <string name="pref_header_advanced">Avançado</string>
-    <string name="pref_header_developer">Desenvolvedor</string>
-    <string name="pref_header_general">Geral</string>
-    <string name="pref_title_apk_update_interval_secs">Intervalo de verificação de atualizações de APK (segundos)</string>
-    <string name="pref_title_incremental_observation_update">Sincronização de observações incremental</string>
-    <string name="pref_title_openmrs_password">Senha OpenMRS</string>
-    <string name="pref_title_openmrs_root_url">URL base do OpenMRS</string>
-    <string name="pref_title_openmrs_user">Nome de usuário OpenMRS</string>
-    <string name="pref_title_package_server_url">URL do servidor de pacotes</string>
-    <string name="pref_title_require_wifi">Exigir conexão wifi</string>
-    <string name="pref_title_server">Servidor Buendia</string>
-    <string name="pref_title_store_form_instances">Salvar instâncias de formulário localmente</string>
-    <string name="pref_title_xform_update_client_cache">Atualizar observações locais ao submetê-las</string>
-    <string name="pregnant">Grávida</string>
-    <string name="present_filter_description">Todos pacientes presentes</string>
-    <string name="retrieving_encounter_form_message">Por favor aguarde enquanto o formulário requerido é recuperado.</string>
-    <string name="retrieving_encounter_form_title">Recuperando formulário</string>
-    <string name="severe_symptom">Severo</string>
-    <string name="sex">Sexo</string>
-    <string name="since_admission">Desde a admissão</string>
-    <string name="since_symptom_onset">Desde o surgimento dos sintomas</string>
-    <string name="snackbar_action_download">Download</string>
-    <string name="snackbar_action_install">Instalar</string>
-    <string name="snackbar_update_available">Atualização do aplicativo disponível</string>
-    <string name="snackbar_update_downloaded">Atualização do aplicativo baixada</string>
-    <string name="status_confirmed_dead">Morte confirmada</string>
-    <string name="status_convalescent">Convalescendo</string>
-    <string name="status_critical">Crítico</string>
-    <string name="status_discharged_cured">Liberado curado</string>
-    <string name="status_palliative">Paliativo</string>
-    <string name="status_short_desc_confirmed_dead">6</string>
-    <string name="status_short_desc_convalescent">5</string>
-    <string name="status_short_desc_critical">3</string>
-    <string name="status_short_desc_discharged_cured">7</string>
-    <string name="status_short_desc_discharged_non_case">8</string>
-    <string name="status_short_desc_palliative">4</string>
-    <string name="status_short_desc_suspected_dead">6?</string>
-    <string name="status_short_desc_unknown">-</string>
-    <string name="status_short_desc_unwell">2</string>
-    <string name="status_short_desc_well">1</string>
-    <string name="status_suspected_dead">Suspeita de morte</string>
-    <string name="status_unknown">Desconhecido</string>
-    <string name="status_unwell">Indisposto</string>
-    <string name="status_well">Bem</string>
-    <string name="string_with_paren">%1$s(%2$s)</string>
-    <string name="submit_xform_failed_server_auth">Erro ao enviar formulário: falha na autenticação com o servidor.</string>
-    <string name="submit_xform_failed_server_timeout">Tempo limite excedido ao enviar formulário para o servidor.</string>
-    <string name="submit_xform_failed_unknown_reason">Algo de errado aconteceu ao enviar o formulário.</string>
-    <string name="submitting_encounter_form_message">Por favor aguarde enquando os dados do formulário são enviados.</string>
-    <string name="submitting_encounter_form_title">Enviando formulário</string>
-    <string name="symptoms_onset_date_label">Data de sugimento do sintoma</string>
-    <string name="symptoms_onset_date_picker_title">Data estimada do surgimento do sintoma</string>
-    <string name="sync_failed_back">Voltar</string>
-    <string name="sync_failed_dialog_message">Ocorreu um erro ao recuperar dados do servidor. Por favor verifique suas configurações OpenMRS ou tente novamente.</string>
-    <string name="sync_failed_dialog_title">Erro de sincronização</string>
-    <string name="sync_failed_retry">Tentar novamente</string>
-    <string name="sync_failed_settings">Configurações</string>
-    <string name="sync_in_progress">Iniciando sincronização...</string>
-    <string name="sync_starting">Iniciando sincronização...</string>
-    <string name="syncing_charts">Syncronizando quadros...</string>
-    <string name="syncing_concepts">Sincronizando conceitos</string>
-    <string name="syncing_forms">Sincronizando formulários...</string>
-    <string name="syncing_locations">Sincronizando localizações...</string>
-    <string name="syncing_observations">Sincronizando observações...</string>
-    <string name="syncing_orders">Sincronizando ordens...</string>
-    <string name="syncing_patients">Sincronizando pacientes...</string>
-    <string name="syncing_users">Sincronizando usuários...</string>
-    <string name="tent_selection_dialog_message">Por favor aguarde enquanto os dados do paciente e da localização são obtidos. Se essa for a primeira vez que os dados do paciente são carregados, esse processo pode levar alguns minutos.</string>
-    <string name="tent_selection_dialog_title">Carregando...</string>
-    <string name="title_activity_patient_add">Novo paciente</string>
-    <string name="title_activity_settings">Configurações</string>
-    <string name="title_add_patient_cancel">Descartar alterações?</string>
-    <string name="title_edit_patient_location">Editar localização do paciente</string>
-    <string name="title_location_list">Localizações</string>
-    <string name="title_new_order">Novo tratamento</string>
-    <string name="title_new_user">Novo usuário</string>
-    <string name="title_patient_chart">Quadro do paciente</string>
-    <string name="title_patient_list">Pacientes</string>
-    <string name="title_single_location">Pacientes nessa localização</string>
-    <string name="title_updating_patient">Atualizando paciente</string>
-    <string name="today">Hoje</string>
-    <string name="today_date">Hoje, %s</string>
-    <string name="troubleshoot_action_check_settings">Verifique as configurações</string>
-    <string name="troubleshoot_action_more_info">Mais informações</string>
-    <string name="troubleshoot_package_server_misconfigured">Configuração do servidor de pacotes pode estar incorreta</string>
-    <string name="troubleshoot_package_server_unreachable">Servidor de pacotes inacessível</string>
-    <string name="troubleshoot_server_address">Endereçço do servidor pode estar incorredo</string>
-    <string name="troubleshoot_server_address_action_check">Verificar</string>
-    <string name="troubleshoot_server_auth">Nome de usuário ou senha do servidor podem estar incorretas</string>
-    <string name="troubleshoot_server_auth_action_check">Verificar</string>
-    <string name="troubleshoot_server_not_responding">Servidor não respondendo</string>
-    <string name="troubleshoot_server_not_responding_details">O servido não está respondendo a requisições no momento. Isso pode ser por que:       \n       \n • O servidor está temporariamente indisponível.</string>
-    <string name="troubleshoot_server_unreachable">Servidor inalcançável</string>
-    <string name="troubleshoot_server_unreachable_details">O servidor não pôde ser alcançado. Isso pode ser por que:       \n       \n • A rede wifi está incorreta.       \n • A URL do servidor está incorreta.       \n • O servidor está fora do ar.       \n       \nPor favor entre em contato com um administrador.</string>
-    <string name="troubleshoot_server_unstable">O servidor pode estar instável</string>
-    <string name="troubleshoot_server_unstable_details">Os servidor no momentoe está respondendo com um erro de códgo 500, indicando que o servidor pode estar num estado de erro.       \n       \nPor favor entre em contat com um administrador.</string>
-    <string name="troubleshoot_update_server_misconfigured_details">Por favor verifique se as configurações do servidor de pacotes estão corretas ou entre em contato com um administrador para conseguir ajuda.</string>
-    <string name="troubleshoot_update_server_unreachable_details">O servidor de pacotes não pode ser alcançado. Isso pode ser por que:       \n       \n • A URL do servidor está incorreta.       \n • O servidor está fora do ar.       \n       \nPor favor corrija as confirgurações do servidor de pacotes ou entre em contato com um administrador para obter ajuda.</string>
-    <string name="troubleshoot_wifi_disabled">O wifi está desativado</string>
-    <string name="troubleshoot_wifi_disabled_action_enable">Ativar</string>
-    <string name="troubleshoot_wifi_disconnected">Wifi está disconectado</string>
-    <string name="troubleshoot_wifi_disconnected_action_connect">Conectar</string>
-    <string name="unknown">Desconhecido</string>
-    <string name="unknown_location">Localização desconhecida</string>
-    <string name="unknown_tent">Tenda desconhecida</string>
-    <string name="unknown_tent_in_zone">%s (nenhuma tenda atribuída)</string>
-    <string name="unknown_zone">Zona desconhecida</string>
-    <string name="user_sync_failed_dialog_message">Ocorreu um erro ao recuperar a lista de usuarios. Por favor verifique suas configurações OpenMRS ou tente novamente.</string>
-    <string name="username_cannot_be_null">\"Nome de usuário não pode ser nulo\"</string>
+  <!-- Statuses -->
+  <string name="status_unknown">Desconhecido</string>
+  <string name="status_well">Bem</string>
+  <string name="status_unwell">Indisposto</string>
+  <string name="status_critical">Crítico</string>
+  <string name="status_palliative">Paliativo</string>
+  <string name="status_convalescent">Convalescendo</string>
+  <string name="status_discharged_non_case">Alta Não-Caso</string>
+  <string name="status_discharged_cured">Alta Curado</string>
+  <string name="status_suspected_dead">Suspeita de morte</string>
+  <string name="status_confirmed_dead">Morte confirmada</string>
+
+  <string name="app_name">Buendia</string>
+  <string name="title_patient_list">Pacientes</string>
+  <string name="title_patient_chart">Prontuário do Paciente</string>
+  <string name="title_activity_patient_add">Novo paciente</string>
+  <string name="cancel">Cancelar</string>
+  <string name="action_new_patient">+ Criar novo paciente</string>
+  <string name="action_view_xform">+ Vizualisar primeiro xform salvo</string>
+  <string name="action_new_round">Novo turno</string>
+  <string name="action_assign_location">Atribuir localização</string>
+  <string name="action_edit_patient">Editar paciente</string>
+  <string name="action_update_chart">Atualizar prontuário</string>
+  <string name="action_view_round_archive">Arquivo de turnos</string>
+  <string name="snackbar_update_available">Atualização do aplicativo disponível</string>
+  <string name="snackbar_update_downloaded">Atualização do aplicativo baixada</string>
+  <string name="snackbar_action_download">Download</string>
+  <string name="snackbar_action_install">Instalar</string>
+  <string name="title_edit_patient_location">Editar localização do paciente</string>
+  <string name="given_name">Nome</string>
+  <string name="family_name">Sobrenome</string>
+  <string name="title_new_user">Novo usuário</string>
+  <string name="action_search">Pesquisar</string>
+  <string name="action_edit">Editar</string>
+  <string name="action_go_to">Pesquisar por ID</string>
+  <string name="title_location_list">Localizações</string>
+  <string name="today">Hoje</string>
+  <string name="today_date">Hoje, %s</string>
+  <string name="day_n">Dia %d</string>
+  <string name="add_user_unknown_error">Erro desconhecido</string>
+  <string name="add_user_invalid_user">Usuário inválido</string>
+  <string name="add_user_user_exists_locally">Usuário já existe no tablet</string>
+  <string name="add_user_user_exists_on_server">Nome de usuário já existe no servidor</string>
+  <string name="add_user_connection_error">Erro ao conectar com o servidor</string>
+  <string name="title_single_location">Pacientes nessa localização</string>
+
+  <string name="no_patients">Nenhum paciente</string>
+  <string name="one_patient">1 paciente</string>
+  <string name="n_patients">%d pacientes</string>
+
+  <string name="no_present_patients">Nenhum paciente presente</string>
+  <string name="one_present_patient">1 paciente presente</string>
+  <string name="n_present_patients">%d pacientes presentes</string>
+  <string name="all_present_patients">TODOS PACIENTES PRESENTES</string>
+
+  <string name="abbrev_n_months">%d m</string>
+  <string name="abbrev_n_years">%d a</string>
+  <string name="abbrev_n_years_n_months">%1$d a %2$d m</string>
+
+  <string name="title_new_order">Novo tratamento</string>
+  <string name="title_edit_order">Editar tratamento</string>
+  <string name="order_medication">Medicação</string>
+  <string name="order_dosage">Dosagem</string>
+  <string name="order_frequency">Frequência</string>
+  <string name="order_time_per_day">vez por dia</string>
+  <string name="order_times_per_day">vezes por dia</string>
+  <string name="order_give_for">Administrar por</string>
+  <string name="order_give_for_days">dias</string>
+  <string name="order_give_for_day">dia</string>
+  <string name="order_duration_stop_after_today">(parar depois de hoje)</string>
+  <string name="order_duration_stop_after_tomorrow">(parar depois de amanhã)</string>
+  <string name="order_duration_stop_after_date">(parar depois de %s)</string>
+  <string name="order_duration_unspecified">(sem duração específica)</string>
+  <string name="enter_medication">Entre a medicação</string>
+  <string name="order_give_for_days_cannot_be_zero">Deve ser vazio ou maior que 0</string>
+  <string name="order_stop_now">Parar agora</string>
+  <string name="order_delete">Remover este tratamento</string>
+  <string name="order_delete_failed">Não foi possível remover o tratamento.</string>
+  <string name="title_confirmation">Confirmação</string>
+  <string name="confirm_order_delete">Deseja remover?</string>
+  <string name="delete">Remover</string>
+  <string name="order_start_date">Data Inicial</string>
+  <!-- The button that says "Change" next to the start date -->
+  <string name="order_start_date_change_label">Alterar</string>
+
+  <string name="order_execution_title">Histórico de tratamento</string>
+  <string name="order_execution_historical_singular_html">Administrado &lt;b&gt;%1$d&lt;/b&gt; vezes em %2$s</string>
+  <string name="order_execution_historical_plural_html">Administrado &lt;b&gt;%1$d&lt;/b&gt; vezes em %2$s</string>
+  <string name="order_execution_today_singular_html">Administrado &lt;b&gt;%1$d&lt;/b&gt; vezes hoje, %2$s</string>
+  <string name="order_execution_today_plural_html">Administrado &lt;b&gt;%1$d&lt;/b&gt; vezes hoje, %2$s</string>
+  <string name="order_execution_mark_as_given">Marcar como administrado agora</string>
+  <string name="order_execution_marked_as_given">&#x2714; Marcado como administrado agora</string>
+  <string name="order_started_on_date_at_time">Iniciado em %1$s às %2$s</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <string name="treatment_plan_title">Plano de tratamento</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <string name="treatment_add_new">Adicionar novo tratamento</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <string name="observations">Observações</string>
+  <!-- NOTE: used in chart.html as part of the pebble template. Check there before deleting. -->
+  <!-- TODO: make this a format string instead of just concatenating it onto the end. -->
+  <string name="times_daily">x diariamente</string>
+
+  <string name="heading_with_patient_count">%1$s&#xa0;&#xa0;&#xb7;&#xa0;&#xa0;%2$s</string>
+  <string name="unknown_tent">Tenda desconhecida</string>
+  <string name="unknown_zone">Zona desconhecida</string>
+  <string name="mild_symptom">Leve</string>
+  <string name="moderate_symptom">Moderado</string>
+  <string name="severe_symptom">Severo</string>
+  <string name="location_load_error">Erro ao carregar recursos de localização</string>
+  <string name="unknown_location">Localização desconhecida</string>
+  <string name="unknown_tent_in_zone">%s (nenhuma tenda atribuída)</string>
+  <string name="chart_last_updated">"Última atualização do prontuário: "</string>
+  <string name="last_observation_none">Nenhuma observação</string>
+  <string name="male">Masculino</string>
+  <string name="female">Feminino</string>
+  <string name="unknown">Desconhecido</string>
+  <string name="title_updating_patient">Atualizando paciente</string>
+  <string name="please_wait">Por favor aguarde&#8230;</string>
+
+  <string name="go_to_patient_title">Ir para o prontuário do paciente</string>
+  <string name="go_to_patient_id_label">ID do paciente</string>
+  <string name="go_to_patient_no_data">Nenhum dado carregado do servidor ainda</string>
+  <string name="go_to_patient_not_found_as_of_time">Nenhum paciente até %s</string>
+  <string name="go_to_patient_not_found">Paciente não encontrado no servidor</string>
+  <string name="go_to_patient_go">Ir para o prontuário</string>
+
+  <string name="since_admission">Desde a admissão</string>
+  <string name="since_symptom_onset">Desde o surgimento dos sintomas</string>
+  <string name="weight">Peso (kg)</string>
+  <string name="location">Localização</string>
+  <string name="id">ID</string>
+  <string name="id_prefix">Prefixo do ID</string>
+  <string name="patient_creation_given_name_label">Nome</string>
+  <string name="patient_creation_family_name_label">Sobrenome</string>
+  <string name="age">Idade</string>
+  <string name="years">anos</string>
+  <string name="months">meses</string>
+  <string name="sex">Sexo</string>
+  <string name="patient_creation_location_label">Localização</string>
+  <string name="patient_creation_location_assign">Atribuir localização</string>
+  <string name="add_patient">Criar</string>
+  <string name="patient_creation_create_busy">Trabalhando&#8230;</string>
+  <string name="patient_creation_cancel">Cancelar</string>
+  <string name="title_add_patient_cancel">Descartar mudanças?</string>
+  <string name="patient_creation_success">Novo paciente adicionado.</string>
+  <string name="patient_creation_error">Incapaz de adicionar paciente: %s</string>
+  <string name="patient_sync_failed">Evento de sincronização do paciente falhou</string>
+  <string name="username_cannot_be_null">\"Nome de usuário não pode ser nulo\"</string>
+  <string name="given_name_cannot_be_null">Nome não pode ser nulo</string>
+  <string name="family_name_cannot_be_null">Sobrenome não pode ser nulo</string>
+  <string name="invalid_username">Nome de usuário deve ter entre 2 e 50 caracteres. Apenas letras, números, ".", "-" e "_" são permitidos.</string>
+  <string name="latest_pcr_label">Teste de Ebola</string>
+  <string name="latest_pcr_label_with_date">Teste de Ebola (%s)</string>
+  <string name="action_add_test_result">Adicionar resultado de teste</string>
+  <string name="pregnant">Grávida</string>
+  <string name="iv_fitted">Catéter intravenoso aplicado</string>
+  <string name="status_short_desc_unknown">-</string>
+  <string name="status_short_desc_well">1</string>
+  <string name="status_short_desc_unwell">2</string>
+  <string name="status_short_desc_critical">3</string>
+  <string name="status_short_desc_palliative">4</string>
+  <string name="status_short_desc_convalescent">5</string>
+  <string name="status_short_desc_discharged_non_case">8</string>
+  <string name="status_short_desc_discharged_cured">7</string>
+  <string name="status_short_desc_suspected_dead">6?</string>
+  <string name="status_short_desc_confirmed_dead">6</string>
+  <string name="action_assign_condition">Condição</string>
+  <string name="avpu_unknown">\?</string>
+  <string name="avpu_alert">A</string>
+  <string name="avpu_voice">V</string>
+  <string name="avpu_pain">P</string>
+  <string name="avpu_unresponsive">U</string>
+  <string name="mobility_unknown">\?</string>
+  <string name="mobility_walking">W</string>
+  <string name="mobility_walking_with_difficulty">Wd</string>
+  <string name="mobility_assisted">As</string>
+  <string name="mobility_bed_bound">BB</string>
+  <string name="pcr_negative">NEG</string>
+  <string name="error_setting_location">Ocorreu um erro desconhecio ao definir a localização do paciente. Por favor tente novamente.</string>
+  <string name="tent_selection_dialog_title">Carregando…</string>
+  <string name="tent_selection_dialog_message">
+Por favor aguarde enquanto os dados do paciente e da localização são obtidos. Se essa for a primeira vez que os dados do paciente são carregados, esse processo pode levar alguns minutos.</string>
+  <string name="admission_date_label">Data de admissão</string>
+  <string name="symptoms_onset_date_label">Data de sugimento do sintoma</string>
+  <string name="symptoms_onset_date_picker_title">Data estimada do surgimento do sintoma</string>
+  <string name="admission_date_picker_title">Definir data de admissão</string>
+  <string name="patient_creation_client_error">não foi possível adicionar o paciente ao bando de dados local</string>
+  <string name="patient_creation_network_error">falha ao completar a requisição ao servidor</string>
+  <string name="patient_creation_network_error_with_reason">falha ao completar a requisição ao servidor (motivo: %s)</string>
+  <string name="patient_creation_server_error">o servidor não retornou corretamente os dados do paciente</string>
+  <string name="patient_creation_interrupted_error">requisição ao servidor interrompida</string>
+  <string name="patient_creation_unknown_error">erro desconhecido</string>
+  <string name="patient_creation_invalid_id_error">ID do paciente é inválido</string>
+  <string name="patient_creation_duplicate_id_error">outro paciente existe com o mesmo ID</string>
+  <string name="patient_creation_invalid_family_name_error">sobrenome inválido</string>
+  <string name="patient_creation_invalid_given_name_error">nome inválido</string>
+  <string name="sync_failed_dialog_title">Erro de sincronização</string>
+  <string name="sync_failed_dialog_message">Um erro ocorreu ao receber dados do servidor. Por favor verifique as configurações do OpenMRS e tente novamente.</string>
+  <string name="sync_failed_settings">Configurações</string>
+  <string name="sync_failed_retry">Tentar novamente</string>
+  <string name="user_sync_failed_dialog_message">Ocorreu um erro ao recuperar a lista de usuarios. Por favor verifique as configurações do OpenMRS e tente novamente.</string>
+  <string name="patient_list_fragment_sync_error">Erro ao sincronizar dados do paciente. Por favor verifique as configurações ou tente novamente.</string>
+  <string name="api_health_problem">Impossível conectar-se com o servidor. Por favor verifique a barra na base da tela para mais informações sobre o problema.</string>
+  <string name="sync_failed_back">Voltar</string>
+  <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
+  <string name="encounter_add_failed_unknown_server_error">Unknown error occurred on server.</string>
+  <string name="encounter_add_failed_interrupted">Network request was interrupted.</string>
+  <string name="encounter_add_failed_to_authenticate">Username or password is invalid.</string>
+  <string name="encounter_add_failed_invalid_encounter">The server rejected the new observation(s). Reason: %s</string>
+  <string name="encounter_add_failed_to_fetch_saved">Observation(s) have been updated but local data may be temporarily out of sync.</string>
+  <string name="encounter_add_failed_to_saved_on_server">The server failed to process this update.</string>
+  <string name="fetch_xform_failed_unknown_reason">An unknown error occurred.</string>
+  <string name="fetch_xform_failed_no_forms_found">Form was not found on the server.</string>
+  <string name="fetch_xform_failed_server_auth">Unable to access form on server. Please confirm that your username and password are correct.</string>
+  <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
+  <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the form from the server.</string>
+  <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
+  <string name="retrieving_encounter_form_title">Retrieving form</string>
+  <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
+  <string name="syncing_patients">Syncing patients…</string>
+  <string name="syncing_concepts">Syncing concepts…</string>
+  <string name="syncing_charts">Syncing charts…</string>
+  <string name="syncing_observations">Syncing observations…</string>
+  <string name="syncing_orders">Syncing orders…</string>
+  <string name="syncing_forms">Syncing forms…</string>
+  <string name="syncing_locations">Syncing locations…</string>
+  <string name="syncing_users">Syncing users…</string>
+  <string name="completing_sync">Completing sync…</string>
+  <string name="sync_in_progress">Starting sync…</string>
+  <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
+  <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
+  <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
+  <string name="submitting_encounter_form_title">Submitting form</string>
+  <string name="submitting_encounter_form_message">Please wait while the form data is submitted.</string>
+  <string name="consciousness">Consciousness</string>
+  <string name="condition">Condition</string>
+  <string name="cancel_sync">Cancel Sync</string>
+  <string name="cancelling_sync">Cancelling sync…</string>
+  <string name="sync_starting">Starting sync…</string>
+  <string name="troubleshoot_wifi_disabled">Wifi is disabled</string>
+  <string name="troubleshoot_wifi_disabled_solved">Wifi enabled</string>
+  <string name="troubleshoot_wifi_disabled_action_enable">Enable</string>
+  <string name="troubleshoot_wifi_disconnected">Wifi is disconnected</string>
+  <string name="troubleshoot_wifi_disconnected_solved">Wifi connection restored</string>
+  <string name="troubleshoot_wifi_disconnected_action_connect">Connect</string>
+  <string name="troubleshoot_server_auth">Server username/password may be incorrect</string>
+  <string name="troubleshoot_server_auth_solved">Server username/password corrected</string>
+  <string name="troubleshoot_server_auth_action_check">Check</string>
+  <string name="troubleshoot_server_address">Server address may be incorrect</string>
+  <string name="troubleshoot_server_address_solved">Server address is now correct</string>
+  <string name="troubleshoot_server_address_action_check">Check</string>
+  <string name="troubleshoot_server_unreachable">Server unreachable</string>
+  <string name="troubleshoot_server_unreachable_solved">Connection with Server reestablished</string>
+  <string name="troubleshoot_action_more_info">More Info</string>
+  <string name="troubleshoot_server_unreachable_details">
+      The server could not be reached. This may be because:
+      \n
+      \n • The wifi network is incorrect.
+      \n • The server URL is incorrect.
+      \n • The server is down.
+      \n
+      \nPlease contact an administrator.
+  </string>
+  <string name="troubleshoot_server_unstable">Server may be unstable</string>
+  <string name="troubleshoot_server_unstable_solved">Server is stable</string>
+  <string name="troubleshoot_server_unstable_details">
+      The server is currently responding with error code 500, indicating that the server may be in an error state.
+      \n
+      \nPlease contact an administrator.</string>
+  <string name="troubleshoot_server_not_responding">Server not responding</string>
+  <string name="troubleshoot_server_not_responding_solved">Server is responsive</string>
+  <string name="troubleshoot_server_not_responding_details">
+      The server is currently not responding to requests. This may be because:
+      \n
+      \n • The server is temporarily unavailable.
+      \n • The server is still starting up.
+      \n
+      \nPlease contact an administrator.</string>
+  <string name="patient_location_error_unknown">An unknown error occurred while updating patient location. Please try again.</string>
+  <string name="patient_location_error_interrupted">Patient location update was interrupted. Please try again.</string>
+  <string name="patient_location_error_network">Error updating patient; please check that you are connected to the server.</string>
+  <string name="patient_location_error_no_such_patient">Error updating patient location: this patient does not exist on the server.</string>
+  <string name="troubleshoot_package_server_unreachable">Package server unreachable</string>
+  <string name="troubleshoot_package_server_unreachable_solved">Connection with Package server reestablished</string>
+  <string name="troubleshoot_update_server_unreachable_details">
+      The package server could not be reached. This may be because:
+      \n
+      \n • The server URL is incorrect.
+      \n • The server is down.
+      \n
+      \nPlease correct the package server setting or consult an administrator for help.
+  </string>
+  <string name="troubleshoot_package_server_misconfigured">Package server setting may be incorrect</string>
+  <string name="troubleshoot_package_server_misconfigured_solved">Package server settings corrected</string>
+  <string name="troubleshoot_update_server_misconfigured_details">
+      Please check that the package server setting is correct or consult an administrator for help.
+  </string>
+  <string name="troubleshoot_action_check_settings">Check Settings</string>
+
+  <string name="present_filter_description">All present patients</string>
+  <string name="age_filter_description">Under %d years</string>
+  <string name="filter_group_default_name">Multiple filters</string>
+
+  <string name="patient_missing_age">Enter the age (using years, months, or both)</string>
+  <string name="patient_validation_missing_family_name">Enter the family name</string>
+  <string name="patient_validation_missing_given_name">Enter the given name</string>
+  <string name="patient_validation_missing_id">Enter the patient ID</string>
+  <string name="patient_validation_missing_admission_date">Enter the admission date</string>
+  <string name="patient_missing_gender">Please select Male or Female.</string>
+  <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
+  <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future.</string>
+  <string name="patient_creation_clear_symptom_onset_date">Clear</string>
+  <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
+  <string name="family_name_hint_unknown">–</string>
+  <string name="given_name_hint_unknown">–</string>
+  <string name="unknown_name">–</string>
+
+  <!-- UI strings related to settings (see default_settings.xml for default values) -->
+  <string name="title_activity_settings">Settings</string>
+
+  <!-- Settings pages -->
+  <string name="pref_header_general">General</string>
+  <string name="pref_header_advanced">Advanced</string>
+  <string name="pref_header_developer">Developer</string>
+
+  <!-- Preference titles and descriptions -->
+  <string name="pref_title_server">Buendia server</string>
+  <string name="pref_title_openmrs_user">OpenMRS username</string>
+  <string name="pref_title_openmrs_password">OpenMRS password</string>
+  <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
+  <string name="pref_title_package_server_url">Package server URL</string>
+
+  <string name="pref_title_apk_update_interval_secs">APK update check interval (seconds)</string>
+  <string name="pref_title_store_form_instances">Store form instances locally</string>
+  <string name="pref_desc_store_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
+  <string name="pref_title_require_wifi">Require wifi connection</string>
+  <string name="pref_desc_require_wifi">Turn this off to allow the app to work with non-wifi (emulated or Bluetooth tethered) networking.</string>
+
+  <!-- Dialog button for accepting a setting that clears the local database -->
+  <string name="clear_data_button">Apply and clear local data</string>
+
+  <!-- Some miscellaneous patient stuff that we'd missed previously -->
+  <string name="discharged">Discharged</string>
+  <string name="admission">Since admission</string>
+  <string name="loading">Loading…</string>
+  <string name="observation">Observation</string>
+  <string name="Medication_and_dosage">Medication and dosage</string>
+  <string name="string_with_paren">%1$s (%2$s)</string>
+
+  <!-- View Observations dialog -->
+  <string name="observation_on_day">on</string>
+  <string name="delete_observations">Delete observations…</string>
+  <string name="observation_delete_failed">Couldn\'t delete observation.</string>
+
+  <!-- Notes panel -->
+  <string name="error_failed_to_submit_note">Failed to submit note.</string>
+  <string name="notes_panel_title">Notes</string>
+  <string name="add_note_hint">Add note…</string>
+  <string name="notes_panel_button_add">Save</string>
+  <!--
+    %1: the timestamp of the observation.
+    %2: the initials of the user who entered the observation.
+  -->
+  <string name="notes_list_metadata_format">%1$tA, %1$td %1$tB • %1$tR • %2$s</string>
+  <string name="notes_list_metadata_format_no_user_info">%1$tA, %1$td %1$tB • %1$tR</string>
+  <string name="notes_list_empty">No recorded observations.</string>
+
+  <!-- The day of week plus "medium" date format. e.g. Tues, 26 Jan 2015 -->
+  <string name="day_of_week_and_medium_date">%1$tA, %1$td %1$tb %1$tY</string>
+  <string name="age_unknown">age unknown</string>
 </resources>
