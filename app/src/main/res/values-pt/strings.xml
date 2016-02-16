@@ -330,7 +330,7 @@ Por favor aguarde enquanto os dados do paciente e da localização são obtidos.
   <string name="unknown_name">–</string>
 
   <!-- UI strings related to settings (see default_settings.xml for default values) -->
-  <string name="title_activity_settings">Settings</string>
+  <string name="title_activity_settings">Configurações</string>
 
   <!-- Settings pages -->
   <string name="pref_header_general">Geral</string>
