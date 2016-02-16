@@ -143,6 +143,15 @@
           {% for column in columns %}
             <td class="{{column.start == nowColumnStart ? 'now' : ''}}">
               {% set active = intervals_overlap(order.interval, column.interval) %}
+              <!--
+              HACK: we want to support zero-length durations, but our code doesn't really know how
+              to handle a bunch of edge cases like that yet. See corresponding
+              TODO in {@link PatientChartController#onEventMainThread(OrderSaveRequestedEvent)}.
+              -->
+              {% if active and order.stop == order.start %}
+                {% set active = false %}
+                {% set previousActive = true %}
+              {% endif %}
               {% if order.stop == null and previousActive %}
                 <div class="future">&nbsp;</div>
               {% elseif order.stop != null and previousActive and not active %}

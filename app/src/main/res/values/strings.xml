@@ -80,6 +80,8 @@
   <string name="order_give_for">Give for</string>
   <string name="order_give_for_days">days</string>
   <string name="order_give_for_day">day</string>
+  <string name="order_duration_stop_yesterday">(stop yesterday)</string>
+  <string name="order_duration_stop_immediately">(stop immediately)</string>
   <string name="order_duration_stop_after_today">(stop after today)</string>
   <string name="order_duration_stop_after_tomorrow">(stop after tomorrow)</string>
   <string name="order_duration_stop_after_date">(stop after %s)</string>
