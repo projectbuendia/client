@@ -27,6 +27,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.TimingLogger;
 
+import com.android.volley.AuthFailureError;
+
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -221,6 +223,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             LOG.e(e, "Error during sync");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
+
+            if (e.getCause().getCause() instanceof AuthFailureError) {
+                ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 0);
+                ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, false);
+            }
             return;
         } finally {
             LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
