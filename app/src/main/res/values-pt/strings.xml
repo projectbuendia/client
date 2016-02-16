@@ -216,72 +216,72 @@ Por favor aguarde enquanto os dados do paciente e da localização são obtidos.
   <string name="patient_list_fragment_sync_error">Erro ao sincronizar dados do paciente. Por favor verifique as configurações ou tente novamente.</string>
   <string name="api_health_problem">Impossível conectar-se com o servidor. Por favor verifique a barra na base da tela para mais informações sobre o problema.</string>
   <string name="sync_failed_back">Voltar</string>
-  <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
-  <string name="encounter_add_failed_unknown_server_error">Unknown error occurred on server.</string>
-  <string name="encounter_add_failed_interrupted">Network request was interrupted.</string>
-  <string name="encounter_add_failed_to_authenticate">Username or password is invalid.</string>
-  <string name="encounter_add_failed_invalid_encounter">The server rejected the new observation(s). Reason: %s</string>
-  <string name="encounter_add_failed_to_fetch_saved">Observation(s) have been updated but local data may be temporarily out of sync.</string>
-  <string name="encounter_add_failed_to_saved_on_server">The server failed to process this update.</string>
-  <string name="fetch_xform_failed_unknown_reason">An unknown error occurred.</string>
-  <string name="fetch_xform_failed_no_forms_found">Form was not found on the server.</string>
-  <string name="fetch_xform_failed_server_auth">Unable to access form on server. Please confirm that your username and password are correct.</string>
-  <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
-  <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the form from the server.</string>
-  <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
-  <string name="retrieving_encounter_form_title">Retrieving form</string>
-  <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
-  <string name="syncing_patients">Syncing patients…</string>
-  <string name="syncing_concepts">Syncing concepts…</string>
-  <string name="syncing_charts">Syncing charts…</string>
-  <string name="syncing_observations">Syncing observations…</string>
-  <string name="syncing_orders">Syncing orders…</string>
-  <string name="syncing_forms">Syncing forms…</string>
-  <string name="syncing_locations">Syncing locations…</string>
-  <string name="syncing_users">Syncing users…</string>
-  <string name="completing_sync">Completing sync…</string>
-  <string name="sync_in_progress">Starting sync…</string>
-  <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
-  <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
-  <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
-  <string name="submitting_encounter_form_title">Submitting form</string>
-  <string name="submitting_encounter_form_message">Please wait while the form data is submitted.</string>
-  <string name="consciousness">Consciousness</string>
-  <string name="condition">Condition</string>
-  <string name="cancel_sync">Cancel Sync</string>
-  <string name="cancelling_sync">Cancelling sync…</string>
-  <string name="sync_starting">Starting sync…</string>
-  <string name="troubleshoot_wifi_disabled">Wifi is disabled</string>
-  <string name="troubleshoot_wifi_disabled_solved">Wifi enabled</string>
-  <string name="troubleshoot_wifi_disabled_action_enable">Enable</string>
-  <string name="troubleshoot_wifi_disconnected">Wifi is disconnected</string>
-  <string name="troubleshoot_wifi_disconnected_solved">Wifi connection restored</string>
-  <string name="troubleshoot_wifi_disconnected_action_connect">Connect</string>
-  <string name="troubleshoot_server_auth">Server username/password may be incorrect</string>
-  <string name="troubleshoot_server_auth_solved">Server username/password corrected</string>
-  <string name="troubleshoot_server_auth_action_check">Check</string>
-  <string name="troubleshoot_server_address">Server address may be incorrect</string>
-  <string name="troubleshoot_server_address_solved">Server address is now correct</string>
-  <string name="troubleshoot_server_address_action_check">Check</string>
-  <string name="troubleshoot_server_unreachable">Server unreachable</string>
-  <string name="troubleshoot_server_unreachable_solved">Connection with Server reestablished</string>
-  <string name="troubleshoot_action_more_info">More Info</string>
+  <string name="encounter_add_failed_unknown_reason">Um erro desconhecido ocorreu.</string>
+  <string name="encounter_add_failed_unknown_server_error">Um erro desconhecido ocorreu no servidor.</string>
+  <string name="encounter_add_failed_interrupted">Requisição de rede interrompida.</string>
+  <string name="encounter_add_failed_to_authenticate">Nome de usuário ou senha inválidos.</string>
+  <string name="encounter_add_failed_invalid_encounter">O servidor rejeitou a nova observação. Motivo: %s</string>
+  <string name="encounter_add_failed_to_fetch_saved">Observações foram atualizadas, dados locais podem ficar temporariamente fora de sincronia.</string>
+  <string name="encounter_add_failed_to_saved_on_server">O servidor falhou ao processar essa atualização.</string>
+  <string name="fetch_xform_failed_unknown_reason">Um erro desconhecido ocorreu.</string>
+  <string name="fetch_xform_failed_no_forms_found">O formulário não foi encontrado no servidor.</string>
+  <string name="fetch_xform_failed_server_auth">Incapaz de acessar o formulário no servidor. Por favor confirme se seu nome de usuário e senha estão corretos.</string>
+  <string name="fetch_xform_failed_server_bad_endpoint">Erro ao recuperar a lista de formulários do servidor.</string>
+  <string name="fetch_xform_failed_server_failed_to_fetch">Falha ao buscar o formulário no servior.</string>
+  <string name="fetch_xform_failed_server_unknown">Erro ao recuperar o formulário do servidor.</string>
+  <string name="retrieving_encounter_form_title">Recuperando formulário</string>
+  <string name="retrieving_encounter_form_message">Por favor aguarde enquanto o formulário requerido é recuperado.</string>
+  <string name="syncing_patients">Sincronizando pacientes…</string>
+  <string name="syncing_concepts">Sincronizando conceitos…</string>
+  <string name="syncing_charts">Sincronizando prontuários…</string>
+  <string name="syncing_observations">Sincronizando observações…</string>
+  <string name="syncing_orders">Sincronizando prescrições…</string>
+  <string name="syncing_forms">Sincronizando formulários…</string>
+  <string name="syncing_locations">Sincronizando localizações…</string>
+  <string name="syncing_users">Sincronizando usuários…</string>
+  <string name="completing_sync">Completando sincronização…</string>
+  <string name="sync_in_progress">Iniciando sincronização…</string>
+  <string name="submit_xform_failed_unknown_reason">Algo de errado aconteceu ao enviar o formulário.</string>
+  <string name="submit_xform_failed_server_auth">Erro ao enviar formulário: falha na autenticação com o servidor.</string>
+  <string name="submit_xform_failed_server_timeout">Tempo limite excedido ao enviar formulário para o servidor.</string>
+  <string name="submitting_encounter_form_title">Enviando formulário</string>
+  <string name="submitting_encounter_form_message">Por favor aguarde enquando os dados do formulário são enviados.</string>
+  <string name="consciousness">Estado de consiência</string>
+  <string name="condition">Condição</string>
+  <string name="cancel_sync">Cancelar sincronização</string>
+  <string name="cancelling_sync">Cancelando sincronização…</string>
+  <string name="sync_starting">Iniciando sincronização…</string>
+  <string name="troubleshoot_wifi_disabled">Wifi desativado</string>
+  <string name="troubleshoot_wifi_disabled_solved">Wifi ativado</string>
+  <string name="troubleshoot_wifi_disabled_action_enable">Ativar</string>
+  <string name="troubleshoot_wifi_disconnected">Wifi desconectado</string>
+  <string name="troubleshoot_wifi_disconnected_solved">Conexão Wifi restaurada</string>
+  <string name="troubleshoot_wifi_disconnected_action_connect">Conectar</string>
+  <string name="troubleshoot_server_auth">Usuário/senha do servidor podem estar incorretos</string>
+  <string name="troubleshoot_server_auth_solved">Usuário/senha do servidor corrigidos</string>
+  <string name="troubleshoot_server_auth_action_check">Verificar</string>
+  <string name="troubleshoot_server_address">Endereço do servidor pode estar incorredo</string>
+  <string name="troubleshoot_server_address_solved">Endereço do servidor agora está correto</string>
+  <string name="troubleshoot_server_address_action_check">Verificar</string>
+  <string name="troubleshoot_server_unreachable">Sem contato com o servidor</string>
+  <string name="troubleshoot_server_unreachable_solved">Conexão com o servidor restabelecida</string>
+  <string name="troubleshoot_action_more_info">Mais informações</string>
   <string name="troubleshoot_server_unreachable_details">
-      The server could not be reached. This may be because:
+      Não foi possível contactar o servidor. Esta pode ser a causa:
       \n
-      \n • The wifi network is incorrect.
-      \n • The server URL is incorrect.
-      \n • The server is down.
+      \n • A rede wifi está incorreta.
+      \n • A URL do servidor está incorreta.
+      \n • O servidor está fora do ar.
       \n
-      \nPlease contact an administrator.
+      \nPor favor contate um administrador.
   </string>
-  <string name="troubleshoot_server_unstable">Server may be unstable</string>
-  <string name="troubleshoot_server_unstable_solved">Server is stable</string>
+  <string name="troubleshoot_server_unstable">O servidor pode estar instável</string>
+  <string name="troubleshoot_server_unstable_solved">Servidor estável</string>
   <string name="troubleshoot_server_unstable_details">
-      The server is currently responding with error code 500, indicating that the server may be in an error state.
+      O servidor está atualmente respondendo com o código de erro 500, indicando que está em estado de erro.
       \n
-      \nPlease contact an administrator.</string>
-  <string name="troubleshoot_server_not_responding">Server not responding</string>
+      \nPor favor contate um administrador.</string>
+  <string name="troubleshoot_server_not_responding">Servidor não está respondendo</string>
   <string name="troubleshoot_server_not_responding_solved">Server is responsive</string>
   <string name="troubleshoot_server_not_responding_details">
       The server is currently not responding to requests. This may be because:
