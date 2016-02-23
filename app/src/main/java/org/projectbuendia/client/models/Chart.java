@@ -11,6 +11,9 @@
 
 package org.projectbuendia.client.models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +23,25 @@ public class Chart {
     public final List<ChartSection> tileGroups;
     public final List<ChartSection> rowGroups;
     public final String name;
+    public String columnFormat;
+    public String columnTime;
 
-    public Chart(String uuid, String name) {
+    public Chart(String uuid, String name, String format) {
         this.uuid = uuid;
         this.name = name;
         this.tileGroups = new ArrayList<>();
         this.rowGroups = new ArrayList<>();
+        String columnFormat = null;
+        String columnTime = null;
+        JSONObject obj;
+        try {
+            obj = new JSONObject(format);
+            columnFormat = obj.getString("column_type");
+            columnTime = obj.getString("column_time");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        this.columnFormat = columnFormat;
+        this.columnTime = columnTime;
     }
 }
