@@ -49,6 +49,8 @@ public class ChartRenderer {
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
     private String lastChart = "";
+    private String mChartColumnType;
+    private int mChartColumnTime;
 
     public interface GridJsInterface {
         @android.webkit.JavascriptInterface
@@ -88,6 +90,8 @@ public class ChartRenderer {
             return;  // nothing has changed; no need to render again
         }
         lastChart = chart.name;
+        mChartColumnType = chart.columnType;
+        mChartColumnTime = chart.columnTime;
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.
@@ -253,6 +257,8 @@ public class ChartRenderer {
             context.put("nowColumnStart", mNowColumn.start);
             context.put("orders", mOrders);
             context.put("dataCellsByConceptId", getJsonDataDump());
+//            context.put("chartColumnType", mChartColumnType);
+//            context.put("chartColumnTime", mChartColumnTime);
             return renderTemplate("assets/chart.html", context);
         }
 
