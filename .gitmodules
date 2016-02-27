@@ -1,4 +1,0 @@
-[submodule "client-libs"]
-  path = client-libs
-  url = ../client-libs
-
