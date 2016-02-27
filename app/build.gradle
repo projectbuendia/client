@@ -9,6 +9,8 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
     repositories {
         mavenCentral()
@@ -22,9 +24,7 @@ buildscript {
 apply plugin: 'com.android.application'
 def appId = 'org.projectbuendia.client'
 def debugAppIdSuffix = '.dev'
-def debugAppId = appId + debugAppIdSuffix
 def contentAuthority = appId + '.provider'
-def debugContentAuthority = debugAppId + '.provider'
 
 android {
     dexOptions {
@@ -89,7 +89,7 @@ dependencies {
 def versionInteger = 0
 
 // Development builds get a version name that identifies the commit.
-def repo = org.ajoberstar.grgit.Grgit.open(project.rootDir)
+def repo = Grgit.open(project.rootDir)
 def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' : '+')
 
 // For a release build, use -PversionNumber=1.2.3 to set the version number.
@@ -97,7 +97,7 @@ def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' :
 if (project.hasProperty('versionNumber')) {
     // The version number is converted to an integer for the version code,
     // e.g. 2.34.5 becomes 2340005.
-    def versionParts = project.versionNumber.split('\\.').toList()
+    def versionParts = ((String) project.versionNumber).split('\\.').toList()
     assert versionParts.size >= 1 && versionParts.size() <= 3
     versionParts.addAll(['0', '0'])  // missing parts default to 0
     def versionMajor = versionParts[0].toInteger()
@@ -115,26 +115,20 @@ if (project.hasProperty('versionNumber')) {
 logger.info("Version number: ${versionString}")
 logger.info("Version code: ${versionInteger}")
 
-// This is where to look for the .apk signing key.
-def releaseRepoRoot = file('../../release/')
-
 // OpenMRS server for development (kept at tip of dev branch).
 def serverDev = 'dev.projectbuendia.org';
 
-// OpenMRS server for integration testing.
-def serverIntegration = 'integration.projectbuendia.org';
-
 // Edison server on the local network.
+//noinspection GroovyUnusedAssignment
 def serverEdison = 'server';
 
 // Host machine when client runs in an emulator (AVD).
+//noinspection GroovyUnusedAssignment
 def serverEmulatorHost = '10.0.2.2';
-
-// Server on the Fantastica wifi network.
-def serverFantastica = '192.168.1.161';
 
 // If you run `adb reverse tcp:9000 tcp:9000` on your machine with a device connected, and
 // use this setting, then the device will talk to a locally running server instance.
+//noinspection GroovyUnusedAssignment
 def serverLocalHost = '127.0.0.1';
 
 // Just for development.  In production builds, these should be overridden
@@ -199,14 +193,13 @@ android {
         testApplicationId appId + '.test'
 
         // Set the default values of preferences.
+        // TODO: Make these build config values instead of resources.
         resValue 'string', 'server_default', server
         resValue 'string', 'openmrs_root_url_default', openmrsRootUrl
         resValue 'string', 'openmrs_user_default', openmrsUser
         resValue 'string', 'openmrs_password_default', openmrsPassword
         resValue 'string', 'package_server_root_url_default', packageServerRootUrl
         resValue 'bool', 'require_wifi_default', requireWifi
-
-        // Allow different sync adapters to be defined for debug and release builds.
         resValue 'string', 'content_authority', contentAuthority
         buildConfigField 'String', 'CONTENT_AUTHORITY', '"' + contentAuthority + '"'
         resValue 'string', 'account_type', appId
@@ -214,15 +207,6 @@ android {
 
         // Set the SQLite database encryption password.
         buildConfigField 'String', 'ENCRYPTION_PASSWORD', '"' + encryptionPassword + '"'
-    }
-
-    signingConfigs {
-        release {
-            storeFile file(new File(releaseRepoRoot, 'keys/org.projectbuendia.client.jks'))
-            storePassword ''
-            keyAlias 'org.projectbuendia.client'
-            keyPassword ''
-        }
     }
 
     packagingOptions {
@@ -245,33 +229,6 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix debugAppIdSuffix
-            resValue 'string', 'content_authority', debugContentAuthority
-            buildConfigField 'String', 'CONTENT_AUTHORITY', '"' + debugContentAuthority + '"'
-            resValue 'string', 'account_type', debugAppId
-            buildConfigField 'String', 'ACCOUNT_TYPE', '"' + debugAppId + '"'
-        }
-
-        release {
-            // noinspection GroovyAssignabilityCheck
-            signingConfig signingConfigs.release
         }
     }
-}
-
-gradle.taskGraph.whenReady {
-    taskGraph ->
-        if (taskGraph.hasTask(':app:assembleRelease')) {
-            if (!android.signingConfigs.release.storeFile.exists()) {
-                throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
-            }
-            if (System.console() == null) {
-                throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew :app:assembleRelease.");
-            }
-            def pass = new String(System.console().readPassword("\nPlease enter key passphrase: "))
-            if (!pass) {
-                throw new IllegalArgumentException("You must enter a password to proceed.")
-            }
-            android.signingConfigs.release.storePassword = pass
-            android.signingConfigs.release.keyPassword = pass
-        }
 }
