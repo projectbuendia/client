@@ -30,12 +30,10 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
             waitForSyncFailure();
 
             expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
-            screenshot("After Sync Fails");
 
             expectVisible(viewWithText(R.string.sync_failed_settings));
             expectVisible(viewWithText(R.string.sync_failed_retry));
             click(viewWithText("Back"));
-            screenshot("Test Finish");
         }
     }
 
@@ -47,10 +45,8 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
             expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
 
             click(viewWithText(R.string.sync_failed_back));
-            screenshot("After Sync Fails");
             waitForProgressFragment(); // Wait for user screen to display.
             expectVisible(viewWithText("Guest User"));
-            screenshot("Test Finish");
         }
     }
 
@@ -60,10 +56,8 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         waitForSyncFailure();
 
         expectVisibleSoon(viewWithText(R.string.sync_failed_settings));
-        screenshot("After Sync Fails");
 
         click(viewWithText(R.string.sync_failed_settings));
-        screenshot("After Settings Clicked");
 
         expectVisible(viewWithText("Advanced"));
         click(viewWithText("Advanced"));
@@ -80,12 +74,10 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     // unresponsive to changes in connectivity state, so a sync may not fail
     // for seconds or even minutes after wifi is turned off.
     /*public void testSyncFailedDialog_RetryButtonRetainsProgressBar() {
-        screenshot("Test Start");
         waitForSyncFailure();
         setWifiEnabled(false);
 
         expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
-        screenshot("After Sync Failed");
 
         click(viewWithText(R.string.sync_failed_retry));
 
@@ -93,7 +85,6 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         Espresso.registerIdlingResources(new WifiStateIdlingResource());
         // Showing progress bar may be slow as the spinner may show while sync is still starting up.
         expectVisibleSoon(viewWithId(R.id.progress_fragment_progress_bar));
-        screenshot("After Retry Clicked");
     }*/
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
@@ -102,20 +93,17 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
             waitForSyncFailure();
 
             expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
-            screenshot("After Sync Failed");
 
             setWifiEnabled(true);
             click(viewWithText(R.string.sync_failed_retry));
 
             waitForInitialSync();
             waitForProgressFragment();
-            screenshot("After Retry Clicked");
 
             // Should be at location selection screen with locations available.
             expectVisible(viewWithText("Triage"));
             expectVisible(viewWithText("Discharged"));
 
-            screenshot("After Sync Completed");
         }
     }
 
@@ -131,15 +119,12 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         waitForSyncFailure();
 
         expectVisibleSoon(viewWithText(R.string.sync_failed_settings));
-        screenshot("After Sync Failed");
 
         click(viewWithText(R.string.sync_failed_settings));
-        screenshot("After Settings Clicked");
 
         setWifiEnabled(true);
         pressBack();
         expectVisibleSoon(viewWithId(R.id.progress_fragment_progress_bar));
-        screenshot("After Back Pressed");
 
         cleanupWifi();
     }*/

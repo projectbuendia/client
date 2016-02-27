@@ -13,21 +13,13 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.Activity;
 import android.support.annotation.IdRes;
-import android.view.View;
-
-import org.hamcrest.Matcher;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormat;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 
-import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
 /** Tests for adding a new patient. */
 public class EditPatientDialogFragmentTest extends FunctionalTestCase {
@@ -45,17 +37,13 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
         // Assign a location to the patient
         click(viewWithId(R.id.attribute_location));
-        screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
-        screenshot("After Location Selected");
 
         pressBack();
 
         // The new patient should be visible in the list for their location
         click(viewWithText(LOCATION_NAME));
-        screenshot("In " + LOCATION_NAME);
         inPatientListClickPatientWithId(id);
-        screenshot("After Patient Clicked");
 
         // The symptom onset date should not be assigned a default value.
         expectVisible(viewThat(
@@ -71,10 +59,8 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
     public void testPatientCreation() throws Throwable {
         inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
         String id = generateId();
         // Populate the patient info
-        screenshot("Before Patient Populated");
         String given = "Giv" + id.substring(id.length() - 2);
         String family = "Fam" + id.substring(id.length() - 4, id.length() - 2);
         type(id, viewWithId(R.id.patient_id));
@@ -85,10 +71,8 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         boolean female = Integer.parseInt(id) % 2 == 0;
         @IdRes int sexButton = female ? R.id.patient_sex_female : R.id.patient_sex_male;
         click(viewWithId(sexButton));
-        screenshot("After Patient Populated");
         click(viewWithText("OK"));
         waitForProgressFragment();
-        screenshot("On Patient Chart");
         Activity activity = getCurrentActivity();
 
         // Now read off the patient info and check that it's all there.
