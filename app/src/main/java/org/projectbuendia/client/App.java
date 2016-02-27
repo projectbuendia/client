@@ -18,8 +18,6 @@ import android.support.multidex.MultiDex;
 
 import com.facebook.stetho.Stetho;
 
-import net.sqlcipher.database.SQLiteDatabase;
-
 import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
@@ -67,8 +65,6 @@ public class App extends Application {
         // Enable Stetho, which lets you inspect the app's database, UI, and network activity
         // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
         Stetho.initializeWithDefaults(this);
-
-        SQLiteDatabase.loadLibs(this);
 
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);

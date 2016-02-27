@@ -13,9 +13,8 @@ package org.projectbuendia.client.providers;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-
-import net.sqlcipher.database.SQLiteDatabase;
 
 import org.projectbuendia.client.sync.Database;
 

@@ -12,11 +12,10 @@
 package org.projectbuendia.client.ui.sync;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteException;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.support.test.espresso.Espresso;
-
-import net.sqlcipher.database.SQLiteException;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;

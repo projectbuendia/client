@@ -12,10 +12,9 @@
 package org.projectbuendia.client.providers;
 
 import android.content.UriMatcher;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.util.SparseArray;
-
-import net.sqlcipher.database.SQLiteOpenHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

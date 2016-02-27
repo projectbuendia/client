@@ -17,14 +17,13 @@ import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.os.RemoteException;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.google.common.collect.ImmutableSet;
-
-import net.sqlcipher.database.SQLiteException;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonNewUser;

@@ -13,10 +13,9 @@ package org.projectbuendia.client.sync;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.google.common.collect.ObjectArrays;
-
-import net.sqlcipher.database.SQLiteDatabase;
 
 import org.projectbuendia.client.providers.Contracts;
 

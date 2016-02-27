@@ -150,17 +150,11 @@ def packageServerRootUrl = project.server ? 'http://' + project.server + ':9001'
     : project.packageServerRootUrl ?: packageServerRootUrlDefault
 def requireWifi = project.requireWifi ?: 'false';
 
-// This is the password used to encrypt the SQLite database on the tablet.
-// In development builds, the password is an empty string, which leaves the
-// database unencrypted so that it can be easily inspected using Stetho.
-def encryptionPassword = project.encryptionPassword ?: '';
-
 logger.info('Default server hostname: ${server}')
 logger.info("Default OpenMRS root URL: ${openmrsRootUrl}")
 logger.info("Default OpenMRS user: ${openmrsUser}")
 logger.info("Default OpenMRS password: ${openmrsPassword}")
 logger.info("Default package server root URL: ${packageServerRootUrl}")
-logger.info("Database encryption password: ${encryptionPassword}")
 
 android {
     compileSdkVersion 23
@@ -168,10 +162,6 @@ android {
     // TODO: Port the various health checks to use HttpURLConnection instead and remove this
     // dependency.
     useLibrary 'org.apache.http.legacy'
-
-    sourceSets.main {
-        jniLibs.srcDir 'libs'
-    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -204,9 +194,6 @@ android {
         buildConfigField 'String', 'CONTENT_AUTHORITY', '"' + contentAuthority + '"'
         resValue 'string', 'account_type', appId
         buildConfigField 'String', 'ACCOUNT_TYPE', '"' + appId + '"'
-
-        // Set the SQLite database encryption password.
-        buildConfigField 'String', 'ENCRYPTION_PASSWORD', '"' + encryptionPassword + '"'
     }
 
     packagingOptions {
