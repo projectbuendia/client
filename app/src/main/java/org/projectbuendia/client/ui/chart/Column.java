@@ -29,6 +29,10 @@ public class Column {
         this.headingHtml = headingHtml;
     }
 
+    public Column(Interval interval, String headingHtml) {
+        this(interval.getStart(), interval.getEnd(), headingHtml);
+    }
+
     public Interval getInterval() {
         return Utils.toInterval(start, stop);
     }
