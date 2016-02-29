@@ -149,6 +149,12 @@ public class ChartRenderer {
                 mTileRows.add(tileRow);
             }
             for (ChartSection section : chart.rowGroups) {
+                // To create a row for the chart section we have to add any UUID.
+                ArrayList<String> anyUUID = new ArrayList<>();
+                anyUUID.add("162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                ChartItem sectionItem = new ChartItem(section.label, "row_section", true, anyUUID,
+                    null, null, "{1,name}", null, null);
+                mRows.add(new Row(sectionItem));
                 for (ChartItem item : section.items) {
                     Row row = new Row(item);
                     mRows.add(row);
