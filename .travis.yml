@@ -1,0 +1,37 @@
+language: android
+env:
+  global:
+    # Apparently this helps with the out-of-memory problem when multidexing on Travis.
+    # See https://github.com/travis-ci/travis-ci/issues/3695
+    - MALLOC_ARENA_MAX=2
+# Turn on sudo to use the legacy infrastructure which seems to give us enough RAM for multidexing
+# to work. See https://github.com/travis-ci/travis-ci/issues/3695
+sudo: required
+android:
+  components:
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
+    - platform-tools
+    - tools
+
+    # The BuildTools version used by your project
+    # Corresponds to buildToolsVersion in app/build.gradle
+    - build-tools-23.0.2
+    # Used for AutofitTextView
+    # TODO: Upgrade AutofitTextView, remove this.
+    - build-tools-19.1.0
+
+    # The SDK version used to compile your project.
+    # Corresponds to compileSdkVersion in app/build.gradle
+    - android-23
+
+    # Additional components
+    - extra-android-m2repository
+script:
+  # By default, Travis runs `./gradlew build connectedCheck`. We don't want to run the integration
+  # tests, however, because they hit our dev server. So, we specifically just build, and build the
+  # app integration tests as well.
+  # TODO: Run a local server for the integration tests.
+  # TODO: Write unit tests and run them here.
+  - ./gradlew build :app:assembleAndroidTest
+# TODO: add after_success clause that pushes builds to our build server.

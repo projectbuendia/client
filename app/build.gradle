@@ -158,6 +158,7 @@ logger.info("Default package server root URL: ${packageServerRootUrl}")
 
 android {
     compileSdkVersion 23
+    // Make sure to change this version in .travis.yml as well.
     buildToolsVersion '23.0.2'
     // TODO: Port the various health checks to use HttpURLConnection instead and remove this
     // dependency.
