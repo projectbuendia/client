@@ -36,24 +36,20 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
     /** Looks for the filter menu. */
     public void testFilterMenu() {
         openPatientList();
-        screenshot("Test Start");
         click(viewWithText("All present patients"));
         waitForProgressFragment();
         expectVisible(viewWithText("Triage"));
         expectVisible(viewWithText("Pregnant"));
-        screenshot("In Filter Menu");
     }
 
     /** Looks for one zone heading and at least one patient. */
     public void testZoneAndPatientDisplayed() {
         openPatientList();
-        screenshot("Test Start");
         // There should be at least one patient in Triage.
         expectVisibleSoon(viewThat(hasTextContaining("Triage  ·  ")));
         // Click the first patient
         click(dataThat(is(Patient.class))
             .inAdapterView(withId(R.id.fragment_patient_list))
             .atPosition(0));
-        screenshot("After Patient Clicked");
     }
 }

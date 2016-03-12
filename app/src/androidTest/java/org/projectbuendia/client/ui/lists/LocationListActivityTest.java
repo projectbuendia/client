@@ -56,7 +56,6 @@ public class LocationListActivityTest extends FunctionalTestCase {
     /** Tests that zones and tents are still displayed after returning from chart view. */
     public void testZonesAndTentsDisplayed_afterChartView() {
         inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
         String id = generateId();
         populateNewPatientFields(id);
         click(viewWithText("OK"));
@@ -68,18 +67,14 @@ public class LocationListActivityTest extends FunctionalTestCase {
     /** Tests that zones and tents are still displayed after changing a patient's location. */
     public void testZonesAndTentsDisplayed_afterPatientLocationChanged() {
         inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
         String id = generateId();
         populateNewPatientFields(id);
         click(viewWithText("OK"));
         waitForProgressFragment();
-        screenshot("On Patient Chart");
 
         // Assign a location to the patient
         click(viewWithId(R.id.attribute_location));
-        screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
-        screenshot("After Location Selected");
 
         pressBack(); // back to location selection screen
         inLocationSelectionCheckZonesAndTentsDisplayed();

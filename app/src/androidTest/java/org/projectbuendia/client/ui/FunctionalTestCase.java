@@ -22,20 +22,13 @@ import android.support.test.runner.lifecycle.Stage;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
-import com.squareup.spoon.Spoon;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
@@ -117,14 +110,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             }
         } catch (NoActivityResumedException | InterruptedException e) {
             // nothing left to close
-        }
-    }
-
-    protected void screenshot(String tag) {
-        try {
-            Spoon.screenshot(getCurrentActivity(), tag.replace(" ", ""));
-        } catch (Throwable throwable) {
-            LOG.w("Could not create screenshot with tag %s", tag);
         }
     }
 
@@ -233,12 +218,10 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     protected String inUserLoginGoToDemoPatientChart() {
         // Create the patient
         inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
         String id = generateId();
         populateNewPatientFields(id);
         click(viewWithText("OK"));
         waitForProgressFragment();
-        screenshot("On Patient Chart");
         return id;
     }
 
@@ -356,7 +339,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
 
     /** Populates all the fields on the New Patient screen. */
     protected void populateNewPatientFields(String id) {
-        screenshot("Before Patient Populated");
         String given = "Given" + id;
         String family = "Family" + id;
         type(id, viewWithId(R.id.patient_id));
@@ -366,6 +348,5 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
         int sex = Integer.parseInt(id) % 2 == 0 ? R.id.patient_sex_female : R.id.patient_sex_male;
         click(viewWithId(sex));
-        screenshot("After Patient Populated");
     }
 }

@@ -28,25 +28,20 @@ public class InitialSyncTest extends SyncTestCase {
 
     /** Expects zones and tents to appear within Espresso's idling period (60s). */
     public void testZonesAndTentsDisplayed() {
-        screenshot("Before Sync Completed");
         waitForProgressFragment();
         inLocationSelectionCheckZonesAndTentsDisplayed();
     }
 
     /** Tests that search functionality works right after initial sync. */
     public void testSearchAfterSync() {
-        screenshot("Before Sync Completed");
 
         waitForProgressFragment();
-        screenshot("After Sync Completed");
 
         click(viewWithId(R.id.action_search));
-        screenshot("After Search Clicked");
 
         // Check that at least one patient is returned (since clicking search
         // should show all patients).
         inPatientListClickFirstPatient(); // open patient chart
-        screenshot("Final State");
     }
 
     /** Tests the behavior of the sync cancel button. */

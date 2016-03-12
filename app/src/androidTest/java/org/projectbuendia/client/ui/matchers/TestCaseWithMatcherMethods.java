@@ -22,7 +22,6 @@ import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
 
-import com.estimote.sdk.internal.Preconditions;
 import com.google.common.base.Joiner;
 
 import org.hamcrest.Description;
@@ -145,7 +144,6 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     // such as whoseParent(hasSiblingThat(isVisible())).
 
     public static Matcher<View> isAnyOf(final Class<? extends View>... classes) {
-        Preconditions.checkArgument(classes.length >= 1);
         return new TypeSafeMatcher<View>() {
             @Override public boolean matchesSafely(View obj) {
                 for (Class cls : classes) {

@@ -15,9 +15,8 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-
-import net.sqlcipher.database.SQLiteOpenHelper;
 
 /** A delegate used to handle a single URI for {@link DelegatingProvider}. */
 public interface ProviderDelegate<T extends SQLiteOpenHelper> {
