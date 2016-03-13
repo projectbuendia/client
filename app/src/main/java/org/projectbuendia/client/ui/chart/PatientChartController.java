@@ -57,7 +57,6 @@ import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
@@ -844,7 +843,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
         public void onEventMainThread(VoidObservationsRequestEvent event) {
             for (String uuid : event.Uuids) {
-                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
+                // TODO: make it possible to delete all observations in one request.
+                mAppModel.deleteObservation(mCrudEventBus, uuid);
             }
             updatePatientObsUi(lastChartIndex);
         }

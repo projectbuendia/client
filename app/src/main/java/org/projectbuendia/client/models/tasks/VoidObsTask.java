@@ -8,7 +8,6 @@ import com.android.volley.toolbox.RequestFuture;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.VoidObsFailedEvent;
-import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 
@@ -18,24 +17,24 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
 
     private final Server mServer;
     private final ContentResolver mContentResolver;
-    private final VoidObs mVoidObs;
     private final CrudEventBus mBus;
+    private final String mObservationUuid;
 
     public VoidObsTask(
             Server server,
             ContentResolver contentResolver,
-            VoidObs voidObs,
+            String observationUuid,
             CrudEventBus bus) {
         mServer = server;
         mContentResolver = contentResolver;
-        mVoidObs = voidObs;
+        mObservationUuid = observationUuid;
         mBus = bus;
     }
 
     @Override protected VoidObsFailedEvent doInBackground(Void... params) {
 
         RequestFuture<Void> future = RequestFuture.newFuture();
-        mServer.deleteObservation(mVoidObs.Uuid, future, future);
+        mServer.deleteObservation(mObservationUuid, future, future);
 
         try {
             future.get();
@@ -48,7 +47,7 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
         mContentResolver.delete(
                 Contracts.Observations.CONTENT_URI,
                 "uuid = ?",
-                new String[]{mVoidObs.Uuid}
+                new String[]{mObservationUuid}
         );
 
         return null;
@@ -63,6 +62,6 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
         }
 
         // Otherwise, broadcast that the deletion succeeded.
-        mBus.post(new ItemDeletedEvent(mVoidObs.Uuid));
+        mBus.post(new ItemDeletedEvent(mObservationUuid));
     }
 }
