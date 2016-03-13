@@ -53,7 +53,6 @@ import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -64,7 +63,6 @@ import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
-import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
@@ -688,7 +686,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override public void showObservationsDialog(ArrayList<ObsRow> observations) {
+        @Override public void showObservationsDialog(ArrayList<Obs> observations) {
             ViewObservationsDialogFragment.newInstance(observations)
                 .show(getSupportFragmentManager(), null);
         }

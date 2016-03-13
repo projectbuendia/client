@@ -53,7 +53,6 @@ import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
@@ -190,7 +189,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showOrderExecutionDialog(Order order, Interval
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObservationsDialog(ArrayList<ObsRow> obs);
+        void showObservationsDialog(ArrayList<Obs> obs);
         void indicateNoteSubmitted();
         void indicateNoteSubmissionFailed();
     }
@@ -452,7 +451,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     @android.webkit.JavascriptInterface
     public void onObsDialog(String conceptUuid, Long startMillis, Long stopMillis) {
 
-        ArrayList<ObsRow> observations = mChartHelper.getPatientObservationsByConceptAndTime(
+        ArrayList<Obs> observations = mChartHelper.getPatientObservationsByConceptAndTime(
                 mPatientUuid, conceptUuid, startMillis, stopMillis);
 
         mUi.showObservationsDialog(observations);

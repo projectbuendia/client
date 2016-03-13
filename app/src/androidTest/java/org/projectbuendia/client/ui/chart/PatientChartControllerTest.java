@@ -52,7 +52,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private static final String PATIENT_NAME_1 = "Bob";
     private static final String PATIENT_ID_1 = "patient-id-1";
 
-    private static final Obs OBS_1 = new Obs(
+    private static final Obs OBS_1 = new Obs("",
         0, ConceptUuids.TEMPERATURE_UUID, ConceptType.NUMERIC, "37.2", "");
 
     private PatientChartController mController;

@@ -24,7 +24,6 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
@@ -144,18 +143,6 @@ public class ChartDataHelper {
     }
 
     private Obs obsFromCursor(Cursor c) {
-        long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
-        String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
-        ConceptType conceptType = sConceptTypes.get(conceptUuid);
-        String value = c.getString(c.getColumnIndex(Observations.VALUE));
-        String localizedValue = value;
-        if (ConceptType.CODED.equals(conceptType)) {
-            localizedValue = sConceptNames.get(value);
-        }
-        return new Obs(millis, conceptUuid, conceptType, value, localizedValue);
-    }
-
-    private @Nullable ObsRow obsrowFromCursor(Cursor c) {
         String uuid = c.getString(c.getColumnIndex(Observations.UUID));
         long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
         String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
@@ -165,15 +152,8 @@ public class ChartDataHelper {
         if (ConceptType.CODED.equals(conceptType)) {
             localizedValue = sConceptNames.get(value);
         }
-        String conceptName = sConceptNames.get(conceptUuid);
-        if (conceptName == null){
-            return null;
-        }
-        else {
-            return new ObsRow(uuid, millis, conceptName, value, localizedValue);
-        }
+        return new Obs(uuid, millis, conceptUuid, conceptType, value, localizedValue);
     }
-
 
     /** Gets all observations for a given patient, localized for a given locale. */
     // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
@@ -201,12 +181,11 @@ public class ChartDataHelper {
      *                   {@link System#currentTimeMillis()} format, exclusive
      * @return a list of observations
      */
-    public ArrayList<ObsRow> getPatientObservationsByConceptAndTime(
+    public ArrayList<Obs> getPatientObservationsByConceptAndTime(
             String patientUuid, String conceptUuid,
             @Nullable Long startMillis, @Nullable Long endMillis) {
         // TODO: localize.
         loadConceptData(ENGLISH_LOCALE);
-        ArrayList<ObsRow> results = new ArrayList<>();
         ArrayList<String> conditions = new ArrayList<>();
         ArrayList<String> values = new ArrayList<>();
         conditions.add(Observations.PATIENT_UUID + " = ?");
@@ -224,17 +203,19 @@ public class ChartDataHelper {
         // Oldest to newest
         String order = Observations.ENCOUNTER_MILLIS + " ASC";
 
+        ArrayList<Obs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
                 Observations.CONTENT_URI,
                 null,
                 StringUtils.join(conditions, " and "),
                 values.toArray(new String[values.size()]),
                 order)) {
+            if (c == null) {
+                // TODO: introduce some kind of fatal-only-in-debug-builds mechanism.
+                throw new AssertionError();
+            }
             while (c.moveToNext()) {
-                ObsRow row = obsrowFromCursor(c);
-                if (row != null) {
-                    results.add(row);
-                }
+                results.add(obsFromCursor(c));
             }
         }
         return results;
