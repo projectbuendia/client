@@ -22,7 +22,7 @@
           id="tile-{{id}}"
           class="tile concept-{{id}} {{class}}"
           {% if tile.item.conceptUuids.size == 1 %}
-            onclick="od('{{tile.item.conceptUuids[0]}}', null, null);"
+            onclick="od('{{tile.item.conceptUuids[0]}}');"
           {% endif %}
           style="{{style}}"
           width="{{100.0 / tileRow.size}}%" >
@@ -69,7 +69,7 @@
       {% for row in rows %}
       {% set id = row.item.conceptIds | first %}
       <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
-          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}', null, null);">
+          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}');">
             {{row.item.label}}
           </th>
           {% for column in columns %}
@@ -199,7 +199,11 @@
   });
 
   function od(concept_uuid, startmillis, stopmillis) {
-    controller.onObsDialog(concept_uuid, startmillis, stopmillis);
+    if (typeof startmillis === "undefined" && typeof endmillis === "undefined") {
+      controller.onObsDialog(concept_uuid);
+    } else {
+      controller.onObsDialog(concept_uuid, startmillis, stopmillis);
+    }
   }
 
 </script>

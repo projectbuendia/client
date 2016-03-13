@@ -172,7 +172,8 @@ public class ChartDataHelper {
     }
 
     /**
-     * Retrieve the observations for a given patient by concept and time.
+     * Retrieve the observations for a given patient by concept and time, sorted from oldest to
+     * newest.
      * @param patientUuid the UUID of the patient.
      * @param conceptUuid the UUID of the concept to retrieve.
      * @param startMillis the time of the earliest observation, {@link System#currentTimeMillis()}

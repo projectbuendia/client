@@ -189,7 +189,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showOrderExecutionDialog(Order order, Interval
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObservationsDialog(ArrayList<Obs> obs);
+        void showObservationsDialog(
+                String patientUuid, String conceptUuid, Long startMillis, Long stopMillis);
         void indicateNoteSubmitted();
         void indicateNoteSubmissionFailed();
     }
@@ -408,8 +409,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-            request.requestIndex, request.formUuid,
-            mPatient.toOdkPatient(), preset);
+                request.requestIndex, request.formUuid,
+                mPatient.toOdkPatient(), preset);
     }
 
     public void onOpenFormPressed(String formUuid) {
@@ -449,25 +450,38 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     @android.webkit.JavascriptInterface
-    public void onObsDialog(String conceptUuid, Long startMillis, Long stopMillis) {
-
-        ArrayList<Obs> observations = mChartHelper.getPatientObservationsByConceptAndTime(
-                mPatientUuid, conceptUuid, startMillis, stopMillis);
-
-        mUi.showObservationsDialog(observations);
+    @Override
+    public void onObsDialog(String conceptUuid, long startMillis, long endMillis) {
+        // TODO: We've currently got no way of differentiating between section headers and
+        // observation rows in the chart, and so section headers can be tapped on just like any
+        // other field to open up a dialog. We don't want this, but the only way to prevent this
+        // from occurring is to ensure that any concept with zero observations doesn't show a
+        // dialog.
+        // This means that section headings currently show up with "No recorded observations". We
+        // should fix this.
+        mUi.showObservationsDialog(mPatientUuid, conceptUuid, startMillis, endMillis);
     }
 
     @android.webkit.JavascriptInterface
+    @Override
+    public void onObsDialog(String conceptUuid) {
+        mUi.showObservationsDialog(mPatientUuid, conceptUuid, null, null);
+    }
+
+    @android.webkit.JavascriptInterface
+    @Override
     public void onNewOrderPressed() {
         mUi.showOrderDialog(mPatientUuid, null);
     }
 
     @android.webkit.JavascriptInterface
+    @Override
     public void onOrderHeadingPressed(String orderUuid) {
         mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid));
     }
 
     @android.webkit.JavascriptInterface
+    @Override
     public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
@@ -483,6 +497,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     @android.webkit.JavascriptInterface
+    @Override
     public void onPageUnload(int scrollX, int scrollY) {
         mLastScrollPosition.set(scrollX, scrollY);
     }

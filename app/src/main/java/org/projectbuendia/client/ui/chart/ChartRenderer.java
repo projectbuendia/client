@@ -61,7 +61,10 @@ public class ChartRenderer {
         void onOrderCellPressed(String orderUuid, long startMillis);
 
         @android.webkit.JavascriptInterface
-        void onObsDialog(String conceptUuid, Long startMillis, Long stopMillis);
+        void onObsDialog(String conceptUuid);
+
+        @android.webkit.JavascriptInterface
+        void onObsDialog(String conceptUuid, long startMillis, long stopMillis);
 
         @android.webkit.JavascriptInterface
         void onPageUnload(int scrollX, int scrollY);

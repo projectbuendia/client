@@ -90,7 +90,8 @@ public final class Obs implements Comparable<Obs> {
         return null;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "Obs(time=" + time
             + ", conceptUuid=" + conceptUuid
             + ", conceptType=" + conceptType

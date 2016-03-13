@@ -686,8 +686,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override public void showObservationsDialog(ArrayList<Obs> observations) {
-            ViewObservationsDialogFragment.newInstance(observations)
+        @Override public void showObservationsDialog(
+                String patientUuid, String conceptUuid, Long startMillis, Long stopMillis) {
+            ViewObservationsDialogFragment.newInstance(
+                    patientUuid, conceptUuid, startMillis, stopMillis)
                 .show(getSupportFragmentManager(), null);
         }
 
