@@ -23,7 +23,6 @@ import de.greenrobot.event.EventBus;
  */
 public class HealthMonitor {
 
-    private final Application mApplication;
     private final EventBus mHealthEventBus;
     private final ImmutableSet<HealthCheck> mHealthChecks;
     private final Troubleshooter mTroubleshooter;
@@ -79,11 +78,9 @@ public class HealthMonitor {
     }
 
     HealthMonitor(
-        Application application,
-        EventBus healthEventBus,
-        ImmutableSet<HealthCheck> healthChecks,
-        Troubleshooter troubleshooter) {
-        mApplication = application;
+            EventBus healthEventBus,
+            ImmutableSet<HealthCheck> healthChecks,
+            Troubleshooter troubleshooter) {
         mHealthEventBus = healthEventBus;
         mHealthChecks = healthChecks;
         mTroubleshooter = troubleshooter;
