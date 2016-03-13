@@ -53,10 +53,9 @@ public class DiagnosticsModule {
 
     @Provides
     @Singleton HealthMonitor provideHealthMonitor(
-        Application application,
         @Qualifiers.HealthEventBus EventBus healthEventBus,
         ImmutableSet<HealthCheck> healthChecks,
         Troubleshooter troubleshooter) {
-        return new HealthMonitor(application, healthEventBus, healthChecks, troubleshooter);
+        return new HealthMonitor(healthEventBus, healthChecks, troubleshooter);
     }
 }

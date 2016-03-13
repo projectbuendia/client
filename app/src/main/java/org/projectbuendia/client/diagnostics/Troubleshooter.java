@@ -42,24 +42,6 @@ public class Troubleshooter {
         mActiveIssues = new HashSet<>();
     }
 
-    /** Returns a set of all currently-active health issues. */
-    public ImmutableSet<HealthIssue> getActiveIssues() {
-        return ImmutableSet.copyOf(mActiveIssues);
-    }
-
-    /**
-     * Returns true iff the given issue is current active.
-     * @param issue {@link HealthIssue} to check for
-     */
-    public boolean hasIssue(HealthIssue issue) {
-        return mActiveIssues.contains(issue);
-    }
-
-    /** Returns true iff no active issues exist. */
-    public boolean isHealthy() {
-        return mActiveIssues.isEmpty();
-    }
-
     /**
      * Returns true if no ongoing issues preventing access to the Buendia server exist. Note that
      * connectivity is still not guaranteed, just not ruled out.
