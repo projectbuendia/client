@@ -16,9 +16,8 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.support.multidex.MultiDex;
 
-import com.facebook.stetho.Stetho;
-
 import org.odk.collect.android.application.Collect;
+import org.projectbuendia.client.debug.StethoInitializer;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
@@ -41,6 +40,7 @@ public class App extends Application {
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject Server mServer;
     @Inject HealthMonitor mHealthMonitor;
+    @Inject StethoInitializer mStethoInitializer;
 
     public static synchronized App getInstance() {
         return sInstance;
@@ -62,13 +62,13 @@ public class App extends Application {
         Collect.onCreate(this);
         super.onCreate();
 
-        // Enable Stetho, which lets you inspect the app's database, UI, and network activity
-        // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
-        Stetho.initializeWithDefaults(this);
-
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);
         mObjectGraph.injectStatics();
+
+        // Enable Stetho, which lets you inspect the app's database, UI, and network activity
+        // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
+        mStethoInitializer.initialize(this);
 
         // Ensure all unset preferences get initialized with default values.
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);

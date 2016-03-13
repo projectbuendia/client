@@ -57,13 +57,19 @@ dependencies {
     compile 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
     compile 'de.greenrobot:eventbus:2.4.0' // The event bus
     compile 'joda-time:joda-time:2.5' // Better dates and times
-    compile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
-    compile 'com.facebook.stetho:stetho-okhttp:1.2.0' // Network debugging
     compile 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
     compile 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
     compile 'org.apache.commons:commons-lang3:3.4'
     // Magic sliding panel that we use for the notes view.
     compile 'com.sothree.slidinguppanel:library:3.2.1'
+    // We use this as a network base so we can use intercept network calls with Stetho on debug
+    // builds.
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
+    compile 'com.google.code.findbugs:jsr305:2.0.1' // Nullable annotations
+
+    // Debug features only
+    debugCompile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
+    debugCompile 'com.facebook.stetho:stetho-okhttp:1.2.0' // Network debugging
 
     // Testing
     androidTestCompile 'com.android.support.test:runner:0.3'

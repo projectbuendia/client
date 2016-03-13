@@ -18,12 +18,16 @@ import com.google.gson.reflect.TypeToken;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.net.GsonRequest;
-import org.projectbuendia.client.net.VolleySingleton;
+import org.projectbuendia.client.net.VolleyRequestQueue;
 import org.projectbuendia.client.json.JsonUpdateInfo;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** Encapsulates requests to the package server. */
+@Singleton
 public class PackageServer {
 
     /**
@@ -33,10 +37,11 @@ public class PackageServer {
      */
     private static final String MODULE_NAME = "buendia-client";
 
-    private final VolleySingleton mVolley;
+    private final VolleyRequestQueue mVolley;
     private final AppSettings mSettings;
 
-    public PackageServer(VolleySingleton volley, AppSettings settings) {
+    @Inject
+    public PackageServer(VolleyRequestQueue volley, AppSettings settings) {
         mVolley = volley;
         mSettings = settings;
     }
