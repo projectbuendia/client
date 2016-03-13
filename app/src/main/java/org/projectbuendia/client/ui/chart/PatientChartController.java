@@ -35,7 +35,7 @@ import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
-import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -43,7 +43,7 @@ import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.OrderDeleteFailedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.events.data.VoidObsFailedEvent;
+import org.projectbuendia.client.events.data.ObsDeleteFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
@@ -841,7 +841,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mAppModel.deleteOrder(mCrudEventBus, event.orderUuid);
         }
 
-        public void onEventMainThread(VoidObservationsRequestEvent event) {
+        public void onEventMainThread(ObsDeleteRequestEvent event) {
             for (String uuid : event.Uuids) {
                 // TODO: make it possible to delete all observations in one request.
                 mAppModel.deleteObservation(mCrudEventBus, uuid);
@@ -854,7 +854,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             BigToast.show(App.getInstance(), R.string.order_delete_failed);
         }
 
-        public void onEventMainThread(VoidObsFailedEvent event) {
+        public void onEventMainThread(ObsDeleteFailedEvent event) {
             // TODO: don't use App.getInstance for this.
             BigToast.show(App.getInstance(), R.string.observation_delete_failed);
         }

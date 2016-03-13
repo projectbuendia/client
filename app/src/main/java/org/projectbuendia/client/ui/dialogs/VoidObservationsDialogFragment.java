@@ -16,7 +16,7 @@ package org.projectbuendia.client.ui.dialogs;
         import java.util.HashMap;
         import java.util.List;
         import butterknife.ButterKnife;
-        import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
+        import org.projectbuendia.client.events.actions.ObsDeleteRequestEvent;
         import org.projectbuendia.client.models.ObsRow;
         import org.projectbuendia.client.ui.lists.ExpandableVoidObsRowAdapter;
         import de.greenrobot.event.EventBus;
@@ -113,7 +113,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
 
                         if ((listAdapter.mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
-                            EventBus.getDefault().post(new VoidObservationsRequestEvent(listAdapter.mCheckedItems));
+                            EventBus.getDefault().post(new ObsDeleteRequestEvent(listAdapter.mCheckedItems));
                         }
 
                         dialogInterface.dismiss();
