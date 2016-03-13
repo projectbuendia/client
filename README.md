@@ -1,4 +1,4 @@
-# client
+# client <small>[![Build Status](https://travis-ci.org/projectbuendia/client.svg?branch=dev)](https://travis-ci.org/projectbuendia/client)</small>
 
 This repository contains the Buendia app,
 which runs on tablets with Android 4.4.2 (KitKat) or higher.
