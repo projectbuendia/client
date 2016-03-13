@@ -16,6 +16,7 @@ import android.database.Cursor;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
@@ -190,39 +191,45 @@ public class ChartDataHelper {
         return results;
     }
 
-    public ArrayList<ObsRow> getPatientObservationsByConcept(String patientUuid, String conceptUuid) {
+    /**
+     * Retrieve the observations for a given patient by concept and time.
+     * @param patientUuid the UUID of the patient.
+     * @param conceptUuid the UUID of the concept to retrieve.
+     * @param startMillis the time of the earliest observation, {@link System#currentTimeMillis()}
+     *                    format, inclusive
+     * @param endMillis the time immediately after the latest observation,
+     *                   {@link System#currentTimeMillis()} format, exclusive
+     * @return a list of observations
+     */
+    public ArrayList<ObsRow> getPatientObservationsByConceptAndTime(
+            String patientUuid, String conceptUuid,
+            @Nullable Long startMillis, @Nullable Long endMillis) {
+        // TODO: localize.
         loadConceptData(ENGLISH_LOCALE);
         ArrayList<ObsRow> results = new ArrayList<>();
-        try (
-                Cursor c = mContentResolver.query(
-                Observations.CONTENT_URI,
-                null,
-                Observations.PATIENT_UUID + " = ? and "
-                        + Observations.CONCEPT_UUID + " = ?",
-                new String[] {patientUuid, conceptUuid},
-                Observations.ENCOUNTER_MILLIS + " ASC"
-        )) {
-            while (c.moveToNext()) {
-                ObsRow row = obsrowFromCursor(c);
-                if (row !=null){results.add(row);}
-            }
+        ArrayList<String> conditions = new ArrayList<>();
+        ArrayList<String> values = new ArrayList<>();
+        conditions.add(Observations.PATIENT_UUID + " = ?");
+        values.add(patientUuid);
+        conditions.add(Observations.CONCEPT_UUID + " = ?");
+        values.add(conceptUuid);
+        if (startMillis != null) {
+            conditions.add(Observations.ENCOUNTER_MILLIS + " >= ?");
+            values.add(startMillis.toString());
         }
-        return results;
-    }
-
-    public ArrayList<ObsRow> getPatientObservationsByMillis(
-            String patientUuid, String startMillis, String stopMillis) {
-        loadConceptData(ENGLISH_LOCALE);
-        ArrayList<ObsRow> results = new ArrayList<>();
-        String conditions = Observations.PATIENT_UUID + " = ? and "
-                + Observations.ENCOUNTER_MILLIS + " >= ? and "
-                + Observations.ENCOUNTER_MILLIS + " <= ?";
-
-        String[] values = new String[]{patientUuid, startMillis, stopMillis};
+        if (endMillis != null) {
+            conditions.add(Observations.ENCOUNTER_MILLIS + " < ?");
+            values.add(endMillis.toString());
+        }
+        // Oldest to newest
         String order = Observations.ENCOUNTER_MILLIS + " ASC";
 
         try (Cursor c = mContentResolver.query(
-                Observations.CONTENT_URI, null, conditions, values, order)) {
+                Observations.CONTENT_URI,
+                null,
+                StringUtils.join(conditions, " and "),
+                values.toArray(new String[values.size()]),
+                order)) {
             while (c.moveToNext()) {
                 ObsRow row = obsrowFromCursor(c);
                 if (row != null) {
@@ -233,27 +240,6 @@ public class ChartDataHelper {
         return results;
     }
 
-    public ArrayList<ObsRow> getPatientObservationsByConceptMillis(
-            String patientUuid, String conceptUuid, String startMillis, String stopMillis) {
-        loadConceptData(ENGLISH_LOCALE);
-        ArrayList<ObsRow> results = new ArrayList<>();
-        String conditions = Observations.PATIENT_UUID + " = ? and "
-                + Observations.CONCEPT_UUID + " = ? and "
-                + Observations.ENCOUNTER_MILLIS + " >= ? and "
-                + Observations.ENCOUNTER_MILLIS + " <= ?";
-
-        String[] values = new String[] {patientUuid, conceptUuid, startMillis, stopMillis};
-        String order = Observations.ENCOUNTER_MILLIS + " ASC";
-
-        try (Cursor c = mContentResolver.query(
-                Observations.CONTENT_URI, null, conditions, values, order)) {
-            while (c.moveToNext()) {
-                ObsRow row = obsrowFromCursor(c);
-                if (row !=null){results.add(row);}
-            }
-        }
-        return results;
-    }
     /** Gets the latest observation of each concept for a given patient, localized to English. */
     // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservations(String patientUuid) {

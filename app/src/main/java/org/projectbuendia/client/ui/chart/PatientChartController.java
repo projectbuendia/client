@@ -450,22 +450,12 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     @android.webkit.JavascriptInterface
-    public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
-        ArrayList<ObsRow> observations = null;
-        if (!conceptUuid.isEmpty()){
-            if (!startMillis.isEmpty()){
-                observations = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
-            }
-            else{
-                observations = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
-            }
-        }
-        else if (!startMillis.isEmpty()){
-            observations = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
-        }
-        if ((observations != null) && (!observations.isEmpty())){
-            mUi.showObservationsDialog(observations);
-        }
+    public void onObsDialog(String conceptUuid, Long startMillis, Long stopMillis) {
+
+        ArrayList<ObsRow> observations = mChartHelper.getPatientObservationsByConceptAndTime(
+                mPatientUuid, conceptUuid, startMillis, stopMillis);
+
+        mUi.showObservationsDialog(observations);
     }
 
     @android.webkit.JavascriptInterface

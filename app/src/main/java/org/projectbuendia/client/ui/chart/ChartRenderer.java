@@ -1,5 +1,6 @@
 package org.projectbuendia.client.ui.chart;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.webkit.WebChromeClient;
@@ -60,7 +61,7 @@ public class ChartRenderer {
         void onOrderCellPressed(String orderUuid, long startMillis);
 
         @android.webkit.JavascriptInterface
-        void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
+        void onObsDialog(String conceptUuid, Long startMillis, Long stopMillis);
 
         @android.webkit.JavascriptInterface
         void onPageUnload(int scrollX, int scrollY);
@@ -73,6 +74,7 @@ public class ChartRenderer {
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
     // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
+    @SuppressLint("SetJavaScriptEnabled")
     public void render(Chart chart, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
