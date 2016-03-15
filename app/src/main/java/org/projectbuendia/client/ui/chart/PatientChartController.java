@@ -35,7 +35,7 @@ import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
-import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -43,7 +43,7 @@ import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.OrderDeleteFailedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.events.data.VoidObsFailedEvent;
+import org.projectbuendia.client.events.data.ObsDeleteFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
@@ -53,11 +53,9 @@ import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
@@ -191,7 +189,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showOrderExecutionDialog(Order order, Interval
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObservationsDialog(ArrayList<ObsRow> obs);
+        void showObservationsDialog(
+                String patientUuid, String conceptUuid, Long startMillis, Long stopMillis);
         void indicateNoteSubmitted();
         void indicateNoteSubmissionFailed();
     }
@@ -410,8 +409,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-            request.requestIndex, request.formUuid,
-            mPatient.toOdkPatient(), preset);
+                request.requestIndex, request.formUuid,
+                mPatient.toOdkPatient(), preset);
     }
 
     public void onOpenFormPressed(String formUuid) {
@@ -451,35 +450,38 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     @android.webkit.JavascriptInterface
-    public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
-        ArrayList<ObsRow> observations = null;
-        if (!conceptUuid.isEmpty()){
-            if (!startMillis.isEmpty()){
-                observations = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
-            }
-            else{
-                observations = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
-            }
-        }
-        else if (!startMillis.isEmpty()){
-            observations = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
-        }
-        if ((observations != null) && (!observations.isEmpty())){
-            mUi.showObservationsDialog(observations);
-        }
+    @Override
+    public void onObsDialog(String conceptUuid, long startMillis, long endMillis) {
+        // TODO: We've currently got no way of differentiating between section headers and
+        // observation rows in the chart, and so section headers can be tapped on just like any
+        // other field to open up a dialog. We don't want this, but the only way to prevent this
+        // from occurring is to ensure that any concept with zero observations doesn't show a
+        // dialog.
+        // This means that section headings currently show up with "No recorded observations". We
+        // should fix this.
+        mUi.showObservationsDialog(mPatientUuid, conceptUuid, startMillis, endMillis);
     }
 
     @android.webkit.JavascriptInterface
+    @Override
+    public void onObsDialog(String conceptUuid) {
+        mUi.showObservationsDialog(mPatientUuid, conceptUuid, null, null);
+    }
+
+    @android.webkit.JavascriptInterface
+    @Override
     public void onNewOrderPressed() {
         mUi.showOrderDialog(mPatientUuid, null);
     }
 
     @android.webkit.JavascriptInterface
+    @Override
     public void onOrderHeadingPressed(String orderUuid) {
         mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid));
     }
 
     @android.webkit.JavascriptInterface
+    @Override
     public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
@@ -495,6 +497,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     @android.webkit.JavascriptInterface
+    @Override
     public void onPageUnload(int scrollX, int scrollY) {
         mLastScrollPosition.set(scrollX, scrollY);
     }
@@ -842,9 +845,10 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mAppModel.deleteOrder(mCrudEventBus, event.orderUuid);
         }
 
-        public void onEventMainThread(VoidObservationsRequestEvent event) {
+        public void onEventMainThread(ObsDeleteRequestEvent event) {
             for (String uuid : event.Uuids) {
-                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
+                // TODO: make it possible to delete all observations in one request.
+                mAppModel.deleteObservation(mCrudEventBus, uuid);
             }
             updatePatientObsUi(lastChartIndex);
         }
@@ -854,7 +858,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             BigToast.show(App.getInstance(), R.string.order_delete_failed);
         }
 
-        public void onEventMainThread(VoidObsFailedEvent event) {
+        public void onEventMainThread(ObsDeleteFailedEvent event) {
             // TODO: don't use App.getInstance for this.
             BigToast.show(App.getInstance(), R.string.observation_delete_failed);
         }

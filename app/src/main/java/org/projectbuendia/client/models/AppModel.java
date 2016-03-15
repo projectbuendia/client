@@ -12,7 +12,6 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -90,8 +89,8 @@ public class AppModel {
         }
     }
 
-    public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
-        mTaskFactory.voidObsTask(bus, voidObs).execute();
+    public void deleteObservation(CrudEventBus bus, String observationUuid) {
+        mTaskFactory.newDeleteObsTask(bus, observationUuid).execute();
     }
 
     /**

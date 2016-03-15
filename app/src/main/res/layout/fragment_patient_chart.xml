@@ -129,7 +129,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="top"
-            android:text="@string/notes_list_empty" />
+            android:text="@string/observations_list_empty" />
 
         <!--
         We set clickable on this so that mis-clicks on the textbox don't close the sliding panel.

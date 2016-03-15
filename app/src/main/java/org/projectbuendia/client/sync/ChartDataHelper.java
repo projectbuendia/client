@@ -16,6 +16,7 @@ import android.database.Cursor;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
@@ -23,7 +24,6 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
@@ -143,18 +143,6 @@ public class ChartDataHelper {
     }
 
     private Obs obsFromCursor(Cursor c) {
-        long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
-        String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
-        ConceptType conceptType = sConceptTypes.get(conceptUuid);
-        String value = c.getString(c.getColumnIndex(Observations.VALUE));
-        String localizedValue = value;
-        if (ConceptType.CODED.equals(conceptType)) {
-            localizedValue = sConceptNames.get(value);
-        }
-        return new Obs(millis, conceptUuid, conceptType, value, localizedValue);
-    }
-
-    private @Nullable ObsRow obsrowFromCursor(Cursor c) {
         String uuid = c.getString(c.getColumnIndex(Observations.UUID));
         long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
         String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
@@ -164,15 +152,8 @@ public class ChartDataHelper {
         if (ConceptType.CODED.equals(conceptType)) {
             localizedValue = sConceptNames.get(value);
         }
-        String conceptName = sConceptNames.get(conceptUuid);
-        if (conceptName == null){
-            return null;
-        }
-        else {
-            return new ObsRow(uuid, millis, conceptName, value, localizedValue);
-        }
+        return new Obs(uuid, millis, conceptUuid, conceptType, value, localizedValue);
     }
-
 
     /** Gets all observations for a given patient, localized for a given locale. */
     // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
@@ -181,9 +162,8 @@ public class ChartDataHelper {
         List<Obs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-            Observations.PATIENT_UUID + " = ? and "
-                    + Observations.VOIDED + " IS NOT ?",
-            new String[] {patientUuid,"1"},null)) {
+            Observations.PATIENT_UUID + " = ?",
+            new String[] {patientUuid}, null)) {
             while (c.moveToNext()) {
                 results.add(obsFromCursor(c));
             }
@@ -191,69 +171,57 @@ public class ChartDataHelper {
         return results;
     }
 
-    public ArrayList<ObsRow> getPatientObservationsByConcept(String patientUuid, String conceptUuid) {
+    /**
+     * Retrieve the observations for a given patient by concept and time, sorted from oldest to
+     * newest.
+     * @param patientUuid the UUID of the patient.
+     * @param conceptUuid the UUID of the concept to retrieve.
+     * @param startMillis the time of the earliest observation, {@link System#currentTimeMillis()}
+     *                    format, inclusive
+     * @param endMillis the time immediately after the latest observation,
+     *                   {@link System#currentTimeMillis()} format, exclusive
+     * @return a list of observations
+     */
+    public ArrayList<Obs> getPatientObservationsByConceptAndTime(
+            String patientUuid, String conceptUuid,
+            @Nullable Long startMillis, @Nullable Long endMillis) {
+        // TODO: localize.
         loadConceptData(ENGLISH_LOCALE);
-        ArrayList<ObsRow> results = new ArrayList<>();
-        try (
-                Cursor c = mContentResolver.query(
+        ArrayList<String> conditions = new ArrayList<>();
+        ArrayList<String> values = new ArrayList<>();
+        conditions.add(Observations.PATIENT_UUID + " = ?");
+        values.add(patientUuid);
+        conditions.add(Observations.CONCEPT_UUID + " = ?");
+        values.add(conceptUuid);
+        if (startMillis != null) {
+            conditions.add(Observations.ENCOUNTER_MILLIS + " >= ?");
+            values.add(startMillis.toString());
+        }
+        if (endMillis != null) {
+            conditions.add(Observations.ENCOUNTER_MILLIS + " < ?");
+            values.add(endMillis.toString());
+        }
+        // Oldest to newest
+        String order = Observations.ENCOUNTER_MILLIS + " ASC";
+
+        ArrayList<Obs> results = new ArrayList<>();
+        try (Cursor c = mContentResolver.query(
                 Observations.CONTENT_URI,
                 null,
-                Observations.VOIDED + " IS NOT ? and "
-                        + Observations.PATIENT_UUID + " = ? and "
-                        + Observations.CONCEPT_UUID + " = ?",
-                new String[] {"1",patientUuid,conceptUuid},
-                Observations.ENCOUNTER_MILLIS + " ASC"
-        )) {
+                StringUtils.join(conditions, " and "),
+                values.toArray(new String[values.size()]),
+                order)) {
+            if (c == null) {
+                // TODO: introduce some kind of fatal-only-in-debug-builds mechanism.
+                throw new AssertionError();
+            }
             while (c.moveToNext()) {
-                ObsRow row = obsrowFromCursor(c);
-                if (row !=null){results.add(row);}
+                results.add(obsFromCursor(c));
             }
         }
         return results;
     }
 
-    public ArrayList<ObsRow> getPatientObservationsByMillis(String patientUuid, String startMillis,String stopMillis) {
-        loadConceptData(ENGLISH_LOCALE);
-        ArrayList<ObsRow> results = new ArrayList<>();
-        String conditions = Observations.VOIDED + " IS NOT ? and "
-                + Observations.PATIENT_UUID + " = ? and "
-                + Observations.ENCOUNTER_MILLIS + " >= ? and "
-                + Observations.ENCOUNTER_MILLIS + " <= ?";
-
-        String[] values = new String[]{"1",patientUuid, startMillis,stopMillis};
-        String order = Observations.ENCOUNTER_MILLIS + " ASC";
-
-        try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
-        {
-            while (c.moveToNext()) {
-                ObsRow row = obsrowFromCursor(c);
-                if (row !=null){results.add(row);}
-            }
-        }
-        return results;
-    }
-
-    public ArrayList<ObsRow> getPatientObservationsByConceptMillis(String patientUuid, String conceptUuid, String StartMillis, String StopMillis) {
-        loadConceptData(ENGLISH_LOCALE);
-        ArrayList<ObsRow> results = new ArrayList<>();
-        String conditions = Observations.VOIDED + " IS NOT ? and "
-                + Observations.PATIENT_UUID + " = ? and "
-                + Observations.CONCEPT_UUID + " = ? and "
-                + Observations.ENCOUNTER_MILLIS + " >= ? and "
-                + Observations.ENCOUNTER_MILLIS + " <= ?";
-
-        String[] values = new String[]{"1",patientUuid, conceptUuid, StartMillis,StopMillis};
-        String order = Observations.ENCOUNTER_MILLIS + " ASC";
-
-        try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
-        {
-            while (c.moveToNext()) {
-                ObsRow row = obsrowFromCursor(c);
-                if (row !=null){results.add(row);}
-            }
-        }
-        return results;
-    }
     /** Gets the latest observation of each concept for a given patient, localized to English. */
     // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservations(String patientUuid) {
@@ -281,9 +249,8 @@ public class ChartDataHelper {
         loadConceptData(locale);
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-                Observations.VOIDED + " IS NOT ? and "
-                    + Observations.CONCEPT_UUID + " = ?",
-                new String[] {"1",conceptUuid},
+                    Observations.CONCEPT_UUID + " = ?",
+                new String[] {conceptUuid},
             Observations.ENCOUNTER_MILLIS + " DESC")) {
             Map<String, Obs> result = new HashMap<>();
             while (c.moveToNext()) {

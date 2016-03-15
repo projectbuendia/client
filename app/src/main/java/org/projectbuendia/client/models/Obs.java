@@ -31,6 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 // { final @Nonnull String uuid; String name; final @Nonnull ObsPoint point; } then delete
 // getObsPoint(), getObsValue(), compareTo(), getTypeOrdering(), getCodedValueOrdering().
 public final class Obs implements Comparable<Obs> {
+    /** The UUID of the observation. */
+    public final String uuid;
+
     /** The time at which this observation was taken. */
     public final DateTime time;
 
@@ -47,11 +50,13 @@ public final class Obs implements Comparable<Obs> {
     public final @Nullable String valueName;
 
     public Obs(
+        String uuid,
         long millis,
         String conceptUuid,
         ConceptType conceptType,
         @Nullable String value,
         @Nullable String valueName) {
+        this.uuid = uuid;
         this.time = new DateTime(millis);
         this.conceptUuid = checkNotNull(conceptUuid);
         this.conceptType = conceptType;
@@ -85,7 +90,8 @@ public final class Obs implements Comparable<Obs> {
         return null;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "Obs(time=" + time
             + ", conceptUuid=" + conceptUuid
             + ", conceptType=" + conceptType
@@ -107,6 +113,8 @@ public final class Obs implements Comparable<Obs> {
     }
 
     @Override public int hashCode() {
+        // TODO: check the logic here; I (capnfabs) don't think it's right.
+        // See also http://developer.android.com/reference/java/lang/Object.html#writing_hashCode
         return (int) time.getMillis() + conceptUuid.hashCode()
             + conceptType.hashCode() + (value == null ? 0 : value.hashCode())
             + (valueName == null ? 0 : valueName.hashCode());
@@ -123,11 +131,10 @@ public final class Obs implements Comparable<Obs> {
      * be interpreted as having a typical temporal sequence).
      * - The Boolean value true is ordered after all other values and types.
      * @param other The other Value to compare to.
-     * @return
      */
     @Override public int compareTo(@NonNull Obs other) {
         if (value == null || other.value == null) {
-            return value == other.value ? 0 : value == null ? -1 : 1;
+            return Objects.equals(value, other.value) ? 0 : value == null ? -1 : 1;
         }
         if (conceptType != other.conceptType) {
             return getTypeOrdering().compareTo(other.getTypeOrdering());

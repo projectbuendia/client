@@ -176,7 +176,6 @@ public class Contracts {
         String CONCEPT_UUID = "concept_uuid";
         String ENTERER_UUID = "enterer_uuid";
         String VALUE = "value";  // concept value or order UUID
-        String VOIDED = "voided";
     }
 
     public interface Orders {

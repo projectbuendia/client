@@ -29,8 +29,6 @@ local.properties
 
 # Android Studio files (https://intellij-support.jetbrains.com/entries/23393067)
 .idea/*
-.idea/copyright/Buendia.xml
-.idea/copyright/profiles_settings.xml
 .idea/inspectionProfiles/Buendia.xml
 .idea/inspectionProfiles/profiles_settings.xml
 

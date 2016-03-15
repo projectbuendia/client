@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:orientation="vertical"
-android:layout_width="match_parent"
-android:layout_height="match_parent">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-<ExpandableListView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/lvObs" />
+    <ExpandableListView
+        android:id="@+id/obs_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- This view will be shown if the ExpandableListView is empty. -->
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_title"
+        android:text="@string/observations_list_empty"
+        android:gravity="center_horizontal"
+        android:padding="16dp"
+        android:textColor="@color/gray_600"
+        android:visibility="gone" />
 
 </LinearLayout>

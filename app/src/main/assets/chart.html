@@ -22,7 +22,7 @@
           id="tile-{{id}}"
           class="tile concept-{{id}} {{class}}"
           {% if tile.item.conceptUuids.size == 1 %}
-            onclick="od('{{tile.item.conceptUuids[0] }}','','');"
+            onclick="od('{{tile.item.conceptUuids[0]}}');"
           {% endif %}
           style="{{style}}"
           width="{{100.0 / tileRow.size}}%" >
@@ -45,7 +45,7 @@
           {% if prevColumn is not null and column.start != prevColumn.stop %}
             <th class="gap" scope="col">&nbsp;</th>
           {% endif %}
-          <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
+          <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col">
             {{column.headingHtml | raw}}
           </th>
           {% set prevColumn = column %}
@@ -69,7 +69,7 @@
       {% for row in rows %}
       {% set id = row.item.conceptIds | first %}
       <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
-          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
+          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}');">
             {{row.item.label}}
           </th>
           {% for column in columns %}
@@ -90,7 +90,7 @@
               style="{{style}}"
               onclick="{% if points is not empty%}
                        {% if (row.item.type).string != 'text_icon' %}
-                       od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
+                       od('{{row.item.conceptUuids[0]}}', {{column.start.millis}}, {{column.stop.millis}});
                        {% endif %}
                        {% endif %}">
             {% if points is not empty %}
@@ -198,8 +198,12 @@
     controller.onPageUnload($('#grid-scroller').scrollLeft(), $(window).scrollTop());
   });
 
-  function od(concept_uuid, startmillis, stopmillis){
-    controller.onObsDialog(concept_uuid, startmillis, stopmillis);
+  function od(concept_uuid, startmillis, stopmillis) {
+    if (typeof startmillis === "undefined" && typeof endmillis === "undefined") {
+      controller.onObsDialog(concept_uuid);
+    } else {
+      controller.onObsDialog(concept_uuid, startmillis, stopmillis);
+    }
   }
 
 </script>
