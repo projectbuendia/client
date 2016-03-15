@@ -30,11 +30,6 @@ class RequestConfigurator {
         return request;
     }
 
-    RequestConfigurator(int timeoutMs) {
-        mRetryPolicy =
-            new DefaultRetryPolicy(timeoutMs, 0 /*maxNumRetries*/, 0 /*backoffMultiplier*/);
-    }
-
     RequestConfigurator(int timeoutMs, int maxNumRetries, int backoffMultiplier) {
         mRetryPolicy = new DefaultRetryPolicy(timeoutMs, maxNumRetries, backoffMultiplier);
     }

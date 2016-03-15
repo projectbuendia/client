@@ -40,8 +40,10 @@ public final class SQLiteDatabaseTransactionHelper { // @nolint
      * @see <a>http://www.sqlite.org/lang_savepoint.html</a>.
      */
     public void rollbackNamedTransaction(String savepointName) {
+        // WOWEE. We shouldn't have to prefix this with a semicolon, but see
+        // https://code.google.com/p/android/issues/detail?id=38706
         SQLiteStatement statement =
-            mDbHelper.getWritableDatabase().compileStatement("ROLLBACK TO " + savepointName);
+            mDbHelper.getWritableDatabase().compileStatement(";ROLLBACK TO " + savepointName);
         statement.execute();
         statement.close();
     }

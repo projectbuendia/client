@@ -67,7 +67,7 @@ public class OpenMrsConnectionDetails {
     public static Map<String, String> addAuthHeader(
         String username, String password, Map<String, String> params) {
         String creds = String.format("%s:%s", username, password);
-        String encoded = Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
+        String encoded = Base64.encodeToString(creds.getBytes(), Base64.NO_WRAP);
         params.put("Authorization", "Basic " + encoded);
         return params;
     }

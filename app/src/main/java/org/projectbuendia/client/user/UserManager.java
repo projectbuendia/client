@@ -81,7 +81,6 @@ public class UserManager {
     private boolean mSynced = false;
     private boolean mAutoCancelEnabled = false;
     private boolean mIsDirty = false;
-    @Nullable private AsyncTask mLastTask;
     @Nullable private JsonUser mActiveUser;
 
     /**
@@ -122,8 +121,7 @@ public class UserManager {
      */
     public void loadKnownUsers() {
         if (!mSynced) {
-            mLastTask = new LoadKnownUsersTask();
-            mAsyncTaskRunner.runTask(mLastTask);
+            mAsyncTaskRunner.runTask(new LoadKnownUsersTask());
         } else {
             mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
         }

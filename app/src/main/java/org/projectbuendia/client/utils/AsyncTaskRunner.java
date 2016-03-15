@@ -18,14 +18,15 @@ import android.os.Looper;
 /** Runs async tasks in a unit-testable way. */
 public interface AsyncTaskRunner {
 
-    public static final AsyncTaskRunner DEFAULT = new AsyncTaskRunner() {
+    AsyncTaskRunner DEFAULT = new AsyncTaskRunner() {
+        private Handler mainHandler = new Handler(Looper.getMainLooper());
+
         @Override @SafeVarargs
         public final <ParamsT, ProgressT, ResultT> void runTask(
             final AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
             final ParamsT... params) {
             // Force the AsyncTask to start from the main thread (since using any other thread will
             // result in an exception, anyway).
-            Handler mainHandler = new Handler(Looper.getMainLooper());
             mainHandler.post(new Runnable() {
                 @Override public void run() {
                     asyncTask.execute(params);
@@ -35,7 +36,7 @@ public interface AsyncTaskRunner {
     };
 
     @SuppressWarnings("unchecked")
-    public <ParamsT, ProgressT, ResultT> void runTask(
+    <ParamsT, ProgressT, ResultT> void runTask(
         AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
         ParamsT... params);
 }
