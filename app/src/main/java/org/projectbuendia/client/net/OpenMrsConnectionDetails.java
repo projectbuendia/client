@@ -20,21 +20,21 @@ import java.util.Map;
 /** Provides the URL and credentials for connecting to OpenMRS. */
 public class OpenMrsConnectionDetails {
 
-    private final VolleySingleton mVolley;
+    private final VolleyRequestQueue mVolley;
     private final AppSettings mSettings;
 
     /**
      * Constructs an {@link OpenMrsConnectionDetails} object.
-     * @param volley   the {@link VolleySingleton} for making requests
+     * @param volley   the {@link VolleyRequestQueue} for making requests
      * @param settings the application settings
      */
-    public OpenMrsConnectionDetails(VolleySingleton volley, AppSettings settings) {
+    public OpenMrsConnectionDetails(VolleyRequestQueue volley, AppSettings settings) {
         mVolley = volley;
         mSettings = settings;
     }
 
     /** Gets the Volley instance to use for network connections. */
-    public VolleySingleton getVolley() {
+    public VolleyRequestQueue getVolley() {
         return mVolley;
     }
 

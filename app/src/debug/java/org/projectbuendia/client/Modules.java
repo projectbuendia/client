@@ -11,9 +11,10 @@
 
 package org.projectbuendia.client;
 
+import org.projectbuendia.client.debug.DebugModule;
+
 /**
- * The modules used for injection in a debug build. Currently identical to a normal build, but
- * can be used to add debug-specific modules.
+ * The modules used for injection in a debug build.
  */
 final class Modules {
 
@@ -22,7 +23,8 @@ final class Modules {
 
     static Object[] list(App app) {
         return new Object[] {
-            new AppModule(app)
+            new AppModule(app),
+            new DebugModule()
         };
     }
 }

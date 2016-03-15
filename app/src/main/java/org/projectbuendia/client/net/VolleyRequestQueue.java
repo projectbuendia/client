@@ -17,31 +17,18 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.circle.android.api.OkHttpStack;
-import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.squareup.okhttp.OkHttpClient;
 
-/** Wraps Volley up in a singleton object. */
-public class VolleySingleton {
-    private static VolleySingleton sInstance;
+import org.projectbuendia.client.debug.StethoInitializer;
+
+/** Wraps Volley up into a single request queue. */
+public class VolleyRequestQueue {
 
     private final RequestQueue mRequestQueue;
 
     /**
-     * Get the VolleySingleton instance for doing multiple operations on a single context.
-     * In general prefer convenience methods unless doing multiple operations.
-     * @param context the Android Application context
-     * @return the Singleton for accessing Volley.
-     */
-    public static synchronized VolleySingleton getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new VolleySingleton(context);
-        }
-        return sInstance;
-    }
-
-    /**
-     * A convenience method for adding a request to the Volley request queue getting all singleton
-     * handling and contexts correct.
+     * A convenience method for adding a request to the Volley request queue getting all contexts
+     * correct.
      */
     public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
@@ -51,10 +38,11 @@ public class VolleySingleton {
         return mRequestQueue;
     }
 
-    private VolleySingleton(Context context) {
-        // Let Stetho inspect all our network requests.
+    public VolleyRequestQueue(StethoInitializer stetho, Context context) {
         final OkHttpClient client = new OkHttpClient();
-        client.networkInterceptors().add(new StethoInterceptor());
+
+        // Let Stetho inspect all our network requests.
+        stetho.registerInterceptors(client);
 
         // getApplicationContext() is key, it keeps you from leaking the
         // Activity or BroadcastReceiver if someone passes one in.

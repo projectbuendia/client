@@ -16,11 +16,8 @@ import android.app.Application;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.json.DateTimeSerializer;
-import org.projectbuendia.client.json.LocalDateSerializer;
+import org.projectbuendia.client.debug.StethoInitializer;
 import org.projectbuendia.client.json.Serializers;
 
 import javax.inject.Singleton;
@@ -34,13 +31,14 @@ import dagger.Provides;
 public class NetModule {
 
     @Provides
-    @Singleton VolleySingleton provideVolleySingleton(Application app) {
-        return VolleySingleton.getInstance(app);
+    @Singleton
+    VolleyRequestQueue provideVolleySingleton(StethoInitializer stetho, Application app) {
+        return new VolleyRequestQueue(stetho, app);
     }
 
     @Provides
     @Singleton OpenMrsConnectionDetails provideOpenMrsConnectionDetails(
-        VolleySingleton volley, AppSettings settings) {
+        VolleyRequestQueue volley, AppSettings settings) {
         return new OpenMrsConnectionDetails(volley, settings);
     }
 

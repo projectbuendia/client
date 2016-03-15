@@ -14,7 +14,6 @@ package org.projectbuendia.client.updater;
 import android.app.Application;
 
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.net.VolleySingleton;
 import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 
 import javax.inject.Singleton;
@@ -30,12 +29,6 @@ import dagger.Provides;
     complete = false,
     library = true)
 public class UpdateModule {
-
-    @Provides
-    @Singleton
-    PackageServer providePackageServer(Application application, AppSettings settings) {
-        return new PackageServer(VolleySingleton.getInstance(application), settings);
-    }
 
     @Provides
     @Singleton UpdateManager provideUpdateManager(

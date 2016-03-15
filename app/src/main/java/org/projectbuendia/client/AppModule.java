@@ -15,6 +15,7 @@ import android.app.Application;
 import android.content.ContentResolver;
 import android.preference.PreferenceManager;
 
+import org.projectbuendia.client.debug.StethoInitializer;
 import org.projectbuendia.client.diagnostics.DiagnosticsModule;
 import org.projectbuendia.client.events.EventsModule;
 import org.projectbuendia.client.models.AppModelModule;
@@ -113,5 +114,11 @@ public final class AppModule {
     @Provides
     @Singleton ChartDataHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
         return new ChartDataHelper(contentResolver);
+    }
+
+    @Provides
+    @Singleton
+    StethoInitializer provideStethoInitializer() {
+        return new StethoInitializer.NoOp();
     }
 }
