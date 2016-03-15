@@ -13,6 +13,7 @@ public class Row {
 
     static Map<String, ChartItem> DEFAULTS = new HashMap<>();
     static {
+        DEFAULTS.put("row_section", new ChartItem("", "", true, null, "", "", "", "", ""));
         DEFAULTS.put("select_one", new ChartItem("", "", false, null, "{1,abbr}", "{1,name}", "", "", ""));
         DEFAULTS.put("yes_no", new ChartItem("", "", false, null, "{1,yes_no,\u25cf;\u25cb}", "{1,yes_no,Yes;No}", "", "{1,yes_no,color:black;color:DarkGray}", ""));
         DEFAULTS.put("yes_no_unknown", new ChartItem("", "", false, null, "{1,yes_no_unknown,\u25cf;\u25cb;?}", "{1,yes_no,Yes;No;Unknown}", "", "{1,yes_no,color:black;color:DarkGray}", ""));

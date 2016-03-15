@@ -54,57 +54,60 @@
     </thead>
 
     <tbody>
-      <tr>
-        <th scope="rowgroup">
-          {{ string_resource("observations") }}
-        </th>
-        {% for column in columns %}
-          {% if prevColumn is not null and column.start != prevColumn.stop %}
-            <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
-          {% endif %}
-          <th scope="rowgroup"></th>
-          {% set prevColumn = column %}
-        {% endfor %}
-      </tr>
       {% for row in rows %}
       {% set id = row.item.conceptIds | first %}
       <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
-          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
-            {{row.item.label}}
-          </th>
+          {% if row.item.type == 'row_section' %}
+            <th scope="rowgroup">
+              {{row.item.label}}
+            </th>
+          {% else %}
+            <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
+              {{row.item.label}}
+            </th>
+          {% endif %}
+          {% set prevColumn = null %}
           {% for column in columns %}
-            {% set points = get_all_points(row=row, column=column) %}
-            {% if points is empty %}
-              {% set summaryValue = null %}
-            {% elseif row.item.type == 'yes_no' %}
-              {% set summaryValue = points | values | max %}
+            {% if prevColumn is not null and column.start != prevColumn.stop %}
+            <th class="gap" scope="col">&nbsp;</th>
+            {% endif %}
+            {% if row.item.type == 'row_section' %}
+              <th scope="rowgroup"></th>
             {% else %}
-              {% set summaryValue = (points | last).value %}
-            {% endif %}
-            {% set class = summaryValue | format_values(row.item.cssClass) %}
-            {% set style = summaryValue | format_values(row.item.cssStyle) %}
-            <td id="cell-{{id}}-{{column.start.millis}}"
-              data-start="{{column.start.millis}}"
-              data-stop="{{column.stop.millis}}"
-              class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
-              style="{{style}}"
-              onclick="{% if points is not empty%}
-                       {% if (row.item.type).string != 'text_icon' %}
-                       od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
-                       {% endif %}
-                       {% endif %}">
-            {% if points is not empty %}
-              {% if row.item.type == 'text_icon' %}
-                <div>&#x1f4dd;</div>
+              {% set points = get_all_points(row=row, column=column) %}
+              {% if points is empty %}
+                {% set summaryValue = null %}
+              {% elseif row.item.type == 'yes_no' %}
+                {% set summaryValue = points | values | max %}
               {% else %}
-                {% set output = summaryValue | format_value(row.item.format) %}
-                {% if output is empty %}
-                  {% set output = summaryValue | format_value(row.item.captionFormat) %}
-                {% endif %}
-              {{output}}
+                {% set summaryValue = (points | last).value %}
               {% endif %}
+              {% set class = summaryValue | format_values(row.item.cssClass) %}
+              {% set style = summaryValue | format_values(row.item.cssStyle) %}
+              <td id="cell-{{id}}-{{column.start.millis}}"
+                data-start="{{column.start.millis}}"
+                data-stop="{{column.stop.millis}}"
+                class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
+                style="{{style}}"
+                onclick="{% if points is not empty%}
+                         {% if (row.item.type).string != 'text_icon' %}
+                         od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
+                         {% endif %}
+                         {% endif %}">
+              {% if points is not empty %}
+                {% if row.item.type == 'text_icon' %}
+                  <div>&#x1f4dd;</div>
+                {% else %}
+                  {% set output = summaryValue | format_value(row.item.format) %}
+                  {% if output is empty %}
+                    {% set output = summaryValue | format_value(row.item.captionFormat) %}
+                  {% endif %}
+                {{output}}
+                {% endif %}
+              {% endif %}
+            </td>
             {% endif %}
-          </td>
+          {% set prevColumn = column %}
           {% endfor %}
           <script>
             // Hides the row if not required and no observation is recorded.
