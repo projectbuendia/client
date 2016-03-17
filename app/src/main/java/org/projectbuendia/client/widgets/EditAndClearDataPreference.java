@@ -17,6 +17,8 @@ import android.util.AttributeSet;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.diagnostics.HealthCheck;
+import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.sync.Database;
 
 /** Custom Android preference widget that clears the database if new text is entered. */
@@ -30,6 +32,7 @@ public class EditAndClearDataPreference extends EditTextPreference {
         super.onDialogClosed(positive);
         if (positive) {
             new Database(App.getInstance().getApplicationContext()).clear();
+            App.getInstance().getHealthMonitor().clear();
             App.getUserManager().reset();
         }
     }

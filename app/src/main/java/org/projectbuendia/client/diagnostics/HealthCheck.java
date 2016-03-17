@@ -75,7 +75,7 @@ public abstract class HealthCheck {
     protected abstract void stopImpl();
 
     /** Clears all the issues for this health check. */
-    public final void clear() {
+    public void clear() {
         mActiveIssues.clear();
     }
 

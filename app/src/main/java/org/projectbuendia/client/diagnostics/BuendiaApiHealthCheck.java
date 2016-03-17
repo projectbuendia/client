@@ -71,6 +71,8 @@ public class BuendiaApiHealthCheck extends HealthCheck {
     private Handler mHandler;
     private BuendiaModuleHealthCheckRunnable mRunnable;
 
+    private boolean httpUnauthorized;
+
     BuendiaApiHealthCheck(
         Application application,
         OpenMrsConnectionDetails connectionDetails) {
@@ -118,6 +120,20 @@ public class BuendiaApiHealthCheck extends HealthCheck {
             ? CHECK_PERIOD_MS : FAST_CHECK_PERIOD_MS;
     }
 
+    @Override
+    public boolean isApiUnavailable() {
+        // Prevents continued http request attempts after a 401 http error.
+        return httpUnauthorized;
+    }
+
+    /** Clears all the issues for this health check. */
+    @Override
+    public void clear() {
+        // Back to original state.
+        httpUnauthorized = false;
+    }
+
+
     private class BuendiaModuleHealthCheckRunnable implements Runnable {
         public final AtomicBoolean isRunning;
 
@@ -142,32 +158,38 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                 }
 
                 try {
-                    httpGet.addHeader(BasicScheme.authenticate(
-                        new UsernamePasswordCredentials(
-                            mConnectionDetails.getUser(),
-                            mConnectionDetails.getPassword()),
-                        "UTF-8", false));
-                    HttpResponse httpResponse = httpClient.execute(httpGet);
-                    if (httpResponse.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-                        LOG.w("The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
-                            uri, httpResponse.getStatusLine().getStatusCode());
-                        switch (httpResponse.getStatusLine().getStatusCode()) {
-                            case HttpURLConnection.HTTP_INTERNAL_ERROR:
-                                reportIssue(HealthIssue.SERVER_INTERNAL_ISSUE);
-                                break;
-                            case HttpURLConnection.HTTP_FORBIDDEN:
-                            case HttpURLConnection.HTTP_UNAUTHORIZED:
-                                reportIssue(HealthIssue.SERVER_AUTHENTICATION_ISSUE);
-                                break;
-                            case HttpURLConnection.HTTP_NOT_FOUND:
-                            default:
-                                reportIssue(HealthIssue.SERVER_NOT_RESPONDING);
-                                break;
-                        }
-                        if (hasIssue(HealthIssue.SERVER_HOST_UNREACHABLE)){
-                            resolveIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
-                        }
+                    if (httpUnauthorized) {
+                        reportIssue(HealthIssue.SERVER_AUTHENTICATION_ISSUE);
                         return;
+                    } else {
+                        httpGet.addHeader(BasicScheme.authenticate(
+                            new UsernamePasswordCredentials(
+                                mConnectionDetails.getUser(),
+                                mConnectionDetails.getPassword()),
+                            "UTF-8", false));
+                        HttpResponse httpResponse = httpClient.execute(httpGet);
+                        if (httpResponse.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
+                            LOG.w("The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
+                                uri, httpResponse.getStatusLine().getStatusCode());
+                            switch (httpResponse.getStatusLine().getStatusCode()) {
+                                case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                                    reportIssue(HealthIssue.SERVER_INTERNAL_ISSUE);
+                                    break;
+                                case HttpURLConnection.HTTP_FORBIDDEN:
+                                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                                    httpUnauthorized = true;
+                                    reportIssue(HealthIssue.SERVER_AUTHENTICATION_ISSUE);
+                                    break;
+                                case HttpURLConnection.HTTP_NOT_FOUND:
+                                default:
+                                    reportIssue(HealthIssue.SERVER_NOT_RESPONDING);
+                                    break;
+                            }
+                            if (hasIssue(HealthIssue.SERVER_HOST_UNREACHABLE)){
+                                resolveIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
+                            }
+                            return;
+                        }
                     }
                 } catch (UnknownHostException | IllegalArgumentException e) {
                     LOG.w("OpenMRS server unreachable: %s", uri);
