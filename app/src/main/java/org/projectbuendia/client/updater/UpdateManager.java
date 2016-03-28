@@ -74,6 +74,7 @@ public class UpdateManager {
     private final LexicographicVersion mCurrentVersion;
     private final DownloadManager mDownloadManager;
     private final AppSettings mSettings;
+    private final EventBus mEventBus;
 
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
@@ -125,7 +126,7 @@ public class UpdateManager {
      * {@link UpdateAvailableEvent}, and {@link UpdateNotAvailableEvent} for details.
      */
     protected void postEvents() {
-        EventBus bus = EventBus.getDefault();
+        EventBus bus = mEventBus;
         if (mLastDownloadedUpdateInfo.shouldInstall()
             && mLastDownloadedUpdateInfo.downloadedVersion.greaterThanOrEqualTo(
             mLastAvailableUpdateInfo.availableVersion)) {
@@ -214,8 +215,9 @@ public class UpdateManager {
         mApplication.startActivity(installIntent);
     }
 
-    UpdateManager(Application application, PackageServer packageServer, AppSettings settings) {
+    UpdateManager(Application application, EventBus eventBus, PackageServer packageServer, AppSettings settings) {
         mApplication = application;
+        mEventBus = eventBus;
         mServer = packageServer;
         mSettings = settings;
         mPackageManager = application.getPackageManager();
@@ -309,7 +311,7 @@ public class UpdateManager {
                 LOG.w(error, message);
             }
             // assume no update is available
-            EventBus.getDefault().post(new UpdateNotAvailableEvent());
+            mEventBus.post(new UpdateNotAvailableEvent());
         }
     }
 

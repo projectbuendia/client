@@ -91,7 +91,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             mAppModel,
             mCrudEventBusProvider.get(),
             new Ui(),
-            new EventBusWrapper(EventBus.getDefault()),
+            new EventBusWrapper(mEventBus),
             mSyncManager,
             getSearchController());
 

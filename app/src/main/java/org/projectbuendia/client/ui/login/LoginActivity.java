@@ -40,6 +40,7 @@ public class LoginActivity extends BaseActivity {
     private LoginController mController;
     private AlertDialog mSyncFailedDialog;
     @Inject Troubleshooter mTroubleshooter;
+    @Inject EventBus mEventBus;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +54,7 @@ public class LoginActivity extends BaseActivity {
             getSupportFragmentManager().findFragmentById(R.id.fragment_user_login);
         mController = new LoginController(
             App.getUserManager(),
-            new EventBusWrapper(EventBus.getDefault()),
+            new EventBusWrapper(mEventBus),
             mTroubleshooter,
             new Ui(),
             fragment.getFragmentUi());

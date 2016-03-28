@@ -26,6 +26,7 @@ import org.projectbuendia.client.user.UserManager;
 import javax.inject.Inject;
 
 import dagger.ObjectGraph;
+import de.greenrobot.event.EventBus;
 
 /** An {@link Application} the represents the Android Client. */
 public class App extends Application {
@@ -61,6 +62,10 @@ public class App extends Application {
     @Override public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
+        // Set up the default event bus.
+        // Turn on throwing exceptions if callbacks fail for Debug builds.
+        EventBus.builder().throwSubscriberException(BuildConfig.DEBUG).installDefaultEventBus();
 
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);

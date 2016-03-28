@@ -33,9 +33,16 @@ public class Qualifiers {
     @Qualifier
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface CrudEventBusBuilder {
+    public @interface CrudEventBus {
+    }
+
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface BaseEventBusBuilder {
     }
 
     private Qualifiers() {
     }
+
 }

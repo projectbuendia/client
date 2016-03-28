@@ -16,6 +16,7 @@ import android.app.Application;
 import com.google.common.collect.ImmutableSet;
 
 import org.projectbuendia.client.AppSettings;
+import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.inject.Qualifiers;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 
@@ -24,6 +25,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import de.greenrobot.event.EventBus;
+import de.greenrobot.event.EventBusBuilder;
 
 /** A Dagger module that provides bindings for diagnostics-related classes. */
 @Module(complete = false, library = true)
@@ -31,8 +33,9 @@ public class DiagnosticsModule {
 
     @Provides
     @Singleton
-    @Qualifiers.HealthEventBus EventBus provideHealthEventBus() {
-        return EventBus.builder().build();
+    @Qualifiers.HealthEventBus EventBus provideHealthEventBus(
+            @Qualifiers.BaseEventBusBuilder EventBusBuilder eventBusBuilder) {
+        return eventBusBuilder.build();
     }
 
     @Provides

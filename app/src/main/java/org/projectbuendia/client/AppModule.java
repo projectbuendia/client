@@ -22,6 +22,7 @@ import org.projectbuendia.client.models.AppModelModule;
 import org.projectbuendia.client.net.NetModule;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncAccountService;
+import org.projectbuendia.client.sync.SyncAdapterService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
@@ -40,12 +41,14 @@ import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.login.LoginFragment;
 import org.projectbuendia.client.updater.UpdateModule;
 import org.projectbuendia.client.user.UserModule;
+import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.UtilsModule;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import de.greenrobot.event.EventBus;
 
 /** A Dagger module that provides the top-level bindings for the app. */
 @Module(
@@ -77,7 +80,8 @@ import dagger.Provides;
         UpdateNotificationController.class,
         LoginActivity.class,
         LoginFragment.class,
-        SettingsActivity.class
+        SettingsActivity.class,
+        SyncAdapterService.class,
     },
     staticInjections = {
         SyncAccountService.class
@@ -107,8 +111,8 @@ public final class AppModule {
     }
 
     @Provides
-    @Singleton SyncManager provideSyncManager(AppSettings settings) {
-        return new SyncManager(settings);
+    @Singleton SyncManager provideSyncManager(EventBus eventBus, AppSettings settings) {
+        return new SyncManager(new EventBusWrapper(eventBus));
     }
 
     @Provides

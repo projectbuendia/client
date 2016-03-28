@@ -260,9 +260,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
             @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(
-                    PatientChartActivity.this, mSettings,
-                    patientUuid, resultCode, data);
+                OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, mEventBus,
+                        mSettings, patientUuid, resultCode, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {
@@ -666,7 +665,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                PatientChartActivity.this, formUuid, requestCode, patient, preset);
+                PatientChartActivity.this, mEventBus, formUuid, requestCode, patient, preset);
         }
 
         @Override public void reEnableFetch() {

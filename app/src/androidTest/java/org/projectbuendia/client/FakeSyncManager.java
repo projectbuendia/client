@@ -12,6 +12,7 @@
 package org.projectbuendia.client;
 
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.utils.EventBusInterface;
 
 /**
  * A {@link SyncManager} that does not attempt to sync any content but can be made to appear is if
@@ -21,8 +22,8 @@ public class FakeSyncManager extends SyncManager {
     private boolean mSyncing;
 
     // TODO/cleanup: Create a common interface between SyncManager and this class.
-    public FakeSyncManager() {
-        super(null);
+    public FakeSyncManager(EventBusInterface eventBus) {
+        super(eventBus);
     }
 
     /** Sets whether or not syncing should appear to be occurring. */

@@ -51,6 +51,7 @@ public class PatientListFragment extends ProgressFragment implements
     private FragmentUi mFragmentUi;
     private ListUi mListUi;
     @Inject SyncManager mSyncManager;
+    @Inject EventBus mEventBus;
 
     /** The current activated item position. Only used on tablets. */
     private int mActivatedPosition = ListView.INVALID_POSITION;
@@ -72,7 +73,7 @@ public class PatientListFragment extends ProgressFragment implements
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
         mListController = new PatientListController(
-            mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
+            mListUi, mSyncManager, new EventBusWrapper(mEventBus));
         setContentView(R.layout.fragment_patient_list);
     }
 

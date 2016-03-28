@@ -15,14 +15,24 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import org.projectbuendia.client.App;
+
+import javax.inject.Inject;
+
+import de.greenrobot.event.EventBus;
+
 /** A service that holds a singleton SyncAdapter and provides it to the OS on request. */
 public class SyncAdapterService extends Service {
 
     private SyncAdapter mSyncAdapter = null;
 
+    @Inject
+    EventBus mEventBus;
+
     @Override public void onCreate() {
         super.onCreate();
-        mSyncAdapter = new SyncAdapter(getApplicationContext(), true);
+        App.getInstance().inject(this);
+        mSyncAdapter = new SyncAdapter(getApplicationContext(), mEventBus, true);
     }
 
     @Override public IBinder onBind(Intent intent) {

@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
@@ -37,6 +39,8 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.Date;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -51,6 +55,10 @@ public class OrderDialogFragment extends DialogFragment {
             R.string.order_duration_stop_after_today,
             R.string.order_duration_stop_after_tomorrow
     };
+
+    // TODO: Use a better result notification mechanism than EventBus for this.
+    @Inject
+    EventBus mEventBus;
 
     @InjectView(R.id.order_medication) EditText mMedication;
     @InjectView(R.id.order_dosage) EditText mDosage;
@@ -91,6 +99,7 @@ public class OrderDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInflater = LayoutInflater.from(getActivity());
+        App.getInstance().inject(this);
     }
 
     @Override public void onResume() {
@@ -170,8 +179,8 @@ public class OrderDialogFragment extends DialogFragment {
         dialog.dismiss();
 
         // Post an event that triggers the PatientChartController to save the order.
-        EventBus.getDefault().post(new OrderSaveRequestedEvent(
-            uuid, patientUuid, instructions, mStartDate, durationDays));
+        mEventBus.post(new OrderSaveRequestedEvent(
+                uuid, patientUuid, instructions, mStartDate, durationDays));
     }
 
     public void onDelete(Dialog dialog, final String orderUuid) {
@@ -182,7 +191,7 @@ public class OrderDialogFragment extends DialogFragment {
             .setTitle(R.string.title_confirmation)
             .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialog, int i) {
-                    EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid));
+                    mEventBus.post(new OrderDeleteRequestedEvent(orderUuid));
                 }
             })
             .setNegativeButton(R.string.cancel, null)
@@ -196,6 +205,7 @@ public class OrderDialogFragment extends DialogFragment {
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+        @SuppressLint("InflateParams") // It's a dialog, there's no root view.
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
