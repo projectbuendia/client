@@ -15,14 +15,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.FragmentActivity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -52,56 +50,14 @@ import de.greenrobot.event.EventBus;
  */
 public abstract class BaseActivity extends FragmentActivity {
     private static final Logger LOG = Logger.create();
-    private static final double PHI = (Math.sqrt(5) + 1)/2; // golden ratio
-    private static final double STEP_FACTOR = Math.sqrt(PHI); // each step up/down scales this much
-    private static final long MIN_STEP = -2;
-    private static final long MAX_STEP = 2;
 
     @Inject
     @VisibleForTesting
     EventBus mEventBus;
 
-    // TODO: Store sScaleStep in an app preference.
-    private static long sScaleStep = 0; // app-wide scale step, selected by user
-    private Long pausedScaleStep = null; // this activity's scale step when last paused
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
     private SnackBar snackBar;
-
-    @Override public boolean dispatchKeyEvent(KeyEvent event) {
-        int action = event.getAction();
-        int keyCode = event.getKeyCode();
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                if (action == KeyEvent.ACTION_DOWN) {
-                    adjustFontScale(1);
-                }
-                return true;
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                if (action == KeyEvent.ACTION_DOWN) {
-                    adjustFontScale(-1);
-                }
-                return true;
-            default:
-                return super.dispatchKeyEvent(event);
-        }
-    }
-
-    public void adjustFontScale(int delta) {
-        long newScaleStep = Math.max(MIN_STEP, Math.min(MAX_STEP, sScaleStep + delta));
-        if (newScaleStep != sScaleStep) {
-            restartWithFontScale(newScaleStep);
-        }
-    }
-
-    public void restartWithFontScale(long newScaleStep) {
-        Configuration config = getResources().getConfiguration();
-        config.fontScale = (float) Math.pow(STEP_FACTOR, newScaleStep);
-        sScaleStep = newScaleStep;
-        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        finish();
-        startActivity(getIntent());
-    }
 
     @Override public void setContentView(int layoutResId) {
         initializeWrapperView();
@@ -447,10 +403,6 @@ public abstract class BaseActivity extends FragmentActivity {
     @Override protected void onResume() {
         super.onResume();
         initializeSnackBar();
-        if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
-            // If the font scale was changed while this activity was paused, force a refresh.
-            restartWithFontScale(sScaleStep);
-        }
         mEventBus.registerSticky(this);
         App.getInstance().getHealthMonitor().start();
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
@@ -459,7 +411,6 @@ public abstract class BaseActivity extends FragmentActivity {
     @Override protected void onPause() {
         mEventBus.unregister(this);
         App.getInstance().getHealthMonitor().stop();
-        pausedScaleStep = sScaleStep;
 
         super.onPause();
     }
