@@ -36,6 +36,8 @@ import java.net.UnknownHostException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.concurrent.GuardedBy;
+
 /**
  * A {@link HealthCheck} that checks whether the Buendia API server is up and responding to HTTP
  * requests at the URL in the "OpenMRS root URL" preference setting.
@@ -67,9 +69,10 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
     private final OpenMrsConnectionDetails mConnectionDetails;
 
+    @GuardedBy("mLock")
     private HandlerThread mHandlerThread;
+    @GuardedBy("mLock")
     private Handler mHandler;
-    private BuendiaModuleHealthCheckRunnable mRunnable;
 
     BuendiaApiHealthCheck(
         Application application,
@@ -81,35 +84,29 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
     @Override protected void startImpl() {
         synchronized (mLock) {
-            if (mHandlerThread == null) {
-                mHandlerThread = new HandlerThread("Buendia API Health Check");
-                mHandlerThread.start();
-                mHandler = new Handler(mHandlerThread.getLooper());
+            if (mHandlerThread != null) {
+                // Already running.
+                return;
             }
-
-            if (mRunnable == null) {
-                mRunnable = new BuendiaModuleHealthCheckRunnable(mHandler);
-            }
-
-            if (!mRunnable.isRunning.getAndSet(true)) {
-                mHandler.post(mRunnable);
-            }
+            mHandlerThread = new HandlerThread("Buendia API Health Check");
+            mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper());
+            mHandler.post(mRunnable);
         }
     }
 
     @Override protected void stopImpl() {
         synchronized (mLock) {
-            if (mRunnable != null) {
-                mRunnable.isRunning.set(false);
-                mRunnable = null;
+            if (mHandlerThread == null) {
+                // Already stopped.
+                return;
             }
 
-            if (mHandlerThread != null) {
-                mHandlerThread.quit();
-                mHandlerThread = null;
-            }
+            mHandler.removeCallbacks(mRunnable);
+            mHandlerThread.quit();
 
             mHandler = null;
+            mHandlerThread = null;
         }
     }
 
@@ -118,19 +115,9 @@ public class BuendiaApiHealthCheck extends HealthCheck {
             ? CHECK_PERIOD_MS : FAST_CHECK_PERIOD_MS;
     }
 
-    private class BuendiaModuleHealthCheckRunnable implements Runnable {
-        public final AtomicBoolean isRunning;
-
-        private final Handler mHandler;
-
-        public BuendiaModuleHealthCheckRunnable(Handler handler) {
-            isRunning = new AtomicBoolean(false);
-            mHandler = handler;
-        }
-
-        @Override public void run() {
-            if (!isRunning.get()) return;
-
+    private final Runnable mRunnable = new Runnable() {
+        @Override
+        public void run() {
             try {
                 Uri uri = Uri.parse(mConnectionDetails.getBuendiaApiUrl() + HEALTH_CHECK_ENDPOINT);
                 HttpClient httpClient = new DefaultHttpClient();
@@ -182,8 +169,13 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
                 resolveAllIssues();
             } finally {
-                mHandler.postDelayed(this, getCheckPeriodMillis());
+                synchronized (mLock) {
+                    // Only post again if we're still supposed to be running.
+                    if (mHandler != null) {
+                        mHandler.postDelayed(this, getCheckPeriodMillis());
+                    }
+                }
             }
         }
-    }
+    };
 }
