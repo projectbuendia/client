@@ -29,6 +29,7 @@ import com.google.common.base.Joiner;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.models.Order;
@@ -37,12 +38,19 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
 /** A {@link DialogFragment} for recording that an order was executed. */
 public class OrderExecutionDialogFragment extends DialogFragment {
+
+    // TODO: Use a better result notification mechanism than EventBus for this.
+    @Inject
+    EventBus mEventBus;
+
     @InjectView(R.id.order_instructions) TextView mOrderInstructions;
     @InjectView(R.id.order_start_time) TextView mOrderStartTime;
     @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
@@ -79,6 +87,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInflater = LayoutInflater.from(getActivity());
+        App.getInstance().inject(this);
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -168,8 +177,8 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 "encounterTime", "" + encounterTime);
 
             // Post an event that triggers the PatientChartController to record the order execution.
-            EventBus.getDefault().post(new OrderExecutionSaveRequestedEvent(
-                orderUuid, interval, encounterTime));
+            mEventBus.post(new OrderExecutionSaveRequestedEvent(
+                    orderUuid, interval, encounterTime));
         }
     }
 }

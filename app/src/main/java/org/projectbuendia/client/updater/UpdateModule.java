@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import de.greenrobot.event.EventBus;
 
 /** A Dagger module that provides bindings for update-related classes. */
 @Module(
@@ -32,7 +33,7 @@ public class UpdateModule {
 
     @Provides
     @Singleton UpdateManager provideUpdateManager(
-        Application application, PackageServer server, AppSettings settings) {
-        return new UpdateManager(application, server, settings);
+        Application application, EventBus eventBus, PackageServer server, AppSettings settings) {
+        return new UpdateManager(application, eventBus, server, settings);
     }
 }

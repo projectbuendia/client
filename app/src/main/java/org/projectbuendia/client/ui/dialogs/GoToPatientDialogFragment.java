@@ -51,6 +51,7 @@ import de.greenrobot.event.EventBus;
 public class GoToPatientDialogFragment extends DialogFragment {
     @Inject AppModel mAppModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject EventBus mEventBus;
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
     @InjectView(R.id.go_to_patient_result) TextView mPatientSearchResult;
     private LayoutInflater mInflater;
@@ -96,7 +97,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
             "patient_id", mPatientId.getText().toString(),
             "patient_uuid", mPatientUuid);
         if (mPatientUuid != null) {
-            EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
+            mEventBus.post(new PatientChartRequestedEvent(mPatientUuid));
             getDialog().dismiss();
         }
     }

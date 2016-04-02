@@ -40,8 +40,6 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import de.greenrobot.event.EventBus;
-
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.RootMatchers.isDialog;
 import static org.hamcrest.Matchers.is;
@@ -74,7 +72,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         IdlingPolicies.setIdlingResourceTimeout(300, TimeUnit.SECONDS);
         IdlingPolicies.setMasterPolicyTimeout(300, TimeUnit.SECONDS);
 
-        mEventBus = new EventBusWrapper(EventBus.getDefault());
+        mEventBus = new EventBusWrapper(((BaseActivity) this.getActivity()).mEventBus);
 
         // Wait for users to sync.
         if (mWaitForUserSync) {

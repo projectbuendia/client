@@ -35,13 +35,12 @@ import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.utils.EventBusInterface;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import de.greenrobot.event.EventBus;
 
 import static org.projectbuendia.client.filter.matchers.MatchingFilterGroup.FilterType.OR;
 
@@ -52,7 +51,7 @@ public class PatientSearchController {
     private static final boolean DEBUG = true;
     private final Ui mUi;
     private final CrudEventBus mCrudEventBus;
-    private final EventBusRegistrationInterface mGlobalEventBus;
+    private final EventBusInterface mGlobalEventBus;
     private final AppModel mModel;
     private final SyncManager mSyncManager;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
@@ -98,7 +97,7 @@ public class PatientSearchController {
     public PatientSearchController(
         Ui ui,
         CrudEventBus crudEventBus,
-        EventBusRegistrationInterface globalEventBus,
+        EventBusInterface globalEventBus,
         AppModel model,
         SyncManager syncManager,
         String locale) {
@@ -185,7 +184,7 @@ public class PatientSearchController {
      * @param patient the selected {@link Patient}
      */
     public void onPatientSelected(Patient patient) {
-        EventBus.getDefault().post(new PatientChartRequestedEvent(patient.uuid));
+        mGlobalEventBus.post(new PatientChartRequestedEvent(patient.uuid));
     }
 
     /**

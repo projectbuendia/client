@@ -20,6 +20,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -40,6 +41,8 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -53,6 +56,10 @@ public abstract class BaseActivity extends FragmentActivity {
     private static final double STEP_FACTOR = Math.sqrt(PHI); // each step up/down scales this much
     private static final long MIN_STEP = -2;
     private static final long MAX_STEP = 2;
+
+    @Inject
+    @VisibleForTesting
+    EventBus mEventBus;
 
     // TODO: Store sScaleStep in an app preference.
     private static long sScaleStep = 0; // app-wide scale step, selected by user
@@ -444,13 +451,13 @@ public abstract class BaseActivity extends FragmentActivity {
             // If the font scale was changed while this activity was paused, force a refresh.
             restartWithFontScale(sScaleStep);
         }
-        EventBus.getDefault().registerSticky(this);
+        mEventBus.registerSticky(this);
         App.getInstance().getHealthMonitor().start();
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
     }
 
     @Override protected void onPause() {
-        EventBus.getDefault().unregister(this);
+        mEventBus.unregister(this);
         App.getInstance().getHealthMonitor().stop();
         pausedScaleStep = sScaleStep;
 
@@ -468,7 +475,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override public void onClick(View view) {
                         Utils.logEvent("download_update_button_pressed");
                         //TODO: programatically dismiss the snackbar message
-                        EventBus.getDefault().post(new DownloadRequestedEvent());
+                        mEventBus.post(new DownloadRequestedEvent());
                     }
                 });
         }
@@ -480,7 +487,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override public void onClick(View view) {
                         Utils.logEvent("install_update_button_pressed");
                         //TODO: programatically dismiss the snackbar message
-                        EventBus.getDefault().post(new InstallationRequestedEvent());
+                        mEventBus.post(new InstallationRequestedEvent());
                     }
                 });
         }

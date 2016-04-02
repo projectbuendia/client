@@ -86,23 +86,25 @@ public class OdkActivityLauncher {
 
     private static final Logger LOG = Logger.create();
 
+    private OdkActivityLauncher() {}
+
     /**
      * Fetches all xforms from the server and caches them. If any error occurs during fetching,
      * a failed event is triggered.
      */
-    public static void fetchAndCacheAllXforms() {
+    public static void fetchAndCacheAllXforms(final EventBus eventBus) {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         for (OpenMrsXformIndexEntry formEntry : response) {
-                            fetchAndCacheXForm(formEntry);
+                            fetchAndCacheXForm(eventBus, formEntry);
                         }
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        handleFetchError(error);
+                        handleFetchError(null, error);
                     }
                 });
     }
@@ -112,8 +114,8 @@ public class OdkActivityLauncher {
      *
      * @param formEntry the {@link OpenMrsXformIndexEntry} object containing the uuid form
      */
-    public static void fetchAndCacheXForm(OpenMrsXformIndexEntry formEntry) {
-        new OdkXformSyncTask(null).fetchAndAddXFormToDb(formEntry.uuid,
+    public static void fetchAndCacheXForm(EventBus eventBus, OpenMrsXformIndexEntry formEntry) {
+        new OdkXformSyncTask(eventBus, null).fetchAndAddXFormToDb(formEntry.uuid,
                 formEntry.makeFileForForm());
     }
 
@@ -132,12 +134,13 @@ public class OdkActivityLauncher {
      */
     public static void fetchAndShowXform(
         final Activity callingActivity,
+        final EventBus eventBus,
         final String uuidToShow,
         final int requestCode,
         @Nullable final org.odk.collect.android.model.Patient patient,
         @Nullable final Preset fields) {
         LOG.i("Trying to fetch it from cache.");
-        if (loadXformFromCache(callingActivity, uuidToShow, requestCode, patient, fields)) {
+        if (loadXformFromCache(callingActivity, eventBus, uuidToShow, requestCode, patient, fields)) {
             return;
         }
 
@@ -147,18 +150,18 @@ public class OdkActivityLauncher {
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         if (response.isEmpty()) {
                             LOG.i("No forms found");
-                            EventBus.getDefault().post(new FetchXformFailedEvent(
+                            eventBus.post(new FetchXformFailedEvent(
                                     FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
                             return;
                         }
-                        showForm(callingActivity, requestCode, patient, fields, findUuid(response,
+                        showForm(callingActivity, eventBus, requestCode, patient, fields, findUuid(response,
                                 uuidToShow));
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         LOG.e(error, "Fetching xform list from server failed. ");
-                        handleFetchError(error);
+                        handleFetchError(eventBus, error);
                     }
                 });
     }
@@ -208,6 +211,7 @@ public class OdkActivityLauncher {
      *                        pre-populated
      */
     private static boolean loadXformFromCache(final Activity callingActivity,
+                                              final EventBus eventBus,
                                               final String uuidToShow,
                                               final int requestCode,
                                               @Nullable final org.odk.collect.android.model.Patient patient,
@@ -217,7 +221,7 @@ public class OdkActivityLauncher {
         if (!formToShow.makeFileForForm().exists()) return false;
 
         LOG.i(format("Using form %s from local cache.", uuidToShow));
-        showForm(callingActivity, requestCode, patient, fields, formToShow);
+        showForm(callingActivity, eventBus, requestCode, patient, fields, formToShow);
 
         return true;
     }
@@ -256,11 +260,14 @@ public class OdkActivityLauncher {
      *                       should be opened
      */
     private static void showForm(final Activity callingActivity,
+                                 final EventBus eventBus,
                                  final int requestCode,
                                  @Nullable final org.odk.collect.android.model.Patient patient,
                                  @Nullable final Preset fields,
                                  final OpenMrsXformIndexEntry formToShow) {
-        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
+        new OdkXformSyncTask(
+                eventBus,
+                new OdkXformSyncTask.FormWrittenListener() {
             @Override public void formWritten(File path, String uuid) {
                 LOG.i("wrote form " + path);
                 showOdkCollect(
@@ -295,6 +302,7 @@ public class OdkActivityLauncher {
      */
     public static void sendOdkResultToServer(
         final Context context,
+        final EventBus eventBus,
         final AppSettings settings,
         @Nullable final String patientUuid,
         int resultCode,
@@ -351,18 +359,18 @@ public class OdkActivityLauncher {
                         if (!settings.getKeepFormInstancesLocally()) {
                             deleteLocalFormInstances(formIdToDelete);
                         }
-                        EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                        eventBus.post(new SubmitXformSucceededEvent());
                     }
                 }, new Response.ErrorListener() {
                     @Override public void onErrorResponse(VolleyError error) {
                         LOG.e(error, "Error submitting form to server");
-                        handleSubmitError(error);
+                        handleSubmitError(eventBus, error);
                     }
                 });
         } catch(ValidationException ve) {
             LOG.e(ve.getMessage());
-            EventBus.getDefault().post(
-                new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
+            eventBus.post(
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
         }
     }
 
@@ -465,8 +473,6 @@ public class OdkActivityLauncher {
         Cursor instanceCursor = context.getContentResolver().query(uri, null, null, null, null);
         if (instanceCursor.getCount() != 1) {
             LOG.e("The form that we tried to load did not exist: " + uri);
-            EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
             return null;
         }
         instanceCursor.moveToFirst();
@@ -498,7 +504,7 @@ public class OdkActivityLauncher {
                 patientUuid, activeUser.id, xml, successListener, errorListener);
     }
 
-    private static void handleSubmitError(VolleyError error) {
+    private static void handleSubmitError(EventBus eventBus, VolleyError error) {
         SubmitXformFailedEvent.Reason reason =  SubmitXformFailedEvent.Reason.UNKNOWN;
 
         if (error instanceof TimeoutError) {
@@ -527,10 +533,10 @@ public class OdkActivityLauncher {
             }
         }
 
-        EventBus.getDefault().post(new SubmitXformFailedEvent(reason, error));
+        eventBus.post(new SubmitXformFailedEvent(reason, error));
     }
 
-    private static void handleFetchError(VolleyError error) {
+    private static void handleFetchError(@Nullable EventBus eventBus, VolleyError error) {
         FetchXformFailedEvent.Reason reason =
             FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
         if (error.networkResponse != null) {
@@ -547,7 +553,9 @@ public class OdkActivityLauncher {
                     reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
             }
         }
-        EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
+        if (eventBus != null) {
+            eventBus.post(new FetchXformFailedEvent(reason, error));
+        }
     }
 
     /**
@@ -755,6 +763,4 @@ public class OdkActivityLauncher {
             return null;
         }
     }
-
-
-        }
+}

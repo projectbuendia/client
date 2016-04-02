@@ -330,7 +330,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         MockitoAnnotations.initMocks(this);
 
         mFakeEventBus = new FakeEventBus();
-        mFakeSyncManager = new FakeSyncManager();
+        mFakeSyncManager = new FakeSyncManager(mFakeEventBus);
         mController = new LocationListController(
             mMockAppModel,
             mFakeEventBus,

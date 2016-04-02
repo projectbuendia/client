@@ -17,7 +17,6 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
@@ -30,6 +29,11 @@ import android.util.TimingLogger;
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.sync.SyncCanceledEvent;
+import org.projectbuendia.client.events.sync.SyncFailedEvent;
+import org.projectbuendia.client.events.sync.SyncProgressEvent;
+import org.projectbuendia.client.events.sync.SyncStartedEvent;
+import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
@@ -51,6 +55,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 
+import de.greenrobot.event.EventBus;
+
 /** Global sync adapter for syncing all client side database caches. */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -63,6 +69,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final ContentResolver mContentResolver;
     /** Tracks whether the sync has been canceled. */
     private boolean mIsSyncCanceled = false;
+
+    private final EventBus mEventBus;
 
     /**
      * Keys in the extras bundle used to select which sync phases to do.
@@ -97,14 +105,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         FULL_SYNC
     }
 
-    public SyncAdapter(Context context, boolean autoInitialize) {
+    public SyncAdapter(Context context, EventBus eventBus, boolean autoInitialize) {
         super(context, autoInitialize);
         mContentResolver = context.getContentResolver();
-    }
-
-    public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
-        super(context, autoInitialize, allowParallelSyncs);
-        mContentResolver = context.getContentResolver();
+        mEventBus = eventBus;
     }
 
     @Override public void onSyncCanceled() {
@@ -119,19 +123,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String authority,
         ContentProviderClient provider,
         SyncResult syncResult) {
-        // Broadcast that sync is starting.
-        Intent syncStartedIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncStartedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.STARTED);
-        getContext().sendBroadcast(syncStartedIntent);
-
-        Intent syncFailedIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
-
-        Intent syncCanceledIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
+        mEventBus.post(new SyncStartedEvent());
 
         // If we can't access the Buendia API, short-circuit. Before this check was added, sync
         // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
@@ -139,14 +131,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // made a determination that the server is definitely accessible.
         if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
             LOG.e("Abort sync: Buendia API is unavailable.");
-            getContext().sendBroadcast(syncFailedIntent);
+            mEventBus.post(new SyncFailedEvent());
             return;
         }
 
         try {
             checkCancellation("before work started");
         } catch (CancellationException e) {
-            getContext().sendBroadcast(syncCanceledIntent);
+            mEventBus.post(new SyncCanceledEvent());
             return;
         }
 
@@ -208,19 +200,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             rollbackSavepoint(dbTransactionHelper);
             // Reset canceled state so that it doesn't interfere with next sync.
             LOG.i(e, "Sync canceled");
-            getContext().sendBroadcast(syncCanceledIntent);
+            mEventBus.post(new SyncCanceledEvent());
             return;
         } catch (OperationApplicationException e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error updating database during sync");
             syncResult.databaseError = true;
-            getContext().sendBroadcast(syncFailedIntent);
+            mEventBus.post(new SyncFailedEvent());
             return;
         } catch (Throwable e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error during sync");
             syncResult.stats.numIoExceptions++;
-            getContext().sendBroadcast(syncFailedIntent);
+            mEventBus.post(new SyncFailedEvent());
             return;
         } finally {
             LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
@@ -230,10 +222,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         timings.dumpToLog();
 
         // Fire a broadcast indicating that sync has completed.
-        Intent syncCompletedIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncCompletedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.COMPLETED);
-        getContext().sendBroadcast(syncCompletedIntent);
+        mEventBus.post(new SyncSucceededEvent());
     }
 
     /**
@@ -250,12 +239,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void reportProgress(int progress, @StringRes int message) {
         String label = getContext().getResources().getString(message);
-        Intent syncProgressIntent =
-                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS, progress);
-        syncProgressIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS);
-        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS_LABEL, label);
-        getContext().sendBroadcast(syncProgressIntent);
+        mEventBus.post(new SyncProgressEvent(progress, label));
     }
 
     private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)

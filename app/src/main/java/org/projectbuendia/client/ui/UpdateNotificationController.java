@@ -32,6 +32,8 @@ public class UpdateNotificationController {
     @Inject UpdateManager mUpdateManager;
     AvailableUpdateInfo mAvailableUpdateInfo;
     DownloadedUpdateInfo mDownloadedUpdateInfo;
+    @Inject
+    EventBus mEventBus;
 
     public interface Ui {
 
@@ -49,7 +51,7 @@ public class UpdateNotificationController {
 
     /** Activate the controller.  Called whenever user enters a new activity. */
     public void init() {
-        EventBus.getDefault().register(this);
+        mEventBus.register(this);
         mUpdateManager.checkForUpdate();
         updateAvailabilityNotifications();
     }
@@ -59,11 +61,10 @@ public class UpdateNotificationController {
      * currently posted sticky events (posted by the UpdateManager).
      */
     protected void updateAvailabilityNotifications() {
-        EventBus bus = EventBus.getDefault();
         UpdateReadyToInstallEvent readyEvent =
-            bus.getStickyEvent(UpdateReadyToInstallEvent.class);
+            mEventBus.getStickyEvent(UpdateReadyToInstallEvent.class);
         UpdateAvailableEvent availableEvent =
-            bus.getStickyEvent(UpdateAvailableEvent.class);
+            mEventBus.getStickyEvent(UpdateAvailableEvent.class);
         if (readyEvent != null) {
             mDownloadedUpdateInfo = readyEvent.updateInfo;
             mUi.showUpdateReadyToInstall(mDownloadedUpdateInfo);
@@ -79,7 +80,7 @@ public class UpdateNotificationController {
     }
 
     public void suspend() {
-        EventBus.getDefault().unregister(this);
+        mEventBus.unregister(this);
     }
 
     /** Updates the UI in response to updated knowledge of available .apks. */

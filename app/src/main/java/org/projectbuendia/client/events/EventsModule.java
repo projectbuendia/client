@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.events;
 
+import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.inject.Qualifiers;
 import org.projectbuendia.client.utils.EventBusInterface;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -28,9 +29,22 @@ import de.greenrobot.event.EventBusBuilder;
     library = true)
 public class EventsModule {
 
+    /**
+     * Returns a base event bus builder with defaults. Providers of other event buses should accept
+     * this builder and then set things as they need.
+     */
     @Provides
-    @Singleton EventBus provideEventBus() {
-        return EventBus.getDefault();
+    @Qualifiers.BaseEventBusBuilder
+    EventBusBuilder provideEventBusBuilder() {
+        return EventBus.builder()
+                // Throw exceptions from event handlers. EventBus squelches these by default.
+                .throwSubscriberException(BuildConfig.DEBUG);
+    }
+
+    @Provides
+    @Singleton EventBus provideEventBus(
+            @Qualifiers.BaseEventBusBuilder EventBusBuilder eventBusBuilder) {
+        return eventBusBuilder.build();
     }
 
     @Provides
@@ -40,14 +54,15 @@ public class EventsModule {
 
     @Provides
     @Singleton
-    @Qualifiers.CrudEventBusBuilder
-    EventBusBuilder provideCrudEventBusBuilder() {
-        return EventBus.builder();
+    @Qualifiers.CrudEventBus
+    EventBus provideCrudEventBus(@Qualifiers.BaseEventBusBuilder EventBusBuilder eventBusBuilder) {
+        return eventBusBuilder.build();
     }
 
     @Provides
-    @Singleton CrudEventBus provideCrudEventBus(
-        @Qualifiers.CrudEventBusBuilder EventBusBuilder crudEventBusBuilder) {
-        return new DefaultCrudEventBus(crudEventBusBuilder.build());
+    @Singleton
+    CrudEventBus provideCrudEventBus(
+        @Qualifiers.CrudEventBus EventBus crudEventBus) {
+        return new DefaultCrudEventBus(crudEventBus);
     }
 }

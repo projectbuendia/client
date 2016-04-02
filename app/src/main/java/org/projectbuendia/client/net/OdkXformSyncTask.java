@@ -44,6 +44,7 @@ import de.greenrobot.event.EventBus;
  * <p>Takes the UUID and, if the form doesn't exist in ODK storage, fetches it from OpenMRS, then
  * creates {$uuid}.xml in storage. Finally, the form is inserted into ODK's local metadata DB.
  */
+// TODO: Why does this class use EventBus for errors but a listener for success?
 public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Void> {
 
     private static final Logger LOG = Logger.create();
@@ -51,11 +52,14 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     @Nullable
     private final FormWrittenListener mFormWrittenListener;
 
-    public static interface FormWrittenListener {
-        public void formWritten(File path, String uuid);
+    private final EventBus mEventBus;
+
+    public interface FormWrittenListener {
+        void formWritten(File path, String uuid);
     }
 
-    public OdkXformSyncTask(@Nullable FormWrittenListener formWrittenListener) {
+    public OdkXformSyncTask(EventBus eventBus, @Nullable FormWrittenListener formWrittenListener) {
+        mEventBus = eventBus;
         this.mFormWrittenListener = formWrittenListener;
     }
 
@@ -105,7 +109,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 if (mFormWrittenListener != null) {
                     mFormWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
-                EventBus.getDefault().post(new FetchXformSucceededEvent());
+                mEventBus.post(new FetchXformSucceededEvent());
                 continue;
             }
 
@@ -129,14 +133,14 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         openMrsXformsConnection.getXform(uuid, new Response.Listener<String>() {
             @Override public void onResponse(String response) {
                 LOG.i("adding form '%s' to db", uuid);
-                new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
+                new AddFormToDbAsyncTask(mEventBus, mFormWrittenListener, uuid)
                     .execute(new FormToWrite(response, proposedPath));
             }
         }, new Response.ErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
                 LOG.e(error, "failed to fetch file");
-                EventBus.getDefault().post(new FetchXformFailedEvent(
-                    FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
+                mEventBus.post(new FetchXformFailedEvent(
+                        FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
             }
         });
     }
@@ -174,10 +178,13 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
         private final FormWrittenListener mFormWrittenListener;
         private final String mUuid;
+        private final EventBus mEventBus;
 
         private AddFormToDbAsyncTask(
-            @Nullable FormWrittenListener formWrittenListener,
-            String uuid) {
+                EventBus eventBus,
+                @Nullable FormWrittenListener formWrittenListener,
+                String uuid) {
+            mEventBus = eventBus;
             mFormWrittenListener = formWrittenListener;
             mUuid = uuid;
         }
@@ -222,7 +229,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             if (mFormWrittenListener != null && path != null) {
                 mFormWrittenListener.formWritten(path, mUuid);
             }
-            EventBus.getDefault().post(new FetchXformSucceededEvent());
+            mEventBus.post(new FetchXformSucceededEvent());
 
             App.getUserManager().setDirty(false);
         }
