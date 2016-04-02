@@ -53,11 +53,6 @@ public final class SimpleSelectionFilterGroup<T extends Base>
         mFilterType = filterType;
     }
 
-    public SimpleSelectionFilterGroup(FilterType filterType, List<SimpleSelectionFilter> filters) {
-        mFilters = ImmutableList.copyOf(filters);
-        mFilterType = filterType;
-    }
-
     public List<SimpleSelectionFilter> getFilters() {
         return mFilters;
     }
