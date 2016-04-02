@@ -71,7 +71,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // Check if the uuid already exists in the database.
             Cursor cursor = null;
             boolean isNew;
-            final boolean usersHaveChanged = App.getUserManager().isDirty();
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[] {
                     FormsProviderAPI.FormsColumns.DATE
@@ -88,11 +87,10 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     long existingTimestamp = cursor.getLong(0);
                     isNew = (existingTimestamp < formInfo.dateChanged);
 
-                    if (isNew || usersHaveChanged) {
+                    if (isNew) {
                         LOG.i("Form " + formInfo.uuid + " requires an update."
                             + " (Local creation date: " + existingTimestamp
-                            + ", (Latest version: " + formInfo.dateChanged + ")"
-                            + ", (Invalidated by UserManager: " + usersHaveChanged + ")");
+                            + ", (Latest version: " + formInfo.dateChanged + ")");
                     }
                 } else {
                     LOG.i("Form " + formInfo.uuid + " not found in database.");
@@ -104,7 +102,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 }
             }
 
-            if (!isNew && !usersHaveChanged) {
+            if (!isNew) {
                 LOG.i("Using form " + formInfo.uuid + " from local cache.");
                 if (mFormWrittenListener != null) {
                     mFormWrittenListener.formWritten(proposedPath, formInfo.uuid);
@@ -230,8 +228,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 mFormWrittenListener.formWritten(path, mUuid);
             }
             mEventBus.post(new FetchXformSucceededEvent());
-
-            App.getUserManager().setDirty(false);
         }
 
         private static boolean writeStringToFile(String response, File proposedPath) {

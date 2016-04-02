@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client.ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -53,7 +51,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     protected ProgressBar mIndeterminateProgressBar;
     protected int mShortAnimationDuration;
     private State mState = State.LOADING;
-    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<ChangeStateSubscriber>();
+    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<>();
 
     public enum State {
         LOADING,
@@ -64,7 +62,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     /** Subscriber for listening for state changes. */
     public interface ChangeStateSubscriber {
         /** Called whenever the state is changed. */
-        public void onChangeState(State newState);
+        void onChangeState(State newState);
     }
 
     public ProgressFragment() {
@@ -125,7 +123,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mIndeterminateProgressBar.setLayoutParams(relativeLayout);
 
         mProgressBarLayout =
-            inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
+            inflater.inflate(R.layout.progress_fragment_measured_progress_view, container, false);
         mProgressBarLayout.setLayoutParams(relativeLayout);
         mProgressBar =
             (ProgressBar) mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
@@ -175,11 +173,6 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mContent = LayoutInflater.from(getActivity()).inflate(layout, null, false);
     }
 
-    protected void incrementProgressBy(int progress) {
-        switchToHorizontalProgressBar();
-        mProgressBar.incrementProgressBy(progress);
-    }
-
     protected void switchToHorizontalProgressBar() {
         if (mState == State.LOADING) {
             mIndeterminateProgressBar.setVisibility(View.GONE);
@@ -201,35 +194,6 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         if (mState == State.LOADING) {
             mIndeterminateProgressBar.setVisibility(View.VISIBLE);
             mProgressBarLayout.setVisibility(View.GONE);
-        }
-    }
-
-    private void crossfade(View inView, final View outView) {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        inView.setAlpha(0f);
-        inView.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        inView.animate()
-            .alpha(1f)
-            .setDuration(mShortAnimationDuration)
-            .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        if (outView != null) {
-            outView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override public void onAnimationEnd(Animator animation) {
-                        outView.setVisibility(View.GONE);
-                    }
-                });
         }
     }
 
