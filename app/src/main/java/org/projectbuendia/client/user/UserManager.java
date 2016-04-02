@@ -14,6 +14,7 @@ package org.projectbuendia.client.user;
 import android.content.OperationApplicationException;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.support.annotation.VisibleForTesting;
 
 import com.android.volley.VolleyError;
 import com.google.common.collect.ImmutableSet;
@@ -38,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -67,7 +69,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <li>{@link UserAddFailedEvent}
  * </ul>
  * <p/>
- * <p>All methods should be called on the main thread.
+ * <p>This class is thread-safe.
  */
 public class UserManager {
 
@@ -77,10 +79,14 @@ public class UserManager {
     private final EventBusInterface mEventBus;
     private final AsyncTaskRunner mAsyncTaskRunner;
 
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
     private final Set<JsonUser> mKnownUsers = new HashSet<>();
+    @GuardedBy("mLock")
     private boolean mSynced = false;
+    @GuardedBy("mLock")
     private boolean mAutoCancelEnabled = false;
-    private boolean mIsDirty = false;
+    @GuardedBy("mLock")
     @Nullable private JsonUser mActiveUser;
 
     /**
@@ -88,27 +94,19 @@ public class UserManager {
      * issues.
      * TODO: Move to a fake or mock out when daggered.
      */
+    @VisibleForTesting
     public void setAutoCancelEnabled(boolean autoCancelEnabled) {
-        mAutoCancelEnabled = autoCancelEnabled;
+        synchronized (mLock) {
+            mAutoCancelEnabled = autoCancelEnabled;
+        }
     }
 
     /** Resets the UserManager to its initial empty state. */
     public void reset() {
-        mKnownUsers.clear();
-        mSynced = false;
-    }
-
-    /**
-     * If true, users have been recently updated and any data relying on a specific view of users
-     * may be out of sync.
-     */
-    public boolean isDirty() {
-        return mIsDirty;
-    }
-
-    /** Sets whether or not users have been recently updated. */
-    public void setDirty(boolean shouldInvalidateFormCache) {
-        mIsDirty = shouldInvalidateFormCache;
+        synchronized (mLock) {
+            mKnownUsers.clear();
+            mSynced = false;
+        }
     }
 
     /**
@@ -120,10 +118,12 @@ public class UserManager {
      * <p>This method will only perform a local cache lookup once per application lifetime.
      */
     public void loadKnownUsers() {
-        if (!mSynced) {
-            mAsyncTaskRunner.runTask(new LoadKnownUsersTask());
-        } else {
-            mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
+        synchronized (mLock) {
+            if (!mSynced) {
+                mAsyncTaskRunner.runTask(new LoadKnownUsersTask());
+            } else {
+                mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
+            }
         }
     }
 
@@ -143,30 +143,29 @@ public class UserManager {
             throw new UserSyncException("Set of users retrieved from server is null or empty.");
         }
 
-        ImmutableSet<JsonUser> addedUsers =
-            ImmutableSet.copyOf(Sets.difference(syncedUsers, mKnownUsers));
-        ImmutableSet<JsonUser> deletedUsers =
-            ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedUsers));
+        synchronized (mLock) {
+            ImmutableSet<JsonUser> addedUsers =
+                    ImmutableSet.copyOf(Sets.difference(syncedUsers, mKnownUsers));
+            ImmutableSet<JsonUser> deletedUsers =
+                    ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedUsers));
 
-        mKnownUsers.clear();
-        mKnownUsers.addAll(syncedUsers);
-        mEventBus.post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
+            mKnownUsers.clear();
+            mKnownUsers.addAll(syncedUsers);
+            mEventBus.post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
 
-        if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
-            // TODO: Potentially clear mActiveUser here.
-            mEventBus.post(new ActiveUserUnsetEvent(
-                mActiveUser, ActiveUserUnsetEvent.REASON_USER_DELETED));
-        }
-
-        // If at least one user was added or deleted, the set of known users has changed.
-        if (!addedUsers.isEmpty() || !deletedUsers.isEmpty()) {
-            setDirty(true);
+            if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
+                // TODO: Potentially clear mActiveUser here.
+                mEventBus.post(new ActiveUserUnsetEvent(
+                        mActiveUser, ActiveUserUnsetEvent.REASON_USER_DELETED));
+            }
         }
     }
 
     /** Returns the current active user or {@code null} if no user is active. */
     @Nullable public JsonUser getActiveUser() {
-        return mActiveUser;
+        synchronized (mLock) {
+            return mActiveUser;
+        }
     }
 
     /**
@@ -180,22 +179,24 @@ public class UserManager {
      * events will be posted even if the active user did not change.
      */
     public boolean setActiveUser(@Nullable JsonUser activeUser) {
-        @Nullable JsonUser previousActiveUser = mActiveUser;
-        if (activeUser == null) {
-            mActiveUser = null;
-            mEventBus.post(new ActiveUserUnsetEvent(
-                previousActiveUser, ActiveUserUnsetEvent.REASON_UNSET_INVOKED));
+        synchronized (mLock) {
+            @Nullable JsonUser previousActiveUser = mActiveUser;
+            if (activeUser == null) {
+                mActiveUser = null;
+                mEventBus.post(new ActiveUserUnsetEvent(
+                        previousActiveUser, ActiveUserUnsetEvent.REASON_UNSET_INVOKED));
+                return true;
+            }
+
+            if (!mKnownUsers.contains(activeUser)) {
+                LOG.e("Couldn't switch user -- new user is not known");
+                return false;
+            }
+
+            mActiveUser = activeUser;
+            mEventBus.post(new ActiveUserSetEvent(previousActiveUser, activeUser));
             return true;
         }
-
-        if (!mKnownUsers.contains(activeUser)) {
-            LOG.e("Couldn't switch user -- new user is not known");
-            return false;
-        }
-
-        mActiveUser = activeUser;
-        mEventBus.post(new ActiveUserSetEvent(previousActiveUser, activeUser));
-        return true;
     }
 
     /**
@@ -233,9 +234,11 @@ public class UserManager {
      */
     private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<JsonUser>> {
         @Override protected Set<JsonUser> doInBackground(Object... unusedObjects) {
-            if (mAutoCancelEnabled) {
-                cancel(true);
-                return null;
+            synchronized (mLock) {
+                if (mAutoCancelEnabled) {
+                    cancel(true);
+                    return null;
+                }
             }
 
             try {
@@ -256,12 +259,14 @@ public class UserManager {
         }
 
         @Override protected void onPostExecute(Set<JsonUser> knownUsers) {
-            mKnownUsers.clear();
-            if (knownUsers != null) {
-                mKnownUsers.addAll(knownUsers);
+            synchronized (mLock) {
+                mKnownUsers.clear();
+                if (knownUsers != null) {
+                    mKnownUsers.addAll(knownUsers);
+                }
+                mSynced = true;
+                mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
             }
-            mSynced = true;
-            mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
         }
     }
 
@@ -269,7 +274,9 @@ public class UserManager {
     private final class AddUserTask extends AsyncTask<Void, Void, JsonUser> {
 
         private final JsonNewUser mUser;
+        @GuardedBy("mLock")
         private boolean mAlreadyExists;
+        @GuardedBy("mLock")
         private boolean mFailedToConnect;
 
         public AddUserTask(JsonNewUser user) {
@@ -281,10 +288,12 @@ public class UserManager {
                 return mUserStore.addUser(mUser);
             } catch (VolleyError e) {
                 if (e.getMessage() != null) {
-                    if (e.getMessage().contains("already in use")) {
-                        mAlreadyExists = true;
-                    } else if (e.getMessage().contains("failed to connect")) {
-                        mFailedToConnect = true;
+                    synchronized (mLock) {
+                        if (e.getMessage().contains("already in use")) {
+                            mAlreadyExists = true;
+                        } else if (e.getMessage().contains("failed to connect")) {
+                            mFailedToConnect = true;
+                        }
                     }
                 }
                 return null;
@@ -292,20 +301,20 @@ public class UserManager {
         }
 
         @Override protected void onPostExecute(JsonUser addedUser) {
-            if (addedUser != null) {
-                mKnownUsers.add(addedUser);
-                mEventBus.post(new UserAddedEvent(addedUser));
-
-                // Set of known users has changed.
-                setDirty(true);
-            } else if (mAlreadyExists) {
-                mEventBus.post(new UserAddFailedEvent(
-                    mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
-            } else if (mFailedToConnect) {
-                mEventBus.post(new UserAddFailedEvent(
-                    mUser, UserAddFailedEvent.REASON_CONNECTION_ERROR));
-            } else {
-                mEventBus.post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
+            synchronized (mLock) {
+                if (addedUser != null) {
+                    mKnownUsers.add(addedUser);
+                    mEventBus.post(new UserAddedEvent(addedUser));
+                } else if (mAlreadyExists) {
+                    mEventBus.post(new UserAddFailedEvent(
+                            mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
+                } else if (mFailedToConnect) {
+                    mEventBus.post(new UserAddFailedEvent(
+                            mUser, UserAddFailedEvent.REASON_CONNECTION_ERROR));
+                } else {
+                    mEventBus.post(
+                            new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
+                }
             }
         }
     }

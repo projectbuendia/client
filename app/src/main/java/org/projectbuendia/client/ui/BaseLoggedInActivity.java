@@ -68,7 +68,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             super.onCreate(savedInstanceState);
 
             // If there is no active user, then return the user to the user login activity.
-            BigToast.show(this, "Please login to continue"); // TODO/i18n
+            BigToast.show(this, R.string.toast_please_login);
 
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

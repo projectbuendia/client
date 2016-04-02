@@ -23,6 +23,7 @@ import android.os.RemoteException;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 import org.projectbuendia.client.App;
@@ -84,6 +85,7 @@ public class UserStore {
         LOG.i("Updating user db with newly added user");
         ContentProviderClient client = App.getInstance().getContentResolver()
             .acquireContentProviderClient(Users.CONTENT_URI);
+        Preconditions.checkNotNull(client);
         try {
             ContentValues values = new ContentValues();
             values.put(Users.UUID, user.id);
@@ -142,8 +144,10 @@ public class UserStore {
         LOG.i("Updating local database with %d users", users.size());
         ContentProviderClient client = App.getInstance().getContentResolver()
             .acquireContentProviderClient(Users.CONTENT_URI);
+        Preconditions.checkNotNull(client);
         BuendiaProvider buendiaProvider =
             (BuendiaProvider) (client.getLocalContentProvider());
+        Preconditions.checkNotNull(buendiaProvider);
         SQLiteDatabaseTransactionHelper dbTransactionHelper =
             buendiaProvider.getDbTransactionHelper();
         try {
@@ -182,6 +186,7 @@ public class UserStore {
                 .acquireContentProviderClient(Users.CONTENT_URI);
 
             // Request users from database.
+            Preconditions.checkNotNull(client);
             cursor = client.query(Users.CONTENT_URI, new String[]{Users.FULL_NAME, Users.UUID},
                 null, null, Users.FULL_NAME);
 
