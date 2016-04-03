@@ -28,8 +28,8 @@ import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
-import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
@@ -43,6 +43,9 @@ import org.projectbuendia.client.updater.UpdateModule;
 import org.projectbuendia.client.user.UserModule;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.UtilsModule;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Singleton;
 
@@ -124,5 +127,11 @@ public final class AppModule {
     @Singleton
     StethoInitializer provideStethoInitializer() {
         return new StethoInitializer.NoOp();
+    }
+
+    @Provides
+    @Singleton
+    Executor provideBackgroundThreadExecutor() {
+        return Executors.newCachedThreadPool();
     }
 }

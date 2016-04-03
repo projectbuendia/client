@@ -43,6 +43,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 /** A store for users. */
+// TODO: document threading.
 public class UserStore {
 
     private static final Logger LOG = Logger.create();
@@ -52,6 +53,7 @@ public class UserStore {
      * Loads the known users from local store. If there is no user in db or the application
      * can't retrieve from there, then it fetches the users from server
      * */
+    // TODO: restrict this to a smaller set of exceptions.
     public Set<JsonUser> loadKnownUsers()
         throws InterruptedException, ExecutionException, RemoteException,
         OperationApplicationException {
@@ -66,6 +68,7 @@ public class UserStore {
     }
 
     /** Syncs known users with the server. */
+    // TODO: restrict this to a smaller set of exceptions.
     public Set<JsonUser> syncKnownUsers()
         throws ExecutionException, InterruptedException, RemoteException,
         OperationApplicationException {
@@ -140,7 +143,9 @@ public class UserStore {
         return  result.user;
     }
 
-    private void  updateDatabase(Set<JsonUser> users) throws RemoteException, OperationApplicationException {
+    // TODO: restrict this to a smaller set of exceptions.
+    private void updateDatabase(Set<JsonUser> users)
+            throws RemoteException, OperationApplicationException {
         LOG.i("Updating local database with %d users", users.size());
         ContentProviderClient client = App.getInstance().getContentResolver()
             .acquireContentProviderClient(Users.CONTENT_URI);
@@ -166,6 +171,7 @@ public class UserStore {
         }
     }
 
+    // TODO: restrict this to a smaller set of exceptions.
     private Set<JsonUser> getUsersFromServer() throws ExecutionException, InterruptedException {
         RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
         App.getServer().listUsers(null, future, future);
