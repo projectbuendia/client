@@ -11,8 +11,9 @@
 
 package org.projectbuendia.client.user;
 
-import org.projectbuendia.client.utils.AsyncTaskRunner;
 import org.projectbuendia.client.utils.EventBusInterface;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Singleton;
 
@@ -34,7 +35,7 @@ public class UserModule {
     @Singleton UserManager provideUserManage(
         UserStore userStore,
         EventBusInterface eventBus,
-        AsyncTaskRunner asyncTaskRunner) {
-        return new UserManager(userStore, eventBus, asyncTaskRunner);
+        Executor backgroundThreadExecutor) {
+        return new UserManager(userStore, eventBus, backgroundThreadExecutor);
     }
 }

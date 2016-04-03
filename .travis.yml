@@ -9,19 +9,16 @@ env:
 sudo: required
 android:
   components:
-    # Uncomment the lines below if you want to
-    # use the latest revision of Android SDK Tools
+    # Use the latest revision of Android SDK Tools
     - platform-tools
     - tools
 
-    # The BuildTools version used by your project
     # Corresponds to buildToolsVersion in app/build.gradle
     - build-tools-23.0.2
     # Used for AutofitTextView
     # TODO: Upgrade AutofitTextView, remove this.
     - build-tools-19.1.0
 
-    # The SDK version used to compile your project.
     # Corresponds to compileSdkVersion in app/build.gradle
     - android-23
 
@@ -29,11 +26,12 @@ android:
     - extra-android-m2repository
 script:
   # By default, Travis runs `./gradlew build connectedCheck`. We don't want to run the integration
-  # tests, however, because they hit our dev server. So, we specifically just build, and build the
-  # app integration tests as well.
+  # tests, however, because they hit our dev server. So, instead we:
+  # - build the app
+  # - build and run the unit tests
+  # - build (but don't run) the app integration tests as well.
   # TODO: Run a local server for the integration tests.
-  # TODO: Write unit tests and run them here.
-  - ./gradlew build :app:assembleAndroidTest
+  - ./gradlew build test :app:assembleAndroidTest
 # TODO: add after_success clause that pushes builds to our build server.
 notifications:
   slack:

@@ -36,6 +36,11 @@ android {
     defaultConfig {
         multiDexEnabled true
     }
+
+    testOptions {
+        // Prevents Log statements from killing unit tests.
+        unitTests.returnDefaultValues = true
+    }
 }
 dependencies {
     // Build plugins
@@ -71,7 +76,11 @@ dependencies {
     debugCompile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
     debugCompile 'com.facebook.stetho:stetho-okhttp:1.2.0' // Network debugging
 
-    // Testing
+    // Unit tests (run locally on host machine)
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+
+    // Instrumentation tests (run on a device or emulator)
     androidTestCompile 'com.android.support.test:runner:0.3'
     // Explicitly add this dep at 23.2.0, because the above entry depends on 22.2.0, and the
     // discrepancy can introduce differences in behaviour between prod and test.

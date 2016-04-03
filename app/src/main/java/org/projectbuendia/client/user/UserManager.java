@@ -12,7 +12,6 @@
 package org.projectbuendia.client.user;
 
 import android.content.OperationApplicationException;
-import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.support.annotation.VisibleForTesting;
 
@@ -30,13 +29,13 @@ import org.projectbuendia.client.events.user.UserAddFailedEvent;
 import org.projectbuendia.client.events.user.UserAddedEvent;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.utils.AsyncTaskRunner;
 import org.projectbuendia.client.utils.EventBusInterface;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
@@ -77,7 +76,7 @@ public class UserManager {
 
     private final UserStore mUserStore;
     private final EventBusInterface mEventBus;
-    private final AsyncTaskRunner mAsyncTaskRunner;
+    private final Executor mBackgroundThreadExecutor;
 
     private final Object mLock = new Object();
     @GuardedBy("mLock")
@@ -88,6 +87,15 @@ public class UserManager {
     private boolean mAutoCancelEnabled = false;
     @GuardedBy("mLock")
     @Nullable private JsonUser mActiveUser;
+
+    UserManager(
+            UserStore userStore,
+            EventBusInterface eventBus,
+            Executor backgroundThreadExecutor) {
+        mUserStore = checkNotNull(userStore);
+        mEventBus = checkNotNull(eventBus);
+        mBackgroundThreadExecutor = checkNotNull(backgroundThreadExecutor);
+    }
 
     /**
      * Utility function for automatically canceling user load tasks to simulate network connectivity
@@ -119,11 +127,12 @@ public class UserManager {
      */
     public void loadKnownUsers() {
         synchronized (mLock) {
-            if (!mSynced) {
-                mAsyncTaskRunner.runTask(new LoadKnownUsersTask());
-            } else {
+            if (mSynced) {
                 mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
+                return;
             }
+
+            mBackgroundThreadExecutor.execute(loadKnownUsersTask);
         }
     }
 
@@ -208,7 +217,7 @@ public class UserManager {
     public void addUser(JsonNewUser user) {
         checkNotNull(user);
         // TODO: Validate user.
-        mAsyncTaskRunner.runTask(new AddUserTask(user));
+        mBackgroundThreadExecutor.execute(new AddUserTask(user));
     }
 
     /** Thrown when an error occurs syncing users from server. */
@@ -218,103 +227,70 @@ public class UserManager {
         }
     }
 
-    UserManager(
-        UserStore userStore,
-        EventBusInterface eventBus,
-        AsyncTaskRunner asyncTaskRunner) {
-        mAsyncTaskRunner = checkNotNull(asyncTaskRunner);
-        mEventBus = checkNotNull(eventBus);
-        mUserStore = checkNotNull(userStore);
-    }
-
     /**
      * Loads known users from the database into memory.
      * <p/>
      * <p>Forces a network sync if the database has not been downloaded yet.
      */
-    private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<JsonUser>> {
-        @Override protected Set<JsonUser> doInBackground(Object... unusedObjects) {
+    private final Runnable loadKnownUsersTask = new Runnable() {
+        @Override
+        public void run() {
             synchronized (mLock) {
                 if (mAutoCancelEnabled) {
-                    cancel(true);
-                    return null;
+                    LOG.w("Load users task cancelled");
+                    mEventBus.post(new KnownUsersLoadFailedEvent(
+                            KnownUsersLoadFailedEvent.REASON_CANCELLED));
+                    return;
                 }
             }
-
+            Set<JsonUser> users;
             try {
-                return mUserStore.loadKnownUsers();
+                users = mUserStore.loadKnownUsers();
             } catch (Exception e) {
-                // TODO: Figure out type of exception to throw.
                 LOG.e(e, "Load users task failed");
                 mEventBus.post(
-                    new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
-                return null;
+                        new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
+                return;
             }
-        }
 
-        @Override protected void onCancelled() {
-            LOG.w("Load users task cancelled");
-            mEventBus.post(
-                new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_CANCELLED));
-        }
-
-        @Override protected void onPostExecute(Set<JsonUser> knownUsers) {
             synchronized (mLock) {
                 mKnownUsers.clear();
-                if (knownUsers != null) {
-                    mKnownUsers.addAll(knownUsers);
+                if (users != null) {
+                    mKnownUsers.addAll(users);
                 }
                 mSynced = true;
                 mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
             }
         }
-    }
+    };
 
     /** Adds a user to the database asynchronously. */
-    private final class AddUserTask extends AsyncTask<Void, Void, JsonUser> {
+    private final class AddUserTask implements Runnable {
 
         private final JsonNewUser mUser;
-        @GuardedBy("mLock")
-        private boolean mAlreadyExists;
-        @GuardedBy("mLock")
-        private boolean mFailedToConnect;
 
         public AddUserTask(JsonNewUser user) {
             mUser = checkNotNull(user);
         }
 
-        @Override protected JsonUser doInBackground(Void... voids) {
+        @Override
+        public void run() {
             try {
-                return mUserStore.addUser(mUser);
+                JsonUser addedUser = mUserStore.addUser(mUser);
+                synchronized (mLock) {
+                    mKnownUsers.add(addedUser);
+                }
+                mEventBus.post(new UserAddedEvent(addedUser));
             } catch (VolleyError e) {
+                int reason = UserAddFailedEvent.REASON_UNKNOWN;
                 if (e.getMessage() != null) {
-                    synchronized (mLock) {
-                        if (e.getMessage().contains("already in use")) {
-                            mAlreadyExists = true;
-                        } else if (e.getMessage().contains("failed to connect")) {
-                            mFailedToConnect = true;
-                        }
+                    if (e.getMessage().contains("already in use")) {
+                        reason = UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER;
+                    } else if (e.getMessage().contains("failed to connect")) {
+                        reason = UserAddFailedEvent.REASON_CONNECTION_ERROR;
                     }
                 }
-                return null;
-            }
-        }
-
-        @Override protected void onPostExecute(JsonUser addedUser) {
-            synchronized (mLock) {
-                if (addedUser != null) {
-                    mKnownUsers.add(addedUser);
-                    mEventBus.post(new UserAddedEvent(addedUser));
-                } else if (mAlreadyExists) {
-                    mEventBus.post(new UserAddFailedEvent(
-                            mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
-                } else if (mFailedToConnect) {
-                    mEventBus.post(new UserAddFailedEvent(
-                            mUser, UserAddFailedEvent.REASON_CONNECTION_ERROR));
-                } else {
-                    mEventBus.post(
-                            new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
-                }
+                mEventBus.post(new UserAddFailedEvent(mUser, reason));
             }
         }
     }
