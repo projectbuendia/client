@@ -11,45 +11,40 @@
 
 package org.projectbuendia.client.ui.chart;
 
-import android.test.InstrumentationTestCase;
-
 import com.mitchellbosecke.pebble.extension.Filter;
 
-import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Instant;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 
 /** Test cases for {@link PebbleExtension}. */
-public class PebbleExtensionTest extends InstrumentationTestCase {
+public class PebbleExtensionTest {
 
-    private DateTime mNowGMT;
     private Instant mNowUTC;
     private Map<String, Object> mArgs;
     private static final String TIME_FORMAT = "HH:mm";
 
+    @Test
     public void testFormatTimeFilter_mustReturnTimeFormattedInDefaultTimeZone() throws Exception {
         mArgs.put("pattern", TIME_FORMAT);
         Filter filter = new  PebbleExtension.FormatTimeFilter();
 
         String result = (String) filter.apply(mNowUTC, mArgs);
 
-        assertThat(result, is(equalTo("12:00")));
+        assertEquals(result, "12:00");
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() {
         mArgs = new HashMap<>();
-        mNowGMT = new DateTime("2000-01-01T12:00", DateTimeZone.getDefault());
-        mNowUTC = new Instant(mNowGMT);
+        mNowUTC = new Instant(
+                new DateTime("2000-01-01T12:00", DateTimeZone.getDefault()));
     }
 }

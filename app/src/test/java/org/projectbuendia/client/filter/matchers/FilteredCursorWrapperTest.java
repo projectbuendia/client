@@ -11,17 +11,18 @@
 
 package org.projectbuendia.client.filter.matchers;
 
-import android.test.InstrumentationTestCase;
-
 import com.google.common.collect.Iterators;
 
+import org.junit.Test;
 import org.projectbuendia.client.FakeTypedCursor;
 import org.projectbuendia.client.models.TypedCursor;
 
 import java.util.Iterator;
 
+import static org.junit.Assert.assertEquals;
+
 /** Tests for {@link FilteredCursorWrapper}. */
-public class FilteredCursorWrapperTest extends InstrumentationTestCase {
+public class FilteredCursorWrapperTest {
     private static final MatchingFilter<String> SUBSTRING_FILTER = new MatchingFilter<String>() {
         @Override public boolean matches(String object, CharSequence constraint) {
             return object.contains(constraint);
@@ -35,6 +36,7 @@ public class FilteredCursorWrapperTest extends InstrumentationTestCase {
     private static final TypedCursor<String> SAMPLE_CURSOR = new FakeTypedCursor<>(SAMPLE_DATA);
 
     /** Tests that getCount() returns the expected number of matches. */
+    @Test
     public void testGetCount_returnsNumberOfMatches() {
         assertEquals(2, getWrapperForConstraint("pe").getCount());
         assertEquals(1, getWrapperForConstraint("pea").getCount());
@@ -46,6 +48,7 @@ public class FilteredCursorWrapperTest extends InstrumentationTestCase {
     }
 
     /** Tests that get() returns any and all matched entries. */
+    @Test
     public void testGet_returnsMatchedEntries() {
         FilteredCursorWrapper<String> wrapper = getWrapperForConstraint("pe");
         assertEquals("pear", wrapper.get(0));
@@ -53,6 +56,7 @@ public class FilteredCursorWrapperTest extends InstrumentationTestCase {
     }
 
     /** Tests that the iterator returned by iterator() only iterates on matched entries. */
+    @Test
     public void testIterator_returnsIteratorForMatchedEntries() {
         Iterator<String> iterator = getWrapperForConstraint("pe").iterator();
         String[] iteratorValues = Iterators.toArray(iterator, String.class);

@@ -331,10 +331,6 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_validation_future_admission_date">Date d\'admission ne peut pas être dans l\'avenir.</string>
   <string name="patient_validation_future_onset_date">Symptôme date de début ne peut pas être dans l\'avenir.</string>
   <string name="patient_creation_clear_symptom_onset_date">Nettoyer</string>
-  <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
-  <string name="family_name_hint_unknown">–</string>
-  <string name="given_name_hint_unknown">–</string>
-  <string name="unknown_name">–</string>
 
   <!-- UI strings related to settings (see default_settings.xml for default values) -->
   <string name="title_activity_settings">Paramètres</string>

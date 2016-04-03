@@ -269,14 +269,6 @@ public class Utils {
         }
     }
 
-    /**
-     * Returns the specified name or a sentinel representing an unknown name, if the name is
-     * null.
-     */
-    public static @Nonnull String nameOrUnknown(@Nullable String name) {
-        return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
-    }
-
     /** Returns a value if that value is not null, or a specified default value otherwise. */
     public static @Nonnull <T> T valueOrDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value == null ? defaultValue : value;
