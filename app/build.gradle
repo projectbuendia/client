@@ -233,5 +233,11 @@ android {
         debug {
             applicationIdSuffix debugAppIdSuffix
         }
+
+        release {
+            // NOTE: never ship a build using the debug signing config; it's not secure.
+            // TODO(ftamp): Integrate signing into release builds on Travis.
+            signingConfig signingConfigs.debug
+        }
     }
 }
