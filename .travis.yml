@@ -42,7 +42,6 @@ deploy:
   file:
     - "app-debug.apk"
     - "app-release.apk"
-    - "app-release-unsigned.apk"
   skip_cleanup: true
   on:
     repo: projectbuendia/client
