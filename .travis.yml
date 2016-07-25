@@ -34,11 +34,6 @@ script:
   - ./gradlew build test :app:assembleAndroidTest
 # Deploy built APK to github
 before_deploy:
-  - git config --global user.email "noreply+travis-ci@projectbuendia.org"
-  - git config --global user.name "Travis CI"
-  - export GIT_TAG=$TRAVIS_BUILD_NUMBER
-  - git tag $GIT_TAG -a -m "Generated tag from Travis CI for build $TRAVIS_BUILD_NUMBER"
-  - git push -q git@github.com:projectbuendia/client.git --tags
   - cp ./app/build/outputs/apk/*.apk .
 deploy:
   provider: releases
