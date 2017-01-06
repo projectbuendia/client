@@ -12,6 +12,11 @@ import java.util.SortedSet;
 
 /** A column (containing the data for its observations) in the patient history grid. */
 public class Column {
+    // Column type constants
+    public static final String DAILY = "daily";
+    public static final String ENCOUNTER = "encounter";
+    public static final String TIMED = "timed";
+
     public Instant start;
     public Instant stop;
     public String headingHtml;
@@ -22,6 +27,10 @@ public class Column {
         this.start = new Instant(start);
         this.stop = new Instant(stop);
         this.headingHtml = headingHtml;
+    }
+
+    public Column(Interval interval, String headingHtml) {
+        this(interval.getStart(), interval.getEnd(), headingHtml);
     }
 
     public Interval getInterval() {

@@ -319,7 +319,8 @@ public class ChartDataHelper {
                     } else {
                         String type = Utils.getString(c, ChartItems.TYPE);
                         if ((type != null) && (type.equals("CHART_DIVIDER"))) {
-                            currentChart = new Chart(uuid, label);
+                            String format = Utils.getString(c, ChartItems.FORMAT);
+                            currentChart = new Chart(uuid, label, format);
                         }
                     }
                 }

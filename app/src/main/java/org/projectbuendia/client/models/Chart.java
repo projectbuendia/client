@@ -11,20 +11,40 @@
 
 package org.projectbuendia.client.models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /** A chart definition. */
 public class Chart {
+    public static final String DEFAULT_COLUMN_TYPE = "daily";
+    public static final int DEFAULT_COLUMN_TIME = 1440;
+
     public final String uuid;  // UUID of the OpenMRS Form containing this chart definition
     public final List<ChartSection> tileGroups;
     public final List<ChartSection> rowGroups;
     public final String name;
+    public String columnType;
+    public int columnTime;
 
-    public Chart(String uuid, String name) {
+    public Chart(String uuid, String name, String format) {
         this.uuid = uuid;
         this.name = name;
         this.tileGroups = new ArrayList<>();
         this.rowGroups = new ArrayList<>();
+        String columnType = DEFAULT_COLUMN_TYPE;
+        int columnTime = DEFAULT_COLUMN_TIME;
+        JSONObject obj;
+        try {
+            obj = new JSONObject(format);
+            columnType = obj.getString("column_type");
+            columnTime = obj.getInt("column_time");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        this.columnType = columnType;
+        this.columnTime = columnTime;
     }
 }

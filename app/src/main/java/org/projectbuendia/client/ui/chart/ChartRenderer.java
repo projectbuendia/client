@@ -9,8 +9,15 @@ import android.webkit.WebView;
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
 
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.ReadableInstant;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +36,7 @@ import org.projectbuendia.client.utils.Utils;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +58,8 @@ public class ChartRenderer {
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
     private String lastChart = "";
+    private String mChartColumnType;
+    private int mChartColumnTime;
 
     public interface GridJsInterface {
         @android.webkit.JavascriptInterface
@@ -93,6 +103,8 @@ public class ChartRenderer {
             return;  // nothing has changed; no need to render again
         }
         lastChart = chart.name;
+        mChartColumnType = chart.columnType;
+        mChartColumnTime = chart.columnTime;
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.
@@ -124,7 +136,14 @@ public class ChartRenderer {
         List<List<Tile>> mTileRows = new ArrayList<>();
         List<org.projectbuendia.client.ui.chart.Row> mRows = new ArrayList<>();
         Map<String, org.projectbuendia.client.ui.chart.Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
-        SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
+
+        private final Comparator<Interval> mIntervalComparator = new Comparator<Interval>() {
+            @Override public int compare(Interval interval1, Interval interval2) {
+                return Long.compare(interval1.getStartMillis(), interval2.getStartMillis());
+            }
+        };
+        SortedMap<Interval, Column> mColumnsByStartMillis = new TreeMap<>(mIntervalComparator);
+
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
         GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
@@ -196,18 +215,71 @@ public class ChartRenderer {
 
         /** Returns the column that contains the given instant, creating it if it doesn't exist. */
         Column getColumnContainingTime(ReadableInstant instant) {
-            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
-            DateTime start = date.toDateTimeAtStartOfDay();
+            Column returnColumn;
+            switch (mChartColumnType) {
+                case Column.ENCOUNTER:
+                    returnColumn =  getEncounterColumn(instant);
+                    break;
+                case Column.TIMED:
+                    returnColumn =  getTimedColumn(instant);
+                    break;
+                case Column.DAILY:
+                default:
+                    returnColumn =  getDailyColumn(instant);
+                    break;
+            }
+            return returnColumn;
+        }
+
+        Column getDailyColumn(ReadableInstant instant) {
+            LocalDateTime date = new DateTime(instant).toLocalDateTime();  // a day in the local time zone
+            DateTime start = date.withTime(0, 0, 0, 0).toDateTime();
+            DateTime end = date.millisOfDay().withMaximumValue().toDateTime();
             long startMillis = start.getMillis();
-            if (!mColumnsByStartMillis.containsKey(startMillis)) {
-                int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
+            long endMillis = end.getMillis();
+            Interval columnInterval = new Interval(startMillis, endMillis);
+
+            if (!mColumnsByStartMillis.containsKey(columnInterval)) {
+                int admitDay = Utils.dayNumberSince(mAdmissionDate, date.toLocalDate());
                 String admitDayLabel = (admitDay >= 1) ?
                     mResources.getString(R.string.day_n, admitDay) : "–";
                 String dateLabel = date.toString("d MMM");
-                mColumnsByStartMillis.put(startMillis, new Column(
-                    start, start.plusDays(1), admitDayLabel + "<br>" + dateLabel));
+                mColumnsByStartMillis.put(columnInterval, new Column(
+                    columnInterval, admitDayLabel + "<br/>" + dateLabel));
             }
-            return mColumnsByStartMillis.get(startMillis);
+            return mColumnsByStartMillis.get(columnInterval);
+        }
+
+        Column getEncounterColumn(ReadableInstant instant) {
+            DateTime date = new DateTime(instant);
+            DateTime start = date.withTime(date.getHourOfDay(), date.getMinuteOfHour(), 0, 0).toDateTime();
+            DateTime end = start.plusMinutes(mChartColumnTime);
+            Interval columnInterval = new Interval(start, end);
+            if (!mColumnsByStartMillis.containsKey(columnInterval)) {
+                String dateLabel = start.toString("d MMM");
+                String timeLabel = start.toString("HH:mm");
+                mColumnsByStartMillis.put(columnInterval, new Column(
+                    columnInterval, dateLabel + "<br/>" + timeLabel));
+            }
+            return mColumnsByStartMillis.get(columnInterval);
+        }
+
+        Column getTimedColumn(ReadableInstant instant) {
+            DateTime date = new DateTime(instant);
+            DateTime hour = date.hourOfDay().roundFloorCopy();
+            long millisSinceHour = new Duration(hour, date).getMillis();
+            int roundedMinutes = ((int)Math.floor(
+                millisSinceHour / 60000.0 / mChartColumnTime)) * mChartColumnTime;
+            DateTime start = hour.plusMinutes(roundedMinutes);
+            DateTime end = start.plusMinutes(mChartColumnTime);
+            Interval columnInterval = new Interval(start, end);
+            if (!mColumnsByStartMillis.containsKey(columnInterval)) {
+                String dateLabel = start.toString("d MMM");
+                String timeLabel = start.toString("HH:mm");
+                mColumnsByStartMillis.put(columnInterval, new Column(
+                    columnInterval, dateLabel + "<br/>" + timeLabel));
+            }
+            return mColumnsByStartMillis.get(columnInterval);
         }
 
         void addObs(Column column, Obs obs) {
@@ -267,7 +339,8 @@ public class ChartRenderer {
          */
         void insertEmptyColumns() {
             List<DateTime> starts = new ArrayList<>();
-            for (Long startMillis : mColumnsByStartMillis.keySet()) {
+            for (Interval i : mColumnsByStartMillis.keySet()) {
+                Long startMillis = i.getStartMillis();
                 starts.add(new DateTime(startMillis));
             }
             DateTime prev = starts.get(0);
