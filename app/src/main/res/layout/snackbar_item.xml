@@ -16,7 +16,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="48dp"
     android:background="#222222">
 
     <View
@@ -40,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="156dp"
+        android:layout_marginRight="48dp"
         android:paddingStart="20sp"
         android:paddingEnd="20sp"
         android:gravity="center_vertical"
