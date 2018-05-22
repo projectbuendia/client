@@ -117,7 +117,9 @@ public class Troubleshooter {
 
             actionsBuilder.addAll(getNetworkConnectivityTroubleshootingActions());
             actionsBuilder.addAll(getConfigurationTroubleshootingActions());
-            actionsBuilder.addAll(getPackageServerTroubleshootingActions());
+
+            // NOTE(ping): Disable package server troubleshooting for now. 2018-05-21
+            // actionsBuilder.addAll(getPackageServerTroubleshootingActions());
 
             ImmutableSet<TroubleshootingAction> actions = actionsBuilder.build();
 
