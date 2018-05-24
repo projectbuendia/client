@@ -3,10 +3,15 @@
 <!-- A template for a button-styled checkbox. -->
 <CheckBox
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
     android:button="@null"
     android:background="@drawable/bg_radio_button"
-    android:textSize="40sp">
+    android:textSize="32sp"
+    tools:text="Toggle label">
 </CheckBox>

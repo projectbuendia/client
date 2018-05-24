@@ -14,18 +14,30 @@ package org.projectbuendia.client.sync;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 /** A service that holds a singleton SyncAdapter and provides it to the OS on request. */
 public class SyncAdapterService extends Service {
 
-    private SyncAdapter mSyncAdapter = null;
+    private static SyncAdapter syncAdapter = null;
+    private static final Object lock = new Object();
+
+    public static SyncAdapter getSyncAdapter() {
+        return syncAdapter;
+    }
 
     @Override public void onCreate() {
+        Log.i("SyncAdapterService", "onCreate");
         super.onCreate();
-        mSyncAdapter = new SyncAdapter(getApplicationContext(), true);
+        synchronized (lock) {
+            if (syncAdapter == null) {
+                syncAdapter = new SyncAdapter(getApplicationContext(), true);
+            }
+        }
     }
 
     @Override public IBinder onBind(Intent intent) {
-        return mSyncAdapter.getSyncAdapterBinder();
+        Log.i("SyncAdapter", "onBind");
+        return syncAdapter.getSyncAdapterBinder();
     }
 }

@@ -28,7 +28,7 @@
   <string name="title_patient_chart">Patient chart</string>
   <string name="title_activity_patient_add">New patient</string>
   <string name="cancel">Cancel</string>
-  <string name="action_new_patient">+ Create new patient</string>
+  <string name="action_new_patient">Add new patient</string>
   <string name="action_view_xform">+ View first saved xform</string>
   <string name="action_new_round">New round</string>
   <string name="action_assign_location">Assign location</string>

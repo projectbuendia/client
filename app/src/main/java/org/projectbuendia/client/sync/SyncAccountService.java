@@ -19,17 +19,14 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SyncStatusObserver;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import com.google.common.eventbus.EventBus;
-
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.SyncAdapter.SyncOption;
 import org.projectbuendia.client.sync.SyncAdapter.SyncPhase;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.inject.Inject;
