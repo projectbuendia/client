@@ -51,6 +51,7 @@
         <th scope="rowgroup">
           Observations
         </th>
+        {% set prevColumn = null %}
         {% for column in columns %}
           {% if prevColumn is not null and column.start != prevColumn.stop %}
             <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
