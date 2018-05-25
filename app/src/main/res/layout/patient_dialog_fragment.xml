@@ -21,7 +21,8 @@
       android:layout_gravity="center"
       android:stretchColumns="1">
 
-    <TableRow>
+    <TableRow
+        android:visibility="gone">
       <TextView
           style="@style/field_label"
           android:labelFor="@+id/patient_id_prefix"
