@@ -11,9 +11,8 @@
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
-
     dependencies {
         classpath 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1'
         classpath 'org.ajoberstar:gradle-git:0.8.0'
@@ -35,6 +34,7 @@ android {
 }
 dependencies {
     // Build plugins
+    annotationProcessor 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
     provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
 
     // Local .jar dependencies
@@ -48,6 +48,7 @@ dependencies {
     compile 'com.android.support:support-annotations:22.2.0'
     compile 'com.google.code.gson:gson:2.3' // JSON parser
     compile 'com.google.guava:guava:18.0' // Google common libraries
+    annotationProcessor 'com.jakewharton:butterknife:5.1.2' // View injection
     compile 'com.jakewharton:butterknife:5.1.2' // View injection
     compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
     compile 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
