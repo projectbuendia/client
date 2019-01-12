@@ -35,43 +35,43 @@ android {
 dependencies {
     // Build plugins
     annotationProcessor 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
-    provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
+    compileOnly 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
 
     // Local .jar dependencies
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
-    compile project(':third_party:odkcollect')
+    implementation project(':third_party:odkcollect')
 
     // External dependencies
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:support-annotations:22.2.0'
-    compile 'com.google.code.gson:gson:2.3' // JSON parser
-    compile 'com.google.guava:guava:18.0' // Google common libraries
+    implementation 'com.android.support:appcompat-v7:22.2.0'
+    implementation 'com.android.support:support-annotations:22.2.0'
+    implementation 'com.google.code.gson:gson:2.3' // JSON parser
+    implementation 'com.google.guava:guava:18.0' // Google common libraries
     annotationProcessor 'com.jakewharton:butterknife:5.1.2' // View injection
-    compile 'com.jakewharton:butterknife:5.1.2' // View injection
-    compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
-    compile 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
-    compile 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
-    compile 'de.greenrobot:eventbus:2.4.0' // The event bus
-    compile 'joda-time:joda-time:2.5' // Better dates and times
-    compile 'com.facebook.stetho:stetho:1.5.0' // Chrome debugging bridge
-    compile 'com.facebook.stetho:stetho-okhttp:1.5.0' // Network debugging
-    compile 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
-    compile 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
-    compile 'org.apache.commons:commons-lang3:3.4'
+    implementation 'com.jakewharton:butterknife:5.1.2' // View injection
+    implementation 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
+    implementation 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
+    implementation 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
+    implementation 'de.greenrobot:eventbus:2.4.0' // The event bus
+    implementation 'joda-time:joda-time:2.5' // Better dates and times
+    implementation 'com.facebook.stetho:stetho:1.5.0' // Chrome debugging bridge
+    implementation 'com.facebook.stetho:stetho-okhttp:1.5.0' // Network debugging
+    implementation 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
+    implementation 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
+    implementation 'org.apache.commons:commons-lang3:3.4'
 
     // Testing
-    androidTestCompile 'com.android.support.test:runner:0.3'
+    androidTestImplementation 'com.android.support.test:runner:0.3'
     // Espresso
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
-    androidTestCompile 'com.android.support.test.espresso:espresso-web:2.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:2.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-web:2.2'
     // Screenshots, multiple android devices on same computer support
-    androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
+    androidTestImplementation 'com.squareup.spoon:spoon-client:1.1.1'
     // Mockito
-    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
-    androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
-    androidTestCompile 'org.mockito:mockito-core:1.9.5'
+    androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.0'
+    androidTestImplementation 'com.google.dexmaker:dexmaker:1.0'
+    androidTestImplementation 'org.mockito:mockito-core:1.9.5'
 }
 
 apply plugin: 'spoon'
