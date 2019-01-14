@@ -119,11 +119,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String authority,
         ContentProviderClient provider,
         SyncResult syncResult) {
-        // Broadcast that sync is starting.
-        Intent syncStartedIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncStartedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.STARTED);
-        getContext().sendBroadcast(syncStartedIntent);
+        broadcastSyncStatus(SyncManager.STARTED);
 
         Intent syncFailedIntent =
             new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
@@ -139,14 +135,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // made a determination that the server is definitely accessible.
         if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
             LOG.e("Abort sync: Buendia API is unavailable.");
-            getContext().sendBroadcast(syncFailedIntent);
+            broadcastSyncStatus(SyncManager.FAILED);
             return;
         }
 
         try {
             checkCancellation("before work started");
         } catch (CancellationException e) {
-            getContext().sendBroadcast(syncCanceledIntent);
+            broadcastSyncStatus(SyncManager.CANCELED);
             return;
         }
 
@@ -164,7 +160,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         LOG.i("Requested phases are: %s", phases);
-        reportProgress(0, R.string.sync_in_progress);
+        broadcastSyncProgress(0, R.string.sync_in_progress);
 
         BuendiaProvider buendiaProvider =
             (BuendiaProvider) (provider.getLocalContentProvider());
@@ -190,14 +186,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
                 checkCancellation("before " + phase);
                 LOG.i("--- Begin %s ---", phase);
-                reportProgress((int) (completedPhases * progressIncrement), phase.message);
+                broadcastSyncProgress((int) (completedPhases * progressIncrement), phase.message);
 
                 phase.runnable.sync(mContentResolver, syncResult, provider);
 
                 timings.addSplit(phase.name() + " phase completed");
                 completedPhases++;
             }
-            reportProgress(100, R.string.completing_sync);
+            broadcastSyncProgress(100, R.string.completing_sync);
 
             if (fullSync) {
                 Instant syncEndTime = Instant.now();
@@ -208,19 +204,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             rollbackSavepoint(dbTransactionHelper);
             // Reset canceled state so that it doesn't interfere with next sync.
             LOG.i(e, "Sync canceled");
-            getContext().sendBroadcast(syncCanceledIntent);
+            broadcastSyncStatus(SyncManager.CANCELED);
             return;
         } catch (OperationApplicationException e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error updating database during sync");
             syncResult.databaseError = true;
-            getContext().sendBroadcast(syncFailedIntent);
+            broadcastSyncStatus(SyncManager.FAILED);
             return;
         } catch (Throwable e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error during sync");
             syncResult.stats.numIoExceptions++;
-            getContext().sendBroadcast(syncFailedIntent);
+            broadcastSyncStatus(SyncManager.FAILED);
             return;
         } finally {
             LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
@@ -228,12 +224,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             dbTransactionHelper.close();
         }
         timings.dumpToLog();
-
-        // Fire a broadcast indicating that sync has completed.
-        Intent syncCompletedIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncCompletedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.COMPLETED);
-        getContext().sendBroadcast(syncCompletedIntent);
+        broadcastSyncStatus(SyncManager.COMPLETED);
     }
 
     /**
@@ -248,14 +239,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private void reportProgress(int progress, @StringRes int message) {
-        String label = getContext().getResources().getString(message);
-        Intent syncProgressIntent =
-                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
-        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS, progress);
-        syncProgressIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS);
-        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS_LABEL, label);
-        getContext().sendBroadcast(syncProgressIntent);
+    private void broadcastSyncStatus(int status) {
+        getContext().sendBroadcast(
+            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class)
+                .putExtra(SyncManager.SYNC_STATUS, status)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        );
+    }
+
+    private void broadcastSyncProgress(int progress, @StringRes int messageId) {
+        String label = getContext().getResources().getString(messageId);
+        getContext().sendBroadcast(
+            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class)
+                .putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS)
+                .putExtra(SyncManager.SYNC_PROGRESS, progress)
+                .putExtra(SyncManager.SYNC_PROGRESS_LABEL, label)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        );
     }
 
     private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
