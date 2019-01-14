@@ -118,7 +118,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mFrame.setLayoutParams(layoutParams);
 
         RelativeLayout.LayoutParams relativeLayout = new RelativeLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
         relativeLayout.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         mIndeterminateProgressBar = new ProgressBar(getActivity());
