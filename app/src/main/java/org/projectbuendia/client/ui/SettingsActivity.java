@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
@@ -65,6 +66,11 @@ public class SettingsActivity extends PreferenceActivity {
         "require_wifi"
     };
     static boolean updatingPrefValues = false;
+
+    static EditTextPreference serverPref;
+    static EditTextPreference openmrsRootUrlPref;
+    static EditTextPreference packageServerRootUrlPref;
+
     /** A listener that performs updates when any preference's value changes. */
     static final Preference.OnPreferenceChangeListener sPrefListener =
         new Preference.OnPreferenceChangeListener() {
@@ -82,22 +88,18 @@ public class SettingsActivity extends PreferenceActivity {
                     switch (pref.getKey()) {
                         case "server":
                             if (!str.equals("")) {
-                                prefs.edit()
-                                    .putString("openmrs_root_url",
-                                        "http://" + str + ":9000/openmrs")
-                                    .putString("package_server_root_url",
-                                        "http://" + str + ":9001")
-                                    .apply();
+                                setTextAndSummary(openmrsRootUrlPref, "http://" + str + ":9000/openmrs");
+                                setTextAndSummary(packageServerRootUrlPref, "http://" + str + ":9001");
                             }
                             break;
                         case "openmrs_root_url":
                             if (!str.equals("http://" + server + ":9000/openmrs")) {
-                                prefs.edit().putString("server", "").apply();
+                                setTextAndSummary(serverPref, "");
                             }
                             break;
                         case "package_server_root_url":
                             if (!str.equals("http://" + server + ":9001")) {
-                                prefs.edit().putString("server", "").apply();
+                                setTextAndSummary(serverPref, "");
                             }
                             break;
                     }
@@ -107,10 +109,18 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         };
+
     @Inject AppModel mAppModel;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, SettingsActivity.class));
+    }
+
+    private static void setTextAndSummary(EditTextPreference pref, String value) {
+        if (pref != null) {
+            pref.setText(value);
+            pref.setSummary(value);
+        }
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -182,6 +192,15 @@ public class SettingsActivity extends PreferenceActivity {
             pref.setOnPreferenceChangeListener(sPrefListener);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
             updatePrefSummary(pref, prefs.getAll().get(pref.getKey()));
+            if (pref.getKey().equals("server")) {
+                serverPref = (EditTextPreference) pref;
+            }
+            if (pref.getKey().equals("openmrs_root_url")) {
+                openmrsRootUrlPref = (EditTextPreference) pref;
+            }
+            if (pref.getKey().equals("package_server_root_url")) {
+                packageServerRootUrlPref = (EditTextPreference) pref;
+            }
         }
     }
 
