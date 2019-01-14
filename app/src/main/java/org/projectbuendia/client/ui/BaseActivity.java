@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui;
 
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -93,7 +94,7 @@ public abstract class BaseActivity extends FragmentActivity {
         sScaleStep = newScaleStep;
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
         finish();
-        startActivity(getIntent());
+        startActivity(getIntent(), ActivityOptions.makeCustomAnimation(getApplicationContext(), 0, 0).toBundle());
     }
 
     @Override public void setContentView(int layoutResId) {
