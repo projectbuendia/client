@@ -31,6 +31,7 @@ android {
         preDexLibraries = false
         javaMaxHeapSize = '4g'
     }
+    useLibrary 'org.apache.http.legacy'
 }
 dependencies {
     // Build plugins
@@ -173,7 +174,7 @@ logger.info("Default package server root URL: ${packageServerRootUrl}")
 logger.info("Database encryption password: ${encryptionPassword}")
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 28
 
     sourceSets.main {
         jniLibs.srcDir 'libs'
@@ -187,7 +188,7 @@ android {
     defaultConfig {
         applicationId appId
         minSdkVersion 19
-        targetSdkVersion 21
+        targetSdkVersion 22
 
         versionCode versionInteger
         versionName versionString
