@@ -85,6 +85,10 @@ public class App extends Application {
         mHealthMonitor.start();
     }
 
+    public <T> T get(Class<T> type) {
+        return mObjectGraph.get(type);
+    }
+
     public void inject(Object obj) {
         mObjectGraph.inject(obj);
     }

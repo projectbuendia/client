@@ -16,6 +16,7 @@ import android.preference.EditTextPreference;
 import android.util.AttributeSet;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.sync.Database;
 
@@ -29,8 +30,11 @@ public class EditAndClearDataPreference extends EditTextPreference {
     public void onDialogClosed(boolean positive) {
         super.onDialogClosed(positive);
         if (positive) {
-            new Database(App.getInstance().getApplicationContext()).clear();
+            Database db = new Database(App.getInstance().getApplicationContext());
+            db.clear();
+            db.close();
             App.getUserManager().reset();
+            App.getInstance().get(AppSettings.class).setSyncAccountInitialized(false);
         }
     }
 }
