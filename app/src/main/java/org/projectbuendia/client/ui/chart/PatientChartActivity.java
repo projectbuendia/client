@@ -28,7 +28,6 @@ import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
-import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
 import org.joda.time.DateTime;
@@ -147,10 +146,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             });
 
         MenuItem updateChart = menu.findItem(R.id.action_update_chart);
-        updateChart.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_pencil_square_o)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
+        updateChart.setIcon(createIcon(Iconify.IconValue.fa_pencil_square_o, 0xccffffff));
         updateChart.setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
@@ -364,10 +360,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // PCR
             Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
-            mPcr.setIconDrawable(
-                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
-                    .color(0x00000000)
-                    .sizeDp(36));
+            mPcr.setIcon(createIcon(Iconify.IconValue.fa_flask, 0x00000000));
             if ((pcrLObservation == null || pcrLObservation.valueName == null)
                 && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
@@ -453,10 +446,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             String locationText = location == null ? "Unknown" : location.toString(); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
-            mPatientLocationView.setIconDrawable(
-                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
-                    .color(0x00000000)
-                    .sizeDp(36));
+            mPatientLocationView.setIcon(createIcon(Iconify.IconValue.fa_map_marker, 0x00000000));
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {

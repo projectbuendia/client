@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
-import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
 import org.projectbuendia.client.App;
@@ -96,27 +95,18 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
             });
 
         MenuItem search = menu.findItem(R.id.action_search);
-        search.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_search)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
+        search.setIcon(createIcon(Iconify.IconValue.fa_search, 0xccffffff));
         search.setVisible(getLoadingState() == LoadingState.LOADED);
 
         MenuItem addPatient = menu.findItem(R.id.action_new_patient);
-        addPatient.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_plus)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
+        addPatient.setIcon(createIcon(Iconify.IconValue.fa_plus, 0xccffffff));
         addPatient.setVisible(getLoadingState() == LoadingState.LOADED);
 
         mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);
 
         MenuItem cancel = menu.findItem(R.id.action_cancel);
-        cancel.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_close)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
+        cancel.setIcon(createIcon(Iconify.IconValue.fa_close, 0xccffffff));
         cancel.setOnMenuItemClickListener(mCancelListener);
         cancel.setVisible(getLoadingState() == LoadingState.SYNCING);
 
