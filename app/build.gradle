@@ -121,7 +121,8 @@ logger.info("Version code: ${versionInteger}")
 def releaseRepoRoot = file('../../release/')
 
 // OpenMRS server for development (kept at tip of dev branch).
-def serverDev = 'dev.projectbuendia.org'
+// def serverDev = 'dev.projectbuendia.org'
+def serverDev = '52.90.76.10'  // AWS Buendia sandbox
 
 // OpenMRS server for integration testing.
 def serverIntegration = 'integration.projectbuendia.org'
