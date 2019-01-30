@@ -180,8 +180,8 @@
   <string name="tent_selection_dialog_message">Please wait while patient and location data are retrieved. If this is the first time patient data has been loaded, this process may take a few minutes.</string>
   <string name="admission_date_label">Admission date</string>
   <string name="symptoms_onset_date_label">Symptom onset date</string>
-  <string name="symptoms_onset_date_picker_title">Estimated symptom onset date</string>
-  <string name="admission_date_picker_title">Set admission date</string>
+  <string name="symptoms_onset_date_picker_title">Symptom onset date</string>
+  <string name="admission_date_picker_title">Admission date</string>
   <string name="patient_creation_client_error">could not add patient to local database</string>
   <string name="patient_creation_network_error">could not complete server request</string>
   <string name="patient_creation_network_error_with_reason">could not complete server request (reason: %s)</string>

@@ -246,6 +246,7 @@ public class ChartDataHelper {
         }
         return results;
     }
+
     /** Gets the latest observation of each concept for a given patient, localized to English. */
     // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservations(String patientUuid) {

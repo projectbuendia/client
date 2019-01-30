@@ -139,8 +139,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
         /** Updates the UI showing the admission date and first symptoms date for this patient. */
         void updateAdmissionDateAndFirstSymptomsDateUi(
-            LocalDate admissionDate,
-            LocalDate firstSymptomsDate);
+            @Nullable LocalDate admissionDate,
+            @Nullable LocalDate firstSymptomsDate);
 
         /** Updates the UI showing Ebola PCR lab test results for this patient. */
         void updateEbolaPcrTestResultUi(Map<String, Obs> observations);
@@ -463,6 +463,17 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mLastScrollPosition.set(scrollX, scrollY);
     }
 
+    public void setDate(String conceptUuid, LocalDate date) {
+        Encounter encounter = new Encounter(
+            mPatientUuid,
+            null, // encounter UUID, which the server will generate
+            DateTime.now(),
+            new Observation[] {
+                new Observation(conceptUuid, date.toString(), Observation.Type.DATE)
+            }, null);
+        mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
+    }
+
     public void showAssignGeneralConditionDialog(
         Context context, final String generalConditionUuid) {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
@@ -561,7 +572,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
-    private LocalDate getObservedDate(
+    private @Nullable LocalDate getObservedDate(
         Map<String, Obs> observations, String conceptUuid) {
         Obs obs = observations.get(conceptUuid);
         return obs == null ? null : Utils.toLocalDate(obs.valueName);

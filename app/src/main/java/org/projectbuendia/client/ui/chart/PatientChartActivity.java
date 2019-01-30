@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.app.ActionBar;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.DatePicker;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -96,6 +98,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
     private ChartRenderer mChartRenderer;
+    private DatePickerDialog mAdmissionDateDialog;
+    private DatePickerDialog mSymptomOnsetDateDialog;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -216,6 +220,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
+        mAdmissionDateDialog = new DateObsDialog(
+            R.string.admission_date_picker_title, ConceptUuids.ADMISSION_DATE_UUID);
+        mSymptomOnsetDateDialog = new DateObsDialog(
+            R.string.symptoms_onset_date_picker_title, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
+
         // Remembering scroll position and applying it after the chart finished loading.
         mGridWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
@@ -257,6 +266,18 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        mAdmissionDaysView.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                Utils.logUserAction("admission_days_pressed");
+                mAdmissionDateDialog.show();
+            }
+        });
+        mSymptomOnsetDaysView.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                Utils.logUserAction("symptom_onset_days_pressed");
+                mSymptomOnsetDateDialog.show();
+            }
+        });
         mPatientLocationView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 Utils.logUserAction("location_view_pressed");
@@ -270,6 +291,36 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
 
         initChartMenu();
+    }
+
+    class DateObsDialog extends DatePickerDialog {
+        private String mTitle;
+
+        public DateObsDialog(String title, final String conceptUuid, final LocalDate date) {
+            super(
+                PatientChartActivity.this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override public void onDateSet(DatePicker picker, int year, int zeroBasedMonth, int day) {
+                        int month = zeroBasedMonth + 1;
+                        mController.setDate(conceptUuid, new LocalDate(year, month, day));
+                    }
+                },
+                date.getYear(),
+                date.getMonthOfYear() - 1,
+                date.getDayOfMonth()
+            );
+            getDatePicker().setCalendarViewShown(false);
+            mTitle = title;
+            setTitle(title);
+        }
+
+        public DateObsDialog(int titleId, String conceptUuid) {
+            this(PatientChartActivity.this.getString(titleId), conceptUuid, LocalDate.now());
+        }
+
+        @Override public void setTitle(CharSequence title) {
+            super.setTitle(mTitle);
+        }
     }
 
     private void initChartMenu() {
@@ -348,6 +399,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mSymptomOnsetDaysView.setValue(
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+            if (admissionDate != null) {
+                mAdmissionDateDialog.updateDate(
+                    admissionDate.getYear(),
+                    admissionDate.getMonthOfYear() - 1,
+                    admissionDate.getDayOfMonth()
+                );
+            }
+            if (firstSymptomsDate != null) {
+                mSymptomOnsetDateDialog.updateDate(
+                    firstSymptomsDate.getYear(),
+                    firstSymptomsDate.getMonthOfYear() - 1,
+                    firstSymptomsDate.getDayOfMonth()
+                );
+            }
         }
 
         // TODO/cleanup: We don't need this special logic for the Ebola PCR test results
