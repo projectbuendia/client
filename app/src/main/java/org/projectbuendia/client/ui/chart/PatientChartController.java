@@ -121,6 +121,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     private final MinimalHandler mMainThreadHandler;
     private AssignLocationDialog mAssignLocationDialog;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
+
     private List<Chart> mCharts;
     private int lastChartIndex = 0;
     // Every form request made by this controller is kept in this list until
@@ -165,6 +166,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
         /** Updates the UI with the patient's personal details (name, gender, etc.). */
         void updatePatientDetailsUi(Patient patient);
+
+        /** Shows a progress dialog with an indeterminate spinner in it. */
+        void showWaitDialog(int titleId);
+
+        void hideWaitDialog();
 
         /** Displays an error message with the given resource id. */
         void showError(int errorMessageResource);
@@ -464,6 +470,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     }
 
     public void setDate(String conceptUuid, LocalDate date) {
+        mUi.showWaitDialog(R.string.title_updating_patient);
         Encounter encounter = new Encounter(
             mPatientUuid,
             null, // encounter UUID, which the server will generate
@@ -478,11 +485,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         Context context, final String generalConditionUuid) {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
             new AssignGeneralConditionDialog.ConditionSelectedCallback() {
-
-                @Override public boolean onNewConditionSelected(String newConditionUuid) {
+                @Override public void onNewConditionSelected(String newConditionUuid) {
+                    mUi.showWaitDialog(R.string.title_updating_patient);
                     setCondition(newConditionUuid);
-                    Utils.logUserAction("condition_assigned");
-                    return false;
                 }
             };
         mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
@@ -511,12 +516,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
         AssignLocationDialog.LocationSelectedCallback callback =
             new AssignLocationDialog.LocationSelectedCallback() {
-                @Override public boolean onLocationSelected(String locationUuid) {
+                @Override public void onLocationSelected(String locationUuid) {
+                    mUi.showWaitDialog(R.string.title_updating_patient);
                     PatientDelta delta = new PatientDelta();
                     delta.assignedLocationUuid = Optional.of(locationUuid);
                     mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, delta);
-                    Utils.logUserAction("location_assigned");
-                    return false;
                 }
             };
 
@@ -613,67 +617,25 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
+            LOG.e(event.exception, "Encounter add failed.");
+            mUi.hideWaitDialog();
             if (mAssignGeneralConditionDialog != null) {
-                mAssignGeneralConditionDialog.dismiss();
-                mAssignGeneralConditionDialog = null;
+                mAssignGeneralConditionDialog.onEncounterAddFailed(event);
             }
-
-            int messageResource;
-            String exceptionMessage = event.exception.getMessage();
-            switch (event.reason) {
-                case FAILED_TO_AUTHENTICATE:
-                    messageResource = R.string.encounter_add_failed_to_authenticate;
-                    break;
-                case FAILED_TO_FETCH_SAVED_OBSERVATION:
-                    messageResource = R.string.encounter_add_failed_to_fetch_saved;
-                    break;
-                case FAILED_TO_SAVE_ON_SERVER:
-                    messageResource = R.string.encounter_add_failed_to_saved_on_server;
-                    break;
-                case FAILED_TO_VALIDATE:
-                    messageResource = R.string.encounter_add_failed_invalid_encounter;
-                    // Validation reason typically starts after the message below.
-                    exceptionMessage = exceptionMessage.replaceFirst(
-                        ".*failed to validate with reason: .*: ", "");
-                    break;
-                case INTERRUPTED:
-                    messageResource = R.string.encounter_add_failed_interrupted;
-                    break;
-                case INVALID_NUMBER_OF_OBSERVATIONS_SAVED: // Hard to communicate to the user.
-                case UNKNOWN_SERVER_ERROR:
-                    messageResource = R.string.encounter_add_failed_unknown_server_error;
-                    break;
-                case UNKNOWN:
-                default:
-                    messageResource = R.string.encounter_add_failed_unknown_reason;
-            }
-            mUi.showError(messageResource, exceptionMessage);
         }
 
         // We get a ItemFetchedEvent when the initial patient data is loaded
         // from SQLite or after an edit has been successfully posted to the server.
         public void onEventMainThread(ItemFetchedEvent event) {
             if (event.item instanceof Patient) {
-                // When the patient's location is changed, the location dialog stays
-                // open while we wait for the patient edit to be posted to the server.
-                // Now that the patient has been posted, close the dialog.
-                if (mAssignLocationDialog != null) {
-                    mAssignLocationDialog.dismiss();
-                    mAssignLocationDialog = null;
-                }
+                mUi.hideWaitDialog();
 
                 // Update the parts of the UI that use data in the Patient.
                 mPatient = (Patient) event.item;
                 mUi.updatePatientDetailsUi(mPatient);
                 updatePatientLocationUi();
             } else if (event.item instanceof Encounter) {
-                // When the patient's condition is changed, the condition dialog stays
-                // open while we wait for the observation to be posted to the server.
-                // Now that the encounter has been posted, close the dialog.
-                if (mAssignGeneralConditionDialog != null) {
-                    mAssignGeneralConditionDialog.dismiss();
-                    mAssignGeneralConditionDialog = null;
-                }
+                mUi.hideWaitDialog();
 
                 // We don't need to update the UI here because updatePatientObsUi()
                 // below updates all the parts of the UI that use observation data.
@@ -703,8 +665,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
-            mAssignLocationDialog.onPatientUpdateFailed(event.reason);
             LOG.e(event.exception, "Patient update failed.");
+            mUi.hideWaitDialog();
+            mAssignLocationDialog.onPatientUpdateFailed(event.reason);
         }
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {

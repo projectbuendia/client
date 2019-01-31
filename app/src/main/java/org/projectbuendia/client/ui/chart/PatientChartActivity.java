@@ -98,6 +98,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
     private ChartRenderer mChartRenderer;
+    private ProgressDialog mProgressDialog;
     private DatePickerDialog mAdmissionDateDialog;
     private DatePickerDialog mSymptomOnsetDateDialog;
 
@@ -530,6 +531,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
             PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
+        }
+
+        @Override public void showWaitDialog(int titleId) {
+            hideWaitDialog();
+            mProgressDialog = ProgressDialog.show(
+                PatientChartActivity.this, getString(titleId),
+                getString(R.string.please_wait), true);
+        }
+
+        @Override public void hideWaitDialog() {
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+                mProgressDialog = null;
+            }
         }
 
         @Override public void showError(int errorMessageResource, Object... args) {
