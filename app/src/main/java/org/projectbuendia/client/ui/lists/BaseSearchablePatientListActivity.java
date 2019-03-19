@@ -105,10 +105,12 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);
 
+        /*
         MenuItem cancel = menu.findItem(R.id.action_cancel);
         cancel.setIcon(createIcon(Iconify.IconValue.fa_close, 0xccffffff));
         cancel.setOnMenuItemClickListener(mCancelListener);
         cancel.setVisible(getLoadingState() == LoadingState.SYNCING);
+        */
 
         InputMethodManager mgr =
             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
