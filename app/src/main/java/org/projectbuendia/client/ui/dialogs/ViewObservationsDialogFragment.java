@@ -9,21 +9,19 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.LinearLayout;
-import android.widget.Switch;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import butterknife.ButterKnife;
-import org.projectbuendia.client.models.ObsRow;
-import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
 
 public class ViewObservationsDialogFragment extends DialogFragment {
 
@@ -65,7 +63,7 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
         for (ObsRow row: rows) {
 
-            Title = row.conceptName + " " + row.day;
+            Title = row.conceptName + " \u2022 " + row.day;
 
             if(!isExistingHeader(Title)){
                 listDataHeader.add(Title);
@@ -79,10 +77,10 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
             for (ObsRow row: rows){
 
-                verifyTitle = row.conceptName + " " + row.day;
+                verifyTitle = row.conceptName + " \u2022 " + row.day;
 
                 if (verifyTitle.equals(header)){
-                    child.add(row.time + " " + row.valueName);
+                    child.add(row.time + " \u2014 " + row.valueName);
                 }
             }
 
@@ -106,8 +104,10 @@ public class ViewObservationsDialogFragment extends DialogFragment {
         for(int i=0; i < listAdapter.getGroupCount(); i++)
             listView.expandGroup(i);
 
-        LinearLayout listFooterView = (LinearLayout)mInflater.inflate(R.layout.void_observations_switch, null);
-        listView.addFooterView(listFooterView);
+        // Omit the "void observations switch" for now.  (Ping, 2019-03-19)
+        //
+        // LinearLayout listFooterView = (LinearLayout)mInflater.inflate(R.layout.void_observations_switch, null);
+        // listView.addFooterView(listFooterView);
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
@@ -121,6 +121,8 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
         final Dialog dialog = builder.create();
 
+        // Omit the "void observations switch" for now.  (Ping, 2019-03-19)
+        /*
         final Switch swVoid = (Switch) fragment.findViewById(R.id.swVoid);
         swVoid.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -132,6 +134,7 @@ public class ViewObservationsDialogFragment extends DialogFragment {
                 dialog.dismiss();
             }
         });
+        */
 
         return dialog;
     }
