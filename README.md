@@ -25,20 +25,36 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
 Follow the instructions below to get your system set up to do Buendia client development.
 
+
 ### Prerequisites
 
-##### JDK 7
+##### JDK 7 or higher
   * If `java -version` reports a version lower than 1.7, install JDK 7:
       * Linux: `sudo apt-get install openjdk-7-jdk`
       * Mac OS: Download from [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
-  * *Note*: JDK 8 works fine for client development, but you'll need the Java 7 runtime installed to
-  run the [OpenMRS server](//github.com/projectbuendia/buendia).
+  * *Note*: JDK 8 works fine for client development, but to run the [OpenMRS server](//github.com/projectbuendia/buendia) you have to use JDK 7, not 8.
 
 ##### Android Studio
   * Visit https://developer.android.com/sdk/installing/studio.html and follow the steps to install Android Studio.
 
-##### (Optional) Tablet with Android 4.4.2 (KitKat) or higher
-  * We use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets in the field: they are waterproof, have a great screen, and come with KitKat.  Otherwise, we recommend at least a 10" tablet; the app is designed for 1200 x 1920 resolution.  Without a tablet, you can use an emulator (see below).
+##### A tablet running Android 4.4.2 or higher (optional)
+  * We have tested the application with [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets in the field: they are waterproof, have a great screen, and come with KitKat.  However, in 2019 these are no longer in production.
+  * Any Android tablet should do fine. We recommend a tablet with at least an 8-inch display; the app is designed for 1200 x 1920 resolution.
+  * The app will also run on an Android phone. The user interface can be scaled down to be usable on a phone (though a bit unwieldy).
+  * You can also use an emulator instead of a real device (see below).
+
+##### Set up your computer to communicate with your tablet or phone
+  * You can skip this step if you're using an emulator (see below).
+  * On the device, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.
+  * In the Settings app under **Developer options**, turn on **USB debugging**.
+  * Connect a USB cable from your computer to your device.  Click OK when asked if you want to allow USB debugging.
+  * Now you need to set up your computer:
+      * If you're developing on Mac OS X, it just works. You're done.
+      * If you're developing on Windows, you need to install a USB driver for adb. For an installation guide and links to OEM drivers, see this OEM USB Drivers [document](http://developer.android.com/tools/extras/oem-usb.html).
+      * If you're developing on Ubuntu Linux, you need to add a `udev` rules file that contains a USB configuration for each type of device you want to use for development. In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the `ATTR{idVendor}` property. For a list of vendor IDs, see [USB Vendor IDs](http://developer.android.com/tools/device.html#VendorIds). To set up device detection on Ubuntu Linux.
+          * Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+          * Use this format to add each vendor to the file: `SUBSYSTEM=="usb", ATTR{idVendor}=="054c", MODE="0666", GROUP="plugdev"`. In this example, the vendor ID **054c** is for **Sony**. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+          * Now execute: `chmod a+r /etc/udev/rules.d/51-android.rules`.
 
 
 ### Android Studio project setup
@@ -49,7 +65,7 @@ Follow the instructions below to get your system set up to do Buendia client dev
 
 2.  Launch Android Studio and click **Open an existing Android Studio project**.
 
-3.  Navigate to the root directory of your `client` repo and click **Choose**.
+3.  Navigate to the root directory of your `client` repo, select the `build.gradle` file there and click **Open**.
 
 4.  Wait a few minutes while Android Studio builds the project for the first time.
 
@@ -57,29 +73,26 @@ Follow the instructions below to get your system set up to do Buendia client dev
 
 You are now ready to develop the Buendia client in Android Studio.
 
+
 ### Building and running the client on a tablet
 
-On your tablet, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.  Then, in the Settings app under **Developer options**, turn on **USB debugging**.
-
-Connect a USB cable from your computer to your tablet.  Click OK when asked if you want to allow USB debugging.
-
-Set up your system to detect your device.
-  * if you're developing on Windows, you need to install a USB driver for adb. For an installation guide and links to OEM drivers, see this OEM USB Drivers [document](http://developer.android.com/tools/extras/oem-usb.html).
-  * If you're developing on Mac OS X, it just works. Skip this step.
-  * If you're developing on Ubuntu Linux, you need to add a `udev` rules file that contains a USB configuration for each type of device you want to use for development. In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the `ATTR{idVendor}` property. For a list of vendor IDs, see [USB Vendor IDs](http://developer.android.com/tools/device.html#VendorIds). To set up device detection on Ubuntu Linux.
-      * Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
-      * Use this format to add each vendor to the file: `SUBSYSTEM=="usb", ATTR{idVendor}=="054c", MODE="0666", GROUP="plugdev"`. In this example, the vendor ID **054c** is for **Sony**. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
-      * Now execute: `chmod a+r /etc/udev/rules.d/51-android.rules`.
+Connect a USB cable from your computer to your device.
 
 On Android Studio, click the Run button (green triangle in the toolbar at the top).  For **Module** select **app** and click **OK**.
 
+You should see your device appear in the "Select Deployment Target" window.  Select it and click **OK**.
+
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
+
+By default, the app is configured to use a server address pointing at a server on the Internet that contains dummy data.  Feel free to add and edit users and patients.
+
 
 ### Client tests
 
 The client-side tests include both unit tests and functional tests, all located under the project's `androidTest` folder.  These tests run best on a real tablet attached to your computer.  (When run on an Android emulator, some tests work and some don't.)
 
 You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  It's necessary to set the **Specific instrumentation runner** to `AndroidJUnitRunner`.  Then you can **Run** or **Debug** this run configuration to run the tests.
+
 
 ### Changing the default OpenMRS server settings
 
@@ -98,6 +111,7 @@ If you want to run the client with an OpenMRS server that you have built locally
   3. Run OpenMRS on your own computer; run the client in an Android emulator on your computer
 
 An Android emulator runs significantly slower than a real tablet, but in terms of setup it's usually the quickest way to get a locally built client running with a locally built OpenMRS server.  Using a local client and local server also enables you to do development while completely offline.
+
 
 ### Using an emulator and a locally built OpenMRS server
 
