@@ -15,8 +15,11 @@ buildscript {
     }
     dependencies {
         classpath 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1'
-        classpath 'org.ajoberstar:gradle-git:0.8.0'
     }
+}
+
+plugins {
+    id 'org.ajoberstar.grgit' version '3.1.1'
 }
 
 apply plugin: 'com.android.application'
@@ -92,7 +95,7 @@ tasks['spoon'].outputs.upToDateWhen { false }
 def versionInteger = 0
 
 // Development builds get a version name that identifies the commit.
-def repo = org.ajoberstar.grgit.Grgit.open(project.rootDir)
+def repo = org.ajoberstar.grgit.Grgit.open(dir: project.rootDir)
 def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' : '+')
 
 // For a release build, use -PversionNumber=1.2.3 to set the version number.
