@@ -62,6 +62,7 @@ Follow the instructions below to get your system set up to do Buendia client dev
 1.  Get the Buendia client source code:
 
         git clone --recursive git@github.com:projectbuendia/client.git
+	git submodule update --init
 
 2.  Launch Android Studio and click **Open an existing Android Studio project**.
 
