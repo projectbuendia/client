@@ -45,7 +45,7 @@ Follow the instructions below to get your system set up to do Buendia client dev
 
 ##### Set up your computer to communicate with your tablet or phone
   * You can skip this step if you're using an emulator (see below).
-  * On the device, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.
+  * On the device, enable Developer options by opening the Settings app, selecting **Software options**, and tapping the Build number 7 times.
   * In the Settings app under **Developer options**, turn on **USB debugging**.
   * Connect a USB cable from your computer to your device.  Click OK when asked if you want to allow USB debugging.
   * Now you need to set up your computer:
@@ -62,7 +62,8 @@ Follow the instructions below to get your system set up to do Buendia client dev
 1.  Get the Buendia client source code:
 
         git clone --recursive git@github.com:projectbuendia/client.git
-	git submodule update --init
+
+        git submodule update --init
 
 2.  Launch Android Studio and click **Open an existing Android Studio project**.
 
