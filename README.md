@@ -56,6 +56,7 @@ Follow the instructions below to get your system set up to do Buendia client dev
           * Use this format to add each vendor to the file: `SUBSYSTEM=="usb", ATTR{idVendor}=="054c", MODE="0666", GROUP="plugdev"`. In this example, the vendor ID **054c** is for **Sony**. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
           * Now execute: `chmod a+r /etc/udev/rules.d/51-android.rules`.
 
+          * *NOTE: 2019-06-07 I did __not__ set up these udev rules on my Ubuntu 16.04 machine, and it worked anyway*
 
 ### Android Studio project setup
 
