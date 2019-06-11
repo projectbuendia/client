@@ -59,6 +59,9 @@ public class Utils {
     public static final DateTime MAX_DATETIME = new DateTime(MAX_TIME, DateTimeZone.UTC);
     public static final LocalDate MIN_DATE = new LocalDate(0, 1, 1).year().withMinimumValue();
     public static final LocalDate MAX_DATE = new LocalDate(0, 12, 31).year().withMaximumValue();
+    public static final int SECOND = 1000;  // in ms
+    public static final int MINUTE = 60 * SECOND;  // in ms
+    public static final int HOUR = 60 * MINUTE;  // in ms
 
     /**
      * Compares two objects that may be null, Integer, Long, BigInteger, or String.
@@ -463,8 +466,8 @@ public class Utils {
         return sw.toString();
     }
 
-    public static String removeUnsafeChars(String input)
-    {
+    // TODO(ping) The name and purpose of this method are unclear.
+    public static String removeUnsafeChars(String input) {
         return input.replaceAll("[\\W]", "_");
     }
 

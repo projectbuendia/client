@@ -1,6 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.support.v4.util.Pair;
 import android.util.DisplayMetrics;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -193,20 +194,76 @@ public class ChartRenderer {
             }
         }
 
-        /** Returns the column that contains the given instant, creating it if it doesn't exist. */
+        /** Gets the starting times (in ms) of the segments into which the day is divided. */
+        public int[] getSegmentStartingTimes() {
+            // Assumptions: the first element of this array must be zero; the
+            // values must be strictly increasing; the last element must be less
+            // than the length of the shortest day (23 hours accounting for DST).
+            return new int[] {
+                0,
+                6 * Utils.HOUR,
+                10 * Utils.HOUR,
+                14 * Utils.HOUR,
+                20 * Utils.HOUR
+            };
+        }
+
+        /** Gets the n + 1 boundaries of the n segments of a specific day. */
+        public DateTime[] getSegmentFenceposts(LocalDate date) {
+            DateTime start = date.toDateTimeAtStartOfDay();
+            DateTime end = date.plusDays(1).toDateTimeAtStartOfDay();
+            int[] starts = getSegmentStartingTimes();
+            DateTime[] fenceposts = new DateTime[starts.length + 1];
+            for (int i = 0; i < starts.length; i++) {
+                fenceposts[i] = start.plusMillis(starts[i]);
+            }
+            fenceposts[starts.length] = end;
+            return fenceposts;
+        }
+
+        /** Finds the segment that contains the given instant. */
+        Pair<DateTime, DateTime> getSegmentBounds(ReadableInstant instant) {
+            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
+            DateTime[] fenceposts = getSegmentFenceposts(date);
+            for (int i = 0; i + 1 < fenceposts.length; i++) {
+                if (!instant.isBefore(fenceposts[i]) && instant.isBefore(fenceposts[i + 1])) {
+                    return new Pair<>(fenceposts[i], fenceposts[i + 1]);
+                }
+            }
+            return null;  // should never get here because start <= instant < end
+        }
+
+        /** Gets the column for a given instant, creating columns for the whole day if needed. */
         Column getColumnContainingTime(ReadableInstant instant) {
             LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
-            DateTime start = date.toDateTimeAtStartOfDay();
-            long startMillis = start.getMillis();
+            Pair<DateTime, DateTime> bounds = getSegmentBounds(instant);
+            long startMillis = bounds.first.getMillis();
             if (!mColumnsByStartMillis.containsKey(startMillis)) {
+                createColumnsForDay(date);
+            }
+            return mColumnsByStartMillis.get(startMillis);
+        }
+
+        /** Creates all the columns for the segments of the given day. */
+        void createColumnsForDay(LocalDate date) {
+            DateTime[] fenceposts = getSegmentFenceposts(date);
+            long dayStartMillis = date.toDateTimeAtStartOfDay().getMillis();
+
+            for (int i = 0; i + 1 < fenceposts.length; i++) {
+                DateTime start = fenceposts[i];
+                DateTime end = fenceposts[i + 1];
+                long startMillis = start.getMillis();
+
                 int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
                 String admitDayLabel = (admitDay >= 1) ?
                     mResources.getString(R.string.day_n, admitDay) : "–";
                 String dateLabel = date.toString("d MMM");
-                mColumnsByStartMillis.put(startMillis, new Column(
-                    start, start.plusDays(1), admitDayLabel + "<br>" + dateLabel));
+                String label = (startMillis == dayStartMillis) ?
+                    admitDayLabel + "<br>" + dateLabel :
+                    ((startMillis - dayStartMillis)/3_600_000) + "h";
+
+                mColumnsByStartMillis.put(startMillis, new Column(start, end, label));
             }
-            return mColumnsByStartMillis.get(startMillis);
         }
 
         void addObs(Column column, Obs obs) {
