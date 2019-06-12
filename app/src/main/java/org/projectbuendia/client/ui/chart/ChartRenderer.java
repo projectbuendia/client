@@ -211,13 +211,13 @@ public class ChartRenderer {
         /** Gets the n + 1 boundaries of the n segments of a specific day. */
         public DateTime[] getSegmentFenceposts(LocalDate date) {
             DateTime start = date.toDateTimeAtStartOfDay();
-            DateTime end = date.plusDays(1).toDateTimeAtStartOfDay();
+            DateTime stop = date.plusDays(1).toDateTimeAtStartOfDay();
             int[] starts = getSegmentStartingTimes();
             DateTime[] fenceposts = new DateTime[starts.length + 1];
             for (int i = 0; i < starts.length; i++) {
                 fenceposts[i] = start.plusMillis(starts[i]);
             }
-            fenceposts[starts.length] = end;
+            fenceposts[starts.length] = stop;
             return fenceposts;
         }
 
@@ -230,7 +230,7 @@ public class ChartRenderer {
                     return new Pair<>(fenceposts[i], fenceposts[i + 1]);
                 }
             }
-            return null;  // should never get here because start <= instant < end
+            return null;  // should never get here because start <= instant < stop
         }
 
         /** Gets the column for a given instant, creating columns for the whole day if needed. */
@@ -247,23 +247,31 @@ public class ChartRenderer {
         /** Creates all the columns for the segments of the given day. */
         void createColumnsForDay(LocalDate date) {
             DateTime[] fenceposts = getSegmentFenceposts(date);
-            long dayStartMillis = date.toDateTimeAtStartOfDay().getMillis();
-
             for (int i = 0; i + 1 < fenceposts.length; i++) {
                 DateTime start = fenceposts[i];
-                DateTime end = fenceposts[i + 1];
-                long startMillis = start.getMillis();
-
-                int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
-                String admitDayLabel = (admitDay >= 1) ?
-                    mResources.getString(R.string.day_n, admitDay) : "–";
-                String dateLabel = date.toString("d MMM");
-                String label = (startMillis == dayStartMillis) ?
-                    admitDayLabel + "<br>" + dateLabel :
-                    ((startMillis - dayStartMillis)/3_600_000) + "h";
-
-                mColumnsByStartMillis.put(startMillis, new Column(start, end, label));
+                DateTime stop = fenceposts[i + 1];
+                String heading = formatDateHeading(date);
+                String subheading = formatSegmentHeading(date, start, stop);
+                Column column = new Column(start, stop, heading, subheading);
+                mColumnsByStartMillis.put(column.start.getMillis(), column);
             }
+        }
+
+        String formatDateHeading(LocalDate date) {
+            int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
+            String admitDayLabel = (admitDay >= 1) ?
+                mResources.getString(R.string.day_n, admitDay) + ", " : "";
+            return admitDayLabel + date.toString("d MMM");
+        }
+
+        String formatSegmentHeading(LocalDate date, DateTime start, DateTime stop) {
+            long dayStartMillis = date.toDateTimeAtStartOfDay().getMillis();
+            long startMillis = start.getMillis();
+            long stopMillis = stop.getMillis();
+            long startHour = (startMillis - dayStartMillis) / Utils.HOUR;
+            long stopHour = (stopMillis - dayStartMillis) / Utils.HOUR;
+            // Typography: en-dashes should be used to indicate a span between values.
+            return startHour + "–" + stopHour;
         }
 
         void addObs(Column column, Obs obs) {
@@ -311,6 +319,7 @@ public class ChartRenderer {
             context.put("tileRows", mTileRows);
             context.put("rows", mRows);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
+            context.put("numColumnsPerDay", getSegmentStartingTimes().length);
             context.put("nowColumnStart", mNowColumn.start);
             context.put("orders", mOrders);
             context.put("dataCellsByConceptId", getJsonDataDump());

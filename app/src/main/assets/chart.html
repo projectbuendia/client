@@ -33,15 +33,25 @@
     <thead>
       <tr>
         <th> </th>
-        {% set prevColumn = null %}
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% if prevColumn is not null and column.start != prevColumn.stop %}
-            <th class="gap" scope="col">&nbsp;</th>
+          {% if loop.index % numColumnsPerDay == 0 %}
+            {% if column.start != prevStop %}
+              <th class="gap" scope="col" rowspan=2>&nbsp;</th>
+            {% endif %}
+            <th colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+              {{column.heading}}
+            </th>
           {% endif %}
+          {% set prevStop = column.stop %}
+        {% endfor %}
+      </tr>
+      <tr>
+        <th> </th>
+        {% for column in columns %}
           <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
-            {{column.headingHtml | raw}}
+            {{column.subheading}}
           </th>
-          {% set prevColumn = column %}
         {% endfor %}
       </tr>
     </thead>

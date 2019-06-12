@@ -14,14 +14,16 @@ import java.util.SortedSet;
 public class Column {
     public Instant start;
     public Instant stop;
-    public String headingHtml;
+    public String heading;
+    public String subheading;
     public Map<String, SortedSet<ObsPoint>> pointSetByConceptUuid = new HashMap<>();
     public Map<String, Integer> executionCountsByOrderUuid = new HashMap<>();
 
-    public Column(ReadableInstant start, ReadableInstant stop, String headingHtml) {
+    public Column(ReadableInstant start, ReadableInstant stop, String heading, String subheading) {
         this.start = new Instant(start);
         this.stop = new Instant(stop);
-        this.headingHtml = headingHtml;
+        this.heading = heading;
+        this.subheading = subheading;
     }
 
     public Interval getInterval() {
