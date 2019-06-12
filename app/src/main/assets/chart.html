@@ -39,7 +39,7 @@
             {% if column.start != prevStop %}
               <th class="gap" scope="col" rowspan=2>&nbsp;</th>
             {% endif %}
-            <th colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+            <th class="{{column.dayStart == nowDayStart ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
               {{column.heading}}
             </th>
           {% endif %}

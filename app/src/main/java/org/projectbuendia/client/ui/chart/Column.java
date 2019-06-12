@@ -1,5 +1,6 @@
 package org.projectbuendia.client.ui.chart;
 
+import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.Interval;
 import org.joda.time.ReadableInstant;
@@ -28,5 +29,9 @@ public class Column {
 
     public Interval getInterval() {
         return Utils.toInterval(start, stop);
+    }
+
+    public DateTime getDayStart() {
+        return new DateTime(start).toLocalDate().toDateTimeAtStartOfDay();
     }
 }

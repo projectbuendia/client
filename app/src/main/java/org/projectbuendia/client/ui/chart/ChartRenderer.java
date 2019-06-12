@@ -321,6 +321,7 @@ public class ChartRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("numColumnsPerDay", getSegmentStartingTimes().length);
             context.put("nowColumnStart", mNowColumn.start);
+            context.put("nowDayStart", mNow.toLocalDate().toDateTimeAtStartOfDay());
             context.put("orders", mOrders);
             context.put("dataCellsByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
