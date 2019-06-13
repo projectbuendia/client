@@ -13,6 +13,7 @@ package org.projectbuendia.client;
 
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 
 /** Type-safe access to application settings. */
 public class AppSettings {
@@ -70,8 +71,15 @@ public class AppSettings {
 
     /** Gets the flag for whether to save filled-in forms locally. */
     public boolean getKeepFormInstancesLocally() {
-        return mSharedPreferences.getBoolean("keep_form_instances_locally",
-            mResources.getBoolean(R.bool.keep_form_instances_locally_default));
+        return mSharedPreferences.getBoolean("keep_form_instances", false);
+    }
+
+    public boolean shouldSkipToPatientChart() {
+        return !getSkipToPatientId().isEmpty();
+    }
+
+    public @NonNull String getSkipToPatientId() {
+        return mSharedPreferences.getString("starting_patient_id", "").trim();
     }
 
     /** Gets the flag indicating whether the sync account has been initialized. */

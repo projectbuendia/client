@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.ui.BaseActivity;
@@ -39,7 +40,10 @@ import de.greenrobot.event.EventBus;
 public class LoginActivity extends BaseActivity {
     private LoginController mController;
     private AlertDialog mSyncFailedDialog;
+    private boolean mSkippedThisActivity;
+
     @Inject Troubleshooter mTroubleshooter;
+    @Inject AppSettings mSettings;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +60,8 @@ public class LoginActivity extends BaseActivity {
             new EventBusWrapper(EventBus.getDefault()),
             mTroubleshooter,
             new Ui(),
-            fragment.getFragmentUi());
+            fragment.getFragmentUi(),
+            mSettings);
 
         // TODO/cleanup: Consider factoring out some common code between here and tent selection.
         mSyncFailedDialog = new AlertDialog.Builder(this)
