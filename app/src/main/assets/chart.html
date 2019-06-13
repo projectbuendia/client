@@ -41,9 +41,11 @@
           {% if column.start == column.dayStart %}
             <th class="day {{column.date == nowDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
               {% if numColumnsPerDay == 1 %}
-                {{column.dayLabel}}<br>{{column.shortDate}}
-              {% else %}
+                {{column.dayLabel}}
+              {% elseif column.dayLabel is not empty %}
                 {{column.dayLabel}}, {{column.shortDate}}
+              {% else %}
+                {{column.shortDate}}
               {% endif %}
             </th>
           {% endif %}
@@ -54,7 +56,11 @@
         <th class="corner"> </th>
         {% for column in columns %}
           <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
-            {{column.startHour}}&ndash;{{column.stopHour}}
+            {% if numColumnsPerDay == 1 %}
+              {{column.shortDate}}
+            {% else %}
+              {{column.startHour}}&ndash;{{column.stopHour}}
+            {% endif %}
           </th>
         {% endfor %}
       </tr>
