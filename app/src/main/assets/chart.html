@@ -32,25 +32,29 @@
   <table id="grid" cellspacing="0" cellpadding="0">
     <thead>
       <tr>
-        <th> </th>
+        <th class="corner"> </th>
         {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% if loop.index % numColumnsPerDay == 0 %}
-            {% if column.start != prevStop %}
-              <th class="gap" scope="col" rowspan=2>&nbsp;</th>
-            {% endif %}
-            <th class="{{column.dayStart == nowDayStart ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
-              {{column.heading}}
+          {% if column.start != prevStop %}
+            <th class="gap" scope="col" rowspan=2>&nbsp;</th>
+          {% endif %}
+          {% if column.start == column.dayStart %}
+            <th class="day {{column.date == nowDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+              {% if numColumnsPerDay == 1 %}
+                {{column.dayLabel}}<br>{{column.shortDate}}
+              {% else %}
+                {{column.dayLabel}}, {{column.shortDate}}
+              {% endif %}
             </th>
           {% endif %}
           {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
       <tr>
-        <th> </th>
+        <th class="corner"> </th>
         {% for column in columns %}
-          <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
-            {{column.subheading}}
+          <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
+            {{column.startHour}}&ndash;{{column.stopHour}}
           </th>
         {% endfor %}
       </tr>
@@ -66,7 +70,7 @@
           {% if prevColumn is not null and column.start != prevColumn.stop %}
             <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
           {% endif %}
-          <th scope="rowgroup"></th>
+          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
           {% set prevColumn = column %}
         {% endfor %}
       </tr>
@@ -88,7 +92,7 @@
             {% set class = summaryValue | format_values(row.item.cssClass) %}
             {% set style = summaryValue | format_values(row.item.cssStyle) %}
             <td id="cell-{{id}}-{{column.start.millis}}"
-              class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
+              class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
               style="{{style}}"
               onclick="{% if points is not empty%}
                        {% if (row.item.type).string != 'text_icon' %}

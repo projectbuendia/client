@@ -250,28 +250,14 @@ public class ChartRenderer {
             for (int i = 0; i + 1 < fenceposts.length; i++) {
                 DateTime start = fenceposts[i];
                 DateTime stop = fenceposts[i + 1];
-                String heading = formatDateHeading(date);
-                String subheading = formatSegmentHeading(date, start, stop);
-                Column column = new Column(start, stop, heading, subheading);
+                Column column = new Column(start, stop, formatDayNumber(date));
                 mColumnsByStartMillis.put(column.start.getMillis(), column);
             }
         }
 
-        String formatDateHeading(LocalDate date) {
+        String formatDayNumber(LocalDate date) {
             int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
-            String admitDayLabel = (admitDay >= 1) ?
-                mResources.getString(R.string.day_n, admitDay) + ", " : "";
-            return admitDayLabel + date.toString("d MMM");
-        }
-
-        String formatSegmentHeading(LocalDate date, DateTime start, DateTime stop) {
-            long dayStartMillis = date.toDateTimeAtStartOfDay().getMillis();
-            long startMillis = start.getMillis();
-            long stopMillis = stop.getMillis();
-            long startHour = (startMillis - dayStartMillis) / Utils.HOUR;
-            long stopHour = (stopMillis - dayStartMillis) / Utils.HOUR;
-            // Typography: en-dashes should be used to indicate a span between values.
-            return startHour + "–" + stopHour;
+            return (admitDay >= 1) ? mResources.getString(R.string.day_n, admitDay) : "";
         }
 
         void addObs(Column column, Obs obs) {
@@ -321,7 +307,7 @@ public class ChartRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("numColumnsPerDay", getSegmentStartingTimes().length);
             context.put("nowColumnStart", mNowColumn.start);
-            context.put("nowDayStart", mNow.toLocalDate().toDateTimeAtStartOfDay());
+            context.put("nowDate", mNow.toLocalDate());
             context.put("orders", mOrders);
             context.put("dataCellsByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
