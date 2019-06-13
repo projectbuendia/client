@@ -327,9 +327,10 @@ public class ChartRenderer {
             for (Long startMillis : mColumnsByStartMillis.keySet()) {
                 starts.add(new DateTime(startMillis));
             }
+            int maxEmptyColumns = 3 / getSegmentStartingTimes().length;
             DateTime prev = starts.get(0);
             for (DateTime next : starts) {
-                if (!next.isAfter(prev.plusDays(3))) {
+                if (!next.isAfter(prev.plusDays(maxEmptyColumns))) {
                     for (DateTime dt = prev.plusDays(1); dt.isBefore(next); dt = dt.plusDays(1)) {
                         getColumnContainingTime(dt); // creates a column if it doesn't exist yet
                     }
