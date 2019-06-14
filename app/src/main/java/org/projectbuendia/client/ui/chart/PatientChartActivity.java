@@ -12,9 +12,11 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -141,7 +143,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
-
                 @Override public boolean onMenuItemClick(MenuItem menuItem) {
                     Utils.logUserAction("go_to_patient_pressed");
                     GoToPatientDialogFragment.newInstance()
@@ -149,6 +150,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     return true;
                 }
             });
+
+        menu.findItem(R.id.action_zoom).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+                @Override public boolean onMenuItemClick(MenuItem item) {
+                    Utils.logUserAction("zoom_chart_pressed");
+                    showZoomDialog();
+                    return true;
+                }
+            }
+        );
 
         MenuItem updateChart = menu.findItem(R.id.action_update_chart);
         updateChart.setIcon(createIcon(Iconify.IconValue.fa_pencil_square_o, 0xccffffff));
@@ -236,7 +247,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
             }
         });
-        mChartRenderer = new ChartRenderer(mGridWebView, getResources());
+        mChartRenderer = new ChartRenderer(mGridWebView, getResources(), mSettings);
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
             @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
@@ -254,6 +265,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         };
         mController = new PatientChartController(
             mAppModel,
+            mSettings,
             new EventBusWrapper(mEventBus),
             mCrudEventBusProvider.get(),
             new Ui(),
@@ -332,7 +344,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             ActionBar.TabListener tabListener = new ActionBar.TabListener() {
                 @Override
                 public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
-                    mController.updatePatientObsUi(tab.getPosition());
+                    mController.setChartIndex(tab.getPosition());
                 }
 
                 @Override
@@ -379,6 +391,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
             getResources().getString(R.string.pcr_negative) :
             String.format("%1$.1f", pcrValue);
+    }
+
+    private void showZoomDialog() {
+        CharSequence[] labels = new CharSequence[ChartRenderer.ZOOM_LEVELS.length];
+        for (int i = 0; i < labels.length; i++) {
+            labels[i] = getString(ChartRenderer.ZOOM_LEVELS[i].labelId);
+        }
+        int selected = mSettings.getChartZoomIndex();
+        new AlertDialog.Builder(this)
+            .setTitle(R.string.title_zoom)
+            .setSingleChoiceItems(labels, selected, new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface dialog, int which) {
+                    mController.setZoomIndex(which);
+                    dialog.cancel();
+                }
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
     }
 
     private final class Ui implements PatientChartController.Ui {

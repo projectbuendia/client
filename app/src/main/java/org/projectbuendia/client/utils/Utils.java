@@ -350,6 +350,14 @@ public class Utils {
         return date == null ? null : date.toString();
     }
 
+    /** Safely index into an array, clamping the index if it's out of bounds. */
+    public static <T> T safeIndex(T[] array, int index) {
+        if (array.length == 0) return null;
+        if (index < 0) index = 0;
+        if (index > array.length - 1) index = array.length - 1;
+        return array[index];
+    }
+
     /** Returns the greater of two DateTimes, treating null as the least value. */
     public static @Nullable DateTime max(DateTime a, DateTime b) {
         return a == null ? b : b == null ? a : a.isAfter(b) ? a : b;
