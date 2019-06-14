@@ -11,10 +11,20 @@
 
 package org.projectbuendia.client.filter.matchers;
 
-import android.test.InstrumentationTestCase;
+import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /** Tests for {@link MatchingFilterGroup}. */
-public class MatchingFilterGroupTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class MatchingFilterGroupTest {
     private static final MatchingFilter<String> PREFIX_FILTER = new MatchingFilter<String>() {
         @Override public boolean matches(String object, CharSequence constraint) {
             return object.startsWith(constraint.toString());
@@ -36,6 +46,7 @@ public class MatchingFilterGroupTest extends InstrumentationTestCase {
             MatchingFilterGroup.FilterType.OR, PREFIX_FILTER, SUFFIX_FILTER);
 
     /** Tests that OR filter groups match on any of their filters. */
+    @Test
     public void testMatches_multiFilterOr() {
         assertTrue(OR_FILTER_GROUP.matches("foobar", "foo"));
         assertTrue(OR_FILTER_GROUP.matches("foobar", "bar"));
@@ -43,6 +54,7 @@ public class MatchingFilterGroupTest extends InstrumentationTestCase {
     }
 
     /** Tests that AND filter groups must match on all of their filters. */
+    @Test
     public void testMatches_multiFilterAnd() {
         assertFalse(AND_FILTER_GROUP.matches("foobar", "foo"));
         assertFalse(AND_FILTER_GROUP.matches("foobar", "bar"));
@@ -50,6 +62,7 @@ public class MatchingFilterGroupTest extends InstrumentationTestCase {
     }
 
     /** Tests that OR filter groups with only one filter work like an ordinary filter. */
+    @Test
     public void testMatches_singleFilterOr() {
         MatchingFilterGroup<String> singleFilterGroup =
             new MatchingFilterGroup<>(MatchingFilterGroup.FilterType.OR, PREFIX_FILTER);
@@ -58,6 +71,7 @@ public class MatchingFilterGroupTest extends InstrumentationTestCase {
     }
 
     /** Tests that AND filter groups with only one filter work like an ordinary filter. */
+    @Test
     public void testMatches_singleFilterAnd() {
         MatchingFilterGroup<String> singleFilterGroup =
             new MatchingFilterGroup<>(MatchingFilterGroup.FilterType.AND, PREFIX_FILTER);
