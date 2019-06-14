@@ -17,25 +17,21 @@ import android.support.annotation.Nullable;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.IdlingPolicies;
 import android.support.test.espresso.NoActivityResumedException;
+import android.support.test.espresso.core.deps.guava.collect.Iterables;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
+import org.junit.After;
+import org.junit.Before;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
@@ -49,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.RootMatchers.isDialog;
 import static org.hamcrest.Matchers.is;
@@ -74,7 +71,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         super(LoginActivity.class);
     }
 
-    @Override public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
         // Increased to 5 minutes as certain operations (like initial sync) may take an exceedingly
         // long time.
@@ -90,7 +88,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             Espresso.registerIdlingResources(resource);
         }
 
-        super.setUp();
         getActivity();
     }
 
@@ -98,7 +95,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         mWaitForUserSync = waitForUserSync;
     }
 
-    @Override public void tearDown() {
+    @After
+    public void tearDown() {
         // Remove activities from the stack until the app is closed.  If we don't do this, the test
         // runner sometimes has trouble launching the activity to start the next test.
         try {
@@ -135,14 +133,10 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     protected Activity getCurrentActivity() throws Throwable {
         getInstrumentation().waitForIdleSync();
         final Activity[] activity = new Activity[1];
-        runTestOnUiThread(new Runnable() {
-            @Override public void run() {
-                java.util.Collection<Activity> activities =
-                    ActivityLifecycleMonitorRegistry.getInstance()
-                        .getActivitiesInStage(Stage.RESUMED);
-                activity[0] = Iterables.getOnlyElement(activities);
-            }
-        });
+        java.util.Collection<Activity> activities =
+            ActivityLifecycleMonitorRegistry.getInstance()
+                .getActivitiesInStage(Stage.RESUMED);
+        activity[0] = Iterables.getOnlyElement(activities);
         return activity[0];
     }
 

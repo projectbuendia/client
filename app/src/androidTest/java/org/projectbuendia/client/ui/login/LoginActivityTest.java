@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.login;
 
+import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.matchers.UserMatchers;
@@ -21,6 +22,7 @@ import java.util.Date;
 public class LoginActivityTest extends FunctionalTestCase {
 
     /** Adds a new user and logs in. */
+    @Test
     public void testAddUser() {
         screenshot("Test Start");
         final long n = new Date().getTime()%100000;
@@ -51,6 +53,7 @@ public class LoginActivityTest extends FunctionalTestCase {
     }
 
     /** Logs in as the guest user and logs out. */
+    @Test
     public void testGuestLoginLogout() {
         // Click guest user
         expectVisible(viewWithText("GU"));

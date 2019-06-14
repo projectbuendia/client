@@ -14,19 +14,21 @@ package org.projectbuendia.client.ui;
 import android.support.test.espresso.NoMatchingViewException;
 import android.view.View;
 
-import junit.framework.Assert;
+import androidx.test.annotation.UiThreadTest;
 
+import org.junit.Assert;
 import org.projectbuendia.client.R;
 
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class SnackBarTest extends FunctionalTestCase {
+    @UiThreadTest
     public void testSimpleMessageSnackBar() {
-        final BaseActivity activity = getActivity();
+        final BaseActivity activity = (BaseActivity) getActivity();
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -36,9 +38,10 @@ public class SnackBarTest extends FunctionalTestCase {
         expectVisibleSoon(viewWithText("Wifi is disabled"));
     }
 
+    @UiThreadTest
     public void testSnackBarWithAction() {
         final View.OnClickListener mockListener = mock(View.OnClickListener.class);
-        final BaseActivity activity = getActivity();
+        final BaseActivity activity = (BaseActivity) getActivity();
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -52,8 +55,9 @@ public class SnackBarTest extends FunctionalTestCase {
         verify(mockListener).onClick(any(View.class));
     }
 
+    @UiThreadTest
     public void testSnackBarDismiss() {
-        final BaseActivity activity = getActivity();
+        final BaseActivity activity = (BaseActivity) getActivity();
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {

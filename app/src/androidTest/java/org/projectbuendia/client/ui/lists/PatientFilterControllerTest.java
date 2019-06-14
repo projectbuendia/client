@@ -11,8 +11,8 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import android.test.AndroidTestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
@@ -26,7 +26,7 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
 
 /** Tests for {@link PatientFilterController}. */
-public class PatientFilterControllerTest extends AndroidTestCase {
+public class PatientFilterControllerTest {
     private static final String LOCALE = "en";
     private PatientFilterController mController;
     private FakeEventBus mFakeCrudEventBus;
@@ -34,6 +34,7 @@ public class PatientFilterControllerTest extends AndroidTestCase {
     @Mock private PatientFilterController.Ui mMockUi;
 
     /** Tests that requesting an action bar initialization fetches a location tree. */
+    @Test
     public void testSetupActionBarAsync_fetchesLocationTree() {
         // GIVEN initialized PatientFilterController
         // WHEN setupActionBarAsync called
@@ -43,6 +44,7 @@ public class PatientFilterControllerTest extends AndroidTestCase {
     }
 
     /** Tests that filters are correctly initialized once a location tree is retrieved. */
+    @Test
     public void testSetupActionBarAsync_passesLocationFilters() {
         // GIVEN initialized PatientFilterController, after setupActionBarAsync called
         mController.setupActionBarAsync();
@@ -55,8 +57,8 @@ public class PatientFilterControllerTest extends AndroidTestCase {
             argThat(new SimpleSelectionFilterMatchers.ContainsFilterWithName("Triage")));
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         mFakeCrudEventBus = new FakeEventBus();

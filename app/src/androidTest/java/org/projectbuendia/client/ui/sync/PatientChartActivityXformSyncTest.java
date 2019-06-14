@@ -11,17 +11,14 @@
 
 package org.projectbuendia.client.ui.sync;
 
-import android.support.test.espresso.Espresso;
-
 import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.junit.Test;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.FetchXformSucceededEvent;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.json.JsonPatient;
 
 import java.util.UUID;
 
@@ -40,6 +37,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
      * Tests that clicking the load xform button after a fresh sync causes the xform to
      * eventually load.
      */
+    @Test
     public void testXformRetrievedFromServer() {
         /*
         loadChart();

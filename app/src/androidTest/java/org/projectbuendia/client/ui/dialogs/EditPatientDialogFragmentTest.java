@@ -13,25 +13,30 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.Activity;
 import android.support.annotation.IdRes;
-import android.view.View;
+import android.support.test.annotation.UiThreadTest;
+import android.support.test.runner.AndroidJUnit4;
 
-import org.hamcrest.Matcher;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormat;
+import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.Espresso.pressBack;
+import static junit.framework.TestCase.assertTrue;
 
 /** Tests for adding a new patient. */
+@RunWith(AndroidJUnit4.class)
+@SmallTest
 public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
+    @Before
+    public void setUp() {
+        getActivity();
+    }
     /**
      * Tests adding a new patient;
      * Tests adding a location to the patient;
@@ -39,6 +44,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
      * Test last observation date;
      * Test admission date;
      */
+    @UiThreadTest
     public void testNewPatient() {
         // Create the patient
         String id = inUserLoginGoToDemoPatientChart();
@@ -69,6 +75,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
             hasText("Day 1")));
     }
 
+    @UiThreadTest
     public void testPatientCreation() throws Throwable {
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");

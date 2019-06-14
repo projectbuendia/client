@@ -11,18 +11,24 @@
 
 package org.projectbuendia.client.net;
 
-import android.test.InstrumentationTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
+import androidx.test.filters.SmallTest;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.UUID;
 
-/** Test cases for {@link OdkDatabaseTest}. */
-public class OdkDatabaseTest extends InstrumentationTestCase {
+import static junit.framework.TestCase.assertEquals;
 
+/** Test cases for {@link OdkDatabaseTest}. */
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class OdkDatabaseTest   {
+
+    @Test
     public void testNonExistentFile_getFormIdForPathMustReturnOneNegative() throws Exception {
         File nonExistentFile = new File("/nonExistentPath_ " + UUID.randomUUID().toString());
         long expectedFormId = -1;

@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
@@ -34,6 +35,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
     }
 
     /** Looks for the filter menu. */
+    @Test
     public void testFilterMenu() {
         openPatientList();
         screenshot("Test Start");
@@ -45,6 +47,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
     }
 
     /** Looks for one zone heading and at least one patient. */
+    @Test
     public void testZoneAndPatientDisplayed() {
         openPatientList();
         screenshot("Test Start");
