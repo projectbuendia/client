@@ -11,11 +11,16 @@
 
 package org.projectbuendia.client.ui.login;
 
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
@@ -30,12 +35,15 @@ import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.user.UserManager;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** Tests for {@link LoginController}. */
-public class LoginControllerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class LoginControllerTest {
 
     private LoginController mController;
     @Mock private UserManager mMockUserManager;
@@ -45,6 +53,7 @@ public class LoginControllerTest extends AndroidTestCase {
     private FakeEventBus mFakeEventBus;
 
     /** Tests that init() attempts to load known users. */
+    @Test
     public void testInit_SetsKnownUserLoadGoing() {
         // WHEN the controller is inited
         mController.init();
@@ -53,6 +62,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that suspend() unregisters subscribers from the event bus. */
+    @Test
     public void testSuspend_UnregistersFromEventBus() {
         // GIVEN an initialized controller
         mController.init();
@@ -63,6 +73,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the UI updates when users are loaded. */
+    @Test
     public void testKnownUsersLoadedEvent_UpdatesUi() throws Exception {
         // GIVEN the controller is inited
         mController.init();
@@ -74,6 +85,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that settings are shown when requested. */
+    @Test
     public void testSettingsPress_ShowsSettings() {
         // GIVEN an inited controller
         mController.init();
@@ -84,6 +96,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that selecting a user causes a transition to the tent selection screen. */
+    @Test
     public void testSelectingUser_SetsUserAndOpensTentSelection() throws Exception {
         // GIVEN an controller inited controller with users loaded
         mController.init();
@@ -98,6 +111,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that spinner is shown when the controller is first initialized. */
+    @Test
     public void testInit_showsSpinner() {
         // WHEN controller is inited
         mController.init();
@@ -106,6 +120,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that successful user load hides the spinner. */
+    @Test
     public void testUsersLoaded_hidesSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -117,6 +132,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the sync failed dialog appears when loading users fails. */
+    @Test
     public void testUserLoadFails_showsSyncFailedDialog() {
         // GIVEN initialized controller
         mController.init();
@@ -127,6 +143,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the sync failed dialog is hidden when users are successfully loaded. */
+    @Test
     public void testUserLoaded_hidesSyncFailedDialog() {
         // GIVEN initialized controller
         mController.init();
@@ -138,6 +155,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that users are requested when a retry is requested. */
+    @Test
     public void testOnSyncRetry_requestsUsers() {
         // GIVEN initialized controller
         mController.init();
@@ -149,6 +167,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the spinner is shown when a retry is requested. */
+    @Test
     public void testOnSyncRetry_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -160,6 +179,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the spinner is hidden whenever a user is added. */
+    @Test
     public void testOnUserAdded_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -171,6 +191,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the spinner is hidden whenever a user add operation fails. */
+    @Test
     public void testOnUserAddFailed_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -182,6 +203,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that users are reloaded if the server becomes healthy and users are unavailable. */
+    @Test
     public void testOnServerHealthy_reloadsUsersIfNotAvailable() {
         // GIVEN initialized controller, no users loaded, server unhealthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(false);
@@ -196,6 +218,7 @@ public class LoginControllerTest extends AndroidTestCase {
     }
 
     /** Tests that users are not reloaded if the server becomes healthy and users are available. */
+    @Test
     public void testOnServerHealthy_doesNothingIfUsersAvailable() {
         // GIVEN initialized controller, users loaded, server unhealthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(false);
@@ -214,6 +237,7 @@ public class LoginControllerTest extends AndroidTestCase {
      * Tests that TroubleshootingActionsChangedEvents do not trigger user reload if server is still
      * unhealthy.
      */
+    @Test
     public void testOnTroubleshootingActionsChanged_checksServerHealthy() {
         // GIVEN initialized controller, no users loaded, server unhealthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(false);
@@ -227,8 +251,8 @@ public class LoginControllerTest extends AndroidTestCase {
         verify(mMockUserManager, times(1)).loadKnownUsers();
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         mFakeEventBus = new FakeEventBus();

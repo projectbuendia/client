@@ -11,11 +11,16 @@
 
 package org.projectbuendia.client.ui.chart;
 
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.R;
@@ -42,12 +47,15 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** Tests for {@link PatientChartController}. */
-public final class PatientChartControllerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public final class PatientChartControllerTest {
     private static final String PATIENT_UUID_1 = "patient-uuid-1";
     private static final String PATIENT_NAME_1 = "Bob";
     private static final String PATIENT_ID_1 = "patient-id-1";
@@ -67,6 +75,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private FakeHandler mFakeHandler;
 
     /** Tests that suspend() unregisters from the event bus. */
+    @Test
     public void testSuspend_UnregistersFromEventBus() {
         // GIVEN an initialized controller
         mController.init();
@@ -77,6 +86,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that init() requests a single patient from the app model. */
+    @Test
     public void testInit_RequestsPatientDetails() {
         // WHEN the controller is inited
         mController.init();
@@ -85,6 +95,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that observations are updated in the UI when patient details fetched. */
+    @Test
     public void testPatientDetailsLoaded_SetsObservationsOnUi() {
         // GIVEN the observations provider is set up to return some dummy data
         List<Obs> allObservations =
@@ -112,6 +123,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the UI is given updated patient data when patient data is fetched. */
+    @Test
     public void testPatientDetailsLoaded_UpdatesUi() {
         // GIVEN controller is initialized
         mController.init();
@@ -123,6 +135,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that selecting a new general condition results in adding a new encounter. */
+    @Test
     public void testSetCondition_AddsEncounterForNewCondition() {
         // GIVEN controller is initialized
         mController.init();
@@ -136,6 +149,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */
+    @Test
     public void testAddObservation_showsLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -146,6 +160,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that requesting an xform through clicking on a vital shows loading dialog. */
+    @Test
     public void testVitalClick_showsLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -156,6 +171,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that requesting an xform through clicking on test results shows loading dialog. */
+    @Test
     public void testTestResultsClick_showsLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -166,6 +182,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the xform can be fetched again if the first fetch fails. */
+    @Test
     public void testXformLoadFailed_ReenablesXformFetch() {
         // GIVEN controller is initialized
         mController.init();
@@ -176,6 +193,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that an error message is displayed when the xform fails to load. */
+    @Test
     public void testXformLoadFailed_ShowsError() {
         // GIVEN controller is initialized
         mController.init();
@@ -186,6 +204,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that a failed xform fetch hides the loading dialog. */
+    @Test
     public void testXformLoadFailed_HidesLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -196,6 +215,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the xform can be fetched again if the first fetch succeeds. */
+    @Test
     public void testXformLoadSucceeded_ReenablesXformFetch() {
         // GIVEN controller is initialized
         mController.init();
@@ -206,6 +226,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that a successful xform fetch hides the loading dialog. */
+    @Test
     public void testXformLoadSucceeded_HidesLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -216,6 +237,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that errors in xform submission are reported to the user. */
+    @Test
     public void testXformSubmitFailed_ShowsErrorMessage() {
         // GIVEN controller is initialized
         mController.init();
@@ -228,6 +250,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     // TODO/completeness: Test that starting an xform submission shows the submission dialog.
 
     /** Tests that errors in xform submission hide the submission dialog. */
+    @Test
     public void testXformSubmitFailed_HidesSubmissionDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -238,6 +261,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     }
 
     /** Tests that successful xform submission hides the submission dialog. */
+    @Test
     public void testXformSubmitSucceeded_EventuallyHidesSubmissionDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -250,8 +274,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         verify(mMockUi).showFormSubmissionDialog(false);
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         mFakeCrudEventBus = new FakeEventBus();

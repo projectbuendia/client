@@ -11,8 +11,13 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
+import androidx.test.filters.SmallTest;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
@@ -21,17 +26,21 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /** Tests for {@link PatientListController}. */
-public class PatientListControllerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class PatientListControllerTest {
     private PatientListController mController;
     private FakeEventBus mFakeEventBus;
     @Mock private SyncManager mMockSyncManager;
     @Mock private PatientListController.Ui mMockUi;
 
     /** Tests whether refreshing results in a sync. */
+    @Test
     public void testRefresh_RequestsSync() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -42,6 +51,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that refreshing multiple times in quick succession results in only one sync. */
+    @Test
     public void testRefresh_PreventsMultipleSimultaneousSyncs() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -53,6 +63,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that refreshing again after a first successful sync results in a new sync. */
+    @Test
     public void testRefresh_AllowsMultipleSequentialSyncsAfterSuccess() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -65,6 +76,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that refreshing again after a first failed sync results in a new sync. */
+    @Test
     public void testRefresh_AllowsMultipleSequentialSyncsAfterFailure() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -77,6 +89,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the PatientListController listens for events when initialized. */
+    @Test
     public void testInit_EnablesEventBusListener() {
         // GIVEN PatientListController
         // WHEN initialized
@@ -86,6 +99,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the PatientListController stops listening for events when suspended. */
+    @Test
     public void testSuspend_DisablesEventBusListener() {
         // GIVEN suspended PatientListController
         mController.init();
@@ -98,6 +112,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the failure of a requested sync results in an error being displayed. */
+    @Test
     public void testForcedSyncFailure_DisplaysSyncError() {
         // GIVEN initialized PatientListController with a forced sync
         mController.init();
@@ -110,6 +125,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that a background sync does not result in a sync error being displayed. */
+    @Test
     public void testBackgroundSyncFailure_DoesNotDisplaySyncError() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -121,6 +137,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that a successful sync hides the refresh indicator. */
+    @Test
     public void testSyncSuccess_StopsRefresh() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -132,6 +149,7 @@ public class PatientListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that a failed sync hides the refresh indicator. */
+    @Test
     public void testSyncFailure_StopsRefresh() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -142,8 +160,8 @@ public class PatientListControllerTest extends AndroidTestCase {
         verify(mMockUi).stopRefreshAnimation();
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         mFakeEventBus = new FakeEventBus();

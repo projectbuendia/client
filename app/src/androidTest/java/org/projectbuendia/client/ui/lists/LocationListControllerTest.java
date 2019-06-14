@@ -11,8 +11,8 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import android.test.AndroidTestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
@@ -28,12 +28,15 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.FakeEventBus;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** Tests for {@link LocationListController}. */
-public final class LocationListControllerTest extends AndroidTestCase {
+public final class LocationListControllerTest {
 
     private LocationListController mController;
     private FakeEventBus mFakeEventBus;
@@ -44,6 +47,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     @Mock private PatientSearchController mMockSearchController;
 
     /** Tests that locations are loaded during initialization, when available. */
+    @Test
     public void testInit_RequestsLoadLocationsWhenDataModelAvailable() {
         // GIVEN initialized data model and the controller hasn't previously fetched the location
         // tree
@@ -55,6 +59,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that init does not result in a new sync if data model is available. */
+    @Test
     public void testInit_DoesNotStartSyncWhenDataModelAvailable() {
         // GIVEN initialized data model and the controller hasn't previously fetched the location
         // tree
@@ -66,6 +71,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that init kicks off a sync if the data model is unavailable. */
+    @Test
     public void testInit_StartsSyncWhenDataModelUnavailable() {
         // GIVEN uninitialized data model,the controller hasn't previously fetched the location
         // tree, and no sync is already in progress
@@ -78,6 +84,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that suspend() unregisters any subscribers from the event bus. */
+    @Test
     public void testSuspend_UnregistersFromEventBus() {
         // GIVEN an initialized controller
         mController.init();
@@ -88,6 +95,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the spinner is hidden after locations are loaded. */
+    @Test
     public void testLoadLocations_HidesSpinner() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -101,6 +109,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the spinner is not hidden if locations are loaded but a sync is in progress. */
+    @Test
     public void testLoadLocations_DoesNotHideSpinnerWhenSyncInProgress() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -114,6 +123,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that the spinner is hidden if locations are loaded and a sync is completed. */
+    @Test
     public void testSpinnerHiddenAfterSyncCompletes() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -128,6 +138,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that a sync failure causes the error dialog to appear when no locations are present. */
+    @Test
     public void testSyncFailureShowsErrorDialog_noLocations() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -143,6 +154,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
      * Tests that if, for some reason, a sync succeeds while the sync dialog is showing, the
      * sync dialog disappears and the locations are usable.
      */
+    @Test
     public void testSyncSuccessHidesSyncDialog() {
         // GIVEN an initialized controller with a fragment attached and a failed sync
         mController.init();
@@ -157,6 +169,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that loading an empty location tree results in a new sync if sync has completed. */
+    @Test
     public void testFetchingIncompleteLocationTree_causesNewSync() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -170,6 +183,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that loading an empty location tree does not hide the sync failed dialog. */
+    @Test
     public void testFetchingIncompleteLocationTree_retainsSyncFailedDialog() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -182,6 +196,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that loading an empty location tree does not hide the loading dialog. */
+    @Test
     public void testFetchingIncompleteLocationTree_retainsLoadingDialog() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -194,6 +209,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that loading a populated location tree does not result in a new sync. */
+    @Test
     public void testFetchingPopulatedLocationTree_doesNotCauseNewSync() {
         // GIVEN an initialized controller with a fragment attached
         when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
@@ -210,6 +226,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
      * Tests that attaching a fragment UI does not show the spinner when locations are present,
      * even if a sync is occurring.
      */
+    @Test
     public void testAttachFragmentUi_doesNotShowSpinnerDuringSyncWhenLocationsPresent() {
         // GIVEN an initialized controller with a location tree, with a sync in progress
         mFakeSyncManager.setSyncing(true);
@@ -226,6 +243,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
      * Tests that attaching a fragment UI shows the spinner if performing during a sync,
      * when location tree is empty.
      */
+    @Test
     public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationTreeEmpty() {
         // GIVEN an initialized controller with a location tree, with a sync in progress
         mFakeSyncManager.setSyncing(true);
@@ -242,6 +260,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
      * Tests that attaching a fragment UI shows the spinner if performing during a sync,
      * when location tree is not present.
      */
+    @Test
     public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationsNotPresent() {
         // GIVEN an initialized controller with a sync in progress and no location tree
         mFakeSyncManager.setSyncing(true);
@@ -253,6 +272,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that user-initiated sync cancellation closes the activity. */
+    @Test
     public void testSyncCancellation_closesActivityWhenUserInitiated() {
         // GIVEN an initialized controller and no location tree
         mController.init();
@@ -267,6 +287,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
      * Tests that user-initiated sync cancellation closes the activity even when the data model has
      * become available since cancellation was requested.
      */
+    @Test
     public void testSyncCancellation_closesActivityWhenUserInitiatedAndDataModelAvailable() {
         // GIVEN an initialized controller
         mController.init();
@@ -280,6 +301,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that sync cancellations requested by the Android OS do not close the activity. */
+    @Test
     public void testSyncCancellation_doesNotCloseActivityIfNotUserInitiated() {
         // GIVEN an initialized controller and no location tree
         mController.init();
@@ -290,6 +312,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that 'sync progress' messages are ignored when the data model is already available. */
+    @Test
     public void testSyncProgress_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location tree
         mController.init();
@@ -302,6 +325,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that 'sync failed' messages are ignored when the data model is already available. */
+    @Test
     public void testSyncFailed_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location tree
         mController.init();
@@ -314,6 +338,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     }
 
     /** Tests that 'sync started' messages are ignored when the data model is already available. */
+    @Test
     public void testSyncStarted_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location tree
         mController.init();
@@ -325,8 +350,8 @@ public final class LocationListControllerTest extends AndroidTestCase {
         verify(mMockFragmentUi, times(0)).resetSyncProgress();
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         mFakeEventBus = new FakeEventBus();

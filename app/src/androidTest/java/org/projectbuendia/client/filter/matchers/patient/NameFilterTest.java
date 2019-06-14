@@ -36,6 +36,7 @@ public class NameFilterTest {
     }
 
     /** Tests that name matching works when a matching full name is provided. */
+    @Test
     public void testMatches_exactMatchOnFullName() {
         assertTrue(mNameFilter.matches(getPatientWithName("John", "Doe"), "John Doe"));
     }
