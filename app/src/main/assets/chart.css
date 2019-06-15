@@ -17,6 +17,10 @@ th, td {
   border-top: 1px solid #666;
 }
 
+#grid thead tr:last-child th, #grid thead th.gap {
+  border-bottom: 1px solid #666;
+}
+
 #grid th[scope="row"], #grid td {
   border-bottom: 1px solid #ddd;
 }
@@ -28,7 +32,7 @@ th, td {
 
 #grid .day, #grid .day-last, #grid th[scope="rowgroup"].day-last,
 #grid .gap, #grid th[scope="rowgroup"].gap,
-#grid th[scope="row"], #grid th.corner {
+#grid th[scope="rowgroup"]:first-child, #grid th[scope="row"], #grid th.corner {
   border-right: 1px solid #666;
 }
 

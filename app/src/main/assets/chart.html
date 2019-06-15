@@ -131,7 +131,7 @@
           {% if prevColumn is not null and column.start != prevColumn.stop %}
             <th scope="rowgroup" class="gap" rowspan={{orders.size + 1}}>&nbsp;</th>
           {% endif %}
-          <th scope="rowgroup"></th>
+        <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
           {% set prevColumn = column %}
         {% endfor %}
       </tr>
@@ -144,7 +144,7 @@
           {% set previousActive = false %}
           {% set future = false %}
           {% for column in columns %}
-            <td class="{{column.start == nowColumnStart ? 'now' : ''}}">
+            <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}">
               {% set active = intervals_overlap(order.interval, column.interval) %}
               {% if order.stop == null and previousActive %}
                 <div class="future">&nbsp;</div>
