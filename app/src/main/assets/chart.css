@@ -10,16 +10,36 @@ th, td {
   text-align: left;
   vertical-align: baseline;
 }
+
+/* Grid lines */
 /* TODO: Adding left/right padding >0 breaks frozen headers.  Figure out why. */
+#grid th.day {
+  border-top: 1px solid #666;
+}
+
+#grid thead tr:last-child th, #grid thead th.gap {
+  border-bottom: 1px solid #666;
+}
+
+#grid th[scope="row"], #grid td {
+  border-bottom: 1px solid #ddd;
+}
+
 #grid th, #grid td {
   padding: 0.7em 0 0.8em; /* extra 0.1em on bottom for vertical centering */
-  /* Use linear-gradient to get a border thickness of 1 device pixel. */
-  background-image: linear-gradient(
-      90deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
-  background-size: 1px 100%;
-  background-repeat: no-repeat;
-  background-position: right;
+  border-right: 1px solid #ddd;
 }
+
+#grid .day, #grid .day-last, #grid th[scope="rowgroup"].day-last,
+#grid .gap, #grid th[scope="rowgroup"].gap,
+#grid th[scope="rowgroup"]:first-child, #grid th[scope="row"], #grid th.corner {
+  border-right: 1px solid #666;
+}
+
+#grid th[scope="rowgroup"], #grid th.command {
+  border-right: none;
+}
+
 #grid th[scope="row"] {
   padding-left: 16px;
 }
@@ -39,13 +59,13 @@ th, td {
   font-size: 1.4rem;
   padding: 0.2em 0 0.3em; /* extra 0.1em on bottom for vertical centering */
 }
-#grid .gap {
-  background: #eee;
+#grid th.gap, #grid th[scope="rowgroup"].gap {
+  background: repeating-linear-gradient(45deg, #fff, #fff 10px, #eee 10px, #eee 20px);
 }
 
 /* Row headers: should match @style/text.caps */
 #grid tbody th { white-space: nowrap; }
-#grid tbody th[scope="rowgroup"] {
+#grid th[scope="rowgroup"] {
   text-transform: uppercase;
   font-size: 1.4rem;
   font-weight: bold;
@@ -53,7 +73,7 @@ th, td {
   padding-top: 1.6em;
   padding-left: 16px;
 }
-#grid th:first-child { overflow: hidden; }
+#grid th[scope="row"] { overflow: hidden; }
 /* TODO: Specifying max-width in vw doesn't work here.  Figure out why. */
 #grid th[scope="row"] div { max-width: 24rem; overflow: hidden; }
 
@@ -87,15 +107,6 @@ th, td {
 }
 .tile .caption { /* should match @style/text.caption */
   font-size: 1.4rem;
-}
-
-#tiles, thead tr, #grid tr {
-  /* Use linear-gradient to get a border thickness of 1 device pixel. */
-  background-image: linear-gradient(
-      0deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
-  background-size: 100% 1px;
-  background-repeat: no-repeat;
-  background-position: bottom;
 }
 
 /* In-range / out-of-range colours */

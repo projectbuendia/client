@@ -60,6 +60,16 @@ public class AppSettings {
             mResources.getString(R.string.package_server_root_url_default));
     }
 
+    /** Gets the index of the preferred chart zoom level. */
+    public int getChartZoomIndex() {
+        return mSharedPreferences.getInt("chart_zoom_index", 0);
+    }
+
+    /** Sets the preferred chart zoom level. */
+    public void setChartZoomIndex(int zoom) {
+        mSharedPreferences.edit().putInt("chart_zoom_index", zoom).commit();
+    }
+
     /**
      * Gets the minimum period between checks for APK updates, in seconds.
      * Repeated calls to UpdateManager.checkForUpdate() within this period
@@ -97,5 +107,4 @@ public class AppSettings {
         return mSharedPreferences.getBoolean("require_wifi",
             mResources.getBoolean(R.bool.require_wifi_default));
     }
-
 }

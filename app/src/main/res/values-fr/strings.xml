@@ -43,6 +43,7 @@
   <string name="family_name">Nom de famille</string>
   <string name="action_search">Rechercher</string>
   <string name="action_go_to">Recherche ID</string>
+  <string name="action_zoom">Zoom</string>
   <string name="title_location_list">Emplacements</string>
   <string name="today">Aujourd\'hui</string>
   <string name="today_date">Aujourd\'hui, %s</string>
@@ -109,6 +110,11 @@
   <string name="unknown">Inconnu</string>
   <string name="title_updating_patient">Mise à jour du patient</string>
   <string name="please_wait">Attendez SVP</string>
+
+  <string name="zoom_day">1 colonne par jour</string>
+  <string name="zoom_half">2 colonnes par jour</string>
+  <string name="zoom_third">3 colonnes par jour</string>
+  <string name="zoom_quarter">4 colonnes par jour</string>
 
   <string name="go_to_patient_title">Accédez au dossier du patient</string>
   <string name="go_to_patient_id_label">Patient ID</string>
