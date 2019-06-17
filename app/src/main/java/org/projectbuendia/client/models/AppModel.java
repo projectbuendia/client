@@ -48,8 +48,14 @@ import de.greenrobot.event.NoSubscriberEvent;
  * not need to worry about the implementation details of this.
  */
 public class AppModel {
-    public static final String ORDER_EXECUTED_CONCEPT_UUID = "buendia-concept-order_executed";
     public static final String CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
+
+    // This is a custom Buendia-specific concept to indicate that a treatment order
+    // has been carried out (e.g. a prescribed medication has been administered).
+    // The timestamp of an observation for this concept should be the time the order
+    // was executed, and the value of the observation should be the UUID of the order.
+    public static final String ORDER_EXECUTED_CONCEPT_UUID = "buendia-concept-order_executed";
+
     private static final Logger LOG = Logger.create();
     private final ContentResolver mContentResolver;
     private final LoaderSet mLoaderSet;
