@@ -327,7 +327,7 @@ public class ChartRenderer {
             for (Long startMillis : mColumnsByStartMillis.keySet()) {
                 starts.add(new DateTime(startMillis));
             }
-            int maxEmptyColumns = 3 / getSegmentStartingTimes().length;
+            int maxEmptyColumns = 3 / getSegmentStartTimes().length;
             DateTime prev = starts.get(0);
             for (DateTime next : starts) {
                 if (!next.isAfter(prev.plusDays(maxEmptyColumns))) {
