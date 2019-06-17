@@ -55,14 +55,15 @@ public class SettingsActivity extends PreferenceActivity {
      * arranged in a single list without a left navigation panel.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
-    static final String[] prefKeys = {
+    static final String[] PREF_KEYS = {
         "server",
         "openmrs_user",
         "openmrs_password",
         "openmrs_root_url",
         "package_server_root_url",
         "apk_update_interval_secs",
-        "keep_form_instances_locally",
+        "keep_form_instances",
+        "starting_patient_id",
         "xform_update_client_cache",
         "incremental_observation_update",
         "require_wifi"
@@ -187,7 +188,7 @@ public class SettingsActivity extends PreferenceActivity {
     /** Sets up all the preferences in a fragment. */
     private static void initPrefs(PreferenceFragment fragment) {
         textPrefs.clear();
-        for (String key : prefKeys) {
+        for (String key : PREF_KEYS) {
             initPref(fragment.findPreference(key));
         }
     }
@@ -269,7 +270,7 @@ public class SettingsActivity extends PreferenceActivity {
     /** Sets up all the preferences in an activity. */
     private static void initPrefs(PreferenceActivity activity) {
         textPrefs.clear();
-        for (String key : prefKeys) {
+        for (String key : PREF_KEYS) {
             initPref(activity.findPreference(key));
         }
     }

@@ -4,10 +4,10 @@
     <!-- Whether to save filled in forms locally. Normally we won't want to (the file system will fill up
      but it is useful when developing or debugging -->
     <CheckBoxPreference
-        android:key="keep_form_instances_locally"
-        android:title="@string/pref_title_store_form_instances"
-        android:summary="@string/pref_desc_store_form_instances"
-        android:defaultValue="@bool/keep_form_instances_locally_default" />
+        android:key="keep_form_instances"
+        android:title="@string/pref_title_keep_form_instances"
+        android:summary="@string/pref_desc_keep_form_instances"
+        android:defaultValue="false" />
 
     <!-- Whether to assume that no wifi means no network at all -->
     <CheckBoxPreference
@@ -15,5 +15,12 @@
         android:title="@string/pref_title_require_wifi"
         android:summary="@string/pref_desc_require_wifi"
         android:defaultValue="@bool/require_wifi_default" />
+
+    <!-- Whether to launch directly into a patient chart, for faster UX iteration. -->
+    <EditTextPreference
+        android:key="skip_to_patient_id"
+        android:title="@string/pref_title_skip_to_patient_id"
+        android:summary="@string/pref_desc_skip_to_patient_id"
+        android:defaultValue="" />
 
 </PreferenceScreen>
