@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.chart;
 
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import androidx.test.filters.SmallTest;
@@ -42,6 +43,7 @@ public class PebbleExtensionTest   {
     private static final String TIME_FORMAT = "HH:mm";
 
     @Test
+    @UiThreadTest
     public void testFormatTimeFilter_mustReturnTimeFormattedInDefaultTimeZone() throws Exception {
         mArgs.put("pattern", TIME_FORMAT);
         Filter filter = new  PebbleExtension.FormatTimeFilter();

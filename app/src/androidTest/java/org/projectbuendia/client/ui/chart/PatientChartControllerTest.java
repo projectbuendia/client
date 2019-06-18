@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.chart;
 
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import androidx.test.filters.SmallTest;
@@ -76,6 +77,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that suspend() unregisters from the event bus. */
     @Test
+    @UiThreadTest
     public void testSuspend_UnregistersFromEventBus() {
         // GIVEN an initialized controller
         mController.init();
@@ -87,6 +89,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that init() requests a single patient from the app model. */
     @Test
+    @UiThreadTest
     public void testInit_RequestsPatientDetails() {
         // WHEN the controller is inited
         mController.init();
@@ -96,6 +99,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that observations are updated in the UI when patient details fetched. */
     @Test
+    @UiThreadTest
     public void testPatientDetailsLoaded_SetsObservationsOnUi() {
         // GIVEN the observations provider is set up to return some dummy data
         List<Obs> allObservations =
@@ -124,6 +128,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that the UI is given updated patient data when patient data is fetched. */
     @Test
+    @UiThreadTest
     public void testPatientDetailsLoaded_UpdatesUi() {
         // GIVEN controller is initialized
         mController.init();
@@ -136,6 +141,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that selecting a new general condition results in adding a new encounter. */
     @Test
+    @UiThreadTest
     public void testSetCondition_AddsEncounterForNewCondition() {
         // GIVEN controller is initialized
         mController.init();
@@ -150,6 +156,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */
     @Test
+    @UiThreadTest
     public void testAddObservation_showsLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -161,6 +168,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that requesting an xform through clicking on a vital shows loading dialog. */
     @Test
+    @UiThreadTest
     public void testVitalClick_showsLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -172,6 +180,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that requesting an xform through clicking on test results shows loading dialog. */
     @Test
+    @UiThreadTest
     public void testTestResultsClick_showsLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -183,6 +192,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that the xform can be fetched again if the first fetch fails. */
     @Test
+    @UiThreadTest
     public void testXformLoadFailed_ReenablesXformFetch() {
         // GIVEN controller is initialized
         mController.init();
@@ -194,6 +204,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that an error message is displayed when the xform fails to load. */
     @Test
+    @UiThreadTest
     public void testXformLoadFailed_ShowsError() {
         // GIVEN controller is initialized
         mController.init();
@@ -205,6 +216,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that a failed xform fetch hides the loading dialog. */
     @Test
+    @UiThreadTest
     public void testXformLoadFailed_HidesLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -216,6 +228,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that the xform can be fetched again if the first fetch succeeds. */
     @Test
+    @UiThreadTest
     public void testXformLoadSucceeded_ReenablesXformFetch() {
         // GIVEN controller is initialized
         mController.init();
@@ -227,6 +240,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that a successful xform fetch hides the loading dialog. */
     @Test
+    @UiThreadTest
     public void testXformLoadSucceeded_HidesLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -238,6 +252,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that errors in xform submission are reported to the user. */
     @Test
+    @UiThreadTest
     public void testXformSubmitFailed_ShowsErrorMessage() {
         // GIVEN controller is initialized
         mController.init();
@@ -251,6 +266,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that errors in xform submission hide the submission dialog. */
     @Test
+    @UiThreadTest
     public void testXformSubmitFailed_HidesSubmissionDialog() {
         // GIVEN controller is initialized
         mController.init();
@@ -262,6 +278,7 @@ public final class PatientChartControllerTest {
 
     /** Tests that successful xform submission hides the submission dialog. */
     @Test
+    @UiThreadTest
     public void testXformSubmitSucceeded_EventuallyHidesSubmissionDialog() {
         // GIVEN controller is initialized
         mController.init();

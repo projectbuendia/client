@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import android.support.test.annotation.UiThreadTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -35,6 +37,7 @@ public class PatientFilterControllerTest {
 
     /** Tests that requesting an action bar initialization fetches a location tree. */
     @Test
+    @UiThreadTest
     public void testSetupActionBarAsync_fetchesLocationTree() {
         // GIVEN initialized PatientFilterController
         // WHEN setupActionBarAsync called
@@ -45,6 +48,7 @@ public class PatientFilterControllerTest {
 
     /** Tests that filters are correctly initialized once a location tree is retrieved. */
     @Test
+    @UiThreadTest
     public void testSetupActionBarAsync_passesLocationFilters() {
         // GIVEN initialized PatientFilterController, after setupActionBarAsync called
         mController.setupActionBarAsync();

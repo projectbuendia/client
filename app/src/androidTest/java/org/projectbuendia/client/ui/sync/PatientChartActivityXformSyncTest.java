@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.ui.sync;
 
+import android.support.test.annotation.UiThreadTest;
+
 import com.google.common.base.Optional;
 
 import org.joda.time.LocalDate;
@@ -38,6 +40,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
      * eventually load.
      */
     @Test
+    @UiThreadTest
     public void testXformRetrievedFromServer() {
         /*
         loadChart();

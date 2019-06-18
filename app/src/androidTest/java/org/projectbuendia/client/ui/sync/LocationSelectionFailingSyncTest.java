@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.ui.sync;
 
+import android.support.test.annotation.UiThreadTest;
+
 import org.junit.Test;
 import org.projectbuendia.client.R;
 
@@ -26,6 +28,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that sync failure results in the sync failed dialog appearing. */
     @Test
+    @UiThreadTest
     public void testSyncFailedDialogAppearsWhenSyncFails() {
         setWifiEnabled(false);
         try (WifiDisabler wd = new WifiDisabler()) {
@@ -43,6 +46,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that the back button in the sync failed dialog returns to user selection. */
     @Test
+    @UiThreadTest
     public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
         try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
@@ -59,6 +63,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     @Test
+    @UiThreadTest
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
         setWifiEnabled(false);
         waitForSyncFailure();
@@ -83,7 +88,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     // TODO/robustness: This test is flaky because of a real bug -- Volley is
     // unresponsive to changes in connectivity state, so a sync may not fail
     // for seconds or even minutes after wifi is turned off.
-    /*@Test
+    /*@UiThreadTest
     public void testSyncFailedDialog_RetryButtonRetainsProgressBar() {
         screenshot("Test Start");
         waitForSyncFailure();
@@ -103,6 +108,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     @Test
+    @UiThreadTest
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
         try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
@@ -132,7 +138,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     // TODO/robustness: This test is flaky because of a real bug -- Volley is
     // unresponsive to changes in connectivity state, so a sync may not fail
     // for seconds or even minutes after wifi is turned off.
-    /*@Test
+    /*@UiThreadTest
     public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
         setWifiEnabled(false);
         waitForSyncFailure();

@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.ui.sync;
 
+import android.support.test.annotation.UiThreadTest;
+
 import org.junit.After;
 import org.junit.Test;
 import org.projectbuendia.client.App;
@@ -36,6 +38,7 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
 
     /** Tests that sync failure results in the sync failed dialog appearing. */
     @Test
+    @UiThreadTest
     public void testSyncFailedDialogAppearsWhenSyncFails() {
         screenshot("Test Start");
         expectVisible(viewWithText(R.string.user_sync_failed_dialog_message));
@@ -49,6 +52,7 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
 
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     @Test
+    @UiThreadTest
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
         screenshot("Test Start");
         expectVisible(viewWithText(R.string.sync_failed_settings));
@@ -63,6 +67,7 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     @Test
+    @UiThreadTest
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
         screenshot("Test Start");
         expectVisible(viewWithText(R.string.sync_failed_retry));

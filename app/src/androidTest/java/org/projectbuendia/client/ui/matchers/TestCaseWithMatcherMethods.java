@@ -35,10 +35,10 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static org.hamcrest.Matchers.allOf;
 
 /** Matchers for {@link View}s. */
-public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTestRule {
+public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTestRule<T> {
 
     public TestCaseWithMatcherMethods(Class<T> startingActivity) {
-        super(startingActivity);
+        super(startingActivity, true, true);
     }
 
     // More concise ways of expressing common constructions like

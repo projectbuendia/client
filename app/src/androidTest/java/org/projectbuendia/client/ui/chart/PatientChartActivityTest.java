@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.chart;
 
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.ViewInteraction;
@@ -76,6 +77,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      */
     /*
     @Test
+    @UiThreadTest
     public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
         inUserLoginGoToDemoPatientChart();
         click(viewWithId(R.id.patient_chart_vital_general_parent));
@@ -99,6 +101,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Tests that the encounter form can be opened more than once. */
     @Test
+    @UiThreadTest
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
         inUserLoginGoToDemoPatientChart();
         // Load the form once and dismiss it
@@ -115,7 +118,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * TODO/completeness: Currently disabled. Re-enable once date picker
      * selection works (supposedly works in Espresso 2.0).
      */
-    /*@Test
+    /*@UiThreadTest
     public void testPatientChart_ShowsCorrectAdmissionDate() {
         mDemoPatient.admissionDate = Optional.of(DateTime.now().minusDays(5));
         inUserLoginGoToDemoPatientChart();
@@ -130,7 +133,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * TODO/completeness: Currently disabled. Re-enable once date picker
      * selection works (supposedly works in Espresso 2.0).
      */
-    /*@Test
+    /*@UiThreadTest
     public void testPatientChart_ShowsCorrectSymptomsOnsetDate() {
         inUserLoginGoToDemoPatientChart();
         expectVisible(viewThat(
@@ -144,7 +147,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * TODO/completeness: Currently disabled. Re-enable once date picker
      * selection works (supposedly works in Espresso 2.0).
      */
-     /*@Test
+     /*@UiThreadTest
     public void testPatientChart_ShowsAllDaysInChartWhenNoObservations() {
         inUserLoginGoToDemoPatientChart();
         expectVisibleWithin(5000, viewThat(hasTextContaining("Today (Day 6)")));
@@ -155,7 +158,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     // scrolling correctly with no adapter view.
 
     /** Tests that encounter time can be set to a date in the past and still displayed correctly. */
-    /*@Test
+    /*@UiThreadTest
     public void testCanSubmitObservationsInThePast() {
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
@@ -172,7 +175,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
-        ViewInteraction testForm = viewWithText("[test] Form");
+        ViewInteraction testForm = viewWithText("Clinical observation");
         expectVisibleSoon(testForm);
         click(testForm);
         Espresso.registerIdlingResources(xformIdlingResource);
@@ -183,7 +186,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Tests that dismissing a form immediately closes it if no changes have been made. */
     @Test
+    @UiThreadTest
     public void testDismissButtonReturnsImmediatelyWithNoChanges() {
+        getActivity();
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         click(viewWithText("Discard"));
@@ -191,6 +196,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
     @Test
+    @UiThreadTest
     public void testDismissButtonShowsDialogWithChanges() {
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
@@ -258,6 +264,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * period of time, that only the latest encounter is present in the relevant column.
      */
     @Test
+    @UiThreadTest
     public void testEncounter_latestEncounterIsAlwaysShown() {
         inUserLoginGoToDemoPatientChart();
 
@@ -325,6 +332,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Ensures that non-overlapping observations for the same encounter are combined. */
     @Test
+    @UiThreadTest
     public void testCombinesNonOverlappingObservationsForSameEncounter() {
         inUserLoginGoToDemoPatientChart();
         waitForProgressFragment();
@@ -394,6 +402,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Exercises all fields in the encounter form, except for encounter time. */
     @Test
+    @UiThreadTest
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
         inUserLoginGoToDemoPatientChart();
         waitForProgressFragment();

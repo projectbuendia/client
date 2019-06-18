@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import androidx.test.filters.SmallTest;
@@ -60,6 +61,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that results are reloaded when a sync event occurs. */
     @Test
+    @UiThreadTest
     public void testSyncSubscriber_reloadsResults() {
         // GIVEN initialized PatientSearchController
         // WHEN a sync event completes
@@ -71,6 +73,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that results are reloaded when a sync event occurs. */
     @Test
+    @UiThreadTest
     public void testSyncSubscriber_doesNotShowSpinnerDuringReload() {
         // GIVEN initialized PatientSearchController
         // WHEN a sync event completes
@@ -81,6 +84,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that patients are passed to fragment UI's after retrieval. */
     @Test
+    @UiThreadTest
     public void testFilterSubscriber_passesPatientsToFragments() {
         // GIVEN initialized PatientSearchController
         mController.loadSearchResults();
@@ -99,6 +103,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that patients are passed to the activity UI after retrieval. */
     @Test
+    @UiThreadTest
     public void testFilterSubscriber_passesPatientsToActivity() {
         // GIVEN initialized PatientSearchController
         mController.loadSearchResults();
@@ -112,6 +117,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that any old patient cursor is closed after results are reloaded. */
     @Test
+    @UiThreadTest
     public void testFilterSubscriber_closesExistingPatientCursor() {
         // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
@@ -129,6 +135,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that retrieving a new cursor results in the closure of any existing cursor. */
     @Test
+    @UiThreadTest
     public void testSuspend_closesExistingPatientCursor() {
         // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
@@ -143,6 +150,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that suspend() does not attempt to close a null cursor. */
     @Test
+    @UiThreadTest
     public void testSuspend_ignoresNullPatientCursor() {
         // GIVEN initialized PatientSearchController with no search results
         // WHEN controller is suspended
@@ -152,6 +160,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that search results are loaded properly after a cycle of init() and suspend(). */
     @Test
+    @UiThreadTest
     public void testLoadSearchResults_functionalAfterInitSuspendCycle() {
         // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
@@ -175,6 +184,7 @@ public class PatientSearchControllerTest {
      * is retrieved.
      */
     @Test
+    @UiThreadTest
     public void testLoadSearchResults_waitsOnLocations() {
         // GIVEN PatientSearchController with a location filter and no locations available
         mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
@@ -190,6 +200,7 @@ public class PatientSearchControllerTest {
      * tree is retrieved.
      */
     @Test
+    @UiThreadTest
     public void testLoadSearchResults_fetchesFilteredPatientsOnceLocationsPresent() {
         // GIVEN PatientSearchController with locations available and specified Triage root
         mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
@@ -208,6 +219,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that the spinner is shown when loadSearchResults() is called. */
     @Test
+    @UiThreadTest
     public void testLoadSearchResults_showsSpinner() {
         // GIVEN initialized PatientSearchController
         // WHEN search results are requested
@@ -218,6 +230,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that the spinner is shown when loadSearchResults() is called. */
     @Test
+    @UiThreadTest
     public void testLoadSearchResults_hidesSpinnerWhenRequested() {
         // GIVEN initialized PatientSearchController
         // WHEN search results are requested with no spinner
@@ -228,6 +241,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that the spinner is hidden after results are retrieved. */
     @Test
+    @UiThreadTest
     public void testFilterSubscriber_hidesSpinner() {
         // GIVEN initialized PatientSearchController
         mController.loadSearchResults();
@@ -242,6 +256,7 @@ public class PatientSearchControllerTest {
 
     /** Tests that the controller correctly filters when the search term changes. */
     @Test
+    @UiThreadTest
     public void testOnQuerySubmitted_filtersBySearchTerm() {
         // GIVEN initialized PatientSearchController with no root location
         // WHEN search term changes

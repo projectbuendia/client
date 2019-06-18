@@ -18,14 +18,14 @@ import android.support.test.runner.AndroidJUnit4;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 
+import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.Espresso.pressBack;
 import static junit.framework.TestCase.assertTrue;
 
 /** Tests for adding a new patient. */
@@ -33,10 +33,6 @@ import static junit.framework.TestCase.assertTrue;
 @SmallTest
 public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
-    @Before
-    public void setUp() {
-        getActivity();
-    }
     /**
      * Tests adding a new patient;
      * Tests adding a location to the patient;
@@ -44,6 +40,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
      * Test last observation date;
      * Test admission date;
      */
+    @Test
     @UiThreadTest
     public void testNewPatient() {
         // Create the patient
@@ -75,6 +72,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
             hasText("Day 1")));
     }
 
+    @Test
     @UiThreadTest
     public void testPatientCreation() throws Throwable {
         inUserLoginGoToPatientCreation();

@@ -13,6 +13,8 @@ package org.projectbuendia.client.ui.sync;
 
 import android.support.test.espresso.Espresso;
 
+import androidx.test.annotation.UiThreadTest;
+
 import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
@@ -29,6 +31,7 @@ public class InitialSyncTest extends SyncTestCase {
 
     /** Expects zones and tents to appear within Espresso's idling period (60s). */
     @Test
+    @UiThreadTest
     public void testZonesAndTentsDisplayed() {
         screenshot("Before Sync Completed");
         waitForProgressFragment();
@@ -37,6 +40,7 @@ public class InitialSyncTest extends SyncTestCase {
 
     /** Tests that search functionality works right after initial sync. */
     @Test
+    @UiThreadTest
     public void testSearchAfterSync() {
         screenshot("Before Sync Completed");
 
@@ -54,6 +58,7 @@ public class InitialSyncTest extends SyncTestCase {
 
     /** Tests the behavior of the sync cancel button. */
     @Test
+    @UiThreadTest
     public void testSyncCancelButton() {
         // Cancel the sync.
         EventBusIdlingResource<SyncCanceledEvent> syncCanceledResource =

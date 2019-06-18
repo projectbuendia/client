@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.ui.login;
 
+import android.support.test.annotation.UiThreadTest;
+
 import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
@@ -23,6 +25,7 @@ public class LoginActivityTest extends FunctionalTestCase {
 
     /** Adds a new user and logs in. */
     @Test
+    @UiThreadTest
     public void testAddUser() {
         screenshot("Test Start");
         final long n = new Date().getTime()%100000;
@@ -54,6 +57,7 @@ public class LoginActivityTest extends FunctionalTestCase {
 
     /** Logs in as the guest user and logs out. */
     @Test
+    @UiThreadTest
     public void testGuestLoginLogout() {
         // Click guest user
         expectVisible(viewWithText("GU"));

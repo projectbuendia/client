@@ -11,6 +11,9 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import android.support.test.annotation.UiThreadTest;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Patient;
@@ -22,6 +25,7 @@ import static org.hamcrest.Matchers.is;
 /** Tests for {@link FilteredPatientListActivity}. */
 public class FilteredPatientListActivityTest extends FunctionalTestCase {
 
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         click(viewWithText("Guest User"));
@@ -36,7 +40,9 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
 
     /** Looks for the filter menu. */
     @Test
+    @UiThreadTest
     public void testFilterMenu() {
+        getActivity();
         openPatientList();
         screenshot("Test Start");
         click(viewWithText("All present patients"));
@@ -48,6 +54,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
 
     /** Looks for one zone heading and at least one patient. */
     @Test
+    @UiThreadTest
     public void testZoneAndPatientDisplayed() {
         openPatientList();
         screenshot("Test Start");

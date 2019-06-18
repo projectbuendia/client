@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import androidx.test.filters.SmallTest;
@@ -41,6 +42,7 @@ public class PatientListControllerTest {
 
     /** Tests whether refreshing results in a sync. */
     @Test
+    @UiThreadTest
     public void testRefresh_RequestsSync() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -52,6 +54,7 @@ public class PatientListControllerTest {
 
     /** Tests that refreshing multiple times in quick succession results in only one sync. */
     @Test
+    @UiThreadTest
     public void testRefresh_PreventsMultipleSimultaneousSyncs() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -64,6 +67,7 @@ public class PatientListControllerTest {
 
     /** Tests that refreshing again after a first successful sync results in a new sync. */
     @Test
+    @UiThreadTest
     public void testRefresh_AllowsMultipleSequentialSyncsAfterSuccess() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -77,6 +81,7 @@ public class PatientListControllerTest {
 
     /** Tests that refreshing again after a first failed sync results in a new sync. */
     @Test
+    @UiThreadTest
     public void testRefresh_AllowsMultipleSequentialSyncsAfterFailure() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -90,6 +95,7 @@ public class PatientListControllerTest {
 
     /** Tests that the PatientListController listens for events when initialized. */
     @Test
+    @UiThreadTest
     public void testInit_EnablesEventBusListener() {
         // GIVEN PatientListController
         // WHEN initialized
@@ -100,6 +106,7 @@ public class PatientListControllerTest {
 
     /** Tests that the PatientListController stops listening for events when suspended. */
     @Test
+    @UiThreadTest
     public void testSuspend_DisablesEventBusListener() {
         // GIVEN suspended PatientListController
         mController.init();
@@ -113,6 +120,7 @@ public class PatientListControllerTest {
 
     /** Tests that the failure of a requested sync results in an error being displayed. */
     @Test
+    @UiThreadTest
     public void testForcedSyncFailure_DisplaysSyncError() {
         // GIVEN initialized PatientListController with a forced sync
         mController.init();
@@ -126,6 +134,7 @@ public class PatientListControllerTest {
 
     /** Tests that a background sync does not result in a sync error being displayed. */
     @Test
+    @UiThreadTest
     public void testBackgroundSyncFailure_DoesNotDisplaySyncError() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -138,6 +147,7 @@ public class PatientListControllerTest {
 
     /** Tests that a successful sync hides the refresh indicator. */
     @Test
+    @UiThreadTest
     public void testSyncSuccess_StopsRefresh() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -150,6 +160,7 @@ public class PatientListControllerTest {
 
     /** Tests that a failed sync hides the refresh indicator. */
     @Test
+    @UiThreadTest
     public void testSyncFailure_StopsRefresh() {
         // GIVEN initialized PatientListController
         mController.init();

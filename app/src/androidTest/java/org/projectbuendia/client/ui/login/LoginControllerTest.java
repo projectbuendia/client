@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.login;
 
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import androidx.test.filters.SmallTest;
@@ -54,6 +55,7 @@ public class LoginControllerTest {
 
     /** Tests that init() attempts to load known users. */
     @Test
+    @UiThreadTest
     public void testInit_SetsKnownUserLoadGoing() {
         // WHEN the controller is inited
         mController.init();
@@ -63,6 +65,7 @@ public class LoginControllerTest {
 
     /** Tests that suspend() unregisters subscribers from the event bus. */
     @Test
+    @UiThreadTest
     public void testSuspend_UnregistersFromEventBus() {
         // GIVEN an initialized controller
         mController.init();
@@ -74,6 +77,7 @@ public class LoginControllerTest {
 
     /** Tests that the UI updates when users are loaded. */
     @Test
+    @UiThreadTest
     public void testKnownUsersLoadedEvent_UpdatesUi() throws Exception {
         // GIVEN the controller is inited
         mController.init();
@@ -86,6 +90,7 @@ public class LoginControllerTest {
 
     /** Tests that settings are shown when requested. */
     @Test
+    @UiThreadTest
     public void testSettingsPress_ShowsSettings() {
         // GIVEN an inited controller
         mController.init();
@@ -97,6 +102,7 @@ public class LoginControllerTest {
 
     /** Tests that selecting a user causes a transition to the tent selection screen. */
     @Test
+    @UiThreadTest
     public void testSelectingUser_SetsUserAndOpensTentSelection() throws Exception {
         // GIVEN an controller inited controller with users loaded
         mController.init();
@@ -112,6 +118,7 @@ public class LoginControllerTest {
 
     /** Tests that spinner is shown when the controller is first initialized. */
     @Test
+    @UiThreadTest
     public void testInit_showsSpinner() {
         // WHEN controller is inited
         mController.init();
@@ -121,6 +128,7 @@ public class LoginControllerTest {
 
     /** Tests that successful user load hides the spinner. */
     @Test
+    @UiThreadTest
     public void testUsersLoaded_hidesSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -133,6 +141,7 @@ public class LoginControllerTest {
 
     /** Tests that the sync failed dialog appears when loading users fails. */
     @Test
+    @UiThreadTest
     public void testUserLoadFails_showsSyncFailedDialog() {
         // GIVEN initialized controller
         mController.init();
@@ -144,6 +153,7 @@ public class LoginControllerTest {
 
     /** Tests that the sync failed dialog is hidden when users are successfully loaded. */
     @Test
+    @UiThreadTest
     public void testUserLoaded_hidesSyncFailedDialog() {
         // GIVEN initialized controller
         mController.init();
@@ -156,6 +166,7 @@ public class LoginControllerTest {
 
     /** Tests that users are requested when a retry is requested. */
     @Test
+    @UiThreadTest
     public void testOnSyncRetry_requestsUsers() {
         // GIVEN initialized controller
         mController.init();
@@ -168,6 +179,7 @@ public class LoginControllerTest {
 
     /** Tests that the spinner is shown when a retry is requested. */
     @Test
+    @UiThreadTest
     public void testOnSyncRetry_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -180,6 +192,7 @@ public class LoginControllerTest {
 
     /** Tests that the spinner is hidden whenever a user is added. */
     @Test
+    @UiThreadTest
     public void testOnUserAdded_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -192,6 +205,7 @@ public class LoginControllerTest {
 
     /** Tests that the spinner is hidden whenever a user add operation fails. */
     @Test
+    @UiThreadTest
     public void testOnUserAddFailed_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
@@ -204,6 +218,7 @@ public class LoginControllerTest {
 
     /** Tests that users are reloaded if the server becomes healthy and users are unavailable. */
     @Test
+    @UiThreadTest
     public void testOnServerHealthy_reloadsUsersIfNotAvailable() {
         // GIVEN initialized controller, no users loaded, server unhealthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(false);
@@ -219,6 +234,7 @@ public class LoginControllerTest {
 
     /** Tests that users are not reloaded if the server becomes healthy and users are available. */
     @Test
+    @UiThreadTest
     public void testOnServerHealthy_doesNothingIfUsersAvailable() {
         // GIVEN initialized controller, users loaded, server unhealthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(false);
@@ -238,6 +254,7 @@ public class LoginControllerTest {
      * unhealthy.
      */
     @Test
+    @UiThreadTest
     public void testOnTroubleshootingActionsChanged_checksServerHealthy() {
         // GIVEN initialized controller, no users loaded, server unhealthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(false);
