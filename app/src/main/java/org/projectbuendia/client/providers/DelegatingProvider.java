@@ -17,7 +17,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import net.sqlcipher.database.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteOpenHelper;
 
 /** A {@link ContentProvider} that delegates responsibility to {@link ProviderDelegate}s. */
 abstract class DelegatingProvider<T extends SQLiteOpenHelper> extends ContentProvider {

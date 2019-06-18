@@ -15,7 +15,7 @@ import android.content.UriMatcher;
 import android.net.Uri;
 import android.util.SparseArray;
 
-import net.sqlcipher.database.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

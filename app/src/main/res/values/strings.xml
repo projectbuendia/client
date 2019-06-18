@@ -46,6 +46,7 @@
   <string name="action_search">Search</string>
   <string name="action_edit">Edit</string>
   <string name="action_go_to">Search by ID</string>
+  <string name="action_zoom">Zoom</string>
   <string name="title_location_list">Locations</string>
   <string name="today">Today</string>
   <string name="today_date">Today, %s</string>
@@ -116,6 +117,13 @@
   <string name="unknown">Unknown</string>
   <string name="title_updating_patient">Updating patient</string>
   <string name="please_wait">Please wait&#8230;</string>
+
+  <string name="title_zoom">Set zoom level</string>
+  <string name="zoom_day">1 column per day</string>
+  <string name="zoom_half">2 columns per day</string>
+  <string name="zoom_third">3 columns per day</string>
+  <string name="zoom_quarter">4 columns per day</string>
+  <string name="zoom_sixth">6 columns per day</string>
 
   <string name="go_to_patient_title">Go to patient chart</string>
   <string name="go_to_patient_id_label">Patient ID</string>
@@ -313,7 +321,7 @@
   <string name="given_name_hint_unknown">–</string>
   <string name="unknown_name">–</string>
 
-  <!-- UI strings related to settings (see default_settings.xml for default values) -->
+  <!-- UI strings related to settings -->
   <string name="title_activity_settings">Settings</string>
 
   <!-- Settings pages -->
@@ -329,10 +337,12 @@
   <string name="pref_title_package_server_url">Package server URL</string>
 
   <string name="pref_title_apk_update_interval_secs">APK update check interval (seconds)</string>
-  <string name="pref_title_store_form_instances">Store form instances locally</string>
-  <string name="pref_desc_store_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
+  <string name="pref_title_keep_form_instances">Store form instances locally</string>
+  <string name="pref_desc_keep_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
   <string name="pref_title_require_wifi">Require wifi connection</string>
   <string name="pref_desc_require_wifi">Turn this off to allow the app to work with non-wifi (emulated or Bluetooth tethered) networking.</string>
+  <string name="pref_title_skip_to_patient_id">Start with patient ID</string>
+  <string name="pref_desc_skip_to_patient_id">Set an ID here to go directly to a patient chart on startup.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>
