@@ -43,6 +43,7 @@
   <string name="family_name">Nom de famille</string>
   <string name="action_search">Rechercher</string>
   <string name="action_go_to">Recherche ID</string>
+  <string name="action_zoom">Zoom</string>
   <string name="title_location_list">Emplacements</string>
   <string name="today">Aujourd\'hui</string>
   <string name="today_date">Aujourd\'hui, %s</string>
@@ -109,6 +110,12 @@
   <string name="unknown">Inconnu</string>
   <string name="title_updating_patient">Mise à jour du patient</string>
   <string name="please_wait">Attendez SVP</string>
+
+  <string name="zoom_day">1 colonne par jour</string>
+  <string name="zoom_half">2 colonnes par jour</string>
+  <string name="zoom_third">3 colonnes par jour</string>
+  <string name="zoom_quarter">4 colonnes par jour</string>
+  <string name="zoom_sixth">6 colonnes par jour</string>
 
   <string name="go_to_patient_title">Accédez au dossier du patient</string>
   <string name="go_to_patient_id_label">Patient ID</string>
@@ -301,7 +308,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_validation_future_onset_date">Symptôme date de début ne peut pas être dans l\'avenir.</string>
   <string name="patient_creation_clear_symptom_onset_date">Nettoyer</string>
 
-  <!-- UI strings related to settings (see default_settings.xml for default values) -->
+  <!-- UI strings related to settings -->
   <string name="title_activity_settings">Paramètres</string>
 
   <!-- Settings pages -->
@@ -317,10 +324,12 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_package_server_url">URL du serveur des packages</string>
 
   <string name="pref_title_apk_update_interval_secs">APK mise à jour intervalle de vérification (secondes)</string>
-  <string name="pref_title_store_form_instances">Instances de formulaire de stocker localement</string>
-  <string name="pref_desc_store_form_instances">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
+  <string name="pref_title_keep_form_instances">Instances de formulaire de stocker localement</string>
+  <string name="pref_desc_keep_form_instances">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
   <string name="pref_title_require_wifi">Exiger connexion wifi</string>
   <string name="pref_desc_require_wifi">Désactivez cette option pour permettre l\'application de travailler avec des non-wifi (ou émulé captif Bluetooth) en réseau.</string>
+  <string name="pref_title_skip_to_patient_id">Commencer avec le dossier du patient avec l\'ID</string>
+  <string name="pref_desc_skip_to_patient_id">Entrez un ID du patient pour ouvrir l\'application avec le dossier du patient</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Appliquer et effacer les données locales</string>
@@ -333,7 +342,6 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="Medication_and_dosage">Médicaments et posologie</string>
   <string name="title_new_user">Nouvel utilisateur</string>
   <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
-  <string name="title_dashboard">Console</string>
   <string name="order_stop_now">Arrêter maintenant</string>
   <string name="order_delete">Supprimer cette traitement</string>
   <string name="voiding">vide</string>

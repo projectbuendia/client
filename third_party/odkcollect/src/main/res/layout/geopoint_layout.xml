@@ -34,7 +34,7 @@
 			android:paddingBottom="60dip">
 			<Button
 				android:id="@+id/cancel_location"
-				android:drawableRight="@+drawable/ic_menu_close_clear_cancel"
+				android:drawableRight="@drawable/ic_menu_close_clear_cancel"
 				android:padding="15dp"
 				android:layout_margin="5dp"
 				android:layout_width="wrap_content"
@@ -42,7 +42,7 @@
 				android:layout_weight="1" />
 			<Button
 				android:id="@+id/accept_location"
-				android:drawableRight="@+drawable/ic_menu_save"
+				android:drawableRight="@drawable/ic_menu_save"
 				android:padding="15dp"
 				android:layout_margin="5dp"
 				android:layout_width="wrap_content"
@@ -50,7 +50,7 @@
 				android:layout_weight="1" />
 			<Button
 				android:id="@+id/reload_location"
-				android:drawableRight="@+drawable/ic_menu_refresh"
+				android:drawableRight="@drawable/ic_menu_refresh"
 				android:padding="15dp"
 				android:layout_margin="5dp"
 				android:layout_width="wrap_content"
@@ -67,7 +67,7 @@
 				android:visibility="gone" />
 			<Button
 				android:id="@+id/refresh_location"
-				android:drawableRight="@+drawable/ic_menu_refresh"
+				android:drawableRight="@drawable/ic_menu_refresh"
 				android:padding="15dp"
 				android:layout_margin="5dp"
 				android:layout_width="wrap_content"

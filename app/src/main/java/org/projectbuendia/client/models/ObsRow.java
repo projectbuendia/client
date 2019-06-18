@@ -28,7 +28,7 @@ public class ObsRow implements Parcelable {
         DateTimeFormatter fmtDay = DateTimeFormat.forPattern("dd MMM yyyy");
         day =  fmtDay.print(new DateTime(Millis));
 
-        DateTimeFormatter fmtTime = DateTimeFormat.forPattern("HH:MM");
+        DateTimeFormatter fmtTime = DateTimeFormat.forPattern("HH:mm");
         time =  fmtTime.print(new DateTime(Millis));
 
         uuid = Uuid;

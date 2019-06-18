@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui;
 
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,6 +27,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+
+import com.joanzapata.android.iconify.IconDrawable;
+import com.joanzapata.android.iconify.Iconify;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -93,7 +97,12 @@ public abstract class BaseActivity extends FragmentActivity {
         sScaleStep = newScaleStep;
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
         finish();
-        startActivity(getIntent());
+        startActivity(getIntent(), ActivityOptions.makeCustomAnimation(getApplicationContext(), 0, 0).toBundle());
+    }
+
+    public IconDrawable createIcon(Iconify.IconValue icon, int color) {
+        int iconSizePx = (int) (36 * getResources().getDisplayMetrics().scaledDensity);
+        return new IconDrawable(this, icon).color(color).sizePx(iconSizePx);
     }
 
     @Override public void setContentView(int layoutResId) {

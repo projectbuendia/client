@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +19,10 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.ui.BigToast;
+import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.Nullable;
 
@@ -37,18 +39,12 @@ public final class AssignGeneralConditionDialog
     private final Context mContext;
     @Nullable private final String mCurrentConditionUuid;
     private final ConditionSelectedCallback mConditionSelectedCallback;
-    private ProgressDialog mProgressDialog;
 
     // TODO: Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
     public interface ConditionSelectedCallback {
-        /**
-         * Called when then user selects a general condition that is not the currently selected one.
-         * @return whether to immediately dismiss the dialog. If {@code false}, the dialog will
-         * disable further button presses and display a progress spinner until
-         * {@link org.projectbuendia.client.ui.chart.AssignGeneralConditionDialog#dismiss} is called.
-         */
-        boolean onNewConditionSelected(String newConditionUuid);
+        /** Called when then user selects a general condition other than the current one. */
+        void onNewConditionSelected(String newConditionUuid);
     }
 
     /**
@@ -90,18 +86,55 @@ public final class AssignGeneralConditionDialog
         mDialog.show();
     }
 
+    /**
+     * Notifies the dialog that updating the patient's location has failed.
+     * @param event The EncounterAddFailedEvent for the current failure.
+     */
+    public void onEncounterAddFailed(EncounterAddFailedEvent event) {
+        mAdapter.setSelectedConditionUuid(mCurrentConditionUuid);
+
+        int messageId;
+        String exceptionMessage = event.exception.getMessage();
+        switch (event.reason) {
+            case FAILED_TO_AUTHENTICATE:
+                messageId = R.string.encounter_add_failed_to_authenticate;
+                break;
+            case FAILED_TO_FETCH_SAVED_OBSERVATION:
+                messageId = R.string.encounter_add_failed_to_fetch_saved;
+                break;
+            case FAILED_TO_SAVE_ON_SERVER:
+                messageId = R.string.encounter_add_failed_to_saved_on_server;
+                break;
+            case FAILED_TO_VALIDATE:
+                messageId = R.string.encounter_add_failed_invalid_encounter;
+                // Validation reason typically starts after the message below.
+                exceptionMessage = exceptionMessage.replaceFirst(
+                    ".*failed to validate with reason: .*: ", "");
+                break;
+            case INTERRUPTED:
+                messageId = R.string.encounter_add_failed_interrupted;
+                break;
+            case INVALID_NUMBER_OF_OBSERVATIONS_SAVED: // Hard to communicate to the user.
+            case UNKNOWN_SERVER_ERROR:
+                messageId = R.string.encounter_add_failed_unknown_server_error;
+                break;
+            case UNKNOWN:
+            default:
+                messageId = R.string.encounter_add_failed_unknown_reason;
+        }
+        BigToast.show(mContext, messageId, exceptionMessage);
+    }
+
     @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mAdapter == null) return;
 
+        Utils.logUserAction("condition_assigned");
         String newConditionUuid = mAdapter.getItem(position);
         mAdapter.setSelectedConditionUuid(newConditionUuid);
-        mProgressDialog = ProgressDialog.show(mContext,
-            mContext.getResources().getString(R.string.title_updating_patient),
-            mContext.getResources().getString(R.string.please_wait), true);
-        if (isCurrentCondition(newConditionUuid)
-            || mConditionSelectedCallback.onNewConditionSelected(newConditionUuid)) {
-            dismiss();
+        if (!isCurrentCondition(newConditionUuid)) {
+            mConditionSelectedCallback.onNewConditionSelected(newConditionUuid);
         }
+        dismiss();
     }
 
     private boolean isCurrentCondition(String newConditionUuid) {
@@ -111,8 +144,6 @@ public final class AssignGeneralConditionDialog
 
     /** Dismisses the dialog. */
     public void dismiss() {
-        mProgressDialog.dismiss();
-
         if (mDialog != null) {
             mDialog.dismiss();
         }

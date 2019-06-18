@@ -24,6 +24,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.ProgressFragment;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public final class LocationListFragment extends ProgressFragment {
     @InjectView(R.id.location_selection_triage) SubtitledButtonView mTriageButton;
     @InjectView(R.id.location_selection_discharged) SubtitledButtonView mDischargedButton;
 
+    private static final Logger LOG = Logger.create();
     private LocationListController mController;
     private final Ui mUi = new Ui();
     private LocationListAdapter mAdapter;
@@ -63,11 +65,19 @@ public final class LocationListFragment extends ProgressFragment {
     @Override public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         mController = ((LocationListActivity) getActivity()).getController();
-        mController.attachFragmentUi(mUi);
+        if (mController == null) {
+            LOG.w("No controller for " + getActivity().getClass().getSimpleName());
+        } else {
+            mController.attachFragmentUi(mUi);
+        }
     }
 
     @Override public void onDestroyView() {
-        mController.detachFragmentUi(mUi);
+        if (mController == null) {
+            LOG.w("No controller for " + getActivity().getClass().getSimpleName());
+        } else {
+            mController.detachFragmentUi(mUi);
+        }
         super.onDestroyView();
     }
 

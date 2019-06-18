@@ -102,10 +102,9 @@ public class PatientAttributeView extends LinearLayout {
     }
 
     /** Sets a {@link Drawable} for use as an icon. */
-    public PatientAttributeView setIconDrawable(Drawable drawable) {
+    public PatientAttributeView setIcon(Drawable drawable) {
         mImageView.setVisibility(VISIBLE);
         mImageView.setImageDrawable(drawable);
-
         return this;
     }
 }

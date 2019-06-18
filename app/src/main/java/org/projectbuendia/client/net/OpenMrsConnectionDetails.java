@@ -68,7 +68,7 @@ public class OpenMrsConnectionDetails {
         String username, String password, Map<String, String> params) {
         String creds = String.format("%s:%s", username, password);
         String encoded = Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
-        params.put("Authorization", "Basic " + encoded);
+        params.put("Authorization", "Basic " + encoded.trim());
         return params;
     }
 

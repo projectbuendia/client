@@ -32,16 +32,36 @@
   <table id="grid" cellspacing="0" cellpadding="0">
     <thead>
       <tr>
-        <th> </th>
-        {% set prevColumn = null %}
+        <th class="corner"> </th>
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% if prevColumn is not null and column.start != prevColumn.stop %}
-            <th class="gap" scope="col">&nbsp;</th>
+          {% if column.start != prevStop %}
+            <th class="gap" scope="col" rowspan=2>&nbsp;</th>
           {% endif %}
-          <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
-            {{column.headingHtml | raw}}
+          {% if column.start == column.dayStart %}
+            <th class="day {{column.date == nowDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+              {% if numColumnsPerDay == 1 %}
+                {{column.dayLabel}}
+              {% elseif column.dayLabel is not empty %}
+                {{column.dayLabel}}, {{column.shortDate}}
+              {% else %}
+                {{column.shortDate}}
+              {% endif %}
+            </th>
+          {% endif %}
+          {% set prevStop = column.stop %}
+        {% endfor %}
+      </tr>
+      <tr>
+        <th class="corner"> </th>
+        {% for column in columns %}
+          <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
+            {% if numColumnsPerDay == 1 %}
+              {{column.shortDate}}
+            {% else %}
+              {{column.startHour}}&ndash;{{column.stopHour}}
+            {% endif %}
           </th>
-          {% set prevColumn = column %}
         {% endfor %}
       </tr>
     </thead>
@@ -51,11 +71,12 @@
         <th scope="rowgroup">
           Observations
         </th>
+        {% set prevColumn = null %}
         {% for column in columns %}
           {% if prevColumn is not null and column.start != prevColumn.stop %}
             <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
           {% endif %}
-          <th scope="rowgroup"></th>
+          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
           {% set prevColumn = column %}
         {% endfor %}
       </tr>
@@ -77,7 +98,7 @@
             {% set class = summaryValue | format_values(row.item.cssClass) %}
             {% set style = summaryValue | format_values(row.item.cssStyle) %}
             <td id="cell-{{id}}-{{column.start.millis}}"
-              class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
+              class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
               style="{{style}}"
               onclick="{% if points is not empty%}
                        {% if (row.item.type).string != 'text_icon' %}
@@ -110,7 +131,7 @@
           {% if prevColumn is not null and column.start != prevColumn.stop %}
             <th scope="rowgroup" class="gap" rowspan={{orders.size + 1}}>&nbsp;</th>
           {% endif %}
-          <th scope="rowgroup"></th>
+        <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
           {% set prevColumn = column %}
         {% endfor %}
       </tr>
@@ -123,7 +144,7 @@
           {% set previousActive = false %}
           {% set future = false %}
           {% for column in columns %}
-            <td class="{{column.start == nowColumnStart ? 'now' : ''}}">
+            <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}">
               {% set active = intervals_overlap(order.interval, column.interval) %}
               {% if order.stop == null and previousActive %}
                 <div class="future">&nbsp;</div>

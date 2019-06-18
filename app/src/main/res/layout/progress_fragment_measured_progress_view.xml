@@ -17,20 +17,21 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <ProgressBar
-        android:id="@+id/progress_fragment_progress_bar"
-        android:padding="16dp"
-        android:layout_width="500dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"
-        style="@android:style/Widget.ProgressBar.Horizontal"/>
     <TextView
         android:id="@+id/progress_fragment_label"
         android:padding="16dp"
         android:textAlignment="center"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         tools:text="@string/loading"/>
+
+    <ProgressBar
+        android:id="@+id/progress_fragment_progress_bar"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|center_horizontal"
+        style="@android:style/Widget.ProgressBar.Horizontal"/>
 
 </LinearLayout>

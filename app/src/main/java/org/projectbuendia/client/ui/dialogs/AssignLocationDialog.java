@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
@@ -32,6 +31,7 @@ import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.lists.LocationListAdapter;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,6 @@ public final class AssignLocationDialog
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final Optional<String> mCurrentLocationUuid;
     private final LocationSelectedCallback mLocationSelectedCallback;
-    private ProgressDialog mProgressDialog;
     private LocationTree mLocationTree;
     private boolean mRegistered;
 
@@ -71,7 +70,7 @@ public final class AssignLocationDialog
          * disable further button presses and display a progress spinner until
          * {@link AssignLocationDialog#dismiss} is called.
          */
-        boolean onLocationSelected(String locationUuid);
+        void onLocationSelected(String locationUuid);
     }
 
     /**
@@ -139,38 +138,34 @@ public final class AssignLocationDialog
     public void onPatientUpdateFailed(int reason) {
         mAdapter.setSelectedLocationUuid(mCurrentLocationUuid);
 
-        int errorMessageResource;
+        int messageId;
         switch (reason) {
             case PatientUpdateFailedEvent.REASON_INTERRUPTED:
-                errorMessageResource = R.string.patient_location_error_interrupted;
+                messageId = R.string.patient_location_error_interrupted;
                 break;
             case PatientUpdateFailedEvent.REASON_NETWORK:
             case PatientUpdateFailedEvent.REASON_SERVER:
-                errorMessageResource = R.string.patient_location_error_network;
+                messageId = R.string.patient_location_error_network;
                 break;
             case PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT:
-                errorMessageResource = R.string.patient_location_error_no_such_patient;
+                messageId = R.string.patient_location_error_no_such_patient;
                 break;
             case PatientUpdateFailedEvent.REASON_CLIENT:
             default:
-                errorMessageResource = R.string.patient_location_error_unknown;
+                messageId = R.string.patient_location_error_unknown;
                 break;
         }
-        BigToast.show(mContext, errorMessageResource);
-        mProgressDialog.dismiss();
+        BigToast.show(mContext, messageId);
     }
 
     @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+        Utils.logUserAction("location_assigned");
         String locationUuid = mAdapter.getItem(position).uuid;
         mAdapter.setSelectedLocationUuid(Optional.fromNullable(locationUuid));
-        mProgressDialog = ProgressDialog.show(mContext,
-            mContext.getResources().getString(R.string.title_updating_patient),
-            mContext.getResources().getString(R.string.please_wait), true);
-        if (isCurrentTent(locationUuid)
-            || mLocationSelectedCallback.onLocationSelected(locationUuid)) {
-            dismiss();
+        if (!isCurrentTent(locationUuid)) {
+            mLocationSelectedCallback.onLocationSelected(locationUuid);
         }
+        dismiss();
     }
 
     private boolean isCurrentTent(String newTentUuid) {
@@ -182,7 +177,6 @@ public final class AssignLocationDialog
         if (mLocationTree != null) {
             mLocationTree.close();
         }
-        mProgressDialog.dismiss();
         mDialog.dismiss();
     }
 

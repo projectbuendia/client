@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui.login;
 
 import com.google.common.collect.Ordering;
 
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
@@ -43,6 +44,8 @@ public final class LoginController {
     private final List<JsonUser> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
     private final Troubleshooter mTroubleshooter;
+    private final AppSettings mSettings;
+    private static boolean sSkippedLogin;
 
     public interface Ui {
 
@@ -80,12 +83,14 @@ public final class LoginController {
         EventBusRegistrationInterface eventBus,
         Troubleshooter troubleshooter,
         Ui ui,
-        FragmentUi fragmentUi) {
+        FragmentUi fragmentUi,
+        AppSettings settings) {
         mUserManager = userManager;
         mEventBus = eventBus;
         mTroubleshooter = troubleshooter;
         mUi = ui;
         mFragmentUi = fragmentUi;
+        mSettings = settings;
     }
 
     /**
@@ -188,6 +193,13 @@ public final class LoginController {
             mFragmentUi.showUsers(mUsersSortedByName);
             mFragmentUi.showSpinner(false);
             mUi.showSyncFailedDialog(false);
+
+            // To facilitate chart development, there's a developer setting that
+            // causes the app to go straight to a patient chart on startup.
+            if (!sSkippedLogin && mSettings.shouldSkipToPatientChart() && event.knownUsers.size() > 0) {
+                sSkippedLogin = true;
+                onUserSelected(event.knownUsers.toArray(new JsonUser[0])[0]);
+            }
         }
 
         public void onEventMainThread(KnownUsersLoadFailedEvent event) {

@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
@@ -30,7 +31,9 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.login.LoginActivity;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -52,19 +55,23 @@ public class SettingsActivity extends PreferenceActivity {
      * arranged in a single list without a left navigation panel.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
-    static final String[] prefKeys = {
+    static final String[] PREF_KEYS = {
         "server",
         "openmrs_user",
         "openmrs_password",
         "openmrs_root_url",
         "package_server_root_url",
         "apk_update_interval_secs",
-        "keep_form_instances_locally",
+        "keep_form_instances",
+        "starting_patient_id",
         "xform_update_client_cache",
         "incremental_observation_update",
         "require_wifi"
     };
     static boolean updatingPrefValues = false;
+
+    static final Map<String, EditTextPreference> textPrefs = new HashMap<>();
+
     /** A listener that performs updates when any preference's value changes. */
     static final Preference.OnPreferenceChangeListener sPrefListener =
         new Preference.OnPreferenceChangeListener() {
@@ -82,22 +89,18 @@ public class SettingsActivity extends PreferenceActivity {
                     switch (pref.getKey()) {
                         case "server":
                             if (!str.equals("")) {
-                                prefs.edit()
-                                    .putString("openmrs_root_url",
-                                        "http://" + str + ":9000/openmrs")
-                                    .putString("package_server_root_url",
-                                        "http://" + str + ":9001")
-                                    .apply();
+                                setTextAndSummary(prefs, "openmrs_root_url", "http://" + str + ":9000/openmrs");
+                                setTextAndSummary(prefs, "package_server_root_url", "http://" + str + ":9001");
                             }
                             break;
                         case "openmrs_root_url":
                             if (!str.equals("http://" + server + ":9000/openmrs")) {
-                                prefs.edit().putString("server", "").apply();
+                                setTextAndSummary(prefs, "server", "");
                             }
                             break;
                         case "package_server_root_url":
                             if (!str.equals("http://" + server + ":9001")) {
-                                prefs.edit().putString("server", "").apply();
+                                setTextAndSummary(prefs, "server", "");
                             }
                             break;
                     }
@@ -107,10 +110,23 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         };
+
     @Inject AppModel mAppModel;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, SettingsActivity.class));
+    }
+
+    private static void setTextAndSummary(SharedPreferences prefs, String key, String value) {
+        // Update the preference edit field, if it's currently showing.
+        EditTextPreference pref = textPrefs.get(key);
+        if (pref != null) {
+            pref.setText(value);
+            pref.setSummary(value);
+        }
+
+        // Update the preference itself, even if the edit field isn't visible.
+        prefs.edit().putString(key, value).commit();
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -171,7 +187,8 @@ public class SettingsActivity extends PreferenceActivity {
 
     /** Sets up all the preferences in a fragment. */
     private static void initPrefs(PreferenceFragment fragment) {
-        for (String key : prefKeys) {
+        textPrefs.clear();
+        for (String key : PREF_KEYS) {
             initPref(fragment.findPreference(key));
         }
     }
@@ -182,6 +199,9 @@ public class SettingsActivity extends PreferenceActivity {
             pref.setOnPreferenceChangeListener(sPrefListener);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
             updatePrefSummary(pref, prefs.getAll().get(pref.getKey()));
+            if (pref instanceof EditTextPreference) {
+                textPrefs.put(pref.getKey(), (EditTextPreference) pref);
+            }
         }
     }
 
@@ -249,7 +269,8 @@ public class SettingsActivity extends PreferenceActivity {
 
     /** Sets up all the preferences in an activity. */
     private static void initPrefs(PreferenceActivity activity) {
-        for (String key : prefKeys) {
+        textPrefs.clear();
+        for (String key : PREF_KEYS) {
             initPref(activity.findPreference(key));
         }
     }

@@ -54,7 +54,7 @@
             android:layout_below="@+id/description"
             android:contentDescription="@+string/backup"
             android:gravity="left"
-            android:src="@+drawable/backup" />
+            android:src="@drawable/backup" />
 
         <TextView
             android:id="@+id/text_backup"
@@ -74,7 +74,7 @@
             android:layout_below="@+id/description"
             android:contentDescription="@+string/advance"
             android:gravity="right"
-            android:src="@+drawable/advance" />
+            android:src="@drawable/advance" />
 
         <TextView
             android:id="@+id/text_advance"

@@ -13,6 +13,7 @@ package org.projectbuendia.client;
 
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 
 /** Type-safe access to application settings. */
 public class AppSettings {
@@ -59,6 +60,16 @@ public class AppSettings {
             mResources.getString(R.string.package_server_root_url_default));
     }
 
+    /** Gets the index of the preferred chart zoom level. */
+    public int getChartZoomIndex() {
+        return mSharedPreferences.getInt("chart_zoom_index", 0);
+    }
+
+    /** Sets the preferred chart zoom level. */
+    public void setChartZoomIndex(int zoom) {
+        mSharedPreferences.edit().putInt("chart_zoom_index", zoom).commit();
+    }
+
     /**
      * Gets the minimum period between checks for APK updates, in seconds.
      * Repeated calls to UpdateManager.checkForUpdate() within this period
@@ -70,8 +81,15 @@ public class AppSettings {
 
     /** Gets the flag for whether to save filled-in forms locally. */
     public boolean getKeepFormInstancesLocally() {
-        return mSharedPreferences.getBoolean("keep_form_instances_locally",
-            mResources.getBoolean(R.bool.keep_form_instances_locally_default));
+        return mSharedPreferences.getBoolean("keep_form_instances", false);
+    }
+
+    public boolean shouldSkipToPatientChart() {
+        return !getSkipToPatientId().isEmpty();
+    }
+
+    public @NonNull String getSkipToPatientId() {
+        return mSharedPreferences.getString("starting_patient_id", "").trim();
     }
 
     /** Gets the flag indicating whether the sync account has been initialized. */
@@ -89,5 +107,4 @@ public class AppSettings {
         return mSharedPreferences.getBoolean("require_wifi",
             mResources.getBoolean(R.bool.require_wifi_default));
     }
-
 }

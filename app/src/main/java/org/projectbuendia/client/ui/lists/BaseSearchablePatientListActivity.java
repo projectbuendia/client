@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui.lists;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,16 +20,17 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
-import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
@@ -50,15 +52,16 @@ import de.greenrobot.event.EventBus;
  * Clicking on patients in the list displays details for that patient.
  */
 public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActivity {
-
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject CrudEventBus mCrudEventBus;
     @Inject SyncManager mSyncManager;
+    @Inject AppSettings mSettings;
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
     private CancelButtonListener mCancelListener = new CancelButtonListener();
+    private static boolean sSkippedPatientList;
 
     // TODO/i18n: Populate properly.
     protected final String mLocale = "en";
@@ -96,29 +99,22 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
             });
 
         MenuItem search = menu.findItem(R.id.action_search);
-        search.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_search)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
+        search.setIcon(createIcon(Iconify.IconValue.fa_search, 0xccffffff));
         search.setVisible(getLoadingState() == LoadingState.LOADED);
 
         MenuItem addPatient = menu.findItem(R.id.action_new_patient);
-        addPatient.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_plus)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
+        addPatient.setIcon(createIcon(Iconify.IconValue.fa_plus, 0xccffffff));
         addPatient.setVisible(getLoadingState() == LoadingState.LOADED);
 
         mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);
 
+        /*
         MenuItem cancel = menu.findItem(R.id.action_cancel);
-        cancel.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_close)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
+        cancel.setIcon(createIcon(Iconify.IconValue.fa_close, 0xccffffff));
         cancel.setOnMenuItemClickListener(mCancelListener);
         cancel.setVisible(getLoadingState() == LoadingState.SYNCING);
+        */
 
         InputMethodManager mgr =
             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -156,6 +152,19 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         );
 
         ButterKnife.inject(this);
+
+        // To facilitate chart development, there's a developer setting that
+        // causes the app to go straight to a patient chart on startup.
+        if (!sSkippedPatientList && mSettings.shouldSkipToPatientChart()) {
+            try (Cursor cursor = getContentResolver().query(
+                Patients.CONTENT_URI, null, Patients.ID + " = ?",
+                new String[] {mSettings.getSkipToPatientId()}, null)) {
+                if (cursor.moveToNext()) {
+                    sSkippedPatientList = true;
+                    PatientChartActivity.start(this, Utils.getString(cursor, Patients.UUID, null));
+                }
+            }
+        }
     }
 
     @Override protected void onResumeImpl() {

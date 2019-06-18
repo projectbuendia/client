@@ -116,7 +116,7 @@ public class SyncManager {
                 case IN_PROGRESS:
                     int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
                     String label = intent.getStringExtra(SYNC_PROGRESS_LABEL);
-                    LOG.d("Sync in progress (%d%%, %s)", progress, label);
+                    LOG.i("Sync in progress (%d%%, %s)", progress, label);
                     EventBus.getDefault().post(new SyncProgressEvent(progress, label));
                     break;
                 case CANCELED:

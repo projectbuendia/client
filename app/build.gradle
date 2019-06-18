@@ -11,13 +11,15 @@
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
-
     dependencies {
         classpath 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1'
-        classpath 'org.ajoberstar:gradle-git:0.8.0'
     }
+}
+
+plugins {
+    id 'org.ajoberstar.grgit' version '3.1.1'
 }
 
 apply plugin: 'com.android.application'
@@ -32,45 +34,48 @@ android {
         preDexLibraries = false
         javaMaxHeapSize = '4g'
     }
+    useLibrary 'org.apache.http.legacy'
 }
 dependencies {
     // Build plugins
-    provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
+    annotationProcessor 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
+    compileOnly 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
 
     // Local .jar dependencies
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
-    compile project(':third_party:odkcollect')
+    implementation project(':third_party:odkcollect')
 
     // External dependencies
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:support-annotations:22.2.0'
-    compile 'com.google.code.gson:gson:2.3' // JSON parser
-    compile 'com.google.guava:guava:18.0' // Google common libraries
-    compile 'com.jakewharton:butterknife:5.1.2' // View injection
-    compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
-    compile 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
-    compile 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
-    compile 'de.greenrobot:eventbus:2.4.0' // The event bus
-    compile 'joda-time:joda-time:2.5' // Better dates and times
-    compile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
-    compile 'com.facebook.stetho:stetho-okhttp:1.2.0' // Network debugging
-    compile 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
-    compile 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
-    compile 'org.apache.commons:commons-lang3:3.4'
+    implementation 'com.android.support:appcompat-v7:22.2.0'
+    implementation 'com.android.support:support-annotations:22.2.0'
+    implementation 'com.google.code.gson:gson:2.3' // JSON parser
+    implementation 'com.google.guava:guava:18.0' // Google common libraries
+    annotationProcessor 'com.jakewharton:butterknife:5.1.2' // View injection
+    implementation 'com.jakewharton:butterknife:5.1.2' // View injection
+    implementation 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
+    implementation 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
+    implementation 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
+    implementation 'de.greenrobot:eventbus:2.4.0' // The event bus
+    implementation 'joda-time:joda-time:2.5' // Better dates and times
+    implementation 'com.facebook.stetho:stetho:1.5.0' // Chrome debugging bridge
+    implementation 'com.facebook.stetho:stetho-okhttp:1.5.0' // Network debugging
+    implementation 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
+    implementation 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
+    implementation 'org.apache.commons:commons-lang3:3.4'
 
     // Testing
-    androidTestCompile 'com.android.support.test:runner:0.3'
+    androidTestImplementation 'com.android.support.test:runner:0.3'
     // Espresso
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
-    androidTestCompile 'com.android.support.test.espresso:espresso-web:2.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:2.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-web:2.2'
     // Screenshots, multiple android devices on same computer support
-    androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
+    androidTestImplementation 'com.squareup.spoon:spoon-client:1.1.1'
     // Mockito
-    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
-    androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
-    androidTestCompile 'org.mockito:mockito-core:1.9.5'
+    androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.0'
+    androidTestImplementation 'com.google.dexmaker:dexmaker:1.0'
+    androidTestImplementation 'org.mockito:mockito-core:1.9.5'
 }
 
 apply plugin: 'spoon'
@@ -90,7 +95,7 @@ tasks['spoon'].outputs.upToDateWhen { false }
 def versionInteger = 0
 
 // Development builds get a version name that identifies the commit.
-def repo = org.ajoberstar.grgit.Grgit.open(project.rootDir)
+def repo = org.ajoberstar.grgit.Grgit.open(dir: project.rootDir)
 def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' : '+')
 
 // For a release build, use -PversionNumber=1.2.3 to set the version number.
@@ -110,8 +115,8 @@ if (project.hasProperty('versionNumber')) {
     versionInteger = versionMajor * 1000000 + versionMinor * 10000 + versionPatch
     // Construct a normalized string for the version name, formatting integers
     // canonically and dropping trailing zeroes (e.g. '0.001.0' becomes '0.1').
-    versionString = versionMajor + '.' + versionMinor + '.' + versionPatch;
-    versionString = versionString.replaceAll('(\\.0)*$', '');
+    versionString = versionMajor + '.' + versionMinor + '.' + versionPatch
+    versionString = versionString.replaceAll('(\\.0)*$', '')
 }
 logger.info("Version number: ${versionString}")
 logger.info("Version code: ${versionInteger}")
@@ -120,47 +125,49 @@ logger.info("Version code: ${versionInteger}")
 def releaseRepoRoot = file('../../release/')
 
 // OpenMRS server for development (kept at tip of dev branch).
-def serverDev = 'dev.projectbuendia.org';
+// def serverDev = 'dev.projectbuendia.org'
+def serverDev = '52.90.76.10'  // AWS Buendia sandbox
 
 // OpenMRS server for integration testing.
-def serverIntegration = 'integration.projectbuendia.org';
+def serverIntegration = 'integration.projectbuendia.org'
 
 // Edison server on the local network.
-def serverEdison = 'server';
+def serverEdison = 'server'
 
 // Host machine when client runs in an emulator (AVD).
-def serverEmulatorHost = '10.0.2.2';
+def serverEmulatorHost = '10.0.2.2'
 
 // Server on the Fantastica wifi network.
-def serverFantastica = '192.168.1.161';
+def serverFantastica = '192.168.1.161'
 
 // If you run `adb reverse tcp:9000 tcp:9000` on your machine with a device connected, and
 // use this setting, then the device will talk to a locally running server instance.
-def serverLocalHost = '127.0.0.1';
+def serverLocalHost = '127.0.0.1'
 
 // Just for development.  In production builds, these should be overridden
 // using -Pserver=server -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def serverDefault = serverDev;
-def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs';
+def serverDefault = serverDev
+def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs'
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
-def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001';
+def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001'
 
 // Apply overrides such as -Pserver=server -PrequireWifi=true etc.
-project.metaClass.propertyMissing = { null }
-def server = project.server ?: serverDefault;
-def openmrsRootUrl = project.server ? 'http://' + project.server + ':9000/openmrs'
-    : project.openmrsRootUrl ?: openmrsRootUrlDefault
-def openmrsUser = project.openmrsUser ?: openmrsUserDefault
-def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
-def packageServerRootUrl = project.server ? 'http://' + project.server + ':9001'
-    : project.packageServerRootUrl ?: packageServerRootUrlDefault
-def requireWifi = project.requireWifi ?: 'false';
+def server = project.findProperty('server') ?: serverDefault
+def openmrsRootUrl = project.findProperty('server') ?
+    'http://' + project.server + ':9000/openmrs' :
+    project.findProperty('openmrsRootUrl') ?: openmrsRootUrlDefault
+def openmrsUser = project.findProperty('openmrsUser') ?: openmrsUserDefault
+def openmrsPassword = project.findProperty('openmrsPassword') ?: openmrsPasswordDefault
+def packageServerRootUrl = project.findProperty('server') ?
+    'http://' + project.server + ':9001' :
+    project.findProperty('packageServerRootUrl') ?: packageServerRootUrlDefault
+def requireWifi = project.findProperty('requireWifi') ?: 'false'
 
 // This is the password used to encrypt the SQLite database on the tablet.
 // In development builds, the password is an empty string, which leaves the
 // database unencrypted so that it can be easily inspected using Stetho.
-def encryptionPassword = project.encryptionPassword ?: '';
+def encryptionPassword = project.findProperty('encryptionPassword') ?: ''
 
 logger.info('Default server hostname: ${server}')
 logger.info("Default OpenMRS root URL: ${openmrsRootUrl}")
@@ -170,8 +177,7 @@ logger.info("Default package server root URL: ${packageServerRootUrl}")
 logger.info("Database encryption password: ${encryptionPassword}")
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '19.1.0'
+    compileSdkVersion 28
 
     sourceSets.main {
         jniLibs.srcDir 'libs'
@@ -185,7 +191,7 @@ android {
     defaultConfig {
         applicationId appId
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 22
 
         versionCode versionInteger
         versionName versionString
@@ -261,7 +267,7 @@ gradle.taskGraph.whenReady {
                 throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
             }
             if (System.console() == null) {
-                throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew :app:assembleRelease.");
+                throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew :app:assembleRelease.")
             }
             def pass = new String(System.console().readPassword("\nPlease enter key passphrase: "))
             if (!pass) {

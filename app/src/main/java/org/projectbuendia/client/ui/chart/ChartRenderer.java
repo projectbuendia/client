@@ -1,6 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.support.v4.util.Pair;
 import android.util.DisplayMetrics;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -8,15 +9,13 @@ import android.webkit.WebView;
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
 
-import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
-import org.joda.time.chrono.ISOChronology;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
@@ -42,17 +41,28 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import static org.projectbuendia.client.utils.Utils.HOUR;
+
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
     static PebbleEngine sEngine;
     private static final Logger LOG = Logger.create();
+    public static ZoomLevel[] ZOOM_LEVELS = new ZoomLevel[] {
+        new ZoomLevel(R.string.zoom_day, 0),
+        new ZoomLevel(R.string.zoom_half, 0, 12*HOUR),
+        new ZoomLevel(R.string.zoom_third, 0, 8*HOUR, 16*HOUR),
+        new ZoomLevel(R.string.zoom_quarter, 0, 6*HOUR, 12*HOUR, 18*HOUR),
+        new ZoomLevel(R.string.zoom_sixth, 0, 4*HOUR, 8*HOUR, 12*HOUR, 16*HOUR, 20*HOUR)
+    };
 
     WebView mView;  // view into which the HTML table will be rendered
     Resources mResources;  // resources used for localizing the rendering
+    AppSettings mSettings;
+
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
-    private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
-    private String lastChart = "";
+    private int mLastRenderedZoomIndex;  // last zoom level index rendered
+    private String mLastChartName = "";
 
     public interface GridJsInterface {
         @android.webkit.JavascriptInterface
@@ -70,9 +80,10 @@ public class ChartRenderer {
         void onPageUnload(int scrollX, int scrollY);
     }
 
-    public ChartRenderer(WebView view, Resources resources) {
+    public ChartRenderer(WebView view, Resources resources, AppSettings settings) {
         mView = view;
         mResources = resources;
+        mSettings = settings;
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
@@ -85,11 +96,12 @@ public class ChartRenderer {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
-        if ((observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders))
-            && (lastChart.equals(chart.name))){
+        if (mLastChartName.equals(chart.name) &&
+            mLastRenderedZoomIndex == mSettings.getChartZoomIndex() &&
+            observations.equals(mLastRenderedObs) &&
+            orders.equals(mLastRenderedOrders)) {
             return;  // nothing has changed; no need to render again
         }
-        lastChart = chart.name;
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.
@@ -101,14 +113,23 @@ public class ChartRenderer {
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
-        String html = new GridHtmlGenerator(chart, latestObservations, observations, orders,
-                                            admissionDate, firstSymptomsDate).getHtml();
-        mView.loadDataWithBaseURL("file:///android_asset/", html,
-            "text/html; charset=utf-8", "utf-8", null);
+        String html = new GridHtmlGenerator(
+            chart, latestObservations, observations, orders,
+            admissionDate, firstSymptomsDate).getHtml();
+        mView.loadDataWithBaseURL(
+            "file:///android_asset/", html, "text/html; charset=utf-8", "utf-8", null);
         mView.setWebContentsDebuggingEnabled(true);
 
+        mLastChartName = chart.name;
+        mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
+    }
+
+    /** Gets the starting times (in ms) of the segments into which the day is divided. */
+    public int[] getSegmentStartTimes() {
+        int index = mSettings.getChartZoomIndex();
+        return Utils.safeIndex(ZOOM_LEVELS, index).segmentStartTimes;
     }
 
     class GridHtmlGenerator {
@@ -193,20 +214,56 @@ public class ChartRenderer {
             }
         }
 
-        /** Returns the column that contains the given instant, creating it if it doesn't exist. */
+        /** Gets the n + 1 boundaries of the n segments of a specific day. */
+        public DateTime[] getSegmentFenceposts(LocalDate date) {
+            DateTime start = date.toDateTimeAtStartOfDay();
+            DateTime stop = date.plusDays(1).toDateTimeAtStartOfDay();
+            int[] starts = getSegmentStartTimes();
+            DateTime[] fenceposts = new DateTime[starts.length + 1];
+            for (int i = 0; i < starts.length; i++) {
+                fenceposts[i] = start.plusMillis(starts[i]);
+            }
+            fenceposts[starts.length] = stop;
+            return fenceposts;
+        }
+
+        /** Finds the segment that contains the given instant. */
+        Pair<DateTime, DateTime> getSegmentBounds(ReadableInstant instant) {
+            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
+            DateTime[] fenceposts = getSegmentFenceposts(date);
+            for (int i = 0; i + 1 < fenceposts.length; i++) {
+                if (!instant.isBefore(fenceposts[i]) && instant.isBefore(fenceposts[i + 1])) {
+                    return new Pair<>(fenceposts[i], fenceposts[i + 1]);
+                }
+            }
+            return null;  // should never get here because start <= instant < stop
+        }
+
+        /** Gets the column for a given instant, creating columns for the whole day if needed. */
         Column getColumnContainingTime(ReadableInstant instant) {
             LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
-            DateTime start = date.toDateTimeAtStartOfDay();
-            long startMillis = start.getMillis();
+            Pair<DateTime, DateTime> bounds = getSegmentBounds(instant);
+            long startMillis = bounds.first.getMillis();
             if (!mColumnsByStartMillis.containsKey(startMillis)) {
-                int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
-                String admitDayLabel = (admitDay >= 1) ?
-                    mResources.getString(R.string.day_n, admitDay) : "–";
-                String dateLabel = date.toString("d MMM");
-                mColumnsByStartMillis.put(startMillis, new Column(
-                    start, start.plusDays(1), admitDayLabel + "<br>" + dateLabel));
+                createColumnsForDay(date);
             }
             return mColumnsByStartMillis.get(startMillis);
+        }
+
+        /** Creates all the columns for the segments of the given day. */
+        void createColumnsForDay(LocalDate date) {
+            DateTime[] fenceposts = getSegmentFenceposts(date);
+            for (int i = 0; i + 1 < fenceposts.length; i++) {
+                DateTime start = fenceposts[i];
+                DateTime stop = fenceposts[i + 1];
+                Column column = new Column(start, stop, formatDayNumber(date));
+                mColumnsByStartMillis.put(column.start.getMillis(), column);
+            }
+        }
+
+        String formatDayNumber(LocalDate date) {
+            int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
+            return (admitDay >= 1) ? mResources.getString(R.string.day_n, admitDay) : "";
         }
 
         void addObs(Column column, Obs obs) {
@@ -254,7 +311,9 @@ public class ChartRenderer {
             context.put("tileRows", mTileRows);
             context.put("rows", mRows);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
+            context.put("numColumnsPerDay", getSegmentStartTimes().length);
             context.put("nowColumnStart", mNowColumn.start);
+            context.put("nowDate", mNow.toLocalDate());
             context.put("orders", mOrders);
             context.put("dataCellsByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
@@ -269,9 +328,10 @@ public class ChartRenderer {
             for (Long startMillis : mColumnsByStartMillis.keySet()) {
                 starts.add(new DateTime(startMillis));
             }
+            int maxEmptyColumns = 3 / getSegmentStartTimes().length;
             DateTime prev = starts.get(0);
             for (DateTime next : starts) {
-                if (!next.isAfter(prev.plusDays(3))) {
+                if (!next.isAfter(prev.plusDays(maxEmptyColumns))) {
                     for (DateTime dt = prev.plusDays(1); dt.isBefore(next); dt = dt.plusDays(1)) {
                         getColumnContainingTime(dt); // creates a column if it doesn't exist yet
                     }
@@ -296,6 +356,26 @@ public class ChartRenderer {
                 StringWriter writer = new StringWriter();
                 e.printStackTrace(new PrintWriter(writer));
                 return "<div style=\"font-size: 150%\">" + writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
+            }
+        }
+    }
+
+    public static class ZoomLevel {
+        public final int labelId;
+        public final int[] segmentStartTimes;
+
+        public ZoomLevel(int labelId, int... segmentStartTimes) {
+            this.labelId = labelId;
+            this.segmentStartTimes = segmentStartTimes;
+
+            if (segmentStartTimes[0] != 0) throw new IllegalArgumentException("First segment must start at time zero");
+            int prev = -1;
+            for (int next : segmentStartTimes) {
+                if (next <= prev) throw new IllegalArgumentException("Segment starting times must strictly increase");
+                prev = next;
+            }
+            if (prev >= 23*HOUR) {
+                throw new IllegalArgumentException("Last segment must start before end of a DST-shortened day");
             }
         }
     }

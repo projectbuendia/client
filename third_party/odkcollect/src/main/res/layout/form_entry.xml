@@ -44,8 +44,8 @@ the License.
 
     <ImageButton
         android:id="@+id/button_down"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_above="@id/button_bar"
         android:layout_alignParentRight="true"
         android:background="?android:attr/selectableItemBackground"
@@ -53,8 +53,8 @@ the License.
 
     <ImageButton
         android:id="@+id/button_up"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_alignParentRight="true"
         android:layout_above="@id/button_down"
         android:background="?android:attr/selectableItemBackground"
