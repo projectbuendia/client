@@ -16,7 +16,7 @@ import android.database.Cursor;
 
 import com.google.common.collect.ObjectArrays;
 
-import net.sqlcipher.database.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase;
 
 import org.projectbuendia.client.providers.Contracts;
 

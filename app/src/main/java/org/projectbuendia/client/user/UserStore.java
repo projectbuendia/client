@@ -24,7 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.google.common.collect.ImmutableSet;
 
-import net.sqlcipher.database.SQLiteException;
+import android.database.sqlite.SQLiteException;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonNewUser;
