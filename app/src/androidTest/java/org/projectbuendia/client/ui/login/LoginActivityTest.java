@@ -16,7 +16,6 @@ import android.support.test.annotation.UiThreadTest;
 import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
-import org.projectbuendia.client.ui.matchers.UserMatchers;
 
 import java.util.Date;
 
@@ -44,9 +43,9 @@ public class LoginActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
 
         // Click new user
-        expectVisible(dataThat(new UserMatchers.HasFullName(given + " " + family)));
+//        expectVisible(dataThat(new UserMatchers.HasFullName(given + " " + family)));
         screenshot("In User Selection");
-        click(dataThat(new UserMatchers.HasFullName(given + " " + family)));
+//        click(dataThat(new UserMatchers.HasFullName(given + " " + family)));
 
         // Should be logged in
         screenshot("After User Selected");
