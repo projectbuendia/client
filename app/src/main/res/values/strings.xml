@@ -123,6 +123,7 @@
   <string name="zoom_half">2 columns per day</string>
   <string name="zoom_third">3 columns per day</string>
   <string name="zoom_quarter">4 columns per day</string>
+  <string name="zoom_sixth">6 columns per day</string>
 
   <string name="go_to_patient_title">Go to patient chart</string>
   <string name="go_to_patient_id_label">Patient ID</string>
