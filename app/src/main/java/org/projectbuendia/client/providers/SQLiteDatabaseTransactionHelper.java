@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.providers;
 
-import net.sqlcipher.database.SQLiteStatement;
+import android.database.sqlite.SQLiteStatement;
 
 import org.projectbuendia.client.sync.Database;
 
