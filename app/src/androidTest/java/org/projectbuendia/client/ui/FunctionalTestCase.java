@@ -17,7 +17,6 @@ import android.support.annotation.Nullable;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.IdlingPolicies;
 import android.support.test.espresso.NoActivityResumedException;
-import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.core.deps.guava.collect.Iterables;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
@@ -89,15 +88,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         // TODO(sdspikes): shouldn't be needed since launchActivity is set to true in the call to
         //  the ActivityTestRule constructor, but without this we don't seem to launch anything.
         launchActivity(null);
-
-
-        // TODO(sdspikes): remove if/when the lib error message is consistently fixed
-        try {
-            click(viewWithText("OK"));
-        } catch (NoMatchingViewException e) {
-            LOG.v("no OK message");
-        }
-
     }
 
     public void setWaitForUserSync(boolean waitForUserSync) {
