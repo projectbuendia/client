@@ -33,6 +33,7 @@ import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
@@ -73,7 +74,8 @@ public final class PatientChartControllerTest {
     @Mock private SyncManager mMockSyncManager;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
-//    private FakeHandler mFakeHandler;
+    private FakeHandler mFakeHandler;
+    private Chart mFakeChart = new Chart(PATIENT_UUID_1, "Test Chart");
 
     /** Tests that suspend() unregisters from the event bus. */
     @Test
@@ -117,10 +119,10 @@ public final class PatientChartControllerTest {
         mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
-//        mFakeHandler.runUntilEmpty();
+        mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
         verify(mMockUi).updateTilesAndGrid(
-            null, recentObservations, allObservations, ImmutableList.<Order> of(), null, null);
+                mFakeChart, recentObservations, allObservations, ImmutableList.<Order> of(), null, null);
         verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
         verify(mMockUi).updateEbolaPcrTestResultUi(recentObservations);
         verify(mMockUi).updatePregnancyAndIvStatusUi(recentObservations);
@@ -287,17 +289,20 @@ public final class PatientChartControllerTest {
         // THEN the controller hides the submission dialog
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
-//        mFakeHandler.runUntilEmpty();
+        mFakeHandler.runUntilEmpty();
         verify(mMockUi).showFormSubmissionDialog(false);
     }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        List<Chart> charts = ImmutableList.of(mFakeChart);
+        when(mMockChartHelper.getCharts(AppModel.CHART_UUID))
+                .thenReturn(charts);
 
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
-//        mFakeHandler = new FakeHandler();
+        mFakeHandler = new FakeHandler();
         mController = new PatientChartController(
             mMockAppModel,
             null,
@@ -309,7 +314,7 @@ public final class PatientChartControllerTest {
             mMockChartHelper,
             null,
             mMockSyncManager,
-            null);
+            mFakeHandler);
     }
 
     private final class FakeHandler implements MinimalHandler {
