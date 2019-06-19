@@ -73,7 +73,7 @@ public final class PatientChartControllerTest {
     @Mock private SyncManager mMockSyncManager;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
-    private FakeHandler mFakeHandler;
+//    private FakeHandler mFakeHandler;
 
     /** Tests that suspend() unregisters from the event bus. */
     @Test
@@ -117,7 +117,7 @@ public final class PatientChartControllerTest {
         mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
-        mFakeHandler.runUntilEmpty();
+//        mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
         verify(mMockUi).updateTilesAndGrid(
             null, recentObservations, allObservations, ImmutableList.<Order> of(), null, null);
@@ -287,7 +287,7 @@ public final class PatientChartControllerTest {
         // THEN the controller hides the submission dialog
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
-        mFakeHandler.runUntilEmpty();
+//        mFakeHandler.runUntilEmpty();
         verify(mMockUi).showFormSubmissionDialog(false);
     }
 
@@ -297,9 +297,10 @@ public final class PatientChartControllerTest {
 
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
-        mFakeHandler = new FakeHandler();
+//        mFakeHandler = new FakeHandler();
         mController = new PatientChartController(
             mMockAppModel,
+            null,
             mFakeGlobalEventBus,
             mFakeCrudEventBus,
             mMockUi,
@@ -308,7 +309,7 @@ public final class PatientChartControllerTest {
             mMockChartHelper,
             null,
             mMockSyncManager,
-            mFakeHandler);
+            null);
     }
 
     private final class FakeHandler implements MinimalHandler {

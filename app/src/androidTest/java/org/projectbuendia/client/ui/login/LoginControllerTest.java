@@ -278,6 +278,8 @@ public class LoginControllerTest {
             mFakeEventBus,
             mTroubleshooter,
             mMockUi,
-            mMockFragmentUi);
+            mMockFragmentUi,
+            null);
+
     }
 }
