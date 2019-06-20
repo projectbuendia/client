@@ -124,9 +124,8 @@ logger.info("Version code: ${versionInteger}")
 // This is where to look for the .apk signing key.
 def releaseRepoRoot = file('../../release/')
 
-// OpenMRS server for development (kept at tip of dev branch).
-// def serverDev = 'dev.projectbuendia.org'
-def serverDev = '52.90.76.10'  // AWS Buendia sandbox
+// OpenMRS server for demos (kept at tip of dev branch, with scratch data).
+def serverDev = 'demo.buendia.org'  // an AWS machine running Linux AMI 2017.09
 
 // OpenMRS server for integration testing.
 def serverIntegration = 'integration.projectbuendia.org'
