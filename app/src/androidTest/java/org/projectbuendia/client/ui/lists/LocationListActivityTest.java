@@ -11,6 +11,9 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import android.support.test.annotation.UiThreadTest;
+
+import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
@@ -20,12 +23,16 @@ import static android.support.test.espresso.Espresso.pressBack;
 public class LocationListActivityTest extends FunctionalTestCase {
 
     /** Looks for the expected zones and tents. */
+    @Test
+    @UiThreadTest
     public void testZonesAndTentsDisplayed() {
         inUserLoginGoToLocationSelection();
         inLocationSelectionCheckZonesAndTentsDisplayed();
     }
 
     /** Tests that zones and tents are still displayed after returning from round view. */
+    @Test
+    @UiThreadTest
     public void testZonesAndTentsDisplayed_afterRoundView() {
         inUserLoginGoToLocationSelection();
         inLocationSelectionClickLocation(LOCATION_NAME);
@@ -34,6 +41,8 @@ public class LocationListActivityTest extends FunctionalTestCase {
     }
 
     /** Tests that zones and tents are still displayed after returning from list view. */
+    @Test
+    @UiThreadTest
     public void testZonesAndTentsDisplayed_afterPatientListView() {
         inUserLoginGoToLocationSelection();
         // TODO/i18n: Use a string resource instead of the literal button text.
@@ -43,6 +52,8 @@ public class LocationListActivityTest extends FunctionalTestCase {
     }
 
     /** Tests that zones and tents are still displayed after returning from settings view. */
+    @Test
+    @UiThreadTest
     public void testZonesAndTentsDisplayed_afterSettingsView() {
         inUserLoginGoToLocationSelection();
 
@@ -54,6 +65,8 @@ public class LocationListActivityTest extends FunctionalTestCase {
     }
 
     /** Tests that zones and tents are still displayed after returning from chart view. */
+    @Test
+    @UiThreadTest
     public void testZonesAndTentsDisplayed_afterChartView() {
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
@@ -66,6 +79,8 @@ public class LocationListActivityTest extends FunctionalTestCase {
     }
 
     /** Tests that zones and tents are still displayed after changing a patient's location. */
+    @Test
+    @UiThreadTest
     public void testZonesAndTentsDisplayed_afterPatientLocationChanged() {
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");

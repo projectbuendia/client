@@ -578,10 +578,12 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
-        mUi.updateTilesAndGrid(
-            mCharts.get(mChartIndex),
-            latestObservations, mObservations, orders,
-            admissionDate, firstSymptomsDate);
+        if (!mCharts.isEmpty()) {
+            mUi.updateTilesAndGrid(
+                mCharts.get(mChartIndex),
+                latestObservations, mObservations, orders,
+                admissionDate, firstSymptomsDate);
+        }
     }
 
     public List<Chart> getCharts(){

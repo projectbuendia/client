@@ -11,45 +11,60 @@
 
 package org.projectbuendia.client.utils.date;
 
-import android.test.InstrumentationTestCase;
+import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 
+import static junit.framework.TestCase.assertEquals;
+
 /** Test cases for {@link RelativeDateTimeFormatter}. */
-public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class RelativeDateTimeFormatterTest   {
 
     private RelativeDateTimeFormatter mFormatter;
     private DateTime mNow;
     private LocalDate mToday;
 
+    @Test
     public void testFormat_rightNow() throws Exception {
         assertEquals("right now", mFormatter.format(mNow, mNow));
     }
 
+    @Test
     public void testFormat_inTheFuture() throws Exception {
         assertEquals("in the future", mFormatter.format(mNow.plusDays(1), mNow));
     }
 
+    @Test
     public void testFormat_60minutesAgo() throws Exception {
         assertEquals("60 min ago", mFormatter.format(mNow.minusHours(1), mNow));
     }
 
+    @Test
     public void testFormat_yesterday() throws Exception {
         assertEquals("yesterday", mFormatter.format(mToday.minusDays(1), mToday));
     }
 
+    @Test
     public void testFormat_daysAgo() throws Exception {
         assertEquals("2 days ago", mFormatter.format(mNow.minusDays(2), mNow));
     }
 
+    @Test
     public void testFormatLocalDate_today() {
         assertEquals("today", mFormatter.format(mToday, mToday));
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
 
         mFormatter = new RelativeDateTimeFormatter();
         mNow = DateTime.parse("2000-01-01T12:00Z");

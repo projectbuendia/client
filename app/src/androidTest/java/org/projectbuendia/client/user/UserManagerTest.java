@@ -11,10 +11,15 @@
 
 package org.projectbuendia.client.user;
 
-import android.test.InstrumentationTestCase;
+import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -25,10 +30,15 @@ import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 /** Tests for {@link UserManager}. */
-public final class UserManagerTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public final class UserManagerTest   {
 
     private static final JsonUser USER = new JsonUser("id", "name");
 
@@ -38,6 +48,7 @@ public final class UserManagerTest extends InstrumentationTestCase {
     @Mock private UserStore mMockUserStore;
 
     /** Tests that getActiveUser() returns null if the user is never set. */
+    @Test
     public void testGetActiveUser_ReturnsNullInitially() {
         // GIVEN a new UserManager instance (user never set)
         // WHEN getActiveUser is called
@@ -46,6 +57,7 @@ public final class UserManagerTest extends InstrumentationTestCase {
     }
 
     /** Tests that an event is posted when users are loaded successfully. */
+    @Test
     public void testLoadKnownUsers_GeneratesEventOnSucess() throws Exception {
         // GIVEN the user store returns a set of users
         when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.of(USER));
@@ -58,6 +70,7 @@ public final class UserManagerTest extends InstrumentationTestCase {
     }
 
     /** Tests that an event is posted when users fail to load. */
+    @Test
     public void testLoadKnownUsers_GeneratesEventOnFailure() throws Exception {
         // GIVEN the user store throws an exception when trying to load the users
         when(mMockUserStore.loadKnownUsers()).thenAnswer(new Answer<Object>() {
@@ -74,8 +87,8 @@ public final class UserManagerTest extends InstrumentationTestCase {
             new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
     }
 
-    @Override protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         mFakeEventBus = new FakeEventBus();

@@ -21,7 +21,7 @@ import java.util.List;
 /** Matchers for {@link SimpleSelectionFilter} objects and arrays. */
 public class SimpleSelectionFilterMatchers {
     /** Matches any array of filters containing a filter with the specified name. */
-    public static class ContainsFilterWithName extends ArgumentMatcher<SimpleSelectionFilter[]> {
+    public static class ContainsFilterWithName implements ArgumentMatcher<SimpleSelectionFilter[]> {
         private String mFilterName;
 
         public ContainsFilterWithName(String filterName) {
@@ -30,11 +30,11 @@ public class SimpleSelectionFilterMatchers {
 
         /**
          * Matches any array of filters containing a filter with the specified name.
-         * @param filters an array of {@link SimpleSelectionFilter}'s
+         * @param filterArr an array of {@link SimpleSelectionFilter}'s
          * @return true if the array contains a filter with the specified name
          */
-        public boolean matches(Object filters) {
-            SimpleSelectionFilter[] filterArr = (SimpleSelectionFilter[]) filters;
+        @Override
+        public boolean matches(SimpleSelectionFilter[] filterArr) {
             for (int i = 0; i < filterArr.length; i++) {
                 if (filterArr[i].toString().equals(mFilterName)) {
                     return true;
@@ -43,6 +43,7 @@ public class SimpleSelectionFilterMatchers {
 
             return false;
         }
+
     }
 
     /**
@@ -51,7 +52,7 @@ public class SimpleSelectionFilterMatchers {
      * location UUID.
      */
     public static class IsFilterGroupWithLocationFilter
-        extends ArgumentMatcher<SimpleSelectionFilter> {
+            implements ArgumentMatcher<SimpleSelectionFilter> {
         private String mLocationUuid;
 
         public IsFilterGroupWithLocationFilter(String locationUuid) {
@@ -63,12 +64,12 @@ public class SimpleSelectionFilterMatchers {
          * {@link SimpleSelectionFilterGroup}) a {@link LocationUuidFilter} filtering by the
          * specified location UUID.
          */
-        public boolean matches(Object filter) {
-            if (isMatchingLocationFilter((SimpleSelectionFilter) filter)) {
+        public boolean matches(SimpleSelectionFilter filter) {
+            if (isMatchingLocationFilter(filter)) {
                 return true;
             }
 
-            if (isMatchingFilterGroup((SimpleSelectionFilter) filter)) {
+            if (isMatchingFilterGroup(filter)) {
                 return true;
             }
 

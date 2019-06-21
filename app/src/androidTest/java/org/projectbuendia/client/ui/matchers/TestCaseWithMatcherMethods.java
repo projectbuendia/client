@@ -19,7 +19,7 @@ import android.support.test.espresso.Espresso;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
-import android.test.ActivityInstrumentationTestCase2;
+import android.support.test.rule.ActivityTestRule;
 import android.view.View;
 
 import com.estimote.sdk.internal.Preconditions;
@@ -27,18 +27,18 @@ import com.google.common.base.Joiner;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.Matchers;
 
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static org.hamcrest.Matchers.allOf;
 
 /** Matchers for {@link View}s. */
-public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
+public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTestRule<T> {
 
     public TestCaseWithMatcherMethods(Class<T> startingActivity) {
-        super(startingActivity);
+        super(startingActivity, true, true);
     }
 
     // More concise ways of expressing common constructions like
