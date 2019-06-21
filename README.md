@@ -226,3 +226,29 @@ The graphical Android SDK Manager at `$ANDROID_HOME/tools/android` will let you 
 `ANDROID_HOME` is usually `/opt/android-sdk-linux` on a Linux machine and `~/Library/Android/sdk` on a Mac.
 
 To build the client from the command line, go to the root of your `client` repo and run `./gradlew clean assembleDebug`.  The resulting apk will be at `app/build/outputs/apk/app-debug.apk`.
+
+### Setting up command-line tools on Debian stretch
+
+```
+sudo apt-get install openjdk-8-jdk unzip git
+
+mkdir -p ~/.android && touch ~/.android/repositories.cfg
+
+mkdir android && cd android
+wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
+unzip sdk-tools-linux-4333796.zip 
+
+export PATH=$HOME/android/tools:$HOME/android/tools/bin:$PATH
+export ANDROID_HOME=$HOME/android
+
+yes | sdkmanager --licenses
+sdkmanager "platforms;android-21" "build-tools;19.1.0" "extras;android;m2repository" "platform-tools"
+
+cd ../client/
+git submodule update --init client-libs
+
+./gradlew assembleDebug 
+ls app/build/outputs/apk/debug/
+
+# ./gradlew -PversionNumber=0.10.0 clean assembleDebug 
+```
