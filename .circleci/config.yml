@@ -1,0 +1,69 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/client
+    docker:
+      - image: circleci/android:api-23
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+
+      - run:
+          name: Init client-lib submodule
+          command: git submodule update --init client-libs
+
+      - restore_cache:
+          keys:
+            - buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+            - buendia-client-v1-{{ checksum "build.gradle" }}-
+            - buendia-client-v1-{{ checksum "build.gradle" }}-
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      
+      - run:
+          name: Build APK
+          command: |
+            export ANDROID_PATH=/opt/android/sdk
+            ./gradlew assembleDebug
+
+      - run:
+          name: Run Tests
+          # lint is slightly busted for us here
+          # command: ./gradlew lint test
+          command: ./gradlew test
+
+      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+          path: app/build/outputs
+          destination: outputs
+
+      #- store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+      #path: app/build/test-results
+
+workflows:
+  version: 2
+  dev-build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              # Don't do a normal build for master; instead let the
+              # release-build job do the builds off master iff that branch is
+              # tagged as part of the documented release process.
+              ignore:
+                - master
+  release-build:
+    # Ensure that tagged releases get their own CircleCI build:
+    # https://circleci.com/docs/2.0/workflows/#executing-workflows-for-a-git-tag
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
