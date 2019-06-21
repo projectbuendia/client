@@ -13,6 +13,10 @@ jobs:
           name: Init client-lib submodule
           command: git submodule update --init client-libs
 
+      - run:
+          name: Get package version
+          command: echo "export PACKAGE_VERSION=$(.circleci/get_package_version)" >> $BASH_ENV
+
       - restore_cache:
           keys:
             - buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
@@ -21,6 +25,7 @@ jobs:
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
+
       - save_cache:
           paths:
             - ~/.gradle
@@ -31,6 +36,8 @@ jobs:
           command: |
             export ANDROID_PATH=/opt/android/sdk
             ./gradlew assembleDebug
+            mkdir -p /tmp/artifacts
+            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk
 
       - run:
           name: Run Tests
@@ -39,8 +46,8 @@ jobs:
           command: ./gradlew test
 
       - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
-          path: app/build/outputs
-          destination: outputs
+          path: /tmp/artifacts
+          destination: artifacts
 
       #- store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
       #path: app/build/test-results
