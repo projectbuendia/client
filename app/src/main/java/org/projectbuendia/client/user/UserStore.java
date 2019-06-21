@@ -17,14 +17,13 @@ import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.os.RemoteException;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.google.common.collect.ImmutableSet;
-
-import android.database.sqlite.SQLiteException;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonNewUser;
@@ -143,23 +142,16 @@ public class UserStore {
         LOG.i("Updating local database with %d users", users.size());
         ContentProviderClient client = App.getInstance().getContentResolver()
             .acquireContentProviderClient(Users.CONTENT_URI);
-        BuendiaProvider buendiaProvider =
-            (BuendiaProvider) (client.getLocalContentProvider());
-        DatabaseTransaction dbTransactionHelper =
-            buendiaProvider.getDbTransactionHelper();
-        try {
-            LOG.d("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            client.applyBatch(getUserUpdateOps(users, new SyncResult()));
-        } catch (RemoteException | OperationApplicationException e) {
-            LOG.d("Rolling back savepoint %s", USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.rollbackNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            throw e;
-        } finally {
-            LOG.d("Releasing savepoint %s", USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.releaseNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.close();
-            client.release();
+        BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
+        try (DatabaseTransaction tx = provider.startTransaction(USER_SYNC_SAVEPOINT_NAME)) {
+            try {
+                client.applyBatch(getUserUpdateOps(users, new SyncResult()));
+            } catch (RemoteException | OperationApplicationException e) {
+                tx.rollback();
+                throw e;
+            } finally {
+                client.release();
+            }
         }
     }
 

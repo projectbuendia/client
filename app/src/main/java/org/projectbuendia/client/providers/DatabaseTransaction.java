@@ -11,56 +11,52 @@
 
 package org.projectbuendia.client.providers;
 
-import android.database.sqlite.SQLiteStatement;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
-import org.projectbuendia.client.sync.Database;
+import org.projectbuendia.client.utils.Logger;
 
-/** Provides helper functions for dealing with savepoints in SQLite databases. */
-public final class DatabaseTransaction { // @nolint
-    private final Database mDbHelper;
+/**
+ * An AutoCloseable object representing a SQLite transaction.  Instantiating
+ * a DatabaseTransaction starts a transaction.  Closing it with close() finishes
+ * the transaction, which causes the operations within the transaction to be
+ * rolled back if rollback() was called, or committed otherwise.
+ */
+public final class DatabaseTransaction implements AutoCloseable { // @nolint
+    private final SQLiteDatabase mDatabase;
+    private final String mName;
 
-    /** Closes the database resources in use by this object. */
-    public void close() {
-        mDbHelper.getWritableDatabase().close();
+    private static final Logger LOG = Logger.create();
+
+    /** Starts a named transaction by creating a savepoint. */
+    public DatabaseTransaction(SQLiteDatabase database, String name) {
+        mDatabase = database;
+        mName = name;
+        LOG.i("Starting transaction with SAVEPOINT " + mName);
+        mDatabase.execSQL("SAVEPOINT " + mName);
+    }
+
+    public DatabaseTransaction(SQLiteOpenHelper openHelper, String name) {
+        this(openHelper.getWritableDatabase(), name);
+    }
+
+    /** Rolls back a named transaction to the state just after it started. */
+    public void rollback() {
+        if (mDatabase.inTransaction()) {
+            LOG.i("Rolling back transaction with ROLLBACK TO " + mName);
+            mDatabase.execSQL("ROLLBACK TO " + mName);
+            LOG.i("Rollback to " + mName + " completed");
+        } else {
+            LOG.w("There is no current transaction to roll back");
+        }
     }
 
     /**
-     * Starts a named transaction by creating a savepoint with the given name.
-     * @see <a>http://www.sqlite.org/lang_savepoint.html</a>.
+     * Finishes a named transaction.  The transaction will be cancelled if
+     * rollback() was called; otherwise it will be committed.
      */
-    public void startNamedTransaction(String savepointName) {
-        SQLiteStatement statement =
-            mDbHelper.getWritableDatabase().compileStatement("SAVEPOINT " + savepointName);
-        statement.execute();
-        statement.close();
+    @Override public void close() {
+        mDatabase.execSQL("RELEASE " + mName);
+        LOG.i("Finished transaction " + mName);
     }
-
-    /**
-     * Rolls back a named transaction by rolling back to a savepoint with the given name.
-     * @see <a>http://www.sqlite.org/lang_savepoint.html</a>.
-     */
-    public void rollbackNamedTransaction(String savepointName) {
-        SQLiteStatement statement =
-            mDbHelper.getWritableDatabase().compileStatement("ROLLBACK TO " + savepointName);
-        statement.execute();
-        statement.close();
-    }
-
-    /**
-     * Releases a named transaction with the given name, removing the savepoint and effectively
-     * committing or canceling the transaction, depending on whether or not
-     * {@link #rollbackNamedTransaction(String)} was called.
-     * @see <a>http://www.sqlite.org/lang_savepoint.html</a>.
-     */
-    public void releaseNamedTransaction(String savepointName) {
-        SQLiteStatement statement =
-            mDbHelper.getWritableDatabase().compileStatement("RELEASE " + savepointName);
-        statement.execute();
-        statement.close();
-    }
-
-    DatabaseTransaction(Database dbHelper) {
-        mDbHelper = dbHelper;
-    }
-
 }
