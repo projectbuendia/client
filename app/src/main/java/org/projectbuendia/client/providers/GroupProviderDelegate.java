@@ -66,8 +66,8 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
             return 0;
         }
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
-            new SQLiteDatabaseTransactionHelper(dbHelper);
+        DatabaseTransaction dbTransactionHelper =
+            new DatabaseTransaction(dbHelper);
 
         ContentValues first = allValues[0];
         String[] columns = first.keySet().toArray(new String[first.size()]);

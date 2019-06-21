@@ -16,7 +16,7 @@ import android.database.sqlite.SQLiteStatement;
 import org.projectbuendia.client.sync.Database;
 
 /** Provides helper functions for dealing with savepoints in SQLite databases. */
-public final class SQLiteDatabaseTransactionHelper { // @nolint
+public final class DatabaseTransaction { // @nolint
     private final Database mDbHelper;
 
     /** Closes the database resources in use by this object. */
@@ -59,7 +59,7 @@ public final class SQLiteDatabaseTransactionHelper { // @nolint
         statement.close();
     }
 
-    SQLiteDatabaseTransactionHelper(Database dbHelper) {
+    DatabaseTransaction(Database dbHelper) {
         mDbHelper = dbHelper;
     }
 

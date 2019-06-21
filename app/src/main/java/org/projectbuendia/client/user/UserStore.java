@@ -32,7 +32,7 @@ import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Users;
-import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
+import org.projectbuendia.client.providers.DatabaseTransaction;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
@@ -145,7 +145,7 @@ public class UserStore {
             .acquireContentProviderClient(Users.CONTENT_URI);
         BuendiaProvider buendiaProvider =
             (BuendiaProvider) (client.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+        DatabaseTransaction dbTransactionHelper =
             buendiaProvider.getDbTransactionHelper();
         try {
             LOG.d("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);

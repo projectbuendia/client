@@ -18,11 +18,11 @@ import org.projectbuendia.client.providers.Contracts.Table;
 public class BuendiaProvider extends DelegatingProvider<Database> {
 
     /**
-     * Provides an {@link SQLiteDatabaseTransactionHelper} for beginning and ending savepoints
+     * Provides an {@link DatabaseTransaction} for beginning and ending savepoints
      * (nested transactions).
      */
-    public SQLiteDatabaseTransactionHelper getDbTransactionHelper() {
-        return new SQLiteDatabaseTransactionHelper(getDatabaseHelper());
+    public DatabaseTransaction getDbTransactionHelper() {
+        return new DatabaseTransaction(getDatabaseHelper());
     }
 
     @Override protected Database getDatabaseHelper() {

@@ -34,7 +34,7 @@ import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
-import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
+import org.projectbuendia.client.providers.DatabaseTransaction;
 import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.FormsSyncPhaseRunnable;
@@ -164,7 +164,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         BuendiaProvider buendiaProvider =
             (BuendiaProvider) (provider.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+        DatabaseTransaction dbTransactionHelper =
             buendiaProvider.getDbTransactionHelper();
         LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
@@ -272,7 +272,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
-    private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
+    private void rollbackSavepoint(DatabaseTransaction dbTransactionHelper) {
         LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
     }
