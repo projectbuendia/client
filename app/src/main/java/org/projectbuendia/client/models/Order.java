@@ -16,13 +16,17 @@ import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,29 +37,30 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class Order extends Base<String> implements Comparable<Order> {
     public static final char NON_BREAKING_SPACE = '\u00a0';
-    public final
-    @Nullable String uuid;
+    public final @Nullable String uuid;
     public final String patientUuid;
     public final String instructions;
     public final DateTime start;
-    public final
-    @Nullable DateTime stop;
+    public final @Nullable DateTime stop;
 
     public static Order fromJson(JsonOrder order) {
         return new Order(order.uuid, order.patient_uuid, order.instructions,
             order.start_millis, order.stop_millis);
     }
 
-    // TODO/robustness: Store medication, dosage, and frequency as separate fields instead of
-    // mashing them into one free-text instructions field.  This will also enable
-    // internationalization.
+    // TODO/robustness: Store medication, dosage, and frequency as separate fields
+    // instead of mashing them into one free-text instructions field.  This will
+    // also enable internationalization.
 
+    // Examples: "Paracetamol 200 mg 3x daily"
     // [Any amount of non-whitespace][space][any text][space][more than one digit]x[space][any text]
     // OR [Any amount of non-whitespace][an optional space][any text]
     // Note that the second branch will match everything - even the empty string - and shoehorn
     // the order instructions into the medication and dosage fields.
     public static final Pattern INSTRUCTIONS_PATTERN = Pattern.compile(
-        "([^ ]*) (.*) ([0-9]+)x .*|([^ ]*) ?(.*)");
+        "([^ ]*) (.*) ([0-9]+)x .*"  // example: "Paracetamol 500 mg 3x daily"
+            + "|" +
+            "([^ ]*) ?(.*)");  // example: "Prednisone 1 L 10 mg/L"
 
     public static String getInstructions(String medication, String dosage, String frequency) {
         medication = Utils.valueOrDefault(medication, "");
@@ -87,12 +92,12 @@ public final class Order extends Base<String> implements Comparable<Order> {
         return null;
     }
 
-    public static String getFrequency(String instructions) {
+    public static int getFrequency(String instructions) {
         Matcher matcher = INSTRUCTIONS_PATTERN.matcher(Utils.valueOrDefault(instructions, ""));
         if (matcher.matches()) {
-            return matcher.group(3);
+            return Integer.valueOf(matcher.group(3));
         }
-        return null;
+        return -1;
     }
 
     public Order(@Nullable String uuid, String patientUuid,
@@ -121,12 +126,53 @@ public final class Order extends Base<String> implements Comparable<Order> {
         return getDosage(instructions);
     }
 
-    public String getFrequency() {
+    public int getFrequency() {
         return getFrequency(instructions);
     }
 
     public Interval getInterval() {
         return Utils.toInterval(start, stop);
+    }
+
+    public List<DateTime> getScheduledDosesOnDay(LocalDate day) {
+        List<DateTime> doseTimes = new ArrayList<>();
+        Interval daySpan = day.toInterval();
+
+        if (getFrequency() > 0) {
+            Duration dayLength = daySpan.toDuration();
+            Duration doseSpacing = dayLength.dividedBy(getFrequency());
+            for (DateTime doseTime = daySpan.getStart().plus(doseSpacing.dividedBy(2));
+                 daySpan.contains(doseTime);
+                 doseTime = doseTime.plus(doseSpacing)) {
+                if (!doseTime.isBefore(stop)) break;
+                if (!doseTime.isBefore(start)) {
+                    doseTimes.add(doseTime);
+                }
+            }
+        } else {
+            if (daySpan.contains(start)) {
+                doseTimes.add(start);
+            }
+        }
+        return doseTimes;
+    }
+
+    public int countScheduledDosesIn(Interval interval) {
+        if (getFrequency() > 0) {
+            int count = 0;
+            LocalDate firstDay = interval.getStart().toLocalDate();
+            LocalDate lastDay = interval.getEnd().toLocalDate();
+            for (LocalDate day = firstDay; !day.isAfter(lastDay); day = day.plusDays(1)) {
+                for (DateTime doseTime : getScheduledDosesOnDay(day)) {
+                    if (interval.contains(doseTime)) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        } else {
+            return interval.contains(start) ? 1 : 0;
+        }
     }
 
     @Override public int compareTo(@NonNull Order other) {

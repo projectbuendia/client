@@ -13,6 +13,7 @@ import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.ObsValue;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -59,6 +60,7 @@ public class PebbleExtension extends AbstractExtension {
         functions.put("get_all_points", new GetAllPointsFunction());
         functions.put("get_order_execution_count", new GetOrderExecutionCountFunction());
         functions.put("intervals_overlap", new IntervalsOverlapFunction());
+        functions.put("count_doses_scheduled", new CountScheduledDosesFunction());
     }
 
     public static final String TYPE_ERROR = "?";
@@ -330,6 +332,18 @@ public class PebbleExtension extends AbstractExtension {
             Interval a = (Interval) args.get("a");
             Interval b = (Interval) args.get("b");
             return a.overlaps(b);
+        }
+    }
+
+    static class CountScheduledDosesFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("order", "interval");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            Order order = (Order) args.get("order");
+            Interval interval = (Interval) args.get("interval");
+            return order.countScheduledDosesIn(interval);
         }
     }
 }
