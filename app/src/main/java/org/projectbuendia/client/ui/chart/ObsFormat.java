@@ -100,7 +100,7 @@ public class ObsFormat extends Format {
             mFormat = new Format() {
                 @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                                      @Nonnull FieldPosition pos) {
-                    buf.append(mPattern);
+                    buf.append("??" + mPattern);
                     return buf;
                 }
 
