@@ -83,8 +83,14 @@ th, td {
 /* Cells: text should match @style/text */
 .obs td, .order td { text-align: center; min-width: 3em; }
 #grid .order th { padding: 0 16px; line-height: 1.2em; vertical-align: middle; }
-.order .future { font-size: 75%; color: #999; vertical-align: middle; }
-.order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; vertical-align: middle; }
+#grid .order .stop { color: #f66; font-size: 1.5rem; text-transform: uppercase; vertical-align: middle; }
+#grid .order .scheduled { background: #ddd; }
+#grid .order .past.underdose { background: #fda; }
+#grid .order .now.underdose { background: #faa; }
+#grid .order .full-dose { background: #afa; }
+#grid .order .overdose { background: #c8f; }
+#grid .order .overdose .given, .order .overdose .extra-given { color: #c00; }
+
 .order .medication { font-weight: bold; }
 #grid th[scope="row"].command { /* matches @style/ActionButton */
   color: #09e;

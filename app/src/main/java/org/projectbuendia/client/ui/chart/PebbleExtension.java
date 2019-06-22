@@ -60,7 +60,7 @@ public class PebbleExtension extends AbstractExtension {
         functions.put("get_all_points", new GetAllPointsFunction());
         functions.put("get_order_execution_count", new GetOrderExecutionCountFunction());
         functions.put("intervals_overlap", new IntervalsOverlapFunction());
-        functions.put("count_doses_scheduled", new CountScheduledDosesFunction());
+        functions.put("count_scheduled_doses", new CountScheduledDosesFunction());
     }
 
     public static final String TYPE_ERROR = "?";

@@ -71,13 +71,13 @@
         <th scope="rowgroup">
           Observations
         </th>
-        {% set prevColumn = null %}
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% if prevColumn is not null and column.start != prevColumn.stop %}
+          {% if column.start != prevStop %}
             <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
           {% endif %}
           <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
-          {% set prevColumn = column %}
+          {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
       {% for row in rows %}
@@ -125,14 +125,15 @@
     <tbody>
       <tr>
         <th scope="rowgroup">
-          Treatment Plan
+          Treatments
         </th>
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% if prevColumn is not null and column.start != prevColumn.stop %}
+          {% if column.start != prevStop %}
             <th scope="rowgroup" class="gap" rowspan={{orders.size + 1}}>&nbsp;</th>
           {% endif %}
-        <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
-          {% set prevColumn = column %}
+          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
+          {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
       {% for order in orders %}
@@ -141,28 +142,32 @@
             <div class="medication">{{order.medication}}</div>
             <div>{{order.dosage}}&nbsp;</div>
           </th>
-          {% set previousActive = false %}
+          {% set past = true %}
           {% set future = false %}
+          {% set stopped = 0 %}
+
           {% for column in columns %}
-            <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}">
-              {% set active = intervals_overlap(order.interval, column.interval) %}
-              {% if order.stop == null and previousActive %}
-                <div class="future">&nbsp;</div>
-              {% elseif order.stop != null and previousActive and not active %}
-                <div class="stop">Stop</div>
-              {% elseif active %}
-                {% if future %}
-                  <div class="future active">&#x25cf;</div>
-                {% else %}
-                  {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
-                  <div class="past active"
-                      onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}})"
-                      >{{count}}</div>
-                {% endif %}
+            {% set now = (column.start == nowColumnStart) %}
+            {% set dayLast = (column.stop == column.dayStop) %}
+            {% if now %} {% set past = false %} {% endif %}
+
+            {% set scheduled = count_scheduled_doses(order, column.interval) + 0 %}
+            {% set given = get_order_execution_count(order_uuid=order.uuid, column=column) + 0 %}
+            {% set status = (given < scheduled) ? 'underdose' : (given > scheduled) ? 'overdose' : (scheduled > 0) ? 'full-dose' : '' %}
+
+            {% if order.isSeries and column.start.millis >= order.stop.millis %}
+              {% set stopped = stopped + 1 %}
+            {% endif %}
+
+            <td class="{{dayLast ? 'day-last' : ''}} {{past ? 'past' : ''}} {{now ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stopped == 1 ? 'stop' : ''}}"
+                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+              {% if given + scheduled > 0 %}
+                <span class="given">{{given}}</span>/{{scheduled}}
+              {% elseif stopped == 1 %}
+                stop
               {% endif %}
-              {% set previousActive = active %}
-              {% set future = future or column.start == nowColumnStart %}
             </td>
+            {% if now %} {% set future = true %} {% endif %}
           {% endfor %}
         </tr>
       {% endfor %}

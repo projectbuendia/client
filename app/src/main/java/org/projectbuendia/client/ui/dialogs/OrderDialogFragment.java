@@ -97,7 +97,7 @@ public class OrderDialogFragment extends DialogFragment {
         String instructions = args.getString("instructions");
         mMedication.setText(Order.getMedication(instructions));
         mDosage.setText(Order.getDosage(instructions));
-        mFrequency.setText(Order.getFrequency(instructions));
+        mFrequency.setText(Order.getFrequencyString(instructions));
         DateTime now = Utils.getDateTime(args, "now_millis");
         Long stopMillis = Utils.getLong(args, "stop_millis");
         if (stopMillis != null) {

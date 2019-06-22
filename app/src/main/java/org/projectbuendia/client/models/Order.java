@@ -100,6 +100,11 @@ public final class Order extends Base<String> implements Comparable<Order> {
         return -1;
     }
 
+    public static String getFrequencyString(String instructions) {
+        int frequency = getFrequency(instructions);
+        return frequency > 0 ? Integer.toString(frequency) : "";
+    }
+
     public Order(@Nullable String uuid, String patientUuid,
                  String instructions, DateTime start, @Nullable DateTime stop) {
         this.uuid = uuid;
@@ -118,6 +123,10 @@ public final class Order extends Base<String> implements Comparable<Order> {
         this.stop = stopMillis == null ? null : new DateTime(stopMillis);
     }
 
+    public boolean isSeries() {
+        return stop != null;
+    }
+
     public String getMedication() {
         return getMedication(instructions);
     }
@@ -127,7 +136,11 @@ public final class Order extends Base<String> implements Comparable<Order> {
     }
 
     public int getFrequency() {
-        return getFrequency(instructions);
+        return isSeries() ? getFrequency(instructions) : -1;
+    }
+
+    public String getFrequencyString() {
+        return isSeries() ? getFrequencyString(instructions) : "";
     }
 
     public Interval getInterval() {
