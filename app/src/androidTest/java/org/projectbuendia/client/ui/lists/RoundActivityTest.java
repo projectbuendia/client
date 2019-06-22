@@ -11,6 +11,10 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import android.support.test.annotation.UiThreadTest;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
@@ -24,6 +28,7 @@ public class RoundActivityTest extends FunctionalTestCase {
      * Initializes the test by entering the Round view for Triage.
      * @throws Exception if anything goes wrong
      */
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         click(viewWithText("Guest User"));
@@ -32,6 +37,8 @@ public class RoundActivityTest extends FunctionalTestCase {
     }
 
     /** Checks for a populated title. */
+    @Test
+    @UiThreadTest
     public void testTitlePopulation() {
         // TODO/completeness: Check that title count actually matches patient count.
         screenshot("Test Start");
@@ -39,6 +46,8 @@ public class RoundActivityTest extends FunctionalTestCase {
     }
 
     /** Checks that at least one patient is displayed. */
+    @Test
+    @UiThreadTest
     public void testAtLeastOnePatientDisplayed() {
         screenshot("Test Start");
         // Click the first patient

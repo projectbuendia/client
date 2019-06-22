@@ -2,8 +2,8 @@ package org.projectbuendia.client.ui.chart;
 
 import com.google.common.base.Objects;
 
-import org.apache.commons.lang3.text.ExtendedMessageFormat;
-import org.apache.commons.lang3.text.FormatFactory;
+import org.apache.commons.text.ExtendedMessageFormat;
+import org.apache.commons.text.FormatFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.models.ObsPoint;
@@ -100,7 +100,7 @@ public class ObsFormat extends Format {
             mFormat = new Format() {
                 @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                                      @Nonnull FieldPosition pos) {
-                    buf.append(mPattern);
+                    buf.append("??" + mPattern);
                     return buf;
                 }
 
@@ -110,7 +110,7 @@ public class ObsFormat extends Format {
             };
         }
     }
-    
+
     public ObsFormat(String pattern) {
         this(pattern, null);
     }

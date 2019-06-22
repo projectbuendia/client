@@ -17,15 +17,12 @@ import org.projectbuendia.client.providers.Contracts.Table;
 /** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
 public class BuendiaProvider extends DelegatingProvider<Database> {
 
-    /**
-     * Provides an {@link SQLiteDatabaseTransactionHelper} for beginning and ending savepoints
-     * (nested transactions).
-     */
-    public SQLiteDatabaseTransactionHelper getDbTransactionHelper() {
-        return new SQLiteDatabaseTransactionHelper(getDatabaseHelper());
+    /** Starts a transaction with the given savepoint name. */
+    public DatabaseTransaction startTransaction(String name) {
+        return new DatabaseTransaction(mDatabaseHelper, name);
     }
 
-    @Override protected Database getDatabaseHelper() {
+    @Override protected Database createDatabaseHelper() {
         return new Database(getContext());
     }
 
