@@ -85,10 +85,10 @@ public class AppSettings {
     }
 
     public boolean shouldSkipToPatientChart() {
-        return !getSkipToPatientId().isEmpty();
+        return !getStartingPatientId().isEmpty();
     }
 
-    public @NonNull String getSkipToPatientId() {
+    public @NonNull String getStartingPatientId() {
         return mSharedPreferences.getString("starting_patient_id", "").trim();
     }
 

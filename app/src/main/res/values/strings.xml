@@ -341,8 +341,8 @@
   <string name="pref_desc_keep_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
   <string name="pref_title_require_wifi">Require wifi connection</string>
   <string name="pref_desc_require_wifi">Turn this off to allow the app to work with non-wifi (emulated or Bluetooth tethered) networking.</string>
-  <string name="pref_title_skip_to_patient_id">Start with patient ID</string>
-  <string name="pref_desc_skip_to_patient_id">Set an ID here to go directly to a patient chart on startup.</string>
+  <string name="pref_title_starting_patient_id">Start with patient ID</string>
+  <string name="pref_desc_starting_patient_id">Set an ID here to go directly to a patient chart on startup.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>

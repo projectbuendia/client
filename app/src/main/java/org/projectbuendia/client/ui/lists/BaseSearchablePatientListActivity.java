@@ -158,7 +158,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         if (!sSkippedPatientList && mSettings.shouldSkipToPatientChart()) {
             try (Cursor cursor = getContentResolver().query(
                 Patients.CONTENT_URI, null, Patients.ID + " = ?",
-                new String[] {mSettings.getSkipToPatientId()}, null)) {
+                new String[] {mSettings.getStartingPatientId()}, null)) {
                 if (cursor.moveToNext()) {
                     sSkippedPatientList = true;
                     PatientChartActivity.start(this, Utils.getString(cursor, Patients.UUID, null));
