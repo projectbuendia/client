@@ -560,7 +560,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             labels.add(patient.birthdate == null ? "age unknown"
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
-            PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
+
+            ActionBar actionBar = getActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(id + ". " + fullName);
+                actionBar.setSubtitle(sexAge);
+            }
         }
 
         @Override public void showWaitDialog(int titleId) {
