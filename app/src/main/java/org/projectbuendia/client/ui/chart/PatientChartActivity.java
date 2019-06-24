@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -161,18 +162,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         );
 
-        MenuItem updateChart = menu.findItem(R.id.action_update_chart);
-        updateChart.setIcon(createIcon(Iconify.IconValue.fa_pencil_square_o, 0xccffffff));
-        updateChart.setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    mController.onAddObservationPressed();
-                    return true;
-                }
-            });
-
-        boolean clinicalObservationFormEnabled = false;
         boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
             MenuItem item = menu.add(form.name);
@@ -184,14 +173,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 }
             );
-            if (form.uuid.equals(PatientChartController.OBSERVATION_FORM_UUID)) {
-                clinicalObservationFormEnabled = true;
-            }
             if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
                 ebolaLabTestFormEnabled = true;
             }
         }
-        updateChart.setVisible(clinicalObservationFormEnabled);
+        Log.d("**PATIENT CHART*** ", "Menu size: "+menu.size());
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 

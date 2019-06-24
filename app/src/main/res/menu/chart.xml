@@ -22,8 +22,4 @@
   <item android:id="@+id/action_zoom"
         android:title="@string/action_zoom"
         android:showAsAction="ifRoom|collapseActionView" />
-
-  <item android:id="@+id/action_update_chart"
-      android:showAsAction="ifRoom"
-      android:title="@string/action_update_chart"/>
 </menu>
