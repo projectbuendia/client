@@ -165,6 +165,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
             MenuItem item = menu.add(form.name);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
                     @Override public boolean onMenuItemClick(MenuItem menuItem) {
