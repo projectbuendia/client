@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -178,7 +177,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 ebolaLabTestFormEnabled = true;
             }
         }
-        Log.d("**PATIENT CHART*** ", "Menu size: "+menu.size());
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
