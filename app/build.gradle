@@ -303,3 +303,9 @@ gradle.taskGraph.whenReady {
             }
         }
 }
+
+task runInstrumentationTestsOnTestLab(type: Exec) {
+    commandLine './firebase-test-run.sh'
+}
+runInstrumentationTestsOnTestLab.dependsOn('assembleDebug')
+runInstrumentationTestsOnTestLab.dependsOn('assembleAndroidTest')
