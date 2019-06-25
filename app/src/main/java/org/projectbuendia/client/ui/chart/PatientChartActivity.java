@@ -93,7 +93,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
-    private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
 
     private PatientChartController mController;
     private boolean mIsFetchingXform = false;
@@ -560,7 +559,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             labels.add(patient.birthdate == null ? "age unknown"
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
-            PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
+
+            ActionBar actionBar = getActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(id + ". " + fullName);
+                actionBar.setSubtitle(sexAge);
+            }
         }
 
         @Override public void showWaitDialog(int titleId) {
