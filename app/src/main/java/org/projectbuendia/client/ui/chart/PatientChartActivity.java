@@ -93,7 +93,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
-    private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
 
     private PatientChartController mController;
     private boolean mIsFetchingXform = false;
