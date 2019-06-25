@@ -49,6 +49,16 @@ references:
       # command: ./gradlew lint test
       command: ./gradlew test
 
+  run_instrumentation_tests: &run_instrumentation_tests
+    run:
+      name: Run instrumentation tests in Firebase Test Labs
+      command: |
+        echo ${FIREBASE_SERVICE_KEY} | base64 --decode > ${HOME}/client-secret.json
+        gcloud config set project buendia-client
+        gcloud auth activate-service-account ${FIREBASE_SERVICE_ACCOUNT} --key-file ${HOME}/client-secret.json
+        gcloud config set account ${FIREBASE_SERVICE_ACCOUNT}
+        ./gradlew runInstrumentationTestsOnTestLab
+
   make_artifact_store: &make_artifact_store
     run:
       name: Make artifact store
@@ -84,6 +94,8 @@ jobs:
             cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}-debug.apk
 
       - *run_unit_tests
+
+      - *run_instrumentation_tests
 
       - *store_artifacts
 
