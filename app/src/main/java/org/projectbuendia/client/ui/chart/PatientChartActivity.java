@@ -160,21 +160,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         );
 
-        MenuItem updateChart = menu.findItem(R.id.action_update_chart);
-        updateChart.setIcon(createIcon(Iconify.IconValue.fa_pencil_square_o, 0xccffffff));
-        updateChart.setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    mController.onAddObservationPressed();
-                    return true;
-                }
-            });
-
-        boolean clinicalObservationFormEnabled = false;
         boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
             MenuItem item = menu.add(form.name);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
                     @Override public boolean onMenuItemClick(MenuItem menuItem) {
@@ -183,14 +172,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 }
             );
-            if (form.uuid.equals(PatientChartController.OBSERVATION_FORM_UUID)) {
-                clinicalObservationFormEnabled = true;
-            }
             if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
                 ebolaLabTestFormEnabled = true;
             }
         }
-        updateChart.setVisible(clinicalObservationFormEnabled);
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
