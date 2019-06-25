@@ -130,16 +130,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chart, menu);
 
-        menu.findItem(R.id.action_edit).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                    Utils.logUserAction("edit_patient_pressed");
-                    mController.onEditPatientPressed();
-                    return true;
-                }
-            });
-
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
                 @Override public boolean onMenuItemClick(MenuItem menuItem) {
@@ -160,9 +150,21 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         );
 
+        // edit submenu includes edit patient (in xml) and forms
+        Menu editSubmenu = menu.findItem(R.id.action_edit).getSubMenu();
+        editSubmenu.getItem(0).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("edit_patient_pressed");
+                        mController.onEditPatientPressed();
+                        return true;
+                    }
+                });
+
         boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
-            MenuItem item = menu.add(form.name);
+            MenuItem item = editSubmenu.add(form.name);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
