@@ -31,6 +31,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.net.Server;
 
 import java.io.PrintWriter;
@@ -42,6 +43,7 @@ import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -98,6 +100,30 @@ public class Utils {
                 return a.size() - b.size();
             }
         };
+
+    /**
+     * Sorts an ArrayList of ObsRow rows so that the order of the ObsRow.conceptUids matches the
+     * order of conceptRowUuids.
+     */
+    public static ArrayList<ObsRow> sortObsRows(final ArrayList<ObsRow> rows,
+                                                final ArrayList<String> conceptUuids) {
+        Collections.sort(rows, new Comparator<ObsRow>() {
+            @Override
+            public int compare(ObsRow a, ObsRow b) {
+                int aIndex = conceptUuids.indexOf(a.conceptUuid);
+                int bIndex = conceptUuids.indexOf(b.conceptUuid);
+                if (aIndex == -1) {
+                    aIndex += rows.size() + rows.indexOf(a);
+                }
+                if (bIndex == -1) {
+                    bIndex += rows.size() + rows.indexOf(b);
+                }
+                return Integer.compare(aIndex, bIndex);
+            }
+        });
+
+        return rows;
+    }
 
     private static final DateTimeFormatter SHORT_DATE_FORMATTER =
         DateTimeFormat.forPattern("d MMM"); // TODO/i18n

@@ -15,15 +15,19 @@ public class ObsRow implements Parcelable {
     public String day;
     public String time;
     public String conceptName;
+    public String conceptUuid;
     public @Nullable String value;
     public @Nullable String valueName;
 
     public ObsRow(String Uuid,
                long Millis,
-               String ConceptName,
+               String conceptName,
+               String conceptUuid,
                @Nullable String Value,
                @Nullable String ValueName) {
-        conceptName = ConceptName;
+
+        this.conceptName = conceptName;
+        this.conceptUuid = conceptUuid;
 
         DateTimeFormatter fmtDay = DateTimeFormat.forPattern("dd MMM yyyy");
         day =  fmtDay.print(new DateTime(Millis));
@@ -53,6 +57,7 @@ public class ObsRow implements Parcelable {
         day = in.readString();
         time = in.readString();
         conceptName = in.readString();
+        conceptUuid = in.readString();
         value = in.readString();
         valueName = in.readString();
     }
@@ -65,6 +70,7 @@ public class ObsRow implements Parcelable {
         dest.writeString(day);
         dest.writeString(time);
         dest.writeString(conceptName);
+        dest.writeString(conceptUuid);
         dest.writeString(value);
         dest.writeString(valueName);
     }

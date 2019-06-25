@@ -44,6 +44,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
+import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
@@ -606,8 +607,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override public void showObservationsDialog(ArrayList<ObsRow> observations) {
-            ViewObservationsDialogFragment.newInstance(observations)
+        @Override public void showObservationsDialog(ArrayList<ObsRow> observations,
+                                                     ArrayList<String> orderedConceptUuids) {
+            ViewObservationsDialogFragment.newInstance(observations, orderedConceptUuids)
                 .show(getSupportFragmentManager(), null);
         }
 

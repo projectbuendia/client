@@ -16,8 +16,11 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,15 +28,20 @@ import butterknife.ButterKnife;
 
 public class ViewObservationsDialogFragment extends DialogFragment {
 
+    private static final String KEY_OBSROWS = "obsrows";
+    private static final String KEY_CONCEPT_UUIDS = "conceptUuids";
+
     private LayoutInflater mInflater;
     private ExpandableListAdapter listAdapter;
     private ExpandableListView expListView;
     private List<String> listDataHeader;
     private HashMap<String, List<String>> listDataChild;
 
-    public static ViewObservationsDialogFragment newInstance(ArrayList<ObsRow> observations) {
+    public static ViewObservationsDialogFragment newInstance(ArrayList<ObsRow> observations,
+                                                             ArrayList<String> orderedConceptUuids) {
         Bundle args = new Bundle();
-        args.putParcelableArrayList("obsrows", observations);
+        args.putParcelableArrayList(KEY_OBSROWS, observations);
+        args.putStringArrayList(KEY_CONCEPT_UUIDS, orderedConceptUuids);
         ViewObservationsDialogFragment f = new ViewObservationsDialogFragment();
         f.setArguments(args);
         return f;
@@ -52,14 +60,18 @@ public class ViewObservationsDialogFragment extends DialogFragment {
         return false;
     }
 
-    private void prepareData(ArrayList<ObsRow> rows){
+    private void prepareData(ArrayList<ObsRow> rows, final ArrayList<String> conceptUuids) {
 
         List<String> child;
         String verifyTitle;
         String Title;
 
         listDataHeader = new ArrayList<>();
-        listDataChild = new HashMap<String, List<String>>();
+        listDataChild = new HashMap<>();
+
+        if (conceptUuids != null) {
+            rows = Utils.sortObsRows(rows, conceptUuids);
+        }
 
         for (ObsRow row: rows) {
 
@@ -75,11 +87,10 @@ public class ViewObservationsDialogFragment extends DialogFragment {
 
             child = new ArrayList<>();
 
-            for (ObsRow row: rows){
-
+            for (ObsRow row : rows) {
                 verifyTitle = row.conceptName + " \u2022 " + row.day;
 
-                if (verifyTitle.equals(header)){
+                if (verifyTitle.equals(header)) {
                     child.add(row.time + " \u2014 " + row.valueName);
                 }
             }
@@ -94,8 +105,9 @@ public class ViewObservationsDialogFragment extends DialogFragment {
         View fragment = mInflater.inflate(R.layout.view_observations_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
-        final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList("obsrows");
-        prepareData(obsrows);
+        final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList(KEY_OBSROWS);
+        final ArrayList<String> conceptUuids = getArguments().getStringArrayList(KEY_CONCEPT_UUIDS);
+        prepareData(obsrows, conceptUuids);
 
         listAdapter = new ExpandableObsRowAdapter(App.getInstance().getApplicationContext(), listDataHeader, listDataChild);
         ExpandableListView listView = (ExpandableListView) fragment.findViewById(R.id.lvObs);
