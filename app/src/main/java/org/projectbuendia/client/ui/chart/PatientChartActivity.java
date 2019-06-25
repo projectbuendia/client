@@ -493,7 +493,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 if (pcrObsTime != null) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = pcrObsTime.toLocalDate();
-                    String dateText = new RelativeDateTimeFormatter().format(today, obsDay);
+                    String dateText = new RelativeDateTimeFormatter().format(obsDay, today);
                     mPcr.setName(getResources().getString(
                         R.string.latest_pcr_label_with_date, dateText));
                 }
