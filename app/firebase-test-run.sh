@@ -11,12 +11,13 @@
 #
 # TODO: add more
 
-PROJECT_ID=buendia-client
+PROJECT_ID=${1:-buendia-client}
 
 gcloud config set project $PROJECT_ID
 gcloud firebase test android run \
     --type instrumentation \
     --app ./build/outputs/apk/debug/app-debug.apk \
     --test ./build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+    --timeout 3m \
     --device model=flo,version=21 \
     --use-orchestrator
