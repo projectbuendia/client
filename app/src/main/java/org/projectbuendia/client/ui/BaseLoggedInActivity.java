@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -23,12 +24,15 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import com.joanzapata.iconify.fonts.FontAwesomeIcons;
+
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
+import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;
@@ -94,6 +98,19 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         onExtendOptionsMenu(menu);
 
         getMenuInflater().inflate(R.menu.base, menu);
+
+        MenuItem searchByIdItem = menu.findItem(R.id.action_go_to);
+        setMenuBarIcon(searchByIdItem, FontAwesomeIcons.fa_search);
+
+        searchByIdItem.setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("go_to_patient_pressed");
+                        GoToPatientDialogFragment.newInstance()
+                                .show(getSupportFragmentManager(), null);
+                        return true;
+                    }
+                });
 
         mPopupWindow = new MenuPopupWindow();
 

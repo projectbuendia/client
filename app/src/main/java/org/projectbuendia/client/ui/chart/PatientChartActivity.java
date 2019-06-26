@@ -32,7 +32,7 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
-import com.joanzapata.android.iconify.Iconify;
+import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -130,17 +130,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chart, menu);
 
-        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                    Utils.logUserAction("go_to_patient_pressed");
-                    GoToPatientDialogFragment.newInstance()
-                        .show(getSupportFragmentManager(), null);
-                    return true;
-                }
-            });
-
-        menu.findItem(R.id.action_zoom).setOnMenuItemClickListener(
+        MenuItem zoomItem = menu.findItem(R.id.action_zoom);
+        setMenuBarIcon(zoomItem, FontAwesomeIcons.fa_arrows_h);
+        zoomItem.setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
                 @Override public boolean onMenuItemClick(MenuItem item) {
                     Utils.logUserAction("zoom_chart_pressed");
@@ -150,8 +142,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         );
 
+        MenuItem editItem = menu.findItem(R.id.action_edit);
+        setMenuBarIcon(editItem, FontAwesomeIcons.fa_pencil_square_o);
         // edit submenu includes edit patient (in xml) and forms
-        Menu editSubmenu = menu.findItem(R.id.action_edit).getSubMenu();
+        Menu editSubmenu = editItem.getSubMenu();
         editSubmenu.getItem(0).setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
 
@@ -442,9 +436,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // PCR
             Obs pcrGpObservation = observations.get(ConceptUuids.PCR_GP_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
-            mPcr.setIcon(createIcon(Iconify.IconValue.fa_flask, 0x00000000));
+
+            mPcr.setIcon(createIcon(FontAwesomeIcons.fa_flask, R.color.chart_tile_icon));
             if ((pcrGpObservation == null || pcrGpObservation.valueName == null)
-                && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
+                    && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
             } else {
                 String pcrGpString = "–";
@@ -536,7 +531,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             String locationText = location == null ? "Unknown" : location.toString(); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
-            mPatientLocationView.setIcon(createIcon(Iconify.IconValue.fa_map_marker, 0x00000000));
+            mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {

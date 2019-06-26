@@ -23,13 +23,14 @@ import android.provider.Settings;
 import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.joanzapata.android.iconify.IconDrawable;
-import com.joanzapata.android.iconify.Iconify;
+import com.joanzapata.iconify.Icon;
+import com.joanzapata.iconify.IconDrawable;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -100,9 +101,13 @@ public abstract class BaseActivity extends FragmentActivity {
         startActivity(getIntent(), ActivityOptions.makeCustomAnimation(getApplicationContext(), 0, 0).toBundle());
     }
 
-    public IconDrawable createIcon(Iconify.IconValue icon, int color) {
+    public void setMenuBarIcon(MenuItem item, Icon icon) {
+        item.setIcon(createIcon(icon, R.color.menubar_icon));
+    }
+
+    public IconDrawable createIcon(Icon icon, int colorRes) {
         int iconSizePx = (int) (36 * getResources().getDisplayMetrics().scaledDensity);
-        return new IconDrawable(this, icon).color(color).sizePx(iconSizePx);
+        return new IconDrawable(this, icon).color(getResources().getColor(colorRes)).sizePx(iconSizePx);
     }
 
     @Override public void setContentView(int layoutResId) {
@@ -231,7 +236,7 @@ public abstract class BaseActivity extends FragmentActivity {
                         R.string.troubleshoot_wifi_disabled_action_enable,
                         new View.OnClickListener() {
                             @Override public void onClick(View view) {
-                                ((WifiManager) getSystemService(Context.WIFI_SERVICE)).setWifiEnabled
+                                ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE)).setWifiEnabled
                                     (true);
                             }
                         }, 995, false);

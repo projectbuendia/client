@@ -20,7 +20,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
-import com.joanzapata.android.iconify.Iconify;
+import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
@@ -38,7 +38,6 @@ import org.projectbuendia.client.ui.LoadingState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
-import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Utils;
 
@@ -87,23 +86,12 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                 }
             });
 
-        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                    Utils.logUserAction("go_to_patient_pressed");
-                    GoToPatientDialogFragment.newInstance()
-                        .show(getSupportFragmentManager(), null);
-                    return true;
-                }
-            });
-
         MenuItem search = menu.findItem(R.id.action_search);
-        search.setIcon(createIcon(Iconify.IconValue.fa_search, 0xccffffff));
+        setMenuBarIcon(search, FontAwesomeIcons.fa_filter);
         search.setVisible(getLoadingState() == LoadingState.LOADED);
 
         MenuItem addPatient = menu.findItem(R.id.action_new_patient);
-        addPatient.setIcon(createIcon(Iconify.IconValue.fa_plus, 0xccffffff));
+        setMenuBarIcon(addPatient, FontAwesomeIcons.fa_user_plus);
         addPatient.setVisible(getLoadingState() == LoadingState.LOADED);
 
         mSearchView = (SearchView) search.getActionView();
