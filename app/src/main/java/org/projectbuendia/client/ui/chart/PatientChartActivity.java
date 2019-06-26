@@ -440,25 +440,25 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // that we need to do the other tiles like Admission Date to complete the layout.
         @Override public void updateEbolaPcrTestResultUi(Map<String, Obs> observations) {
             // PCR
-            Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
+            Obs pcrGpObservation = observations.get(ConceptUuids.PCR_GP_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
             mPcr.setIcon(createIcon(Iconify.IconValue.fa_flask, 0x00000000));
-            if ((pcrLObservation == null || pcrLObservation.valueName == null)
+            if ((pcrGpObservation == null || pcrGpObservation.valueName == null)
                 && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
             } else {
-                String pcrLString = "–";
+                String pcrGpString = "–";
                 DateTime pcrObsTime = null;
-                if (pcrLObservation != null && pcrLObservation.valueName != null) {
-                    pcrObsTime = pcrLObservation.time;
+                if (pcrGpObservation != null && pcrGpObservation.valueName != null) {
+                    pcrObsTime = pcrGpObservation.time;
                     try {
-                        double pcrL = Double.parseDouble(pcrLObservation.valueName);
-                        pcrLString = getFormattedPcrString(pcrL);
+                        double pcrGp = Double.parseDouble(pcrGpObservation.valueName);
+                        pcrGpString = getFormattedPcrString(pcrGp);
                     } catch (NumberFormatException e) {
                         LOG.w(
-                            "Retrieved a malformed L-gene PCR value: '%1$s'.",
-                            pcrLObservation.valueName);
-                        pcrLString = pcrLObservation.valueName;
+                            "Retrieved a malformed GP-gene PCR value: '%1$s'.",
+                            pcrGpObservation.valueName);
+                        pcrGpString = pcrGpObservation.valueName;
                     }
                 }
                 String pcrNpString = "–";
@@ -475,7 +475,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 }
 
-                mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
+                mPcr.setValue(String.format("%1$s / %2$s", pcrGpString, pcrNpString));
                 if (pcrObsTime != null) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = pcrObsTime.toLocalDate();
@@ -504,6 +504,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             obs = observations.get(ConceptUuids.IV_UUID);
             if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.iv_fitted));
+            }
+            obs = observations.get(ConceptUuids.OXYGEN_UUID);
+            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+                specialLabels.add(getString(R.string.oxygen));
+            }
+            obs = observations.get(ConceptUuids.DYSPHAGIA_UUID);
+            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+                specialLabels.add(getString(R.string.cannot_eat));
             }
             mPatientPregnantOrIvView.setText(Joiner.on("\n").join(specialLabels));
         }

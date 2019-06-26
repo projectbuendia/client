@@ -160,6 +160,8 @@
   <string name="action_add_test_result">Add test result</string>
   <string name="pregnant">Pregnant</string>
   <string name="iv_fitted">IV fitted</string>
+  <string name="cannot_eat">Cannot eat</string>
+  <string name="oxygen">Oxygen</string>
   <string name="status_short_desc_unknown">-</string>
   <string name="status_short_desc_well">1</string>
   <string name="status_short_desc_unwell">2</string>
