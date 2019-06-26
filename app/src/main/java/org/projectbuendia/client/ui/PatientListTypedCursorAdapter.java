@@ -117,6 +117,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public Object getGroup(int groupPosition) {
+        if (mLocations == null) {
+            return null;
+        }
         return mLocations[groupPosition];
     }
 
