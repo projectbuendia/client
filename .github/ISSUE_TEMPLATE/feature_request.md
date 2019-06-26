@@ -10,8 +10,10 @@ assignees: ''
 App version: (the number after "Buendia" on the starting screen)
 Screen or dialog:
 
-#### Proposed feature
+#### Use case or problem addressed by this proposal
 
-#### Alternatives considered
+#### Proposed feature or improvement
 
-#### Screenshots or sketches
+#### Alternatives considered <!-- optional -->
+
+#### Screenshots or sketches <!-- optional -->
