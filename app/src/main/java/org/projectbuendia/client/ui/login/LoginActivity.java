@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.joanzapata.iconify.fonts.FontAwesomeIcons;
+
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
@@ -102,7 +104,9 @@ public class LoginActivity extends BaseActivity {
             }
         );
 
-        menu.findItem(R.id.settings).setOnMenuItemClickListener(
+        MenuItem settingsItem = menu.findItem(R.id.settings);
+        setMenuBarIcon(settingsItem, FontAwesomeIcons.fa_cog);
+        settingsItem.setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
                 @Override public boolean onMenuItemClick(MenuItem item) {
