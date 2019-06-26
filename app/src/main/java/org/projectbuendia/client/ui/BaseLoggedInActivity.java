@@ -81,6 +81,9 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
+        // Show the Up button in the action bar.
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         onCreateImpl(savedInstanceState);
         mIsCreated = true;
     }
@@ -128,6 +131,17 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     }
 
     public void onExtendOptionsMenu(Menu menu) {
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            // Go back rather than reloading the activity, so that the patient list retains its
+            // filter state.
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void updateActiveUser() {
