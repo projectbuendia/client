@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a defect
 title: ''
-labels: needs triage
+labels: bug, needs triage
 assignees: ''
 
 ---
