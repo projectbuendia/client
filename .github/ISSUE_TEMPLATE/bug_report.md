@@ -16,4 +16,4 @@ Screen or dialog:
 
 #### Expected behaviour
 
-#### Screenshots
+#### Screenshots <!-- optional -->
