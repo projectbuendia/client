@@ -157,11 +157,11 @@ public class ChartDataHelper {
             localizedValue = sConceptNames.get(value);
         }
         String conceptName = sConceptNames.get(conceptUuid);
-        if (conceptName == null){
+        if (conceptName == null) {
             return null;
         }
         else {
-            return new ObsRow(uuid, millis, conceptName, value, localizedValue);
+            return new ObsRow(uuid, millis, conceptName, conceptUuid, value, localizedValue);
         }
     }
 
