@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.login;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -51,10 +52,12 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
 
+        setContentView(R.layout.activity_user_login);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+
         // This is the starting activity for the app, so show the app name and version.
         setTitle(getString(R.string.app_name) + " " + getString(R.string.app_version));
 
-        setContentView(R.layout.activity_user_login);
         LoginFragment fragment = (LoginFragment)
             getSupportFragmentManager().findFragmentById(R.id.fragment_user_login);
         mController = new LoginController(

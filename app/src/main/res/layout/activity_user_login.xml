@@ -9,13 +9,21 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_user_login"
-    android:name="org.projectbuendia.client.ui.login.LoginFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    tools:context="org.projectbuendia.client.ui.UserLoginActivity"
-    tools:layout="@android:layout/list_content" />
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <fragment
+        android:id="@+id/fragment_user_login"
+        android:name="org.projectbuendia.client.ui.login.LoginFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        tools:context="org.projectbuendia.client.ui.UserLoginActivity"
+        tools:layout="@android:layout/list_content" />
+</LinearLayout>

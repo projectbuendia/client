@@ -11,10 +11,10 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
@@ -57,7 +57,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
     @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(SELECTED_FILTER_KEY, getActionBar().getSelectedNavigationIndex());
+        outState.putInt(SELECTED_FILTER_KEY, getSupportActionBar().getSelectedNavigationIndex());
     }
 
     private final class FilterUi implements PatientFilterController.Ui {
@@ -80,7 +80,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
                 }
             };
 
-            final ActionBar actionBar = getActionBar();
+            final ActionBar actionBar = getSupportActionBar();
             actionBar.setLogo(R.drawable.ic_launcher);
             actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);

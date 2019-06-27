@@ -10,14 +10,15 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_zoom"
         android:title="@string/action_zoom"
-        android:showAsAction="ifRoom|collapseActionView" />
+        app:showAsAction="ifRoom|collapseActionView" />
 
     <item android:id="@+id/action_edit"
       android:title="@string/action_edit"
-      android:showAsAction="always" >
+      app:showAsAction="always" >
 
       <menu>
           <item android:id="@+id/edit_patient"

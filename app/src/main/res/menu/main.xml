@@ -10,15 +10,16 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_search"
           android:title="@string/action_search"
-          android:showAsAction="ifRoom|collapseActionView"
-          android:actionViewClass="android.widget.SearchView"/>
+          app:showAsAction="ifRoom|collapseActionView"
+          app:actionViewClass="android.widget.SearchView"/>
 
     <item android:id="@+id/action_new_patient"
-          android:showAsAction="ifRoom|collapseActionView"
+          app:showAsAction="ifRoom|collapseActionView"
           android:title="@string/action_new_patient"/>
 <!--
     <item android:id="@+id/action_cancel"

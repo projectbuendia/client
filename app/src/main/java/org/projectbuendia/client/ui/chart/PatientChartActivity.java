@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui.chart;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
@@ -21,6 +20,8 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -60,7 +61,6 @@ import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
-import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
@@ -177,7 +177,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
-        setContentView(R.layout.fragment_patient_chart);
+        setContentView(R.layout.activity_patient_chart);
 
         @Nullable Bundle controllerState = null;
         if (savedInstanceState != null) {
@@ -305,20 +305,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private void initChartMenu() {
         List<Chart> charts = mController.getCharts();
         if (charts.size() > 1) {
-            final ActionBar actionBar = getActionBar();
+            final ActionBar actionBar = getSupportActionBar();
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
             ActionBar.TabListener tabListener = new ActionBar.TabListener() {
                 @Override
-                public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
                     mController.setChartIndex(tab.getPosition());
                 }
 
                 @Override
-                public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
                 }
 
                 @Override
-                public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction ft) {
+                public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
                 }
             };
 
@@ -536,7 +536,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
 
-            ActionBar actionBar = getActionBar();
+            ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setTitle(id + ". " + fullName);
                 actionBar.setSubtitle(sexAge);

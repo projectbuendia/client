@@ -14,51 +14,49 @@
   <!-- THEMES -->
 
   <!-- Base application theme -->
-  <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
     <!-- Action Bar -->
-    <item name="android:actionBarStyle">@style/ActionBar</item>
-    <item name="android:actionMenuTextAppearance">@style/MenuActionBar</item>
     <item name="android:actionButtonStyle">@style/ActionButton</item>
     <!-- Action Bar: Chart Tabs -->
     <item name="android:actionBarTabBarStyle">@style/ChartTabBarStyle</item>
     <item name="android:actionBarTabTextStyle">@style/ChartTabBarTextStyle</item>
     <!-- Widgets -->
-    <item name="android:textViewStyle">@style/widgets.TextView</item>
     <item name="android:editTextStyle">@style/widgets.EditText</item>
     <item name="android:buttonStyle">@style/widgets.Button</item>
     <item name="android:radioButtonStyle">@style/widgets.RadioButton</item>
-  </style>
-
-
-  <!-- ACTION BAR -->
-
-  <style name="ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
-    <item name="android:height">56sp</item>
-    <item name="android:titleTextStyle">@style/text.large.white</item>
-    <item name="android:subtitleTextStyle">@style/text.medium.white</item>
-    <item name="android:background">@drawable/action_bar_bg</item>
-    <item name="android:progressBarPadding">32sp</item>
     <item name="android:itemPadding">8sp</item>
   </style>
 
-  <style name="MenuActionBar" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
-    <item name="android:textAppearance">@style/text.large.white</item>
+  <!-- ACTION BAR -->
+  <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+    <item name="android:textColorPrimary">@color/white</item>
+    <item name="actionMenuTextColor">@color/white</item>
+    <item name="colorAccent">@color/color_accent</item>
+    <item name="colorControlNormal">@color/white</item>
+    <item name="colorControlActivated">@color/color_accent</item>
+    <item name="android:background">@color/color_primary</item>
+    <item name="android:itemPadding">8sp</item>
+    <item name="android:titleTextStyle">@style/text.large.white</item>
+    <item name="android:subtitleTextStyle">@style/text.medium.white</item>
+  </style>
+    
+  <style name="ToolbarPopupTheme" parent="@style/ThemeOverlay.AppCompat.Light">
+    <item name="android:background">@color/submenu_background</item>
   </style>
 
-  <style name="ChartTabBarTextStyle" parent="android:Widget.Holo.Light.ActionBar.TabText">
+  <style name="ChartTabBarTextStyle" parent="Base.Widget.AppCompat.ActionBar.TabText">
     <item name="android:textSize">18dp</item>
     <item name="android:textColor">@color/white</item>
   </style>
 
-  <style name="ChartTabBarStyle" parent="android:Widget.Holo.Light.ActionBar.TabBar">
+  <style name="ChartTabBarStyle" parent="Base.Widget.AppCompat.ActionBar.TabBar">
     <item name="android:background">@drawable/action_bar_bg</item>
     <item name="android:layout_width">match_parent</item>
     <item name="android:layout_gravity">fill_horizontal</item>
   </style>
 
   <!-- TODO: Figure out why applying padding to @style/ActionButton doesn't work. -->
-  <style name="ActionButton" parent="@android:style/Widget.Holo.Light.ActionButton">
+  <style name="ActionButton" parent="Base.Widget.AppCompat.ActionButton">
     <item name="android:textSize">19sp</item>
     <item name="android:minWidth">56sp</item>
     <item name="android:paddingStart">16sp</item>
@@ -68,13 +66,8 @@
 
   <!-- WIDGETS -->
 
-  <!-- TextView -->
-  <style name="widgets.TextView" parent="android:Widget.Holo.Light.TextView">
-    <item name="android:textAppearance">@style/text</item>
-  </style>
-
   <!-- EditText -->
-  <style name="widgets.EditText" parent="android:Widget.Holo.Light.EditText">
+  <style name="widgets.EditText" parent="Base.V7.Widget.AppCompat.EditText">
     <item name="android:focusable">true</item>
     <item name="android:focusableInTouchMode">true</item>
     <item name="android:clickable">true</item>
@@ -82,13 +75,13 @@
   </style>
 
   <!-- Button -->
-  <style name="widgets.Button" parent="android:Widget.Holo.Light.Button">
+  <style name="widgets.Button" parent="Base.Widget.AppCompat.Button">
     <item name="android:textAppearance">@style/text</item>
   </style>
 
   <!-- Radio Button -->
   <style name="widgets.RadioButton"
-      parent="android:Widget.Holo.Light.CompoundButton.RadioButton">
+      parent="Base.Widget.AppCompat.CompoundButton.RadioButton">
     <item name="android:paddingTop">6sp</item>
     <item name="android:paddingBottom">6sp</item>
     <item name="android:paddingStart">18sp</item>

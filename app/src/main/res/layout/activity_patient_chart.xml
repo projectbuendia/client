@@ -19,8 +19,13 @@
     android:orientation="vertical"
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
+  <include
+      android:id="@+id/toolbar"
+      layout="@layout/toolbar" />
+
   <LinearLayout
       android:id="@+id/patient_chart_status_section"
+      android:layout_below="@+id/toolbar"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
       android:layout_margin="16dp"

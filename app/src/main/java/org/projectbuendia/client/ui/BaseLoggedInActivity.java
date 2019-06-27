@@ -15,6 +15,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -81,10 +82,12 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-
         onCreateImpl(savedInstanceState);
+
+        // Show the Up button in the action bar.
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mIsCreated = true;
     }
 
@@ -117,7 +120,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         mPopupWindow = new MenuPopupWindow();
 
-        final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
+        final View userView = mMenu.findItem(R.id.action_user).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
 
             @Override public void onClick(View view) {
@@ -154,7 +157,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         mLastActiveUser = user;
 
         TextView initials = (TextView) mMenu
-            .getItem(mMenu.size() - 1)
+            .findItem(R.id.action_user)
             .getActionView()
             .findViewById(R.id.user_initials);
 

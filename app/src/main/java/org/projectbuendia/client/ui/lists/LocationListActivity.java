@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -65,13 +66,15 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
         super.onExtendOptionsMenu(menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
-        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-            @Override public boolean onMenuItemActionExpand(MenuItem item) {
+        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
                 mController.onSearchPressed();
                 return true;
             }
 
-            @Override public boolean onMenuItemActionCollapse(MenuItem item) {
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
                 mController.onSearchCancelled();
                 return true;
             }

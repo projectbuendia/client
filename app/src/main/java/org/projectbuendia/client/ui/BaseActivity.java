@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -52,7 +53,7 @@ import de.greenrobot.event.EventBus;
  * view" that can be populated by implementing classes and a "status view" that can be used for
  * troubleshooting and status messages.
  */
-public abstract class BaseActivity extends FragmentActivity {
+public abstract class BaseActivity extends AppCompatActivity {
     private static final Logger LOG = Logger.create();
     private static final double PHI = (Math.sqrt(5) + 1)/2; // golden ratio
     private static final double STEP_FACTOR = Math.sqrt(PHI); // each step up/down scales this much

@@ -15,7 +15,10 @@
     tools:ignore="UnusedResources">
 
     <!-- Theme -->
+    <color name="color_primary">#494</color>
+    <color name="color_accent">#00FF00</color>
     <color name="menubar_icon">#ffffff</color>
+    <color name="submenu_background">#e1e1e1</color>
 
     <!-- Vitals -->
     <color name="vital_fg_light">#ffffff</color>
