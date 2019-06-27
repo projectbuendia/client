@@ -12,8 +12,7 @@
 package org.projectbuendia.client.net;
 
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.NinePatchDrawable;
+import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -116,8 +115,8 @@ public class OpenMrsErrorListener implements ErrorListener {
             message,
             Toast.LENGTH_LONG
         );
-        NinePatchDrawable drawable = (NinePatchDrawable) toast.getView().getBackground();
-        drawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+        View view = toast.getView();
+        view.setBackgroundColor(Color.RED);
         toast.show();
     }
 
