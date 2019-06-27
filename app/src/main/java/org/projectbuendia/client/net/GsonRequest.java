@@ -22,6 +22,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.http.protocol.HTTP;
+import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
@@ -36,6 +38,8 @@ public class GsonRequest<T> extends Request<T> {
     private final Map<String, String> mHeaders;
     private final Response.Listener<T> mListener;
     private Map<String, String> mBody = null;
+
+    private static Logger LOG = Logger.create();
 
     /**
      * Makes a GET request and returns a parsed object from JSON.
@@ -98,6 +102,7 @@ public class GsonRequest<T> extends Request<T> {
     }
 
     @Override protected Response<T> parseNetworkResponse(NetworkResponse response) {
+        LOG.i("Response from %s -> %s", Utils.repr(this), Utils.repr(response.data, 500));
         try {
             String json = new String(
                 response.data,

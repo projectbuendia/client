@@ -14,6 +14,7 @@ package org.projectbuendia.client;
 import android.app.Application;
 import android.preference.PreferenceManager;
 
+import com.android.volley.VolleyLog;
 import com.facebook.stetho.Stetho;
 import com.joanzapata.iconify.Iconify;
 import com.joanzapata.iconify.fonts.FontAwesomeModule;
@@ -61,6 +62,9 @@ public class App extends Application {
     @Override public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
+        // Distinguish our Volley log messages from other apps that might use Volley
+        VolleyLog.setTag("buendia/Volley");
 
         // Enable FontAwesome Icons
         Iconify.with(new FontAwesomeModule());

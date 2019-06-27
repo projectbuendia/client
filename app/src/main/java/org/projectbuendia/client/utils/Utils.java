@@ -17,6 +17,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
@@ -45,7 +47,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,6 +69,26 @@ public class Utils {
     public static final int SECOND = 1000;  // in ms
     public static final int MINUTE = 60 * SECOND;  // in ms
     public static final int HOUR = 60 * MINUTE;  // in ms
+
+    private static Map<Integer, String> sMethodNames = initMethodNames();
+    private static Map<Integer, String> initMethodNames() {
+        Map<Integer, String> map = new HashMap<>();
+        map.put(Request.Method.DEPRECATED_GET_OR_POST, "DEPRECATED_GET_OR_POST");
+        map.put(Request.Method.GET, "GET");
+        map.put(Request.Method.POST, "POST");
+        map.put(Request.Method.PUT, "PUT");
+        map.put(Request.Method.DELETE, "DELETE");
+        map.put(Request.Method.HEAD, "HEAD");
+        map.put(Request.Method.OPTIONS, "OPTIONS");
+        map.put(Request.Method.TRACE, "TRACE");
+        map.put(Request.Method.PATCH, "PATCH");
+        return map;
+    }
+
+    /** Prevent instantiation. */
+    private Utils() {
+        // Prevent instantiation.
+    }
 
     /**
      * Compares two objects that may be null, Integer, Long, BigInteger, or String.
@@ -240,6 +265,11 @@ public class Utils {
             return (BigInteger) obj;
         }
         return null;
+    }
+
+    /** Formats a string using ASCII encoding. */
+    public static String format(String template, Object... args) {
+        return String.format(Locale.US, template, args);
     }
 
     /** URL-encodes a nullable string, catching the useless exception that never happens. */
@@ -511,21 +541,103 @@ public class Utils {
         return sw.toString();
     }
 
-    // TODO(ping) The name and purpose of this method are unclear.
+    /** Converts a string to a C identifier by turning all non-identifier characters into underscores. */
     public static String removeUnsafeChars(String input) {
         return input.replaceAll("[\\W]", "_");
     }
 
-    /** calculates the dumber of pixels for a dip given the density of the display */
+    /** Returns an unambiguous string representation of a byte array, suitable for logging. */
+    public static String repr(byte[] bytes, int maxLength) {
+        try {
+            if (bytes == null) {
+                return "(null byte[])";
+            }
+            StringBuffer buffer = new StringBuffer(format("(length %d) \"", bytes.length));
+            for (int i = 0; i < bytes.length && i < maxLength; i++) {
+                switch ((char) bytes[i]) {
+                    case '\t':
+                        buffer.append('\t');
+                        break;
+                    case '\r':
+                        buffer.append('\r');
+                        break;
+                    case '\n':
+                        buffer.append('\n');
+                        break;
+                    case '\\':
+                        buffer.append("\\\\");
+                        break;
+                    case '"':
+                        buffer.append("\\\"");
+                        break;
+                    default:
+                        if (bytes[i] >= 32 && bytes[i] <= 126) {
+                            buffer.append((char) bytes[i]);
+                        } else {
+                            buffer.append(format("\\x%02x", bytes[i]));
+                        }
+                }
+            }
+            buffer.append(bytes.length > maxLength ? "\"..." : "\"");
+            return buffer.toString();
+        } catch (Throwable ignored) {
+            return "(repr of " + bytes + " failed)";
+        }
+    }
+
+    /** Formats a description of a Request. */
+    public static <T> String repr(Request<T> req) {
+        try {
+            if (req == null) {
+                return "(null Request)";
+            }
+            String method = sMethodNames.get(req.getMethod());
+            if (method == null) {
+                method = format("(method %d)", req.getMethod());
+            }
+            String data = "";
+            if (req.getPostBody() != null) {
+                try {
+                    data = format(" (%s) %s", req.getBodyContentType(), repr(req.getPostBody(), 500));
+                } catch (AuthFailureError e) {
+                    data += " (" + repr(e) + ")";
+                }
+            }
+            return format("(%s) %s %s%s", typeof(req), method, req.getUrl(), data);
+        } catch (Throwable ignored) {
+            return "(repr of " + req + " failed)";
+        }
+    }
+
+    /** Formats a short description of a Throwable. */
+    public static <T> String repr(Throwable t) {
+        try {
+            if (t == null) {
+                return "(null Throwable)";
+            }
+            return format("%s: %s", typeof(t), t.getMessage());
+        } catch (Throwable ignored) {
+            return "(repr of " + t + " failed)";
+        }
+    }
+
+    /** Formats a short description of the type of an object. */
+    public static String typeof(Object obj) {
+        String name = obj.getClass().getSimpleName();
+        if (name.isEmpty()) {
+            String[] parts = obj.getClass().getName().split("\\.");
+            return parts.length == 0 ? "(anonymous)" : parts[parts.length - 1];
+        }
+        return name;
+    }
+
+
+    /** Converts a dp value (density-independent pixels) to pixels. */
     public static int getPixelFromDips(float dips) {
         // Get the screen's density scale
         final float scale = App.getInstance().getResources().getDisplayMetrics().density;
 
         // Convert the dps to pixels, based on density scale
         return (int) (dips * scale + 0.5f);
-    }
-
-    private Utils() {
-        // Prevent instantiation.
     }
 }
