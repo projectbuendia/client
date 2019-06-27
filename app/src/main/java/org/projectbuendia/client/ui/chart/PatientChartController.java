@@ -563,6 +563,10 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     public synchronized void updatePatientObsUi() {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
+        long start = System.currentTimeMillis();
+        String patientId = mPatient != null ? mPatient.id : "(unknown)";
+        Utils.logEvent("Start rendering chart for " + patientId + ", uuid = " + mPatientUuid);
+
         mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, Obs> latestObservations =
             new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
@@ -571,7 +575,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
-        LOG.d("Showing " + mObservations.size() + " observations and "
+        LOG.i("Showing " + mObservations.size() + " observations and "
             + orders.size() + " orders");
 
         LocalDate admissionDate = getObservedDate(
@@ -587,6 +591,10 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 latestObservations, mObservations, orders,
                 admissionDate, firstSymptomsDate);
         }
+
+        long finish = System.currentTimeMillis();
+        LOG.i("Rendered chart in %d ms", finish - start);
+        Utils.logEvent("Finished rendering chart for " + patientId + ", uuid = " + mPatientUuid);
     }
 
     public List<Chart> getCharts(){
