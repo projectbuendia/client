@@ -49,7 +49,7 @@ import javax.inject.Inject;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends AppCompatPreferenceActivity {
     /**
      * Controls whether to always show the simplified UI, where settings are
      * arranged in a single list without a left navigation panel.
@@ -220,7 +220,7 @@ public class SettingsActivity extends PreferenceActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
-        setupActionBar();
+//        setupActionBar();
     }
 
     /** Set up the {@link android.app.ActionBar}, if the API is available. */
@@ -228,7 +228,7 @@ public class SettingsActivity extends PreferenceActivity {
     private void setupActionBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 

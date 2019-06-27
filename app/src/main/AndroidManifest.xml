@@ -118,6 +118,7 @@
         </activity>
         <activity
             android:name="org.projectbuendia.client.ui.SettingsActivity"
+            android:theme="@style/Theme.AppCompat.Light"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".ui.lists.FilteredPatientListActivity"
             android:screenOrientation="userPortrait" >
