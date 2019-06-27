@@ -112,13 +112,19 @@ public class Utils {
             public int compare(ObsRow a, ObsRow b) {
                 int aIndex = conceptUuids.indexOf(a.conceptUuid);
                 int bIndex = conceptUuids.indexOf(b.conceptUuid);
+
+                int pastLastIndex = rows.size();
                 if (aIndex == -1) {
-                    aIndex += rows.size() + rows.indexOf(a);
+                    aIndex = pastLastIndex;
                 }
                 if (bIndex == -1) {
-                    bIndex += rows.size() + rows.indexOf(b);
+                    bIndex = pastLastIndex;
                 }
-                return Integer.compare(aIndex, bIndex);
+                if (aIndex == bIndex) {
+                    return a.conceptName.compareTo(b.conceptName);
+                } else {
+                    return Integer.compare(aIndex, bIndex);
+                }
             }
         });
 
