@@ -18,6 +18,8 @@ import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
+import org.projectbuendia.client.utils.Logger;
+
 /**
  * GroupedListView is a list view split up by category, where each category has a heading.
  * <p/>
@@ -29,6 +31,8 @@ import android.widget.ExpandableListView;
  * </ul>
  */
 public class GroupedListView extends ExpandableListView {
+    private static final Logger LOG = Logger.create();
+
     /**
      * Instantiates a {@link GroupedListView}.
      * {@see ExpandableListView(Context, AttributeSet)}
@@ -66,7 +70,9 @@ public class GroupedListView extends ExpandableListView {
     }
 
     private void expandAllGroups(ExpandableListAdapter adapter) {
+        LOG.i("expandAllGroups(%s) with group count = %d", adapter, adapter.getGroupCount());
         for (int i = 0; i < adapter.getGroupCount(); i++) {
+            LOG.i("expandGroup(%d)", i);
             expandGroup(i);
         }
     }
