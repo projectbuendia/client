@@ -36,27 +36,15 @@ public final class NameFilter implements MatchingFilter<Patient> {
         String givenName = (patient.givenName == null) ? "" : patient.givenName;
         String familyName = (patient.familyName == null) ? "" : patient.familyName;
         String fullName = givenName + " " + familyName;
-        String[] nameParts = fullName.toLowerCase().split(" ");
+        String fullNameLowercase = fullName.toLowerCase();
 
         // Get array of words in the search query
         String[] searchTerms = constraint.toString().toLowerCase().split(" ");
 
-        // Loop through each of the search terms checking if there is a prefix match
-        // for it in any word of the name.
+        // Loop through each of the search terms checking if there is a match for every one in the
+        // name.
         for (String searchTerm : searchTerms) {
-            boolean termMatched = false;
-            for (String namePart : nameParts) {
-                // If both the search term and a name are dashes, use a more permissive matcher
-                // that allows for an arbitrary type of dash. This makes it simpler to search for
-                // patients with an unknown name, which is represented by a dash.
-                if (namePart.startsWith(searchTerm) || areBothDashes(namePart, searchTerm)) {
-                    termMatched = true;
-                    break;  // no need to keep checking for this term
-                }
-            }
-            // This search term was not matched to any word of the name,
-            // so this patient is not a match
-            if (!termMatched) {
+            if (!fullNameLowercase.contains(searchTerm)) {
                 return false;
             }
         }
