@@ -75,8 +75,11 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this._listDataChild.get(this._listDataHeader.get(groupPosition))
-                .size();
+        List<String> listDataChild = this._listDataChild.get(this._listDataHeader.get(groupPosition));
+        if (listDataChild != null) {
+            return listDataChild.size();
+        }
+        return 0;
     }
 
     @Override

@@ -97,7 +97,7 @@ th, td {
 
 /* Tiles */
 #tiles { table-layout: fixed; width: 100%; }
-.tile { height: 3rem; overflow: hidden; white-space: nowrap; padding: 1rem 16px; }
+.tile { height: 3rem; overflow: hidden; white-space: nowrap; padding: 1rem 8px 1rem 16px; }
 .tile div { width: 100%; overflow: hidden; }
 .tile .heading { /* should match @style/text.caps */
   font-size: 1.4rem;

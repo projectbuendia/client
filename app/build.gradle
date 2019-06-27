@@ -58,7 +58,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife:5.1.2' // View injection
     implementation 'com.jakewharton:butterknife:5.1.2' // View injection
     implementation 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
-    implementation 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
+    implementation 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2' // Font-based icons
     implementation 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
     implementation 'de.greenrobot:eventbus:2.4.0' // The event bus
     implementation 'joda-time:joda-time:2.5' // Better dates and times
@@ -66,7 +66,7 @@ dependencies {
     implementation 'com.facebook.stetho:stetho-okhttp:1.5.0' // Network debugging
     implementation 'com.mitchellbosecke:pebble:1.5.1' // HTML templating
     implementation 'org.slf4j:slf4j-simple:1.7.12' // HTML templating dependency
-    implementation 'org.apache.commons:commons-lang3:3.4'
+    implementation 'org.apache.commons:commons-text:1.6' // ExtendedMessageFormat
 
     // Testing
     androidTestImplementation 'com.android.support.test:runner:0.3'
@@ -135,9 +135,8 @@ logger.info("Version code: ${versionInteger}")
 // This is where to look for the .apk signing key.
 def releaseRepoRoot = file('../../release/')
 
-// OpenMRS server for development (kept at tip of dev branch).
-// def serverDev = 'dev.projectbuendia.org'
-def serverDev = '52.90.76.10'  // AWS Buendia sandbox
+// OpenMRS server for demos (kept at tip of dev branch, with scratch data).
+def serverDev = 'demo.buendia.org'  // an AWS machine running Linux AMI 2017.09
 
 // OpenMRS server for integration testing.
 def serverIntegration = 'integration.projectbuendia.org'

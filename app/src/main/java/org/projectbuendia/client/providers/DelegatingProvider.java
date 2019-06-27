@@ -28,7 +28,7 @@ abstract class DelegatingProvider<T extends SQLiteOpenHelper> extends ContentPro
 
     @Override public boolean onCreate() {
         mRegistry = getRegistry();
-        mDatabaseHelper = getDatabaseHelper();
+        mDatabaseHelper = createDatabaseHelper();
         mContentResolver = getContext().getContentResolver();
 
         return true;
@@ -36,7 +36,7 @@ abstract class DelegatingProvider<T extends SQLiteOpenHelper> extends ContentPro
 
     protected abstract ProviderDelegateRegistry<T> getRegistry();
 
-    protected abstract T getDatabaseHelper();
+    protected abstract T createDatabaseHelper();
 
     @Override public String getType(Uri uri) {
         return mRegistry.getDelegate(uri).getType();

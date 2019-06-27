@@ -36,6 +36,7 @@
   <style name="ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
     <item name="android:height">56sp</item>
     <item name="android:titleTextStyle">@style/text.large.white</item>
+    <item name="android:subtitleTextStyle">@style/text.medium.white</item>
     <item name="android:background">@drawable/action_bar_bg</item>
     <item name="android:progressBarPadding">32sp</item>
     <item name="android:itemPadding">8sp</item>
@@ -234,7 +235,13 @@
   <style name="text.large">
     <item name="android:textSize">22sp</item> <!-- matches dialog title size -->
   </style>
+  <style name="text.medium">
+    <item name="android:textSize">18sp</item> <!-- matches dialog title size -->
+  </style>
   <style name="text.large.white">
+    <item name="android:textColor">@android:color/white</item>
+  </style>
+  <style name="text.medium.white">
     <item name="android:textColor">@android:color/white</item>
   </style>
 

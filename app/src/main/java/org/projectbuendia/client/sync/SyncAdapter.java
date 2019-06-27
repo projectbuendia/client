@@ -34,7 +34,7 @@ import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
-import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
+import org.projectbuendia.client.providers.DatabaseTransaction;
 import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.FormsSyncPhaseRunnable;
@@ -161,70 +161,55 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         LOG.i("Requested phases are: %s", phases);
         broadcastSyncProgress(0, R.string.sync_in_progress);
-
-        BuendiaProvider buendiaProvider =
-            (BuendiaProvider) (provider.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
-            buendiaProvider.getDbTransactionHelper();
-        LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
-        dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
-
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
 
-        try {
-            if (fullSync) {
-                Instant syncStartTime = Instant.now();
-                LOG.i("Recording full sync start time: " + syncStartTime);
-                storeFullSyncStartTime(provider, syncStartTime);
-            }
-
-            float progressIncrement = 100.0f/phases.size();
-            int completedPhases = 0;
-            for (SyncPhase phase : SyncPhase.values()) {
-                if (!phases.contains(phase)) {
-                    continue;
+        BuendiaProvider buendiaProvider = (BuendiaProvider) provider.getLocalContentProvider();
+        try (DatabaseTransaction tx = buendiaProvider.startTransaction(SYNC_SAVEPOINT_NAME)) {
+            try {
+                if (fullSync) {
+                    storeFullSyncStartTime(provider, Instant.now());
                 }
-                checkCancellation("before " + phase);
-                LOG.i("--- Begin %s ---", phase);
-                broadcastSyncProgress((int) (completedPhases * progressIncrement), phase.message);
 
-                phase.runnable.sync(mContentResolver, syncResult, provider);
+                float progressIncrement = 100.0f/phases.size();
+                int completedPhases = 0;
+                for (SyncPhase phase : SyncPhase.values()) {
+                    if (phases.contains(phase)) {
+                        LOG.i("--- Begin %s ---", phase);
+                        checkCancellation("before " + phase);
+                        broadcastSyncProgress((int) (completedPhases * progressIncrement), phase.message);
+                        phase.runnable.sync(mContentResolver, syncResult, provider);
+                        timings.addSplit(phase.name() + " phase completed");
+                        completedPhases++;
+                    }
+                }
+                broadcastSyncProgress(100, R.string.completing_sync);
 
-                timings.addSplit(phase.name() + " phase completed");
-                completedPhases++;
+                if (fullSync) {
+                    storeFullSyncEndTime(provider, Instant.now());
+                }
+            } catch (CancellationException e) {
+                LOG.i(e, "Sync canceled");
+                tx.rollback();
+                // Reset canceled state so that it doesn't interfere with next sync.
+                broadcastSyncStatus(SyncManager.CANCELED);
+                return;
+            } catch (OperationApplicationException e) {
+                LOG.e(e, "Error updating database during sync");
+                tx.rollback();
+                syncResult.databaseError = true;
+                broadcastSyncStatus(SyncManager.FAILED);
+                return;
+            } catch (Throwable e) {
+                LOG.e(e, "Error during sync");
+                tx.rollback();
+                syncResult.stats.numIoExceptions++;
+                broadcastSyncStatus(SyncManager.FAILED);
+                return;
             }
-            broadcastSyncProgress(100, R.string.completing_sync);
-
-            if (fullSync) {
-                Instant syncEndTime = Instant.now();
-                LOG.i("Recording full sync end time: " + syncEndTime);
-                storeFullSyncEndTime(provider, syncEndTime);
-            }
-        } catch (CancellationException e) {
-            rollbackSavepoint(dbTransactionHelper);
-            // Reset canceled state so that it doesn't interfere with next sync.
-            LOG.i(e, "Sync canceled");
-            broadcastSyncStatus(SyncManager.CANCELED);
-            return;
-        } catch (OperationApplicationException e) {
-            rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error updating database during sync");
-            syncResult.databaseError = true;
-            broadcastSyncStatus(SyncManager.FAILED);
-            return;
-        } catch (Throwable e) {
-            rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error during sync");
-            syncResult.stats.numIoExceptions++;
-            broadcastSyncStatus(SyncManager.FAILED);
-            return;
-        } finally {
-            LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.releaseNamedTransaction(SYNC_SAVEPOINT_NAME);
-            dbTransactionHelper.close();
         }
         timings.dumpToLog();
         broadcastSyncStatus(SyncManager.COMPLETED);
+        LOG.i("onPerformSync completed");
     }
 
     /**
@@ -258,23 +243,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         );
     }
 
-    private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
-        throws RemoteException {
+    private void storeFullSyncStartTime(ContentProviderClient provider, Instant time) throws RemoteException {
+        LOG.i("Recording full sync start time: " + time);
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_START_MILLIS, syncStartTime.getMillis());
+        cv.put(Misc.FULL_SYNC_START_MILLIS, time.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
-    private void storeFullSyncEndTime(ContentProviderClient provider, Instant syncEndTime)
-        throws RemoteException {
+    private void storeFullSyncEndTime(ContentProviderClient provider, Instant time) throws RemoteException {
+        LOG.i("Recording full sync end time: " + time);
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_END_MILLIS, syncEndTime.getMillis());
+        cv.put(Misc.FULL_SYNC_END_MILLIS, time.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
-    }
-
-    private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
-        LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
-        dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
     }
 
     /** Returns the server timestamp corresponding to the last observation sync. */

@@ -117,10 +117,15 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public Object getGroup(int groupPosition) {
+        if (mLocations == null) {
+            BigToast.show(mContext, "#352 would have crashed!  Please report this immediately.");
+            return null;
+        }
         return mLocations[groupPosition];
     }
 
     @Override public int getChildrenCount(int groupPosition) {
+        LOG.d("getChildrenCount with mLocations = %s (%d), groupPosition = %d", mLocations, mLocations == null ? -1 : mLocations.length, groupPosition);
         Object patientsForLocation = getGroup(groupPosition);
         if (mPatientsByLocation == null || patientsForLocation == null) {
             return 0;
@@ -151,6 +156,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
         ResStatus.Resolved status =
             ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
+        LOG.i("getChildView: patient %s has condition = %s (%s)", patient.id, status.getMessage(), condition);
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
         String givenName = Utils.valueOrDefault(patient.givenName, EN_DASH);
@@ -164,15 +170,18 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             patient.birthdate == null ? "" : Utils.birthdateToAge(
                 patient.birthdate, mContext.getResources()));
 
+        boolean isChild = Utils.isChild(patient.birthdate);
+
         holder.mPatientGender.setVisibility(
             patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
 
         if (patient.gender != Patient.GENDER_UNKNOWN) {
-            holder.mPatientGender.setImageDrawable(mContext.getResources().getDrawable(
-                patient.gender == Patient.GENDER_MALE ? R.drawable.ic_gender_male
-                    : pregnant ? R.drawable.ic_gender_female_pregnant
-                    : R.drawable.ic_gender_female
-            ));
+                holder.mPatientGender.setImageDrawable(mContext.getResources().getDrawable(
+                        patient.gender == Patient.GENDER_MALE ?
+                                isChild ? R.drawable.ic_gender_male_child : R.drawable.ic_gender_male
+                                : pregnant ? R.drawable.ic_gender_female_pregnant
+                                : isChild ? R.drawable.ic_gender_female_child : R.drawable.ic_gender_female
+                ));
         }
 
         // Add a bottom border and extra padding to the last item in each group.
@@ -224,6 +233,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         // Produce a sorted list of all the locations that have patients.
+        LOG.i("setPatients with count = %d, mLocations = new Location[%d]", count, mPatientsByLocation.size());
         mLocations = new Location[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
         Arrays.sort(mLocations, new LocationComparator(mLocationTree));

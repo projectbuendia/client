@@ -36,7 +36,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
                 android:ems="10"
-                android:id="@+id/add_user_given_name_tv" />
+                android:id="@+id/add_user_given_name_tv"
+                android:maxLength="50" />
 
         </TableRow>
 
@@ -54,7 +55,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
                 android:ems="10"
-                android:id="@+id/add_user_family_name_tv" />
+                android:id="@+id/add_user_family_name_tv"
+                android:maxLength="50" />
 
         </TableRow>
     </TableLayout>

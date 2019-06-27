@@ -31,6 +31,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.net.Server;
 
 import java.io.PrintWriter;
@@ -42,6 +43,7 @@ import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -98,6 +100,36 @@ public class Utils {
                 return a.size() - b.size();
             }
         };
+
+    /**
+     * Sorts an ArrayList of ObsRow rows so that the order of the ObsRow.conceptUids matches the
+     * order of conceptRowUuids.
+     */
+    public static ArrayList<ObsRow> sortObsRows(final ArrayList<ObsRow> rows,
+                                                final ArrayList<String> conceptUuids) {
+        Collections.sort(rows, new Comparator<ObsRow>() {
+            @Override
+            public int compare(ObsRow a, ObsRow b) {
+                int aIndex = conceptUuids.indexOf(a.conceptUuid);
+                int bIndex = conceptUuids.indexOf(b.conceptUuid);
+
+                int pastLastIndex = rows.size();
+                if (aIndex == -1) {
+                    aIndex = pastLastIndex;
+                }
+                if (bIndex == -1) {
+                    bIndex = pastLastIndex;
+                }
+                if (aIndex == bIndex) {
+                    return a.conceptName.compareTo(b.conceptName);
+                } else {
+                    return Integer.compare(aIndex, bIndex);
+                }
+            }
+        });
+
+        return rows;
+    }
 
     private static final DateTimeFormatter SHORT_DATE_FORMATTER =
         DateTimeFormat.forPattern("d MMM"); // TODO/i18n
@@ -406,6 +438,11 @@ public class Utils {
      */
     public static @Nullable String toMediumString(@Nullable DateTime dateTime) {
         return dateTime == null ? null : MEDIUM_DATETIME_FORMATTER.print(dateTime);
+    }
+
+    /** Checks whether a birthdate indicates an age less than 5 years old. */
+    public static boolean isChild(LocalDate birthdate) {
+        return birthdate != null && new Period(birthdate, LocalDate.now()).getYears() < 5;
     }
 
     /** Converts a birthdate to a string describing age in months or years. */
