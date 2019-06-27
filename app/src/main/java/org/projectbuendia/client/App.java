@@ -15,6 +15,8 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.facebook.stetho.Stetho;
+import com.joanzapata.iconify.Iconify;
+import com.joanzapata.iconify.fonts.FontAwesomeModule;
 
 import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
@@ -59,6 +61,9 @@ public class App extends Application {
     @Override public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
+        // Enable FontAwesome Icons
+        Iconify.with(new FontAwesomeModule());
 
         // Enable Stetho, which lets you inspect the app's database, UI, and network activity
         // just by opening chrome://inspect in Chrome on a computer connected to the tablet.

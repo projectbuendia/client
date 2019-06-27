@@ -408,6 +408,11 @@ public class Utils {
         return dateTime == null ? null : MEDIUM_DATETIME_FORMATTER.print(dateTime);
     }
 
+    /** Checks whether a birthdate indicates an age less than 5 years old. */
+    public static boolean isChild(LocalDate birthdate) {
+        return birthdate != null && new Period(birthdate, LocalDate.now()).getYears() < 5;
+    }
+
     /** Converts a birthdate to a string describing age in months or years. */
     public static String birthdateToAge(LocalDate birthdate, Resources resources) {
         Period age = new Period(birthdate, LocalDate.now());

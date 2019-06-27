@@ -32,7 +32,7 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
-import com.joanzapata.android.iconify.Iconify;
+import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -93,7 +93,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
-    private static final String SEPARATOR_DOT = "\u00a0\u00a0\u00b7\u00a0\u00a0";
 
     private PatientChartController mController;
     private boolean mIsFetchingXform = false;
@@ -131,27 +130,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chart, menu);
 
-        menu.findItem(R.id.action_edit).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                    Utils.logUserAction("edit_patient_pressed");
-                    mController.onEditPatientPressed();
-                    return true;
-                }
-            });
-
-        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                    Utils.logUserAction("go_to_patient_pressed");
-                    GoToPatientDialogFragment.newInstance()
-                        .show(getSupportFragmentManager(), null);
-                    return true;
-                }
-            });
-
-        menu.findItem(R.id.action_zoom).setOnMenuItemClickListener(
+        MenuItem zoomItem = menu.findItem(R.id.action_zoom);
+        setMenuBarIcon(zoomItem, FontAwesomeIcons.fa_arrows_h);
+        zoomItem.setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
                 @Override public boolean onMenuItemClick(MenuItem item) {
                     Utils.logUserAction("zoom_chart_pressed");
@@ -161,21 +142,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         );
 
-        MenuItem updateChart = menu.findItem(R.id.action_update_chart);
-        updateChart.setIcon(createIcon(Iconify.IconValue.fa_pencil_square_o, 0xccffffff));
-        updateChart.setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
+        MenuItem editItem = menu.findItem(R.id.action_edit);
+        setMenuBarIcon(editItem, FontAwesomeIcons.fa_pencil_square_o);
+        // edit submenu includes edit patient (in xml) and forms
+        Menu editSubmenu = editItem.getSubMenu();
+        editSubmenu.getItem(0).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
 
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    mController.onAddObservationPressed();
-                    return true;
-                }
-            });
+                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("edit_patient_pressed");
+                        mController.onEditPatientPressed();
+                        return true;
+                    }
+                });
 
-        boolean clinicalObservationFormEnabled = false;
         boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
-            MenuItem item = menu.add(form.name);
+            MenuItem item = editSubmenu.add(form.name);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
                     @Override public boolean onMenuItemClick(MenuItem menuItem) {
@@ -184,14 +168,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 }
             );
-            if (form.uuid.equals(PatientChartController.OBSERVATION_FORM_UUID)) {
-                clinicalObservationFormEnabled = true;
-            }
             if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
                 ebolaLabTestFormEnabled = true;
             }
         }
-        updateChart.setVisible(clinicalObservationFormEnabled);
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
@@ -454,25 +434,26 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // that we need to do the other tiles like Admission Date to complete the layout.
         @Override public void updateEbolaPcrTestResultUi(Map<String, Obs> observations) {
             // PCR
-            Obs pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
+            Obs pcrGpObservation = observations.get(ConceptUuids.PCR_GP_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
-            mPcr.setIcon(createIcon(Iconify.IconValue.fa_flask, 0x00000000));
-            if ((pcrLObservation == null || pcrLObservation.valueName == null)
-                && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
+
+            mPcr.setIcon(createIcon(FontAwesomeIcons.fa_flask, R.color.chart_tile_icon));
+            if ((pcrGpObservation == null || pcrGpObservation.valueName == null)
+                    && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
                 mPcr.setValue("–");
             } else {
-                String pcrLString = "–";
+                String pcrGpString = "–";
                 DateTime pcrObsTime = null;
-                if (pcrLObservation != null && pcrLObservation.valueName != null) {
-                    pcrObsTime = pcrLObservation.time;
+                if (pcrGpObservation != null && pcrGpObservation.valueName != null) {
+                    pcrObsTime = pcrGpObservation.time;
                     try {
-                        double pcrL = Double.parseDouble(pcrLObservation.valueName);
-                        pcrLString = getFormattedPcrString(pcrL);
+                        double pcrGp = Double.parseDouble(pcrGpObservation.valueName);
+                        pcrGpString = getFormattedPcrString(pcrGp);
                     } catch (NumberFormatException e) {
                         LOG.w(
-                            "Retrieved a malformed L-gene PCR value: '%1$s'.",
-                            pcrLObservation.valueName);
-                        pcrLString = pcrLObservation.valueName;
+                            "Retrieved a malformed GP-gene PCR value: '%1$s'.",
+                            pcrGpObservation.valueName);
+                        pcrGpString = pcrGpObservation.valueName;
                     }
                 }
                 String pcrNpString = "–";
@@ -489,11 +470,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 }
 
-                mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
+                mPcr.setValue(String.format("%1$s / %2$s", pcrGpString, pcrNpString));
                 if (pcrObsTime != null) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = pcrObsTime.toLocalDate();
-                    String dateText = new RelativeDateTimeFormatter().format(today, obsDay);
+                    String dateText = new RelativeDateTimeFormatter().format(obsDay, today);
                     mPcr.setName(getResources().getString(
                         R.string.latest_pcr_label_with_date, dateText));
                 }
@@ -519,6 +500,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
+            obs = observations.get(ConceptUuids.OXYGEN_UUID);
+            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+                specialLabels.add(getString(R.string.oxygen));
+            }
+            obs = observations.get(ConceptUuids.DYSPHAGIA_UUID);
+            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+                specialLabels.add(getString(R.string.cannot_eat));
+            }
             mPatientPregnantOrIvView.setText(Joiner.on("\n").join(specialLabels));
         }
 
@@ -542,7 +531,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             String locationText = location == null ? "Unknown" : location.toString(); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
-            mPatientLocationView.setIcon(createIcon(Iconify.IconValue.fa_map_marker, 0x00000000));
+            mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {
@@ -560,7 +549,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             labels.add(patient.birthdate == null ? "age unknown"
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);
-            PatientChartActivity.this.setTitle(id + ". " + fullName + SEPARATOR_DOT + sexAge);
+
+            ActionBar actionBar = getActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(id + ". " + fullName);
+                actionBar.setSubtitle(sexAge);
+            }
         }
 
         @Override public void showWaitDialog(int titleId) {

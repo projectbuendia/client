@@ -33,7 +33,6 @@
   <string name="action_new_round">New round</string>
   <string name="action_assign_location">Assign location</string>
   <string name="action_edit_patient">Edit patient</string>
-  <string name="action_update_chart">Update chart</string>
   <string name="action_view_round_archive">Round archive</string>
   <string name="snackbar_update_available">Application update available</string>
   <string name="snackbar_update_downloaded">Application update downloaded</string>
@@ -161,6 +160,8 @@
   <string name="action_add_test_result">Add test result</string>
   <string name="pregnant">Pregnant</string>
   <string name="iv_fitted">IV fitted</string>
+  <string name="cannot_eat">Cannot eat</string>
+  <string name="oxygen">Oxygen</string>
   <string name="status_short_desc_unknown">-</string>
   <string name="status_short_desc_well">1</string>
   <string name="status_short_desc_unwell">2</string>

@@ -164,15 +164,18 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             patient.birthdate == null ? "" : Utils.birthdateToAge(
                 patient.birthdate, mContext.getResources()));
 
+        boolean isChild = Utils.isChild(patient.birthdate);
+
         holder.mPatientGender.setVisibility(
             patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
 
         if (patient.gender != Patient.GENDER_UNKNOWN) {
-            holder.mPatientGender.setImageDrawable(mContext.getResources().getDrawable(
-                patient.gender == Patient.GENDER_MALE ? R.drawable.ic_gender_male
-                    : pregnant ? R.drawable.ic_gender_female_pregnant
-                    : R.drawable.ic_gender_female
-            ));
+                holder.mPatientGender.setImageDrawable(mContext.getResources().getDrawable(
+                        patient.gender == Patient.GENDER_MALE ?
+                                isChild ? R.drawable.ic_gender_male_child : R.drawable.ic_gender_male
+                                : pregnant ? R.drawable.ic_gender_female_pregnant
+                                : isChild ? R.drawable.ic_gender_female_child : R.drawable.ic_gender_female
+                ));
         }
 
         // Add a bottom border and extra padding to the last item in each group.

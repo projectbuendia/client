@@ -14,6 +14,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="UnusedResources">
 
+    <!-- Theme -->
+    <color name="menubar_icon">#ffffff</color>
+
     <!-- Vitals -->
     <color name="vital_fg_light">#ffffff</color>
     <color name="vital_fg_dark">#000000</color>
@@ -60,6 +63,7 @@
     <color name="chart_background_light">#e1e1e1</color>
     <color name="chart_background_dark">#cccccc</color>
     <color name="chart_grid_lines">#999999</color>
+    <color name="chart_tile_icon">#000000</color>
     <color name="zone_location_selected_padding">@android:color/black</color>
     <color name="general_condition_selected_padding">@android:color/black</color>
 
