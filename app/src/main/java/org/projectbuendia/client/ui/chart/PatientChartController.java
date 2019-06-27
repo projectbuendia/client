@@ -46,6 +46,8 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
+import org.projectbuendia.client.models.ChartItem;
+import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
@@ -65,6 +67,7 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -193,7 +196,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showOrderExecutionDialog(Order order, Interval
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObservationsDialog(ArrayList<ObsRow> obs);
+        void showObservationsDialog(ArrayList<ObsRow> obs, ArrayList<String> orderedConceptUuids);
     }
 
     /** Sends ODK form data. */
@@ -440,7 +443,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             observations = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
         }
         if ((observations != null) && (!observations.isEmpty())){
-            mUi.showObservationsDialog(observations);
+            mUi.showObservationsDialog(observations, getCurrentChartRowItemConceptUuids());
         }
     }
 
@@ -588,6 +591,21 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     public List<Chart> getCharts(){
         return mCharts;
+    }
+
+    private Chart getCurrentChart() {
+        return mCharts.get(mChartIndex);
+    }
+
+    private ArrayList<String> getCurrentChartRowItemConceptUuids() {
+        ArrayList<String> conceptUuids = new ArrayList<>();
+        Chart chart = getCurrentChart();
+        for (ChartSection chartSection : chart.rowGroups) {
+            for (ChartItem chartItem : chartSection.items) {
+                conceptUuids.addAll(Arrays.asList(chartItem.conceptUuids));
+            }
+        }
+        return conceptUuids;
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
