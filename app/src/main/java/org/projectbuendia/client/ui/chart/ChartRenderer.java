@@ -345,8 +345,7 @@ public class ChartRenderer {
             if (sEngine == null) {
                 // PebbleEngine caches compiled templates by filename, so as long as we keep using the
                 // same engine instance, it's okay to call getTemplate(filename) on each render.
-                sEngine = new PebbleEngine();
-                sEngine.addExtension(new PebbleExtension());
+                sEngine = new PebbleEngine.Builder().extension(new PebbleExtension()).build();
             }
             try {
                 StringWriter writer = new StringWriter();
