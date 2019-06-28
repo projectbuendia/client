@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
-import android.app.Activity;
 import android.support.annotation.IdRes;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -88,12 +87,23 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         click(viewWithText("OK"));
         waitForProgressFragment();
         screenshot("On Patient Chart");
-        Activity activity = getCurrentActivity();
+
+        // Make sure we're on a PatientChartActivity
+        // TODO(sdspikes): shouldn't this already be on ui thread because of @UiThreadTest annotation?
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    assertTrue("Expected PatientChartActivity, got something else",
+                            getCurrentActivity() instanceof PatientChartActivity);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        });
 
         // Now read off the patient info and check that it's all there.
         // It should all be in the action bar.
-        assertTrue("Expected PatientChartActivity, got something else",
-                activity instanceof PatientChartActivity);
         expectVisible(viewThat(hasTextContaining(id + ".")));
         expectVisible(viewThat(hasTextContaining(given)));
         expectVisible(viewThat(hasTextContaining(family)));

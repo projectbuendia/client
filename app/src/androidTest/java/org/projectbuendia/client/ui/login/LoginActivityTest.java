@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.login;
 import android.support.test.annotation.UiThreadTest;
 
 import org.junit.Test;
+import org.mockito.Mock;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
@@ -21,6 +22,9 @@ import java.util.Date;
 
 /** Tests for {@link LoginActivity}. */
 public class LoginActivityTest extends FunctionalTestCase {
+
+    @Mock
+    private LoginController.Ui mMockUi;
 
     /** Adds a new user and logs in. */
     @Test
@@ -42,15 +46,22 @@ public class LoginActivityTest extends FunctionalTestCase {
 
         waitForProgressFragment();
 
+//        verify(mMockUi).populateActionBar(
+//                argThat(new UserMatchers.HasFullName(given + " " + family)));
         // Click new user
-//        expectVisible(dataThat(new UserMatchers.HasFullName(given + " " + family)));
+
+        final String fullName = given + " " + family;
+
+        expectVisible(viewWithText(fullName));
+
         screenshot("In User Selection");
-//        click(dataThat(new UserMatchers.HasFullName(given + " " + family)));
+        click(viewWithText(fullName));
 
         // Should be logged in
         screenshot("After User Selected");
+
         click(viewWithText("TT"));
-        expectVisible(viewWithText(given + " " + family));
+        expectVisible(viewWithText(fullName));
         screenshot("After User Selected in Action Bar");
     }
 

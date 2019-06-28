@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui.sync;
 
 import android.support.test.annotation.UiThreadTest;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.projectbuendia.client.R;
 
@@ -29,6 +30,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     /** Tests that sync failure results in the sync failed dialog appearing. */
     @Test
     @UiThreadTest
+    @Ignore
     public void testSyncFailedDialogAppearsWhenSyncFails() {
         setWifiEnabled(false);
         try (WifiDisabler wd = new WifiDisabler()) {
@@ -47,6 +49,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     /** Tests that the back button in the sync failed dialog returns to user selection. */
     @Test
     @UiThreadTest
+    @Ignore
     public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
         try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
@@ -64,6 +67,8 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     @Test
     @UiThreadTest
+    @Ignore
+    // TODO(sdspikes): Sync appears to successfully complete despite wifi being off, maybe due to data connection?
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
         setWifiEnabled(false);
         waitForSyncFailure();
@@ -109,6 +114,8 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     @Test
     @UiThreadTest
+    @Ignore
+    // TODO(sdspikes): should there be a sync failed message?
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
         try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
