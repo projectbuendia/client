@@ -81,7 +81,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
-        // Show the Up button in the action bar.
+        // Turn the action bar icon into a "back" arrow that goes back in the activity stack.
+        getActionBar().setIcon(R.drawable.ic_back_36dp);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         onCreateImpl(savedInstanceState);
