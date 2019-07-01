@@ -149,6 +149,7 @@
           {% set stopped = false %}
           {% set stop = false %}
           {% set divisionIndex = 0 %}
+          {% set summarize = order.instructions.frequency > numColumnsPerDay %}
 
           {% for column in columns %}
             {% if column.start == column.dayStart %}
@@ -156,6 +157,8 @@
                 {% set started = true %}
               {% endif %}
               <td class="day" colspan={{numColumnsPerDay}}>
+                {% set totalScheduled = 0 %}
+                {% set totalGiven = 0 %}
                 <div class="divisions">
                   {% if started and not stopped %}
                     {% for division in get_order_divisions(order, column.date) %}
@@ -173,20 +176,34 @@
 
                       <div class="division {{past ? 'past' : ''}} {{current ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stop ? 'stop' : ''}}"
                           onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
-                        {% if given == scheduled and given > 0 %}
+                        {% if summarize %}
+                          {# leave blank #}
+                        {% elseif given == scheduled and given > 0 %}
                           <span class="given">{{given}}</span>
                         {% elseif given + scheduled > 0 %}
                           <span class="given">{{given}}</span>/{{scheduled}}
                         {% elseif stop %}
                           stop
                         {% else %}
-                          &nbsp;
+                          &nbsp; {# ensure uniform height #}
                         {% endif %}
                       </div>
 
                       {% if current %} {% set future = true %} {% endif %}
+                      {% set totalScheduled = totalScheduled + scheduled %}
+                      {% set totalGiven = totalGiven + given %}
                       {% set divisionIndex = divisionIndex + 1 %}
                     {% endfor %}
+                    {% if summarize %}
+                      <div class="summary"
+                          onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                        {% if totalGiven == totalScheduled and totalGiven > 0 %}
+                          <span class="given">{{totalGiven}}</span>
+                        {% elseif totalGiven + totalScheduled > 0 %}
+                          <span class="given">{{totalGiven}}</span>/{{totalScheduled}}
+                        {% endif %}
+                      </div>
+                    {% endif %}
                   {% else %}
                     &nbsp;
                   {% endif %}

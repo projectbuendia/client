@@ -25,8 +25,11 @@ th, td {
   border-bottom: 1px solid #ddd;
 }
 
-#grid th, #grid td, #grid .division {
+#grid th, #grid td {
   border-right: 1px solid #ddd;
+}
+
+#grid th, #grid td, #grid .order .division, #grid .order .summary {
   padding: 0.6em 0 0.5em; /* extra 0.1em on top for vertical centering */
   /* Some symbols have a different height than other characters, so we need */
   /* to set the line-height to ensure that rows have uniform height. */
@@ -87,6 +90,7 @@ th, td {
 #grid .order th { padding: 0 16px; line-height: 1.2em; vertical-align: middle; }
 #grid .order td { position: relative; }
 #grid .order .divisions { position: absolute; top: 0; left: 0; bottom: 0; right: 0; display: flex; flex-direction: row; }
+#grid .order .summary { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
 #grid .order .division { flex-basis: 0; flex-grow: 1; }
 #grid .order .division:last-child { border-right: none; }
 #grid .order .stop { color: #f66; font-size: 1.5rem; font-weight: bold; text-transform: uppercase; padding-top: 1em; }
