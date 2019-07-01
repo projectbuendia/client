@@ -6,9 +6,7 @@ import android.util.DisplayMetrics;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
-import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
@@ -146,7 +144,7 @@ public class ChartRenderer {
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
-        Map<String, Multiset<Integer>> mExecutionCounts = new HashMap<>();
+        Map<String, ExecutionCounter> mExecutionCounts = new HashMap<>();
         List<List<Tile>> mTileRows = new ArrayList<>();
         List<Row> mRows = new ArrayList<>();
         Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
@@ -207,12 +205,12 @@ public class ChartRenderer {
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Order order = orders.get(obs.value);
                     if (order != null) {
-                        Multiset<Integer> counts = mExecutionCounts.get(order.uuid);
-                        if (counts == null) {
-                            counts = HashMultiset.<Integer>create();
-                            mExecutionCounts.put(order.uuid, counts);
+                        ExecutionCounter counter = mExecutionCounts.get(order.uuid);
+                        if (counter == null) {
+                            counter = new ExecutionCounter();
+                            mExecutionCounts.put(order.uuid, counter);
                         }
-                        counts.add(order.getDivisionIndex(obs.time));
+                        counter.add(order.getDivisionIndex(obs.time));
                     }
                 } else {
                     addObs(getColumnContainingTime(obs.time), obs);
