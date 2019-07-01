@@ -70,8 +70,8 @@ public class Utils {
     public static final int MINUTE = 60 * SECOND;  // in ms
     public static final int HOUR = 60 * MINUTE;  // in ms
 
-    private static Map<Integer, String> sMethodNames = initMethodNames();
-    private static Map<Integer, String> initMethodNames() {
+    private static Map<Integer, String> sHttpMethods = initHttpMethods();
+    private static Map<Integer, String> initHttpMethods() {
         Map<Integer, String> map = new HashMap<>();
         map.put(Request.Method.DEPRECATED_GET_OR_POST, "DEPRECATED_GET_OR_POST");
         map.put(Request.Method.GET, "GET");
@@ -86,142 +86,46 @@ public class Utils {
     }
 
     /** Prevent instantiation. */
-    private Utils() {
-        // Prevent instantiation.
+    private Utils() { }
+
+
+    // ==== Basic types ====
+
+    /** Returns a value if that value is not null, or a specified default value otherwise. */
+    public static @Nonnull <T> T orDefault(@Nullable T value, @Nonnull T defaultValue) {
+        return value != null ? value : defaultValue;
     }
 
-    /**
-     * Compares two objects that may be null, Integer, Long, BigInteger, or String.
-     * null sorts before everything; all integers sort before all strings; integers
-     * sort according to numeric value; strings sort according to string value.
-     */
-    public static Comparator<Object> nullIntStrComparator = new Comparator<Object>() {
-        @Override public int compare(Object a, Object b) {
-            BigInteger intA = toBigInteger(a);
-            BigInteger intB = toBigInteger(b);
-            if (intA != null && intB != null) {
-                return intA.compareTo(intB);
-            }
-            if (a instanceof String && b instanceof String) {
-                return ((String) a).compareTo((String) b);
-            }
-            return (a == null ? 0 : intA != null ? 1 : 2)
-                - (b == null ? 0 : intB != null ? 1 : 2);
-        }
-    };
-    /**
-     * Compares two lists, each of whose elements is a null, Integer, Long,
-     * BigInteger, or String, lexicographically by element, just like Python.
-     */
-    public static Comparator<List<Object>> nullIntStrListComparator =
-        new Comparator<List<Object>>() {
-            @Override public int compare(List<Object> a, List<Object> b) {
-                for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-                    int result = nullIntStrComparator.compare(a.get(i), b.get(i));
-                    if (result != 0) {
-                        return result;
-                    }
-                }
-                return a.size() - b.size();
-            }
-        };
-
-    /**
-     * Sorts an ArrayList of ObsRow rows so that the order of the ObsRow.conceptUids matches the
-     * order of conceptRowUuids.
-     */
-    public static ArrayList<ObsRow> sortObsRows(final ArrayList<ObsRow> rows,
-                                                final ArrayList<String> conceptUuids) {
-        Collections.sort(rows, new Comparator<ObsRow>() {
-            @Override
-            public int compare(ObsRow a, ObsRow b) {
-                int aIndex = conceptUuids.indexOf(a.conceptUuid);
-                int bIndex = conceptUuids.indexOf(b.conceptUuid);
-
-                int pastLastIndex = rows.size();
-                if (aIndex == -1) {
-                    aIndex = pastLastIndex;
-                }
-                if (bIndex == -1) {
-                    bIndex = pastLastIndex;
-                }
-                if (aIndex == bIndex) {
-                    return a.conceptName.compareTo(b.conceptName);
-                } else {
-                    return Integer.compare(aIndex, bIndex);
-                }
-            }
-        });
-
-        return rows;
+    /** Converts nulls to a default integer value. */
+    public static int toNonnull(@Nullable Integer n, int defaultValue) {
+        return n == null ? defaultValue : n;
     }
 
-    private static final DateTimeFormatter SHORT_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM"); // TODO/i18n
-    private static final DateTimeFormatter MEDIUM_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM yyyy"); // TODO/i18n
-    private static final DateTimeFormatter SHORT_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("d MMM 'at' HH:mm"); // TODO/i18n
-    private static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER =
-        DateTimeFormat.mediumDateTime();
-    private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
-        DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
-    // Note: Use of \L here assumes a string that is already NFC-normalized.
-    private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
-    private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
+    /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
+    public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
 
-    /**
-     * Compares two strings in a manner that sorts alphabetic parts in alphabetic
-     * order and numeric parts in numeric order, while guaranteeing that:
-     * - compare(s, t) == 0 if and only if s.equals(t).
-     * - compare(s, s + t) < 0 for any strings s and t.
-     * - compare(s + x, s + y) == Integer.compare(x, y) for all integers x, y
-     * and strings s that do not end in a digit.
-     * - compare(s + t, s + u) == compare(s, t) for all strings s and strings
-     * t, u that consist entirely of Unicode letters.
-     * For example, the strings ["b1", "a11a", "a11", "a2", "a2b", "a2a", "a1"]
-     * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
-     */
-    public static Comparator<String> alphanumericComparator = new Comparator<String>() {
-        @Override public int compare(String a, String b) {
-            String aNormalized = Normalizer.normalize(a == null ? "" : a, Normalizer.Form.NFC);
-            String bNormalized = Normalizer.normalize(b == null ? "" : b, Normalizer.Form.NFC);
-            List<Object> aParts = getParts(aNormalized);
-            List<Object> bParts = getParts(bNormalized);
-            // Add a separator to ensure that the tiebreakers added below are never
-            // compared against the actual numeric or alphabetic parts.
-            aParts.add(null);
-            bParts.add(null);
-            // Break ties between strings that yield the same parts (e.g. "a04b"
-            // and "a4b") using the normalized original string as a tiebreaker.
-            aParts.add(aNormalized);
-            bParts.add(bNormalized);
-            // Break ties between strings that become the same after normalization
-            // using the non-normalized string as a further tiebreaker.
-            aParts.add(a);
-            bParts.add(b);
-            return nullIntStrListComparator.compare(aParts, bParts);
-        }
+    /** Safely index into an array, clamping the index if it's out of bounds. */
+    public static <T> T safeIndex(T[] array, int index) {
+        if (array.length == 0) return null;
+        if (index < 0) index = 0;
+        if (index > array.length - 1) index = array.length - 1;
+        return array[index];
+    }
 
-        /**
-         * Breaks a string into a list of Integers (from sequences of ASCII digits)
-         * and Strings (from sequences of letters).  Other characters are ignored.
-         */
-        private List<Object> getParts(String str) {
-            Matcher matcher = NUMBER_OR_WORD_PATTERN.matcher(str);
-            List<Object> parts = new ArrayList<>();
-            while (matcher.find()) {
-                try {
-                    String part = matcher.group();
-                    String intPart = matcher.group(1);
-                    parts.add(intPart != null ? new BigInteger(intPart) : part);
-                } catch (Exception e) {  // shouldn't happen, but just in case
-                    parts.add(null);
-                }
-            }
-            return parts;
+    /** Converts a list of Longs to an array of primitive longs. */
+    public static long[] toArray(List<Long> items) {
+        long[] array = new long[items.size()];
+        int i = 0;
+        for (Long item : items) {
+            array[i++] = item;
         }
-    };
+        return array;
+    }
+
+
+    // ==== String handling ====
 
     /** Performs a null-safe check for a null or empty string. */
     public static boolean isEmpty(@Nullable String str) {
@@ -229,42 +133,18 @@ public class Utils {
     }
 
     /** Converts empty strings to null. */
-    public static String toNonemptyOrNull(@Nullable String str) {
+    public static @Nullable String toNonemptyOrNull(@Nullable String str) {
         return isEmpty(str) ? null : str;
     }
 
-    /** Parses a long integer value from a string, or returns null if parsing fails. */
-    public static @Nullable Long toLongOrNull(@Nullable String str) {
-        if (str == null) return null;
-        try {
-            return Long.parseLong(str);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+    /** Converts nulls to empty strings. */
+    public static @Nonnull String toNonnull(@Nullable String str) {
+        return str != null ? str : "";
     }
 
-    /** Parses a double value from a string, or returns null if parsing fails. */
-    public static @Nullable Double toDoubleOrNull(@Nullable String str) {
-        if (str == null) return null;
-        try {
-            return Double.parseDouble(str);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    /** Converts objects with integer type to BigInteger. */
-    public static BigInteger toBigInteger(Object obj) {
-        if (obj instanceof Integer) {
-            return BigInteger.valueOf(((Integer) obj).longValue());
-        }
-        if (obj instanceof Long) {
-            return BigInteger.valueOf(((Long) obj).longValue());
-        }
-        if (obj instanceof BigInteger) {
-            return (BigInteger) obj;
-        }
-        return null;
+    /** Calls toString() on a nullable object, returning an empty string if null. */
+    public static @Nonnull String toStringNonnull(@Nullable Object obj) {
+        return obj != null ? obj.toString() : "";
     }
 
     /** Formats a string using ASCII encoding. */
@@ -295,6 +175,177 @@ public class Utils {
         }
     }
 
+
+    // ==== Number parsing ====
+
+    /** Converts a String to an integer, returning null if parsing fails. */
+    public static Integer toIntOrNull(String text) {
+        try {
+            return Integer.valueOf(text);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** Converts a String to an integer, returning a default value if parsing fails. */
+    public static int toIntOrDefault(String text, int defaultValue) {
+        try {
+            return Integer.valueOf(text);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /** Parses a long integer value from a string, or returns null if parsing fails. */
+    public static @Nullable Long toLongOrNull(@Nullable String str) {
+        if (str == null) return null;
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** Parses a double value from a string, or returns null if parsing fails. */
+    public static @Nullable Double toDoubleOrNull(@Nullable String str) {
+        if (str == null) return null;
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** Converts objects of integer types to BigIntegers. */
+    public static BigInteger toBigInteger(Object obj) {
+        if (obj instanceof Integer) {
+            return BigInteger.valueOf(((Integer) obj).longValue());
+        }
+        if (obj instanceof Long) {
+            return BigInteger.valueOf((Long) obj);
+        }
+        if (obj instanceof BigInteger) {
+            return (BigInteger) obj;
+        }
+        return null;
+    }
+
+
+    // ==== Dates and times ====
+
+    private static final DateTimeFormatter SHORT_DATE_FORMATTER =
+        DateTimeFormat.forPattern("d MMM"); // TODO/i18n
+    private static final DateTimeFormatter MEDIUM_DATE_FORMATTER =
+        DateTimeFormat.forPattern("d MMM yyyy"); // TODO/i18n
+    private static final DateTimeFormatter SHORT_DATETIME_FORMATTER =
+        DateTimeFormat.forPattern("d MMM 'at' HH:mm"); // TODO/i18n
+    private static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER =
+        DateTimeFormat.mediumDateTime();
+    private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
+        DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
+    // Note: Use of \L here assumes a string that is already NFC-normalized.
+    private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
+    private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
+
+    /** Returns the lesser of two DateTimes, treating null as the greatest value. */
+    public static @Nullable DateTime min(DateTime a, DateTime b) {
+        return a == null ? b : b == null ? a : a.isBefore(b) ? a : b;
+    }
+
+    /** Returns the greater of two DateTimes, treating null as the least value. */
+    public static @Nullable DateTime max(DateTime a, DateTime b) {
+        return a == null ? b : b == null ? a : a.isAfter(b) ? a : b;
+    }
+
+    /** Converts a nullable LocalDate to a yyyy-mm-dd String or null. */
+    public static @Nullable String formatDate(@Nullable LocalDate date) {
+        return date != null ? date.toString() : null;
+    }
+
+    /** Converts a yyyy-mm-dd String or null to a nullable LocalDate. */
+    public static @Nullable LocalDate toLocalDate(@Nullable String string) {
+        try {
+            return string != null ? LocalDate.parse(string) : null;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
+    public static @Nullable String formatShortDate(@Nullable LocalDate localDate) {
+        return localDate != null ? SHORT_DATE_FORMATTER.print(localDate) : null;
+    }
+
+    /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
+    public static @Nullable String formatMediumDate(@Nullable LocalDate localDate) {
+        return localDate != null ? MEDIUM_DATE_FORMATTER.print(localDate) : null;
+    }
+
+    /** Converts a nullable {@link DateTime} to a nullable String with time, day, and month only. */
+    public static @Nullable String formatShortDateTime(@Nullable DateTime dateTime) {
+        return dateTime != null ? SHORT_DATETIME_FORMATTER.print(dateTime) : null;
+    }
+
+    /** Converts a nullable {@link DateTime} to a nullable String in HH:MM format. */
+    public static @Nullable String formatTimeOfDay(@Nullable DateTime dateTime) {
+        return dateTime != null ? TIME_OF_DAY_FORMATTER.print(dateTime) : null;
+    }
+
+    /**
+     * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
+     * time zone.
+     */
+    public static @Nullable String formatMediumDateTime(@Nullable DateTime dateTime) {
+        return dateTime != null ? MEDIUM_DATETIME_FORMATTER.print(dateTime) : null;
+    }
+
+    /** Gets the DateTime at the start of a day. */
+    public static DateTime getDayStart(LocalDate day) {
+        return day.toDateTimeAtStartOfDay();
+    }
+
+    /** Gets the DateTime at the end of a day. */
+    public static DateTime getDayEnd(LocalDate day) {
+        return day.plusDays(1).toDateTimeAtStartOfDay();
+    }
+
+    /** Creates an interval from a min and max, where null means "unbounded". */
+    public static Interval toInterval(ReadableInstant start, ReadableInstant stop) {
+        return new Interval(Utils.orDefault(start, MIN_DATETIME), Utils.orDefault(stop, MAX_DATETIME));
+    }
+
+    /** Gets the DateTime at the center of an Interval. */
+    public static DateTime centerOf(Interval interval) {
+        return interval.getStart().plus(interval.toDuration().dividedBy(2));
+    }
+
+    /**
+     * Describes a given date as a number of days since a starting date, where the starting date
+     * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
+     */
+    public static int dayNumberSince(@Nullable LocalDate startDate, @Nullable LocalDate date) {
+        if (startDate == null || date == null) {
+            return -1;
+        }
+        return Days.daysBetween(startDate, date).getDays() + 1;
+    }
+
+    /** Checks whether a birthdate indicates an age less than 5 years old. */
+    public static boolean isChild(LocalDate birthdate) {
+        return birthdate != null && new Period(birthdate, LocalDate.now()).getYears() < 5;
+    }
+
+    /** Converts a birthdate to a string describing age in months or years. */
+    public static String birthdateToAge(LocalDate birthdate, Resources resources) {
+        Period age = new Period(birthdate, LocalDate.now());
+        int years = age.getYears(), months = age.getMonths();
+        return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
+            resources.getString(R.string.abbrev_n_months, months + years * 12);
+    }
+
+
+    // ==== System ====
+
     /**
      * Returns the value for a system property. System properties need to start with "debug." and
      * can be set using "adb shell setprop $propertyName $value".
@@ -310,76 +361,8 @@ public class Utils {
         }
     }
 
-    /**
-     * Logs a user action by sending a dummy request to the server.  (The server
-     * logs can then be scanned later to produce analytics for the client app.)
-     * @param action An identifier for the user action; should describe a user-
-     *               initiated operation in the UI (e.g. "foo_button_pressed").
-     * @param pairs  An even number of arguments providing key-value pairs of
-     *               arbitrary data to record with the event.
-     */
-    public static void logUserAction(String action, String... pairs) {
-        Server server = App.getInstance().getServer();
-        if (server != null) {
-            List<String> allPairs = Lists.newArrayList("action", action);
-            allPairs.addAll(Arrays.asList(pairs));
-            server.logToServer(allPairs);
-        }
-    }
 
-    /**
-     * Logs an event by sending a dummy request to the server.  (The server logs
-     * can then be scanned later to produce analytics for the client app.)
-     * @param event An identifier for an event that is not directly initiated by
-     *              the user (e.g. "form_submission_failed").
-     * @param pairs An even number of arguments providing key-value pairs of
-     *              arbitrary data to record with the event.
-     */
-    public static void logEvent(String event, String... pairs) {
-        Server server = App.getInstance().getServer();
-        if (server != null) {
-            List<String> allPairs = Lists.newArrayList("event", event);
-            allPairs.addAll(Arrays.asList(pairs));
-            server.logToServer(allPairs);
-        }
-    }
-
-    /**
-     * Returns the specified name or a sentinel representing an unknown name, if the name is
-     * null.
-     */
-    public static @Nonnull String nameOrUnknown(@Nullable String name) {
-        return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
-    }
-
-    /** Returns a value if that value is not null, or a specified default value otherwise. */
-    public static @Nonnull <T> T valueOrDefault(@Nullable T value, @Nonnull T defaultValue) {
-        return value == null ? defaultValue : value;
-    }
-
-    /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
-    public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-
-    /** Converts a String to an integer, returning a default value instead of throwing an exception. */
-    public static int toIntegerOrDefault(String text, int defaultValue) {
-        try {
-            return Integer.valueOf(text);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    /** Converts a list of Longs to an array of primitive longs. */
-    public static long[] toArray(List<Long> items) {
-        long[] array = new long[items.size()];
-        int i = 0;
-        for (Long item : items) {
-            array[i++] = item;
-        }
-        return array;
-    }
+    // ==== Cursors ====
 
     /** Gets a nullable string value from a cursor. */
     public static @Nullable String getString(Cursor c, String columnName) {
@@ -419,6 +402,9 @@ public class Utils {
         return c.isNull(index) ? defaultValue : (Long) c.getLong(index);
     }
 
+
+    // ==== Bundles ====
+
     /** Gets a nullable Long value from a Bundle.  Always use this instead of getLong() directly. */
     public static Long getLong(Bundle bundle, String key) {
         // getLong never returns null; we have to check explicitly.
@@ -438,113 +424,36 @@ public class Utils {
         }
     }
 
-    /** Converts a nullable LocalDate to a yyyy-mm-dd String. */
-    public static @Nullable String toString(@Nullable LocalDate date) {
-        return date == null ? null : date.toString();
-    }
 
-    /** Safely index into an array, clamping the index if it's out of bounds. */
-    public static <T> T safeIndex(T[] array, int index) {
-        if (array.length == 0) return null;
-        if (index < 0) index = 0;
-        if (index > array.length - 1) index = array.length - 1;
-        return array[index];
-    }
+    // ==== User interface ====
 
-    /** Returns the greater of two DateTimes, treating null as the least value. */
-    public static @Nullable DateTime max(DateTime a, DateTime b) {
-        return a == null ? b : b == null ? a : a.isAfter(b) ? a : b;
-    }
-
-    /** Returns the lesser of two DateTimes, treating null as the greatest value. */
-    public static @Nullable DateTime min(DateTime a, DateTime b) {
-        return a == null ? b : b == null ? a : a.isBefore(b) ? a : b;
-    }
-
-    /** Converts a nullable yyyy-mm-dd String to a LocalDate. */
-    public static @Nullable LocalDate toLocalDate(@Nullable String string) {
-        try {
-            return string == null ? null : LocalDate.parse(string);
-        } catch (IllegalArgumentException e) {
-            return null;
+    /** Shows or hides a dialog based on a boolean flag. */
+    public static void showDialogIf(@Nullable Dialog dialog, boolean show) {
+        if (dialog != null) {
+            if (show) {
+                dialog.show();
+            } else {
+                dialog.hide();
+            }
         }
     }
 
-    /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
-    public static @Nullable String toShortString(@Nullable LocalDate localDate) {
-        return localDate == null ? null : SHORT_DATE_FORMATTER.print(localDate);
+    /** Shows or a hides a view based on a boolean flag. */
+    public static void showIf(View view, boolean show) {
+        view.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
-    public static @Nullable String toMediumString(@Nullable LocalDate localDate) {
-        return localDate == null ? null : MEDIUM_DATE_FORMATTER.print(localDate);
+    /** Converts a dp value (density-independent pixels) to pixels. */
+    public static int getPixelFromDips(float dips) {
+        // Get the screen's density scale
+        final float scale = App.getInstance().getResources().getDisplayMetrics().density;
+
+        // Convert the dps to pixels, based on density scale
+        return (int) (dips * scale + 0.5f);
     }
 
-    /** Converts a nullable {@link DateTime} to a nullable String with time, day, and month only. */
-    public static @Nullable String toShortString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : SHORT_DATETIME_FORMATTER.print(dateTime);
-    }
 
-    /**
-     * Converts a nullable {@link DateTime} to a nullable String with just the time in hours and
-     * minutes.
-     */
-    public static @Nullable String toTimeOfDayString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : TIME_OF_DAY_FORMATTER.print(dateTime);
-    }
-
-    /**
-     * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
-     * time zone.
-     */
-    public static @Nullable String toMediumString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : MEDIUM_DATETIME_FORMATTER.print(dateTime);
-    }
-
-    /** Checks whether a birthdate indicates an age less than 5 years old. */
-    public static boolean isChild(LocalDate birthdate) {
-        return birthdate != null && new Period(birthdate, LocalDate.now()).getYears() < 5;
-    }
-
-    /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate, Resources resources) {
-        Period age = new Period(birthdate, LocalDate.now());
-        int years = age.getYears(), months = age.getMonths();
-        return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
-                resources.getString(R.string.abbrev_n_months, months + years * 12);
-    }
-
-    /**
-     * Describes a given date as a number of days since a starting date, where the starting date
-     * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
-     */
-    public static int dayNumberSince(@Nullable LocalDate startDate, @Nullable LocalDate date) {
-        if (startDate == null || date == null) {
-            return -1;
-        }
-        return Days.daysBetween(startDate, date).getDays() + 1;
-    }
-
-    /** Gets the DateTime at the start of a day. */
-    public static DateTime getDayStart(LocalDate day) {
-        return day.toDateTimeAtStartOfDay();
-    }
-
-    /** Gets the DateTime at the end of a day. */
-    public static DateTime getDayEnd(LocalDate day) {
-        return day.plusDays(1).toDateTimeAtStartOfDay();
-    }
-
-    /** Creates an interval from a min and max, where null means "unbounded". */
-    public static Interval toInterval(ReadableInstant start, ReadableInstant stop) {
-        return new Interval(start == null ? MIN_DATETIME : start,
-            stop == null ? MAX_DATETIME : stop);
-    }
-
-    /** Gets the DateTime at the center of an Interval. */
-    public static DateTime centerOf(Interval interval) {
-        return interval.getStart().plus(interval.toDuration().dividedBy(2));
-    }
+    // ==== OpenMRS ====
 
     /** Compresses a UUID optionally to a small integer. */
     public static Object compressUuid(String uuid) {
@@ -564,21 +473,161 @@ public class Utils {
         return (String) id;
     }
 
-    /** Shows or hides a dialog based on a boolean flag. */
-    public static void showDialogIf(@Nullable Dialog dialog, boolean show) {
-        if (dialog != null) {
-            if (show) {
-                dialog.show();
-            } else {
-                dialog.hide();
+
+
+    // ==== Ordering ====
+
+    /**
+     * Compares two objects that may be null, Integer, Long, BigInteger, or String.
+     * null sorts before everything; all integers sort before all strings; integers
+     * sort according to numeric value; strings sort according to string value.
+     */
+    public static Comparator<Object> nullIntStrComparator = new Comparator<Object>() {
+        @Override public int compare(Object a, Object b) {
+            BigInteger intA = toBigInteger(a);
+            BigInteger intB = toBigInteger(b);
+            if (intA != null && intB != null) {
+                return intA.compareTo(intB);
             }
+            if (a instanceof String && b instanceof String) {
+                return ((String) a).compareTo((String) b);
+            }
+            return (a == null ? 0 : intA != null ? 1 : 2)
+                - (b == null ? 0 : intB != null ? 1 : 2);
+        }
+    };
+
+    /**
+     * Compares two lists, each of whose elements is a null, Integer, Long,
+     * BigInteger, or String, lexicographically by element, just like Python.
+     */
+    public static Comparator<List<Object>> nullIntStrListComparator = new Comparator<List<Object>>() {
+        @Override public int compare(List<Object> a, List<Object> b) {
+            for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+                int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+                if (result != 0) {
+                    return result;
+                }
+            }
+            return a.size() - b.size();
+        }
+    };
+
+    /**
+     * Sorts ObsRows so their order matches the order of concepts in conceptUuids,
+     * with any non-matching ObsRows at the end in alphabetical order by concept name.
+     */
+    public static void sortObsRows(final List<ObsRow> rows, final List<String> conceptUuids) {
+        final int pastLastIndex = rows.size();
+
+        Collections.sort(rows, new Comparator<ObsRow>() {
+            @Override public int compare(ObsRow a, ObsRow b) {
+                int ai = conceptUuids.indexOf(a.conceptUuid);
+                if (ai < 0) ai = pastLastIndex;
+
+                int bi = conceptUuids.indexOf(b.conceptUuid);
+                if (bi < 0) bi = pastLastIndex;
+
+                int result = Integer.compare(ai, bi);
+                if (result != 0) return result;
+
+                return a.conceptName.compareTo(b.conceptName);
+            }
+        });
+    }
+
+    /**
+     * Compares two strings in a manner that sorts alphabetic parts in alphabetic
+     * order and numeric parts in numeric order, while guaranteeing that:
+     * - compare(s, t) == 0 if and only if s.equals(t).
+     * - compare(s, s + t) < 0 for any strings s and t.
+     * - compare(s + x, s + y) == Integer.compare(x, y) for all integers x, y
+     * and strings s that do not end in a digit.
+     * - compare(s + t, s + u) == compare(s, t) for all strings s and strings
+     * t, u that consist entirely of Unicode letters.
+     * For example, the strings ["b1", "a11a", "a11", "a2", "a2b", "a2a", "a1"]
+     * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
+     */
+    public static Comparator<String> alphanumericComparator = new Comparator<String>() {
+        @Override public int compare(String a, String b) {
+            String aNormalized = Normalizer.normalize(Utils.toNonnull(a), Normalizer.Form.NFC);
+            String bNormalized = Normalizer.normalize(Utils.toNonnull(b), Normalizer.Form.NFC);
+            List<Object> aParts = getParts(aNormalized);
+            List<Object> bParts = getParts(bNormalized);
+            // Add a separator to ensure that the tiebreakers added below are never
+            // compared against the actual numeric or alphabetic parts.
+            aParts.add(null);
+            bParts.add(null);
+            // Break ties between strings that yield the same parts (e.g. "a04b"
+            // and "a4b") using the normalized original string as a tiebreaker.
+            aParts.add(aNormalized);
+            bParts.add(bNormalized);
+            // Break ties between strings that become the same after normalization
+            // using the non-normalized string as a further tiebreaker.
+            aParts.add(a);
+            bParts.add(b);
+            return nullIntStrListComparator.compare(aParts, bParts);
+        }
+
+        /**
+         * Breaks a string into a list of Integers (from sequences of ASCII digits)
+         * and Strings (from sequences of letters).  Other characters are ignored.
+         */
+        private List<Object> getParts(String str) {
+            Matcher matcher = NUMBER_OR_WORD_PATTERN.matcher(str);
+            List<Object> parts = new ArrayList<>();
+            while (matcher.find()) {
+                try {
+                    String part = matcher.group();
+                    String intPart = matcher.group(1);
+                    parts.add(intPart != null ? new BigInteger(intPart) : part);
+                } catch (Exception e) {  // shouldn't happen, but just in case
+                    parts.add(null);
+                }
+            }
+            return parts;
+        }
+    };
+
+
+    // ==== Logging ====
+
+    /**
+     * Logs a user action by sending a dummy request to the server.  (The server
+     * logs can then be scanned later to produce analytics for the client app.)
+     * @param action An identifier for the user action; should describe a user-
+     *               initiated operation in the UI (e.g. "foo_button_pressed").
+     * @param pairs  An even number of arguments providing key-value pairs of
+     *               arbitrary data to record with the event.
+     */
+    public static void logUserAction(String action, String... pairs) {
+        Server server = App.getInstance().getServer();
+        if (server != null) {
+            List<String> allPairs = Lists.newArrayList("action", action);
+            allPairs.addAll(Arrays.asList(pairs));
+            server.logToServer(allPairs);
         }
     }
 
-    /** Shows or a hides a view based on a boolean flag. */
-    public static void showIf(View view, boolean show) {
-        view.setVisibility(show ? View.VISIBLE : View.GONE);
+    /**
+     * Logs an event by sending a dummy request to the server.  (The server logs
+     * can then be scanned later to produce analytics for the client app.)
+     * @param event An identifier for an event that is not directly initiated by
+     *              the user (e.g. "form_submission_failed").
+     * @param pairs An even number of arguments providing key-value pairs of
+     *              arbitrary data to record with the event.
+     */
+    public static void logEvent(String event, String... pairs) {
+        Server server = App.getInstance().getServer();
+        if (server != null) {
+            List<String> allPairs = Lists.newArrayList("event", event);
+            allPairs.addAll(Arrays.asList(pairs));
+            server.logToServer(allPairs);
+        }
     }
+
+
+    // ==== Debugging ====
 
     /** Gets the stack trace as a string.  Handy for looking inside exceptions when debugging. */
     public static String toString(Throwable e) {
@@ -595,40 +644,10 @@ public class Utils {
     /** Returns an unambiguous string representation of a string, suitable for logging. */
     public static String repr(String str, int maxLength) {
         try {
-            if (str == null) {
-                return "(null String)";
-            }
-            StringBuffer buffer = new StringBuffer(format("(length %d) \"", str.length()));
-            for (int i = 0; i < str.length() && i < maxLength; i++) {
-                char c = str.charAt(i);
-                switch (str.charAt(i)) {
-                    case '\t':
-                        buffer.append('\t');
-                        break;
-                    case '\r':
-                        buffer.append('\r');
-                        break;
-                    case '\n':
-                        buffer.append('\n');
-                        break;
-                    case '\\':
-                        buffer.append("\\\\");
-                        break;
-                    case '"':
-                        buffer.append("\\\"");
-                        break;
-                    default:
-                        if ((int) c >= 32 && (int) c <= 126) {
-                            buffer.append(c);
-                        } else if ((int) c < 256) {
-                            buffer.append(format("\\x%02x", (int) c));
-                        } else {
-                            buffer.append(format("\\u%04x", (int) c));
-                        }
-                }
-            }
-            buffer.append(str.length() > maxLength ? "\"..." : "\"");
-            return buffer.toString();
+            return str != null ? format("(length %d) \"%s\"%s",
+                str.length(), escape(str, maxLength),
+                str.length() > maxLength ? "..." : ""
+            ) : "(null String)";
         } catch (Throwable ignored) {
             return "(repr of " + str + " failed)";
         }
@@ -637,40 +656,47 @@ public class Utils {
     /** Returns an unambiguous string representation of a byte array, suitable for logging. */
     public static String repr(byte[] bytes, int maxLength) {
         try {
-            if (bytes == null) {
-                return "(null byte[])";
-            }
-            StringBuffer buffer = new StringBuffer(format("(length %d) \"", bytes.length));
-            for (int i = 0; i < bytes.length && i < maxLength; i++) {
-                switch ((char) bytes[i]) {
-                    case '\t':
-                        buffer.append("\\t");
-                        break;
-                    case '\r':
-                        buffer.append("\\r");
-                        break;
-                    case '\n':
-                        buffer.append("\\n");
-                        break;
-                    case '\\':
-                        buffer.append("\\\\");
-                        break;
-                    case '"':
-                        buffer.append("\\\"");
-                        break;
-                    default:
-                        if (bytes[i] >= 32 && bytes[i] <= 126) {
-                            buffer.append((char) bytes[i]);
-                        } else {
-                            buffer.append(format("\\x%02x", bytes[i]));
-                        }
-                }
-            }
-            buffer.append(bytes.length > maxLength ? "\"..." : "\"");
-            return buffer.toString();
+            return bytes != null ? format("(length %d) \"%s\"%s",
+                bytes.length, escape(new String(bytes, "ISO-8859-1"), maxLength),
+                bytes.length > maxLength ? "\"..." : "\""
+            ) : "(null byte[])";
         } catch (Throwable ignored) {
             return "(repr of " + bytes + " failed)";
         }
+    }
+
+    /** Uses backslash sequences to form a printable representation of a string. */
+    private static String escape(String str, int maxLength) {
+        StringBuffer buffer = new StringBuffer(format("(length %d) \"", str.length()));
+        for (int i = 0; i < str.length() && i < maxLength; i++) {
+            char c = str.charAt(i);
+            switch (str.charAt(i)) {
+                case '\t':
+                    buffer.append("\\t");
+                    break;
+                case '\r':
+                    buffer.append("\\r");
+                    break;
+                case '\n':
+                    buffer.append("\\n");
+                    break;
+                case '\\':
+                    buffer.append("\\\\");
+                    break;
+                case '"':
+                    buffer.append("\\\"");
+                    break;
+                default:
+                    if ((int) c >= 32 && (int) c <= 126) {
+                        buffer.append(c);
+                    } else if ((int) c < 256) {
+                        buffer.append(format("\\x%02x", (int) c));
+                    } else {
+                        buffer.append(format("\\u%04x", (int) c));
+                    }
+            }
+        }
+        return buffer.toString();
     }
 
     /** Formats a description of a Request. */
@@ -679,7 +705,7 @@ public class Utils {
             if (req == null) {
                 return "(null Request)";
             }
-            String method = sMethodNames.get(req.getMethod());
+            String method = sHttpMethods.get(req.getMethod());
             if (method == null) {
                 method = format("(method %d)", req.getMethod());
             }
@@ -717,15 +743,5 @@ public class Utils {
             return parts.length == 0 ? "(anonymous)" : parts[parts.length - 1];
         }
         return name;
-    }
-
-
-    /** Converts a dp value (density-independent pixels) to pixels. */
-    public static int getPixelFromDips(float dips) {
-        // Get the screen's density scale
-        final float scale = App.getInstance().getResources().getDisplayMetrics().density;
-
-        // Convert the dps to pixels, based on density scale
-        return (int) (dips * scale + 0.5f);
     }
 }

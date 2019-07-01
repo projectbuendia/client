@@ -28,7 +28,7 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
     }
 
     @Override public int getCount() {
-        return mTypedCursor == null ? 0 : mTypedCursor.getCount();
+        return mTypedCursor != null ? mTypedCursor.getCount() : 0;
     }
 
     /**

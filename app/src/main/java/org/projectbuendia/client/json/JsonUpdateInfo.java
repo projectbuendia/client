@@ -30,7 +30,7 @@ public class JsonUpdateInfo {
      */
     public LexicographicVersion getParsedVersion() {
         try {
-            return version == null ? null : LexicographicVersion.parse(version);
+            return version != null ? LexicographicVersion.parse(version) : null;
         } catch (IllegalArgumentException e) {
             return null;
         }

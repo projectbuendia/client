@@ -59,7 +59,7 @@ public class ChartsSyncPhaseRunnable implements SyncPhaseRunnable {
                     .withValue("rowid", nextId++)
                     .withValue(Contracts.ChartItems.CHART_UUID, response.uuid)
                     .withValue(Contracts.ChartItems.WEIGHT, nextWeight++)
-                    .withValue(Contracts.ChartItems.SECTION_TYPE, section.type == null ? null : section.type.name())
+                    .withValue(Contracts.ChartItems.SECTION_TYPE, section.type != null ? section.type.name() : null)
                     .withValue(Contracts.ChartItems.LABEL, section.label)
                     .build());
             syncResult.stats.numInserts++;

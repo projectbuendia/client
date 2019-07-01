@@ -618,7 +618,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     private @Nullable LocalDate getObservedDate(
         Map<String, Obs> observations, String conceptUuid) {
         Obs obs = observations.get(conceptUuid);
-        return obs == null ? null : Utils.toLocalDate(obs.valueName);
+        return obs != null ? Utils.toLocalDate(obs.valueName) : null;
     }
 
     private synchronized void updatePatientLocationUi() {

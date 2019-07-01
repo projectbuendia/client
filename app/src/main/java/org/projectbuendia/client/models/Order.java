@@ -93,7 +93,7 @@ public @Immutable class Order extends Base<String> {
         this(
             uuid, patientUuid, instructionsText,
             new DateTime(startMillis),
-            stopMillis == null ? null : new DateTime(stopMillis)
+            stopMillis != null ? new DateTime(stopMillis) : null
         );
     }
 
@@ -207,7 +207,7 @@ public @Immutable class Order extends Base<String> {
         json.put("instructions", instructions.format());
         json.put("start_millis", start.getMillis());
         // Use `JSONObject.NULL` instead of `null` so that the value is actually set.
-        json.put("stop_millis", stop == null ? JSONObject.NULL : stop.getMillis());
+        json.put("stop_millis", stop != null ? stop.getMillis() : JSONObject.NULL);
         return json;
     }
 
@@ -254,9 +254,9 @@ public @Immutable class Order extends Base<String> {
                 "([^ ]*) ?(.*)");  // example: "Prednisone 1 L 10 mg/L"
 
         public Instructions(String medication, String route, String dosage, int frequency) {
-            this.medication = Utils.valueOrDefault(medication, "");
-            this.route = Utils.valueOrDefault(route, "");
-            this.dosage = Utils.valueOrDefault(dosage, "");
+            this.medication = Utils.toNonnull(medication);
+            this.route = Utils.toNonnull(route);
+            this.dosage = Utils.toNonnull(dosage);
             this.frequency = frequency > 0 ? frequency : 0;
         }
 
@@ -282,16 +282,16 @@ public @Immutable class Order extends Base<String> {
 
                 // Frequency
                 fields = Utils.splitFields(records[2], US, 2);
-                frequency = Utils.toIntegerOrDefault(fields[0].trim(), 0);
+                frequency = Utils.toIntOrDefault(fields[0].trim(), 0);
                 // TODO(ping): Support frequency units (currently "per day" is assumed).
             } else {
-                Matcher matcher = OLD_PATTERN.matcher(Utils.valueOrDefault(instructionsText, ""));
+                Matcher matcher = OLD_PATTERN.matcher(Utils.toNonnull(instructionsText));
                 if (!matcher.matches()) {
                     throw new IllegalArgumentException("Invalid order instructions: " + Utils.repr(instructionsText, 100));
                 }
-                medication = Utils.valueOrDefault(matcher.group(1), matcher.group(4)).replace(NON_BREAKING_SPACE, ' ');
+                medication = Utils.orDefault(matcher.group(1), matcher.group(4)).replace(NON_BREAKING_SPACE, ' ');
                 route = "";
-                dosage = Utils.valueOrDefault(matcher.group(2), matcher.group(5));
+                dosage = Utils.orDefault(matcher.group(2), matcher.group(5));
                 frequency = matcher.group(3) != null ? Integer.valueOf(matcher.group(3)) : 0;
             }
         }

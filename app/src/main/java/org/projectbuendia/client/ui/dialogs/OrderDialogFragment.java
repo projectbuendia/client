@@ -155,7 +155,7 @@ public class OrderDialogFragment extends DialogFragment {
         String medication = mMedication.getText().toString().trim();
         String route = mRoute.getText().toString().trim();
         String dosage = mDosage.getText().toString().trim();
-        int frequency = Utils.toIntegerOrDefault(mFrequency.getText().toString().trim(), 0);
+        int frequency = Utils.toIntOrDefault(mFrequency.getText().toString().trim(), 0);
         Order.Instructions instructions = new Order.Instructions(medication, route, dosage, frequency);
 
         String durationStr = mGiveForDays.getText().toString().trim();
@@ -191,9 +191,9 @@ public class OrderDialogFragment extends DialogFragment {
 
         dialog.dismiss();
 
-        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
         DateTime start = Utils.getDateTime(getArguments(), "start_millis");
-        start = Utils.valueOrDefault(start, now);
+        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
+        start = Utils.orDefault(start, now);
 
         if (durationDays != null) {
             // Adjust durationDays to account for a start date in the past.  Entering "2"
@@ -275,7 +275,7 @@ public class OrderDialogFragment extends DialogFragment {
 
     /** Updates the various labels in the form that react to changes in input fields. */
     void updateLabels() {
-        int frequency = Utils.toIntegerOrDefault(mFrequency.getText().toString().trim(), 0);
+        int frequency = Utils.toIntOrDefault(mFrequency.getText().toString().trim(), 0);
         DateTime now = Utils.getDateTime(getArguments(), "now_millis");
         String text = mGiveForDays.getText().toString().trim();
         int days = text.isEmpty() ? 0 : Integer.parseInt(text);
@@ -293,7 +293,7 @@ public class OrderDialogFragment extends DialogFragment {
                 days == 1 ? R.string.order_duration_stop_after_today :
                     days == 2 ? R.string.order_duration_stop_after_tomorrow :
                         R.string.order_duration_stop_after_date
-        ).replace("%s", Utils.toShortString(lastDay)));
+        ).replace("%s", Utils.formatShortDate(lastDay)));
     }
 
     class DurationDaysWatcher implements TextWatcher {

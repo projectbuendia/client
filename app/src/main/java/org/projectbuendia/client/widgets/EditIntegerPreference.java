@@ -18,6 +18,8 @@ import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.util.AttributeSet;
 
+import org.projectbuendia.client.utils.Utils;
+
 /**
  * Custom Android preference widget for editing an Integer value. The majority of code modifies
  * the storage type to be an Integer rather than a String.
@@ -51,7 +53,7 @@ public class EditIntegerPreference extends EditTextPreference {
 
     @Override public void setText(String text) {
         boolean wasBlocking = shouldDisableDependents();
-        mInteger = parseIntOrNull(text);
+        mInteger = Utils.toIntOrNull(text);
         if (mInteger == null) {
             SharedPreferences.Editor editor = getEditor();
             editor.remove(getKey());
@@ -65,7 +67,8 @@ public class EditIntegerPreference extends EditTextPreference {
         }
     }
 
-    @Override protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
+    @Override
+    protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
         Integer newValue;
         if (restoreValue) {
             if (!shouldPersist()) {
@@ -82,17 +85,9 @@ public class EditIntegerPreference extends EditTextPreference {
             if (defaultValue instanceof Integer) {
                 newValue = (Integer) defaultValue;
             } else {
-                newValue = defaultValue == null ? null : parseIntOrNull(defaultValue.toString());
+                newValue = defaultValue != null ? Utils.toIntOrNull(defaultValue.toString()) : null;
             }
         }
-        this.setText(newValue == null ? null : newValue.toString());
-    }
-
-    private Integer parseIntOrNull(String text) {
-        try {
-            return Integer.parseInt(text);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        this.setText(newValue != null ? newValue.toString() : null);
     }
 }

@@ -19,8 +19,6 @@ import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -70,7 +68,7 @@ public class ViewObservationsDialogFragment extends DialogFragment {
         listDataChild = new HashMap<>();
 
         if (conceptUuids != null) {
-            rows = Utils.sortObsRows(rows, conceptUuids);
+            Utils.sortObsRows(rows, conceptUuids);
         }
 
         for (ObsRow row: rows) {
