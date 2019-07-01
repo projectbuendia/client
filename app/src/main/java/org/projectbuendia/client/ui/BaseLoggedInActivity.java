@@ -167,7 +167,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         // TODO: Implement this in one way or another!
     }
 
-    public void onEvent(PatientChartRequestedEvent event) {
+    public void onEventMainThread(PatientChartRequestedEvent event) {
         PatientChartActivity.start(this, event.uuid);
     }
 

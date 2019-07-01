@@ -271,6 +271,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         initChartMenu();
     }
 
+    @Override protected void onNewIntent(Intent intent) {
+        String uuid = intent.getStringExtra("uuid");
+        if (uuid != null) {
+            mGridWebView.clearView();
+            mController.setPatient(uuid);
+        }
+    }
+
     class DateObsDialog extends DatePickerDialog {
         private String mTitle;
 
@@ -345,11 +353,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mIsFetchingXform = false;
         mController.onXFormResult(requestCode, resultCode, data);
-    }
-
-    @Override protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
     }
 
     private String getFormattedPcrString(double pcrValue) {
