@@ -55,7 +55,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         Order order, Interval interval, List<DateTime> executionTimes) {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
-        args.putString("instructions", order.instructions);
+        args.putString("instructions", order.instructions.format());
         args.putLong("orderStartMillis", order.start.getMillis());
         args.putLong("intervalStartMillis", interval.getStartMillis());
         args.putLong("intervalStopMillis", interval.getEndMillis());

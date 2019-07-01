@@ -347,6 +347,11 @@ public class Utils {
         return value == null ? defaultValue : value;
     }
 
+    /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
+    public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+
     /** Converts a list of Longs to an array of primitive longs. */
     public static long[] toArray(List<Long> items) {
         long[] array = new long[items.size()];
@@ -405,6 +410,13 @@ public class Utils {
     public static DateTime getDateTime(Bundle bundle, String key) {
         // getLong never returns null; we have to check explicitly.
         return bundle.containsKey(key) ? new DateTime(bundle.getLong(key)) : null;
+    }
+
+    /** Puts a nullable DateTime into a Bundle.  Always use this instead of setLong() directly. */
+    public static void putDateTime(Bundle bundle, String key, DateTime time) {
+        if (time != null) {
+            bundle.putLong(key, time.getMillis());
+        }
     }
 
     /** Converts a nullable LocalDate to a yyyy-mm-dd String. */
@@ -494,10 +506,25 @@ public class Utils {
         return Days.daysBetween(startDate, date).getDays() + 1;
     }
 
+    /** Gets the DateTime at the start of a day. */
+    public static DateTime getDayStart(LocalDate day) {
+        return day.toDateTimeAtStartOfDay();
+    }
+
+    /** Gets the DateTime at the end of a day. */
+    public static DateTime getDayEnd(LocalDate day) {
+        return day.plusDays(1).toDateTimeAtStartOfDay();
+    }
+
     /** Creates an interval from a min and max, where null means "unbounded". */
     public static Interval toInterval(ReadableInstant start, ReadableInstant stop) {
         return new Interval(start == null ? MIN_DATETIME : start,
             stop == null ? MAX_DATETIME : stop);
+    }
+
+    /** Gets the DateTime at the center of an Interval. */
+    public static DateTime centerOf(Interval interval) {
+        return interval.getStart().plus(interval.toDuration().dividedBy(2));
     }
 
     /** Compresses a UUID optionally to a small integer. */
@@ -546,6 +573,48 @@ public class Utils {
         return input.replaceAll("[\\W]", "_");
     }
 
+    /** Returns an unambiguous string representation of a string, suitable for logging. */
+    public static String repr(String str, int maxLength) {
+        try {
+            if (str == null) {
+                return "(null String)";
+            }
+            StringBuffer buffer = new StringBuffer(format("(length %d) \"", str.length()));
+            for (int i = 0; i < str.length() && i < maxLength; i++) {
+                char c = str.charAt(i);
+                switch (str.charAt(i)) {
+                    case '\t':
+                        buffer.append('\t');
+                        break;
+                    case '\r':
+                        buffer.append('\r');
+                        break;
+                    case '\n':
+                        buffer.append('\n');
+                        break;
+                    case '\\':
+                        buffer.append("\\\\");
+                        break;
+                    case '"':
+                        buffer.append("\\\"");
+                        break;
+                    default:
+                        if ((int) c >= 32 && (int) c <= 126) {
+                            buffer.append(c);
+                        } else if ((int) c < 256) {
+                            buffer.append(format("\\x%02x", (int) c));
+                        } else {
+                            buffer.append(format("\\u%04x", (int) c));
+                        }
+                }
+            }
+            buffer.append(str.length() > maxLength ? "\"..." : "\"");
+            return buffer.toString();
+        } catch (Throwable ignored) {
+            return "(repr of " + str + " failed)";
+        }
+    }
+
     /** Returns an unambiguous string representation of a byte array, suitable for logging. */
     public static String repr(byte[] bytes, int maxLength) {
         try {
@@ -556,13 +625,13 @@ public class Utils {
             for (int i = 0; i < bytes.length && i < maxLength; i++) {
                 switch ((char) bytes[i]) {
                     case '\t':
-                        buffer.append('\t');
+                        buffer.append("\\t");
                         break;
                     case '\r':
-                        buffer.append('\r');
+                        buffer.append("\\r");
                         break;
                     case '\n':
-                        buffer.append('\n');
+                        buffer.append("\\n");
                         break;
                     case '\\':
                         buffer.append("\\\\");
