@@ -85,6 +85,8 @@
   <string name="order_duration_unspecified">(no specific duration)</string>
   <string name="enter_medication">Enter a medication</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
+  <string name="order_cannot_exceed_n_times_per_day">Cannot exceed %d times per day</string>
+  <string name="order_cannot_exceed_n_days">Cannot exceed %d days</string>
   <string name="order_stop_now">Stop now</string>
   <string name="order_delete">Delete this treatment</string>
   <string name="title_confirmation">Confirmation</string>
