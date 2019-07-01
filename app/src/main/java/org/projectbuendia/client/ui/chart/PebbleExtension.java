@@ -58,8 +58,9 @@ public class PebbleExtension extends AbstractExtension {
     static {
         functions.put("get_latest_point", new GetLatestPointFunction());
         functions.put("get_all_points", new GetAllPointsFunction());
-        functions.put("get_order_execution_count", new GetOrderExecutionCountFunction());
+        functions.put("interval_contains", new IntervalContainsFunction());
         functions.put("intervals_overlap", new IntervalsOverlapFunction());
+        functions.put("get_order_divisions", new GetOrderDivisionsFunction());
         functions.put("count_scheduled_doses", new CountScheduledDosesFunction());
     }
 
@@ -335,12 +336,39 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
+    static class IntervalContainsFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("interval", "instant");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            // TODO/robustness: Check types before casting.
+            Interval interval = (Interval) args.get("interval");
+            ReadableInstant instant = (ReadableInstant) args.get("instant");
+            return interval.contains(instant);
+        }
+    }
+
+    static class GetOrderDivisionsFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("order", "date");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            // TODO/robustness: Check types before casting.
+            Order order = (Order) args.get("order");
+            LocalDate date = (LocalDate) args.get("date");
+            return order.getDivisionsOfDay(date);
+        }
+    }
+
     static class CountScheduledDosesFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("order", "interval");
         }
 
         @Override public Object execute(Map<String, Object> args) {
+            // TODO/robustness: Check types before casting.
             Order order = (Order) args.get("order");
             Interval interval = (Interval) args.get("interval");
             return order.countScheduledDosesIn(interval);

@@ -63,11 +63,11 @@ public class OrderDialogFragment extends DialogFragment {
 
         if (order != null) {
             args.putString("uuid", order.uuid);
-            args.putString("instructions", order.instructions);
-            args.putLong("start_millis", order.start.getMillis());
-            if (order.stop != null) {
-                args.putLong("stop_millis", order.stop.getMillis());
-            }
+            args.putString("medication", order.instructions.medication);
+            args.putString("dosage", order.instructions.dosage);
+            args.putInt("frequency", order.instructions.frequency);
+            Utils.putDateTime(args, "start_millis", order.start);
+            Utils.putDateTime(args, "stop_millis", order.stop);
         }
         OrderDialogFragment fragment = new OrderDialogFragment();
         fragment.setArguments(args);
@@ -94,17 +94,17 @@ public class OrderDialogFragment extends DialogFragment {
     }
 
     private void populateFields(Bundle args) {
-        String instructions = args.getString("instructions");
-        mMedication.setText(Order.getMedication(instructions));
-        mDosage.setText(Order.getDosage(instructions));
-        mFrequency.setText(Order.getFrequencyString(instructions));
+        mMedication.setText(args.getString("medication"));
+        mDosage.setText(args.getString("dosage"));
+        int frequency = args.getInt("frequency");
+        mFrequency.setText(frequency > 0 ? Integer.toString(frequency) : "");
         DateTime now = Utils.getDateTime(args, "now_millis");
-        Long stopMillis = Utils.getLong(args, "stop_millis");
-        if (stopMillis != null) {
-            LocalDate lastDay = new DateTime(stopMillis).toLocalDate();
+        DateTime stop = Utils.getDateTime(args, "stop_millis");
+        if (stop != null) {
+            LocalDate lastDay = stop.toLocalDate();
             int days = Days.daysBetween(now.toLocalDate(), lastDay).getDays();
             if (days >= 0) {
-                mGiveForDays.setText("" + (days + 1));  // 1 day means stop after today
+                mGiveForDays.setText(Utils.format("%d", days + 1));  // 1 day means stop after today
             }
         }
         updateLabels();
@@ -115,9 +115,15 @@ public class OrderDialogFragment extends DialogFragment {
         String patientUuid = getArguments().getString("patientUuid");
         String medication = mMedication.getText().toString().trim();
         String dosage = mDosage.getText().toString().trim();
-        String frequency = mFrequency.getText().toString().trim();
+        String frequencyText = mFrequency.getText().toString().trim();
+        int frequency;
+        try {
+            frequency = Integer.valueOf(frequencyText);
+        } catch (NumberFormatException e) {
+            frequency = 0;
+        }
+        Order.Instructions instructions = new Order.Instructions(medication, dosage, frequency);
 
-        String instructions = Order.getInstructions(medication, dosage, frequency);
         String durationStr = mGiveForDays.getText().toString().trim();
         Integer durationDays = durationStr.isEmpty() ? null : Integer.valueOf(durationStr);
         boolean valid = true;
@@ -134,10 +140,8 @@ public class OrderDialogFragment extends DialogFragment {
             "uuid", uuid,
             "medication", medication,
             "dosage", dosage,
-            "frequency", frequency,
-            "instructions", instructions,
+            "frequency", "" + frequency,
             "durationDays", "" + durationDays);
-
         if (!valid) {
             return;
         }
@@ -158,7 +162,7 @@ public class OrderDialogFragment extends DialogFragment {
 
         // Post an event that triggers the PatientChartController to save the order.
         EventBus.getDefault().post(new OrderSaveRequestedEvent(
-            uuid, patientUuid, instructions, start, durationDays));
+            uuid, patientUuid, instructions.format(), start, durationDays));
     }
 
     public void onDelete(Dialog dialog, final String orderUuid) {
