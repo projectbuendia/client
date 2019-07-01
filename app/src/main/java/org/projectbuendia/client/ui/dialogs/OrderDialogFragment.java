@@ -41,6 +41,9 @@ import de.greenrobot.event.EventBus;
 
 /** A {@link DialogFragment} for adding a new user. */
 public class OrderDialogFragment extends DialogFragment {
+    public static final int MAX_FREQUENCY = 24;  // maximum 24 times per day
+    public static final int MAX_DURATION_DAYS = 30;  // maximum 30 days
+
     @InjectView(R.id.order_medication) EditText mMedication;
     @InjectView(R.id.order_dosage) EditText mDosage;
     @InjectView(R.id.order_frequency) EditText mFrequency;
@@ -131,8 +134,16 @@ public class OrderDialogFragment extends DialogFragment {
             setError(mMedication, R.string.enter_medication);
             valid = false;
         }
+        if (frequency > MAX_FREQUENCY) {
+            setError(mFrequency, R.string.order_cannot_exceed_n_times_per_day, MAX_FREQUENCY);
+            valid = false;
+        }
         if (durationDays != null && durationDays == 0) {
             setError(mGiveForDays, R.string.order_give_for_days_cannot_be_zero);
+            valid = false;
+        }
+        if (durationDays != null && durationDays > MAX_DURATION_DAYS) {
+            setError(mGiveForDays, R.string.order_cannot_exceed_n_days, MAX_DURATION_DAYS);
             valid = false;
         }
         Utils.logUserAction("order_submitted",
@@ -180,8 +191,8 @@ public class OrderDialogFragment extends DialogFragment {
             .create().show();
     }
 
-    private void setError(EditText field, int resourceId) {
-        field.setError(getResources().getString(resourceId));
+    private void setError(EditText field, int resourceId, Object... args) {
+        field.setError(getResources().getString(resourceId, args));
         field.invalidate();
         field.requestFocus();
     }

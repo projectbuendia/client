@@ -82,7 +82,7 @@
           android:digits="0123456789"
           android:ems="3"
           android:inputType="numberDecimal"
-          android:maxLength="3"/>
+          android:maxLength="2"/>
 
       <TextView
           android:id="@+id/order_times_per_day_label"
@@ -112,7 +112,7 @@
           android:digits="0123456789"
           android:ems="3"
           android:inputType="numberDecimal"
-          android:maxLength="3"/>
+          android:maxLength="2"/>
 
       <TextView
           android:id="@+id/order_give_for_days_label"
