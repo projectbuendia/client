@@ -787,6 +787,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 }
             }
 
+            LOG.i("Saving order: %s", event.instructions);
             mAppModel.saveOrder(mCrudEventBus, new Order(
                 event.orderUuid, event.patientUuid, event.instructions, start, stop));
         }

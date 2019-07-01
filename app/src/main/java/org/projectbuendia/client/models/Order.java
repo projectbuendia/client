@@ -28,7 +28,6 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -42,8 +41,9 @@ import javax.annotation.concurrent.Immutable;
  * There are two types of orders: unary orders and series orders.  Unary orders
  * represent a single dose scheduled at a point in time, and have no frequency.
  * Series orders represent a series of doses scheduled at regular intervals from
- * a start time until a stop time, and have a frequency specified as an integer
- * number of doses per day.
+ * a start time until an optional stop time, and have a frequency specified as
+ * an integer number of doses per day.  A series with no stop time represents a
+ * treatment to be continued indefinitely.
  *
  * Each dose is modelled as a "dose interval"; a dose is considered to be given
  * "on time" if the actual time of administration falls within the dose interval.
@@ -86,9 +86,6 @@ public @Immutable class Order extends Base<String> {
         this.instructions = new Instructions(instructionsText);
         this.start = start;
         this.stop = stop;
-        if (instructions.frequency > 0 && stop == null) {
-            throw new IllegalArgumentException("Series order must have a stop time: " + Utils.repr(instructionsText, 100));
-        }
     }
 
     public Order(@Nullable String uuid, String patientUuid,
@@ -105,7 +102,7 @@ public @Immutable class Order extends Base<String> {
     }
 
     public Interval getInterval() {
-        return Utils.toInterval(start, stop);
+        return Utils.toInterval(start, stop == null ? Utils.MAX_DATETIME : stop);
     }
 
     public LocalDate getStartDay() {
@@ -148,23 +145,24 @@ public @Immutable class Order extends Base<String> {
 
     /** Returns all the scheduled dose intervals for this order on a given day. */
     public List<Interval> getDoseIntervalsOnDay(LocalDate day) {
+        List<Interval> intervals = new ArrayList<>();
         if (!isSeries()) {
             // For a single dose, the interval lasts until the end of the day.
             LocalDate doseDay = start.toLocalDate();
             if (day.equals(doseDay)) {
-                return Arrays.asList(new Interval(start, Utils.getDayEnd(doseDay)));
+                intervals.add(new Interval(start, Utils.getDayEnd(doseDay)));
             }
-        }
-        // Otherwise, each day is divided into 'frequency' equal parts, and doses
-        // are scheduled for a contiguous series of these divisions.  The starting
-        // division is the one containing the start time; the stopping division is
-        // the one containing the stop time.  The series consists of the divisions
-        // from the starting division inclusive to the stopping division exclusive.
-        List<Interval> intervals = new ArrayList<>();
-        for (Interval division : getDivisionsOfDay(day)) {
-            if ((division.contains(start) || division.isAfter(start)) &&
-                !(division.contains(stop) || division.isAfter(stop))) {
-                intervals.add(division);
+        } else {
+            // Otherwise, each day is divided into 'frequency' equal parts, and doses
+            // are scheduled for a contiguous series of these divisions.  The starting
+            // division is the one containing the start time; the stopping division is
+            // the one containing the stop time.  The series consists of the divisions
+            // from the starting division inclusive to the stopping division exclusive.
+            for (Interval division : getDivisionsOfDay(day)) {
+                if (stop != null && (division.contains(stop) || division.isAfter(stop))) break;
+                if (division.contains(start) || division.isAfter(start)) {
+                    intervals.add(division);
+                }
             }
         }
         return intervals;
@@ -223,45 +221,98 @@ public @Immutable class Order extends Base<String> {
         return cv;
     }
 
-    /** A record of a medication, dosage, and frequency. */
+    /**
+     * A record of a medication, route of administration, dosage, and frequency.
+     * An OpenMRS Order does not have any of these specific fields; rather, it
+     * only has a string field called "instructions".  Our workaround is for the
+     * Instructions class to know how to pack these fields into a single String,
+     * in a way that is human-readable and can also be unambiguously unpacked
+     * into the original fields.
+     */
     public static class Instructions implements Comparable<Instructions> {
+        // These String fields are empty if missing, but never null.
         public final @NonNull String medication;
+        public final @NonNull String route;
         public final @NonNull String dosage;
         public final int frequency;  // == 0 if unary, > 0 if series
 
-        // This pattern unpacks the output of Instructions.format() back into medication,
-        // dosage, and frequency fields.  The regular expression has two branches:
-        //
-        // 1. Series: [any non-spaces][space][any text][space][one or more digits]x[space]daily
-        // 2. Unary: [any non-spaces][optional space][any text]
-        //
-        // Note that the second branch will match anything (even the empty string)
-        // and shoehorn the order instructions into the medication and dosage fields.
-        public static final Pattern PATTERN = Pattern.compile(
+        // ASCII 30 is the "record separator" character; it renders as a space.
+        public static final String RS = "\u001e";
+
+        // ASCII 31 is the "unit separator" character; it renders as a space.
+        public static final String US = "\u001f";
+
+        // This pattern unpacks the output of a previous implementation of
+        // Instructions.format() that did not use the ASCII 31 (unit separator)
+        // character to separate the fields.  The part before the first space
+        // is the medication (with spaces replaced by non-breaking spaces),
+        // followed by the dosage, and optionally a frequency consisting of a
+        // number followed by "x".
+        public static final Pattern OLD_PATTERN = Pattern.compile(
             "([^ ]*) (.*) ([0-9]+)x .*"  // example: "Paracetamol 500 mg 3x daily"
                 + "|" +
                 "([^ ]*) ?(.*)");  // example: "Prednisone 1 L 10 mg/L"
 
-        public Instructions(String medication, String dosage, int frequency) {
+        public Instructions(String medication, String route, String dosage, int frequency) {
             this.medication = Utils.valueOrDefault(medication, "");
+            this.route = Utils.valueOrDefault(route, "");
             this.dosage = Utils.valueOrDefault(dosage, "");
             this.frequency = frequency > 0 ? frequency : 0;
         }
 
         public Instructions(String instructionsText) {
-            Matcher matcher = PATTERN.matcher(Utils.valueOrDefault(instructionsText, ""));
-            if (!matcher.matches()) {
-                throw new IllegalArgumentException("Invalid order instructions: " + Utils.repr(instructionsText, 100));
+            // Instructions are serialized to a String consisting of records
+            // separated by RS, and fields within those records separated by US.
+            // The records and fields within them are as follows:
+            //   - Record 0: medication, route
+            //   - Record 1: dosage, unit, concentration, unit
+            //   - Record 2: frequency, unit
+            if (instructionsText.contains(RS)) {
+                String[] records = Utils.splitFields(instructionsText, RS, 3);
+
+                // Medication
+                String[] fields = Utils.splitFields(records[0], US, 2);
+                medication = fields[0].trim();
+                route = fields[1].trim();
+
+                // Dosage
+                fields = Utils.splitFields(records[1], US, 2);
+                dosage = fields[0].trim();
+                // TODO(ping): Support dosage units and concentration.
+
+                // Frequency
+                fields = Utils.splitFields(records[2], US, 2);
+                frequency = Utils.toIntegerOrDefault(fields[0].trim(), 0);
+                // TODO(ping): Support frequency units (currently "per day" is assumed).
+            } else {
+                Matcher matcher = OLD_PATTERN.matcher(Utils.valueOrDefault(instructionsText, ""));
+                if (!matcher.matches()) {
+                    throw new IllegalArgumentException("Invalid order instructions: " + Utils.repr(instructionsText, 100));
+                }
+                medication = Utils.valueOrDefault(matcher.group(1), matcher.group(4)).replace(NON_BREAKING_SPACE, ' ');
+                route = "";
+                dosage = Utils.valueOrDefault(matcher.group(2), matcher.group(5));
+                frequency = matcher.group(3) != null ? Integer.valueOf(matcher.group(3)) : 0;
             }
-            medication = Utils.valueOrDefault(matcher.group(1), matcher.group(4)).replace(NON_BREAKING_SPACE, ' ');
-            dosage = Utils.valueOrDefault(matcher.group(2), matcher.group(5));
-            frequency = matcher.group(3) != null ? Integer.valueOf(matcher.group(3)) : 0;
+        }
+
+        /** Packs medication, dosage, and frequency into a single instruction string. */
+        public String format() {
+            String result = (medication + US + route);
+            if (!dosage.isEmpty()) {
+                result += RS + (dosage);
+            }
+            if (frequency != 0) {
+                result += RS + (frequency + US + "x daily");
+            }
+            return result;
         }
 
         public boolean equals(Object other) {
             if (other instanceof Instructions) {
                 Instructions o = (Instructions) other;
                 return Objects.equals(medication, o.medication)
+                    && Objects.equals(route, o.route)
                     && Objects.equals(dosage, o.dosage)
                     && Objects.equals(frequency, o.frequency);
             }
@@ -270,14 +321,6 @@ public @Immutable class Order extends Base<String> {
 
         public int compareTo(Instructions other) {
             return format().compareTo(other.format());
-        }
-
-        /** Packs medication, dosage, and frequency into a single instruction string. */
-        public String format() {
-            String medicationText = Utils.valueOrDefault(medication, "").replace(' ', NON_BREAKING_SPACE);
-            String dosageText = Utils.valueOrDefault(dosage, "");
-            String frequencyText = frequency > 0 ? frequency + "x daily" : "";
-            return (medicationText + " " + dosageText + " " + frequencyText).trim();
         }
     }
 

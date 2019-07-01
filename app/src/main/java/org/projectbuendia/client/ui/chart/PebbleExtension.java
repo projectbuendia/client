@@ -362,6 +362,8 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
+    // TODO(ping): Switch to looking up dose counts by division index instead
+    // of using this expensive function.
     static class CountScheduledDosesFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("order", "interval");

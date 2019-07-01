@@ -139,7 +139,7 @@
       {% for order in orders %}
         <tr class="order">
           <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
-            <div class="medication">{{order.instructions.medication}}</div>
+            <div class="medication">{{order.instructions.medication}}&nbsp;{{order.instructions.route}}</div>
             <div>{{order.instructions.dosage}}&nbsp;</div>
           </th>
           {% set counts = executionCounts[order.uuid] %}

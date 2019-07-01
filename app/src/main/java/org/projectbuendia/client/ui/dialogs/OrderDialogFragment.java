@@ -35,6 +35,8 @@ import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.Arrays;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
@@ -43,14 +45,19 @@ import de.greenrobot.event.EventBus;
 public class OrderDialogFragment extends DialogFragment {
     public static final int MAX_FREQUENCY = 24;  // maximum 24 times per day
     public static final int MAX_DURATION_DAYS = 30;  // maximum 30 days
+    public static final String[] ROUTE_LABELS = {
+        "PO", "IV", "IM", "SC"
+    };
 
     @InjectView(R.id.order_medication) EditText mMedication;
+    @InjectView(R.id.order_route) EditText mRoute;
     @InjectView(R.id.order_dosage) EditText mDosage;
     @InjectView(R.id.order_frequency) EditText mFrequency;
     @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_delete) Button mDelete;
+
     private LayoutInflater mInflater;
 
     /** Creates a new instance and registers the given UI, if specified. */
@@ -67,6 +74,7 @@ public class OrderDialogFragment extends DialogFragment {
         if (order != null) {
             args.putString("uuid", order.uuid);
             args.putString("medication", order.instructions.medication);
+            args.putString("route", order.instructions.route);
             args.putString("dosage", order.instructions.dosage);
             args.putInt("frequency", order.instructions.frequency);
             Utils.putDateTime(args, "start_millis", order.start);
@@ -98,6 +106,7 @@ public class OrderDialogFragment extends DialogFragment {
 
     private void populateFields(Bundle args) {
         mMedication.setText(args.getString("medication"));
+        mRoute.setText(args.getString("route"));
         mDosage.setText(args.getString("dosage"));
         int frequency = args.getInt("frequency");
         mFrequency.setText(frequency > 0 ? Integer.toString(frequency) : "");
@@ -105,6 +114,7 @@ public class OrderDialogFragment extends DialogFragment {
         DateTime stop = Utils.getDateTime(args, "stop_millis");
         if (stop != null) {
             LocalDate lastDay = stop.toLocalDate();
+            // TODO(ping): Orders that stopped in the past will have a blank duration.
             int days = Days.daysBetween(now.toLocalDate(), lastDay).getDays();
             if (days >= 0) {
                 mGiveForDays.setText(Utils.format("%d", days + 1));  // 1 day means stop after today
@@ -113,19 +123,40 @@ public class OrderDialogFragment extends DialogFragment {
         updateLabels();
     }
 
+    private void addListeners() {
+        // TODO(ping): Replace this EditText with a properly styled Spinner.
+        mRoute.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) v.callOnClick();
+            }
+        });
+        mRoute.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                int index = Arrays.asList(ROUTE_LABELS).indexOf(mRoute.getText().toString());
+                new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.route_of_administration)
+                    .setSingleChoiceItems(ROUTE_LABELS, index, new DialogInterface.OnClickListener() {
+                        @Override public void onClick(DialogInterface dialog, int which) {
+                            mRoute.setText(ROUTE_LABELS[which]);
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+            }
+        });
+
+        mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
+    }
+
     public void onSubmit(Dialog dialog) {
         String uuid = getArguments().getString("uuid");
         String patientUuid = getArguments().getString("patientUuid");
         String medication = mMedication.getText().toString().trim();
+        String route = mRoute.getText().toString().trim();
         String dosage = mDosage.getText().toString().trim();
-        String frequencyText = mFrequency.getText().toString().trim();
-        int frequency;
-        try {
-            frequency = Integer.valueOf(frequencyText);
-        } catch (NumberFormatException e) {
-            frequency = 0;
-        }
-        Order.Instructions instructions = new Order.Instructions(medication, dosage, frequency);
+        int frequency = Utils.toIntegerOrDefault(mFrequency.getText().toString().trim(), 0);
+        Order.Instructions instructions = new Order.Instructions(medication, route, dosage, frequency);
 
         String durationStr = mGiveForDays.getText().toString().trim();
         Integer durationDays = durationStr.isEmpty() ? null : Integer.valueOf(durationStr);
@@ -150,6 +181,7 @@ public class OrderDialogFragment extends DialogFragment {
             "valid", "" + valid,
             "uuid", uuid,
             "medication", medication,
+            "route", route,
             "dosage", dosage,
             "frequency", "" + frequency,
             "durationDays", "" + durationDays);
@@ -200,13 +232,14 @@ public class OrderDialogFragment extends DialogFragment {
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
-        mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
 
         Bundle args = getArguments();
         boolean newOrder = args.getBoolean("new");
         String title = getString(newOrder ? R.string.title_new_order : R.string.title_edit_order);
         final String orderUuid = args.getString("uuid");
         populateFields(args);
+
+        addListeners();
 
         final Dialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
@@ -242,6 +275,7 @@ public class OrderDialogFragment extends DialogFragment {
 
     /** Updates the various labels in the form that react to changes in input fields. */
     void updateLabels() {
+        int frequency = Utils.toIntegerOrDefault(mFrequency.getText().toString().trim(), 0);
         DateTime now = Utils.getDateTime(getArguments(), "now_millis");
         String text = mGiveForDays.getText().toString().trim();
         int days = text.isEmpty() ? 0 : Integer.parseInt(text);
@@ -251,7 +285,11 @@ public class OrderDialogFragment extends DialogFragment {
                 days == 1 ? R.string.order_give_for_day :
                     R.string.order_give_for_days);
         mDurationLabel.setText(getResources().getString(
-            days == 0 ? R.string.order_duration_unspecified :
+            days == 0 ? (
+                frequency == 0 ?
+                R.string.order_duration_administer_once :
+                R.string.order_duration_indefinitely
+            ) :
                 days == 1 ? R.string.order_duration_stop_after_today :
                     days == 2 ? R.string.order_duration_stop_after_tomorrow :
                         R.string.order_duration_stop_after_date
