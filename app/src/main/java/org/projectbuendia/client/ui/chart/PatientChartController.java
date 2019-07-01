@@ -772,14 +772,19 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             DateTime stop = null;
 
             if (event.durationDays != null) {
-                LocalDate stopDate = start.toLocalDate().plusDays(event.durationDays);
-                // In OpenMRS, OrderServiceImpl.saveOrderInternal() forces the
-                // order expiry (auuughhh!) to 23:59:59.999 on its specified date.
-                // We have to shift it back a bit to prevent it from being
-                // advanced almost an entire day, and even then this only works if
-                // the client's time zone matches the server's time zone, because
-                // the server's fidelity is time-zone-dependent (auggghh!!!)
-                stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
+                stop = start.plusDays(event.durationDays);
+                // In OpenMRS, OrderServiceImpl.saveOrderInternal() has a crazy
+                // special case that changes an expiry time at 00:00:00.000 on
+                // any date to 23:59:59.999 on that date.  To prevent such an
+                // expiry time from being advanced almost an entire day, we have
+                // to detect this special case and shift the expiry time a bit.
+                // Because we can't be sure that the client's time zone matches
+                // the server's time zone, we have to do this for any time that
+                // might be at 00:00:00.000 in any time zone.  Conservatively,
+                // we treat any time with a whole number of minutes this way.
+                if (stop.getSecondOfMinute() == 0 && stop.getMillisOfSecond() == 0) {
+                    stop = stop.withMillisOfSecond(1);
+                }
             }
 
             mAppModel.saveOrder(mCrudEventBus, new Order(
