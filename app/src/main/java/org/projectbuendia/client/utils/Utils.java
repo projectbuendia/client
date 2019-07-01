@@ -272,6 +272,16 @@ public class Utils {
         return String.format(Locale.US, template, args);
     }
 
+    /** Splits a string, returning an array padded out to known length with empty strings. */
+    public static String[] splitFields(String text, String separator, int count) {
+        String[] fields = text.split(separator, -1);
+        String[] result = new String[count];
+        for (int i = 0; i < count; i++) {
+            result[i] = i < fields.length ? fields[i] : "";
+        }
+        return result;
+    }
+
     /** URL-encodes a nullable string, catching the useless exception that never happens. */
     public static String urlEncode(@Nullable String s) {
         if (s == null) {
@@ -350,6 +360,15 @@ public class Utils {
     /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
     public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
         return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+
+    /** Converts a String to an integer, returning a default value instead of throwing an exception. */
+    public static int toIntegerOrDefault(String text, int defaultValue) {
+        try {
+            return Integer.valueOf(text);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     /** Converts a list of Longs to an array of primitive longs. */

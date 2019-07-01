@@ -30,7 +30,8 @@
           style="@style/field_label"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
-          android:text="@string/order_medication"/>
+          android:text="@string/order_medication"
+          android:labelFor="@id/order_medication"/>
 
       <EditText
           android:id="@+id/order_medication"
@@ -42,6 +43,16 @@
           android:ems="15"
           android:inputType="textCapSentences|textNoSuggestions"
           android:maxLength="40"/>
+
+      <EditText
+          android:id="@+id/order_route"
+          style="?android:attr/spinnerStyle"
+          android:editable="false"
+          android:textSize="19sp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="2"
+          android:hint="Route" />
     </TableRow>
 
     <TableRow
@@ -52,7 +63,8 @@
           style="@style/field_label"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
-          android:text="@string/order_dosage"/>
+          android:text="@string/order_dosage"
+          android:labelFor="@id/order_dosage"/>
 
       <EditText
           android:id="@+id/order_dosage"
@@ -74,7 +86,8 @@
           style="@style/field_label"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
-          android:text="@string/order_frequency"/>
+          android:text="@string/order_frequency"
+          android:labelFor="@id/order_frequency"/>
 
       <EditText
           android:id="@+id/order_frequency"
@@ -104,7 +117,8 @@
           android:layout_column="0"
           android:layout_marginEnd="12sp"
           android:gravity="center_vertical"
-          android:text="@string/order_give_for"/>
+          android:text="@string/order_give_for"
+          android:labelFor="@id/order_give_for_days"/>
 
       <EditText
           android:id="@+id/order_give_for_days"
@@ -150,7 +164,7 @@
       android:id="@+id/order_delete"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginLeft="16sp"
+      android:layout_marginStart="16sp"
       android:layout_marginBottom="16sp"
       android:padding="16sp"
       android:text="@string/order_delete"/>

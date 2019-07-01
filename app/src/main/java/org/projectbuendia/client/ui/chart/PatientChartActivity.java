@@ -373,7 +373,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     private void showZoomDialog() {
-        CharSequence[] labels = new CharSequence[ChartRenderer.ZOOM_LEVELS.length];
+        String[] labels = new String[ChartRenderer.ZOOM_LEVELS.length];
         for (int i = 0; i < labels.length; i++) {
             labels[i] = getString(ChartRenderer.ZOOM_LEVELS[i].labelId);
         }
@@ -383,7 +383,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             .setSingleChoiceItems(labels, selected, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialog, int which) {
                     mController.setZoomIndex(which);
-                    dialog.cancel();
+                    dialog.dismiss();
                 }
             })
             .setNegativeButton(R.string.cancel, null)
