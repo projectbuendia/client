@@ -38,6 +38,7 @@
           android:layout_height="wrap_content"
           android:layout_column="1"
           android:layout_span="2"
+          android:layout_weight="1"
           android:ems="15"
           android:inputType="textCapSentences|textNoSuggestions"
           android:maxLength="40"/>
@@ -59,6 +60,7 @@
           android:layout_height="wrap_content"
           android:layout_column="1"
           android:layout_span="2"
+          android:layout_weight="1"
           android:ems="15"
           android:inputType="textNoSuggestions"
           android:maxLength="40"/>
