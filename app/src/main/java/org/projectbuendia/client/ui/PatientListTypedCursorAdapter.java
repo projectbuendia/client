@@ -118,14 +118,14 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     @Override public Object getGroup(int groupPosition) {
         if (mLocations == null) {
-            BigToast.show(mContext, "#352 would have crashed!  Please report this immediately.");
+            LOG.e("getGroup: mLocations is null! (see issue #352)");
             return null;
         }
         return mLocations[groupPosition];
     }
 
     @Override public int getChildrenCount(int groupPosition) {
-        LOG.d("getChildrenCount with mLocations = %s (%d), groupPosition = %d", mLocations, mLocations == null ? -1 : mLocations.length, groupPosition);
+        LOG.d("getChildrenCount: mLocations = %s (%d), groupPosition = %d", mLocations, mLocations == null ? -1 : mLocations.length, groupPosition);
         Object patientsForLocation = getGroup(groupPosition);
         if (mPatientsByLocation == null || patientsForLocation == null) {
             return 0;
@@ -233,7 +233,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         // Produce a sorted list of all the locations that have patients.
-        LOG.i("setPatients with count = %d, mLocations = new Location[%d]", count, mPatientsByLocation.size());
+        LOG.i("setPatients: count = %d, mLocations = new Location[%d]", count, mPatientsByLocation.size());
         mLocations = new Location[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
         Arrays.sort(mLocations, new LocationComparator(mLocationTree));
