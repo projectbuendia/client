@@ -102,11 +102,11 @@ public class GoToPatientDialogFragment extends DialogFragment {
             // Handler is necessary to get the numeric keypad to close.  If we
             // post the event to the EventBus immediately, the numeric keypad
             // stays up even as the new activity launches underneath it!
-            new Handler().post(new Runnable() {
+            new Handler().postDelayed(new Runnable() {
                 @Override public void run() {
                     EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
                 }
-            });
+            }, 100);
         }
     }
 
