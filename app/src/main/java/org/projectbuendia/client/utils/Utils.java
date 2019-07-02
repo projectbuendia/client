@@ -33,7 +33,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.net.Server;
 
 import java.io.PrintWriter;
@@ -45,7 +44,6 @@ import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -626,10 +624,7 @@ public class Utils {
     /** Returns an unambiguous string representation of a string, suitable for logging. */
     public static String repr(String str, int maxLength) {
         try {
-            return str != null ? format("(length %d) \"%s\"%s",
-                str.length(), escape(str, maxLength),
-                str.length() > maxLength ? "..." : ""
-            ) : "(null String)";
+            return str != null ? escape(str, maxLength) : "(null String)";
         } catch (Throwable ignored) {
             return "(repr of " + str + " failed)";
         }
@@ -638,10 +633,8 @@ public class Utils {
     /** Returns an unambiguous string representation of a byte array, suitable for logging. */
     public static String repr(byte[] bytes, int maxLength) {
         try {
-            return bytes != null ? format("(length %d) \"%s\"%s",
-                bytes.length, escape(new String(bytes, "ISO-8859-1"), maxLength),
-                bytes.length > maxLength ? "\"..." : "\""
-            ) : "(null byte[])";
+            return bytes != null ?
+                escape(new String(bytes, "ISO-8859-1"), maxLength) : "(null byte[])";
         } catch (Throwable ignored) {
             return "(repr of " + bytes + " failed)";
         }
@@ -678,6 +671,7 @@ public class Utils {
                     }
             }
         }
+        buffer.append(str.length() > maxLength ? "\"..." : "\"");
         return buffer.toString();
     }
 

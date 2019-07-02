@@ -278,7 +278,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mPcr.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
-                mController.onAddTestResultsPressed();
+                mController.onPcrResultsPressed();
             }
         });
 
