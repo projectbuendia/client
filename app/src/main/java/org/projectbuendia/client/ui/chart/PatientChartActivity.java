@@ -62,7 +62,7 @@ import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
-import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -605,9 +605,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override public void showObservationsDialog(ArrayList<ObsRow> observations,
-                                                     ArrayList<String> orderedConceptUuids) {
-            ViewObservationsDialogFragment.newInstance(observations, orderedConceptUuids)
+        @Override public void showObsDetailDialog(ArrayList<ObsRow> obsRows,
+                                                  ArrayList<String> orderedConceptUuids) {
+            ObsDetailDialogFragment.newInstance(obsRows, orderedConceptUuids)
                 .show(getSupportFragmentManager(), null);
         }
 

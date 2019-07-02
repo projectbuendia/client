@@ -24,7 +24,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 
-public class ViewObservationsDialogFragment extends DialogFragment {
+public class ObsDetailDialogFragment extends DialogFragment {
 
     private static final String KEY_OBSROWS = "obsrows";
     private static final String KEY_CONCEPT_UUIDS = "conceptUuids";
@@ -35,12 +35,12 @@ public class ViewObservationsDialogFragment extends DialogFragment {
     private List<String> listDataHeader;
     private HashMap<String, List<String>> listDataChild;
 
-    public static ViewObservationsDialogFragment newInstance(ArrayList<ObsRow> observations,
-                                                             ArrayList<String> orderedConceptUuids) {
+    public static ObsDetailDialogFragment newInstance(ArrayList<ObsRow> observations,
+                                                      ArrayList<String> orderedConceptUuids) {
         Bundle args = new Bundle();
         args.putParcelableArrayList(KEY_OBSROWS, observations);
         args.putStringArrayList(KEY_CONCEPT_UUIDS, orderedConceptUuids);
-        ViewObservationsDialogFragment f = new ViewObservationsDialogFragment();
+        ObsDetailDialogFragment f = new ObsDetailDialogFragment();
         f.setArguments(args);
         return f;
     }
@@ -100,7 +100,7 @@ public class ViewObservationsDialogFragment extends DialogFragment {
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.view_observations_dialog_fragment, null);
+        View fragment = mInflater.inflate(R.layout.obs_detail_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
         final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList(KEY_OBSROWS);

@@ -88,7 +88,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.view_observations_dialog_fragment, null);
+        View fragment = mInflater.inflate(R.layout.obs_detail_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
         final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList("obsrows");

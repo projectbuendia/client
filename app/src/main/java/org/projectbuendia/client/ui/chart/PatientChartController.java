@@ -196,7 +196,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showOrderExecutionDialog(Order order, Interval
             interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObservationsDialog(ArrayList<ObsRow> obs, ArrayList<String> orderedConceptUuids);
+        void showObsDetailDialog(ArrayList<ObsRow> obs, ArrayList<String> orderedConceptUuids);
     }
 
     /** Sends ODK form data. */
@@ -443,7 +443,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             observations = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
         }
         if ((observations != null) && (!observations.isEmpty())){
-            mUi.showObservationsDialog(observations, getCurrentChartRowItemConceptUuids());
+            mUi.showObsDetailDialog(observations, getCurrentChartRowItemConceptUuids());
         }
     }
 
