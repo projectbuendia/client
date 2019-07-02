@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 
 import org.projectbuendia.client.filter.matchers.MatchingFilter;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.regex.Pattern;
 
@@ -33,8 +34,8 @@ public final class NameFilter implements MatchingFilter<Patient> {
         }
 
         // Get array of words that appear in any part of the name
-        String givenName = (patient.givenName == null) ? "" : patient.givenName;
-        String familyName = (patient.familyName == null) ? "" : patient.familyName;
+        String givenName = Utils.toNonnull(patient.givenName);
+        String familyName = Utils.toNonnull(patient.familyName);
         String fullName = givenName + " " + familyName;
         String[] nameParts = fullName.toLowerCase().split(" ");
 

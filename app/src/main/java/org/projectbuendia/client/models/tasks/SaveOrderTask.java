@@ -71,8 +71,8 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
     @SuppressWarnings("unused") // called by reflection from EventBus
     public void onEventMainThread(ItemFetchedEvent<Order> event) {
-        mBus.post(mOrder.uuid == null ? new ItemCreatedEvent<>(event.item)
-            : new ItemUpdatedEvent<>(mOrder.uuid, event.item));
+        mBus.post(mOrder.uuid != null ? new ItemUpdatedEvent<>(mOrder.uuid, event.item)
+            : new ItemCreatedEvent<>(event.item));
         mBus.unregister(this);
     }
 

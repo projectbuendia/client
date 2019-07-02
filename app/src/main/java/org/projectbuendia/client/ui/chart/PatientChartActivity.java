@@ -62,7 +62,7 @@ import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
-import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -527,7 +527,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         public void updatePatientLocationUi(LocationTree locationTree, Patient patient) {
             Location location = locationTree.findByUuid(patient.locationUuid);
-            String locationText = location == null ? "Unknown" : location.toString(); // TODO/i18n
+            String locationText = Utils.orDefault(Utils.toStringNonnull(location), "Unknown"); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
@@ -535,9 +535,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
-            String id = Utils.valueOrDefault(patient.id, EN_DASH);
-            String fullName = Utils.valueOrDefault(patient.givenName, EN_DASH) + " " +
-                Utils.valueOrDefault(patient.familyName, EN_DASH);
+            String id = Utils.orDefault(patient.id, EN_DASH);
+            String fullName = Utils.orDefault(patient.givenName, EN_DASH) + " " +
+                Utils.orDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
@@ -605,9 +605,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override public void showObservationsDialog(ArrayList<ObsRow> observations,
-                                                     ArrayList<String> orderedConceptUuids) {
-            ViewObservationsDialogFragment.newInstance(observations, orderedConceptUuids)
+        @Override public void showObsDetailDialog(
+            List<ObsRow> obsRows, List<String> orderedConceptUuids) {
+            ObsDetailDialogFragment.newInstance(obsRows, orderedConceptUuids)
                 .show(getSupportFragmentManager(), null);
         }
 

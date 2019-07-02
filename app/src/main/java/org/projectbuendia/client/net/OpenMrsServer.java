@@ -304,7 +304,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/orders" + (order.uuid == null ? "" : "/" + order.uuid),
+            "/orders" + (order.uuid != null ? "/" + order.uuid : ""),
             json,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {

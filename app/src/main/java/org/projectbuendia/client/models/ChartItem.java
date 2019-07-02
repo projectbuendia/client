@@ -47,15 +47,15 @@ public class ChartItem {
                      @Nullable String[] conceptUuids, @Nullable Format format,
                      @Nullable Format captionFormat, @Nullable Format cssClass,
                      @Nullable Format cssStyle, @Nullable String script) {
-        this.label = label == null ? "" : label;
-        this.type = type == null ? "" : type;
+        this.label = Utils.toNonnull(label);
+        this.type = Utils.toNonnull(type);
         this.required = required;
-        this.conceptUuids = conceptUuids == null ? new String[0] : conceptUuids;
+        this.conceptUuids = Utils.orDefault(conceptUuids, new String[0]);
         this.format = format;
         this.captionFormat = captionFormat;
         this.cssClass = cssClass;
         this.cssStyle = cssStyle;
-        this.script = script == null ? "" : script;
+        this.script = Utils.toNonnull(script);
 
         this.conceptIds = new ArrayList<>();
         for (String uuid : this.conceptUuids) {
@@ -70,11 +70,11 @@ public class ChartItem {
         Format cssStyle = this.cssStyle;
         String script = this.script;
         if (defaults != null) {
-            format = format == null ? defaults.format : format;
-            captionFormat = captionFormat == null ? defaults.captionFormat : captionFormat;
-            cssClass = cssClass == null ? defaults.cssClass : cssClass;
-            cssStyle = cssStyle == null ? defaults.cssStyle : cssStyle;
-            script = script.isEmpty() ? defaults.script : script;
+            format = Utils.orDefault(format, defaults.format);
+            captionFormat = Utils.orDefault(captionFormat, defaults.captionFormat);
+            cssClass = Utils.orDefault(cssClass, defaults.cssClass);
+            cssStyle = Utils.orDefault(cssStyle, defaults.cssStyle);
+            script = Utils.isEmpty(script) ? defaults.script : script;
         }
         return new ChartItem(label, type, required, conceptUuids,
             format, captionFormat, cssClass, cssStyle, script);

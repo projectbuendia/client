@@ -22,6 +22,7 @@ import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,8 +71,8 @@ public class Encounter extends Base<String> {
         this.patientUuid = patientUuid;
         this.encounterUuid = id;
         this.timestamp = timestamp;
-        this.observations = observations == null ? new Observation[] {} : observations;
-        this.orderUuids = orderUuids == null ? new String[] {} : orderUuids;
+        this.observations = Utils.orDefault(observations, new Observation[0]);
+        this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
     }
 
     /**

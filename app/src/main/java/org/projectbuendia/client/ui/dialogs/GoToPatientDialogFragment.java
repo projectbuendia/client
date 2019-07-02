@@ -144,8 +144,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
                         String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
                         LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
-                        String age = birthdate == null ? "age unknown"
-                            : Utils.birthdateToAge(birthdate, getResources());
+                        String age = birthdate != null ?
+                            Utils.birthdateToAge(birthdate, getResources()) : "age unknown";
                         String gender = Utils.getString(cursor, Patients.GENDER, "");
                         mPatientUuid = uuid;
                         mPatientSearchResult.setText(givenName + " " + familyName +

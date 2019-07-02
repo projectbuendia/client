@@ -13,13 +13,13 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.utils.Utils;
+
+import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -43,8 +43,8 @@ public class NameFilterTest {
 
     private Patient getPatientWithName(String givenName, String familyName) {
         return Patient.builder()
-            .setGivenName(Utils.nameOrUnknown(givenName))
-            .setFamilyName(Utils.nameOrUnknown(familyName))
+            .setGivenName(Utils.orDefault(givenName, "\u2013"))
+            .setFamilyName(Utils.orDefault(familyName, "\u2013"))
             .build();
     }
 

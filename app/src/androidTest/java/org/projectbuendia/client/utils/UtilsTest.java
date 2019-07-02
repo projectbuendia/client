@@ -13,17 +13,19 @@ package org.projectbuendia.client.utils;
 
 import com.google.common.base.Joiner;
 
-import org.junit.Assert;
+import org.joda.time.LocalDate;
 import org.junit.Test;
-import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Section;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.SectionComparator;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class UtilsTest {
-    /** Tests Utils.alphanumericComparator. */
-    @Test
-    public void testAlphanumericComparator() {
+    @Test public void testAlphanumericComparator() {
         String[] elements = {
             "b1", "a11a", "a11", "a2", "a2b", "a02b", "a2a", "a1",
             "b7465829459273654782634", "b7465829459273654782633"};
@@ -33,31 +35,34 @@ public class UtilsTest {
         String[] expected = {
             "a1", "a2", "a2a", "a02b", "a2b", "a11", "a11a", "b1",
             "b7465829459273654782633", "b7465829459273654782634"};
-        Assert.assertEquals(joiner.join(expected), joiner.join(sorted));
+        assertEquals(joiner.join(expected), joiner.join(sorted));
     }
 
-    @Test
-    public void testSortObsRows() {
-        String conceptUuid1 = "1";
-        String conceptUuid2 = "2";
+    @Test public void testSectionComparator() {
+        List<String> conceptUuids = Arrays.asList("5", "1", "3");
 
-        ObsRow obsRow0 = new ObsRow("", 0, "", "", "", "");
-        ObsRow obsRow1 = new ObsRow("", 0, "", conceptUuid1, "", "");
-        ObsRow obsRow2 = new ObsRow("", 0, "", conceptUuid2, "", "");
+        List<Section> sections = Arrays.asList(
+            new Section(new LocalDate(2019, 1, 7), "1", "a"),
+            new Section(new LocalDate(2019, 1, 4), "1", "a"),
+            new Section(new LocalDate(2019, 1, 8), "2", "b"),
+            new Section(new LocalDate(2019, 1, 3), "2", "b"),
+            new Section(new LocalDate(2019, 1, 4), "3", "c"),
+            new Section(new LocalDate(2019, 1, 4), "4", "d"),
+            new Section(new LocalDate(2019, 1, 4), "5", "e")
+        );
 
-        ArrayList<ObsRow> obsRows = new ArrayList<>();
-        obsRows.add(obsRow0);
-        obsRows.add(obsRow2);
-        obsRows.add(obsRow1);
+        Collections.sort(sections, new SectionComparator(conceptUuids));
 
-        ArrayList<String> conceptUuids = new ArrayList<>();
-        conceptUuids.add(conceptUuid1);
-        conceptUuids.add(conceptUuid2);
+        assertEquals("2019-01-03/2/b", toString(sections.get(0)));
+        assertEquals("2019-01-04/5/e", toString(sections.get(1)));
+        assertEquals("2019-01-04/1/a", toString(sections.get(2)));
+        assertEquals("2019-01-04/3/c", toString(sections.get(3)));
+        assertEquals("2019-01-04/4/d", toString(sections.get(4)));
+        assertEquals("2019-01-07/1/a", toString(sections.get(5)));
+        assertEquals("2019-01-08/2/b", toString(sections.get(6)));
+    }
 
-        Utils.sortObsRows(obsRows, conceptUuids);
-
-        Assert.assertEquals(conceptUuid1, obsRows.get(0).conceptUuid);
-        Assert.assertEquals(conceptUuid2, obsRows.get(1).conceptUuid);
-        Assert.assertEquals("", obsRows.get(2).conceptUuid);
+    private String toString(Section section) {
+        return section.date.toString() + "/" + section.conceptUuid + "/" + section.conceptName;
     }
 }

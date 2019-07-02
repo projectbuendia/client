@@ -146,7 +146,7 @@ public class PebbleExtension extends AbstractExtension {
             // The input is a tuple, so we must ensure that values has the same number of elements.
             if (input instanceof ObsPoint[]) {
                 for (ObsPoint point : (ObsPoint[]) input) {
-                    values.add(point == null ? null : point.value);
+                    values.add(point != null ? point.value : null);
                 }
             } else if (input instanceof Collection) {
                 for (Object item : (Collection) input) {
@@ -204,7 +204,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     static Format asFormat(Object arg) {
-        return arg instanceof Format ? (Format) arg : arg == null ? null : new ObsFormat("" + arg);
+        return arg instanceof Format ? (Format) arg : arg != null ? new ObsFormat("" + arg) : null;
     }
 
     static String formatValues(List<ObsValue> values, Format format) {
@@ -216,8 +216,7 @@ public class PebbleExtension extends AbstractExtension {
         // to sub-formatters.  To work around this, replace all nulls with a sentinel object.
         // (See the ObsOutputFormat.format() method, which checks for UNOBSERVED.)
         for (int i = 0; i < values.size(); i++) {
-            ObsValue value = values.get(i);
-            array[i + 1] = value == null ? ObsFormat.UNOBSERVED : value;
+            array[i + 1] = Utils.orDefault(values.get(i), ObsFormat.UNOBSERVED);
         }
 
         try {

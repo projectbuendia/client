@@ -75,7 +75,7 @@ public class EditPatientDialogFragment extends DialogFragment {
             args.putString("id", patient.id);
             args.putString("givenName", patient.givenName);
             args.putString("familyName", patient.familyName);
-            args.putString("birthdate", Utils.toString(patient.birthdate));
+            args.putString("birthdate", Utils.formatDate(patient.birthdate));
             args.putInt("gender", patient.gender);
         }
         fragment.setArguments(args);
@@ -90,7 +90,7 @@ public class EditPatientDialogFragment extends DialogFragment {
 
     private void populateFields(Bundle args) {
         String idPrefix = "";
-        String id = Utils.valueOrDefault(args.getString("id"), "");
+        String id = Utils.toNonnull(args.getString("id"));
         Matcher matcher = ID_PATTERN.matcher(id);
         if (matcher.matches()) {
             idPrefix = matcher.group(1);
@@ -102,8 +102,8 @@ public class EditPatientDialogFragment extends DialogFragment {
         }
         mIdPrefix.setText(idPrefix);
         mId.setText(id);
-        mGivenName.setText(Utils.valueOrDefault(args.getString("givenName"), ""));
-        mFamilyName.setText(Utils.valueOrDefault(args.getString("familyName"), ""));
+        mGivenName.setText(Utils.toNonnull(args.getString("givenName")));
+        mFamilyName.setText(Utils.toNonnull(args.getString("familyName")));
         LocalDate birthdate = Utils.toLocalDate(args.getString("birthdate"));
         if (birthdate != null) {
             Period age = new Period(birthdate, LocalDate.now());

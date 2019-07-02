@@ -193,10 +193,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showOrderDialog(String patientUuid, Order order);
-        void showOrderExecutionDialog(Order order, Interval
-            interval, List<DateTime> executionTimes);
+        void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObservationsDialog(ArrayList<ObsRow> obs, ArrayList<String> orderedConceptUuids);
+        void showObsDetailDialog(List<ObsRow> obsRows, List<String> orderedConceptUuids);
     }
 
     /** Sends ODK form data. */
@@ -430,20 +429,19 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     @android.webkit.JavascriptInterface
     public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
-        ArrayList<ObsRow> observations = null;
+        ArrayList<ObsRow> obsRows = null;
         if (!conceptUuid.isEmpty()){
             if (!startMillis.isEmpty()){
-                observations = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
-            }
-            else{
-                observations = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
+                obsRows = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
+            } else {
+                obsRows = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
             }
         }
         else if (!startMillis.isEmpty()){
-            observations = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
+            obsRows = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
         }
-        if ((observations != null) && (!observations.isEmpty())){
-            mUi.showObservationsDialog(observations, getCurrentChartRowItemConceptUuids());
+        if (obsRows != null && !obsRows.isEmpty()) {
+            mUi.showObsDetailDialog(obsRows, getCurrentChartRowItemConceptUuids());
         }
     }
 
@@ -618,7 +616,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     private @Nullable LocalDate getObservedDate(
         Map<String, Obs> observations, String conceptUuid) {
         Obs obs = observations.get(conceptUuid);
-        return obs == null ? null : Utils.toLocalDate(obs.valueName);
+        return obs != null ? Utils.toLocalDate(obs.valueName) : null;
     }
 
     private synchronized void updatePatientLocationUi() {

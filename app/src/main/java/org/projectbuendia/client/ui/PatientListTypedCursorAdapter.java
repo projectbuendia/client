@@ -125,7 +125,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public int getChildrenCount(int groupPosition) {
-        LOG.d("getChildrenCount: mLocations = %s (%d), groupPosition = %d", mLocations, mLocations == null ? -1 : mLocations.length, groupPosition);
+        LOG.d("getChildrenCount: mLocations = %s (%d), groupPosition = %d", mLocations, mLocations != null ? mLocations.length : -1, groupPosition);
         Object patientsForLocation = getGroup(groupPosition);
         if (mPatientsByLocation == null || patientsForLocation == null) {
             return 0;
@@ -148,7 +148,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         boolean pregnant = obs != null && ConceptUuids.YES_UUID.equals(obs.value);
 
         obs = mConditionObs.get(patient.uuid);
-        String condition = obs == null ? null : obs.value;
+        String condition = obs != null ? obs.value : null;
 
         if (convertView == null) {
             convertView = newChildView();
@@ -159,8 +159,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         LOG.i("getChildView: patient %s has condition = %s (%s)", patient.id, status.getMessage(), condition);
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        String givenName = Utils.valueOrDefault(patient.givenName, EN_DASH);
-        String familyName = Utils.valueOrDefault(patient.familyName, EN_DASH);
+        String givenName = Utils.orDefault(patient.givenName, EN_DASH);
+        String familyName = Utils.orDefault(patient.familyName, EN_DASH);
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(patient.id);
         holder.mPatientId.setTextColor(status.getForegroundColor());

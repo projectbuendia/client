@@ -34,7 +34,7 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
 
     /** Creates a filter that returns all patients in a valid location. */
     public LocationUuidFilter(LocationTree tree) {
-        this(tree, tree == null ? null : tree.getRoot());
+        this(tree, tree != null ? tree.getRoot() : null);
     }
 
     /** Creates a filter returning only patients under a subroot of the given location tree. */
