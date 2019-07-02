@@ -69,11 +69,13 @@ public class ObsDetailDialogFragment extends DialogFragment {
         rowsBySection = new TreeMap<>(new SectionComparator(conceptUuids));
         if (obsRows != null) {
             for (ObsRow row : obsRows) {
-                Section section = new Section(row);
-                if (!rowsBySection.containsKey(section)) {
-                    rowsBySection.put(section, new ArrayList<ObsRow>());
+                if (row.valueName != null) {
+                    Section section = new Section(row);
+                    if (!rowsBySection.containsKey(section)) {
+                        rowsBySection.put(section, new ArrayList<ObsRow>());
+                    }
+                    rowsBySection.get(section).add(row);
                 }
-                rowsBySection.get(section).add(row);
             }
         }
 
