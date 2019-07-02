@@ -85,6 +85,7 @@
   <string name="order_duration_unspecified">(no specific duration)</string>
   <string name="order_duration_indefinitely">(indefinitely)</string>
   <string name="order_duration_administer_once">(administer once)</string>
+  <string name="order_notes">Notes</string>
   <string name="enter_medication">Enter a medication</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
   <string name="order_cannot_exceed_n_times_per_day">Cannot exceed %d times per day</string>

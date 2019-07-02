@@ -110,6 +110,7 @@ th, td {
   padding-bottom: 3.8rem;
   font-weight: bold;
 }
+.order .notes { float: right; max-width: 80px; max-height: 2em; font-size: 1.2rem; text-overflow: ellipsis; color: #c40; }
 
 /* Tiles */
 #tiles { table-layout: fixed; width: 100%; }

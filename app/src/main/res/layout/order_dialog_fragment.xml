@@ -153,6 +153,30 @@
           android:layout_span="2"
           android:text="@string/order_duration_unspecified"/>
     </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+      <TextView
+          style="@style/field_label"
+          android:layout_column="0"
+          android:layout_marginEnd="12sp"
+          android:text="@string/order_notes"
+          android:labelFor="@id/order_notes"/>
+
+      <EditText
+          android:id="@+id/order_notes"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="1"
+          android:layout_span="2"
+          android:layout_weight="1"
+          android:ems="15"
+          android:inputType="textCapSentences|textNoSuggestions"
+          android:maxLength="40"/>
+    </TableRow>
+
   </TableLayout>
 
   <LinearLayout

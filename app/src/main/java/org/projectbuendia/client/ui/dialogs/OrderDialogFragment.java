@@ -56,6 +56,7 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
+    @InjectView(R.id.order_notes) EditText mNotes;
     @InjectView(R.id.order_delete) Button mDelete;
 
     private LayoutInflater mInflater;
@@ -77,6 +78,7 @@ public class OrderDialogFragment extends DialogFragment {
             args.putString("route", order.instructions.route);
             args.putString("dosage", order.instructions.dosage);
             args.putInt("frequency", order.instructions.frequency);
+            args.putString("notes", order.instructions.notes);
             Utils.putDateTime(args, "start_millis", order.start);
             Utils.putDateTime(args, "stop_millis", order.stop);
         }
@@ -110,6 +112,7 @@ public class OrderDialogFragment extends DialogFragment {
         mDosage.setText(args.getString("dosage"));
         int frequency = args.getInt("frequency");
         mFrequency.setText(frequency > 0 ? Integer.toString(frequency) : "");
+        mNotes.setText(args.getString("notes"));
         DateTime now = Utils.getDateTime(args, "now_millis");
         DateTime stop = Utils.getDateTime(args, "stop_millis");
         if (stop != null) {
@@ -156,7 +159,8 @@ public class OrderDialogFragment extends DialogFragment {
         String route = mRoute.getText().toString().trim();
         String dosage = mDosage.getText().toString().trim();
         int frequency = Utils.toIntOrDefault(mFrequency.getText().toString().trim(), 0);
-        Order.Instructions instructions = new Order.Instructions(medication, route, dosage, frequency);
+        String notes = mNotes.getText().toString().trim();
+        Order.Instructions instructions = new Order.Instructions(medication, route, dosage, frequency, notes);
 
         String durationStr = mGiveForDays.getText().toString().trim();
         Integer durationDays = durationStr.isEmpty() ? null : Integer.valueOf(durationStr);
@@ -184,6 +188,7 @@ public class OrderDialogFragment extends DialogFragment {
             "route", route,
             "dosage", dosage,
             "frequency", "" + frequency,
+            "notes", notes,
             "durationDays", "" + durationDays);
         if (!valid) {
             return;
