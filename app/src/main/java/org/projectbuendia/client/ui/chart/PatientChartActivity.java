@@ -605,8 +605,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override public void showObsDetailDialog(ArrayList<ObsRow> obsRows,
-                                                  ArrayList<String> orderedConceptUuids) {
+        @Override public void showObsDetailDialog(
+            List<ObsRow> obsRows, List<String> orderedConceptUuids) {
             ObsDetailDialogFragment.newInstance(obsRows, orderedConceptUuids)
                 .show(getSupportFragmentManager(), null);
         }

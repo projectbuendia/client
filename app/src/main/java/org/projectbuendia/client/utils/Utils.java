@@ -281,6 +281,11 @@ public class Utils {
         return localDate != null ? MEDIUM_DATE_FORMATTER.print(localDate) : null;
     }
 
+    /** Converts a nullable {@link DateTime} to a nullable String with day and month only. */
+    public static @Nullable String formatShortDate(@Nullable DateTime dateTime) {
+        return dateTime != null ? SHORT_DATE_FORMATTER.print(dateTime) : null;
+    }
+
     /** Converts a nullable {@link DateTime} to a nullable String with time, day, and month only. */
     public static @Nullable String formatShortDateTime(@Nullable DateTime dateTime) {
         return dateTime != null ? SHORT_DATETIME_FORMATTER.print(dateTime) : null;
