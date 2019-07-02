@@ -519,29 +519,6 @@ public class Utils {
     };
 
     /**
-     * Sorts ObsRows so their order matches the order of concepts in conceptUuids,
-     * with any non-matching ObsRows at the end in alphabetical order by concept name.
-     */
-    public static void sortObsRows(final List<ObsRow> rows, final List<String> conceptUuids) {
-        final int pastLastIndex = rows.size();
-
-        Collections.sort(rows, new Comparator<ObsRow>() {
-            @Override public int compare(ObsRow a, ObsRow b) {
-                int ai = conceptUuids.indexOf(a.conceptUuid);
-                if (ai < 0) ai = pastLastIndex;
-
-                int bi = conceptUuids.indexOf(b.conceptUuid);
-                if (bi < 0) bi = pastLastIndex;
-
-                int result = Integer.compare(ai, bi);
-                if (result != 0) return result;
-
-                return a.conceptName.compareTo(b.conceptName);
-            }
-        });
-    }
-
-    /**
      * Compares two strings in a manner that sorts alphabetic parts in alphabetic
      * order and numeric parts in numeric order, while guaranteeing that:
      * - compare(s, t) == 0 if and only if s.equals(t).
