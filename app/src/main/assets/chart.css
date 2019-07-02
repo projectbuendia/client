@@ -13,7 +13,7 @@ th, td {
 
 /* Grid lines */
 /* TODO: Adding left/right padding >0 breaks frozen headers.  Figure out why. */
-#grid th.day {
+#grid thead th.day {
   border-top: 1px solid #666;
 }
 
@@ -26,8 +26,11 @@ th, td {
 }
 
 #grid th, #grid td {
-  padding: 0.6em 0 0.5em; /* extra 0.1em on top for vertical centering */
   border-right: 1px solid #ddd;
+}
+
+#grid th, #grid td, #grid .order .division, #grid .order .summary {
+  padding: 0.6em 0 0.5em; /* extra 0.1em on top for vertical centering */
   /* Some symbols have a different height than other characters, so we need */
   /* to set the line-height to ensure that rows have uniform height. */
   line-height: 1.3;
@@ -82,9 +85,22 @@ th, td {
 
 /* Cells: text should match @style/text */
 .obs td, .order td { text-align: center; min-width: 3em; }
+
+/* Orders */
 #grid .order th { padding: 0 16px; line-height: 1.2em; vertical-align: middle; }
-.order .future { font-size: 75%; color: #999; vertical-align: middle; }
-.order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; vertical-align: middle; }
+#grid .order td { position: relative; }
+#grid .order .divisions { position: absolute; top: 0; left: 0; bottom: 0; right: 0; display: flex; flex-direction: row; }
+#grid .order .summary { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+#grid .order .division { flex-basis: 0; flex-grow: 1; }
+#grid .order .division:last-child { border-right: none; }
+#grid .order .stop { color: #f66; font-size: 1.5rem; font-weight: bold; text-transform: uppercase; padding-top: 1em; }
+#grid .order .scheduled { background: #ddd; }
+#grid .order .past.underdose { background: #fda; }
+#grid .order .now.underdose { background: #faa; }
+#grid .order .full-dose { background: #afa; }
+#grid .order .overdose { background: #c8f; }
+#grid .order .overdose .given, .order .overdose .extra-given { color: #c00; }
+
 .order .medication { font-weight: bold; }
 #grid th[scope="row"].command { /* matches @style/ActionButton */
   color: #09e;

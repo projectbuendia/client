@@ -92,7 +92,7 @@ public class ObsFormat extends Format {
                 pattern = "{1,number," + pattern + "}";
             } catch (IllegalArgumentException e) { }
         }
-        mRootObsFormat = rootObsFormat == null ? this : rootObsFormat;
+        mRootObsFormat = Utils.orDefault(rootObsFormat, this);
         try {
             mFormat = new ExtendedMessageFormat(pattern, new FormatFactoryMap());
         } catch (IllegalArgumentException e) {

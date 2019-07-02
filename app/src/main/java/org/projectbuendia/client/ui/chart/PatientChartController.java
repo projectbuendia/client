@@ -46,6 +46,8 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
+import org.projectbuendia.client.models.ChartItem;
+import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
@@ -65,6 +67,7 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,17 +93,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
      * whenever data is refreshed.
      */
     private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
-
-    // TODO: Get rid of mPatientUuids, mNextIndex etc. now that we have mFormRequests.
-    /** Maximum concurrent ODK forms assigned request codes. */
-    private static final int MAX_ODK_REQUESTS = 10;
-    // The ODK code for filling in a form has no way of attaching metadata to it.
-    // This means we can't pass which patient is currently being edited. Instead, we keep an array
-    // of up to MAX_ODK_REQUESTS patientUuids. The array is persisted through activity restart in
-    // the savedInstanceState.
-    // TODO: Use a map for this instead of an array.
-    private final String[] mPatientUuids;
-    private int mNextIndex = 0;
 
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
@@ -190,10 +182,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showOrderDialog(String patientUuid, Order order);
-        void showOrderExecutionDialog(Order order, Interval
-            interval, List<DateTime> executionTimes);
+        void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObservationsDialog(ArrayList<ObsRow> obs);
+        void showObsDetailDialog(List<ObsRow> obsRows, List<String> orderedConceptUuids);
     }
 
     /** Sends ODK form data. */
@@ -228,31 +219,32 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mPatientUuid = patientUuid;
         mOdkResultSender = odkResultSender;
         mChartHelper = chartHelper;
-        if (savedState != null) {
-            mPatientUuids = savedState.getStringArray(KEY_PENDING_UUIDS);
-        } else {
-            mPatientUuids = new String[MAX_ODK_REQUESTS];
-        }
         mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
         mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
         mCharts = mChartHelper.getCharts(AppModel.CHART_UUID);
     }
 
-    /**
-     * Returns the state of the controller. This should be saved to preserve it over activity
-     * restarts.
-     */
-    public Bundle getState() {
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(KEY_PENDING_UUIDS, mPatientUuids);
-        return bundle;
+    public void setPatient(String uuid) {
+        // Clear all patient-specific state.
+        mPatient = null;
+        mOrdersByUuid = null;
+        mObservations = null;
+        if (mAssignGeneralConditionDialog != null) {
+            mAssignGeneralConditionDialog.dismiss();
+            mAssignGeneralConditionDialog = null;
+        }
+        if (mAssignLocationDialog != null) {
+            mAssignLocationDialog.dismiss();
+            mAssignLocationDialog = null;
+        }
+
+        // Load a new patient, which will trigger UI updates.
+        mPatientUuid = uuid;
+        mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
     }
 
-    /**
-     * Initializes the controller, setting async operations going to collect data required by the
-     * UI.
-     */
+    /** Sets async operations going to collect data required by the UI. */
     public void init() {
         mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
 
@@ -391,21 +383,12 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         return request;
     }
 
-    public void onAddTestResultsPressed() {
-        Preset preset = new Preset();
-        preset.locationName = "Triage";
-
-        JsonUser user = App.getUserManager().getActiveUser();
-        Utils.logUserAction("form_opener_pressed", "form", "lab_test");
-        if (user != null) {
-            preset.clinicianName = user.fullName;
+    public void onPcrResultsPressed() {
+        String[] conceptUuids = new String[] {ConceptUuids.PCR_GP_UUID, ConceptUuids.PCR_NP_UUID};
+        List<ObsRow> obsRows = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuids);
+        if (!obsRows.isEmpty()) {
+            mUi.showObsDetailDialog(obsRows, Arrays.asList(conceptUuids));
         }
-
-        mUi.showFormLoadingDialog(true);
-        FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
-        mUi.fetchAndShowXform(
-            request.requestIndex, request.formUuid,
-            mPatient.toOdkPatient(), preset);
     }
 
     public void onOpenFormPressed(String formUuid) {
@@ -427,20 +410,19 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     @android.webkit.JavascriptInterface
     public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
-        ArrayList<ObsRow> observations = null;
+        ArrayList<ObsRow> obsRows = null;
         if (!conceptUuid.isEmpty()){
             if (!startMillis.isEmpty()){
-                observations = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
-            }
-            else{
-                observations = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
+                obsRows = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
+            } else {
+                obsRows = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
             }
         }
         else if (!startMillis.isEmpty()){
-            observations = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
+            obsRows = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
         }
-        if ((observations != null) && (!observations.isEmpty())){
-            mUi.showObservationsDialog(observations);
+        if (obsRows != null && !obsRows.isEmpty()) {
+            mUi.showObsDetailDialog(obsRows, getCurrentChartRowItemConceptUuids());
         }
     }
 
@@ -560,6 +542,10 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     public synchronized void updatePatientObsUi() {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
+        long start = System.currentTimeMillis();
+        String patientId = mPatient != null ? mPatient.id : "(unknown)";
+        LOG.i("Start updatePatientObsUi for patient " + patientId);
+
         mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, Obs> latestObservations =
             new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
@@ -568,8 +554,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
-        LOG.d("Showing " + mObservations.size() + " observations and "
-            + orders.size() + " orders");
+        LOG.d("Fetched " + mObservations.size() + " observations, " + orders.size() + " orders");
 
         LocalDate admissionDate = getObservedDate(
             latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
@@ -584,17 +569,35 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 latestObservations, mObservations, orders,
                 admissionDate, firstSymptomsDate);
         }
+
+        long finish = System.currentTimeMillis();
+        LOG.i("Finished updatePatientObsUi in %d ms", finish - start);
     }
 
     public List<Chart> getCharts(){
         return mCharts;
     }
 
+    private Chart getCurrentChart() {
+        return mCharts.get(mChartIndex);
+    }
+
+    private ArrayList<String> getCurrentChartRowItemConceptUuids() {
+        ArrayList<String> conceptUuids = new ArrayList<>();
+        Chart chart = getCurrentChart();
+        for (ChartSection chartSection : chart.rowGroups) {
+            for (ChartItem chartItem : chartSection.items) {
+                conceptUuids.addAll(Arrays.asList(chartItem.conceptUuids));
+            }
+        }
+        return conceptUuids;
+    }
+
     /** Retrieves the value of a date observation as a LocalDate. */
     private @Nullable LocalDate getObservedDate(
         Map<String, Obs> observations, String conceptUuid) {
         Obs obs = observations.get(conceptUuid);
-        return obs == null ? null : Utils.toLocalDate(obs.valueName);
+        return obs != null ? Utils.toLocalDate(obs.valueName) : null;
     }
 
     private synchronized void updatePatientLocationUi() {
@@ -748,16 +751,22 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             DateTime stop = null;
 
             if (event.durationDays != null) {
-                LocalDate stopDate = start.toLocalDate().plusDays(event.durationDays);
-                // In OpenMRS, OrderServiceImpl.saveOrderInternal() forces the
-                // order expiry (auuughhh!) to 23:59:59.999 on its specified date.
-                // We have to shift it back a bit to prevent it from being
-                // advanced almost an entire day, and even then this only works if
-                // the client's time zone matches the server's time zone, because
-                // the server's fidelity is time-zone-dependent (auggghh!!!)
-                stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
+                stop = start.plusDays(event.durationDays);
+                // In OpenMRS, OrderServiceImpl.saveOrderInternal() has a crazy
+                // special case that changes an expiry time at 00:00:00.000 on
+                // any date to 23:59:59.999 on that date.  To prevent such an
+                // expiry time from being advanced almost an entire day, we have
+                // to detect this special case and shift the expiry time a bit.
+                // Because we can't be sure that the client's time zone matches
+                // the server's time zone, we have to do this for any time that
+                // might be at 00:00:00.000 in any time zone.  Conservatively,
+                // we treat any time with a whole number of minutes this way.
+                if (stop.getSecondOfMinute() == 0 && stop.getMillisOfSecond() == 0) {
+                    stop = stop.withMillisOfSecond(1);
+                }
             }
 
+            LOG.i("Saving order: %s", event.instructions);
             mAppModel.saveOrder(mCrudEventBus, new Order(
                 event.orderUuid, event.patientUuid, event.instructions, start, stop));
         }

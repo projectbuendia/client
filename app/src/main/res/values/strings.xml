@@ -83,13 +83,19 @@
   <string name="order_duration_stop_after_tomorrow">(stop after tomorrow)</string>
   <string name="order_duration_stop_after_date">(stop after %s)</string>
   <string name="order_duration_unspecified">(no specific duration)</string>
+  <string name="order_duration_indefinitely">(indefinitely)</string>
+  <string name="order_duration_administer_once">(administer once)</string>
   <string name="enter_medication">Enter a medication</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
+  <string name="order_cannot_exceed_n_times_per_day">Cannot exceed %d times per day</string>
+  <string name="order_cannot_exceed_n_days">Cannot exceed %d days</string>
   <string name="order_stop_now">Stop now</string>
   <string name="order_delete">Delete this treatment</string>
   <string name="title_confirmation">Confirmation</string>
   <string name="confirm_order_delete">Really delete?</string>
   <string name="delete">Delete</string>
+
+  <string name="route_of_administration">Route of administration</string>
 
   <string name="order_execution_title">Treatment history</string>
   <string name="order_execution_historical_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time on %2$s</string>

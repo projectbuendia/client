@@ -13,6 +13,7 @@ import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.ObsValue;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -57,8 +58,10 @@ public class PebbleExtension extends AbstractExtension {
     static {
         functions.put("get_latest_point", new GetLatestPointFunction());
         functions.put("get_all_points", new GetAllPointsFunction());
-        functions.put("get_order_execution_count", new GetOrderExecutionCountFunction());
+        functions.put("interval_contains", new IntervalContainsFunction());
         functions.put("intervals_overlap", new IntervalsOverlapFunction());
+        functions.put("get_order_divisions", new GetOrderDivisionsFunction());
+        functions.put("count_scheduled_doses", new CountScheduledDosesFunction());
     }
 
     public static final String TYPE_ERROR = "?";
@@ -143,7 +146,7 @@ public class PebbleExtension extends AbstractExtension {
             // The input is a tuple, so we must ensure that values has the same number of elements.
             if (input instanceof ObsPoint[]) {
                 for (ObsPoint point : (ObsPoint[]) input) {
-                    values.add(point == null ? null : point.value);
+                    values.add(point != null ? point.value : null);
                 }
             } else if (input instanceof Collection) {
                 for (Object item : (Collection) input) {
@@ -201,7 +204,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     static Format asFormat(Object arg) {
-        return arg instanceof Format ? (Format) arg : arg == null ? null : new ObsFormat("" + arg);
+        return arg instanceof Format ? (Format) arg : arg != null ? new ObsFormat("" + arg) : null;
     }
 
     static String formatValues(List<ObsValue> values, Format format) {
@@ -213,8 +216,7 @@ public class PebbleExtension extends AbstractExtension {
         // to sub-formatters.  To work around this, replace all nulls with a sentinel object.
         // (See the ObsOutputFormat.format() method, which checks for UNOBSERVED.)
         for (int i = 0; i < values.size(); i++) {
-            ObsValue value = values.get(i);
-            array[i + 1] = value == null ? ObsFormat.UNOBSERVED : value;
+            array[i + 1] = Utils.orDefault(values.get(i), ObsFormat.UNOBSERVED);
         }
 
         try {
@@ -330,6 +332,47 @@ public class PebbleExtension extends AbstractExtension {
             Interval a = (Interval) args.get("a");
             Interval b = (Interval) args.get("b");
             return a.overlaps(b);
+        }
+    }
+
+    static class IntervalContainsFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("interval", "instant");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            // TODO/robustness: Check types before casting.
+            Interval interval = (Interval) args.get("interval");
+            ReadableInstant instant = (ReadableInstant) args.get("instant");
+            return interval.contains(instant);
+        }
+    }
+
+    static class GetOrderDivisionsFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("order", "date");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            // TODO/robustness: Check types before casting.
+            Order order = (Order) args.get("order");
+            LocalDate date = (LocalDate) args.get("date");
+            return order.getDivisionsOfDay(date);
+        }
+    }
+
+    // TODO(ping): Switch to looking up dose counts by division index instead
+    // of using this expensive function.
+    static class CountScheduledDosesFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("order", "interval");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            // TODO/robustness: Check types before casting.
+            Order order = (Order) args.get("order");
+            Interval interval = (Interval) args.get("interval");
+            return order.countScheduledDosesIn(interval);
         }
     }
 }

@@ -8,6 +8,7 @@ import android.webkit.WebView;
 
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -45,7 +46,7 @@ import static org.projectbuendia.client.utils.Utils.HOUR;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
-    static PebbleEngine sEngine;
+    private static PebbleEngine sEngine;
     private static final Logger LOG = Logger.create();
     public static ZoomLevel[] ZOOM_LEVELS = new ZoomLevel[] {
         new ZoomLevel(R.string.zoom_day, 0),
@@ -96,11 +97,13 @@ public class ChartRenderer {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
+        LOG.i("Rendering %d observations, %d orders, zoom index %d", observations.size(), orders.size(), mSettings.getChartZoomIndex());
         if (mLastChartName.equals(chart.name) &&
             mLastRenderedZoomIndex == mSettings.getChartZoomIndex() &&
             observations.equals(mLastRenderedObs) &&
             orders.equals(mLastRenderedOrders)) {
-            return;  // nothing has changed; no need to render again
+            LOG.i("Data and zoom index have not changed; skipping render");
+            return;
         }
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
@@ -141,9 +144,10 @@ public class ChartRenderer {
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
+        Map<String, ExecutionCounter> mExecutionCounts = new HashMap<>();
         List<List<Tile>> mTileRows = new ArrayList<>();
-        List<org.projectbuendia.client.ui.chart.Row> mRows = new ArrayList<>();
-        Map<String, org.projectbuendia.client.ui.chart.Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
+        List<Row> mRows = new ArrayList<>();
+        Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
@@ -183,22 +187,33 @@ public class ChartRenderer {
                     }
                 }
             }
-            addObservations(observations);
+
+            Map<String, Order> ordersByUuid = new HashMap<>();
+            for (Order order : orders) {
+                ordersByUuid.put(order.uuid, order);
+            }
+            addObservations(observations, ordersByUuid);
             addOrders(orders);
             insertEmptyColumns();
         }
 
-        void addObservations(List<Obs> observations) {
+        /** Collects observations into Column objects that make up the grid. */
+        void addObservations(List<Obs> observations, Map<String, Order> orders) {
             for (Obs obs : observations) {
                 if (obs == null) continue;
-                Column column = getColumnContainingTime(obs.time);
 
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
-                    Integer count = column.executionCountsByOrderUuid.get(obs.value);
-                    column.executionCountsByOrderUuid.put(
-                        obs.value, count == null ? 1 : count + 1);
+                    Order order = orders.get(obs.value);
+                    if (order != null) {
+                        ExecutionCounter counter = mExecutionCounts.get(order.uuid);
+                        if (counter == null) {
+                            counter = new ExecutionCounter();
+                            mExecutionCounts.put(order.uuid, counter);
+                        }
+                        counter.add(order.getDivisionIndex(obs.time));
+                    }
                 } else {
-                    addObs(column, obs);
+                    addObs(getColumnContainingTime(obs.time), obs);
                 }
             }
         }
@@ -308,13 +323,14 @@ public class ChartRenderer {
         // TODO: concept tags for formatting hints (e.g. none/mild/moderate/severe, abbreviated)
         String getHtml() {
             Map<String, Object> context = new HashMap<>();
+            context.put("now", mNow);
             context.put("tileRows", mTileRows);
             context.put("rows", mRows);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
+            context.put("nowColumn", mNowColumn);
             context.put("numColumnsPerDay", getSegmentStartTimes().length);
-            context.put("nowColumnStart", mNowColumn.start);
-            context.put("nowDate", mNow.toLocalDate());
             context.put("orders", mOrders);
+            context.put("executionCounts", mExecutionCounts);
             context.put("dataCellsByConceptId", getJsonDataDump());
             return renderTemplate("assets/chart.html", context);
         }
@@ -345,12 +361,15 @@ public class ChartRenderer {
             if (sEngine == null) {
                 // PebbleEngine caches compiled templates by filename, so as long as we keep using the
                 // same engine instance, it's okay to call getTemplate(filename) on each render.
-                sEngine = new PebbleEngine();
-                sEngine.addExtension(new PebbleExtension());
+                sEngine = new PebbleEngine.Builder().extension(new PebbleExtension()).build();
             }
             try {
                 StringWriter writer = new StringWriter();
-                sEngine.getTemplate(filename).evaluate(writer, context);
+                LOG.d("Loading template...");
+                PebbleTemplate template = sEngine.getTemplate(filename);
+                LOG.d("Evaluating template...");
+                template.evaluate(writer, context);
+                LOG.d("Template rendered.");
                 return writer.toString();
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();

@@ -73,42 +73,36 @@ public class NewUserDialogFragment extends DialogFragment {
         final AlertDialog dialog = dialogBuilder.create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override public void onShow(DialogInterface dialogInterface) {
-                dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                    .setOnClickListener(
-                        new View.OnClickListener() {
-
-                            @Override public void onClick(View view) {
-                                // Validate the user.
-                                String givenName = mGivenName.getText() == null ? ""
-                                    : mGivenName.getText().toString().trim();
-                                String familyName = mFamilyName.getText() == null ? ""
-                                    : mFamilyName.getText().toString().trim();
-                                boolean valid = true;
-                                if (givenName.isEmpty()) {
-                                    setError(mGivenName,
-                                        R.string.given_name_cannot_be_null);
-                                    valid = false;
-                                }
-                                if (familyName.isEmpty()) {
-                                    setError(mFamilyName,
-                                        R.string.family_name_cannot_be_null);
-                                    valid = false;
-                                }
-                                Utils.logUserAction("add_user_submitted",
-                                    "valid", "" + valid,
-                                    "given_name", givenName,
-                                    "family_name", familyName);
-                                if (!valid) return;
-
-                                App.getUserManager().addUser(new JsonNewUser(
-                                    givenName, familyName
-                                ));
-                                if (mActivityUi != null) {
-                                    mActivityUi.showSpinner(true);
-                                }
-                                dialog.dismiss();
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override public void onClick(View view) {
+                            // Validate the user.
+                            String givenName = Utils.toStringNonnull(mGivenName.getText()).trim();
+                            String familyName = Utils.toStringNonnull(mFamilyName.getText()).trim();
+                            boolean valid = true;
+                            if (givenName.isEmpty()) {
+                                setError(mGivenName, R.string.given_name_cannot_be_null);
+                                valid = false;
                             }
-                        });
+                            if (familyName.isEmpty()) {
+                                setError(mFamilyName, R.string.family_name_cannot_be_null);
+                                valid = false;
+                            }
+                            Utils.logUserAction("add_user_submitted",
+                                "valid", "" + valid,
+                                "given_name", givenName,
+                                "family_name", familyName);
+                            if (!valid) return;
+
+                            App.getUserManager().addUser(new JsonNewUser(
+                                givenName, familyName
+                            ));
+                            if (mActivityUi != null) {
+                                mActivityUi.showSpinner(true);
+                            }
+                            dialog.dismiss();
+                        }
+                    });
             }
         });
         // Open the keyboard, ready to type into the given name field.

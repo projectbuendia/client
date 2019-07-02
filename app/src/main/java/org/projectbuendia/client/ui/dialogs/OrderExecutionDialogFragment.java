@@ -55,7 +55,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         Order order, Interval interval, List<DateTime> executionTimes) {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
-        args.putString("instructions", order.instructions);
+        args.putString("instructions", order.instructions.format());
         args.putLong("orderStartMillis", order.start.getMillis());
         args.putLong("intervalStartMillis", interval.getStartMillis());
         args.putLong("intervalStopMillis", interval.getEndMillis());
@@ -123,7 +123,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         DateTime start = Utils.getDateTime(args, "orderStartMillis");
         mOrderStartTime.setText(getResources().getString(
             R.string.order_started_on_date_at_time,
-            Utils.toShortString(start.toLocalDate()), Utils.toTimeOfDayString(start)));
+            Utils.formatShortDate(start.toLocalDate()), Utils.formatTimeOfDay(start)));
 
         // Describe how many times the order was executed during the selected interval.
         int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
@@ -134,19 +134,19 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                     : R.string.order_execution_today_singular_html) :
                 (plural ? R.string.order_execution_historical_plural_html
                     : R.string.order_execution_historical_singular_html),
-            count, Utils.toShortString(date))));
+            count, Utils.formatShortDate(date))));
 
         // Show the list of times that the order was executed during the selected interval.
         boolean editable = args.getBoolean("editable");
         Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
         List<String> htmlItems = new ArrayList<>();
         for (DateTime executionTime : executionTimes) {
-            htmlItems.add(Utils.toTimeOfDayString(executionTime));
+            htmlItems.add(Utils.formatTimeOfDay(executionTime));
         }
         if (editable) {
             DateTime encounterTime = Utils.getDateTime(args, "encounterTimeMillis");
             htmlItems.add(orderExecutedNow ?
-                "<b>" + Utils.toTimeOfDayString(encounterTime) + "</b>" :
+                "<b>" + Utils.formatTimeOfDay(encounterTime) + "</b>" :
                 "<b>&nbsp;</b>");  // keep total height stable
         }
         mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));

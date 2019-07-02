@@ -27,8 +27,8 @@ public final class Order {
     public Order(String uuid, String instructions, Long startMillis, Long stopMillis) {
         this.uuid = uuid;
         this.instructions = instructions;
-        this.start = startMillis == null ? null : new DateTime(startMillis);
-        this.stop = stopMillis == null ? null : new DateTime(stopMillis);
+        this.start = startMillis != null ? new DateTime(startMillis) : null;
+        this.stop = stopMillis != null ? new DateTime(stopMillis) : null;
     }
 
     public Interval getInterval() {

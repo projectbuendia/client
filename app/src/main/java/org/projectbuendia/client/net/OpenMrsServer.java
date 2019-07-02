@@ -41,6 +41,7 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -74,9 +75,9 @@ public class OpenMrsServer implements Server {
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but
         // ignored by the REST resource handler, which just returns the "Pulse" concept.
+        String timestamp = "time=" + (new Date().getTime());
         final String urlPath = "/concepts/" + ConceptUuids.PULSE_UUID;
         List<String> params = new ArrayList<>();
-        params.add("time=" + (new Date().getTime()));
         JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
             params.add("user_id=" + user.id);
@@ -87,6 +88,8 @@ public class OpenMrsServer implements Server {
         for (int i = 0; i + 1 < pairs.size(); i += 2) {
             params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
         }
+        Collections.sort(params);
+        params.add(0, timestamp);
 
         LOG.i("Logging to server: %s", params);
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
@@ -301,7 +304,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/orders" + (order.uuid == null ? "" : "/" + order.uuid),
+            "/orders" + (order.uuid != null ? "/" + order.uuid : ""),
             json,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {

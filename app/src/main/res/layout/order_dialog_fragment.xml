@@ -20,7 +20,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
-      android:padding="16dp">
+      android:padding="16sp">
 
     <TableRow
         android:layout_width="fill_parent"
@@ -30,7 +30,8 @@
           style="@style/field_label"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
-          android:text="@string/order_medication"/>
+          android:text="@string/order_medication"
+          android:labelFor="@id/order_medication"/>
 
       <EditText
           android:id="@+id/order_medication"
@@ -38,9 +39,20 @@
           android:layout_height="wrap_content"
           android:layout_column="1"
           android:layout_span="2"
+          android:layout_weight="1"
           android:ems="15"
           android:inputType="textCapSentences|textNoSuggestions"
           android:maxLength="40"/>
+
+      <EditText
+          android:id="@+id/order_route"
+          style="?android:attr/spinnerStyle"
+          android:editable="false"
+          android:textSize="19sp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="2"
+          android:hint="Route" />
     </TableRow>
 
     <TableRow
@@ -51,7 +63,8 @@
           style="@style/field_label"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
-          android:text="@string/order_dosage"/>
+          android:text="@string/order_dosage"
+          android:labelFor="@id/order_dosage"/>
 
       <EditText
           android:id="@+id/order_dosage"
@@ -59,6 +72,7 @@
           android:layout_height="wrap_content"
           android:layout_column="1"
           android:layout_span="2"
+          android:layout_weight="1"
           android:ems="15"
           android:inputType="textNoSuggestions"
           android:maxLength="40"/>
@@ -72,7 +86,8 @@
           style="@style/field_label"
           android:layout_column="0"
           android:layout_marginEnd="12sp"
-          android:text="@string/order_frequency"/>
+          android:text="@string/order_frequency"
+          android:labelFor="@id/order_frequency"/>
 
       <EditText
           android:id="@+id/order_frequency"
@@ -82,7 +97,7 @@
           android:digits="0123456789"
           android:ems="3"
           android:inputType="numberDecimal"
-          android:maxLength="3"/>
+          android:maxLength="2"/>
 
       <TextView
           android:id="@+id/order_times_per_day_label"
@@ -102,7 +117,8 @@
           android:layout_column="0"
           android:layout_marginEnd="12sp"
           android:gravity="center_vertical"
-          android:text="@string/order_give_for"/>
+          android:text="@string/order_give_for"
+          android:labelFor="@id/order_give_for_days"/>
 
       <EditText
           android:id="@+id/order_give_for_days"
@@ -112,7 +128,7 @@
           android:digits="0123456789"
           android:ems="3"
           android:inputType="numberDecimal"
-          android:maxLength="3"/>
+          android:maxLength="2"/>
 
       <TextView
           android:id="@+id/order_give_for_days_label"
@@ -142,17 +158,16 @@
   <LinearLayout
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      >
+      android:orientation="horizontal">
 
   <Button
       android:id="@+id/order_delete"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_margin="16sp"
-      android:padding="24sp"
-      android:text="@string/order_delete"
-  />
+      android:layout_marginStart="16sp"
+      android:layout_marginBottom="16sp"
+      android:padding="16sp"
+      android:text="@string/order_delete"/>
   </LinearLayout>
 
 </LinearLayout>

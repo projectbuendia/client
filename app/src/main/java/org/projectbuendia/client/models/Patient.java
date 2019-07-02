@@ -46,7 +46,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
                 "M".equals(patient.sex) ? GENDER_MALE : GENDER_UNKNOWN)
             .setBirthdate(patient.birthdate)
             .setLocationUuid(
-                patient.assigned_location == null ? null : patient.assigned_location.uuid)
+                patient.assigned_location != null ? patient.assigned_location.uuid : null)
             .build();
     }
 
@@ -64,7 +64,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         cv.put(Contracts.Patients.GENDER,
             gender == JsonPatient.GENDER_MALE ? "M" :
                 gender == JsonPatient.GENDER_FEMALE ? "F" : "U");
-        cv.put(Contracts.Patients.BIRTHDATE, Utils.toString(birthdate));
+        cv.put(Contracts.Patients.BIRTHDATE, Utils.formatDate(birthdate));
         cv.put(Contracts.Patients.LOCATION_UUID,
             locationUuid == null ? Zones.DEFAULT_LOCATION_UUID : locationUuid);
         return cv;

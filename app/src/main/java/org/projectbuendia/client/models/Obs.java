@@ -46,6 +46,17 @@ public final class Obs implements Comparable<Obs> {
     /** The name of the answer concept, if the value is an answer concept. */
     public final @Nullable String valueName;
 
+    private static final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
+        .put(ConceptUuids.NO_UUID, 0)
+        .put(ConceptUuids.NONE_UUID, 1)
+        .put(ConceptUuids.NORMAL_UUID, 2)
+        .put(ConceptUuids.SOLID_FOOD_UUID, 3)
+        .put(ConceptUuids.MILD_UUID, 4)
+        .put(ConceptUuids.MODERATE_UUID, 5)
+        .put(ConceptUuids.SEVERE_UUID, 6)
+        .put(ConceptUuids.YES_UUID, 7)
+        .build();
+
     public Obs(
         long millis,
         String conceptUuid,
@@ -62,7 +73,7 @@ public final class Obs implements Comparable<Obs> {
     /** Returns the time and value of this observation as an ObsPoint. */
     public @Nullable ObsPoint getObsPoint() {
         ObsValue ov = getObsValue();
-        return ov == null ? null : new ObsPoint(time, getObsValue());
+        return ov != null ? new ObsPoint(time, getObsValue()) : null;
     }
 
     /** Returns the value of this observation as an ObsValue. */
@@ -107,9 +118,10 @@ public final class Obs implements Comparable<Obs> {
     }
 
     @Override public int hashCode() {
-        return (int) time.getMillis() + conceptUuid.hashCode()
-            + conceptType.hashCode() + (value == null ? 0 : value.hashCode())
-            + (valueName == null ? 0 : valueName.hashCode());
+        return (int) time.getMillis()
+            + conceptUuid.hashCode() + conceptType.hashCode()
+            + (value != null ? value.hashCode() : 0)
+            + (valueName != null ? valueName.hashCode() : 0);
     }
 
     /**
@@ -127,10 +139,10 @@ public final class Obs implements Comparable<Obs> {
      */
     @Override public int compareTo(@NonNull Obs other) {
         if (value == null || other.value == null) {
-            return value == other.value ? 0 : value == null ? -1 : 1;
+            return value == other.value ? 0 : value != null ? 1 : -1;
         }
         if (conceptType != other.conceptType) {
-            return getTypeOrdering().compareTo(other.getTypeOrdering());
+            return Integer.compare(getTypeOrdering(), other.getTypeOrdering());
         }
         if (conceptType == ConceptType.NUMERIC) {
             return Double.valueOf(value).compareTo(Double.valueOf(other.value));
@@ -141,8 +153,8 @@ public final class Obs implements Comparable<Obs> {
         return value.compareTo(other.value);
     }
 
-    /** Gets a number specifying the ordering of Values of different types. */
-    public Integer getTypeOrdering() {
+    /** Gets a number defining the ordering of Values of different types. */
+    public int getTypeOrdering() {
         switch (conceptType) {
             case BOOLEAN:
                 return ConceptUuids.YES_UUID.equals(value) ? 5 : 1;
@@ -157,21 +169,11 @@ public final class Obs implements Comparable<Obs> {
     }
 
     /**
-     * Gets a number specifying the ordering of coded values.  These are
+     * Gets a number defining the ordering of coded values.  These are
      * arranged from least to most severe so that using the Pebble "max" filter
      * will select the most severe value from a list of values.
      */
     public Integer getCodedValueOrdering() {
-        final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
-            .put(ConceptUuids.NO_UUID, 0)
-            .put(ConceptUuids.NONE_UUID, 1)
-            .put(ConceptUuids.NORMAL_UUID, 2)
-            .put(ConceptUuids.SOLID_FOOD_UUID, 3)
-            .put(ConceptUuids.MILD_UUID, 4)
-            .put(ConceptUuids.MODERATE_UUID, 5)
-            .put(ConceptUuids.SEVERE_UUID, 6)
-            .put(ConceptUuids.YES_UUID, 7).build();
-        Integer cvo = CODED_VALUE_ORDERING.get(value);
-        return cvo == null ? 0 : cvo;
+        return Utils.toNonnull(CODED_VALUE_ORDERING.get(value), 0);
     }
 }

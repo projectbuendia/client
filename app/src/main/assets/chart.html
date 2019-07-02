@@ -39,7 +39,7 @@
             <th class="gap" scope="col" rowspan=2>&nbsp;</th>
           {% endif %}
           {% if column.start == column.dayStart %}
-            <th class="day {{column.date == nowDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+            <th class="day {{column.date == now.toLocalDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
               {% if numColumnsPerDay == 1 %}
                 {{column.dayLabel}}
               {% elseif column.dayLabel is not empty %}
@@ -55,7 +55,7 @@
       <tr>
         <th class="corner"> </th>
         {% for column in columns %}
-          <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
+          <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
             {% if numColumnsPerDay == 1 %}
               {{column.shortDate}}
             {% else %}
@@ -66,18 +66,18 @@
       </tr>
     </thead>
 
-    <tbody>
+    <tbody class="observations">
       <tr>
         <th scope="rowgroup">
           Observations
         </th>
-        {% set prevColumn = null %}
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% if prevColumn is not null and column.start != prevColumn.stop %}
+          {% if column.start != prevStop %}
             <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
           {% endif %}
           <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
-          {% set prevColumn = column %}
+          {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
       {% for row in rows %}
@@ -98,7 +98,7 @@
             {% set class = summaryValue | format_values(row.item.cssClass) %}
             {% set style = summaryValue | format_values(row.item.cssStyle) %}
             <td id="cell-{{id}}-{{column.start.millis}}"
-              class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
+              class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
               style="{{style}}"
               onclick="{% if points is not empty%}
                        {% if (row.item.type).string != 'text_icon' %}
@@ -122,47 +122,94 @@
       {% endfor %}
     </tbody>
 
-    <tbody>
+    <tbody class="orders">
       <tr>
         <th scope="rowgroup">
-          Treatment Plan
+          Treatments
         </th>
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% if prevColumn is not null and column.start != prevColumn.stop %}
+          {% if column.start != prevStop %}
             <th scope="rowgroup" class="gap" rowspan={{orders.size + 1}}>&nbsp;</th>
           {% endif %}
-        <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
-          {% set prevColumn = column %}
+          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
+          {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
       {% for order in orders %}
         <tr class="order">
           <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
-            <div class="medication">{{order.medication}}</div>
-            <div>{{order.dosage}}&nbsp;</div>
+            <div class="medication">{{order.instructions.medication}}&nbsp;{{order.instructions.route}}</div>
+            <div>{{order.instructions.dosage}}&nbsp;</div>
           </th>
-          {% set previousActive = false %}
+          {% set counts = executionCounts[order.uuid] %}
+          {% set past = true %}
           {% set future = false %}
+          {% set started = false %}
+          {% set stopped = false %}
+          {% set stop = false %}
+          {% set divisionIndex = 0 %}
+          {% set summarize = order.instructions.frequency > numColumnsPerDay %}
+
           {% for column in columns %}
-            <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumnStart ? 'now' : ''}}">
-              {% set active = intervals_overlap(order.interval, column.interval) %}
-              {% if order.stop == null and previousActive %}
-                <div class="future">&nbsp;</div>
-              {% elseif order.stop != null and previousActive and not active %}
-                <div class="stop">Stop</div>
-              {% elseif active %}
-                {% if future %}
-                  <div class="future active">&#x25cf;</div>
-                {% else %}
-                  {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
-                  <div class="past active"
-                      onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}})"
-                      >{{count}}</div>
-                {% endif %}
+            {% if column.start == column.dayStart %}
+              {% if column.date == order.startDay %}
+                {% set started = true %}
               {% endif %}
-              {% set previousActive = active %}
-              {% set future = future or column.start == nowColumnStart %}
-            </td>
+              <td class="day" colspan={{numColumnsPerDay}}>
+                {% set totalScheduled = 0 %}
+                {% set totalGiven = 0 %}
+                <div class="divisions">
+                  {% if started and not stopped %}
+                    {% for division in get_order_divisions(order, column.date) %}
+                      {% set current = interval_contains(division, now) %}
+                      {% if current %} {% set past = false %} {% endif %}
+
+                      {% set scheduled = count_scheduled_doses(order, division) %}
+                      {% set given = counts[divisionIndex] %}
+                      {% if given is null %} {% set given = 0 %} {% endif %}
+                      {% set status = (given < scheduled) ? 'underdose' : (given > scheduled) ? 'overdose' : (scheduled > 0) ? 'full-dose' : '' %}
+                      {% if order.isSeries and interval_contains(division, order.stop) %}
+                        {% set stopped = true %}
+                        {% set stop = given + scheduled == 0 %}
+                      {% endif %}
+
+                      <div class="division {{past ? 'past' : ''}} {{current ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stop ? 'stop' : ''}}"
+                          onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                        {% if summarize %}
+                          {# leave blank #}
+                        {% elseif given == scheduled and given > 0 %}
+                          <span class="given">{{given}}</span>
+                        {% elseif given + scheduled > 0 %}
+                          <span class="given">{{given}}</span>/{{scheduled}}
+                        {% elseif stop %}
+                          stop
+                        {% else %}
+                          &nbsp; {# ensure uniform height #}
+                        {% endif %}
+                      </div>
+
+                      {% if current %} {% set future = true %} {% endif %}
+                      {% set totalScheduled = totalScheduled + scheduled %}
+                      {% set totalGiven = totalGiven + given %}
+                      {% set divisionIndex = divisionIndex + 1 %}
+                    {% endfor %}
+                    {% if summarize %}
+                      <div class="summary"
+                          onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                        {% if totalGiven == totalScheduled and totalGiven > 0 %}
+                          <span class="given">{{totalGiven}}</span>
+                        {% elseif totalGiven + totalScheduled > 0 %}
+                          <span class="given">{{totalGiven}}</span>/{{totalScheduled}}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    &nbsp;
+                  {% endif %}
+                </div>
+              </td>
+            {% endif %}
           {% endfor %}
         </tr>
       {% endfor %}

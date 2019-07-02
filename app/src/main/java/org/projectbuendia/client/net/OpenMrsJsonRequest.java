@@ -17,6 +17,8 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
+import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -24,9 +26,10 @@ import java.util.Map;
 
 /** Base class for authenticated OpenMRS JSON requests. */
 public class OpenMrsJsonRequest extends JsonObjectRequest {
-
     private final String mUsername;
     private final String mPassword;
+
+    private static Logger LOG = Logger.create();
 
     /**
      * Constructs a GET request to OpenMRS.
@@ -83,6 +86,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+        LOG.i("Response from %s -> %s", Utils.repr(this), Utils.repr(response.data, 500));
         try {
             if (response.data.length == 0) {
                 byte[] responseData = "{}".getBytes("UTF8");

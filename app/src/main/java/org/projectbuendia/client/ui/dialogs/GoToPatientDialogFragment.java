@@ -16,6 +16,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
@@ -35,8 +36,8 @@ import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.providers.Contracts.Patients;
+import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
 
@@ -67,11 +68,10 @@ public class GoToPatientDialogFragment extends DialogFragment {
         mInflater = LayoutInflater.from(getActivity());
         mBus = mCrudEventBusProvider.get();
         mBus.register(this);
-
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
+        final View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mPatientId.addTextChangedListener(new IdWatcher());
         mPatientSearchResult.setOnClickListener(new View.OnClickListener() {
@@ -96,8 +96,17 @@ public class GoToPatientDialogFragment extends DialogFragment {
             "patient_id", mPatientId.getText().toString(),
             "patient_uuid", mPatientUuid);
         if (mPatientUuid != null) {
-            EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
             getDialog().dismiss();
+
+            // NOTE(ping): I don't fully understand why, but posting this on a
+            // Handler is necessary to get the numeric keypad to close.  If we
+            // post the event to the EventBus immediately, the numeric keypad
+            // stays up even as the new activity launches underneath it!
+            new Handler().postDelayed(new Runnable() {
+                @Override public void run() {
+                    EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
+                }
+            }, 100);
         }
     }
 
@@ -144,8 +153,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
                         String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
                         LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
-                        String age = birthdate == null ? "age unknown"
-                            : Utils.birthdateToAge(birthdate, getResources());
+                        String age = birthdate != null ?
+                            Utils.birthdateToAge(birthdate, getResources()) : "age unknown";
                         String gender = Utils.getString(cursor, Patients.GENDER, "");
                         mPatientUuid = uuid;
                         mPatientSearchResult.setText(givenName + " " + familyName +

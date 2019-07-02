@@ -241,7 +241,6 @@ public final class ObsValue implements Comparable<ObsValue> {
      * in a list of values for a particular concept is the most severe value or latest value.
      */
     private int getUuidOrdering() {
-        Integer cvo = CODED_VALUE_ORDERING.get(uuid);
-        return cvo == null ? 0 : cvo;
+        return Utils.toNonnull(CODED_VALUE_ORDERING.get(uuid), 0);
     }
 }

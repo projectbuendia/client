@@ -242,7 +242,12 @@ public class FormEntryActivity
 		setContentView(R.layout.form_entry);
 
         setTitle(getString(R.string.title_loading_form));
-//
+
+		// Turn the action bar icon into a "back" arrow that goes back in the activity stack.
+		getActionBar().setIcon(R.drawable.ic_back_36dp);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+
+		//
 //		setTitle(getString(R.string.app_name) + " > "
 //				+ getString(R.string.loading_form));
 
@@ -1011,9 +1016,14 @@ public class FormEntryActivity
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		FormController formController = Collect.getInstance()
-				.getFormController();
+//		FormController formController = Collect.getInstance()
+//				.getFormController();
 		switch (item.getItemId()) {
+			case android.R.id.home :
+				// Go back rather than reloading the activity, so that the patient list retains its
+				// filter state.
+				onBackPressed();
+				return true;
 ////		case MENU_LANGUAGES:
 ////			Collect.getInstance()
 ////					.getActivityLogger()

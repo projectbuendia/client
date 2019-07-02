@@ -42,7 +42,6 @@ import de.greenrobot.event.EventBus;
 public class LoginActivity extends BaseActivity {
     private LoginController mController;
     private AlertDialog mSyncFailedDialog;
-    private boolean mSkippedThisActivity;
 
     @Inject Troubleshooter mTroubleshooter;
     @Inject AppSettings mSettings;
@@ -50,6 +49,10 @@ public class LoginActivity extends BaseActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
+
+        getActionBar().setDisplayUseLogoEnabled(false);
+        getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
+        getActionBar().setDisplayHomeAsUpEnabled(false);  // don't behave like a back button
 
         // This is the starting activity for the app, so show the app name and version.
         setTitle(getString(R.string.app_name) + " " + getString(R.string.app_version));

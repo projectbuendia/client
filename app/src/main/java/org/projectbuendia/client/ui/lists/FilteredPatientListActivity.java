@@ -17,14 +17,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.SectionedSpinnerAdapter;
 import org.projectbuendia.client.utils.Utils;
-
-import javax.inject.Inject;
 
 /** A list of patients with a choice of several filters in a dropdown menu. */
 public class FilteredPatientListActivity extends BaseSearchablePatientListActivity {
@@ -81,7 +77,6 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
             };
 
             final ActionBar actionBar = getActionBar();
-            actionBar.setLogo(R.drawable.ic_launcher);
             actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
             actionBar.setListNavigationCallbacks(adapter, callback);

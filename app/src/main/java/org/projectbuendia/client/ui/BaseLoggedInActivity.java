@@ -81,6 +81,10 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
+        // Turn the action bar icon into a "back" arrow that goes back in the activity stack.
+        getActionBar().setIcon(R.drawable.ic_back_36dp);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         onCreateImpl(savedInstanceState);
         mIsCreated = true;
     }
@@ -130,6 +134,17 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     public void onExtendOptionsMenu(Menu menu) {
     }
 
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            // Go back rather than reloading the activity, so that the patient list retains its
+            // filter state.
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void updateActiveUser() {
         JsonUser user = App.getUserManager().getActiveUser();
 
@@ -152,7 +167,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         // TODO: Implement this in one way or another!
     }
 
-    public void onEvent(PatientChartRequestedEvent event) {
+    public void onEventMainThread(PatientChartRequestedEvent event) {
         PatientChartActivity.start(this, event.uuid);
     }
 

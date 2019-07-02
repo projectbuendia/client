@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedSet;
 
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -124,7 +125,7 @@ public class LocationTree implements Observable {
         }
 
         ImmutableSet<Location> children = mUuidsToChildren.get(location.uuid);
-        return children == null ? ImmutableSet.<Location> of() : children;
+        return Utils.orDefault(children, ImmutableSet.<Location> of());
     }
 
     /**

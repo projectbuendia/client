@@ -60,10 +60,9 @@ import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
-import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
-import org.projectbuendia.client.ui.dialogs.ViewObservationsDialogFragment;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -175,17 +174,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // Go back rather than reloading the activity, so that the patient list retains its
-            // filter state.
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
@@ -256,9 +244,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mSyncManager,
             minimalHandler);
 
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-
         mAdmissionDaysView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 Utils.logUserAction("admission_days_pressed");
@@ -279,11 +264,19 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mPcr.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
-                mController.onAddTestResultsPressed();
+                mController.onPcrResultsPressed();
             }
         });
 
         initChartMenu();
+    }
+
+    @Override protected void onNewIntent(Intent intent) {
+        String uuid = intent.getStringExtra("uuid");
+        if (uuid != null) {
+            mGridWebView.clearView();
+            mController.setPatient(uuid);
+        }
     }
 
     class DateObsDialog extends DatePickerDialog {
@@ -362,11 +355,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onXFormResult(requestCode, resultCode, data);
     }
 
-    @Override protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
-    }
-
     private String getFormattedPcrString(double pcrValue) {
         return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
             getResources().getString(R.string.pcr_negative) :
@@ -374,7 +362,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     private void showZoomDialog() {
-        CharSequence[] labels = new CharSequence[ChartRenderer.ZOOM_LEVELS.length];
+        String[] labels = new String[ChartRenderer.ZOOM_LEVELS.length];
         for (int i = 0; i < labels.length; i++) {
             labels[i] = getString(ChartRenderer.ZOOM_LEVELS[i].labelId);
         }
@@ -384,7 +372,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             .setSingleChoiceItems(labels, selected, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialog, int which) {
                     mController.setZoomIndex(which);
-                    dialog.cancel();
+                    dialog.dismiss();
                 }
             })
             .setNegativeButton(R.string.cancel, null)
@@ -528,7 +516,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         public void updatePatientLocationUi(LocationTree locationTree, Patient patient) {
             Location location = locationTree.findByUuid(patient.locationUuid);
-            String locationText = location == null ? "Unknown" : location.toString(); // TODO/i18n
+            String locationText = Utils.orDefault(Utils.toStringNonnull(location), "Unknown"); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
@@ -536,9 +524,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
-            String id = Utils.valueOrDefault(patient.id, EN_DASH);
-            String fullName = Utils.valueOrDefault(patient.givenName, EN_DASH) + " " +
-                Utils.valueOrDefault(patient.familyName, EN_DASH);
+            String id = Utils.orDefault(patient.id, EN_DASH);
+            String fullName = Utils.orDefault(patient.givenName, EN_DASH) + " " +
+                Utils.orDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
@@ -606,8 +594,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override public void showObservationsDialog(ArrayList<ObsRow> observations) {
-            ViewObservationsDialogFragment.newInstance(observations)
+        @Override public void showObsDetailDialog(
+            List<ObsRow> obsRows, List<String> orderedConceptUuids) {
+            ObsDetailDialogFragment.newInstance(obsRows, orderedConceptUuids)
                 .show(getSupportFragmentManager(), null);
         }
 

@@ -13,10 +13,9 @@ package org.projectbuendia.client.sync;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.google.common.collect.ObjectArrays;
-
-import android.database.sqlite.SQLiteDatabase;
 
 import org.projectbuendia.client.providers.Contracts;
 
@@ -41,7 +40,7 @@ public class QueryBuilder {
     public QueryBuilder where(String sqlCondition, String... args) {
         if (sqlCondition != null && !sqlCondition.isEmpty()) {
             mCondition += " and (" + sqlCondition + ")";
-            mArgs = args == null ? mArgs : ObjectArrays.concat(mArgs, args, String.class);
+            mArgs = args != null ? ObjectArrays.concat(mArgs, args, String.class) : mArgs;
         }
         return this;
     }

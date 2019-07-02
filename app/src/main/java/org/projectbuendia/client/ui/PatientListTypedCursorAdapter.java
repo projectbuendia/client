@@ -117,10 +117,15 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public Object getGroup(int groupPosition) {
+        if (mLocations == null) {
+            LOG.e("getGroup: mLocations is null! (see issue #352)");
+            return null;
+        }
         return mLocations[groupPosition];
     }
 
     @Override public int getChildrenCount(int groupPosition) {
+        LOG.d("getChildrenCount: mLocations = %s (%d), groupPosition = %d", mLocations, mLocations != null ? mLocations.length : -1, groupPosition);
         Object patientsForLocation = getGroup(groupPosition);
         if (mPatientsByLocation == null || patientsForLocation == null) {
             return 0;
@@ -143,7 +148,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         boolean pregnant = obs != null && ConceptUuids.YES_UUID.equals(obs.value);
 
         obs = mConditionObs.get(patient.uuid);
-        String condition = obs == null ? null : obs.value;
+        String condition = obs != null ? obs.value : null;
 
         if (convertView == null) {
             convertView = newChildView();
@@ -151,10 +156,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
         ResStatus.Resolved status =
             ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
+        LOG.i("getChildView: patient %s has condition = %s (%s)", patient.id, status.getMessage(), condition);
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        String givenName = Utils.valueOrDefault(patient.givenName, EN_DASH);
-        String familyName = Utils.valueOrDefault(patient.familyName, EN_DASH);
+        String givenName = Utils.orDefault(patient.givenName, EN_DASH);
+        String familyName = Utils.orDefault(patient.familyName, EN_DASH);
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(patient.id);
         holder.mPatientId.setTextColor(status.getForegroundColor());
@@ -227,6 +233,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         // Produce a sorted list of all the locations that have patients.
+        LOG.i("setPatients: count = %d, mLocations = new Location[%d]", count, mPatientsByLocation.size());
         mLocations = new Location[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
         Arrays.sort(mLocations, new LocationComparator(mLocationTree));

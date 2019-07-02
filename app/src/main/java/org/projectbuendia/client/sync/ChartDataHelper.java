@@ -157,11 +157,11 @@ public class ChartDataHelper {
             localizedValue = sConceptNames.get(value);
         }
         String conceptName = sConceptNames.get(conceptUuid);
-        if (conceptName == null){
+        if (conceptName == null) {
             return null;
         }
         else {
-            return new ObsRow(uuid, millis, conceptName, value, localizedValue);
+            return new ObsRow(uuid, millis, conceptName, conceptUuid, value, localizedValue);
         }
     }
 
@@ -183,22 +183,33 @@ public class ChartDataHelper {
         return results;
     }
 
-    public ArrayList<ObsRow> getPatientObservationsByConcept(String patientUuid, String conceptUuid) {
+    public ArrayList<ObsRow> getPatientObservationsByConcept(String patientUuid, String... conceptUuids) {
         loadConceptData(ENGLISH_LOCALE);
+
+        String[] args = new String[conceptUuids.length + 1];
+        String conceptSet = "";
+        int i = 0;
+        while (i < conceptUuids.length) {
+            if (i > 0) conceptSet += ", ";
+            conceptSet += "?";
+            args[i] = conceptUuids[i];
+            i++;
+        }
+        args[i++] = patientUuid;
+
         ArrayList<ObsRow> results = new ArrayList<>();
-        try (
-                Cursor c = mContentResolver.query(
-                Observations.CONTENT_URI,
-                null,
-                Observations.VOIDED + " IS NOT ? and "
-                        + Observations.PATIENT_UUID + " = ? and "
-                        + Observations.CONCEPT_UUID + " = ?",
-                new String[] {"1",patientUuid,conceptUuid},
-                Observations.ENCOUNTER_MILLIS + " ASC"
+        try (Cursor c = mContentResolver.query(
+            Observations.CONTENT_URI,
+            null,
+            Observations.CONCEPT_UUID + " in (" + conceptSet + ") and "
+                + Observations.PATIENT_UUID + " = ? and "
+                + Observations.VOIDED + " IS NOT 1",
+            args,
+            Observations.ENCOUNTER_MILLIS + " ASC"
         )) {
             while (c.moveToNext()) {
                 ObsRow row = obsrowFromCursor(c);
-                if (row !=null){results.add(row);}
+                if (row !=null) results.add(row);
             }
         }
         return results;

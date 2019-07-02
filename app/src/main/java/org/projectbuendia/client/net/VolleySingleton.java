@@ -20,10 +20,13 @@ import com.circle.android.api.OkHttpStack;
 import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.squareup.okhttp.OkHttpClient;
 
+import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
+
 /** Wraps Volley up in a singleton object. */
 public class VolleySingleton {
     private static VolleySingleton sInstance;
-
+    private static Logger LOG = Logger.create();
     private final RequestQueue mRequestQueue;
 
     /**
@@ -44,10 +47,11 @@ public class VolleySingleton {
      * handling and contexts correct.
      */
     public <T> void addToRequestQueue(Request<T> req) {
+        LOG.i("Queueing HTTP %s", Utils.repr(req));
         getRequestQueue().add(req);
     }
 
-    public RequestQueue getRequestQueue() {
+    private RequestQueue getRequestQueue() {
         return mRequestQueue;
     }
 

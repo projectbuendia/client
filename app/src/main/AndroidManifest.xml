@@ -95,7 +95,8 @@
             android:name=".ui.lists.FilteredPatientListActivity"
             android:label="@string/title_patient_list"
             android:parentActivityName=".ui.lists.LocationListActivity"
-            android:screenOrientation="userPortrait" >
+            android:screenOrientation="userPortrait"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -106,7 +107,8 @@
             android:label="@string/title_patient_chart"
             android:parentActivityName=".ui.lists.FilteredPatientListActivity"
             android:screenOrientation="userPortrait"
-            android:uiOptions="splitActionBarWhenNarrow">
+            android:uiOptions="splitActionBarWhenNarrow"
+            android:launchMode="singleInstance">
             <meta-data
                 android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
