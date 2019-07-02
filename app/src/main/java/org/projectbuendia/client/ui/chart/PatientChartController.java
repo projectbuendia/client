@@ -94,17 +94,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
      */
     private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
-    // TODO: Get rid of mPatientUuids, mNextIndex etc. now that we have mFormRequests.
-    /** Maximum concurrent ODK forms assigned request codes. */
-    private static final int MAX_ODK_REQUESTS = 10;
-    // The ODK code for filling in a form has no way of attaching metadata to it.
-    // This means we can't pass which patient is currently being edited. Instead, we keep an array
-    // of up to MAX_ODK_REQUESTS patientUuids. The array is persisted through activity restart in
-    // the savedInstanceState.
-    // TODO: Use a map for this instead of an array.
-    private final String[] mPatientUuids;
-    private int mNextIndex = 0;
-
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
     private String mPatientUuid = "";
@@ -230,31 +219,32 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mPatientUuid = patientUuid;
         mOdkResultSender = odkResultSender;
         mChartHelper = chartHelper;
-        if (savedState != null) {
-            mPatientUuids = savedState.getStringArray(KEY_PENDING_UUIDS);
-        } else {
-            mPatientUuids = new String[MAX_ODK_REQUESTS];
-        }
         mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
         mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
         mCharts = mChartHelper.getCharts(AppModel.CHART_UUID);
     }
 
-    /**
-     * Returns the state of the controller. This should be saved to preserve it over activity
-     * restarts.
-     */
-    public Bundle getState() {
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(KEY_PENDING_UUIDS, mPatientUuids);
-        return bundle;
+    public void setPatient(String uuid) {
+        // Clear all patient-specific state.
+        mPatient = null;
+        mOrdersByUuid = null;
+        mObservations = null;
+        if (mAssignGeneralConditionDialog != null) {
+            mAssignGeneralConditionDialog.dismiss();
+            mAssignGeneralConditionDialog = null;
+        }
+        if (mAssignLocationDialog != null) {
+            mAssignLocationDialog.dismiss();
+            mAssignLocationDialog = null;
+        }
+
+        // Load a new patient, which will trigger UI updates.
+        mPatientUuid = uuid;
+        mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
     }
 
-    /**
-     * Initializes the controller, setting async operations going to collect data required by the
-     * UI.
-     */
+    /** Sets async operations going to collect data required by the UI. */
     public void init() {
         mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
 

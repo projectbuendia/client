@@ -174,17 +174,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // Go back rather than reloading the activity, so that the patient list retains its
-            // filter state.
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
@@ -255,9 +244,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mSyncManager,
             minimalHandler);
 
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-
         mAdmissionDaysView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 Utils.logUserAction("admission_days_pressed");
@@ -283,6 +269,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
 
         initChartMenu();
+    }
+
+    @Override protected void onNewIntent(Intent intent) {
+        String uuid = intent.getStringExtra("uuid");
+        if (uuid != null) {
+            mGridWebView.clearView();
+            mController.setPatient(uuid);
+        }
     }
 
     class DateObsDialog extends DatePickerDialog {
@@ -359,11 +353,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mIsFetchingXform = false;
         mController.onXFormResult(requestCode, resultCode, data);
-    }
-
-    @Override protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
     }
 
     private String getFormattedPcrString(double pcrValue) {
