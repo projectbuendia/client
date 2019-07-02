@@ -393,21 +393,12 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         return request;
     }
 
-    public void onAddTestResultsPressed() {
-        Preset preset = new Preset();
-        preset.locationName = "Triage";
-
-        JsonUser user = App.getUserManager().getActiveUser();
-        Utils.logUserAction("form_opener_pressed", "form", "lab_test");
-        if (user != null) {
-            preset.clinicianName = user.fullName;
+    public void onPcrResultsPressed() {
+        String[] conceptUuids = new String[] {ConceptUuids.PCR_GP_UUID, ConceptUuids.PCR_NP_UUID};
+        List<ObsRow> obsRows = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuids);
+        if (!obsRows.isEmpty()) {
+            mUi.showObsDetailDialog(obsRows, Arrays.asList(conceptUuids));
         }
-
-        mUi.showFormLoadingDialog(true);
-        FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
-        mUi.fetchAndShowXform(
-            request.requestIndex, request.formUuid,
-            mPatient.toOdkPatient(), preset);
     }
 
     public void onOpenFormPressed(String formUuid) {
