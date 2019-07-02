@@ -243,8 +243,11 @@ public class FormEntryActivity
 
         setTitle(getString(R.string.title_loading_form));
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-//
+		// Turn the action bar icon into a "back" arrow that goes back in the activity stack.
+		getActionBar().setIcon(R.drawable.ic_back_36dp);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+
+		//
 //		setTitle(getString(R.string.app_name) + " > "
 //				+ getString(R.string.loading_form));
 
