@@ -13,7 +13,6 @@ package org.projectbuendia.client.ui.lists;
         import org.projectbuendia.client.R;
         import org.projectbuendia.client.models.ObsRow;
 
-        import java.lang.reflect.Array;
         import java.util.ArrayList;
         import java.util.HashMap;
         import java.util.List;
@@ -76,11 +75,11 @@ public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.observation_group, null);
+            convertView = infalInflater.inflate(R.layout.obs_section, null);
         }
 
         TextView lblListHeader = (TextView) convertView
-                .findViewById(R.id.tvGroup);
+                .findViewById(R.id.section_heading);
         lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);
 

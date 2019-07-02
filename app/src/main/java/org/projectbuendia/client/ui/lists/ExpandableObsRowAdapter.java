@@ -53,18 +53,18 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
 
     @Override public View getGroupView(int groupIndex, boolean isExpanded, View view, ViewGroup parent) {
         if (view == null) {
-            view = inflate(R.layout.observation_group);
+            view = inflate(R.layout.obs_section);
         }
-        TextView heading = view.findViewById(R.id.tvGroup);
+        TextView heading = view.findViewById(R.id.section_heading);
         heading.setText((String) getGroup(groupIndex));
         return view;
     }
 
     @Override public View getChildView(int groupIndex, int childIndex, boolean isLastChild, View view, ViewGroup parent) {
         if (view == null) {
-            view = inflate(R.layout.item_observation);
+            view = inflate(R.layout.obs_item);
         }
-        TextView item = view.findViewById(R.id.tvValue);
+        TextView item = view.findViewById(R.id.item_text);
         item.setText((String) getChild(groupIndex, childIndex));
         return view;
     }

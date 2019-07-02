@@ -99,7 +99,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         prepareData(obsrows);
 
         final ExpandableVoidObsRowAdapter listAdapter = new ExpandableVoidObsRowAdapter(App.getInstance().getApplicationContext(), listDataHeader, listDataChild);
-        ExpandableListView listView = (ExpandableListView) fragment.findViewById(R.id.lvObs);
+        ExpandableListView listView = (ExpandableListView) fragment.findViewById(R.id.obs_list);
         listView.setAdapter(listAdapter);
 
         for(int i=0; i < listAdapter.getGroupCount(); i++)

@@ -79,7 +79,7 @@ public class ObsDetailDialogFragment extends DialogFragment {
 
         ExpandableListAdapter adapter = new ExpandableObsRowAdapter(
             App.getInstance().getApplicationContext(), rowsBySection);
-        ExpandableListView listView = fragment.findViewById(R.id.lvObs);
+        ExpandableListView listView = fragment.findViewById(R.id.obs_list);
         listView.setAdapter(adapter);
         for (int i = 0; i < adapter.getGroupCount(); i++) {
             listView.expandGroup(i);

@@ -5,9 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ExpandableListView
-        android:id="@+id/obs_list"
+    <TextView
+        android:id="@+id/item_text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48sp"
+        android:padding="8sp"
+        android:textColor="#000000"
+        android:textSize="19sp"/>
 
 </LinearLayout>
