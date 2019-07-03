@@ -110,6 +110,15 @@ th, td {
   padding-bottom: 3.8rem;
   font-weight: bold;
 }
+#grid .order div.notes {
+  float: right;
+  max-width: 8em;
+  max-height: 100%;
+  line-height: 45px;
+  font-size: 1.2rem;
+  text-overflow: ellipsis;
+  color: #c40;
+}
 
 /* Tiles */
 #tiles { table-layout: fixed; width: 100%; }

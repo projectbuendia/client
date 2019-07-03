@@ -139,6 +139,9 @@
       {% for order in orders %}
         <tr class="order">
           <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
+            {% if order.instructions.notes is not empty %}
+              <div class="notes">{{order.instructions.notes | slice(0, 30)}}</div>
+            {% endif %}
             <div class="medication">{{order.instructions.medication}}&nbsp;{{order.instructions.route}}</div>
             <div>{{order.instructions.dosage}}&nbsp;</div>
           </th>
