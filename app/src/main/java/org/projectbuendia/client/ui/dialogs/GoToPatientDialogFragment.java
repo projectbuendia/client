@@ -117,7 +117,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
             mPatientUuid = patient.uuid;
             mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
                 " (" + patient.gender + ", " + Utils.birthdateToAge(
-                patient.birthdate, getResources()) + ")");
+                patient.birthdate, App.getInstance().getResources()) + ")");
 
             // Perform incremental observation sync to get the patient's admission date
             // and any other recent observations.

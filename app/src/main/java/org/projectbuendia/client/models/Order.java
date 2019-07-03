@@ -235,6 +235,7 @@ public @Immutable class Order extends Base<String> {
         public final @NonNull String route;
         public final @NonNull String dosage;
         public final int frequency;  // == 0 if unary, > 0 if series
+        public final @NonNull String notes;
 
         // ASCII 30 is the "record separator" character; it renders as a space.
         public static final String RS = "\u001e";
@@ -253,11 +254,12 @@ public @Immutable class Order extends Base<String> {
                 + "|" +
                 "([^ ]*) ?(.*)");  // example: "Prednisone 1 L 10 mg/L"
 
-        public Instructions(String medication, String route, String dosage, int frequency) {
+        public Instructions(String medication, String route, String dosage, int frequency, String notes) {
             this.medication = Utils.toNonnull(medication);
             this.route = Utils.toNonnull(route);
             this.dosage = Utils.toNonnull(dosage);
             this.frequency = frequency > 0 ? frequency : 0;
+            this.notes = Utils.toNonnull(notes);
         }
 
         public Instructions(String instructionsText) {
@@ -267,8 +269,9 @@ public @Immutable class Order extends Base<String> {
             //   - Record 0: medication, route
             //   - Record 1: dosage, unit, concentration, unit
             //   - Record 2: frequency, unit
+            //   - Record 3: notes
             if (instructionsText.contains(RS)) {
-                String[] records = Utils.splitFields(instructionsText, RS, 3);
+                String[] records = Utils.splitFields(instructionsText, RS, 4);
 
                 // Medication
                 String[] fields = Utils.splitFields(records[0], US, 2);
@@ -284,6 +287,10 @@ public @Immutable class Order extends Base<String> {
                 fields = Utils.splitFields(records[2], US, 2);
                 frequency = Utils.toIntOrDefault(fields[0].trim(), 0);
                 // TODO(ping): Support frequency units (currently "per day" is assumed).
+
+                // Notes
+                fields = Utils.splitFields(records[3], US, 2);
+                notes = fields[0].trim();
             } else {
                 Matcher matcher = OLD_PATTERN.matcher(Utils.toNonnull(instructionsText));
                 if (!matcher.matches()) {
@@ -293,19 +300,16 @@ public @Immutable class Order extends Base<String> {
                 route = "";
                 dosage = Utils.orDefault(matcher.group(2), matcher.group(5));
                 frequency = matcher.group(3) != null ? Integer.valueOf(matcher.group(3)) : 0;
+                notes = "";
             }
         }
 
         /** Packs medication, dosage, and frequency into a single instruction string. */
         public String format() {
-            String result = (medication + US + route);
-            if (!dosage.isEmpty()) {
-                result += RS + (dosage);
-            }
-            if (frequency != 0) {
-                result += RS + (frequency + US + "x daily");
-            }
-            return result;
+            return (medication + US + route)
+                + RS + (dosage)
+                + RS + (frequency > 0 ? (frequency + US + "x daily") : "")
+                + RS + (notes);
         }
 
         public boolean equals(Object other) {
@@ -314,7 +318,8 @@ public @Immutable class Order extends Base<String> {
                 return Objects.equals(medication, o.medication)
                     && Objects.equals(route, o.route)
                     && Objects.equals(dosage, o.dosage)
-                    && Objects.equals(frequency, o.frequency);
+                    && Objects.equals(frequency, o.frequency)
+                    && Objects.equals(notes, o.notes);
             }
             return false;
         }
