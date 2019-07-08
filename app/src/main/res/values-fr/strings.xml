@@ -32,7 +32,6 @@
   <string name="action_new_round">Nouveau tour</string>
   <string name="action_assign_location">Attribuer emplacement</string>
   <string name="action_edit_patient">Modifier patient</string>
-  <string name="action_update_chart">Mise à jour graphique</string>
   <string name="action_view_round_archive">Archive de tours</string>
   <string name="snackbar_update_available">Mise à jour des applications disponibles</string>
   <string name="snackbar_update_downloaded">Mise à jour l\'application téléchargée</string>
