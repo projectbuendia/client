@@ -85,7 +85,7 @@
   <string name="order_give_for_days_cannot_be_zero">Doit être vide ou supérieure à 0</string>
 
   <string name="order_execution_title">L\'historique de traitement</string>
-  <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; foi on %2$s</string>
+  <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois on %2$s</string>
   <string name="order_execution_historical_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois on %2$s</string>
   <string name="order_execution_today_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois aujourd\'hui, %2$s</string>
   <string name="order_execution_today_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois aujourd\'hui, %2$s</string>
