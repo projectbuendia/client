@@ -94,7 +94,10 @@ public class ObsFormat extends Format {
         }
         mRootObsFormat = Utils.orDefault(rootObsFormat, this);
         try {
-            mFormat = new ExtendedMessageFormat(pattern, new FormatFactoryMap());
+            // It's unsafe to use the ExtendedMessageFormat(pattern, registry) constructor,
+            // as it crashes with a NoClassDefFoundError on java.util.Locale.Category on
+            // Android 5.1.  We must use ExtendedMessageFormat(pattern, locale, registry).
+            mFormat = new ExtendedMessageFormat(pattern, Locale.US, new FormatFactoryMap());
         } catch (IllegalArgumentException e) {
             // Instead of crashing, display the invalid pattern in the output to aid debugging.
             mFormat = new Format() {
@@ -153,9 +156,9 @@ public class ObsFormat extends Format {
         }
 
         /**
-         * ExtendedMessageFormat expects a Map containing FormatFactory instances;
-         * rather than defining a separate FormatFactory class to go with every Format,
-         * we simply return this class, which can instantiate any Format.
+         * ExtendedMessageFormat expects a Map containing FormatFactory instances.
+         * Rather than defining a separate FormatFactory class for every Format,
+         * we return the FormatFactoryMap itself, which can instantiate any Format.
          */
         @Override public @Nullable FormatFactory get(Object name) {
             return FORMAT_CLASSES.containsKey("" + name) ? this : null;
