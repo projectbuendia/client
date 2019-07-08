@@ -20,6 +20,7 @@ bin/
 build/
 gen/
 crashlytics-build.properties
+output.json
 
 # Gradle files
 .gradle/
@@ -33,9 +34,6 @@ local.properties
 .idea/copyright/profiles_settings.xml
 .idea/inspectionProfiles/Buendia.xml
 .idea/inspectionProfiles/profiles_settings.xml
-
-
-
 !.idea/inspectionProfiles
 !.idea/copyright
 
