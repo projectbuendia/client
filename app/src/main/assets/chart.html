@@ -19,7 +19,7 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-        <div id="tile-{{id}}" class="tile concept-{{id}} {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}" width="{{100.0 / tileRow.size}}%">
+        <div class="tile {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -84,7 +84,7 @@
     </tr>
     {% for row in rows %}
     {% set id = row.item.conceptIds | first %}
-    <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
+    <tr class="obs">
         <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
           {{row.item.label}}
         </th>
@@ -99,13 +99,10 @@
           {% endif %}
           {% set class = summaryValue | format_values(row.item.cssClass) %}
           {% set style = summaryValue | format_values(row.item.cssStyle) %}
-          <td id="cell-{{id}}-{{column.start.millis}}"
-            class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
+          <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
             style="{{style}}"
-            onclick="{% if points is not empty %}
-                     {% if (row.item.type).string != 'text_icon' %}
-                     od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
-                     {% endif %}
+            onclick="{% if points is not empty and row.item.type.string != 'text_icon' %}
+                       od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
                      {% endif %}">
           {% if points is empty %}
             &nbsp;
