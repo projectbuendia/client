@@ -250,33 +250,52 @@
   controller.log('Start constructing grid-left and grid-body');
 
   var grid = $('#grid');
+  var gridLeft = $('#grid-left');
+  var gridBody = $('#grid-body');
+
   var left = grid.clone();
   var body = grid.clone();
   left.find('th').add(left.find('td')).not(':first-child').remove();
   body.find('th:first-child').add(body.find('td:first-child')).remove();
   grid.remove();
-  left.attr('id', null);
-  body.attr('id', null);
-  $('#grid-left').append(left);
-  $('#grid-body').append(body);
+  gridLeft.append(left.attr('id', null));
+  gridBody.append(body.attr('id', null));
 
   var corner = $('#grid-left thead');
   var frozenCorner = corner.clone().addClass('frozen').hide();
-  corner.parent().append(frozenCorner);
+  gridLeft.append(frozenCorner);
 
   var headings = $('#grid-body thead');
   var frozenHeadings = headings.clone().addClass('frozen').hide();
-  headings.parent().append(frozenHeadings);
+  gridBody.append(frozenHeadings);
 
-  $(window).scroll(function() {
-    var visible = window.scrollY >= headings.offset().top;
-    frozenCorner.toggle(visible);
-    frozenHeadings.toggle(visible);
-  });
+  var floatingHeadings = headings.clone().addClass('floating').hide();
+  gridBody.append(floatingHeadings);
 
-  $('#grid-body').scroll(function() {
-    frozenHeadings.css({left: headings.offset().left});
-  });
+  var yOffset = 0;
+
+  function updateY() {
+    yOffset = window.scrollY - headings.offset().top;
+    frozenCorner.toggle(yOffset > 0);
+    frozenHeadings.toggle(yOffset > 0);
+    floatingHeadings.hide();
+    floatingHeadings.css({top: yOffset});
+  }
+
+  var lastTimeout = 0;
+
+  function updateX() {
+    frozenHeadings.hide();
+    frozenHeadings.css({left: headings.offset().left + 'px'});
+    if (yOffset > 0) {
+      floatingHeadings.show();
+      window.clearTimeout(lastTimeout);
+      lastTimeout = window.setTimeout(updateY, 50);
+    }
+  }
+
+  $(window).scroll(updateY);
+  $('#grid-body').scroll(updateX);
 
   $(window).unload(function() {
     controller.onPageUnload($('#grid-body').scrollLeft(), $(window).scrollTop());

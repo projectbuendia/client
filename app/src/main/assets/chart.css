@@ -12,7 +12,7 @@ th, td { font-weight: normal; text-align: left; vertical-align: baseline; }
 #scroller { display: flex; flex-direction: row; width: 100%; }
 #grid { visibility: hidden; }
 #grid-left { flex-basis: 0; flex-grow: 0; }
-#grid-body { flex-basis: 0; flex-grow: 1; overflow: scroll; }
+#grid-body { flex-basis: 0; flex-grow: 1; overflow: scroll; position: relative; }
 
 /* Apply borders to all cells so their sizes are uniform. */
 .top th { border-top: 1px solid transparent; }
@@ -108,8 +108,9 @@ th.command { /* should match @style/ActionButton */
 .order .notes + .medication { max-width: 60%; }
 
 /* Frozen headings */
-.frozen { position: fixed; top: 0; background: white; }
-#grid-left .frozen { background: white; z-index: 1; }
+.frozen { position: fixed; top: 0; background: #fff; }
+.floating { position: absolute; background: #fff; }
+#grid-left .frozen { background: #fff; z-index: 1; }
 
 /* Tiles */
 #tiles { width: 100%; }
