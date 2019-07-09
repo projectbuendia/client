@@ -32,7 +32,7 @@
   <table id="grid" cellspacing="0" cellpadding="0">
     <thead>
       <tr>
-        <th class="corner"> </th>
+        <th class="corner">&nbsp;</th>
         {% set prevStop = columns[0].start %}
         {% for column in columns %}
           {% if column.start != prevStop %}
@@ -41,7 +41,7 @@
           {% if column.start == column.dayStart %}
             <th class="day {{column.date == now.toLocalDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
               {% if numColumnsPerDay == 1 %}
-                {{column.dayLabel}}
+                {% if column.dayLabel is empty %}&nbsp;{% else %}{{column.dayLabel}}{% endif %}
               {% elseif column.dayLabel is not empty %}
                 {{column.dayLabel}}, {{column.shortDate}}
               {% else %}
@@ -53,7 +53,7 @@
         {% endfor %}
       </tr>
       <tr>
-        <th class="corner"> </th>
+        <th class="corner">&nbsp;</th>
         {% for column in columns %}
           <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
             {% if numColumnsPerDay == 1 %}
@@ -76,7 +76,7 @@
           {% if column.start != prevStop %}
             <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
           {% endif %}
-          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
+          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}">&nbsp;</th>
           {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
@@ -100,21 +100,21 @@
             <td id="cell-{{id}}-{{column.start.millis}}"
               class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
               style="{{style}}"
-              onclick="{% if points is not empty%}
+              onclick="{% if points is not empty %}
                        {% if (row.item.type).string != 'text_icon' %}
                        od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
                        {% endif %}
                        {% endif %}">
-            {% if points is not empty %}
-              {% if row.item.type == 'text_icon' %}
-                <div>&#x1f4dd;</div>
-              {% else %}
-                {% set output = summaryValue | format_value(row.item.format) %}
-                {% if output is empty %}
-                  {% set output = summaryValue | format_value(row.item.captionFormat) %}
-                {% endif %}
-              {{output}}
+            {% if points is empty %}
+              &nbsp;
+            {% elseif row.item.type == 'text_icon' %}
+              <div>&#x1f4dd;</div>
+            {% else %}
+              {% set output = summaryValue | format_value(row.item.format) %}
+              {% if output is empty %}
+                {% set output = summaryValue | format_value(row.item.captionFormat) %}
               {% endif %}
+              {% if output is empty %}&nbsp;{% else %}{{output}}{% endif %}
             {% endif %}
           </td>
           {% endfor %}
@@ -159,7 +159,7 @@
               {% if column.date == order.startDay %}
                 {% set started = true %}
               {% endif %}
-              <td class="day" colspan={{numColumnsPerDay}}>
+              <td class="day" colspan={{numColumnsPerDay}}>&nbsp;
                 {% set totalScheduled = 0 %}
                 {% set totalGiven = 0 %}
                 <div class="divisions">
@@ -254,7 +254,6 @@
   function od(concept_uuid, startmillis, stopmillis){
     controller.onObsDialog(concept_uuid, startmillis, stopmillis);
   }
-
 </script>
 </body>
 </html>

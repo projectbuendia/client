@@ -13,9 +13,9 @@ th, td {
 
 /* Grid lines */
 /* TODO: Adding left/right padding >0 breaks frozen headers.  Figure out why. */
-#grid thead th.day {
-  border-top: 1px solid #666;
-}
+#grid th.corner { border-top: 1px solid transparent; }
+#grid thead th { border-top: 1px solid transparent; }
+#grid thead th.day { border-top: 1px solid #666; }
 
 #grid thead tr:last-child th, #grid thead th.gap {
   border-bottom: 1px solid #666;
