@@ -4,229 +4,236 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="chart.css">
+<script>controller.log('Start loading scripts');</script>
 <script src="jquery-1.5.1.min.js"></script>
-<script src="freezeheader.js"></script>
 <script src="chart.js"></script>
+<script>controller.log('Start HTML');</script>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 <body>
-<table id="tiles" cellspacing="0" cellpadding="0">
+<div id="tiles" cellspacing="0" cellpadding="0">
   {% for tileRow in tileRows %}
-    <tr>
+    <div class="row">
       {% for tile in tileRow %}
         {% set id = tile.item.conceptIds | first %}
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-        <td id="tile-{{id}}" class="tile concept-{{id}} {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}" width="{{100.0 / tileRow.size}}%">
+        <div id="tile-{{id}}" class="tile concept-{{id}} {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
-        </td>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+
+<table id="grid" cellspacing=0 cellpadding=0>
+  <thead>
+    <tr class="top">
+      <th class="corner">&nbsp;</th>
+      {% set prevStop = columns[0].start %}
+      {% for column in columns %}
+        {% if column.start != prevStop %}
+          <th class="gap" scope="col" rowspan=2>&nbsp;</th>
+        {% endif %}
+        {% if column.start == column.dayStart %}
+          <th class="day {{column.date == now.toLocalDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+            {% if numColumnsPerDay == 1 %}
+              {% if column.dayLabel is empty %}&nbsp;{% else %}{{column.dayLabel}}{% endif %}
+            {% elseif column.dayLabel is not empty %}
+              {{column.dayLabel}}, {{column.shortDate}}
+            {% else %}
+              {{column.shortDate}}
+            {% endif %}
+          </th>
+        {% endif %}
+        {% set prevStop = column.stop %}
       {% endfor %}
     </tr>
-  {% endfor %}
+    <tr>
+      <th class="corner">&nbsp;</th>
+      {% for column in columns %}
+        <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
+          {% if numColumnsPerDay == 1 %}
+            {{column.shortDate}}
+          {% else %}
+            {{column.startHour}}&ndash;{{column.stopHour}}
+          {% endif %}
+        </th>
+      {% endfor %}
+    </tr>
+  </thead>
+
+  <tbody class="observations">
+    <tr>
+      <th scope="rowgroup">
+        Observations
+      </th>
+      {% set prevStop = columns[0].start %}
+      {% for column in columns %}
+        {% if column.start != prevStop %}
+          <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
+        {% endif %}
+        {% if column.start == column.dayStart %}
+          <th scope="rowgroup" colspan={{numColumnsPerDay}}>&nbsp;</th>
+        {% endif %}
+        {% set prevStop = column.stop %}
+      {% endfor %}
+    </tr>
+    {% for row in rows %}
+    {% set id = row.item.conceptIds | first %}
+    <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
+        <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
+          {{row.item.label}}
+        </th>
+        {% for column in columns %}
+          {% set points = get_all_points(row=row, column=column) %}
+          {% if points is empty %}
+            {% set summaryValue = null %}
+          {% elseif row.item.type == 'yes_no' %}
+            {% set summaryValue = points | values | max %}
+          {% else %}
+            {% set summaryValue = (points | last).value %}
+          {% endif %}
+          {% set class = summaryValue | format_values(row.item.cssClass) %}
+          {% set style = summaryValue | format_values(row.item.cssStyle) %}
+          <td id="cell-{{id}}-{{column.start.millis}}"
+            class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
+            style="{{style}}"
+            onclick="{% if points is not empty %}
+                     {% if (row.item.type).string != 'text_icon' %}
+                     od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
+                     {% endif %}
+                     {% endif %}">
+          {% if points is empty %}
+            &nbsp;
+          {% elseif row.item.type == 'text_icon' %}
+            <div>&#x1f4dd;</div>
+          {% else %}
+            {% set output = summaryValue | format_value(row.item.format) %}
+            {% if output is empty %}
+              {% set output = summaryValue | format_value(row.item.captionFormat) %}
+            {% endif %}
+            {% if output is empty %}&nbsp;{% else %}{{output}}{% endif %}
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+
+  <tbody class="orders">
+    <tr>
+      <th scope="rowgroup">
+        Treatments
+      </th>
+      {% set prevStop = columns[0].start %}
+      {% for column in columns %}
+        {% if column.start != prevStop %}
+          <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
+        {% endif %}
+        {% if column.start == column.dayStart %}
+          <th scope="rowgroup" colspan={{numColumnsPerDay}}>&nbsp;</th>
+        {% endif %}
+        {% set prevStop = column.stop %}
+      {% endfor %}
+    </tr>
+    {% for order in orders %}
+      <tr class="order">
+        <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
+          {% if order.instructions.notes is not empty %}
+            <div class="notes">{{order.instructions.notes | slice(0, 30)}}</div>
+          {% endif %}
+          <div class="medication">{{order.instructions.medication}}&nbsp;{{order.instructions.route}}</div>
+          <div>{{order.instructions.dosage}}&nbsp;</div>
+        </th>
+        {% set counts = executionCounts[order.uuid] %}
+        {% set past = true %}
+        {% set future = false %}
+        {% set started = false %}
+        {% set stopped = false %}
+        {% set divisionIndex = 0 %}
+        {% set summarize = order.instructions.frequency > numColumnsPerDay %}
+
+        {% for column in columns %}
+          {% if column.start == column.dayStart %}
+            {% if column.date == order.startDay %}
+              {% set started = true %}
+            {% endif %}
+            <td class="day" colspan={{numColumnsPerDay}}>
+              &nbsp; {# ensure uniform height #}
+              {% set totalScheduled = 0 %}
+              {% set totalGiven = 0 %}
+              <div class="divisions">
+                {% if started and not stopped %}
+                  {% for division in get_order_divisions(order, column.date) %}
+                    {% set current = interval_contains(division, now) %}
+                    {% if current %} {% set past = false %} {% endif %}
+
+                    {% set scheduled = count_scheduled_doses(order, division) %}
+                    {% set given = counts[divisionIndex] %}
+                    {% if given is null %} {% set given = 0 %} {% endif %}
+                    {% set status = (given < scheduled) ? 'underdose' : (given > scheduled) ? 'overdose' : (scheduled > 0) ? 'full-dose' : '' %}
+                    {% if order.isSeries and interval_contains(division, order.stop) %}
+                      {% set stopped = true %}
+                    {% endif %}
+
+                    <div class="division {{past ? 'past' : ''}} {{current ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stop ? 'stop' : ''}}"
+                        onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                      {% if summarize %}
+                        {# leave blank #}
+                      {% elseif given == scheduled and given > 0 %}
+                        <span class="given">{{given}}</span>
+                      {% elseif given + scheduled > 0 %}
+                        <span class="given">{{given}}</span>/{{scheduled}}
+                      {% else %}
+                        &nbsp; {# ensure uniform height #}
+                      {% endif %}
+                    </div>
+
+                    {% if current %} {% set future = true %} {% endif %}
+                    {% set totalScheduled = totalScheduled + scheduled %}
+                    {% set totalGiven = totalGiven + given %}
+                    {% set divisionIndex = divisionIndex + 1 %}
+                  {% endfor %}
+                  {% if summarize %}
+                    <div class="summary"
+                        onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                      {% if totalGiven == totalScheduled and totalGiven > 0 %}
+                        <span class="given">{{totalGiven}}</span>
+                      {% elseif totalGiven + totalScheduled > 0 %}
+                        <span class="given">{{totalGiven}}</span>/{{totalScheduled}}
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% else %}
+                  &nbsp; {# ensure uniform height #}
+                {% endif %}
+              </div>
+            </td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    {% endfor %}
+
+    <tr>
+      <th scope="row" class="command" onclick="controller.onNewOrderPressed()">
+        Add a New Treatment
+      </th>
+    </tr>
+  </tbody>
 </table>
 
-<div id="grid-scroller" style="width: 100%; overflow: scroll">
-  <table id="grid" cellspacing="0" cellpadding="0">
-    <thead>
-      <tr>
-        <th class="corner">&nbsp;</th>
-        {% set prevStop = columns[0].start %}
-        {% for column in columns %}
-          {% if column.start != prevStop %}
-            <th class="gap" scope="col" rowspan=2>&nbsp;</th>
-          {% endif %}
-          {% if column.start == column.dayStart %}
-            <th class="day {{column.date == now.toLocalDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
-              {% if numColumnsPerDay == 1 %}
-                {% if column.dayLabel is empty %}&nbsp;{% else %}{{column.dayLabel}}{% endif %}
-              {% elseif column.dayLabel is not empty %}
-                {{column.dayLabel}}, {{column.shortDate}}
-              {% else %}
-                {{column.shortDate}}
-              {% endif %}
-            </th>
-          {% endif %}
-          {% set prevStop = column.stop %}
-        {% endfor %}
-      </tr>
-      <tr>
-        <th class="corner">&nbsp;</th>
-        {% for column in columns %}
-          <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
-            {% if numColumnsPerDay == 1 %}
-              {{column.shortDate}}
-            {% else %}
-              {{column.startHour}}&ndash;{{column.stopHour}}
-            {% endif %}
-          </th>
-        {% endfor %}
-      </tr>
-    </thead>
-
-    <tbody class="observations">
-      <tr>
-        <th scope="rowgroup">
-          Observations
-        </th>
-        {% set prevStop = columns[0].start %}
-        {% for column in columns %}
-          {% if column.start != prevStop %}
-            <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
-          {% endif %}
-          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}">&nbsp;</th>
-          {% set prevStop = column.stop %}
-        {% endfor %}
-      </tr>
-      {% for row in rows %}
-      {% set id = row.item.conceptIds | first %}
-      <tr class="obs concept-{{id}} {{ row.item.label | tosafechars }}">
-          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
-            {{row.item.label}}
-          </th>
-          {% for column in columns %}
-            {% set points = get_all_points(row=row, column=column) %}
-            {% if points is empty %}
-              {% set summaryValue = null %}
-            {% elseif row.item.type == 'yes_no' %}
-              {% set summaryValue = points | values | max %}
-            {% else %}
-              {% set summaryValue = (points | last).value %}
-            {% endif %}
-            {% set class = summaryValue | format_values(row.item.cssClass) %}
-            {% set style = summaryValue | format_values(row.item.cssStyle) %}
-            <td id="cell-{{id}}-{{column.start.millis}}"
-              class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
-              style="{{style}}"
-              onclick="{% if points is not empty %}
-                       {% if (row.item.type).string != 'text_icon' %}
-                       od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
-                       {% endif %}
-                       {% endif %}">
-            {% if points is empty %}
-              &nbsp;
-            {% elseif row.item.type == 'text_icon' %}
-              <div>&#x1f4dd;</div>
-            {% else %}
-              {% set output = summaryValue | format_value(row.item.format) %}
-              {% if output is empty %}
-                {% set output = summaryValue | format_value(row.item.captionFormat) %}
-              {% endif %}
-              {% if output is empty %}&nbsp;{% else %}{{output}}{% endif %}
-            {% endif %}
-          </td>
-          {% endfor %}
-        </tr>
-      {% endfor %}
-    </tbody>
-
-    <tbody class="orders">
-      <tr>
-        <th scope="rowgroup">
-          Treatments
-        </th>
-        {% set prevStop = columns[0].start %}
-        {% for column in columns %}
-          {% if column.start != prevStop %}
-            <th scope="rowgroup" class="gap" rowspan={{orders.size + 1}}>&nbsp;</th>
-          {% endif %}
-          <th scope="rowgroup" class="{{column.stop == column.dayStop ? 'day-last' : ''}}"></th>
-          {% set prevStop = column.stop %}
-        {% endfor %}
-      </tr>
-      {% for order in orders %}
-        <tr class="order">
-          <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
-            {% if order.instructions.notes is not empty %}
-              <div class="notes">{{order.instructions.notes | slice(0, 30)}}</div>
-            {% endif %}
-            <div class="medication">{{order.instructions.medication}}&nbsp;{{order.instructions.route}}</div>
-            <div>{{order.instructions.dosage}}&nbsp;</div>
-          </th>
-          {% set counts = executionCounts[order.uuid] %}
-          {% set past = true %}
-          {% set future = false %}
-          {% set started = false %}
-          {% set stopped = false %}
-          {% set stop = false %}
-          {% set divisionIndex = 0 %}
-          {% set summarize = order.instructions.frequency > numColumnsPerDay %}
-
-          {% for column in columns %}
-            {% if column.start == column.dayStart %}
-              {% if column.date == order.startDay %}
-                {% set started = true %}
-              {% endif %}
-              <td class="day" colspan={{numColumnsPerDay}}>&nbsp;
-                {% set totalScheduled = 0 %}
-                {% set totalGiven = 0 %}
-                <div class="divisions">
-                  {% if started and not stopped %}
-                    {% for division in get_order_divisions(order, column.date) %}
-                      {% set current = interval_contains(division, now) %}
-                      {% if current %} {% set past = false %} {% endif %}
-
-                      {% set scheduled = count_scheduled_doses(order, division) %}
-                      {% set given = counts[divisionIndex] %}
-                      {% if given is null %} {% set given = 0 %} {% endif %}
-                      {% set status = (given < scheduled) ? 'underdose' : (given > scheduled) ? 'overdose' : (scheduled > 0) ? 'full-dose' : '' %}
-                      {% if order.isSeries and interval_contains(division, order.stop) %}
-                        {% set stopped = true %}
-                        {% set stop = given + scheduled == 0 %}
-                      {% endif %}
-
-                      <div class="division {{past ? 'past' : ''}} {{current ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stop ? 'stop' : ''}}"
-                          onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
-                        {% if summarize %}
-                          {# leave blank #}
-                        {% elseif given == scheduled and given > 0 %}
-                          <span class="given">{{given}}</span>
-                        {% elseif given + scheduled > 0 %}
-                          <span class="given">{{given}}</span>/{{scheduled}}
-                        {% elseif stop %}
-                          stop
-                        {% else %}
-                          &nbsp; {# ensure uniform height #}
-                        {% endif %}
-                      </div>
-
-                      {% if current %} {% set future = true %} {% endif %}
-                      {% set totalScheduled = totalScheduled + scheduled %}
-                      {% set totalGiven = totalGiven + given %}
-                      {% set divisionIndex = divisionIndex + 1 %}
-                    {% endfor %}
-                    {% if summarize %}
-                      <div class="summary"
-                          onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
-                        {% if totalGiven == totalScheduled and totalGiven > 0 %}
-                          <span class="given">{{totalGiven}}</span>
-                        {% elseif totalGiven + totalScheduled > 0 %}
-                          <span class="given">{{totalGiven}}</span>/{{totalScheduled}}
-                        {% endif %}
-                      </div>
-                    {% endif %}
-                  {% else %}
-                    &nbsp;
-                  {% endif %}
-                </div>
-              </td>
-            {% endif %}
-          {% endfor %}
-        </tr>
-      {% endfor %}
-
-      <tr>
-        <th scope="row" class="command" onclick="controller.onNewOrderPressed()">
-          Add a New Treatment
-        </th>
-      </tr>
-    </tbody>
-  </table>
+<div id="scroller">
+  <div id="grid-left"></div>
+  <div id="grid-body"></div>
 </div>
 
 <script>
+  controller.log('Start running script');
+
   var data = {{dataCellsByConceptId | raw}};
 
   {% for tileRow in tileRows %}
@@ -243,17 +250,46 @@
     {% endif %}
   {% endfor %}
 
-  $(document).ready(function() {
-    $('#grid').freezeHeader({top: true, left: true});
+  controller.log('Start constructing grid-left and grid-body');
+
+  var grid = $('#grid');
+  var left = grid.clone();
+  var body = grid.clone();
+  left.find('th').add(left.find('td')).not(':first-child').remove();
+  body.find('th:first-child').add(body.find('td:first-child')).remove();
+  grid.remove();
+  left.attr('id', null);
+  body.attr('id', null);
+  $('#grid-left').append(left);
+  $('#grid-body').append(body);
+
+  var corner = $('#grid-left thead');
+  var frozenCorner = corner.clone().addClass('frozen').hide();
+  corner.parent().append(frozenCorner);
+
+  var headings = $('#grid-body thead');
+  var frozenHeadings = headings.clone().addClass('frozen').hide();
+  headings.parent().append(frozenHeadings);
+
+  $(window).scroll(function() {
+    var visible = window.scrollY >= headings.offset().top;
+    frozenCorner.toggle(visible);
+    frozenHeadings.toggle(visible);
   });
 
-  $( window ).unload(function() {
-    controller.onPageUnload($('#grid-scroller').scrollLeft(), $(window).scrollTop());
+  $('#grid-body').scroll(function() {
+    frozenHeadings.css({left: headings.offset().left});
   });
 
-  function od(concept_uuid, startmillis, stopmillis){
-    controller.onObsDialog(concept_uuid, startmillis, stopmillis);
+  $(window).unload(function() {
+    controller.onPageUnload($('#grid-body').scrollLeft(), $(window).scrollTop());
+  });
+
+  function od(conceptUuid, startMillis, stopMillis) {
+    controller.onObsDialog(conceptUuid, startMillis, stopMillis);
   }
+
+  controller.log('Finished script');
 </script>
 </body>
 </html>

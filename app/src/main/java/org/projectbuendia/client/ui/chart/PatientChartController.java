@@ -456,6 +456,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mLastScrollPosition.set(scrollX, scrollY);
     }
 
+    @android.webkit.JavascriptInterface
+    public void log(String message) {
+        LOG.i("Chart JS: " + message);
+    }
+
     public void setDate(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
         Encounter encounter = new Encounter(
