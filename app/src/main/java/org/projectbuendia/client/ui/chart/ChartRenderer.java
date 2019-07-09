@@ -3,7 +3,9 @@ package org.projectbuendia.client.ui.chart;
 import android.content.res.Resources;
 import android.support.v4.util.Pair;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import com.google.common.collect.Lists;
@@ -85,6 +87,9 @@ public class ChartRenderer {
         mView = view;
         mResources = resources;
         mSettings = settings;
+        mView.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+        mView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
@@ -119,9 +124,20 @@ public class ChartRenderer {
         String html = new GridHtmlGenerator(
             chart, latestObservations, observations, orders,
             admissionDate, firstSymptomsDate).getHtml();
+
+        long start = System.currentTimeMillis();
+        LOG.i("Start loading HTML into WebView");
+
+        // To avoid showing stale, possibly misleading data from a previous
+        // patient, clear out any previous chart HTML before showing the WebView.
+        mView.loadUrl("about:blank");
+        mView.clearView();
+        mView.setVisibility(View.VISIBLE);
         mView.loadDataWithBaseURL(
             "file:///android_asset/", html, "text/html; charset=utf-8", "utf-8", null);
         mView.setWebContentsDebuggingEnabled(true);
+        long finish = System.currentTimeMillis();
+        LOG.i("Finished loading HTML into WebView in %d ms", finish - start);
 
         mLastChartName = chart.name;
         mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
@@ -136,8 +152,6 @@ public class ChartRenderer {
     }
 
     class GridHtmlGenerator {
-        List<String> mTileConceptUuids;
-        List<String> mGridConceptUuids;
         List<Order> mOrders;
         DateTime mNow;
         Column mNowColumn;
@@ -293,6 +307,9 @@ public class ChartRenderer {
 
         /** Exports a map of concept IDs to arrays of [columnStart, points] pairs. */
         JSONObject getJsonDataDump() {
+            long start = System.currentTimeMillis();
+            LOG.i("Starting getJsonDataDump");
+
             JSONObject dump = new JSONObject();
             for (String uuid : mConceptsToDump) {
                 try {
@@ -316,6 +333,9 @@ public class ChartRenderer {
                     LOG.e(e, "JSON error while dumping chart data");
                 }
             }
+            long finish = System.currentTimeMillis();
+            LOG.i("Finished getJsonDataDump in %d ms", finish - start);
+
             return dump;
         }
 
@@ -358,6 +378,9 @@ public class ChartRenderer {
 
         /** Renders a Pebble template. */
         String renderTemplate(String filename, Map<String, Object> context) {
+            long start = System.currentTimeMillis();
+            LOG.i("Starting renderTemplate");
+
             if (sEngine == null) {
                 // PebbleEngine caches compiled templates by filename, so as long as we keep using the
                 // same engine instance, it's okay to call getTemplate(filename) on each render.
@@ -370,6 +393,9 @@ public class ChartRenderer {
                 LOG.d("Evaluating template...");
                 template.evaluate(writer, context);
                 LOG.d("Template rendered.");
+
+                long finish = System.currentTimeMillis();
+                LOG.i("Finished renderTemplate in %d ms", finish - start);
                 return writer.toString();
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();
