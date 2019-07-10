@@ -125,17 +125,18 @@ public @Immutable class Order extends Base<String> {
      * and so on.  Divisions preceding the starting day have negative index values.
      */
     public Interval getDivision(int index) {
-        int dayIndex = Utils.floorDiv(index, instructions.frequency);
-        int subdivisionIndex = Utils.floorMod(index, instructions.frequency);
+        int numDivisions = getNumDivisionsPerDay();
+        int dayIndex = Utils.floorDiv(index, numDivisions);
         LocalDate day = start.toLocalDate().plusDays(dayIndex);
         Interval daySpan = day.toInterval();
 
-        int numDivisions = instructions.frequency == 0 ? 1 : instructions.frequency;
         long startMillis = daySpan.getStartMillis();
         long dayMillis = daySpan.toDurationMillis();
+        int i = Utils.floorMod(index, numDivisions);
 
-        long prevMillis = startMillis + dayMillis * subdivisionIndex / numDivisions;
-        long nextMillis = startMillis + dayMillis * (subdivisionIndex + 1) / numDivisions;
+        // Pick out the i-th division out of 'numDivisions' divisions of the day.
+        long prevMillis = startMillis + dayMillis * i / numDivisions;
+        long nextMillis = startMillis + dayMillis * (i + 1) / numDivisions;
         return new Interval(prevMillis, nextMillis);
     }
 
@@ -144,7 +145,7 @@ public @Immutable class Order extends Base<String> {
         List<Interval> divisions = new ArrayList<>();
         Interval daySpan = day.toInterval();
 
-        int numDivisions = instructions.frequency == 0 ? 1 : instructions.frequency;
+        int numDivisions = getNumDivisionsPerDay();
         long startMillis = daySpan.getStartMillis();
         long dayMillis = daySpan.toDurationMillis();
 
@@ -156,6 +157,11 @@ public @Immutable class Order extends Base<String> {
             prevMillis = nextMillis;
         }
         return divisions;
+    }
+
+    /** Returns the number of divisions per day (always positive, 1 for a unary order). */
+    public int getNumDivisionsPerDay() {
+        return instructions.frequency == 0 ? 1 : instructions.frequency;
     }
 
     /** Returns all the scheduled dose intervals for this order on a given day. */
