@@ -133,7 +133,7 @@ logger.info("Version number: ${versionString}")
 logger.info("Version code: ${versionInteger}")
 
 // This is where to look for the .apk signing key.
-def releaseRepoRoot = file('../../release/')
+def clientRoot = file('../')
 
 // OpenMRS server for demos (kept at tip of dev branch, with scratch data).
 def serverDev = 'demo.buendia.org'  // an AWS machine running Linux AMI 2017.09
@@ -232,11 +232,20 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file(new File(releaseRepoRoot, 'keys/org.projectbuendia.client.jks'))
-            storePassword ''
-            keyAlias 'org.projectbuendia.client'
-            keyPassword ''
+        if (System.getenv("CI")) {
+            release {
+                keyAlias 'buendia'
+                keyPassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                storeFile file(System.getenv('ANDROID_KEYSTORE_FILE'))
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+            }
+        } else {
+            release {
+                storeFile file(new File(clientRoot, 'zestybuendia.jks'))
+                storePassword ''
+                keyAlias 'buendia'
+                keyPassword ''
+            }
         }
     }
 
@@ -274,17 +283,23 @@ android {
 gradle.taskGraph.whenReady {
     taskGraph ->
         if (taskGraph.hasTask(':app:assembleRelease')) {
-            if (!android.signingConfigs.release.storeFile.exists()) {
-                throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
+            def cfg = android.signingConfigs.release
+            if (!cfg.storeFile.exists()) {
+                throw new IllegalStateException("No keystore found at ${cfg.storeFile}.")
             }
-            if (System.console() == null) {
-                throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew :app:assembleRelease.")
+            if (!cfg.storePassword || !cfg.keyPassword) {
+                if (System.getenv("CI")) {
+                    throw new IllegalArgumentException("ANDROID_KEYSTORE_PASSWORD must be set in the environment.")
+                }
+                if (System.console() == null) {
+                    throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew --no-daemon :app:assembleRelease.")
+                }
+                def pass = new String(System.console().readPassword("\nPlease enter key passphrase: "))
+                if (!pass) {
+                    throw new IllegalArgumentException("You must enter a password to proceed.")
+                }
+                cfg.storePassword = pass
+                cfg.keyPassword = pass
             }
-            def pass = new String(System.console().readPassword("\nPlease enter key passphrase: "))
-            if (!pass) {
-                throw new IllegalArgumentException("You must enter a password to proceed.")
-            }
-            android.signingConfigs.release.storePassword = pass
-            android.signingConfigs.release.keyPassword = pass
         }
 }
