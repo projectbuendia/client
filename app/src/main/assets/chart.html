@@ -227,6 +227,13 @@
 <div id="scroller">
   <div id="grid-left"></div>
   <div id="grid-body"></div>
+  <div id="buttons">
+    <button id="up" ontouchstart="moveTarget(0, -jumpY)"></button>
+    <button id="down" ontouchstart="moveTarget(0, jumpY)"></button>
+    <button id="left" ontouchstart="moveTarget(-jumpX, 0)"></button>
+    <button id="home" ontouchstart="moveTarget(0, 0, true)"></button>
+    <button id="right" ontouchstart="moveTarget(jumpX, 0)"></button>
+  </div>
 </div>
 
 <script>
@@ -250,6 +257,7 @@
 
   controller.log('Start constructing grid-left and grid-body');
 
+  var win = $(window);
   var grid = $('#grid');
   var gridLeft = $('#grid-left');
   var gridBody = $('#grid-body');
@@ -276,7 +284,7 @@
   var yOffset = 0;
 
   function updateY() {
-    yOffset = window.scrollY - headings.offset().top;
+    yOffset = win.scrollTop() - headings.offset().top;
     frozenCorner.toggle(yOffset > 0);
     frozenHeadings.toggle(yOffset > 0);
     floatingHeadings.hide();
@@ -295,8 +303,8 @@
     }
   }
 
-  $(window).scroll(updateY);
-  $('#grid-body').scroll(updateX);
+  win.scroll(updateY);
+  gridBody.scroll(updateX);
 
   $(window).unload(function() {
     controller.onPageUnload($('#grid-body').scrollLeft(), $(window).scrollTop());
@@ -304,6 +312,63 @@
 
   function od(conceptUuid, startMillis, stopMillis) {
     controller.onObsDialog(conceptUuid, startMillis, stopMillis);
+  }
+
+  var nowColumn = $('.now[scope="col"]');
+  var nowCenter = nowColumn.offset().left + nowColumn.width()/2;
+  var bodyCenter = gridBody.offset().left + gridBody.width()/2;
+  var jumpX = gridBody.width()/2;
+  var jumpY = gridBody.height()/3;
+  var homeX = nowCenter - bodyCenter;
+  var targetX = 0;
+  var targetY = 0;
+
+  function scrollJump(dx, dy, home) {
+    var x = gridBody.scrollLeft();
+    var y = win.scrollTop();
+    if (home) {
+      gridBody.scrollLeft(homeX);
+      updateX();
+    }
+    if (dx != 0) {
+      gridBody.scrollLeft(x + dx);
+      updateX();
+    }
+    if (dy != 0) {
+      win.scrollTop(y + dy);
+      updateY();
+    }
+  }
+
+  function moveTarget(dx, dy, home) {
+    if (home) targetX = homeX;
+    targetX += dx;
+    targetY += dy;
+    scrollStep();
+  }
+
+  var abs = Math.abs;
+
+  function scrollStep() {
+    var x = gridBody.scrollLeft();
+    var y = win.scrollTop();
+    console.log('scroll', x, y);
+    gridBody.scrollLeft(x * 0.6 + targetX * 0.4);
+    win.scrollTop(y * 0.6 + targetY * 0.4);
+    var step = false;
+    if (abs(gridBody.scrollLeft() - x) > 0.5) {
+      updateX();
+      step = true;
+    } else {
+      targetX = x;
+    }
+    if (abs(win.scrollTop() - y) > 0.5) {
+      updateY();
+      step = true;
+    } else {
+      targetY = y;
+    }
+    if (step) window.setTimeout(scrollStep, 30);
   }
 
   controller.log('Finished script');
