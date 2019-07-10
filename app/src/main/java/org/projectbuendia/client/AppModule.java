@@ -18,7 +18,10 @@ import android.preference.PreferenceManager;
 import org.projectbuendia.client.diagnostics.DiagnosticsModule;
 import org.projectbuendia.client.events.EventsModule;
 import org.projectbuendia.client.models.AppModelModule;
+import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.net.NetModule;
+import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.sync.SyncAdapterSyncScheduler;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
@@ -26,8 +29,8 @@ import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
-import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
@@ -77,7 +80,8 @@ import dagger.Provides;
         UpdateNotificationController.class,
         LoginActivity.class,
         LoginFragment.class,
-        SettingsActivity.class
+        SettingsActivity.class,
+        AddPatientTask.class
     },
     staticInjections = {
         SyncAccountService.class
@@ -107,8 +111,10 @@ public final class AppModule {
     }
 
     @Provides
-    @Singleton SyncManager provideSyncManager(AppSettings settings) {
-        return new SyncManager(settings);
+    @Singleton SyncManager provideSyncManager() {
+        return new SyncManager(
+            new SyncAdapterSyncScheduler(SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY)
+        );
     }
 
     @Provides

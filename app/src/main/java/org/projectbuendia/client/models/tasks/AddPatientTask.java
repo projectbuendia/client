@@ -18,22 +18,25 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
 
 /**
  * An {@link AsyncTask} that adds a patient to a server.
@@ -52,6 +55,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     private final ContentResolver mContentResolver;
     private final PatientDelta mPatientDelta;
     private final CrudEventBus mBus;
+    @Inject SyncManager mSyncManager;
 
     private String mUuid;
 
@@ -69,6 +73,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         mContentResolver = contentResolver;
         mPatientDelta = patientDelta;
         mBus = bus;
+        App.getInstance().inject(this);
     }
 
     @Override protected PatientAddFailedEvent doInBackground(Void... params) {
@@ -111,7 +116,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
             Contracts.Patients.CONTENT_URI, patient.toContentValues());
 
         // Perform incremental observation sync so we get admission date.
-        SyncAccountService.startObservationsAndOrdersSync();
+        mSyncManager.startObservationsAndOrdersSync();
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(

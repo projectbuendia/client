@@ -15,23 +15,21 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.sync.BuendiaSyncEngine.SyncOption;
+import org.projectbuendia.client.sync.BuendiaSyncEngine.SyncPhase;
 import org.projectbuendia.client.utils.Logger;
-
-import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
 
-/** Manages the sync process and responds to sync events. */
+/** Provides app-facing methods for requesting and cancelling sync operations. */
 public class SyncManager {
-
     private static final Logger LOG = Logger.create();
 
     static final String SYNC_STATUS = "sync-status";
@@ -51,53 +49,69 @@ public class SyncManager {
      */
     static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
-    @Nullable private final AppSettings mSettings;
+    private final SyncScheduler mSyncScheduler;
 
-    public SyncManager(@Nullable AppSettings settings) {
-        mSettings = settings;
+    public SyncManager(SyncScheduler runner) {
+        mSyncScheduler = runner;
     }
 
     /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
-        ContentResolver.cancelSync(
-            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+        mSyncScheduler.stopSyncing();
 
-        // If sync was pending, it should now be idle and we can consider the sync immediately
-        // canceled.
-        if (!isSyncPending() && !isSyncActive()) {
+        // If sync was pending, it should now be idle and we can consider the sync immediately canceled.
+        if (!isSyncRunningOrPending()) {
             LOG.i("Sync was canceled before it began -- immediately firing SyncCanceledEvent.");
             EventBus.getDefault().post(new SyncCanceledEvent());
         }
     }
 
-    /** Returns {@code true} if a sync is pending. */
-    public boolean isSyncPending() {
-        return ContentResolver.isSyncPending(
-            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
-    }
-
-    /** Returns {@code true} if a sync is active. */
-    public boolean isSyncActive() {
-        return ContentResolver.isSyncActive(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+    public boolean isSyncRunningOrPending() {
+        return mSyncScheduler.isRunningOrPending();
     }
 
     /** Starts a full sync as soon as possible. */
     public void startFullSync() {
-        SyncAccountService.startFullSync();
-    }
+        Bundle options = new Bundle();
+        // Request aggressively that the sync should start straight away.
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
-    /** Starts a sync of only observations and orders. */
-    public static void startObservationsAndOrdersSync() {
-        SyncAccountService.startObservationsAndOrdersSync();
+        // Fetch everything
+        options.putBoolean(SyncOption.FULL_SYNC.name(), true);
+        LOG.i("Requesting full sync");
+        mSyncScheduler.requestSync(options);
     }
 
     /**
-     * A {@link BroadcastReceiver} that listens for sync status broadcasts sent by
-     * {@link SyncAdapter}.
+     * Starts, changes, or stops the periodic sync schedule.  There can be at most
+     * one such repeating loop; any periodic sync from a previous call is replaced
+     * with this new one.  Specifying a period of zero stops the periodic sync.
      */
-    public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
+    public void setPeriodicSync(Bundle options, int periodSec) {
+        mSyncScheduler.setPeriodicSync(options, periodSec);
+    }
 
+    /** Starts a sync of only observations and orders. */
+    public void startObservationsAndOrdersSync() {
+        // Start by canceling any existing syncs, which may delay this one.
+        mSyncScheduler.stopSyncing();
+
+        Bundle options = new Bundle();
+        // Request aggressively that the sync should start straight away.
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        // Fetch just the newly added observations.
+        options.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
+        options.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
+
+        LOG.i("Requesting incremental observations / orders sync");
+        mSyncScheduler.requestSync(options);
+    }
+
+    /** Listens for sync status events that are broadcast by BuendiaSyncEngine. */
+    public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
             switch (syncStatus) {
