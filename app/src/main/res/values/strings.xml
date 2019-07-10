@@ -84,7 +84,7 @@
   <string name="order_duration_stop_after_date">(stop after %s)</string>
   <string name="order_duration_unspecified">(no specific duration)</string>
   <string name="order_duration_indefinitely">(indefinitely)</string>
-  <string name="order_duration_administer_once">(administer once)</string>
+  <string name="order_duration_administer_once">(one dose only)</string>
   <string name="order_notes">Notes</string>
   <string name="enter_medication">Enter a medication</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
@@ -99,9 +99,12 @@
   <string name="route_of_administration">Route of administration</string>
 
   <string name="order_execution_title">Treatment history</string>
-  <string name="order_execution_historical_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time on %2$s</string>
+  <string name="order_medication_route">%1$s %2$s</string>
+  <string name="order_dosage_unary">%1$s</string>
+  <string name="order_dosage_series">%1$s, given %2$dx daily</string>
+  <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; on %2$s</string>
   <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times on %2$s</string>
-  <string name="order_execution_today_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time today, %2$s</string>
+  <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today, %2$s</string>
   <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today, %2$s</string>
   <string name="order_execution_mark_as_given">Mark as given now</string>
   <string name="order_execution_marked_as_given">&#x2714; Marked as given now</string>
@@ -360,7 +363,6 @@
   <string name="loading">Loading...</string>
   <string name="no_such_patient_as_of_48_min_ago">No such patient as of 48 min ago</string>
   <string name="observation">Observation</string>
-  <string name="Medication_and_dosage">Medication and dosage</string>
   <string name="string_with_paren">%1$s (%2$s)</string>
   <string name="voiding">Void</string>
   <string name="void_observations">Void Observations</string>

@@ -81,15 +81,30 @@
   <string name="order_duration_stop_after_tomorrow">(arrêter après demain)</string>
   <string name="order_duration_stop_after_date">(arrêter après %s)</string>
   <string name="order_duration_unspecified">(pas de durée spécifique)</string>
+  <string name="order_duration_indefinitely">(indéfiniment)</string>
+  <string name="order_duration_administer_once">(seul dose)</string>
+  <string name="order_notes">Remarques</string>
   <string name="enter_medication">Entrez le médicament</string>
   <string name="order_give_for_days_cannot_be_zero">Doit être vide ou supérieure à 0</string>
+  <string name="order_cannot_exceed_n_times_per_day">Ne peut pas dépasser %d fois par jour</string>
+  <string name="order_cannot_exceed_n_days">Ne peut pas dépasser %d jours</string>
+  <string name="order_stop_now">Arrêter maintenant</string>
+  <string name="order_delete">Supprimer cette traitement</string>
+  <string name="title_confirmation">Confirmation</string>
+  <string name="confirm_order_delete">Vraiment supprimer?</string>
+  <string name="delete">Supprimer</string>
+
+  <string name="route_of_administration">Voie d\'administration</string>
 
   <string name="order_execution_title">L\'historique de traitement</string>
+  <string name="order_medication_route">%1$s %2$s</string>
+  <string name="order_dosage_unary">%1$s</string>
+  <string name="order_dosage_series">%1$s, donné %2$d fois par jour</string>
   <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois on %2$s</string>
   <string name="order_execution_historical_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois on %2$s</string>
   <string name="order_execution_today_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois aujourd\'hui, %2$s</string>
   <string name="order_execution_today_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois aujourd\'hui, %2$s</string>
-  <string name="order_execution_mark_as_given">Marquer comme donnée maintenant</string>
+  <string name="order_execution_mark_as_given">Marquer comme donné maintenant</string>
   <string name="order_execution_marked_as_given">&#x2714; Marqué comme donné maintenant</string>
   <string name="order_started_on_date_at_time">Commencé le %1$s à %2$s</string>
 
@@ -110,6 +125,7 @@
   <string name="title_updating_patient">Mise à jour du patient</string>
   <string name="please_wait">Attendez SVP</string>
 
+  <string name="title_zoom">Sélectionnez le niveau de zoom</string>
   <string name="zoom_day">1 colonne par jour</string>
   <string name="zoom_half">2 colonnes par jour</string>
   <string name="zoom_third">3 colonnes par jour</string>
@@ -152,6 +168,8 @@
   <string name="action_add_test_result">Ajouter le résultat du test</string>
   <string name="pregnant">Enceinte</string>
   <string name="iv_fitted">cathéter intraveineux en place</string>
+  <string name="cannot_eat">Ne peut pas manger</string>
+  <string name="oxygen">Oxygène</string>
   <string name="status_short_desc_unknown">-</string>
   <string name="status_short_desc_well">1</string>
   <string name="status_short_desc_unwell">2</string>
@@ -338,11 +356,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="loading">Chargement...</string>
   <string name="no_such_patient_as_of_48_min_ago">Aucun patient d\'il y a 48 min</string>
   <string name="observation">Observation</string>
-  <string name="Medication_and_dosage">Médicaments et posologie</string>
   <string name="title_new_user">Nouvel utilisateur</string>
   <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
-  <string name="order_stop_now">Arrêter maintenant</string>
-  <string name="order_delete">Supprimer cette traitement</string>
   <string name="voiding">vide</string>
   <string name="void_observations">Observations Vides</string>
 </resources>

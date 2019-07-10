@@ -44,7 +44,9 @@ import de.greenrobot.event.EventBus;
 
 /** A {@link DialogFragment} for recording that an order was executed. */
 public class OrderExecutionDialogFragment extends DialogFragment {
-    @InjectView(R.id.order_instructions) TextView mOrderInstructions;
+    @InjectView(R.id.order_medication) TextView mOrderMedication;
+    @InjectView(R.id.order_dosage) TextView mOrderDosage;
+    @InjectView(R.id.order_notes) TextView mOrderNotes;
     @InjectView(R.id.order_start_time) TextView mOrderStartTime;
     @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
     @InjectView(R.id.order_execution_list) TextView mOrderExecutionList;
@@ -56,7 +58,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         Order order, Interval interval, List<DateTime> executionTimes) {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
-        args.putString("instructions", order.instructions.format());
+        args.putString("medication", order.instructions.medication);
+        args.putString("route", order.instructions.route);
+        args.putString("dosage", order.instructions.dosage);
+        args.putInt("frequency", order.instructions.frequency);
+        args.putString("notes", order.instructions.notes);
         args.putLong("orderStartMillis", order.start.getMillis());
         args.putLong("intervalStartMillis", interval.getStartMillis());
         args.putLong("intervalStopMillis", interval.getEndMillis());
@@ -121,16 +127,30 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         Collections.sort(executionTimes);
 
         // Show what was ordered and when the order started.
-        mOrderInstructions.setText(args.getString("instructions"));
+        mOrderMedication.setText(getString(
+            R.string.order_medication_route,
+            args.getString("medication"),
+            args.getString("route")
+        ));
+        int frequency = args.getInt("frequency");
+        mOrderDosage.setText(getString(
+            frequency > 0 ? R.string.order_dosage_series : R.string.order_dosage_unary,
+            args.getString("dosage"),
+            frequency
+        ));
+        String notes = args.getString("notes");
+        mOrderNotes.setText(notes);
+        mOrderNotes.setVisibility(notes.trim().isEmpty() ? View.GONE : View.VISIBLE);
+
         DateTime start = Utils.getDateTime(args, "orderStartMillis");
-        mOrderStartTime.setText(getResources().getString(
+        mOrderStartTime.setText(getString(
             R.string.order_started_on_date_at_time,
             Utils.formatShortDate(start.toLocalDate()), Utils.formatTimeOfDay(start)));
 
         // Describe how many times the order was executed during the selected interval.
         int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
         boolean plural = count != 1;
-        mOrderExecutionCount.setText(Html.fromHtml(getResources().getString(
+        mOrderExecutionCount.setText(Html.fromHtml(getString(
             date.equals(LocalDate.now()) ?
                 (plural ? R.string.order_execution_today_plural_html
                     : R.string.order_execution_today_singular_html) :
