@@ -14,8 +14,6 @@ package org.projectbuendia.client.ui.chart;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -48,6 +46,8 @@ import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
+
+import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.any;
@@ -176,18 +176,6 @@ public final class PatientChartControllerTest {
         mController.init();
         // WHEN a vital is pressed
         mController.onAddObservationPressed("foo");
-        // THEN the controller displays the loading dialog
-        verify(mMockUi).showFormLoadingDialog(true);
-    }
-
-    /** Tests that requesting an xform through clicking on test results shows loading dialog. */
-    @Test
-    @UiThreadTest
-    public void testTestResultsClick_showsLoadingDialog() {
-        // GIVEN controller is initialized
-        mController.init();
-        // WHEN test results are pressed
-        mController.onPcrResultsPressed();
         // THEN the controller displays the loading dialog
         verify(mMockUi).showFormLoadingDialog(true);
     }
