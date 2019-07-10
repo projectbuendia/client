@@ -30,17 +30,18 @@ if echo "$CIRCLE_TAG" | grep -Eq '^v([0-9]+\.?)+$'; then
 fi
 
 # Find the most recent release tag on master.
-TAG=$(git describe --match='v*' --abbrev=0 origin/master)
+TAG=$(git describe --tags --match='v*' --abbrev=0 origin/master)
 
-# If we're building in CircleCI, the version is "x.y.z+b<n>" where <n> is the
+# If we're building in CircleCI, the version is "x.y.<b>" where <b> is the
 # latest build number. 
 if [ -n "$CIRCLE_BUILD_NUM" ]; then
-    echo "${TAG#v}+b${CIRCLE_BUILD_NUM}"
+    IFS='.' read -ra TAG_VERSION <<< "${TAG#v}"
+    echo "${TAG_VERSION[0]}.${TAG_VERSION[1]}.${CIRCLE_BUILD_NUM}"
     exit
 fi
 
-# Otherwise, we're building locally, so the version should be "x.y.z~g<commit>"
-# where <commit> is the latest unambiguous commit identifier. This version is
-# actually treated by Debian as _less_ recent than "x.y.z".
+# Otherwise, we're building locally, so the version should be "x.y.z-<commit>"
+# where <commit> is the latest unambiguous commit identifier. "+dirty" is
+# appended if the current tree is dirty.
 COMMIT=$(git describe --abbrev --dirty=+dirty)
-echo "${TAG#v}~${COMMIT#*g}"
+echo "${TAG#v}-${COMMIT#*g}"
