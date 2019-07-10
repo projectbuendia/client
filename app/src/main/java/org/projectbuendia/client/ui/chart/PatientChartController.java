@@ -557,13 +557,6 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         Map<String, Obs> latestObservations =
             new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
         List<Order> orders = mChartHelper.getOrders(mPatientUuid);
-        Collections.sort(orders, new Comparator<Order>() {
-            @Override public int compare(Order a, Order b) {
-                int result = a.instructions.route.compareTo(b.instructions.route);
-                if (result != 0) return result;
-                return a.start.compareTo(b.start);
-            }
-        });
         mOrdersByUuid = new HashMap<>();
         for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);

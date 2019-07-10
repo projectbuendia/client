@@ -100,7 +100,7 @@ public class Utils {
     }
 
     /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
-    public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
+    public static <K, V> V getOrDefault(Map<K, V> map, Object key, V defaultValue) {
         return map.containsKey(key) ? map.get(key) : defaultValue;
     }
 
@@ -120,6 +120,16 @@ public class Utils {
             array[i++] = item;
         }
         return array;
+    }
+
+    /** Provides Math.floorMod for Android versions prior to API level 24, d > 0. */
+    public static int floorMod(int x, int d) {
+        return ((x % d) + d) % d;
+    }
+
+    /** Provides Math.floorDiv for Android versions prior to API level 24, d > 0. */
+    public static int floorDiv(int x, int d) {
+        return (x - floorMod(x, d)) / d;
     }
 
 
@@ -475,7 +485,6 @@ public class Utils {
         }
         return (String) id;
     }
-
 
 
     // ==== Ordering ====

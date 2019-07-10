@@ -74,7 +74,7 @@
       {% set prevStop = columns[0].start %}
       {% for column in columns %}
         {% if column.start != prevStop %}
-          <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
+          <th scope="rowgroup" class="gap" rowspan={{(rows | length) + 1}}>&nbsp;</th>
         {% endif %}
         {% if column.start == column.dayStart %}
           <th scope="rowgroup" colspan={{numColumnsPerDay}}>&nbsp;</th>
@@ -129,7 +129,7 @@
       {% set prevStop = columns[0].start %}
       {% for column in columns %}
         {% if column.start != prevStop %}
-          <th scope="rowgroup" class="gap" rowspan={{rows.size + 1}}>&nbsp;</th>
+          <th scope="rowgroup" class="gap" rowspan={{(rows | length) + 1}}>&nbsp;</th>
         {% endif %}
         {% if column.start == column.dayStart %}
           <th scope="rowgroup" colspan={{numColumnsPerDay}}>&nbsp;</th>
@@ -147,19 +147,20 @@
           <div class="medication">{{ins.medication}}&nbsp;{{ins.route}}</div>
           <div>{{ins.dosage}}&nbsp;</div>
         </th>
-        {% set counts = executionCounts[order.uuid] %}
+        {% set executionHistory = executionHistories[order.uuid] %}
         {% set past = true %}
         {% set future = false %}
         {% set started = false %}
         {% set divisionIndex = 0 %}
-        {% set summarize = ins.frequency > numColumnsPerDay %}
+        {% set showPerDivisionCounts = numColumnsPerDay >= ins.frequency %}
 
         {% for column in columns %}
           {% if column.start == column.dayStart %}
             {% if column.date == order.startDay %}
               {% set started = true %}
             {% endif %}
-            <td class="day" colspan={{numColumnsPerDay}}>
+            <td class="day" colspan={{numColumnsPerDay}}
+                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
               &nbsp; {# ensure uniform height #}
               {% set totalScheduled = 0 %}
               {% set totalGiven = 0 %}
@@ -170,18 +171,20 @@
                     {% if current %} {% set past = false %} {% endif %}
 
                     {% set scheduled = count_scheduled_doses(order, division) %}
-                    {% set given = counts[divisionIndex] %}
-                    {% if given is null %} {% set given = 0 %} {% endif %}
+                    {% set executionTimes = executionHistory[divisionIndex] %}
+                    {% set given = executionTimes | length %}
                     {% set status = (given < scheduled) ? 'underdose' : (given > scheduled) ? 'overdose' : (scheduled > 0) ? 'full-dose' : '' %}
 
-                    <div class="division {{past ? 'past' : ''}} {{current ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stop ? 'stop' : ''}}"
-                        onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
-                      {% if summarize %}
-                        {# leave blank #}
-                      {% elseif given == scheduled and given > 0 %}
-                        <span class="given">{{given}}</span>
-                      {% elseif given + scheduled > 0 %}
-                        <span class="given">{{given}}</span>/{{scheduled}}
+                    <div class="division {{past ? 'past' : ''}} {{current ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stop ? 'stop' : ''}}">
+                      {% for percentage in executionTimes %}
+                        <div class="execution" style="left: {{percentage}}%"></div>
+                      {% endfor %}
+                      {% if showPerDivisionCounts and given + scheduled > 0 %}
+                        {% if given == scheduled %}
+                          <span class="given">{{given}}</span>
+                        {% else %}
+                          <span class="given">{{given}}</span>/{{scheduled}}
+                        {% endif %}
                       {% else %}
                         &nbsp; {# ensure uniform height #}
                       {% endif %}
@@ -192,9 +195,8 @@
                     {% set totalGiven = totalGiven + given %}
                     {% set divisionIndex = divisionIndex + 1 %}
                   {% endfor %}
-                  {% if summarize %}
-                    <div class="summary"
-                        onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                  {% if not showPerDivisionCounts %}
+                    <div class="summary">
                       {% if totalGiven == totalScheduled and totalGiven > 0 %}
                         <span class="given">{{totalGiven}}</span>
                       {% elseif totalGiven + totalScheduled > 0 %}
