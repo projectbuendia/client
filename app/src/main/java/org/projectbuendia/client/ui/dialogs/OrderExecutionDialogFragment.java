@@ -35,6 +35,7 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -117,6 +118,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         for (long millis : args.getLongArray("executionTimes")) {
             executionTimes.add(new DateTime(millis));
         }
+        Collections.sort(executionTimes);
 
         // Show what was ordered and when the order started.
         mOrderInstructions.setText(args.getString("instructions"));

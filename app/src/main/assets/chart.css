@@ -126,7 +126,7 @@ th[scope="rowgroup"] {
   position: absolute;
   top: 70%;
   bottom: 0;
-  opacity: 0.4;
+  opacity: 0.3;
   background: #000;
 }
 .past.underdose .execution { background: #f80; }
