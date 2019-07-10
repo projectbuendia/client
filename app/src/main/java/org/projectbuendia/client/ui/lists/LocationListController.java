@@ -131,7 +131,7 @@ final class LocationListController {
         } else {
             LOG.i("Data model unavailable; waiting on sync.");
             mWaitingOnSync = true;
-            if (!mSyncManager.isSyncActive() && !mSyncManager.isSyncPending()) {
+            if (!mSyncManager.isSyncRunningOrPending()) {
                 LOG.i("No sync detected, forcing new sync.");
                 onSyncRetry();
             }

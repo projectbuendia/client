@@ -16,7 +16,6 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.app.Service;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,7 +23,6 @@ import android.os.IBinder;
 
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.SyncAdapter.SyncOption;
 import org.projectbuendia.client.utils.Logger;
 
@@ -40,15 +38,16 @@ public class SyncAccountService extends Service {
 
     public static final String ACCOUNT_NAME = "sync";
     private static final Logger LOG = Logger.create();
-    private static final long SYNC_PERIOD = 5*60;  // 5 minutes (in seconds)
+    private static final int SYNC_PERIOD_SEC = 5*60;  // 5 minutes (in seconds)
     @Inject static AppSettings sSettings;
+    @Inject static SyncManager sSyncManager;
 
     private Authenticator mAuthenticator;
 
     /** Sets up the sync account for this app. */
     public static void initialize(Context context) {
         if (createAccount(context) || !sSettings.getSyncAccountInitialized()) {
-            startFullSync();
+            sSyncManager.startFullSync();
             sSettings.setSyncAccountInitialized(true);
         }
     }
@@ -61,61 +60,18 @@ public class SyncAccountService extends Service {
         Account account = getAccount();
         AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
         if (accountManager.addAccountExplicitly(account, null, null)) {
-
-            // TODO(sync): Set up a periodic loop to invoke syncs every 5 minutes.
-            /*
-            // Enable automatic sync for the account with a period of SYNC_PERIOD.
-            ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 1);
-            ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
-            Bundle b = new Bundle();
-            b.putBoolean(SyncOption.FULL_SYNC.name(), true);
-            ContentResolver.addPeriodicSync(account, Contracts.CONTENT_AUTHORITY, b, SYNC_PERIOD);
-            */
+            // Enable a periodic full sync for the account with a period of SYNC_PERIOD_SEC.
+            Bundle options = new Bundle();
+            options.putBoolean(SyncOption.FULL_SYNC.name(), true);
+            sSyncManager.startPeriodic(options, SYNC_PERIOD_SEC);
             return true;
         }
         return false;
     }
 
-    /** Starts a full sync. */
-    public static void startFullSync() {
-        Bundle b = new Bundle();
-        // Request aggressively that the sync should start straight away.
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-        // Fetch everything
-        b.putBoolean(SyncOption.FULL_SYNC.name(), true);
-        LOG.i("Requesting full sync");
-
-        // TODO(sync): Invoke a sync directly instead of through requestSync.
-        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
-    }
-
     /** Gets the app's sync account (call initialize() before using this). */
     public static Account getAccount() {
         return new Account(ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
-    }
-
-    /** Starts an sync of just the observations and orders. */
-    public static void startObservationsAndOrdersSync() {
-
-        // TODO(sync): Cancel any currently running sync and invoke an incremental sync directly.
-
-        /*
-        // Start by canceling any existing syncs, which may delay this one.
-        ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
-
-        Bundle b = new Bundle();
-        // Request aggressively that the sync should start straight away.
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-        // Fetch just the newly added observations.
-        b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
-        b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
-        LOG.i("Requesting incremental observations / orders sync");
-        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
-        */
     }
 
     @Override public void onCreate() {

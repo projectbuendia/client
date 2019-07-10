@@ -15,17 +15,14 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
-
-import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
 
@@ -51,48 +48,60 @@ public class SyncManager {
      */
     static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
-    @Nullable private final AppSettings mSettings;
+    private final SyncRunner mSyncRunner;
 
-    public SyncManager(@Nullable AppSettings settings) {
-        mSettings = settings;
+    public SyncManager(SyncRunner runner) {
+        mSyncRunner = runner;
     }
 
     /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
-        // TODO(sync): Cancel any running sync.
-        ContentResolver.cancelSync(
-            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+        mSyncRunner.cancelSync();
 
-        // If sync was pending, it should now be idle and we can consider the sync immediately
-        // canceled.
-        if (!isSyncPending() && !isSyncActive()) {
+        // If sync was pending, it should now be idle and we can consider the sync immediately canceled.
+        if (!isSyncRunningOrPending()) {
             LOG.i("Sync was canceled before it began -- immediately firing SyncCanceledEvent.");
             EventBus.getDefault().post(new SyncCanceledEvent());
         }
     }
 
-    /** Returns {@code true} if a sync is pending. */
-    public boolean isSyncPending() {
-        // TODO(sync): Return whether a sync is pending.
-        return ContentResolver.isSyncPending(
-            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
-    }
-
-    /** Returns {@code true} if a sync is active. */
-    public boolean isSyncActive() {
-        // TODO(sync): Return whether a sync is running.
-        return ContentResolver.isSyncActive(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+    public boolean isSyncRunningOrPending() {
+        return mSyncRunner.isRunningOrPending();
     }
 
     /** Starts a full sync as soon as possible. */
     public void startFullSync() {
-        SyncAccountService.startFullSync();
+        Bundle options = new Bundle();
+        // Request aggressively that the sync should start straight away.
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        // Fetch everything
+        options.putBoolean(SyncAdapter.SyncOption.FULL_SYNC.name(), true);
+        LOG.i("Requesting full sync");
+        mSyncRunner.queueSync(options);
+    }
+
+    public void startPeriodic(Bundle options, int periodSec) {
+        mSyncRunner.setPeriodicSync(options, periodSec);
     }
 
     /** Starts a sync of only observations and orders. */
-    public static void startObservationsAndOrdersSync() {
-        SyncAccountService.startObservationsAndOrdersSync();
+    public void startObservationsAndOrdersSync() {
+        // Start by canceling any existing syncs, which may delay this one.
+        mSyncRunner.cancelSync();
+
+        Bundle options = new Bundle();
+        // Request aggressively that the sync should start straight away.
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        // Fetch just the newly added observations.
+        options.putBoolean(SyncAdapter.SyncPhase.SYNC_OBSERVATIONS.name(), true);
+        options.putBoolean(SyncAdapter.SyncPhase.SYNC_ORDERS.name(), true);
+
+        LOG.i("Requesting incremental observations / orders sync");
+        mSyncRunner.queueSync(options);
     }
 
     /**
