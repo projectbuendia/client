@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
@@ -51,6 +52,7 @@ public class LoginControllerTest {
     @Mock private LoginController.Ui mMockUi;
     @Mock private LoginController.FragmentUi mMockFragmentUi;
     @Mock private Troubleshooter mTroubleshooter;
+    @Mock private AppSettings mAppSettings;
     private FakeEventBus mFakeEventBus;
 
     /** Tests that init() attempts to load known users. */
@@ -279,7 +281,7 @@ public class LoginControllerTest {
             mTroubleshooter,
             mMockUi,
             mMockFragmentUi,
-            null);
+            mAppSettings);
 
     }
 }

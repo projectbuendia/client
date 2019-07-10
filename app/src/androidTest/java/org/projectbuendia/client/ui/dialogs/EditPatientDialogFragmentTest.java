@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
-import android.app.Activity;
 import android.support.annotation.IdRes;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -24,7 +23,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 
-import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static junit.framework.TestCase.assertTrue;
 
@@ -35,10 +33,11 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
     /**
      * Tests adding a new patient;
-     * Tests adding a location to the patient;
+     * Tests initial location of the patient;
      * Test symptom date;
      * Test last observation date;
      * Test admission date;
+     * Tests adding a location to the patient;
      */
     @Test
     @UiThreadTest
@@ -46,30 +45,24 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         // Create the patient
         String id = inUserLoginGoToDemoPatientChart();
 
+        expectVisibleSoon(viewThat(hasTextContaining("Triage")));
+
+        // The symptom onset date should not be assigned a default value.
+        expectVisible(viewThat(
+                hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
+                hasText("–")));
+
+        expectVisibleWithin(399999, viewThat(
+                hasAncestorThat(withId(R.id.attribute_admission_days)),
+                hasText("Day 1")));
+
         // Assign a location to the patient
         click(viewWithId(R.id.attribute_location));
         screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");
 
-        pressBack();
-
-        // The new patient should be visible in the list for their location
-        click(viewWithText(LOCATION_NAME));
-        screenshot("In " + LOCATION_NAME);
-        inPatientListClickPatientWithId(id);
-        screenshot("After Patient Clicked");
-
-        // The symptom onset date should not be assigned a default value.
-        expectVisible(viewThat(
-            hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
-            hasText("–")));
-
-        // The admission date should be visible right after adding a patient.
-        // Flaky because of potential periodic syncs.
-        expectVisibleWithin(399999, viewThat(
-            hasAncestorThat(withId(R.id.attribute_admission_days)),
-            hasText("Day 1")));
+        expectVisibleSoon(viewThat(hasTextContaining(LOCATION_NAME)));
     }
 
     @Test
@@ -94,12 +87,23 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         click(viewWithText("OK"));
         waitForProgressFragment();
         screenshot("On Patient Chart");
-        Activity activity = getCurrentActivity();
+
+        // Make sure we're on a PatientChartActivity
+        // TODO(sdspikes): shouldn't this already be on ui thread because of @UiThreadTest annotation?
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    assertTrue("Expected PatientChartActivity, got something else",
+                            getCurrentActivity() instanceof PatientChartActivity);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        });
 
         // Now read off the patient info and check that it's all there.
         // It should all be in the action bar.
-        assertTrue("Expected PatientChartActivity, got something else",
-                activity instanceof PatientChartActivity);
         expectVisible(viewThat(hasTextContaining(id + ".")));
         expectVisible(viewThat(hasTextContaining(given)));
         expectVisible(viewThat(hasTextContaining(family)));
