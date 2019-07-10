@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.util.TimingLogger;
 
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
@@ -146,6 +145,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
+        LOG.start("onPerformSync");
+
         // Decide which phases to do.  If FULL_SYNC is set or no phases
         // are specified, do them all.
         Set<SyncPhase> phases = new HashSet<>();
@@ -159,9 +160,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Collections.addAll(phases, SyncPhase.values());
         }
 
-        LOG.i("Requested phases are: %s", phases);
+        LOG.i("Starting sync with phases: %s", phases);
         broadcastSyncProgress(0, R.string.sync_in_progress);
-        TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
 
         BuendiaProvider buendiaProvider = (BuendiaProvider) provider.getLocalContentProvider();
         try (DatabaseTransaction tx = buendiaProvider.startTransaction(SYNC_SAVEPOINT_NAME)) {
@@ -170,20 +170,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     storeFullSyncStartTime(provider, Instant.now());
                 }
 
-                float progressIncrement = 100.0f/phases.size();
                 int completedPhases = 0;
+                LOG.elapsed("onPerformSync", "Starting phases");
                 for (SyncPhase phase : SyncPhase.values()) {
                     if (phases.contains(phase)) {
-                        LOG.i("--- Begin %s ---", phase);
                         checkCancellation("before " + phase);
-                        broadcastSyncProgress((int) (completedPhases * progressIncrement), phase.message);
+                        broadcastSyncProgress(completedPhases * 100 / phases.size(), phase.message);
                         phase.runnable.sync(mContentResolver, syncResult, provider);
-                        timings.addSplit(phase.name() + " phase completed");
+                        LOG.elapsed("onPerformSync", "Completed phase %s", phase);
                         completedPhases++;
                     }
                 }
                 broadcastSyncProgress(100, R.string.completing_sync);
-
                 if (fullSync) {
                     storeFullSyncEndTime(provider, Instant.now());
                 }
@@ -207,9 +205,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 return;
             }
         }
-        timings.dumpToLog();
         broadcastSyncStatus(SyncManager.COMPLETED);
-        LOG.i("onPerformSync completed");
+        LOG.finish("onPerformSync");
     }
 
     /**

@@ -113,6 +113,8 @@ public class ChartRenderer {
             return;
         }
 
+        LOG.start("render");
+
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.
         // So, we apply the scaling factor explicitly, defining 1 em to be 10 sp.
@@ -127,8 +129,7 @@ public class ChartRenderer {
             chart, latestObservations, observations, orders,
             admissionDate, firstSymptomsDate).getHtml();
 
-        long start = System.currentTimeMillis();
-        LOG.i("Start loading HTML into WebView");
+        LOG.elapsed("render", "HTML generated");
 
         // To avoid showing stale, possibly misleading data from a previous
         // patient, clear out any previous chart HTML before showing the WebView.
@@ -138,8 +139,8 @@ public class ChartRenderer {
         mView.loadDataWithBaseURL(
             "file:///android_asset/", html, "text/html; charset=utf-8", "utf-8", null);
         mView.setWebContentsDebuggingEnabled(true);
-        long finish = System.currentTimeMillis();
-        LOG.i("Finished loading HTML into WebView in %d ms", finish - start);
+
+        LOG.finish("render", "HTML loaded into WebView");
 
         mLastChartName = chart.name;
         mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
@@ -181,6 +182,7 @@ public class ChartRenderer {
             mNow = DateTime.now();
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
+            LOG.start("GridHtmlGenerator");
             for (ChartSection tileGroup : chart.tileGroups) {
                 List<Tile> tileRow = new ArrayList<>();
                 for (ChartItem item : tileGroup.items) {
@@ -216,6 +218,8 @@ public class ChartRenderer {
             addObservations(observations, ordersByUuid);
             addOrders(orders);
             insertEmptyColumns();
+
+            LOG.elapsed("GridHtmlGenerator", "Data prepared");
         }
 
         /** Collects observations into Column objects that make up the grid. */
@@ -312,9 +316,6 @@ public class ChartRenderer {
 
         /** Exports a map of concept IDs to arrays of [columnStart, points] pairs. */
         JSONObject getJsonDataDump() {
-            long start = System.currentTimeMillis();
-            LOG.i("Starting getJsonDataDump");
-
             JSONObject dump = new JSONObject();
             for (String uuid : mConceptsToDump) {
                 try {
@@ -338,9 +339,6 @@ public class ChartRenderer {
                     LOG.e(e, "JSON error while dumping chart data");
                 }
             }
-            long finish = System.currentTimeMillis();
-            LOG.i("Finished getJsonDataDump in %d ms", finish - start);
-
             return dump;
         }
 
@@ -357,7 +355,10 @@ public class ChartRenderer {
             context.put("dataCellsByConceptId", getJsonDataDump());
             context.put("orders", getSortedOrders());
             context.put("executionHistories", getSortedExecutionHistories());
-            return renderTemplate("assets/chart.html", context);
+            LOG.elapsed("GridHtmlGenerator", "Template context populated");
+            String result = renderTemplate("assets/chart.html", context);
+            LOG.finish("GridHtmlGenerator", "Finished rendering HTML");
+            return result;
         }
 
         List<Order> getSortedOrders() {
@@ -402,8 +403,7 @@ public class ChartRenderer {
 
         /** Renders a Pebble template. */
         String renderTemplate(String filename, Map<String, Object> context) {
-            long start = System.currentTimeMillis();
-            LOG.i("Starting renderTemplate");
+            LOG.start("renderTemplate");
 
             if (sEngine == null) {
                 // PebbleEngine caches compiled templates by filename, so as long as we keep using the
@@ -412,14 +412,10 @@ public class ChartRenderer {
             }
             try {
                 StringWriter writer = new StringWriter();
-                LOG.d("Loading template...");
                 PebbleTemplate template = sEngine.getTemplate(filename);
-                LOG.d("Evaluating template...");
+                LOG.elapsed("renderTemplate", "Template loaded");
                 template.evaluate(writer, context);
-                LOG.d("Template rendered.");
-
-                long finish = System.currentTimeMillis();
-                LOG.i("Finished renderTemplate in %d ms", finish - start);
+                LOG.finish("renderTemplate");
                 return writer.toString();
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();

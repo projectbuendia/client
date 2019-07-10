@@ -68,8 +68,6 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -549,9 +547,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     public synchronized void updatePatientObsUi() {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
-        long start = System.currentTimeMillis();
         String patientId = mPatient != null ? mPatient.id : "(unknown)";
-        LOG.i("Start updatePatientObsUi for patient " + patientId);
+        LOG.start("updatePatientObsUi", "patientId = %s", patientId);
 
         mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, Obs> latestObservations =
@@ -561,7 +558,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
-        LOG.d("Fetched " + mObservations.size() + " observations, " + orders.size() + " orders");
+        LOG.elapsed("updatePatientObsUi", "Fetched %d obs, %d orders", mObservations.size(), orders.size());
 
         LocalDate admissionDate = getObservedDate(
             latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
@@ -577,8 +574,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 admissionDate, firstSymptomsDate);
         }
 
-        long finish = System.currentTimeMillis();
-        LOG.i("Finished updatePatientObsUi in %d ms", finish - start);
+        LOG.finish("updatePatientObsUi");
     }
 
     public List<Chart> getCharts(){

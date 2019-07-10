@@ -308,34 +308,6 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
-    static class GetOrderExecutionHistoryFunction implements Function {
-        @Override public List<String> getArgumentNames() {
-            return ImmutableList.of("order_uuid", "column");
-        }
-
-        @Override public Object execute(Map<String, Object> args) {
-            // TODO/robustness: Check types before casting.
-            String orderUuid = (String) args.get("order_uuid");
-            Column column = (Column) args.get("column");
-            Integer count = column.executionCountsByOrderUuid.get(orderUuid);
-            return count == null ? 0 : count;
-        }
-    }
-
-    static class GetOrderExecutionCountFunction implements Function {
-        @Override public List<String> getArgumentNames() {
-            return ImmutableList.of("order_uuid", "column");
-        }
-
-        @Override public Object execute(Map<String, Object> args) {
-            // TODO/robustness: Check types before casting.
-            String orderUuid = (String) args.get("order_uuid");
-            Column column = (Column) args.get("column");
-            Integer count = column.executionCountsByOrderUuid.get(orderUuid);
-            return count == null ? 0 : count;
-        }
-    }
-
     static class IntervalsOverlapFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("a", "b");
