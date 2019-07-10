@@ -37,7 +37,7 @@ jobs:
             export ANDROID_PATH=/opt/android/sdk
             ./gradlew assembleDebug
             mkdir -p /tmp/artifacts
-            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk
+            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}-debug.apk
 
       - run:
           name: Run Tests
@@ -52,6 +52,66 @@ jobs:
       #- store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
       #path: app/build/test-results
 
+  release:
+    working_directory: ~/client
+    docker:
+      - image: circleci/android:api-23
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+
+      - run:
+          name: Init client-lib submodule
+          command: git submodule update --init client-libs
+
+      - run:
+          name: Get package version
+          command: echo "export PACKAGE_VERSION=$(.circleci/get_package_version)" >> $BASH_ENV
+
+      - restore_cache:
+          keys:
+            - buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+            - buendia-client-v1-{{ checksum "build.gradle" }}-
+            - buendia-client-v1-{{ checksum "build.gradle" }}-
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+
+      - run:
+          name: Save keystore
+          command: |
+            echo "$ANDROID_KEYSTORE" | base64 -d > $ANDROID_KEYSTORE_FILE
+      
+      - run:
+          name: Build release APK
+          command: |
+            export ANDROID_PATH=/opt/android/sdk
+            ./gradlew -PversionNumber=${PACKAGE_VERSION} --no-daemon assembleRelease
+            mkdir -p /tmp/artifacts
+            cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk
+
+      - run:
+          name: Verify APK signature
+          command: |
+            keytool -list -printcert -jarfile /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk | tee /tmp/cert.txt
+            grep -q Buendia /tmp/cert.txt
+
+      - run:
+          name: Run Tests
+          # lint is slightly busted for us here
+          # command: ./gradlew lint test
+          command: ./gradlew test
+
+      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+          path: /tmp/artifacts
+          destination: artifacts
+ 
 workflows:
   version: 2
   dev-build:
@@ -68,7 +128,7 @@ workflows:
     # Ensure that tagged releases get their own CircleCI build:
     # https://circleci.com/docs/2.0/workflows/#executing-workflows-for-a-git-tag
     jobs:
-      - build:
+      - release:
           filters:
             tags:
               only: /^v.*/
