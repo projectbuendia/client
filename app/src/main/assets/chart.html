@@ -139,7 +139,7 @@
     </tr>
     {% for order in orders %}
       {% set ins = order.instructions %}
-      <tr class="order">
+      <tr class="order route-{{ins.route}}">
         <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
           {% if ins.notes is not empty %}
             <div class="notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
@@ -151,7 +151,6 @@
         {% set past = true %}
         {% set future = false %}
         {% set started = false %}
-        {% set stopped = false %}
         {% set divisionIndex = 0 %}
         {% set summarize = ins.frequency > numColumnsPerDay %}
 
@@ -165,7 +164,7 @@
               {% set totalScheduled = 0 %}
               {% set totalGiven = 0 %}
               <div class="divisions">
-                {% if started and not stopped %}
+                {% if started %}
                   {% for division in get_order_divisions(order, column.date) %}
                     {% set current = interval_contains(division, now) %}
                     {% if current %} {% set past = false %} {% endif %}
@@ -174,9 +173,6 @@
                     {% set given = counts[divisionIndex] %}
                     {% if given is null %} {% set given = 0 %} {% endif %}
                     {% set status = (given < scheduled) ? 'underdose' : (given > scheduled) ? 'overdose' : (scheduled > 0) ? 'full-dose' : '' %}
-                    {% if order.isSeries and interval_contains(division, order.stop) %}
-                      {% set stopped = true %}
-                    {% endif %}
 
                     <div class="division {{past ? 'past' : ''}} {{current ? 'now' : ''}} {{future ? 'future' : ''}} {{status}} {{stop ? 'stop' : ''}}"
                         onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
