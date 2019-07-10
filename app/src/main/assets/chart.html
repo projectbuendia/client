@@ -138,13 +138,14 @@
       {% endfor %}
     </tr>
     {% for order in orders %}
+      {% set ins = order.instructions %}
       <tr class="order">
         <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
-          {% if order.instructions.notes is not empty %}
-            <div class="notes">{{order.instructions.notes | slice(0, 30)}}</div>
+          {% if ins.notes is not empty %}
+            <div class="notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
           {% endif %}
-          <div class="medication">{{order.instructions.medication}}&nbsp;{{order.instructions.route}}</div>
-          <div>{{order.instructions.dosage}}&nbsp;</div>
+          <div class="medication">{{ins.medication}}&nbsp;{{ins.route}}</div>
+          <div>{{ins.dosage}}&nbsp;</div>
         </th>
         {% set counts = executionCounts[order.uuid] %}
         {% set past = true %}
@@ -152,7 +153,7 @@
         {% set started = false %}
         {% set stopped = false %}
         {% set divisionIndex = 0 %}
-        {% set summarize = order.instructions.frequency > numColumnsPerDay %}
+        {% set summarize = ins.frequency > numColumnsPerDay %}
 
         {% for column in columns %}
           {% if column.start == column.dayStart %}
