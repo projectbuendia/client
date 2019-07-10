@@ -70,7 +70,7 @@ th.gap, th[scope="rowgroup"].gap {
 #grid-left th { padding-left: 16px; min-width: 20rem; max-width: 20rem; }
 
 /* Grid text: should match @style/text */
-th, td, .order .division, .order .summary {
+th, td, .division, .summary {
   font-size: 1.9rem;
   line-height: 1.3; /* ensure that rows have uniform height */
   padding: 0.6em 0 0.5em; /* extra 0.1em on top for vertical centering */
@@ -119,15 +119,16 @@ th[scope="rowgroup"] {
 .order .overdose { background: #ecf; }
 .order .overdose .given, .order .overdose .extra-given { color: #c00; }
 
-.division { position: relative; }  /* contains positioned .execution */
+.division { position: relative; overflow: visible; }  /* contains positioned .execution */
 .execution {
   width: 0.3rem;
-  margin-left: 0.15rem;
+  margin-left: -0.15rem;
   position: absolute;
   top: 70%;
   bottom: 0;
   opacity: 0.3;
   background: #000;
+  z-index: 1;
 }
 .past.underdose .execution { background: #f80; }
 .now.underdose .execution { background: #f00; }
