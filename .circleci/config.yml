@@ -7,7 +7,7 @@ references:
   build_config: &build_config
     working_directory: ~/client
     docker:
-      - image: circleci/android:api-23
+      - image: circleci/android:api-28
     environment:
       # See https://github.com/opendatakit/collect/blob/master/.circleci/config.yml#L86-L92 for -Xm[sx]
       # Disable pre-dexing because we don't need incremental builds here and it just slows the process down.
