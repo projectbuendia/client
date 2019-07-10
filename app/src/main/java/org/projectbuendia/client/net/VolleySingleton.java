@@ -47,8 +47,8 @@ public class VolleySingleton {
      * handling and contexts correct.
      */
     public <T> void addToRequestQueue(Request<T> req) {
-        LOG.i("Queueing HTTP %s", Utils.repr(req));
         getRequestQueue().add(req);
+        LOG.start("HTTP." + req.getSequence(), "Queued %s", Utils.repr(req));
     }
 
     private RequestQueue getRequestQueue() {

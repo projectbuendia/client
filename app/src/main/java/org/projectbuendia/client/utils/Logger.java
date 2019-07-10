@@ -47,8 +47,8 @@ public final class Logger {
     private static final int MAX_TAG_LENGTH = 23;
     public final String tag;
 
-    private Map<String, Long> startTimes = new HashMap<>();
-    private Map<String, Long> lastTimes = new HashMap<>();
+    private static Map<String, Long> startTimes = new HashMap<>();
+    private static Map<String, Long> lastTimes = new HashMap<>();
 
     /** Creates a {@link Logger} with the calling class's class name as a tag. */
     public static Logger create() {
@@ -141,20 +141,11 @@ public final class Logger {
         startTimes.put(key, now);
         lastTimes.put(key, now);
         String formatted = formatIfNeeded(message, args);
-        Log.d(tag, "[" + key + "] 0 ms: " + formatted);
+        Log.d(tag, "[" + key + "- 0 ms: " + formatted);
     }
 
     public void elapsed(String key, String message, Object... args) {
-        long now = System.currentTimeMillis();
-        Long start = startTimes.get(key);
-        Long last = lastTimes.get(key);
-        if (start == null || last == null) {
-            start(key, "(timer not started) " + message, args);
-        } else {
-            String formatted = formatIfNeeded(message, args);
-            Log.d(tag, "[" + key + "] +" + (now - last) + " = " + (now - start) + " ms: " + formatted);
-            lastTimes.put(key, now);
-        }
+        elapsedOrFinish(false, key, message, args);
     }
 
     public void finish(String key) {
@@ -162,9 +153,27 @@ public final class Logger {
     }
 
     public void finish(String key, String message, Object... args) {
-        elapsed(key, message, args);
-        startTimes.remove(key);
-        lastTimes.remove(key);
+        elapsedOrFinish(true, key, message, args);
+    }
+
+    private void elapsedOrFinish(boolean finish, String key, String message, Object... args) {
+        long now = System.currentTimeMillis();
+        Long start = startTimes.get(key);
+        Long last = lastTimes.get(key);
+        if (start == null || last == null) {
+            start(key, "(timer not started) " + message, args);
+        } else {
+            String formatted = formatIfNeeded(message, args);
+            String timing = "+" + (now - last);
+            if (!start.equals(last)) timing += " = " + (now - start);
+            String prefix = "-" + key + (finish ? "]" : "-");
+            Log.d(tag, prefix + " " + timing + " ms: " + formatted);
+            lastTimes.put(key, now);
+        }
+        if (finish) {
+            startTimes.remove(key);
+            lastTimes.remove(key);
+        }
     }
 
     private Logger(String tag) {

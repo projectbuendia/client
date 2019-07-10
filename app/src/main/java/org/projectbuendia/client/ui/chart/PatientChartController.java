@@ -18,6 +18,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.JavascriptInterface;
 
 import com.google.common.base.Optional;
 
@@ -75,7 +76,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Controller for {@link PatientChartActivity}. */
-final class PatientChartController implements ChartRenderer.GridJsInterface {
+final class PatientChartController implements ChartRenderer.JsInterface {
 
     private static final Logger LOG = Logger.create();
     private static final boolean DEBUG = true;
@@ -408,8 +409,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 mPatient.toOdkPatient(), preset);
     }
 
-    @android.webkit.JavascriptInterface
-    public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
+    @JavascriptInterface public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
         ArrayList<ObsRow> obsRows = null;
         if (!conceptUuid.isEmpty()){
             if (!startMillis.isEmpty()){
@@ -426,18 +426,15 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
     }
 
-    @android.webkit.JavascriptInterface
-    public void onNewOrderPressed() {
+    @JavascriptInterface public void onNewOrderPressed() {
         mUi.showOrderDialog(mPatientUuid, null);
     }
 
-    @android.webkit.JavascriptInterface
-    public void onOrderHeadingPressed(String orderUuid) {
+    @JavascriptInterface public void onOrderHeadingPressed(String orderUuid) {
         mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid));
     }
 
-    @android.webkit.JavascriptInterface
-    public void onOrderCellPressed(String orderUuid, long startMillis) {
+    @JavascriptInterface public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
@@ -451,14 +448,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showOrderExecutionDialog(order, interval, executionTimes);
     }
 
-    @android.webkit.JavascriptInterface
-    public void onPageUnload(int scrollX, int scrollY) {
+    @JavascriptInterface public void onPageUnload(int scrollX, int scrollY) {
         mLastScrollPosition.set(scrollX, scrollY);
     }
 
-    @android.webkit.JavascriptInterface
-    public void log(String message) {
-        LOG.i("Chart JS: " + message);
+    @JavascriptInterface public void log(String message) {
+        LOG.elapsed("ChartJS", message);
+    }
+
+    @JavascriptInterface public void finish() {
+        LOG.finish("ChartJS");
     }
 
     public void setDate(String conceptUuid, LocalDate date) {

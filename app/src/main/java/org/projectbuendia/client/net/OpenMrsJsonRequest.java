@@ -86,7 +86,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-        LOG.i("Got response to %s -> %s", Utils.repr(this), Utils.repr(response.data, 500));
+        LOG.finish("HTTP." + getSequence(), "Response to %s -> %s", Utils.repr(this), Utils.repr(response.data, 500));
         try {
             if (response.data.length == 0) {
                 byte[] responseData = "{}".getBytes("UTF8");

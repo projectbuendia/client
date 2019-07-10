@@ -102,15 +102,12 @@ public class SyncManager {
             int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
             switch (syncStatus) {
                 case STARTED:
-                    LOG.i("Sync started");
                     EventBus.getDefault().post(new SyncStartedEvent());
                     break;
                 case COMPLETED:
-                    LOG.i("Sync completed");
                     EventBus.getDefault().post(new SyncSucceededEvent());
                     break;
                 case FAILED:
-                    LOG.i("Sync failed");
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case IN_PROGRESS:
@@ -120,15 +117,12 @@ public class SyncManager {
                     EventBus.getDefault().post(new SyncProgressEvent(progress, label));
                     break;
                 case CANCELED:
-                    LOG.i("Sync was canceled.");
                     EventBus.getDefault().post(new SyncCanceledEvent());
                     break;
                 case -1:
-                    LOG.i("Sync status broadcast intent received without a status code.");
                     break;
                 default:
-                    LOG.i("Sync status broadcast intent received with unknown status %1$d.",
-                        syncStatus);
+                    LOG.i("Sync status broadcast intent received with unknown status %1$d.", syncStatus);
             }
         }
     }

@@ -73,7 +73,7 @@ public class ChartRenderer {
     private int mLastRenderedZoomIndex;  // last zoom level index rendered
     private String mLastChartName = "";
 
-    public interface GridJsInterface {
+    public interface JsInterface {
         @JavascriptInterface void onNewOrderPressed();
 
         @JavascriptInterface void onOrderHeadingPressed(String orderUuid);
@@ -99,7 +99,7 @@ public class ChartRenderer {
     public void render(Chart chart, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
-                       GridJsInterface controllerInterface) {
+                       JsInterface controllerInterface) {
         if (chart == null) {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
@@ -146,6 +146,8 @@ public class ChartRenderer {
         mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
+
+        LOG.start("ChartJS");
     }
 
     /** Gets the starting times (in ms) of the segments into which the day is divided. */
