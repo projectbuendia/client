@@ -101,22 +101,38 @@ th[scope="rowgroup"] {
 /* Orders */
 .order th { padding: 0 4px 0 16px; line-height: 1.1em; vertical-align: middle; }
 .medication { font-weight: bold; }
-.order td { position: relative; }
+.route-IV .medication { color: #c60; }
+.route-PO .medication { color: #084; }
+
+.order td { position: relative; }  /* contains positioned .divisions and .summary */
 .order .divisions, .order .summary {
     position: absolute; top: 0; left: 0; bottom: 0; right: 0;
 }
-.order .divisions { display: flex; flex-direction: row; }
+
+.order .divisions { display: flex; flex-direction: row; }  /* contains flexed .division */
 .order .division { flex-basis: 0; flex-grow: 1; }
 
-.order .scheduled { background: #ddd; }
-.order .past.underdose { background: #fda; }
-.order .now.underdose { background: #faa; }
-.order .full-dose { background: #afa; }
-.order .overdose { background: #c8f; }
+.order .past.underdose { background: #fed; }
+.order .now.underdose { background: #fcc; }
+.order .future.underdose { background: #eee; }
+.order .full-dose { background: #dfd; }
+.order .overdose { background: #ecf; }
 .order .overdose .given, .order .overdose .extra-given { color: #c00; }
 
-.route-IV .medication { color: #c60; }
-.route-PO .medication { color: #084; }
+.division { position: relative; }  /* contains positioned .execution */
+.execution {
+  width: 0.3rem;
+  margin-left: 0.15rem;
+  position: absolute;
+  top: 70%;
+  bottom: 0;
+  opacity: 0.4;
+  background: #000;
+}
+.past.underdose .execution { background: #f80; }
+.now.underdose .execution { background: #f00; }
+.full-dose .execution { background: #080; }
+.overdose .execution { background: #80f; }
 
 th.command { /* should match @style/ActionButton */
   font-weight: bold;

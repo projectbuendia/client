@@ -1,9 +1,11 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -34,6 +36,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,8 +52,6 @@ import static org.projectbuendia.client.utils.Utils.HOUR;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
-    private static PebbleEngine sEngine;
-    private static final Logger LOG = Logger.create();
     public static ZoomLevel[] ZOOM_LEVELS = new ZoomLevel[] {
         new ZoomLevel(R.string.zoom_day, 0),
         new ZoomLevel(R.string.zoom_half, 0, 12*HOUR),
@@ -58,9 +60,13 @@ public class ChartRenderer {
         new ZoomLevel(R.string.zoom_sixth, 0, 4*HOUR, 8*HOUR, 12*HOUR, 16*HOUR, 20*HOUR)
     };
 
-    WebView mView;  // view into which the HTML table will be rendered
-    Resources mResources;  // resources used for localizing the rendering
-    AppSettings mSettings;
+    private static PebbleEngine sEngine;
+    private static final Logger LOG = Logger.create();
+    private static final ExecutionHistory EMPTY_HISTORY = new ExecutionHistory();
+
+    private WebView mView;  // view into which the HTML table will be rendered
+    private Resources mResources;  // resources used for localizing the rendering
+    private AppSettings mSettings;
 
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
@@ -68,19 +74,15 @@ public class ChartRenderer {
     private String mLastChartName = "";
 
     public interface GridJsInterface {
-        @android.webkit.JavascriptInterface
-        void onNewOrderPressed();
+        @JavascriptInterface void onNewOrderPressed();
 
-        @android.webkit.JavascriptInterface void onOrderHeadingPressed(String orderUuid);
+        @JavascriptInterface void onOrderHeadingPressed(String orderUuid);
 
-        @android.webkit.JavascriptInterface
-        void onOrderCellPressed(String orderUuid, long startMillis);
+        @JavascriptInterface void onOrderCellPressed(String orderUuid, long startMillis);
 
-        @android.webkit.JavascriptInterface
-        void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
+        @JavascriptInterface void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
 
-        @android.webkit.JavascriptInterface
-        void onPageUnload(int scrollX, int scrollY);
+        @JavascriptInterface void onPageUnload(int scrollX, int scrollY);
     }
 
     public ChartRenderer(WebView view, Resources resources, AppSettings settings) {
@@ -158,7 +160,12 @@ public class ChartRenderer {
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
-        Map<String, ExecutionCounter> mExecutionCounts = new HashMap<>();
+        Map<String, ExecutionHistory> mExecutionHistories = new HashMap<String, ExecutionHistory>() {
+            @Override public @NonNull ExecutionHistory get(Object key) {
+                // Always return non-null, for convenient access from the Pebble template.
+                return Utils.orDefault(super.get(key), EMPTY_HISTORY);
+            }
+        };
         List<List<Tile>> mTileRows = new ArrayList<>();
         List<Row> mRows = new ArrayList<>();
         Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
@@ -219,12 +226,10 @@ public class ChartRenderer {
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Order order = orders.get(obs.value);
                     if (order != null) {
-                        ExecutionCounter counter = mExecutionCounts.get(order.uuid);
-                        if (counter == null) {
-                            counter = new ExecutionCounter();
-                            mExecutionCounts.put(order.uuid, counter);
+                        if (!mExecutionHistories.containsKey(order.uuid)) {
+                            mExecutionHistories.put(order.uuid, new ExecutionHistory(order));
                         }
-                        counter.add(order.getDivisionIndex(obs.time));
+                        mExecutionHistories.get(order.uuid).add(obs.time);
                     }
                 } else {
                     addObs(getColumnContainingTime(obs.time), obs);
@@ -349,10 +354,29 @@ public class ChartRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumn", mNowColumn);
             context.put("numColumnsPerDay", getSegmentStartTimes().length);
-            context.put("orders", mOrders);
-            context.put("executionCounts", mExecutionCounts);
             context.put("dataCellsByConceptId", getJsonDataDump());
+            context.put("orders", getSortedOrders());
+            context.put("executionHistories", getSortedExecutionHistories());
             return renderTemplate("assets/chart.html", context);
+        }
+
+        List<Order> getSortedOrders() {
+            List<Order> sortedOrders = new ArrayList<>(mOrders);
+            Collections.sort(sortedOrders, new Comparator<Order>() {
+                @Override public int compare(Order a, Order b) {
+                    int result = a.instructions.route.compareTo(b.instructions.route);
+                    if (result != 0) return result;
+                    return a.start.compareTo(b.start);
+                }
+            });
+            return sortedOrders;
+        }
+
+        Map<String, ExecutionHistory> getSortedExecutionHistories() {
+            for (ExecutionHistory history : mExecutionHistories.values()) {
+                history.sort();
+            }
+            return mExecutionHistories;
         }
 
         /**
