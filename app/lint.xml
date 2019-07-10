@@ -22,5 +22,6 @@
     <issue id="ConstantConditions" severity="warning" />
     <issue id="InvalidPackage" severity="warning" />
     <issue id="OldTargetApi" severity="warning" />
+    <issue id="ExpiredTargetSdkVersion" severity="warning" />
     <issue id="UnusedDeclaration" severity="warning" />
 </lint>
