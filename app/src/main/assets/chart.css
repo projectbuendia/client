@@ -14,6 +14,31 @@ th, td { font-weight: normal; text-align: left; vertical-align: baseline; }
 #grid-left { flex-basis: 0; flex-grow: 0; }
 #grid-body { flex-basis: 0; flex-grow: 1; overflow: scroll; position: relative; }
 
+#buttons button {
+  font-size: 3.2rem;
+  -webkit-text-stroke: 0.2rem black;
+  opacity: 0.4;
+  width: 6rem;
+  height: 6rem;
+  padding-top: 0.3rem; /* adjust the centering of the arrow */
+  background: transparent;
+  border: none;
+  outline: none;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+}
+#buttons button[disabled] { opacity: 0.15; color: black; }
+#buttons button::before { content: '\00279c'; }
+button#home::before { content: '\0025c9'; }
+button#up { transform: rotate(270deg); }
+button#left { transform: rotate(180deg); }
+button#down { transform: rotate(90deg); }
+button#left { right: 12rem; }
+button#home { right: 6rem; }
+button#up { bottom: 12rem; }
+button#down { bottom: 6rem; }
+
 /* Apply borders to all cells so their sizes are uniform. */
 .top th { border-top: 1px solid transparent; }
 th, td { border: 1px solid transparent; border-width: 0 1px 1px 0; }
