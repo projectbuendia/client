@@ -115,6 +115,9 @@ th[scope="rowgroup"] {
 .order .overdose { background: #c8f; }
 .order .overdose .given, .order .overdose .extra-given { color: #c00; }
 
+.route-IV .medication { color: #c60; }
+.route-PO .medication { color: #084; }
+
 th.command { /* should match @style/ActionButton */
   font-weight: bold;
   color: #09e;
