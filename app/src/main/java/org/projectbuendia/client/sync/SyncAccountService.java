@@ -26,7 +26,6 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.SyncAdapter.SyncOption;
-import org.projectbuendia.client.sync.SyncAdapter.SyncPhase;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.inject.Inject;
@@ -62,12 +61,16 @@ public class SyncAccountService extends Service {
         Account account = getAccount();
         AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
         if (accountManager.addAccountExplicitly(account, null, null)) {
+
+            // TODO(sync): Set up a periodic loop to invoke syncs every 5 minutes.
+            /*
             // Enable automatic sync for the account with a period of SYNC_PERIOD.
             ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 1);
             ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
             Bundle b = new Bundle();
             b.putBoolean(SyncOption.FULL_SYNC.name(), true);
             ContentResolver.addPeriodicSync(account, Contracts.CONTENT_AUTHORITY, b, SYNC_PERIOD);
+            */
             return true;
         }
         return false;
@@ -83,6 +86,8 @@ public class SyncAccountService extends Service {
         // Fetch everything
         b.putBoolean(SyncOption.FULL_SYNC.name(), true);
         LOG.i("Requesting full sync");
+
+        // TODO(sync): Invoke a sync directly instead of through requestSync.
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
 
@@ -93,6 +98,10 @@ public class SyncAccountService extends Service {
 
     /** Starts an sync of just the observations and orders. */
     public static void startObservationsAndOrdersSync() {
+
+        // TODO(sync): Cancel any currently running sync and invoke an incremental sync directly.
+
+        /*
         // Start by canceling any existing syncs, which may delay this one.
         ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
 
@@ -106,6 +115,7 @@ public class SyncAccountService extends Service {
         b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
         LOG.i("Requesting incremental observations / orders sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
+        */
     }
 
     @Override public void onCreate() {

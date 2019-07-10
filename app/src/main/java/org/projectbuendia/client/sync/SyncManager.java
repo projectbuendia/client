@@ -59,6 +59,7 @@ public class SyncManager {
 
     /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
+        // TODO(sync): Cancel any running sync.
         ContentResolver.cancelSync(
             SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
 
@@ -72,12 +73,14 @@ public class SyncManager {
 
     /** Returns {@code true} if a sync is pending. */
     public boolean isSyncPending() {
+        // TODO(sync): Return whether a sync is pending.
         return ContentResolver.isSyncPending(
             SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
 
     /** Returns {@code true} if a sync is active. */
     public boolean isSyncActive() {
+        // TODO(sync): Return whether a sync is running.
         return ContentResolver.isSyncActive(
                 SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
