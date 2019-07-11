@@ -39,7 +39,7 @@
           <th class="gap" scope="col" rowspan=2>&nbsp;</th>
         {% endif %}
         {% if column.start == column.dayStart %}
-          <th class="day {{column.date == now.toLocalDate ? 'now' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+          <th class="day {{column.date == today ? 'now' : ''}} {{column.date.dayOfWeek > 5 ? 'weekend' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
             {% if numColumnsPerDay == 1 %}
               {% if column.dayLabel is empty %}&nbsp;{% else %}{{column.dayLabel}}{% endif %}
             {% elseif column.dayLabel is not empty %}

@@ -349,6 +349,7 @@ public class ChartRenderer {
         String getHtml() {
             Map<String, Object> context = new HashMap<>();
             context.put("now", mNow);
+            context.put("today", mNow.toLocalDate());
             context.put("tileRows", mTileRows);
             context.put("rowGroups", mRowGroups);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));

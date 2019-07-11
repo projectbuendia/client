@@ -92,6 +92,9 @@ thead th {
   padding: 0.2em 0;
   white-space: nowrap;
 }
+thead th.weekend {
+  color: #900;
+}
 
 /* Row headings: should match @style/text.caps */
 th[scope="rowgroup"] {
