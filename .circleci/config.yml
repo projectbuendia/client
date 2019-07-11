@@ -4,6 +4,19 @@ version: 2
 # https://discuss.circleci.com/t/using-defaults-syntax-in-config-yaml-aka-yaml-anchors/16168/3
 # For a working example see https://github.com/opendatakit/collect/blob/master/.circleci/config.yml
 references:
+  workspace: &workspace
+    ~/client
+
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace
+
+  persist_workspace: &persist_workspace
+    persist_to_workspace:
+      root: *workspace
+      paths:
+        - app/build
+
   build_config: &build_config
     working_directory: ~/client
     docker:
@@ -50,6 +63,7 @@ references:
       command: ./gradlew test
 
   run_instrumentation_tests: &run_instrumentation_tests
+    # https://firebase.google.com/docs/test-lab/android/continuous
     run:
       name: Run instrumentation tests in Firebase Test Labs
       command: |
@@ -95,12 +109,21 @@ jobs:
 
       - *run_unit_tests
 
-      - *run_instrumentation_tests
+      - *persist_workspace
 
       - *store_artifacts
 
       #- store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
       #path: app/build/test-results
+
+  instrumentation-test:
+    <<: *build_config
+    steps:
+      - checkout
+      - *init_client_libs
+      - *restore_cache
+      - *attach_workspace
+      - *run_instrumentation_tests
 
   release:
     <<: *build_config
@@ -152,6 +175,17 @@ workflows:
               # tagged as part of the documented release process.
               ignore:
                 - master
+      - instrumentation-test:
+          requires:
+            - build
+          filters:
+            branches:
+              # Running the instrumentation tests is expensive. Only do it for
+              # dev or branches where we're actively working on the tests.
+              only:
+                - dev
+                - /.*firebase.*/
+
   release-build:
     # Ensure that tagged releases get their own CircleCI build:
     # https://circleci.com/docs/2.0/workflows/#executing-workflows-for-a-git-tag
