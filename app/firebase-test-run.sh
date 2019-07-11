@@ -19,5 +19,5 @@ gcloud firebase test android run \
     --app ./build/outputs/apk/debug/app-debug.apk \
     --test ./build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
     --timeout 3m \
-    --device model=flo,version=21 \
+    --device model=Nexus7,version=21 \
     --use-orchestrator
