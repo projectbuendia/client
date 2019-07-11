@@ -25,6 +25,7 @@ import org.projectbuendia.client.sync.SyncAdapterSyncScheduler;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.sync.ThreadedSyncScheduler;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
@@ -111,9 +112,11 @@ public final class AppModule {
     }
 
     @Provides
-    @Singleton SyncManager provideSyncManager() {
+    @Singleton SyncManager provideSyncManager(AppSettings settings) {
         return new SyncManager(
-            new SyncAdapterSyncScheduler(SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY)
+            settings.getUseSyncAdapter() ?
+                new SyncAdapterSyncScheduler(SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY) :
+                new ThreadedSyncScheduler(mApp.getApplicationContext())
         );
     }
 

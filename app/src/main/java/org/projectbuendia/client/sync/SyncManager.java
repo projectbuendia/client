@@ -49,15 +49,15 @@ public class SyncManager {
      */
     static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
-    private final SyncScheduler mSyncScheduler;
+    private final SyncScheduler mScheduler;
 
-    public SyncManager(SyncScheduler runner) {
-        mSyncScheduler = runner;
+    public SyncManager(SyncScheduler scheduler) {
+        mScheduler = scheduler;
     }
 
     /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
-        mSyncScheduler.stopSyncing();
+        mScheduler.stopSyncing();
 
         // If sync was pending, it should now be idle and we can consider the sync immediately canceled.
         if (!isSyncRunningOrPending()) {
@@ -67,7 +67,7 @@ public class SyncManager {
     }
 
     public boolean isSyncRunningOrPending() {
-        return mSyncScheduler.isRunningOrPending();
+        return mScheduler.isRunningOrPending();
     }
 
     /** Starts a full sync as soon as possible. */
@@ -80,7 +80,7 @@ public class SyncManager {
         // Fetch everything
         options.putBoolean(SyncOption.FULL_SYNC.name(), true);
         LOG.i("Requesting full sync");
-        mSyncScheduler.requestSync(options);
+        mScheduler.requestSync(options);
     }
 
     /**
@@ -89,13 +89,13 @@ public class SyncManager {
      * with this new one.  Specifying a period of zero stops the periodic sync.
      */
     public void setPeriodicSync(Bundle options, int periodSec) {
-        mSyncScheduler.setPeriodicSync(options, periodSec);
+        mScheduler.setPeriodicSync(options, periodSec);
     }
 
     /** Starts a sync of only observations and orders. */
     public void startObservationsAndOrdersSync() {
         // Start by canceling any existing syncs, which may delay this one.
-        mSyncScheduler.stopSyncing();
+        mScheduler.stopSyncing();
 
         Bundle options = new Bundle();
         // Request aggressively that the sync should start straight away.
@@ -107,36 +107,38 @@ public class SyncManager {
         options.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
 
         LOG.i("Requesting incremental observations / orders sync");
-        mSyncScheduler.requestSync(options);
+        mScheduler.requestSync(options);
     }
 
-    /** Listens for sync status events that are broadcast by BuendiaSyncEngine. */
+    /** Listens for sync status events that are broadcast by the BuendiaSyncEngine. */
     public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
             switch (syncStatus) {
                 case STARTED:
+                    LOG.i("SyncStatus: STARTED");
                     EventBus.getDefault().post(new SyncStartedEvent());
                     break;
                 case COMPLETED:
+                    LOG.i("SyncStatus: COMPLETED");
                     EventBus.getDefault().post(new SyncSucceededEvent());
                     break;
                 case FAILED:
+                    LOG.i("SyncStatus: FAILED");
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case IN_PROGRESS:
                     int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
                     String label = intent.getStringExtra(SYNC_PROGRESS_LABEL);
-                    LOG.i("Sync in progress (%d%%, %s)", progress, label);
+                    LOG.i("SyncStatus: IN_PROGRESS (%d%%, %s)", progress, label);
                     EventBus.getDefault().post(new SyncProgressEvent(progress, label));
                     break;
                 case CANCELED:
+                    LOG.i("SyncStatus: CANCELED");
                     EventBus.getDefault().post(new SyncCanceledEvent());
                     break;
-                case -1:
-                    break;
                 default:
-                    LOG.i("Sync status broadcast intent received with unknown status %1$d.", syncStatus);
+                    LOG.i("SyncStatus: unknown code %d", syncStatus);
             }
         }
     }

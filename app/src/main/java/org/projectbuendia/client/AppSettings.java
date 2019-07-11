@@ -79,17 +79,24 @@ public class AppSettings {
         return mSharedPreferences.getInt("apk_update_interval_secs", APK_UPDATE_INTERVAL_DEFAULT);
     }
 
-    /** Gets the flag for whether to save filled-in forms locally. */
+    /** Gets the setting for whether to save filled-in forms locally. */
     public boolean getKeepFormInstancesLocally() {
         return mSharedPreferences.getBoolean("keep_form_instances", false);
     }
 
+    /** Returns true if the app should skip directly to a patient chart on startup. */
     public boolean shouldSkipToPatientChart() {
         return !getStartingPatientId().isEmpty();
     }
 
+    /** Gets the patient ID of the chart to skip directly to on startup, or "". */
     public @NonNull String getStartingPatientId() {
         return mSharedPreferences.getString("starting_patient_id", "").trim();
+    }
+
+    /** Gets the setting for whether to use the unreliable SyncAdapter framework. */
+    public boolean getUseSyncAdapter() {
+        return mSharedPreferences.getBoolean("use_sync_adapter", false);
     }
 
     /** Gets the flag indicating whether the sync account has been initialized. */

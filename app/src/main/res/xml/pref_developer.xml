@@ -23,4 +23,11 @@
         android:summary="@string/pref_desc_starting_patient_id"
         android:defaultValue="" />
 
+    <!-- Whether to use the SyncAdapter framework; default is to use our own scheduler. -->
+    <CheckBoxPreference
+        android:key="use_sync_adapter"
+        android:title="@string/pref_title_use_sync_adapter"
+        android:summary="@string/pref_desc_use_sync_adapter"
+        android:defaultValue="false" />
+
 </PreferenceScreen>

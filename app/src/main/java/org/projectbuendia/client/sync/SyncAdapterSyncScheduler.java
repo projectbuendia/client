@@ -31,6 +31,7 @@ public class SyncAdapterSyncScheduler implements SyncScheduler {
         if (periodSec > 0) {
             ContentResolver.setIsSyncable(account, authority, 1);
             ContentResolver.setSyncAutomatically(account, authority, true);
+            ContentResolver.setMasterSyncAutomatically(true);
             ContentResolver.addPeriodicSync(account, authority, options, periodSec);
         } else {
             ContentResolver.setSyncAutomatically(account, authority, false);
