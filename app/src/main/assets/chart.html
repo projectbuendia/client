@@ -332,7 +332,7 @@
   var nowCenter = nowColumn.offset().left + nowColumn.width()/2;
   var bodyCenter = gridBody.offset().left + gridBody.width()/2;
   var jumpX = gridBody.width()/2;
-  var jumpY = gridBody.height()/3;
+  var jumpY = (window.innerHeight - $('#scroller').offset().top)/2;
   var homeX = nowCenter - bodyCenter;
   var targetX = 0;
   var targetY = 0;
