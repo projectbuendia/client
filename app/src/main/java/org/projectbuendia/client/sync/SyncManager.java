@@ -32,7 +32,7 @@ import de.greenrobot.event.EventBus;
 public class SyncManager {
     private static final Logger LOG = Logger.create();
 
-    private static final int FULL_SYNC_PERIOD_SEC = 3 * 60;  // 3 minutes
+    private static final int FULL_SYNC_PERIOD_SEC = 2 * 60;  // 2 minutes
 
     static final String SYNC_STATUS = "sync-status";
     static final int STARTED = 1;
@@ -115,8 +115,9 @@ public class SyncManager {
         // Fetch just the newly added observations.
         options.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
         options.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
+        options.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
 
-        LOG.i("Requesting incremental observations / orders sync");
+        LOG.i("Requesting incremental observations / orders / patients sync");
         mScheduler.requestSync(options);
     }
 

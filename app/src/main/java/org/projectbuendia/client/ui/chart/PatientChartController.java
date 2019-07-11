@@ -87,11 +87,11 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
 
     /**
-     * Period between observation syncs while the chart view is active.  It would
-     * be nice for this to be even shorter (10 s?) but currently the table scroll
-     * position resets on each sync if any data has changed.
+     * Period between observation syncs while the chart view is active.
+     * It would be nice to make this very short, but note that the grid
+     * scroll position resets every time the sync causes data to change.
      */
-    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 20000;
+    private static final int FAST_SYNC_PERIOD_MILLIS = 10000;
 
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
@@ -268,8 +268,11 @@ final class PatientChartController implements ChartRenderer.JsInterface {
                 // controller is suspended the cycle stops; and also since mCurrentPhaseId can
                 // only have one value, only one such cycle can be active at any given time.
                 if (mCurrentPhaseId == phaseId) {
+                    if (mPatient != null) {
+                        mAppModel.downloadSinglePatient(mCrudEventBus, mPatient.id);
+                    }
                     mSyncManager.startObservationsAndOrdersSync();
-                    handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
+                    handler.postDelayed(this, FAST_SYNC_PERIOD_MILLIS);
                 }
             }
         };
@@ -649,9 +652,13 @@ final class PatientChartController implements ChartRenderer.JsInterface {
                 mUi.hideWaitDialog();
 
                 // Update the parts of the UI that use data in the Patient.
-                mPatient = (Patient) event.item;
-                mUi.updatePatientDetailsUi(mPatient);
-                updatePatientLocationUi();
+                Patient patient = (Patient) event.item;
+                LOG.i("Fetched Patient: %s", patient.toContentValues());
+                if (mPatientUuid.equals(mPatientUuid)) {
+                    mPatient = patient;
+                    mUi.updatePatientDetailsUi(mPatient);
+                    updatePatientLocationUi();
+                }
             } else if (event.item instanceof Encounter) {
                 mUi.hideWaitDialog();
 
