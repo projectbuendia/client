@@ -31,7 +31,7 @@ import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.net.GsonRequest;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.sync.SyncAdapter;
+import org.projectbuendia.client.sync.BuendiaSyncEngine;
 import org.projectbuendia.client.utils.Logger;
 
 import java.lang.reflect.ParameterizedType;
@@ -87,7 +87,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
 
         beforeSyncStarted(contentResolver, syncResult, providerClient);
 
-        String syncToken = SyncAdapter.getLastSyncToken(providerClient, dbTable);
+        String syncToken = BuendiaSyncEngine.getLastSyncToken(providerClient, dbTable);
         LOG.i("Using sync token `%s`", syncToken);
 
         IncrementalSyncResponse<T> response;
@@ -106,7 +106,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
         } while (response.more);
 
         LOG.i("Saving new sync token `%s`", syncToken);
-        SyncAdapter.storeSyncToken(providerClient, dbTable, response.syncToken);
+        BuendiaSyncEngine.storeSyncToken(providerClient, dbTable, response.syncToken);
 
         afterSyncFinished(contentResolver, syncResult, providerClient);
     }

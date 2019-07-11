@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.lists;
 import android.support.test.annotation.UiThreadTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Patient;
@@ -41,6 +42,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
     /** Looks for the filter menu. */
     @Test
     @UiThreadTest
+    @Ignore
     public void testFilterMenu() {
         getActivity();
         openPatientList();

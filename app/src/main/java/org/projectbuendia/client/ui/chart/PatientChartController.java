@@ -18,6 +18,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.JavascriptInterface;
 
 import com.google.common.base.Optional;
 
@@ -75,7 +76,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Controller for {@link PatientChartActivity}. */
-final class PatientChartController implements ChartRenderer.GridJsInterface {
+final class PatientChartController implements ChartRenderer.JsInterface {
 
     private static final Logger LOG = Logger.create();
     private static final boolean DEBUG = true;
@@ -86,13 +87,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
 
     /**
-     * Period between observation syncs while the chart view is active.  It would be nice for
-     * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
-     * each sync, if any data has changed.
-     * TODO: Try reducing this period to improve responsiveness, but be wary of the table scrolling
-     * whenever data is refreshed.
+     * Period between observation syncs while the chart view is active.
+     * It would be nice to make this very short, but note that the grid
+     * scroll position resets every time the sync causes data to change.
      */
-    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
+    private static final int FAST_SYNC_PERIOD_MILLIS = 10000;
 
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
@@ -269,8 +268,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 // controller is suspended the cycle stops; and also since mCurrentPhaseId can
                 // only have one value, only one such cycle can be active at any given time.
                 if (mCurrentPhaseId == phaseId) {
+                    if (mPatient != null) {
+                        mAppModel.downloadSinglePatient(mCrudEventBus, mPatient.id);
+                    }
                     mSyncManager.startObservationsAndOrdersSync();
-                    handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
+                    handler.postDelayed(this, FAST_SYNC_PERIOD_MILLIS);
                 }
             }
         };
@@ -408,8 +410,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 mPatient.toOdkPatient(), preset);
     }
 
-    @android.webkit.JavascriptInterface
-    public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
+    @JavascriptInterface public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
         ArrayList<ObsRow> obsRows = null;
         if (!conceptUuid.isEmpty()){
             if (!startMillis.isEmpty()){
@@ -426,18 +427,15 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
     }
 
-    @android.webkit.JavascriptInterface
-    public void onNewOrderPressed() {
+    @JavascriptInterface public void onNewOrderPressed() {
         mUi.showOrderDialog(mPatientUuid, null);
     }
 
-    @android.webkit.JavascriptInterface
-    public void onOrderHeadingPressed(String orderUuid) {
+    @JavascriptInterface public void onOrderHeadingPressed(String orderUuid) {
         mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid));
     }
 
-    @android.webkit.JavascriptInterface
-    public void onOrderCellPressed(String orderUuid, long startMillis) {
+    @JavascriptInterface public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
@@ -451,9 +449,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.showOrderExecutionDialog(order, interval, executionTimes);
     }
 
-    @android.webkit.JavascriptInterface
-    public void onPageUnload(int scrollX, int scrollY) {
+    @JavascriptInterface public void onPageUnload(int scrollX, int scrollY) {
         mLastScrollPosition.set(scrollX, scrollY);
+    }
+
+    @JavascriptInterface public void log(String message) {
+        LOG.elapsed("ChartJS", message);
+    }
+
+    @JavascriptInterface public void finish() {
+        LOG.finish("ChartJS");
     }
 
     public void setDate(String conceptUuid, LocalDate date) {
@@ -542,9 +547,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     public synchronized void updatePatientObsUi() {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
-        long start = System.currentTimeMillis();
         String patientId = mPatient != null ? mPatient.id : "(unknown)";
-        LOG.i("Start updatePatientObsUi for patient " + patientId);
+        LOG.start("updatePatientObsUi", "patientId = %s", patientId);
 
         mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, Obs> latestObservations =
@@ -554,7 +558,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
-        LOG.d("Fetched " + mObservations.size() + " observations, " + orders.size() + " orders");
+        LOG.elapsed("updatePatientObsUi", "Fetched %d obs, %d orders", mObservations.size(), orders.size());
 
         LocalDate admissionDate = getObservedDate(
             latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
@@ -570,8 +574,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 admissionDate, firstSymptomsDate);
         }
 
-        long finish = System.currentTimeMillis();
-        LOG.i("Finished updatePatientObsUi in %d ms", finish - start);
+        LOG.finish("updatePatientObsUi");
     }
 
     public List<Chart> getCharts(){
@@ -649,9 +652,13 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 mUi.hideWaitDialog();
 
                 // Update the parts of the UI that use data in the Patient.
-                mPatient = (Patient) event.item;
-                mUi.updatePatientDetailsUi(mPatient);
-                updatePatientLocationUi();
+                Patient patient = (Patient) event.item;
+                LOG.i("Fetched Patient: %s", patient.toContentValues());
+                if (mPatientUuid.equals(mPatientUuid)) {
+                    mPatient = patient;
+                    mUi.updatePatientDetailsUi(mPatient);
+                    updatePatientLocationUi();
+                }
             } else if (event.item instanceof Encounter) {
                 mUi.hideWaitDialog();
 

@@ -274,7 +274,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Override protected void onNewIntent(Intent intent) {
         String uuid = intent.getStringExtra("uuid");
         if (uuid != null) {
-            mGridWebView.clearView();
+            // Immediately hide the current patient chart, to avoid giving the
+            // misleading impression that it applies to the new patient.
+            mGridWebView.setVisibility(View.INVISIBLE);
             mController.setPatient(uuid);
         }
     }

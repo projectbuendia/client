@@ -32,7 +32,7 @@ public final class DatabaseTransaction implements AutoCloseable { // @nolint
     public DatabaseTransaction(SQLiteDatabase database, String name) {
         mDatabase = database;
         mName = name;
-        LOG.i("Starting transaction with SAVEPOINT " + mName);
+        LOG.d("Starting transaction with SAVEPOINT " + mName);
         mDatabase.execSQL("SAVEPOINT " + mName);
     }
 
@@ -43,9 +43,9 @@ public final class DatabaseTransaction implements AutoCloseable { // @nolint
     /** Rolls back a named transaction to the state just after it started. */
     public void rollback() {
         if (mDatabase.inTransaction()) {
-            LOG.i("Rolling back transaction with ROLLBACK TO " + mName);
+            LOG.d("Rolling back transaction with ROLLBACK TO " + mName);
             mDatabase.execSQL("ROLLBACK TO " + mName);
-            LOG.i("Rollback to " + mName + " completed");
+            LOG.d("Rollback to " + mName + " completed");
         } else {
             LOG.w("There is no current transaction to roll back");
         }
@@ -57,6 +57,6 @@ public final class DatabaseTransaction implements AutoCloseable { // @nolint
      */
     @Override public void close() {
         mDatabase.execSQL("RELEASE " + mName);
-        LOG.i("Finished transaction " + mName);
+        LOG.d("Finished transaction " + mName);
     }
 }

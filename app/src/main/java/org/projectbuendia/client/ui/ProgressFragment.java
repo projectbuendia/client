@@ -192,9 +192,9 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mProgressBar.setProgress(progress);
     }
 
-    protected void setProgressLabel(String label) {
+    protected void setProgressMessage(int messageId) {
         switchToHorizontalProgressBar();
-        mProgressBarLabel.setText(label);
+        mProgressBarLabel.setText(messageId);
     }
 
     protected void switchToCircularProgressBar() {

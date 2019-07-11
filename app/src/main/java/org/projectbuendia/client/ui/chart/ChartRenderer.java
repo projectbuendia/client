@@ -1,9 +1,13 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.util.DisplayMetrics;
+import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import com.google.common.collect.Lists;
@@ -32,6 +36,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,8 +52,6 @@ import static org.projectbuendia.client.utils.Utils.HOUR;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
-    private static PebbleEngine sEngine;
-    private static final Logger LOG = Logger.create();
     public static ZoomLevel[] ZOOM_LEVELS = new ZoomLevel[] {
         new ZoomLevel(R.string.zoom_day, 0),
         new ZoomLevel(R.string.zoom_half, 0, 12*HOUR),
@@ -56,35 +60,38 @@ public class ChartRenderer {
         new ZoomLevel(R.string.zoom_sixth, 0, 4*HOUR, 8*HOUR, 12*HOUR, 16*HOUR, 20*HOUR)
     };
 
-    WebView mView;  // view into which the HTML table will be rendered
-    Resources mResources;  // resources used for localizing the rendering
-    AppSettings mSettings;
+    private static PebbleEngine sEngine;
+    private static final Logger LOG = Logger.create();
+    private static final ExecutionHistory EMPTY_HISTORY = new ExecutionHistory();
+
+    private WebView mView;  // view into which the HTML table will be rendered
+    private Resources mResources;  // resources used for localizing the rendering
+    private AppSettings mSettings;
 
     private List<Obs> mLastRenderedObs;  // last set of observations rendered
     private List<Order> mLastRenderedOrders;  // last set of orders rendered
     private int mLastRenderedZoomIndex;  // last zoom level index rendered
     private String mLastChartName = "";
 
-    public interface GridJsInterface {
-        @android.webkit.JavascriptInterface
-        void onNewOrderPressed();
+    public interface JsInterface {
+        @JavascriptInterface void onNewOrderPressed();
 
-        @android.webkit.JavascriptInterface void onOrderHeadingPressed(String orderUuid);
+        @JavascriptInterface void onOrderHeadingPressed(String orderUuid);
 
-        @android.webkit.JavascriptInterface
-        void onOrderCellPressed(String orderUuid, long startMillis);
+        @JavascriptInterface void onOrderCellPressed(String orderUuid, long startMillis);
 
-        @android.webkit.JavascriptInterface
-        void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
+        @JavascriptInterface void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
 
-        @android.webkit.JavascriptInterface
-        void onPageUnload(int scrollX, int scrollY);
+        @JavascriptInterface void onPageUnload(int scrollX, int scrollY);
     }
 
     public ChartRenderer(WebView view, Resources resources, AppSettings settings) {
         mView = view;
         mResources = resources;
         mSettings = settings;
+        mView.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+        mView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
@@ -92,7 +99,7 @@ public class ChartRenderer {
     public void render(Chart chart, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
-                       GridJsInterface controllerInterface) {
+                       JsInterface controllerInterface) {
         if (chart == null) {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
@@ -105,6 +112,8 @@ public class ChartRenderer {
             LOG.i("Data and zoom index have not changed; skipping render");
             return;
         }
+
+        LOG.start("render");
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.
@@ -119,14 +128,26 @@ public class ChartRenderer {
         String html = new GridHtmlGenerator(
             chart, latestObservations, observations, orders,
             admissionDate, firstSymptomsDate).getHtml();
+
+        LOG.elapsed("render", "HTML generated");
+
+        // To avoid showing stale, possibly misleading data from a previous
+        // patient, clear out any previous chart HTML before showing the WebView.
+        mView.loadUrl("about:blank");
+        mView.clearView();
+        mView.setVisibility(View.VISIBLE);
         mView.loadDataWithBaseURL(
             "file:///android_asset/", html, "text/html; charset=utf-8", "utf-8", null);
         mView.setWebContentsDebuggingEnabled(true);
+
+        LOG.finish("render", "HTML loaded into WebView");
 
         mLastChartName = chart.name;
         mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
+
+        LOG.start("ChartJS");
     }
 
     /** Gets the starting times (in ms) of the segments into which the day is divided. */
@@ -136,18 +157,20 @@ public class ChartRenderer {
     }
 
     class GridHtmlGenerator {
-        List<String> mTileConceptUuids;
-        List<String> mGridConceptUuids;
         List<Order> mOrders;
         DateTime mNow;
         Column mNowColumn;
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
-        Map<String, ExecutionCounter> mExecutionCounts = new HashMap<>();
+        Map<String, ExecutionHistory> mExecutionHistories = new HashMap<String, ExecutionHistory>() {
+            @Override public @NonNull ExecutionHistory get(Object key) {
+                // Always return non-null, for convenient access from the Pebble template.
+                return Utils.orDefault(super.get(key), EMPTY_HISTORY);
+            }
+        };
         List<List<Tile>> mTileRows = new ArrayList<>();
-        List<Row> mRows = new ArrayList<>();
-        Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
+        List<RowGroup> mRowGroups = new ArrayList<>();
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
@@ -160,6 +183,7 @@ public class ChartRenderer {
             mNow = DateTime.now();
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
+            LOG.start("GridHtmlGenerator");
             for (ChartSection tileGroup : chart.tileGroups) {
                 List<Tile> tileRow = new ArrayList<>();
                 for (ChartItem item : tileGroup.items) {
@@ -177,11 +201,12 @@ public class ChartRenderer {
                 }
                 mTileRows.add(tileRow);
             }
+
             for (ChartSection section : chart.rowGroups) {
+                RowGroup rowGroup = new RowGroup(section.label);
+                mRowGroups.add(rowGroup);
                 for (ChartItem item : section.items) {
-                    Row row = new Row(item);
-                    mRows.add(row);
-                    mRowsByUuid.put(item.conceptUuids[0], row);
+                    rowGroup.rows.add(new Row(item));
                     if (!item.script.trim().isEmpty()) {
                         mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
                     }
@@ -195,6 +220,8 @@ public class ChartRenderer {
             addObservations(observations, ordersByUuid);
             addOrders(orders);
             insertEmptyColumns();
+
+            LOG.elapsed("GridHtmlGenerator", "Data prepared");
         }
 
         /** Collects observations into Column objects that make up the grid. */
@@ -205,12 +232,10 @@ public class ChartRenderer {
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Order order = orders.get(obs.value);
                     if (order != null) {
-                        ExecutionCounter counter = mExecutionCounts.get(order.uuid);
-                        if (counter == null) {
-                            counter = new ExecutionCounter();
-                            mExecutionCounts.put(order.uuid, counter);
+                        if (!mExecutionHistories.containsKey(order.uuid)) {
+                            mExecutionHistories.put(order.uuid, new ExecutionHistory(order));
                         }
-                        counter.add(order.getDivisionIndex(obs.time));
+                        mExecutionHistories.get(order.uuid).add(obs.time);
                     }
                 } else {
                     addObs(getColumnContainingTime(obs.time), obs);
@@ -324,15 +349,38 @@ public class ChartRenderer {
         String getHtml() {
             Map<String, Object> context = new HashMap<>();
             context.put("now", mNow);
+            context.put("today", mNow.toLocalDate());
             context.put("tileRows", mTileRows);
-            context.put("rows", mRows);
+            context.put("rowGroups", mRowGroups);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumn", mNowColumn);
             context.put("numColumnsPerDay", getSegmentStartTimes().length);
-            context.put("orders", mOrders);
-            context.put("executionCounts", mExecutionCounts);
             context.put("dataCellsByConceptId", getJsonDataDump());
-            return renderTemplate("assets/chart.html", context);
+            context.put("orders", getSortedOrders());
+            context.put("executionHistories", getSortedExecutionHistories());
+            LOG.elapsed("GridHtmlGenerator", "Template context populated");
+            String result = renderTemplate("assets/chart.html", context);
+            LOG.finish("GridHtmlGenerator", "Finished rendering HTML");
+            return result;
+        }
+
+        List<Order> getSortedOrders() {
+            List<Order> sortedOrders = new ArrayList<>(mOrders);
+            Collections.sort(sortedOrders, new Comparator<Order>() {
+                @Override public int compare(Order a, Order b) {
+                    int result = a.instructions.route.compareTo(b.instructions.route);
+                    if (result != 0) return result;
+                    return a.start.compareTo(b.start);
+                }
+            });
+            return sortedOrders;
+        }
+
+        Map<String, ExecutionHistory> getSortedExecutionHistories() {
+            for (ExecutionHistory history : mExecutionHistories.values()) {
+                history.sort();
+            }
+            return mExecutionHistories;
         }
 
         /**
@@ -358,6 +406,8 @@ public class ChartRenderer {
 
         /** Renders a Pebble template. */
         String renderTemplate(String filename, Map<String, Object> context) {
+            LOG.start("renderTemplate");
+
             if (sEngine == null) {
                 // PebbleEngine caches compiled templates by filename, so as long as we keep using the
                 // same engine instance, it's okay to call getTemplate(filename) on each render.
@@ -365,11 +415,10 @@ public class ChartRenderer {
             }
             try {
                 StringWriter writer = new StringWriter();
-                LOG.d("Loading template...");
                 PebbleTemplate template = sEngine.getTemplate(filename);
-                LOG.d("Evaluating template...");
+                LOG.elapsed("renderTemplate", "Template loaded");
                 template.evaluate(writer, context);
-                LOG.d("Template rendered.");
+                LOG.finish("renderTemplate");
                 return writer.toString();
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();

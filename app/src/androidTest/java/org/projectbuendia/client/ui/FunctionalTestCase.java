@@ -56,7 +56,7 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
 public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity> {
     private static final Logger LOG = Logger.create();
 
-    public static final String LOCATION_NAME = "S1";
+    public static final String LOCATION_NAME = "Discharged";
 
     // For now, we create a new demo patient for tests using the real patient
     // creation UI on each test run (see {@link #inUserLoginInitDemoPatient()}).

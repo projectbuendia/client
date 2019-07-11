@@ -102,7 +102,7 @@ public class GsonRequest<T> extends Request<T> {
     }
 
     @Override protected Response<T> parseNetworkResponse(NetworkResponse response) {
-        LOG.i("Response from %s -> %s", Utils.repr(this), Utils.repr(response.data, 500));
+        LOG.finish("HTTP." + getSequence(), "Response to %s -> %s", Utils.repr(this), Utils.repr(response.data, 500));
         try {
             String json = new String(
                 response.data,

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+version=$(git describe --tags)
+
+if ! [[ $version =~ ^v[0-9]+[.0-9]*$ ]]; then
+    echo "Must run on a commit tagged with a release number.  Try one of:"
+    git tag --list 'v*' --sort v:refname | tail -10 | sed -e 's/^/    git checkout /'
+    exit 1
+fi
+
+version=${version#v}
+target=$HOME/buendia/buendia-$version-debug.apk
+echo "Release version: $version"
+rm -rf build app/build
+if ./gradlew -PversionNumber=$version :app:assembleDebug; then
+    cp app/build/outputs/apk/debug/app-debug.apk $target
+    ls -l $target
+fi

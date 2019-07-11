@@ -109,11 +109,7 @@ public @Immutable class Order extends Base<String> {
         return start.toLocalDate();
     }
 
-    /**
-     * Gets the index of the division containing the given time, where the first
-     * division of the starting day has index 0, the next division has index 1,
-     * and so on.  Divisions preceding the starting day have negative index values.
-     */
+    /** Gets the index of the division containing the given time.  See getDivision(). */
     public int getDivisionIndex(DateTime time) {
         LocalDate day = time.toLocalDate();
         Interval daySpan = day.toInterval();
@@ -123,24 +119,49 @@ public @Immutable class Order extends Base<String> {
         return (int) ((dayIndex + fractionOfDay) * instructions.frequency);
     }
 
+    /**
+     * Gets the division corresponding to the given index, where the first
+     * division of the starting day has index 0, the next division has index 1,
+     * and so on.  Divisions preceding the starting day have negative index values.
+     */
+    public Interval getDivision(int index) {
+        int numDivisions = getNumDivisionsPerDay();
+        int dayIndex = Utils.floorDiv(index, numDivisions);
+        LocalDate day = start.toLocalDate().plusDays(dayIndex);
+        Interval daySpan = day.toInterval();
+
+        long startMillis = daySpan.getStartMillis();
+        long dayMillis = daySpan.toDurationMillis();
+        int i = Utils.floorMod(index, numDivisions);
+
+        // Pick out the i-th division out of 'numDivisions' divisions of the day.
+        long prevMillis = startMillis + dayMillis * i / numDivisions;
+        long nextMillis = startMillis + dayMillis * (i + 1) / numDivisions;
+        return new Interval(prevMillis, nextMillis);
+    }
+
     /** Divides a given day into equal intervals according to the order's frequency. */
     public List<Interval> getDivisionsOfDay(LocalDate day) {
         List<Interval> divisions = new ArrayList<>();
         Interval daySpan = day.toInterval();
 
-        Duration dayLength = daySpan.toDuration();
-        int numDivisions = instructions.frequency == 0 ? 1 : instructions.frequency;
-        Duration divisionLength = dayLength.dividedBy(numDivisions);
+        int numDivisions = getNumDivisionsPerDay();
+        long startMillis = daySpan.getStartMillis();
+        long dayMillis = daySpan.toDurationMillis();
 
         // Divide the day into 'numDivisions' equal parts, ending exactly at end of day.
-        DateTime prev = daySpan.getStart();
-        for (int i = 0; i < instructions.frequency - 1; i++) {
-            DateTime next = prev.plus(divisionLength);
-            divisions.add(new Interval(prev, next));
-            prev = next;
+        long prevMillis = startMillis;
+        for (int i = 0; i < numDivisions; i++) {
+            long nextMillis = startMillis + dayMillis * (i + 1) / numDivisions;
+            divisions.add(new Interval(prevMillis, nextMillis));
+            prevMillis = nextMillis;
         }
-        divisions.add(new Interval(prev, daySpan.getEnd()));
         return divisions;
+    }
+
+    /** Returns the number of divisions per day (always positive, 1 for a unary order). */
+    public int getNumDivisionsPerDay() {
+        return instructions.frequency == 0 ? 1 : instructions.frequency;
     }
 
     /** Returns all the scheduled dose intervals for this order on a given day. */

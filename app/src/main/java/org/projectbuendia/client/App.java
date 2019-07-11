@@ -12,6 +12,7 @@
 package org.projectbuendia.client;
 
 import android.app.Application;
+import android.content.ContentProviderClient;
 import android.preference.PreferenceManager;
 
 import com.android.volley.VolleyLog;
@@ -23,6 +24,7 @@ import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.user.UserManager;
 
 import javax.inject.Inject;
@@ -34,6 +36,7 @@ public class App extends Application {
 
     /** The current instance of the application. */
     private static App sInstance;
+    private static ContentProviderClient sContentProviderClient;
     private static UserManager sUserManager;
     private static Server sServer;
     private static OpenMrsConnectionDetails sConnectionDetails;
@@ -45,6 +48,10 @@ public class App extends Application {
 
     public static synchronized App getInstance() {
         return sInstance;
+    }
+
+    public static synchronized ContentProviderClient getContentProviderClient() {
+        return sContentProviderClient;
     }
 
     public static synchronized UserManager getUserManager() {
@@ -82,6 +89,7 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
+            sContentProviderClient = getContentResolver().acquireContentProviderClient(Contracts.Users.CONTENT_URI);
             sUserManager = mUserManager; // TODO: Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO: Remove when Daggered.
             sServer = mServer; // TODO: Remove when Daggered.

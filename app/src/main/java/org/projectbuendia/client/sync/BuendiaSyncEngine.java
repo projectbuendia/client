@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client.sync;
 
-import android.accounts.Account;
-import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -25,7 +23,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.util.TimingLogger;
 
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
@@ -51,18 +48,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 
-/** Global sync adapter for syncing all client side database caches. */
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
-
+/** Implementation of sync operations for the Buendia database. */
+public class BuendiaSyncEngine implements SyncEngine {
     private static final Logger LOG = Logger.create();
-
-    /** Named used during the sync process for SQL savepoints. */
     private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
 
-    /** Content resolver, for performing database operations. */
-    private final ContentResolver mContentResolver;
-    /** Tracks whether the sync has been canceled. */
-    private boolean mIsSyncCanceled = false;
+    private final Context context;
+    private final ContentResolver contentResolver;
+    private boolean isCancelled = false;
 
     /**
      * Keys in the extras bundle used to select which sync phases to do.
@@ -78,8 +71,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         SYNC_ORDERS(R.string.syncing_orders, new OrdersSyncPhaseRunnable()),
         SYNC_FORMS(R.string.syncing_forms, new FormsSyncPhaseRunnable());
 
-        @StringRes
-        public final int message;
+        public final @StringRes int message;
         public final SyncPhaseRunnable runnable;
 
         SyncPhase(int message, SyncPhaseRunnable runnable) {
@@ -97,36 +89,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         FULL_SYNC
     }
 
-    public SyncAdapter(Context context, boolean autoInitialize) {
-        super(context, autoInitialize);
-        mContentResolver = context.getContentResolver();
+    public BuendiaSyncEngine(Context context) {
+        this.context = context;
+        this.contentResolver = context.getContentResolver();
     }
 
-    public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
-        super(context, autoInitialize, allowParallelSyncs);
-        mContentResolver = context.getContentResolver();
-    }
-
-    @Override public void onSyncCanceled() {
-        mIsSyncCanceled = true;
-        LOG.i("Detecting a sync cancellation, canceling sync soon.");
+    @Override public void cancel() {
+        isCancelled = true;
+        LOG.i("Received a cancel() request");
     }
 
     /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
-    @Override public void onPerformSync(
-        Account account,
-        Bundle extras,
-        String authority,
-        ContentProviderClient provider,
-        SyncResult syncResult) {
+    @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
+        isCancelled = false;
         broadcastSyncStatus(SyncManager.STARTED);
 
         Intent syncFailedIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class);
         syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
 
         Intent syncCanceledIntent =
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class);
         syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
 
         // If we can't access the Buendia API, short-circuit. Before this check was added, sync
@@ -146,46 +129,45 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
+        LOG.start("sync");
+
         // Decide which phases to do.  If FULL_SYNC is set or no phases
         // are specified, do them all.
         Set<SyncPhase> phases = new HashSet<>();
         for (SyncPhase phase : SyncPhase.values()) {
-            if (extras.getBoolean(phase.name())) {
+            if (options.getBoolean(phase.name())) {
                 phases.add(phase);
             }
         }
-        boolean fullSync = phases.isEmpty() || extras.getBoolean(SyncOption.FULL_SYNC.name());
+        boolean fullSync = phases.isEmpty() || options.getBoolean(SyncOption.FULL_SYNC.name());
         if (fullSync) {
             Collections.addAll(phases, SyncPhase.values());
         }
 
-        LOG.i("Requested phases are: %s", phases);
+        LOG.i("Starting sync with phases: %s", phases);
         broadcastSyncProgress(0, R.string.sync_in_progress);
-        TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
 
-        BuendiaProvider buendiaProvider = (BuendiaProvider) provider.getLocalContentProvider();
-        try (DatabaseTransaction tx = buendiaProvider.startTransaction(SYNC_SAVEPOINT_NAME)) {
+        BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
+        try (DatabaseTransaction tx = provider.startTransaction(SYNC_SAVEPOINT_NAME)) {
             try {
                 if (fullSync) {
-                    storeFullSyncStartTime(provider, Instant.now());
+                    storeFullSyncStartTime(client, Instant.now());
                 }
 
-                float progressIncrement = 100.0f/phases.size();
                 int completedPhases = 0;
+                LOG.elapsed("sync", "Starting phases");
                 for (SyncPhase phase : SyncPhase.values()) {
                     if (phases.contains(phase)) {
-                        LOG.i("--- Begin %s ---", phase);
                         checkCancellation("before " + phase);
-                        broadcastSyncProgress((int) (completedPhases * progressIncrement), phase.message);
-                        phase.runnable.sync(mContentResolver, syncResult, provider);
-                        timings.addSplit(phase.name() + " phase completed");
+                        broadcastSyncProgress(completedPhases * 100 / phases.size(), phase.message);
+                        phase.runnable.sync(contentResolver, result, client);
+                        LOG.elapsed("sync", "Completed phase %s", phase);
                         completedPhases++;
                     }
                 }
                 broadcastSyncProgress(100, R.string.completing_sync);
-
                 if (fullSync) {
-                    storeFullSyncEndTime(provider, Instant.now());
+                    storeFullSyncEndTime(client, Instant.now());
                 }
             } catch (CancellationException e) {
                 LOG.i(e, "Sync canceled");
@@ -196,20 +178,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } catch (OperationApplicationException e) {
                 LOG.e(e, "Error updating database during sync");
                 tx.rollback();
-                syncResult.databaseError = true;
+                result.databaseError = true;
                 broadcastSyncStatus(SyncManager.FAILED);
                 return;
             } catch (Throwable e) {
                 LOG.e(e, "Error during sync");
                 tx.rollback();
-                syncResult.stats.numIoExceptions++;
+                result.stats.numIoExceptions++;
                 broadcastSyncStatus(SyncManager.FAILED);
                 return;
             }
         }
-        timings.dumpToLog();
         broadcastSyncStatus(SyncManager.COMPLETED);
-        LOG.i("onPerformSync completed");
+        LOG.finish("sync");
     }
 
     /**
@@ -218,27 +199,28 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * procedures.
      */
     private synchronized void checkCancellation(String when) throws CancellationException {
-        if (mIsSyncCanceled) {
-            mIsSyncCanceled = false;
-            throw new CancellationException("Sync cancelled " + when);
+        if (isCancelled) {
+            isCancelled = false;
+            String message = "Sync cancelled " + when;
+            LOG.w(message);
+            throw new CancellationException(message);
         }
     }
 
     private void broadcastSyncStatus(int status) {
-        getContext().sendBroadcast(
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class)
+        context.sendBroadcast(
+            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
                 .putExtra(SyncManager.SYNC_STATUS, status)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );
     }
 
     private void broadcastSyncProgress(int progress, @StringRes int messageId) {
-        String label = getContext().getResources().getString(messageId);
-        getContext().sendBroadcast(
-            new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class)
+        context.sendBroadcast(
+            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
                 .putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS)
                 .putExtra(SyncManager.SYNC_PROGRESS, progress)
-                .putExtra(SyncManager.SYNC_PROGRESS_LABEL, label)
+                .putExtra(SyncManager.SYNC_MESSAGE_ID, messageId)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );
     }

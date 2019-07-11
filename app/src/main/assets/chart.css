@@ -1,129 +1,179 @@
-/* Specify font sizes and scalable margins/paddings in rem (1 rem = 10 sp). */
-/* Specify scalable margins/paddings relative to the current font size in em. */
-/* Specify non-scalable margins and paddings in px (1 px = 1 dp). */
+/* Use rem for font sizes and scalable margins/paddings (1 rem = 10 sp). */
+/* Use em for scalable margins/paddings relative to current font size. */
+/* Use px for non-scalable margins/paddings (1 px = 1 dp). */
 
+* { box-sizing: border-box; }
 body { margin: 0; }
 div, th, td { text-overflow: ellipsis; }
-table { background: #fff; } /* opaque so that frozen headers are opaque */
-th, td {
-  font-weight: normal;
-  text-align: left;
-  vertical-align: baseline;
+th, td, table div { overflow: hidden; }
+th, td { font-weight: normal; text-align: left; vertical-align: baseline; }
+
+/* Scrolling */
+#scroller { display: flex; flex-direction: row; width: 100%; }
+#grid { visibility: hidden; }
+#grid-left { flex-basis: 0; flex-grow: 0; }
+#grid-body { flex-basis: 0; flex-grow: 1; overflow: scroll; position: relative; }
+
+#buttons button {
+  font-size: 3.2rem;
+  -webkit-text-stroke: 0.2rem black;
+  opacity: 0.4;
+  width: 6rem;
+  height: 6rem;
+  padding-top: 0.3rem; /* adjust the centering of the arrow */
+  background: transparent;
+  border: none;
+  outline: none;
+  position: fixed;
+  right: 0;
+  bottom: 0;
 }
+#buttons button[disabled] { opacity: 0.15; color: black; }
+#buttons button::before { content: '\00279c'; }
+button#home::before { content: '\0025c9'; }
+button#up { transform: rotate(270deg); }
+button#left { transform: rotate(180deg); }
+button#down { transform: rotate(90deg); }
+button#left { right: 12rem; }
+button#home { right: 6rem; }
+button#up { bottom: 12rem; }
+button#down { bottom: 6rem; }
+
+/* Apply borders to all cells so their sizes are uniform. */
+.top th { border-top: 1px solid transparent; }
+th, td { border: 1px solid transparent; border-width: 0 1px 1px 0; }
 
 /* Grid lines */
-/* TODO: Adding left/right padding >0 breaks frozen headers.  Figure out why. */
-#grid thead th.day {
-  border-top: 1px solid #666;
+thead th.day { border-top-color: #666; }
+thead tr:last-child th, thead th.gap { border-bottom-color: #666; }
+thead th { border-right-color: #ddd; }
+
+th[scope="rowgroup"] { border-top: 1px solid #666; }
+tbody.observations tr:first-child th { border-top: none; }
+tbody th, tbody td { border-bottom-color: #ddd; }
+
+tbody th, .corner, .day, .day-last, .gap { border-right-color: #666; }
+tbody td, th[scope="rowgroup"] { border-right-color: #ddd; }
+.division { border-right: 1px solid #ddd; }
+.division:last-child { border-right: none; }
+.command { border-right: transparent; }
+
+/* Row shading */
+tr.obs, tr.order { background: #f8f8f8; }
+
+/* Column shading */
+.now { font-weight: bold; background: #e0f0ff; }
+
+th.gap {
+  background: repeating-linear-gradient(
+      45deg, #fff, #fff 10px, #eee 10px, #eee 20px);
 }
 
-#grid thead tr:last-child th, #grid thead th.gap {
-  border-bottom: 1px solid #666;
-}
+/* Left margin */
+#grid-left th { padding-left: 16px; min-width: 20rem; max-width: 20rem; }
 
-#grid th[scope="row"], #grid td {
-  border-bottom: 1px solid #ddd;
-}
-
-#grid th, #grid td {
-  border-right: 1px solid #ddd;
-}
-
-#grid th, #grid td, #grid .order .division, #grid .order .summary {
+/* Grid text: should match @style/text */
+th, td, .division, .summary {
+  font-size: 1.9rem;
+  line-height: 1.3; /* ensure that rows have uniform height */
   padding: 0.6em 0 0.5em; /* extra 0.1em on top for vertical centering */
-  /* Some symbols have a different height than other characters, so we need */
-  /* to set the line-height to ensure that rows have uniform height. */
-  line-height: 1.3;
-}
-
-#grid .day, #grid .day-last, #grid th[scope="rowgroup"].day-last,
-#grid .gap, #grid th[scope="rowgroup"].gap,
-#grid th[scope="rowgroup"]:first-child, #grid th[scope="row"], #grid th.corner {
-  border-right: 1px solid #666;
-}
-
-#grid th[scope="rowgroup"], #grid th.command {
-  border-right: none;
-}
-
-#grid th[scope="row"] {
-  padding-left: 16px;
-}
-
-/* History grid: cells should match @style/text */
-#grid th[scope="row"], #grid td { font-size: 1.9rem; } /* @style/text */
-#grid-scroller { position: relative; } /* for overlays with position: absolute */
-
-/* Row and column shading */
-#grid .now { font-weight: bold; background: #e0f0ff; }
-
-/* Column headers: should match @style/text.caption */
-/* TODO: Adding left/right padding >0 breaks frozen headers.  Figure out why. */
-#grid thead th {
-  text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Grid cell sizes */
+thead th, .obs td, .order td { text-align: center; min-width: 6rem; max-width: 6rem; }
+tbody th, tbody td { height: 4.5rem; }
+th.gap, th[scope="rowgroup"].gap { min-width: 1.5rem; max-width: 1.5rem; }
+
+/* Column headings: should match @style/text.caption */
+thead th {
   font-size: 1.4rem;
   padding: 0.2em 0;
+  white-space: nowrap;
 }
-#grid th.gap, #grid th[scope="rowgroup"].gap {
-  background: repeating-linear-gradient(45deg, #fff, #fff 10px, #eee 10px, #eee 20px);
+thead th.weekend {
+  color: #900;
 }
 
-/* Row headers: should match @style/text.caps */
-#grid tbody th { white-space: nowrap; }
-#grid th[scope="rowgroup"] {
-  text-transform: uppercase;
-  font-size: 1.4rem;
+/* Row headings: should match @style/text.caps */
+th[scope="rowgroup"] {
+  font-size: 1.5rem;
   font-weight: bold;
-  background: #eee;
   padding-top: 1.6em;
-  padding-left: 16px;
+  text-transform: uppercase;
+  background: #fff;
+  color: #900;
 }
-#grid th[scope="row"] { overflow: hidden; }
-/* TODO: Specifying max-width in vw doesn't work here.  Figure out why. */
-#grid th[scope="row"] div { max-width: 24rem; overflow: hidden; }
-
-/* Cells: text should match @style/text */
-.obs td, .order td { text-align: center; min-width: 3em; }
 
 /* Orders */
-#grid .order th { padding: 0 16px; line-height: 1.2em; vertical-align: middle; }
-#grid .order td { position: relative; }
-#grid .order .divisions { position: absolute; top: 0; left: 0; bottom: 0; right: 0; display: flex; flex-direction: row; }
-#grid .order .summary { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
-#grid .order .division { flex-basis: 0; flex-grow: 1; }
-#grid .order .division:last-child { border-right: none; }
-#grid .order .stop { color: #f66; font-size: 1.5rem; font-weight: bold; text-transform: uppercase; padding-top: 1em; }
-#grid .order .scheduled { background: #ddd; }
-#grid .order .past.underdose { background: #fda; }
-#grid .order .now.underdose { background: #faa; }
-#grid .order .full-dose { background: #afa; }
-#grid .order .overdose { background: #c8f; }
-#grid .order .overdose .given, .order .overdose .extra-given { color: #c00; }
-
-.order .medication { font-weight: bold; }
-#grid th[scope="row"].command { /* matches @style/ActionButton */
+.orders th[scope="rowgroup"] {
   color: #09e;
-  background: #fff;
-  text-transform: uppercase;
-  font-size: 1.9rem;
-  padding-bottom: 3.8rem;
+}
+#grid-left .order th { padding: 0 4px 0 16px; line-height: 1.1em; vertical-align: middle; }
+.medication { font-weight: bold; }
+.route-IV .medication { color: #c60; }
+.route-PO .medication { color: #084; }
+
+.order td { position: relative; }  /* contains positioned .divisions and .summary */
+.order .divisions, .order .summary {
+    position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.order .divisions { display: flex; flex-direction: row; }  /* contains flexed .division */
+.order .division { flex-basis: 0; flex-grow: 1; }
+
+.order .past.underdose { background: #fed; }
+.order .now.underdose { background: #fcc; }
+.order .future.underdose { background: #ddd; }
+.order .full-dose { background: #dfd; }
+.order .overdose { background: #ecf; }
+.order .overdose .given, .order .overdose .extra-given { color: #c00; }
+
+.division { position: relative; overflow: visible; }  /* contains positioned .execution */
+.execution {
+  width: 0.3rem;
+  margin-left: -0.15rem;
+  position: absolute;
+  top: 70%;
+  bottom: 0;
+  opacity: 0.3;
+  background: #000;
+  z-index: 1;
+}
+.past.underdose .execution { background: #f80; }
+.now.underdose .execution { background: #f00; }
+.full-dose .execution { background: #080; }
+.overdose .execution { background: #80f; }
+
+th.command { /* should match @style/ActionButton */
+  font-size: 1.5rem;
   font-weight: bold;
+  color: #09e;
+  text-transform: uppercase;
+  padding-bottom: 3.8rem;
+  overflow: visible;
 }
-#grid .order div.notes {
+.order .notes {
   float: right;
-  max-width: 8em;
-  max-height: 100%;
-  line-height: 45px;
-  font-size: 1.2rem;
-  text-overflow: ellipsis;
+  max-width: 40%;
+  font-size: 1.4rem; /* should match @style/text.caption */
   color: #c40;
+  line-height: 4rem;
+  overflow: hidden;
 }
+.order .notes + .medication { max-width: 60%; }
+
+/* Frozen headings */
+.frozen { position: fixed; top: 0; background: #fff; }
+.floating { position: absolute; background: #fff; }
+#grid-left .frozen { background: #fff; z-index: 1; }
 
 /* Tiles */
-#tiles { table-layout: fixed; width: 100%; }
-.tile { height: 3rem; overflow: hidden; white-space: nowrap; padding: 1rem 8px 1rem 16px; }
-.tile div { width: 100%; overflow: hidden; }
+#tiles { width: 100%; }
+.row { display: flex; flex-direction: row; }
+.tile { flex-basis: 0; flex-grow: 1; padding: 1rem 0 1rem 16px; }
+.tile, .tile div { overflow: hidden; white-space: nowrap; }
 .tile .heading { /* should match @style/text.caps */
   font-size: 1.4rem;
   text-transform: uppercase;
@@ -141,4 +191,5 @@ th, td {
 .critical { color: #ff0000; }
 .abnormal { color: #ff9500; }
 .borderline { color: #aa6600; }
-.good { color: #4caf50; }
+.normal { color: #4caf50; }
+
