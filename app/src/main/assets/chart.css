@@ -45,23 +45,26 @@ th, td { border: 1px solid transparent; border-width: 0 1px 1px 0; }
 
 /* Grid lines */
 thead th.day { border-top-color: #666; }
-thead tr:last-child th { border-bottom-color: #666; }
+thead tr:last-child th, thead th.gap { border-bottom-color: #666; }
 thead th { border-right-color: #ddd; }
 
-tbody.orders th[scope="rowgroup"] { border-top-color: #666; }
+th[scope="rowgroup"] { border-top: 1px solid #666; }
+tbody.observations tr:first-child th { border-top: none; }
 tbody th, tbody td { border-bottom-color: #ddd; }
 
-tbody th, .corner, .day, .day-last, .gap { border-right: 1px solid #666; }
-tbody td { border-right: 1px solid #ddd; }
+tbody th, .corner, .day, .day-last, .gap { border-right-color: #666; }
+tbody td, th[scope="rowgroup"] { border-right-color: #ddd; }
 .division { border-right: 1px solid #ddd; }
 .division:last-child { border-right: none; }
 .command { border-right: transparent; }
 
+/* Row shading */
+tr.obs, tr.order { background: #f8f8f8; }
+
 /* Column shading */
 .now { font-weight: bold; background: #e0f0ff; }
 
-th.gap, th[scope="rowgroup"].gap {
-  min-width: 1.5rem;
+th.gap {
   background: repeating-linear-gradient(
       45deg, #fff, #fff 10px, #eee 10px, #eee 20px);
 }
@@ -78,9 +81,10 @@ th, td, .division, .summary {
   overflow: hidden;
 }
 
-/* Grid cells */
+/* Grid cell sizes */
 thead th, .obs td, .order td { text-align: center; min-width: 6rem; max-width: 6rem; }
 tbody th, tbody td { height: 4.5rem; }
+th.gap, th[scope="rowgroup"].gap { min-width: 1.5rem; max-width: 1.5rem; }
 
 /* Column headings: should match @style/text.caption */
 thead th {
@@ -91,15 +95,19 @@ thead th {
 
 /* Row headings: should match @style/text.caps */
 th[scope="rowgroup"] {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: bold;
   padding-top: 1.6em;
   text-transform: uppercase;
-  background: #eee;
+  background: #fff;
+  color: #900;
 }
 
 /* Orders */
-.order th { padding: 0 4px 0 16px; line-height: 1.1em; vertical-align: middle; }
+.orders th[scope="rowgroup"] {
+  color: #09e;
+}
+#grid-left .order th { padding: 0 4px 0 16px; line-height: 1.1em; vertical-align: middle; }
 .medication { font-weight: bold; }
 .route-IV .medication { color: #c60; }
 .route-PO .medication { color: #084; }
@@ -114,7 +122,7 @@ th[scope="rowgroup"] {
 
 .order .past.underdose { background: #fed; }
 .order .now.underdose { background: #fcc; }
-.order .future.underdose { background: #eee; }
+.order .future.underdose { background: #ddd; }
 .order .full-dose { background: #dfd; }
 .order .overdose { background: #ecf; }
 .order .overdose .given, .order .overdose .extra-given { color: #c00; }
@@ -136,6 +144,7 @@ th[scope="rowgroup"] {
 .overdose .execution { background: #80f; }
 
 th.command { /* should match @style/ActionButton */
+  font-size: 1.5rem;
   font-weight: bold;
   color: #09e;
   text-transform: uppercase;
