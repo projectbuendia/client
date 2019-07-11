@@ -58,8 +58,54 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_notes) EditText mNotes;
     @InjectView(R.id.order_delete) Button mDelete;
+    @InjectView(R.id.order_med) Button mMed;
+
+    class Med {
+        public String medication;
+        public String route;
+        public String dosage;
+
+        public Med(String m, String r, String d) {
+            medication = m;
+            route = r;
+            dosage = d;
+        }
+    }
+
+    Med[] COMMON_MEDS = new Med[] {
+        new Med("Amoxicillin", "PO", "250 mg"),
+        new Med("Amoxicillin", "PO", "500 mg"),
+        new Med("Glucose 5%", "IV", "500 mL"),
+        new Med("Glucose 5%", "IV", "1000 mL"),
+        new Med("Hydrocortisone", "IM", "50 mg"),
+        new Med("Hydrocortisone", "IM", "100 mg"),
+        new Med("Paracetamol", "PO", "100 mg"),
+        new Med("Paracetamol", "PO", "500 mg"),
+        new Med("Ringer Lactate", "IV", "500 mL"),
+        new Med("Ringer Lactate", "IV", "1000 mL")
+    };
 
     private LayoutInflater mInflater;
+
+    private void showMedsDialog() {
+        CharSequence[] labels = new CharSequence[COMMON_MEDS.length];
+        for (int i = 0; i < labels.length; i++) {
+            Med m = COMMON_MEDS[i];
+            labels[i] = m.medication + " " + m.route + " " + m.dosage;
+        }
+        new AlertDialog.Builder(getActivity())
+            .setSingleChoiceItems(labels, -1, new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface dialog, int which) {
+                    Med m = COMMON_MEDS[which];
+                    mMedication.setText(m.medication);
+                    mRoute.setText(m.route);
+                    mDosage.setText(m.dosage);
+                    dialog.dismiss();
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderDialogFragment newInstance(String patientUuid, Order order) {
@@ -150,6 +196,12 @@ public class OrderDialogFragment extends DialogFragment {
         });
 
         mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
+
+        mMed.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                showMedsDialog();
+            }
+        });
     }
 
     public void onSubmit(Dialog dialog) {
