@@ -170,8 +170,7 @@ public class ChartRenderer {
             }
         };
         List<List<Tile>> mTileRows = new ArrayList<>();
-        List<Row> mRows = new ArrayList<>();
-        Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
+        List<RowGroup> mRowGroups = new ArrayList<>();
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
@@ -202,11 +201,12 @@ public class ChartRenderer {
                 }
                 mTileRows.add(tileRow);
             }
+
             for (ChartSection section : chart.rowGroups) {
+                RowGroup rowGroup = new RowGroup(section.label);
+                mRowGroups.add(rowGroup);
                 for (ChartItem item : section.items) {
-                    Row row = new Row(item);
-                    mRows.add(row);
-                    mRowsByUuid.put(item.conceptUuids[0], row);
+                    rowGroup.rows.add(new Row(item));
                     if (!item.script.trim().isEmpty()) {
                         mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
                     }
@@ -350,7 +350,7 @@ public class ChartRenderer {
             Map<String, Object> context = new HashMap<>();
             context.put("now", mNow);
             context.put("tileRows", mTileRows);
-            context.put("rows", mRows);
+            context.put("rowGroups", mRowGroups);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumn", mNowColumn);
             context.put("numColumnsPerDay", getSegmentStartTimes().length);

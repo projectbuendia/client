@@ -67,57 +67,66 @@
   </thead>
 
   <tbody class="observations">
-    <tr>
-      <th scope="rowgroup">
-        Observations
-      </th>
-      {% set prevStop = columns[0].start %}
-      {% for column in columns %}
-        {% if column.start != prevStop %}
-          <th scope="rowgroup" class="gap" rowspan={{(rows | length) + 1}}>&nbsp;</th>
-        {% endif %}
-        {% if column.start == column.dayStart %}
-          <th scope="rowgroup" colspan={{numColumnsPerDay}}>&nbsp;</th>
-        {% endif %}
-        {% set prevStop = column.stop %}
-      {% endfor %}
-    </tr>
-    {% for row in rows %}
-    {% set id = row.item.conceptIds | first %}
-    <tr class="obs">
-        <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
-          {{row.item.label}}
+    {% for group in rowGroups %}
+      <tr>
+        <th scope="rowgroup">
+          {{group.title is not empty ? group.title : 'Observations'}}
         </th>
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
-          {% set points = get_all_points(row=row, column=column) %}
-          {% if points is empty %}
-            {% set summaryValue = null %}
-          {% elseif row.item.type == 'yes_no' %}
-            {% set summaryValue = points | values | max %}
-          {% else %}
-            {% set summaryValue = (points | last).value %}
+          {% if column.start != prevStop %}
+            <th scope="rowgroup" class="gap">&nbsp;</th>
           {% endif %}
-          {% set class = summaryValue | format_values(row.item.cssClass) %}
-          {% set style = summaryValue | format_values(row.item.cssStyle) %}
-          <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
-            style="{{style}}"
-            onclick="{% if points is not empty and row.item.type.string != 'text_icon' %}
-                       od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
-                     {% endif %}">
-          {% if points is empty %}
-            &nbsp;
-          {% elseif row.item.type == 'text_icon' %}
-            <div>&#x1f4dd;</div>
-          {% else %}
-            {% set output = summaryValue | format_value(row.item.format) %}
-            {% if output is empty %}
-              {% set output = summaryValue | format_value(row.item.captionFormat) %}
-            {% endif %}
-            {% if output is empty %}&nbsp;{% else %}{{output}}{% endif %}
+          {% if column.start == column.dayStart %}
+            <th scope="rowgroup" colspan={{numColumnsPerDay}}>&nbsp;</th>
           {% endif %}
-        </td>
+          {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
+      {% set top = true %}
+      {% for row in group.rows %}
+        {% set id = row.item.conceptIds | first %}
+        <tr class="obs">
+          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
+            {{row.item.label}}
+          </th>
+          {% set prevStop = columns[0].start %}
+          {% for column in columns %}
+            {% if top and column.start != prevStop %}
+              <th class="gap" rowspan={{group.rows | length}}>&nbsp;</th>
+            {% endif %}
+            {% set points = get_all_points(row=row, column=column) %}
+            {% if points is empty %}
+              {% set summaryValue = null %}
+            {% elseif row.item.type == 'yes_no' %}
+              {% set summaryValue = points | values | max %}
+            {% else %}
+              {% set summaryValue = (points | last).value %}
+            {% endif %}
+            {% set class = summaryValue | format_values(row.item.cssClass) %}
+            {% set style = summaryValue | format_values(row.item.cssStyle) %}
+            <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
+              style="{{style}}"
+              onclick="{% if points is not empty and row.item.type.string != 'text_icon' %}
+                         od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
+                       {% endif %}">
+              {% if points is empty %}
+                &nbsp;
+              {% elseif row.item.type == 'text_icon' %}
+                <div>&#x1f4dd;</div>
+              {% else %}
+                {% set output = summaryValue | format_value(row.item.format) %}
+                {% if output is empty %}
+                  {% set output = summaryValue | format_value(row.item.captionFormat) %}
+                {% endif %}
+                {% if output is empty %}&nbsp;{% else %}{{output}}{% endif %}
+              {% endif %}
+            </td>
+            {% set prevStop = column.stop %}
+          {% endfor %}
+        </tr>
+        {% set top = false %}
+      {% endfor %}
     {% endfor %}
   </tbody>
 
@@ -129,7 +138,7 @@
       {% set prevStop = columns[0].start %}
       {% for column in columns %}
         {% if column.start != prevStop %}
-          <th scope="rowgroup" class="gap" rowspan={{(rows | length) + 1}}>&nbsp;</th>
+          <th scope="rowgroup" class="gap">&nbsp;</th>
         {% endif %}
         {% if column.start == column.dayStart %}
           <th scope="rowgroup" colspan={{numColumnsPerDay}}>&nbsp;</th>
@@ -137,6 +146,7 @@
         {% set prevStop = column.stop %}
       {% endfor %}
     </tr>
+    {% set top = true %}
     {% for order in orders %}
       {% set ins = order.instructions %}
       <tr class="order route-{{ins.route}}">
@@ -154,7 +164,11 @@
         {% set divisionIndex = 0 %}
         {% set showPerDivisionCounts = numColumnsPerDay >= ins.frequency %}
 
+        {% set prevStop = columns[0].start %}
         {% for column in columns %}
+          {% if column.start != prevStop and top %}
+            <th class="gap" rowspan={{orders | length}}>&nbsp;</th>
+          {% endif %}
           {% if column.start == column.dayStart %}
             {% if column.date == order.startDay %}
               {% set started = true %}
@@ -210,8 +224,10 @@
               </div>
             </td>
           {% endif %}
+          {% set prevStop = column.stop %}
         {% endfor %}
       </tr>
+      {% set top = false %}
     {% endfor %}
 
     <tr>
