@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.FakeSyncManager;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
@@ -341,9 +342,9 @@ public final class LocationListControllerTest {
         LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a periodic sync reports progress
-        mFakeEventBus.post(new SyncProgressEvent(10, "Foo synced"));
+        mFakeEventBus.post(new SyncProgressEvent(10, R.string.syncing_users));
         // THEN the activity does not notify the UI
-        verify(mMockFragmentUi, times(0)).showIncrementalSyncProgress(10, "Foo synced");
+        verify(mMockFragmentUi, times(0)).showIncrementalSyncProgress(10, R.string.syncing_users);
     }
 
     /** Tests that 'sync failed' messages are ignored when the data model is already available. */

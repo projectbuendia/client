@@ -47,7 +47,7 @@ public class SyncManager {
      * Intent extras using this key are nullable strings representing the current sync status.
      * They are localized and are suitable for presentation to the user.
      */
-    static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
+    static final String SYNC_MESSAGE_ID = "sync-message-id";
 
     private final SyncScheduler mScheduler;
 
@@ -129,9 +129,9 @@ public class SyncManager {
                     break;
                 case IN_PROGRESS:
                     int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
-                    String label = intent.getStringExtra(SYNC_PROGRESS_LABEL);
-                    LOG.i("SyncStatus: IN_PROGRESS (%d%%, %s)", progress, label);
-                    EventBus.getDefault().post(new SyncProgressEvent(progress, label));
+                    int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, 0);
+                    LOG.i("SyncStatus: IN_PROGRESS (%d%%, %s)", progress, context.getString(messageId));
+                    EventBus.getDefault().post(new SyncProgressEvent(progress, messageId));
                     break;
                 case CANCELED:
                     LOG.i("SyncStatus: CANCELED");

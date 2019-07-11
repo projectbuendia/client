@@ -213,12 +213,11 @@ public class BuendiaSyncEngine implements SyncEngine {
     }
 
     private void broadcastSyncProgress(int progress, @StringRes int messageId) {
-        String label = context.getResources().getString(messageId);
         context.sendBroadcast(
             new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
                 .putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS)
                 .putExtra(SyncManager.SYNC_PROGRESS, progress)
-                .putExtra(SyncManager.SYNC_PROGRESS_LABEL, label)
+                .putExtra(SyncManager.SYNC_MESSAGE_ID, messageId)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );
     }

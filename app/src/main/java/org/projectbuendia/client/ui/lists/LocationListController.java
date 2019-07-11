@@ -94,7 +94,7 @@ final class LocationListController {
 
         void setBusyLoading(boolean busy);
 
-        void showIncrementalSyncProgress(int progress, String label);
+        void showIncrementalSyncProgress(int progress, int messageId);
 
         void resetSyncProgress();
 
@@ -278,7 +278,7 @@ final class LocationListController {
         public void onEventMainThread(SyncProgressEvent event) {
             if (mWaitingOnSync) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.showIncrementalSyncProgress(event.progress, event.label);
+                    fragmentUi.showIncrementalSyncProgress(event.progress, event.messageId);
                 }
             }
         }

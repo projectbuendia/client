@@ -11,17 +11,15 @@
 
 package org.projectbuendia.client.events.sync;
 
-import android.support.annotation.Nullable;
-
 /** An event bus event giving details on the last-reported progress of an in-progress sync. */
 public class SyncProgressEvent {
     /** The progress completed so far, as a percentage. */
     public int progress;
-    /** A label describing the current sync status. */
-    @Nullable public String label;
+    /** The resource ID of a string label describing the current sync status. */
+    public int messageId;
 
-    public SyncProgressEvent(int progress, @Nullable String label) {
+    public SyncProgressEvent(int progress, int messageId) {
         this.progress = progress;
-        this.label = label;
+        this.messageId = messageId;
     }
 }
