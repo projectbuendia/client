@@ -139,10 +139,10 @@ def clientRoot = file('../')
 def serverDev = 'demo.buendia.org'  // an AWS machine running Linux AMI 2017.09
 
 // OpenMRS server for integration testing.
-def serverIntegration = 'integration.projectbuendia.org'
+def serverIntegration = 'staging.buendia.org'
 
-// Edison server on the local network.
-def serverEdison = 'server'
+// Portable server (Raspberry Pi, NUC, Edison, etc.) on a local network.
+def serverLan = 'server'
 
 // Host machine when client runs in an emulator (AVD).
 def serverEmulatorHost = '10.0.2.2'
@@ -152,11 +152,11 @@ def serverFantastica = '192.168.1.161'
 
 // If you run `adb reverse tcp:9000 tcp:9000` on your machine with a device connected, and
 // use this setting, then the device will talk to a locally running server instance.
-def serverLocalHost = '127.0.0.1'
+def serverLocalhost = '127.0.0.1'
 
 // Just for development.  In production builds, these should be overridden
 // using -Pserver=server -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def serverDefault = serverDev
+def serverDefault = serverLan
 def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs'
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
