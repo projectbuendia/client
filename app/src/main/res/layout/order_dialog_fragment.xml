@@ -44,6 +44,12 @@
           android:inputType="textCapSentences|textNoSuggestions"
           android:maxLength="40"/>
 
+      <Button
+          android:id="@+id/order_med"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="&#x25bc;"/>
+
       <EditText
           android:id="@+id/order_route"
           style="?android:attr/spinnerStyle"
