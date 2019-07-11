@@ -10,6 +10,7 @@ import android.os.Message;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 /** An implementation of SyncScheduler that runs the SyncEngine on a background thread. */
 public class ThreadedSyncScheduler implements SyncScheduler {
@@ -23,8 +24,9 @@ public class ThreadedSyncScheduler implements SyncScheduler {
     private static final int LOOP_TICK = 3;
 
     // Bundle keys
-    private static final String KEY_PERIOD_SEC = "org.projectbuendia.PERIOD_SEC";
-    private static final String KEY_LOOP_ID = "org.projectbuendia.LOOP_ID";
+    private static final String KEY_OPTIONS = "OPTIONS";
+    private static final String KEY_PERIOD_SEC = "PERIOD_SEC";
+    private static final String KEY_LOOP_ID = "LOOP_ID";
 
     public ThreadedSyncScheduler(Context context) {
         LOG.i("> new SyncThread");
@@ -34,7 +36,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
     @Override public void requestSync(Bundle options) {
         LOG.i("> requestSync()");
-        thread.send(REQUEST_SYNC, options);
+        thread.send(REQUEST_SYNC, Utils.putBundle(KEY_OPTIONS, options, new Bundle()));
     }
 
     @Override public void stopSyncing() {
@@ -44,8 +46,9 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
     @Override public void setPeriodicSync(Bundle options, int periodSec) {
         LOG.i("> setPeriodicSync(options=%s, periodSec=%d)", options, periodSec);
-        options.putInt(KEY_PERIOD_SEC, periodSec);
-        thread.send(SET_PERIODIC_SYNC, options);
+        thread.send(SET_PERIODIC_SYNC,
+            Utils.putBundle(KEY_OPTIONS, options,
+                Utils.putInt(KEY_PERIOD_SEC, periodSec, new Bundle())));
     }
 
     @Override public boolean isRunningOrPending() {
@@ -70,11 +73,9 @@ public class ThreadedSyncScheduler implements SyncScheduler {
             extContext = context;
         }
 
-        public void send(int command, Bundle options) {
-            LOG.i("> send(command=" + command + ")");
-            Message message = handler.obtainMessage(command);
-            message.setData(options);
-            handler.sendMessage(message);
+        public void send(int command, Bundle data) {
+            LOG.i("> send(command=%d, data=%s)", command, data);
+            handler.sendMessage(Utils.newMessage(handler, command, data));
         }
 
         public boolean isSyncRunning() {
@@ -102,10 +103,11 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
                 handler = new Handler(new Handler.Callback() {
                     @Override public boolean handleMessage(Message message) {
-                        Bundle options = message.getData();
-                        LOG.i("* handleMessage(what=" + message.what + ", options=" + options + ")");
-                        int periodSec = options.getInt(KEY_PERIOD_SEC, 0);
-                        int loopId = options.getInt(KEY_LOOP_ID, 0);
+                        Bundle data = message.getData();
+                        LOG.i("* handleMessage(what=" + message.what + ", data=" + data + ")");
+                        Bundle options = data.getBundle(KEY_OPTIONS);
+                        int periodSec = data.getInt(KEY_PERIOD_SEC, 0);
+                        int loopId = data.getInt(KEY_LOOP_ID, 0);
 
                         switch (message.what) {
                             case REQUEST_SYNC:
@@ -118,11 +120,11 @@ public class ThreadedSyncScheduler implements SyncScheduler {
                                 LOG.i("* SET_PERIODIC_SYNC: periodSec=%d, activeLoopId is now %d", periodSec, activeLoopId);
 
                                 if (periodSec > 0) {
-                                    options.putInt(KEY_LOOP_ID, activeLoopId);
-                                    Message nextMessage = handler.obtainMessage(LOOP_TICK);
-                                    nextMessage.setData(options);
                                     LOG.i("* scheduling LOOP_TICK(%d) message in %d sec", activeLoopId, periodSec);
-                                    handler.sendMessageDelayed(nextMessage, periodSec*1000);
+                                    handler.sendMessageDelayed(Utils.newMessage(handler, LOOP_TICK,
+                                        Utils.putBundle(KEY_OPTIONS, options,
+                                            Utils.putInt(KEY_PERIOD_SEC, periodSec,
+                                                Utils.putInt(KEY_LOOP_ID, activeLoopId, new Bundle())))), periodSec * 1000);
                                 }
                                 return true;
 
@@ -131,7 +133,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
                                 if (loopId == activeLoopId) {
                                     runSync(options);
                                     LOG.i("* scheduling LOOP_TICK(%d) message in %d sec", loopId, periodSec);
-                                    handler.sendMessageDelayed(Message.obtain(message), periodSec*1000);
+                                    handler.sendMessageDelayed(Message.obtain(message), periodSec * 1000);
                                 } else {
                                     LOG.i("* loopId=%d is no longer active; ignoring", loopId);
                                 }

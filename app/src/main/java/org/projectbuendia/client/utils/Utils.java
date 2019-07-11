@@ -15,6 +15,9 @@ import android.app.Dialog;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcel;
 import android.view.View;
 
 import com.android.volley.AuthFailureError;
@@ -41,6 +44,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -437,6 +441,37 @@ public class Utils {
         }
     }
 
+    /** Puts an integer into a Bundle in a chainable way. */
+    public static Bundle putInt(String key, int value, Bundle bundle) {
+        bundle.putInt(key, value);
+        return bundle;
+    }
+
+    /** Puts a String into a Bundle in a chainable way. */
+    public static Bundle putString(String key, String value, Bundle bundle) {
+        bundle.putString(key, value);
+        return bundle;
+    }
+
+    /** Puts a Bundle into a Bundle in a chainable way. */
+    public static Bundle putBundle(String key, Bundle value, Bundle bundle) {
+        bundle.putBundle(key, value);
+        return bundle;
+    }
+
+    /** Builds a Message with a Bundle of data. */
+    public static Message newMessage(Handler handler, int what, Bundle data) {
+        Message message = handler.obtainMessage(what);
+        message.setData(data);
+        return message;
+    }
+
+    /** Serializes a Bundle to a String. */
+    public static String toString(Bundle bundle) {
+        Parcel parcel = Parcel.obtain();
+        bundle.writeToParcel(parcel, 0);
+        return new String(parcel.marshall(), StandardCharsets.ISO_8859_1);
+    }
 
     // ==== User interface ====
 
