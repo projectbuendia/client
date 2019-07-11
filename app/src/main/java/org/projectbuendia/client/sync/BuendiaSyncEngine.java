@@ -101,6 +101,7 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
     @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
+        isCancelled = false;
         broadcastSyncStatus(SyncManager.STARTED);
 
         Intent syncFailedIntent =
@@ -200,7 +201,9 @@ public class BuendiaSyncEngine implements SyncEngine {
     private synchronized void checkCancellation(String when) throws CancellationException {
         if (isCancelled) {
             isCancelled = false;
-            throw new CancellationException("Sync cancelled " + when);
+            String message = "Sync cancelled " + when;
+            LOG.w(message);
+            throw new CancellationException(message);
         }
     }
 
