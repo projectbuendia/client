@@ -354,6 +354,8 @@
   <string name="pref_desc_require_wifi">Turn this off to allow the app to work with non-wifi (emulated or Bluetooth tethered) networking.</string>
   <string name="pref_title_starting_patient_id">Start with patient ID</string>
   <string name="pref_desc_starting_patient_id">Set an ID here to go directly to a patient chart on startup.</string>
+  <string name="pref_title_use_sync_adapter">Use the old SyncAdapter framework</string>
+  <string name="pref_desc_use_sync_adapter">Turn this on to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>

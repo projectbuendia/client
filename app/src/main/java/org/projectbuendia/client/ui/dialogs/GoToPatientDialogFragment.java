@@ -37,7 +37,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.sync.SyncAccountService;
+import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
 
@@ -52,6 +52,7 @@ import de.greenrobot.event.EventBus;
 public class GoToPatientDialogFragment extends DialogFragment {
     @Inject AppModel mAppModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject SyncManager mSyncManager;
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
     @InjectView(R.id.go_to_patient_result) TextView mPatientSearchResult;
     private LayoutInflater mInflater;
@@ -121,7 +122,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
 
             // Perform incremental observation sync to get the patient's admission date
             // and any other recent observations.
-            SyncAccountService.startObservationsAndOrdersSync();
+            mSyncManager.startObservationsAndOrdersSync();
         }
     }
 

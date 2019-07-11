@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.FakeSyncManager;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
@@ -71,7 +72,7 @@ public final class LocationListControllerTest {
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller does not start a new sync
-        assertFalse(mFakeSyncManager.isSyncActive());
+        assertFalse(mFakeSyncManager.isSyncRunningOrPending());
     }
 
     /** Tests that init kicks off a sync if the data model is unavailable. */
@@ -85,7 +86,7 @@ public final class LocationListControllerTest {
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller requests a sync
-        assertTrue(mFakeSyncManager.isSyncActive());
+        assertTrue(mFakeSyncManager.isSyncRunningOrPending());
     }
 
     /** Tests that suspend() unregisters any subscribers from the event bus. */
@@ -191,7 +192,7 @@ public final class LocationListControllerTest {
         LocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller starts a new sync
-        assertTrue(mFakeSyncManager.isSyncActive());
+        assertTrue(mFakeSyncManager.isSyncRunningOrPending());
     }
 
     /** Tests that loading an empty location tree does not hide the sync failed dialog. */
@@ -234,7 +235,7 @@ public final class LocationListControllerTest {
         LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller does not start a new sync
-        assertTrue(!mFakeSyncManager.isSyncActive());
+        assertTrue(!mFakeSyncManager.isSyncRunningOrPending());
     }
 
     /**
@@ -341,9 +342,9 @@ public final class LocationListControllerTest {
         LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a periodic sync reports progress
-        mFakeEventBus.post(new SyncProgressEvent(10, "Foo synced"));
+        mFakeEventBus.post(new SyncProgressEvent(10, R.string.syncing_users));
         // THEN the activity does not notify the UI
-        verify(mMockFragmentUi, times(0)).showIncrementalSyncProgress(10, "Foo synced");
+        verify(mMockFragmentUi, times(0)).showIncrementalSyncProgress(10, R.string.syncing_users);
     }
 
     /** Tests that 'sync failed' messages are ignored when the data model is already available. */

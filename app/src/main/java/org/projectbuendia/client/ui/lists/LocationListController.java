@@ -94,7 +94,7 @@ final class LocationListController {
 
         void setBusyLoading(boolean busy);
 
-        void showIncrementalSyncProgress(int progress, String label);
+        void showIncrementalSyncProgress(int progress, int messageId);
 
         void resetSyncProgress();
 
@@ -131,7 +131,7 @@ final class LocationListController {
         } else {
             LOG.i("Data model unavailable; waiting on sync.");
             mWaitingOnSync = true;
-            if (!mSyncManager.isSyncActive() && !mSyncManager.isSyncPending()) {
+            if (!mSyncManager.isSyncRunningOrPending()) {
                 LOG.i("No sync detected, forcing new sync.");
                 onSyncRetry();
             }
@@ -278,7 +278,7 @@ final class LocationListController {
         public void onEventMainThread(SyncProgressEvent event) {
             if (mWaitingOnSync) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.showIncrementalSyncProgress(event.progress, event.label);
+                    fragmentUi.showIncrementalSyncProgress(event.progress, event.messageId);
                 }
             }
         }

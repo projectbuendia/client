@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui.lists;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -129,10 +128,10 @@ public final class LocationListFragment extends ProgressFragment {
             changeState(busy ? State.LOADING : State.LOADED);
         }
 
-        @Override public void showIncrementalSyncProgress(int progress, @Nullable String label) {
+        @Override public void showIncrementalSyncProgress(int progress, int messageId) {
             setProgress(progress);
-            if (label != null) {
-                setProgressLabel(label);
+            if (messageId > 0) {
+                setProgressMessage(messageId);
             }
         }
 
@@ -141,7 +140,7 @@ public final class LocationListFragment extends ProgressFragment {
         }
 
         @Override public void showSyncCancelRequested() {
-            setProgressLabel(getString(R.string.cancelling_sync));
+            setProgressMessage(R.string.cancelling_sync);
         }
     }
 }
