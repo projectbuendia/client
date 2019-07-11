@@ -32,6 +32,8 @@ import de.greenrobot.event.EventBus;
 public class SyncManager {
     private static final Logger LOG = Logger.create();
 
+    private static final int FULL_SYNC_PERIOD_SEC = 5 * 60;  // 5 minutes
+
     static final String SYNC_STATUS = "sync-status";
     static final int STARTED = 1;
     static final int COMPLETED = 2;
@@ -68,6 +70,14 @@ public class SyncManager {
 
     public boolean isSyncRunningOrPending() {
         return mScheduler.isRunningOrPending();
+    }
+
+    /** Sets up regularly repeating syncs that run all the time. */
+    public void initPeriodicSyncs() {
+        // Run a full sync every FULL_SYNC_PERIOD_SEC.
+        Bundle options = new Bundle();
+        options.putBoolean(SyncOption.FULL_SYNC.name(), true);
+        setPeriodicSync(options, FULL_SYNC_PERIOD_SEC);
     }
 
     /** Starts a full sync as soon as possible. */

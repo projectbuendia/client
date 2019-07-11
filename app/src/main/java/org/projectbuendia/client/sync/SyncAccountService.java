@@ -23,7 +23,6 @@ import android.os.IBinder;
 
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
-import org.projectbuendia.client.sync.BuendiaSyncEngine.SyncOption;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.inject.Inject;
@@ -38,7 +37,6 @@ public class SyncAccountService extends Service {
 
     public static final String ACCOUNT_NAME = "sync";
     private static final Logger LOG = Logger.create();
-    private static final int SYNC_PERIOD_SEC = 5*60;  // 5 minutes (in seconds)
     @Inject static AppSettings sSettings;
     @Inject static SyncManager sSyncManager;
 
@@ -63,7 +61,7 @@ public class SyncAccountService extends Service {
             // Enable a periodic full sync for the account with a period of SYNC_PERIOD_SEC.
             Bundle options = new Bundle();
             options.putBoolean(SyncOption.FULL_SYNC.name(), true);
-            sSyncManager.setPeriodicSync(options, SYNC_PERIOD_SEC);
+            sSyncManager.initPeriodicSyncs();
             return true;
         }
         return false;
