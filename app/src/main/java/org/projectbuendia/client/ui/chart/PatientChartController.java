@@ -87,13 +87,11 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
 
     /**
-     * Period between observation syncs while the chart view is active.  It would be nice for
-     * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
-     * each sync, if any data has changed.
-     * TODO: Try reducing this period to improve responsiveness, but be wary of the table scrolling
-     * whenever data is refreshed.
+     * Period between observation syncs while the chart view is active.  It would
+     * be nice for this to be even shorter (10 s?) but currently the table scroll
+     * position resets on each sync if any data has changed.
      */
-    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
+    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 20000;
 
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;

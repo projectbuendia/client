@@ -32,7 +32,7 @@ import de.greenrobot.event.EventBus;
 public class SyncManager {
     private static final Logger LOG = Logger.create();
 
-    private static final int FULL_SYNC_PERIOD_SEC = 5 * 60;  // 5 minutes
+    private static final int FULL_SYNC_PERIOD_SEC = 3 * 60;  // 3 minutes
 
     static final String SYNC_STATUS = "sync-status";
     static final int STARTED = 1;

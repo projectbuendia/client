@@ -23,6 +23,7 @@ import android.os.IBinder;
 
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
+import org.projectbuendia.client.sync.BuendiaSyncEngine.SyncOption;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.inject.Inject;
