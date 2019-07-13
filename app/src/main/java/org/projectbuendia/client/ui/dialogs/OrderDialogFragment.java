@@ -21,7 +21,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager.LayoutParams;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -33,6 +33,8 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.ui.AutocompleteAdapter;
+import org.projectbuendia.client.ui.MedCompleter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.Arrays;
@@ -49,7 +51,7 @@ public class OrderDialogFragment extends DialogFragment {
         "PO", "IV", "IM", "SC"
     };
 
-    @InjectView(R.id.order_medication) EditText mMedication;
+    @InjectView(R.id.order_medication) AutoCompleteTextView mMedication;
     @InjectView(R.id.order_route) EditText mRoute;
     @InjectView(R.id.order_dosage) EditText mDosage;
     @InjectView(R.id.order_frequency) EditText mFrequency;
@@ -58,54 +60,8 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_notes) EditText mNotes;
     @InjectView(R.id.order_delete) Button mDelete;
-    @InjectView(R.id.order_med) Button mMed;
-
-    class Med {
-        public String medication;
-        public String route;
-        public String dosage;
-
-        public Med(String m, String r, String d) {
-            medication = m;
-            route = r;
-            dosage = d;
-        }
-    }
-
-    Med[] COMMON_MEDS = new Med[] {
-        new Med("Amoxicillin", "PO", "250 mg"),
-        new Med("Amoxicillin", "PO", "500 mg"),
-        new Med("Glucose 5%", "IV", "500 mL"),
-        new Med("Glucose 5%", "IV", "1000 mL"),
-        new Med("Hydrocortisone", "IM", "50 mg"),
-        new Med("Hydrocortisone", "IM", "100 mg"),
-        new Med("Paracetamol", "PO", "100 mg"),
-        new Med("Paracetamol", "PO", "500 mg"),
-        new Med("Ringer Lactate", "IV", "500 mL"),
-        new Med("Ringer Lactate", "IV", "1000 mL")
-    };
 
     private LayoutInflater mInflater;
-
-    private void showMedsDialog() {
-        CharSequence[] labels = new CharSequence[COMMON_MEDS.length];
-        for (int i = 0; i < labels.length; i++) {
-            Med m = COMMON_MEDS[i];
-            labels[i] = m.medication + " " + m.route + " " + m.dosage;
-        }
-        new AlertDialog.Builder(getActivity())
-            .setSingleChoiceItems(labels, -1, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialog, int which) {
-                    Med m = COMMON_MEDS[which];
-                    mMedication.setText(m.medication);
-                    mRoute.setText(m.route);
-                    mDosage.setText(m.dosage);
-                    dialog.dismiss();
-                }
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
-    }
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderDialogFragment newInstance(String patientUuid, Order order) {
@@ -197,11 +153,9 @@ public class OrderDialogFragment extends DialogFragment {
 
         mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
 
-        mMed.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                showMedsDialog();
-            }
-        });
+        mMedication.setThreshold(1);
+        mMedication.setAdapter(new AutocompleteAdapter(
+            getActivity(), android.R.layout.simple_dropdown_item_1line, new MedCompleter()));
     }
 
     public void onSubmit(Dialog dialog) {
@@ -325,7 +279,6 @@ public class OrderDialogFragment extends DialogFragment {
         Utils.showIf(mDelete, !newOrder);
 
         // Open the keyboard, ready to type into the medication field.
-        dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         mMedication.requestFocus();
         return dialog;
     }
@@ -354,14 +307,13 @@ public class OrderDialogFragment extends DialogFragment {
     }
 
     class DurationDaysWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {
-        }
+        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) { }
 
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {
-        }
+        @Override public void onTextChanged(CharSequence c, int x, int y, int z) { }
 
         @Override public void afterTextChanged(Editable editable) {
             updateLabels();
         }
     }
+
 }

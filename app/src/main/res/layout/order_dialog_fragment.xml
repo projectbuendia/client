@@ -33,7 +33,7 @@
           android:text="@string/order_medication"
           android:labelFor="@id/order_medication"/>
 
-      <EditText
+      <AutoCompleteTextView
           android:id="@+id/order_medication"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
@@ -42,23 +42,7 @@
           android:layout_weight="1"
           android:ems="15"
           android:inputType="textCapSentences|textNoSuggestions"
-          android:maxLength="40"/>
-
-      <Button
-          android:id="@+id/order_med"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="&#x25bc;"/>
-
-      <EditText
-          android:id="@+id/order_route"
-          style="?android:attr/spinnerStyle"
-          android:editable="false"
-          android:textSize="19sp"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="2"
-          android:hint="Route" />
+          android:maxLength="40" />
     </TableRow>
 
     <TableRow
@@ -82,6 +66,16 @@
           android:ems="15"
           android:inputType="textNoSuggestions"
           android:maxLength="40"/>
+
+      <EditText
+          android:id="@+id/order_route"
+          style="?android:attr/spinnerStyle"
+          android:editable="false"
+          android:textSize="19sp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_column="2"
+          android:hint="Route" />
     </TableRow>
 
     <TableRow
