@@ -178,6 +178,7 @@
           android:id="@+id/order_notes"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
+          android:layout_marginBottom="12sp"
           android:layout_column="1"
           android:layout_span="2"
           android:layout_weight="1"
