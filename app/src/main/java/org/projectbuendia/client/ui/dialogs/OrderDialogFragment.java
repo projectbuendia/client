@@ -154,8 +154,12 @@ public class OrderDialogFragment extends DialogFragment {
         mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
 
         mMedication.setThreshold(1);
+        /*
         mMedication.setAdapter(new AutocompleteAdapter(
             getActivity(), android.R.layout.simple_dropdown_item_1line, new MedCompleter()));
+            */
+        mMedication.setAdapter(new AutocompleteAdapter(
+            getActivity(), R.layout.medication_item, new MedCompleter()));
     }
 
     public void onSubmit(Dialog dialog) {
