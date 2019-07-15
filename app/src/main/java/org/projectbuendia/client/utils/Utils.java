@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.view.View;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -487,17 +488,18 @@ public class Utils {
     }
 
     /** Shows or a hides a view based on a boolean flag. */
-    public static void showIf(View view, boolean show) {
-        view.setVisibility(show ? View.VISIBLE : View.GONE);
+    public static void showIf(@Nullable View view, boolean show) {
+        if (view != null) {
+            view.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
     }
 
-    /** Converts a dp value (density-independent pixels) to pixels. */
-    public static int getPixelFromDips(float dips) {
-        // Get the screen's density scale
-        final float scale = App.getInstance().getResources().getDisplayMetrics().density;
-
-        // Convert the dps to pixels, based on density scale
-        return (int) (dips * scale + 0.5f);
+    /** Sets the text of a child view identified by its ID. */
+    public static void setText(@Nullable View view, int id, String text) {
+        if (view != null) {
+            TextView textView = view.findViewById(id);
+            if (textView != null) textView.setText(text);
+        }
     }
 
 
