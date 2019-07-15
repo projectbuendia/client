@@ -254,7 +254,7 @@ public class OrderDialogFragment extends DialogFragment {
 
         // Post an event that triggers the PatientChartController to save the order.
         EventBus.getDefault().post(new OrderSaveRequestedEvent(
-            uuid, patientUuid, instructions.format(), start, durationDays));
+            uuid, patientUuid, instructions, start, durationDays));
     }
 
     public void onDelete(DialogInterface dialog, final String orderUuid) {

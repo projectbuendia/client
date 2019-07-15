@@ -80,12 +80,17 @@ public @Immutable class Order extends Base<String> {
     }
 
     public Order(@Nullable String uuid, String patientUuid,
-                 String instructionsText, DateTime start, @Nullable DateTime stop) {
+                 Instructions instructions, DateTime start, @Nullable DateTime stop) {
         this.uuid = uuid;
         this.patientUuid = patientUuid;
-        this.instructions = new Instructions(instructionsText);
+        this.instructions = instructions;
         this.start = start;
         this.stop = stop;
+    }
+
+    public Order(@Nullable String uuid, String patientUuid,
+                 String instructionsText, DateTime start, @Nullable DateTime stop) {
+        this(uuid, patientUuid, new Instructions(instructionsText), start, stop);
     }
 
     public Order(@Nullable String uuid, String patientUuid,
