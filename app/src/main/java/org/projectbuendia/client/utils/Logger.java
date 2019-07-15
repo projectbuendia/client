@@ -141,7 +141,7 @@ public final class Logger {
         startTimes.put(key, now);
         lastTimes.put(key, now);
         String formatted = formatIfNeeded(message, args);
-        Log.d(tag, "[" + key + "- 0 ms: " + formatted);
+        Log.d(tag, "[_" + key + "__ 0 ms: " + formatted);
     }
 
     public void elapsed(String key, String message, Object... args) {
@@ -166,7 +166,7 @@ public final class Logger {
             String formatted = formatIfNeeded(message, args);
             String timing = "+" + (now - last);
             if (!start.equals(last)) timing += " = " + (now - start);
-            String prefix = "-" + key + (finish ? "]" : "-");
+            String prefix = "__" + key + (finish ? "_]" : "__");
             Log.d(tag, prefix + " " + timing + " ms: " + formatted);
             lastTimes.put(key, now);
         }

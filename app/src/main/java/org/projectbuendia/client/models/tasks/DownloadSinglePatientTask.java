@@ -71,7 +71,7 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         RequestFuture<JsonPatient> future = RequestFuture.newFuture();
 
         // Try to download the specified patient from the server.
-        LOG.i("Downloading single patient %s from server...", mPatientId);
+        LOG.i("Downloading single patient %s from server", mPatientId);
         mServer.getPatient(mPatientId, future, future);
         JsonPatient json;
         try {
@@ -92,14 +92,13 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         try (Cursor c = mContentResolver.query(Patients.URI, null,
             Patients.ID + " = ?", new String[] {mPatientId}, null)) {
             if (c.moveToNext()) {
-                LOG.i("Updating existing local patient.");
                 uri = Patients.URI.buildUpon().appendPath(mPatientId).build();
                 mContentResolver.update(uri, patient.toContentValues(),
                     Patients.ID + " = ?", new String[] {mPatientId});
+                LOG.i("Updated local patient %s", mPatientId);
             } else {
-                LOG.i("Adding new local copy of patient.");
-                uri = mContentResolver.insert(
-                    Patients.URI, patient.toContentValues());
+                uri = mContentResolver.insert(Patients.URI, patient.toContentValues());
+                LOG.i("Added new local patient %s", mPatientId);
             }
         }
 

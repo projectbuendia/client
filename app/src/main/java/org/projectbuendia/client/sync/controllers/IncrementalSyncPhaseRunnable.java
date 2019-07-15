@@ -65,17 +65,12 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
      * Instantiate a new IncrementalSyncPhaseRunnable. This is designed to be called from a no-arg
      * constructor of subclasses.
      *
-     * @param resourceType the type of resource to be fetched. This string is appended to
-     *                     {@link OpenMrsConnectionDetails#getBuendiaApiUrl()} to determine the HTTP
-     *                     endpoint to request from.
-     * @param dbTable      the database table to store fetched data in. Also used as a key against
-     *                     which sync tokens from the server will be stored.
-     * @param clazz        the {@link Class} object corresponding to the generic type {@code T}.
+     * @param resourceType The path name appended to {@link OpenMrsConnectionDetails#getBuendiaApiUrl()}
+     *                     to fetch the desired resource.
+     * @param dbTable      The database table in which to store the fetched data.
+     * @param clazz        The Class object for the JSON response model.
      */
-    protected IncrementalSyncPhaseRunnable(
-            String resourceType,
-            Contracts.Table dbTable,
-            Class<T> clazz) {
+    protected IncrementalSyncPhaseRunnable(String resourceType, Contracts.Table dbTable, Class<T> clazz) {
         this.resourceType = resourceType;
         this.dbTable = dbTable;
         this.clazz = clazz;
@@ -88,7 +83,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
         beforeSyncStarted(contentResolver, syncResult, providerClient);
 
         String syncToken = BuendiaSyncEngine.getLastSyncToken(providerClient, dbTable);
-        LOG.i("Using sync token `%s`", syncToken);
+        LOG.i("%s: Using sync token %s", dbTable, syncToken);
 
         IncrementalSyncResponse<T> response;
 
@@ -96,16 +91,13 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
             RequestFuture<IncrementalSyncResponse<T>> future = RequestFuture.newFuture();
             createRequest(syncToken, future, future);
             response = future.get();
-            ArrayList<ContentProviderOperation> ops =
-                    getUpdateOps(response.results, syncResult);
+            ArrayList<ContentProviderOperation> ops = getUpdateOps(response.results, syncResult);
             providerClient.applyBatch(ops);
-            LOG.i("Updated page of %s (%d db ops)", resourceType, ops.size());
-
-            // Update sync token
+            LOG.i("%s: Applied %d db ops", dbTable, ops.size());
             syncToken = response.syncToken;
         } while (response.more);
 
-        LOG.i("Saving new sync token `%s`", syncToken);
+        LOG.i("%s: Saving sync token %s", dbTable, syncToken);
         BuendiaSyncEngine.storeSyncToken(providerClient, dbTable, response.syncToken);
 
         afterSyncFinished(contentResolver, syncResult, providerClient);

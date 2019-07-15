@@ -34,7 +34,7 @@ public class FakeSyncManager extends SyncManager {
         return mSyncing;
     }
 
-    @Override public void startFullSync() {
+    @Override public void syncAll() {
         mSyncing = true;
     }
 }

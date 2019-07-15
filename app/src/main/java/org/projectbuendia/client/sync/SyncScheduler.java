@@ -11,9 +11,12 @@ public interface SyncScheduler<T> {
     void stopSyncing();
 
     /**
-     * Starts, changes, or stops the periodic sync schedule.  There can be at most
-     * one such repeating loop; any periodic sync from a previous call is replaced
-     * with this new one.  Specifying a period of zero stops the periodic sync.
+     * Starts, changes, or stops a periodic sync schedule.  There can be at most
+     * one such repeating loop for each set of options; if this bundle of options
+     * has the same contents as that from a previous call, the repeating loop set
+     * by the previous call is terminated and a new loop is started with the given
+     * period.  When a loop starts, the first sync occurs after the first period
+     * has elapsed.  Specifying a period of zero stops the loop.
      */
     void setPeriodicSync(int periodSec, Bundle options);
 

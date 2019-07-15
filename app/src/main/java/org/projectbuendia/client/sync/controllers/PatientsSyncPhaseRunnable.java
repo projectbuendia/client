@@ -22,6 +22,7 @@ import android.net.Uri;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
 
@@ -30,28 +31,30 @@ import java.util.ArrayList;
  * {@link IncrementalSyncPhaseRunnable} for details.
  */
 public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonPatient> {
+    private static final Logger LOG = Logger.create();
 
     public PatientsSyncPhaseRunnable() {
-        super(
-                "patients",
-                Contracts.Table.PATIENTS,
-                JsonPatient.class);
+        super("patients", Contracts.Table.PATIENTS, JsonPatient.class);
     }
 
     @Override
     protected ArrayList<ContentProviderOperation> getUpdateOps(
-            JsonPatient[] list, SyncResult syncResult) {
+            JsonPatient[] patients, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        for (JsonPatient patient : list) {
+        int numInserts = 0;
+        int numDeletes = 0;
+        for (JsonPatient patient : patients) {
             if (patient.voided) {
-                syncResult.stats.numDeletes++;
+                numDeletes++;
                 ops.add(makeDeleteOpForPatientUuid(patient.uuid));
             } else {
-                syncResult.stats.numInserts++;
+                numInserts++;
                 ops.add(makeInsertOpForPatient(patient));
             }
         }
-
+        LOG.d("Patients: %d inserts, %d deletes", numInserts, numDeletes);
+        syncResult.stats.numInserts += numInserts;
+        syncResult.stats.numDeletes += numDeletes;
         return ops;
     }
 

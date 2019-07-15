@@ -59,6 +59,7 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
+import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
@@ -91,7 +92,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
      * It would be nice to make this very short, but note that the grid
      * scroll position resets every time the sync causes data to change.
      */
-    private static final int FAST_SYNC_PERIOD_MILLIS = 10000;
+    private static final int PATIENT_UPDATE_PERIOD_MILLIS = 10000;
 
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
@@ -99,9 +100,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
 
-    // This value is incremented whenever the controller is activated or suspended.
-    // A "phase" is a period of time between such transition points.
-    private int mCurrentPhaseId = 0;
     private final EventBusRegistrationInterface mDefaultEventBus;
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
@@ -114,6 +112,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private final MinimalHandler mMainThreadHandler;
     private AssignLocationDialog mAssignLocationDialog;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
+    private Runnable mActivePatientUpdater;
 
     private List<Chart> mCharts;
     private int mChartIndex = 0;  // the currently selected tab (chart number)
@@ -245,44 +244,36 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
     /** Sets async operations going to collect data required by the UI. */
     public void init() {
-        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
-
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().toString());
 
-        startObservationSync();
+        mSyncManager.sync(Phase.OBSERVATIONS, Phase.ORDERS);
+        mSyncManager.setPeriodicSync(10, Phase.OBSERVATIONS, Phase.ORDERS);
+        startPatientSync();
     }
 
-    /** Starts syncing observations more frequently while the user is viewing the chart. */
-    private void startObservationSync() {
+    /** Syncs data for the current patient frequently while the user is viewing the chart. */
+    private void startPatientSync() {
         final Handler handler = new Handler(Looper.getMainLooper());
-        final int phaseId = mCurrentPhaseId;
 
-        Runnable runnable = new Runnable() {
+        mActivePatientUpdater = new Runnable() {
             @Override public void run() {
-                // This runnable triggers itself in a cycle, each run calling postDelayed()
-                // to schedule the next run.  Each such cycle belongs to a phase, identified
-                // by phaseId; once the current phase is exited the cycle stops.  Thus, when the
-                // controller is suspended the cycle stops; and also since mCurrentPhaseId can
-                // only have one value, only one such cycle can be active at any given time.
-                if (mCurrentPhaseId == phaseId) {
-                    if (mPatient != null) {
-                        mAppModel.downloadSinglePatient(mCrudEventBus, mPatient.id);
-                    }
-                    mSyncManager.startObservationsAndOrdersSync();
-                    handler.postDelayed(this, FAST_SYNC_PERIOD_MILLIS);
+                if (this == mActivePatientUpdater && mPatient != null) {
+                    mAppModel.downloadSinglePatient(mCrudEventBus, mPatient.id);
+                    handler.postDelayed(this, PATIENT_UPDATE_PERIOD_MILLIS);
                 }
             }
         };
 
-        handler.postDelayed(runnable, 0);
+        handler.postDelayed(mActivePatientUpdater, 0);
     }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
-        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
+        mSyncManager.setPeriodicSync(0, Phase.OBSERVATIONS, Phase.ORDERS);
+        mActivePatientUpdater = null;  // clearing this stops the patient update loop
 
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
@@ -653,8 +644,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
                 // Update the parts of the UI that use data in the Patient.
                 Patient patient = (Patient) event.item;
-                LOG.i("Fetched Patient: %s", patient.toContentValues());
-                if (mPatientUuid.equals(mPatientUuid)) {
+                if (patient.uuid.equals(mPatientUuid)) {
                     mPatient = patient;
                     mUi.updatePatientDetailsUi(mPatient);
                     updatePatientLocationUi();

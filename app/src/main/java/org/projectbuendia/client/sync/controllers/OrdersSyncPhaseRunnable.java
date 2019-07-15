@@ -21,17 +21,14 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
     private static final Logger LOG = Logger.create();
 
     public OrdersSyncPhaseRunnable() {
-        super(
-                "orders",
-                Contracts.Table.ORDERS,
-                JsonOrder.class);
+        super("orders", Contracts.Table.ORDERS, JsonOrder.class);
     }
 
     @Override
     protected ArrayList<ContentProviderOperation> getUpdateOps(
             JsonOrder[] orders, SyncResult syncResult) {
-        int numDeletes = 0;
         int numInserts = 0;
+        int numDeletes = 0;
         ArrayList<ContentProviderOperation> ops = new ArrayList<>(orders.length);
         for (JsonOrder order : orders) {
             if (order.voided) {
@@ -42,9 +39,9 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
                 numInserts++;
             }
         }
-        syncResult.stats.numDeletes += numDeletes;
+        LOG.d("Orders: %d inserts, %d deletes", numInserts, numDeletes);
         syncResult.stats.numInserts += numInserts;
-        LOG.d("Orders processed! Inserts: %d, Deletes: %d", numInserts, numDeletes);
+        syncResult.stats.numDeletes += numDeletes;
         return ops;
     }
 
