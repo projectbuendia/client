@@ -50,11 +50,11 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         for (JsonObservation observation: list) {
             if (observation.voided) {
-                Uri uri = Observations.CONTENT_URI.buildUpon().appendPath(observation.uuid).build();
+                Uri uri = Observations.URI.buildUpon().appendPath(observation.uuid).build();
                 ops.add(ContentProviderOperation.newDelete(uri).build());
                 deletes++;
             } else {
-                ops.add(ContentProviderOperation.newInsert(Observations.CONTENT_URI)
+                ops.add(ContentProviderOperation.newInsert(Observations.URI)
                         .withValues(getObsValuesToInsert(observation)).build());
                 inserts++;
             }
@@ -86,7 +86,7 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
             SyncResult syncResult,
             ContentProviderClient providerClient) throws RemoteException {
         // Remove all temporary observations now we have the real ones
-        providerClient.delete(Observations.CONTENT_URI,
+        providerClient.delete(Observations.URI,
                 Observations.UUID + " IS NULL",
                 new String[0]);
     }

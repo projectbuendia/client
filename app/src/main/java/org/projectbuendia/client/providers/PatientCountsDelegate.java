@@ -24,7 +24,7 @@ import org.projectbuendia.client.providers.Contracts.Table;
 public class PatientCountsDelegate implements ProviderDelegate<Database> {
 
     @Override public String getType() {
-        return Contracts.PatientCounts.GROUP_CONTENT_TYPE;
+        return Contracts.PatientCounts.GROUP_TYPE;
     }
 
     @Override public Cursor query(

@@ -89,7 +89,7 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-            sContentProviderClient = getContentResolver().acquireContentProviderClient(Contracts.Users.CONTENT_URI);
+            sContentProviderClient = getContentResolver().acquireContentProviderClient(Contracts.Users.URI);
             sUserManager = mUserManager; // TODO: Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO: Remove when Daggered.
             sServer = mServer; // TODO: Remove when Daggered.

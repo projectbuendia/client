@@ -39,7 +39,7 @@ public class FormsSyncPhaseRunnable implements SyncPhaseRunnable {
         ops.addAll(getFormUpdateOps(syncResult));
         providerClient.applyBatch(ops);
         LOG.i("Finished updating forms (" + ops.size() + " db ops)");
-        contentResolver.notifyChange(Contracts.Forms.CONTENT_URI, null, false);
+        contentResolver.notifyChange(Contracts.Forms.URI, null, false);
 
         OdkActivityLauncher.fetchAndCacheAllXforms();
     }
@@ -56,13 +56,13 @@ public class FormsSyncPhaseRunnable implements SyncPhaseRunnable {
 
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         final ContentResolver resolver = App.getInstance().getContentResolver();
-        Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, new String[] {Contracts.Forms.UUID},
+        Cursor c = resolver.query(Contracts.Forms.URI, new String[] {Contracts.Forms.UUID},
                 null, null, null);
         LOG.i("Examining forms: " + c.getCount() + " local, " + cvs.size() + " from server");
         try {
             while (c.moveToNext()) {
                 String uuid = Utils.getString(c, Contracts.Forms.UUID);
-                Uri uri = Contracts.Forms.CONTENT_URI.buildUpon().appendPath(uuid).build();
+                Uri uri = Contracts.Forms.URI.buildUpon().appendPath(uuid).build();
                 LOG.i("  - will delete form " + uuid);
                 ops.add(ContentProviderOperation.newDelete(uri).build());
             }
@@ -72,7 +72,7 @@ public class FormsSyncPhaseRunnable implements SyncPhaseRunnable {
 
         for (ContentValues values : cvs.values()) {  // server has a new record
             LOG.i("  - will insert form " + values.getAsString(Contracts.Forms.UUID));
-            ops.add(ContentProviderOperation.newInsert(Contracts.Forms.CONTENT_URI).withValues(values).build());
+            ops.add(ContentProviderOperation.newInsert(Contracts.Forms.URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
         return ops;

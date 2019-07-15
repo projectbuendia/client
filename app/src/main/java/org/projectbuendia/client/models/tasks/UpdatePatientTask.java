@@ -83,7 +83,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
         }
 
         int count = mContentResolver.update(
-            Contracts.Patients.CONTENT_URI,
+            Contracts.Patients.URI,
             mPatientDelta.toContentValues(),
             FILTER.getSelectionString(),
             FILTER.getSelectionArgs(mUuid));
@@ -110,7 +110,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
         FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
-            Contracts.Patients.CONTENT_URI,
+            Contracts.Patients.URI,
             null,
             new UuidFilter(),
             mUuid,

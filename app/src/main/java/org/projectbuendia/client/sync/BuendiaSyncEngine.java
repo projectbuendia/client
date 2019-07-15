@@ -210,14 +210,14 @@ public class BuendiaSyncEngine implements SyncEngine {
         LOG.i("Recording full sync start time: " + time);
         ContentValues cv = new ContentValues();
         cv.put(Misc.FULL_SYNC_START_MILLIS, time.getMillis());
-        provider.insert(Misc.CONTENT_URI, cv);
+        provider.insert(Misc.URI, cv);
     }
 
     private void storeFullSyncEndTime(ContentProviderClient provider, Instant time) throws RemoteException {
         LOG.i("Recording full sync end time: " + time);
         ContentValues cv = new ContentValues();
         cv.put(Misc.FULL_SYNC_END_MILLIS, time.getMillis());
-        provider.insert(Misc.CONTENT_URI, cv);
+        provider.insert(Misc.URI, cv);
     }
 
     /** Returns the server timestamp corresponding to the last observation sync. */
@@ -225,7 +225,7 @@ public class BuendiaSyncEngine implements SyncEngine {
     public static String getLastSyncToken(ContentProviderClient provider, Contracts.Table table)
             throws RemoteException {
         try(Cursor c = provider.query(
-                SyncTokens.CONTENT_URI.buildUpon().appendPath(table.name).build(),
+                SyncTokens.URI.buildUpon().appendPath(table.name).build(),
                 new String[] {SyncTokens.SYNC_TOKEN}, null, null, null)) {
             // Make the linter happy, there's no way that the cursor can be null without throwing
             // an exception.
@@ -249,6 +249,6 @@ public class BuendiaSyncEngine implements SyncEngine {
         ContentValues cv = new ContentValues();
         cv.put(SyncTokens.TABLE_NAME, table.name);
         cv.put(SyncTokens.SYNC_TOKEN, syncToken);
-        provider.insert(SyncTokens.CONTENT_URI, cv);
+        provider.insert(SyncTokens.URI, cv);
     }
 }

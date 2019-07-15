@@ -145,7 +145,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         // causes the app to go straight to a patient chart on startup.
         if (!sSkippedPatientList && mSettings.shouldSkipToPatientChart()) {
             try (Cursor cursor = getContentResolver().query(
-                Patients.CONTENT_URI, null, Patients.ID + " = ?",
+                Patients.URI, null, Patients.ID + " = ?",
                 new String[] {mSettings.getStartingPatientId()}, null)) {
                 if (cursor.moveToNext()) {
                     sSkippedPatientList = true;

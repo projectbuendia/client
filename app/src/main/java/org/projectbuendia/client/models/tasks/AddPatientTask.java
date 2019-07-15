@@ -113,7 +113,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
         Patient patient = Patient.fromJson(json);
         Uri uri = mContentResolver.insert(
-            Contracts.Patients.CONTENT_URI, patient.toContentValues());
+            Contracts.Patients.URI, patient.toContentValues());
 
         // Perform incremental observation sync so we get admission date.
         mSyncManager.startObservationsAndOrdersSync();
@@ -154,7 +154,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
-            Contracts.Patients.CONTENT_URI,
+            Contracts.Patients.URI,
             null,
             new UuidFilter(),
             mUuid,

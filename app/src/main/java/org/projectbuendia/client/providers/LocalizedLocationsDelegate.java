@@ -53,7 +53,7 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
         + " GROUP BY locations.uuid";
 
     @Override public String getType() {
-        return Contracts.LocalizedLocations.GROUP_CONTENT_TYPE;
+        return Contracts.LocalizedLocations.GROUP_TYPE;
     }
 
     @Override public Cursor query(

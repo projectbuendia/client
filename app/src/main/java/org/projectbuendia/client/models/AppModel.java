@@ -76,7 +76,7 @@ public class AppModel {
         // last operations of a complete sync. If both of these fields are present, and the last
         // end time is greater than the last start time, then a full sync must have completed.
         try (Cursor c = mContentResolver.query(
-                Contracts.Misc.CONTENT_URI, null, null, null, null)) {
+                Contracts.Misc.URI, null, null, null, null)) {
             LOG.d("Sync timing result count: %d", c.getCount());
             if (c.moveToNext()) {
                 DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_MILLIS);
@@ -95,7 +95,7 @@ public class AppModel {
         String conditions = Contracts.Observations.UUID + " = ?";
         ContentValues values = new ContentValues();
         values.put(Contracts.Observations.VOIDED,1);
-        mContentResolver.update(Contracts.Observations.CONTENT_URI, values, conditions, new String[]{voidObs.Uuid});
+        mContentResolver.update(Contracts.Observations.URI, values, conditions, new String[]{voidObs.Uuid});
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
@@ -124,7 +124,7 @@ public class AppModel {
         // See http://stackoverflow.com/questions/24136126/fatal-exception-asynctask and
         // https://github.com/projectbuendia/client/issues/7
         FetchTypedCursorAsyncTask<Patient> task = new FetchTypedCursorAsyncTask<>(
-            Contracts.Patients.CONTENT_URI,
+            Contracts.Patients.URI,
             // The projection must contain an "_id" column for the ListAdapter as well as all
             // the columns used in Patient.Loader.fromCursor().
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
@@ -140,7 +140,7 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         mTaskFactory.newFetchItemTask(
-                Contracts.Patients.CONTENT_URI, null, new UuidFilter(), uuid,
+                Contracts.Patients.URI, null, new UuidFilter(), uuid,
                 mLoaderSet.patientLoader, bus).execute();
     }
 

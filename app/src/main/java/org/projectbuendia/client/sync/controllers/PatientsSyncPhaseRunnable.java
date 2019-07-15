@@ -56,12 +56,12 @@ public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<Json
     }
 
     private static ContentProviderOperation makeInsertOpForPatient(JsonPatient patient) {
-        return ContentProviderOperation.newInsert(Contracts.Patients.CONTENT_URI)
+        return ContentProviderOperation.newInsert(Contracts.Patients.URI)
                 .withValues(Patient.fromJson(patient).toContentValues()).build();
     }
 
     private static ContentProviderOperation makeDeleteOpForPatientUuid(String uuid) {
-        Uri uri = Contracts.Patients.CONTENT_URI.buildUpon().appendPath(uuid).build();
+        Uri uri = Contracts.Patients.URI.buildUpon().appendPath(uuid).build();
         return ContentProviderOperation.newDelete(uri).build();
     }
 
@@ -70,6 +70,6 @@ public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<Json
             ContentResolver contentResolver,
             SyncResult syncResult,
             ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
+        contentResolver.notifyChange(Contracts.Patients.URI, null, false);
     }
 }

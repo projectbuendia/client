@@ -121,7 +121,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         Encounter encounter = Encounter.fromJson(mPatient.uuid, jsonEncounter);
         ContentValues[] values = encounter.toContentValuesArray();
         if (values.length > 0) {
-            int inserted = mContentResolver.bulkInsert(Observations.CONTENT_URI, values);
+            int inserted = mContentResolver.bulkInsert(Observations.URI, values);
 
             if (inserted != values.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
@@ -159,7 +159,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
         FetchItemTask<Encounter> task = mTaskFactory.newFetchItemTask(
-            Observations.CONTENT_URI,
+            Observations.URI,
             ENCOUNTER_PROJECTION,
             new EncounterUuidFilter(),
             mUuid,

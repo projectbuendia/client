@@ -49,7 +49,7 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
     }
 
     private static ContentProviderOperation insertOrReplaceOrder(JsonOrder order) {
-        return ContentProviderOperation.newInsert(Orders.CONTENT_URI)
+        return ContentProviderOperation.newInsert(Orders.URI)
                 .withValue(Orders.UUID, order.uuid)
                 .withValue(Orders.PATIENT_UUID, order.patient_uuid)
                 .withValue(Orders.INSTRUCTIONS, order.instructions)
@@ -59,7 +59,7 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
     }
 
     private static ContentProviderOperation deleteOrderWithUuid(String uuid) {
-        Uri uri = Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
+        Uri uri = Orders.URI.buildUpon().appendPath(uuid).build();
         return ContentProviderOperation.newDelete(uri).build();
     }
 
@@ -68,6 +68,6 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
             ContentResolver contentResolver,
             SyncResult syncResult,
             ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Orders.CONTENT_URI, null, false);
+        contentResolver.notifyChange(Orders.URI, null, false);
     }
 }

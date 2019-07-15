@@ -64,7 +64,7 @@ public class DeleteOrderTask extends AsyncTask<Void, Void, OrderDeleteFailedEven
         }
 
         mContentResolver.delete(
-            Contracts.Orders.CONTENT_URI,
+            Contracts.Orders.URI,
             "uuid = ?",
             new String[] {mOrderUuid}
         );
