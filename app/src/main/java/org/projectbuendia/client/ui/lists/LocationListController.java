@@ -151,7 +151,7 @@ final class LocationListController {
         for (LocationFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.resetSyncProgress();
         }
-        mSyncManager.startFullSync();
+        mSyncManager.syncAll();
     }
 
     private void updateUi() {

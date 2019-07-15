@@ -45,7 +45,7 @@ public class SyncAccountService extends Service {
     /** Sets up the sync account for this app. */
     public static void initialize(Context context) {
         if (createAccount(context) || !sSettings.getSyncAccountInitialized()) {
-            sSyncManager.startFullSync();
+            sSyncManager.syncAll();
             sSettings.setSyncAccountInitialized(true);
         }
     }

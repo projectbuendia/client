@@ -30,8 +30,6 @@ import de.greenrobot.event.EventBus;
 public class SyncManager {
     private static final Logger LOG = Logger.create();
 
-    private static final int FULL_SYNC_PERIOD_SEC = 2 * 60;  // 2 minutes
-
     static final String SYNC_STATUS = "sync-status";
     static final int STARTED = 1;
     static final int COMPLETED = 2;
@@ -72,31 +70,36 @@ public class SyncManager {
 
     /** Sets up regularly repeating syncs that run all the time. */
     public void initPeriodicSyncs() {
-        setPeriodicSync(FULL_SYNC_PERIOD_SEC, BuendiaSyncEngine.buildOptions(Phase.ALL));
+        setPeriodicSync(30, Phase.PATIENTS);
+        setPeriodicSync(60, Phase.OBSERVATIONS, Phase.ORDERS);
+        setPeriodicSync(180, Phase.ALL);
     }
 
-    /** Starts a full sync as soon as possible. */
-    public void startFullSync() {
-        LOG.i("Requesting full sync");
-        mScheduler.requestSync(BuendiaSyncEngine.buildOptions(Phase.ALL));
+    /** Starts a sync now. */
+    public void sync(Phase... phases) {
+        mScheduler.stopSyncing();  // cancel any running syncs to avoid delaying this one
+        mScheduler.requestSync(buildOptions(phases));
+    }
+
+    /** Starts a sync of everything now. */
+    public void syncAll() {
+        sync(Phase.ALL);
     }
 
     /**
-     * Starts, changes, or stops the periodic sync schedule.  There can be at most
-     * one such repeating loop; any periodic sync from a previous call is replaced
-     * with this new one.  Specifying a period of zero stops the periodic sync.
+     * Starts, changes, or stops a periodic sync schedule.  There can be at most
+     * one such repeating loop for each list of phases; if this list of phases
+     * is identical to the list from a previous call, the repeating loop set
+     * by the previous call is terminated and a new loop is started with the given
+     * period.  When a loop starts, the first sync occurs after the first period
+     * has elapsed.  Specifying a period of zero stops the loop.
      */
-    public void setPeriodicSync(int periodSec, Bundle options) {
-        mScheduler.setPeriodicSync(periodSec, options);
+    public void setPeriodicSync(int periodSec, Phase... phases) {
+        mScheduler.setPeriodicSync(periodSec, buildOptions(phases));
     }
 
-    /** Starts a sync of only observations, orders, and patients. */
-    public void startObservationsAndOrdersSync() {
-        // Cancel any existing syncs, which may delay this one.
-        mScheduler.stopSyncing();
-        LOG.i("Requesting incremental observations / orders / patients sync");
-        mScheduler.requestSync(BuendiaSyncEngine.buildOptions(
-            Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS));
+    private Bundle buildOptions(Phase... phases) {
+        return BuendiaSyncEngine.buildOptions(phases);
     }
 
     /** Listens for sync status events that are broadcast by the BuendiaSyncEngine. */
@@ -119,7 +122,6 @@ public class SyncManager {
                 case IN_PROGRESS:
                     int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
                     int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, 0);
-                    LOG.i("SyncStatus: IN_PROGRESS (%d%%, %s)", progress, context.getString(messageId));
                     EventBus.getDefault().post(new SyncProgressEvent(progress, messageId));
                     break;
                 case CANCELED:

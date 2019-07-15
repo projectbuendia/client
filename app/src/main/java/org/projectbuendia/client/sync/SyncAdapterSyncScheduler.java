@@ -2,10 +2,9 @@ package org.projectbuendia.client.sync;
 
 import android.accounts.Account;
 import android.content.ContentResolver;
-import android.content.PeriodicSync;
 import android.os.Bundle;
 
-import org.projectbuendia.client.utils.Utils;
+import org.projectbuendia.client.utils.Logger;
 
 /**
  * A SyncScheduler that schedules sync operations by making requests to Android's
@@ -14,6 +13,7 @@ import org.projectbuendia.client.utils.Utils;
  */
 public class SyncAdapterSyncScheduler implements SyncScheduler {
     private static final String KEY_OPTIONS = "OPTIONS";
+    private static final Logger LOG = Logger.create();
 
     private final SyncEngine engine;
     private final Account account;
@@ -25,38 +25,27 @@ public class SyncAdapterSyncScheduler implements SyncScheduler {
         this.authority = authority;
     }
 
-    public static Bundle getOptions(Bundle extras) {
-        return extras.getBundle(KEY_OPTIONS);
-    }
-
-    private static Bundle buildExtras(Bundle options) {
-        return Utils.putBundle(KEY_OPTIONS, options, new Bundle());
-    }
-
     @Override public void requestSync(Bundle options) {
-        Bundle extras = buildExtras(options);
-        extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        extras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        ContentResolver.requestSync(account, authority, extras);
+        LOG.i("requestSync(%s)", options);
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        options.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(account, authority, options);
     }
 
     @Override public void stopSyncing() {
+        LOG.i("stopSyncing()");
         ContentResolver.cancelSync(account, authority);
     }
 
     @Override public void setPeriodicSync(int periodSec, Bundle options) {
+        LOG.i("setPeriodicSync(%d, %s)", periodSec, options);
         if (periodSec > 0) {
             ContentResolver.setIsSyncable(account, authority, 1);
             ContentResolver.setSyncAutomatically(account, authority, true);
             ContentResolver.setMasterSyncAutomatically(true);
-            ContentResolver.addPeriodicSync(account, authority, buildExtras(options), periodSec);
+            ContentResolver.addPeriodicSync(account, authority, options, periodSec);
         } else {
-            ContentResolver.setSyncAutomatically(account, authority, false);
-            try {
-                for (PeriodicSync ps : ContentResolver.getPeriodicSyncs(account, authority)) {
-                    ContentResolver.removePeriodicSync(account, authority, ps.extras);
-                }
-            } catch (SecurityException e) { /* ignore */ }
+            ContentResolver.removePeriodicSync(account, authority, options);
         }
     }
 

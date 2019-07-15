@@ -6,17 +6,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /** An implementation of SyncScheduler that runs the SyncEngine on a background thread. */
 public class ThreadedSyncScheduler implements SyncScheduler {
     private static Logger LOG = Logger.create();
 
     private final SyncThread thread;
-    private final SyncEngine engine;
 
     // Command codes
     private static final int REQUEST_SYNC = 1;
@@ -29,14 +32,13 @@ public class ThreadedSyncScheduler implements SyncScheduler {
     private static final String KEY_LOOP_ID = "LOOP_ID";
 
     public ThreadedSyncScheduler(SyncEngine engine) {
-        LOG.i("> new SyncThread");
-        this.engine = engine;
+        LOG.i("> start new SyncThread");
         thread = new SyncThread(engine);
         thread.start();
     }
 
     @Override public void requestSync(Bundle options) {
-        LOG.i("> requestSync()");
+        LOG.i("> requestSync(%s)", options);
         thread.send(REQUEST_SYNC, Utils.putBundle(KEY_OPTIONS, options, new Bundle()));
     }
 
@@ -57,12 +59,11 @@ public class ThreadedSyncScheduler implements SyncScheduler {
     }
 
     protected static class SyncThread extends Thread {
-        // ==== Fields that belong to this thread ====
-
         private final SyncEngine engine;
+        private final Map<BundleWrapper, Loop> loopStates = new HashMap<>();
+        private int nextLoopId = 0;
         private Handler handler = null;
         private boolean running = false;
-        private int activeLoopId = 0;
 
         // ==== Methods exposed to external threads ====
 
@@ -103,32 +104,29 @@ public class ThreadedSyncScheduler implements SyncScheduler {
                         Bundle options = data.getBundle(KEY_OPTIONS);
                         int periodSec = data.getInt(KEY_PERIOD_SEC, 0);
                         int loopId = data.getInt(KEY_LOOP_ID, 0);
+                        Loop loop = getLoop(options);
 
                         switch (message.what) {
                             case REQUEST_SYNC:
-                                LOG.i("* handleMessage(REQUEST_SYNC, data=%s)", data);
+                                LOG.i("* handleMessage(REQUEST_SYNC, %s)", data);
                                 runSync(options);
                                 return true;
 
                             case SET_PERIODIC_SYNC:
-                                LOG.i("* handleMessage(SET_PERIODIC_SYNC, data=%s)", data);
-                                activeLoopId++;
-                                LOG.i("* activeLoopId is now %d", activeLoopId);
-                                if (periodSec > 0) {
-                                    LOG.i("* scheduling LOOP_TICK(%d) message in %d sec", activeLoopId, periodSec);
-                                    handler.sendMessageDelayed(Utils.newMessage(handler, LOOP_TICK,
-                                        Utils.putBundle(KEY_OPTIONS, options,
-                                            Utils.putInt(KEY_PERIOD_SEC, periodSec,
-                                                Utils.putInt(KEY_LOOP_ID, activeLoopId, new Bundle())))), periodSec * 1000);
+                                LOG.i("* handleMessage(SET_PERIODIC_SYNC, %s), loop=%s", data, loop);
+                                loop.set(periodSec);
+                                LOG.i("* activeLoopId is now %d for options=%s", loop.activeLoopId, options);
+
+                                if (loop.periodSec > 0) {
+                                    sendLoopTick(loop);
                                 }
                                 return true;
 
                             case LOOP_TICK:
-                                LOG.i("* handleMessage(LOOP_TICK, data=%s), activeLoopId=%d", data, activeLoopId);
-                                if (loopId == activeLoopId) {
+                                LOG.i("* handleMessage(LOOP_TICK, %s), loop=%s", data, loop);
+                                if (loopId == loop.activeLoopId) {
                                     runSync(options);
-                                    LOG.i("* scheduling LOOP_TICK(%d) message in %d sec", loopId, periodSec);
-                                    handler.sendMessageDelayed(Message.obtain(message), periodSec * 1000);
+                                    sendLoopTick(loop);
                                 } else {
                                     LOG.i("* loopId=%d is no longer active; ignoring", loopId);
                                 }
@@ -146,6 +144,25 @@ public class ThreadedSyncScheduler implements SyncScheduler {
             }
         }
 
+        private Loop getLoop(Bundle options) {
+            BundleWrapper key = new BundleWrapper(options);
+            Loop loop = loopStates.get(key);
+            if (loop == null) {
+                loop = new Loop(options);
+                loopStates.put(key, loop);
+            }
+            return loop;
+        }
+
+        private void sendLoopTick(Loop loop) {
+            LOG.i("* scheduling LOOP_TICK(%d) in %d sec for %s", loop.activeLoopId, loop.periodSec, loop);
+            handler.sendMessageDelayed(Utils.newMessage(handler, LOOP_TICK,
+                Utils.putBundle(KEY_OPTIONS, loop.options,
+                    Utils.putInt(KEY_PERIOD_SEC, loop.periodSec,
+                        Utils.putInt(KEY_LOOP_ID, loop.activeLoopId, new Bundle())))
+            ), loop.periodSec * 1000);
+        }
+
         private void runSync(Bundle options) {
             ContentProviderClient client = App.getContentProviderClient();
             SyncResult result = new SyncResult();
@@ -156,6 +173,26 @@ public class ThreadedSyncScheduler implements SyncScheduler {
             } finally {
                 LOG.i("* engine.sync() terminated");
                 running = false;
+            }
+        }
+
+        private class Loop {
+            private int periodSec;
+            private int activeLoopId;
+            private final Bundle options;
+
+            private Loop(Bundle options) {
+                this.options = options;
+            }
+
+            public void set(int periodSec) {
+                this.periodSec = periodSec;
+                this.activeLoopId = ++nextLoopId;
+            }
+
+            public @NonNull String toString() {
+                return Utils.format("Loop(periodSec=%d, activeLoopId=%d, options=%s)",
+                    periodSec, activeLoopId, options);
             }
         }
     }

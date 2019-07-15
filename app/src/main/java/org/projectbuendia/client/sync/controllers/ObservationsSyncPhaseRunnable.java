@@ -36,38 +36,34 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
     private static final Logger LOG = Logger.create();
 
     public ObservationsSyncPhaseRunnable() {
-        super(
-                "observations",
-                Contracts.Table.OBSERVATIONS,
-                JsonObservation.class);
+        super("observations", Contracts.Table.OBSERVATIONS, JsonObservation.class);
     }
 
     @Override
     protected ArrayList<ContentProviderOperation> getUpdateOps(
-            JsonObservation[] list, SyncResult syncResult) {
-        int deletes = 0;
-        int inserts = 0;
+            JsonObservation[] observations, SyncResult syncResult) {
+        int numInserts = 0;
+        int numDeletes = 0;
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        for (JsonObservation observation: list) {
+        for (JsonObservation observation : observations) {
             if (observation.voided) {
                 Uri uri = Observations.URI.buildUpon().appendPath(observation.uuid).build();
                 ops.add(ContentProviderOperation.newDelete(uri).build());
-                deletes++;
+                numDeletes++;
             } else {
                 ops.add(ContentProviderOperation.newInsert(Observations.URI)
                         .withValues(getObsValuesToInsert(observation)).build());
-                inserts++;
+                numInserts++;
             }
         }
-        LOG.d("Observations processed! Inserts: %d, Deletes: %d", inserts, deletes);
-        syncResult.stats.numInserts += inserts;
-        syncResult.stats.numDeletes += deletes;
+        LOG.d("Observations: %d inserts, %d deletes", numInserts, numDeletes);
+        syncResult.stats.numInserts += numInserts;
+        syncResult.stats.numDeletes += numDeletes;
         return ops;
     }
 
     /** Converts an encounter data response into appropriate inserts in the encounters table. */
-    public static ContentValues getObsValuesToInsert(
-            JsonObservation observation) {
+    public static ContentValues getObsValuesToInsert(JsonObservation observation) {
         ContentValues cvs = new ContentValues();
         cvs.put(Observations.UUID, observation.uuid);
         cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);

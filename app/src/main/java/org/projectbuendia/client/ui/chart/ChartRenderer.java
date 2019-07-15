@@ -104,16 +104,15 @@ public class ChartRenderer {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
-        LOG.i("Rendering %d observations, %d orders, zoom index %d", observations.size(), orders.size(), mSettings.getChartZoomIndex());
         if (mLastChartName.equals(chart.name) &&
             mLastRenderedZoomIndex == mSettings.getChartZoomIndex() &&
             observations.equals(mLastRenderedObs) &&
             orders.equals(mLastRenderedOrders)) {
-            LOG.i("Data and zoom index have not changed; skipping render");
+            LOG.i("%d observations, %d orders, and zoom index %d unchanged; skipping render", observations.size(), orders.size(), mSettings.getChartZoomIndex());
             return;
         }
 
-        LOG.start("render");
+        LOG.start("render", "%d observations, %d orders, zoom index %d", observations.size(), orders.size(), mSettings.getChartZoomIndex());
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.

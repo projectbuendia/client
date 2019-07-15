@@ -62,9 +62,9 @@ public class BuendiaSyncAdapterService extends Service {
             engine.cancel();
         }
 
-        @Override public void onPerformSync(Account account, Bundle extras,
+        @Override public void onPerformSync(Account account, Bundle options,
             String authority, ContentProviderClient client, SyncResult result) {
-            engine.sync(SyncAdapterSyncScheduler.getOptions(extras), client, result);
+            engine.sync(options, client, result);
         }
     }
 }
