@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import org.joda.time.DateTime;
-import org.projectbuendia.client.events.CleanupSubscriber;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -29,14 +28,12 @@ import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
-import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.models.tasks.TaskFactory;
+import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
-
-import de.greenrobot.event.NoSubscriberEvent;
 
 /**
  * A model that manages all data access within the application.
@@ -107,14 +104,12 @@ public class AppModel {
      * {@link AppLocationTreeFetchedEvent} on the specified event bus when complete.
      */
     public void fetchLocationTree(CrudEventBus bus, String locale) {
-        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
         new FetchLocationTreeAsyncTask(
             mContentResolver, locale, mLoaderSet.locationLoader, bus).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
     public void downloadSinglePatient(CrudEventBus bus, String patientId) {
-        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
         mTaskFactory.newDownloadSinglePatientTask(patientId, bus).execute();
     }
 
@@ -123,7 +118,6 @@ public class AppModel {
      * {@link Patient}s on the specified event bus when complete.
      */
     public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
-        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
         // NOTE: We need to keep the object creation separate from calling #execute() here, because
         // the type inference breaks on Java 8 otherwise, which throws
         // `java.lang.ClassCastException: java.lang.Object[] cannot be cast to java.lang.Void[]`.
@@ -148,17 +142,6 @@ public class AppModel {
         mTaskFactory.newFetchItemTask(
                 Contracts.Patients.CONTENT_URI, null, new UuidFilter(), uuid,
                 mLoaderSet.patientLoader, bus).execute();
-    }
-
-    /**
-     * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
-     * {@link User}s on the specified event bus when complete.
-     */
-    public void fetchUsers(CrudEventBus bus) {
-        // Register for error events so that we can close cursors if we need to.
-        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
-
-        // TODO: Asynchronously fetch users or delete this function.
     }
 
     /**
@@ -224,33 +207,6 @@ public class AppModel {
 
     public void voidObservation(CrudEventBus bus, VoidObs obs) {
         mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
-    }
-
-    /** A subscriber that handles error events posted to {@link CrudEventBus}es. */
-    private static class CrudEventBusCleanupSubscriber implements CleanupSubscriber {
-
-        private final CrudEventBus mBus;
-
-        public CrudEventBusCleanupSubscriber(CrudEventBus bus) {
-            mBus = bus;
-        }
-
-        @Override @SuppressWarnings("unused") // Called by reflection from event bus.
-        public void onEvent(NoSubscriberEvent event) {
-            if (event.originalEvent instanceof TypedCursorFetchedEvent<?>) {
-                // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
-                // the event won't be managed by anyone else; therefore, we close it ourselves.
-                ((TypedCursorFetchedEvent<?>) event.originalEvent).cursor.close();
-            } else if (event.originalEvent instanceof AppLocationTreeFetchedEvent) {
-                ((AppLocationTreeFetchedEvent) event.originalEvent).tree.close();
-            }
-
-            mBus.unregisterCleanupSubscriber(this);
-        }
-
-        @Override public void onAllUnregistered() {
-            mBus.unregisterCleanupSubscriber(this);
-        }
     }
 
     private static class FetchLocationTreeAsyncTask extends AsyncTask<Void, Void, LocationTree> {
