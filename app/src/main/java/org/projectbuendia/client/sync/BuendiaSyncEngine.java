@@ -24,6 +24,9 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
+
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -42,51 +45,39 @@ import org.projectbuendia.client.sync.controllers.PatientsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.SyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.UsersSyncPhaseRunnable;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CancellationException;
 
 /** Implementation of sync operations for the Buendia database. */
 public class BuendiaSyncEngine implements SyncEngine {
     private static final Logger LOG = Logger.create();
-    private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
+    private static final String SAVEPOINT_NAME = "SYNC_SAVEPOINT";
+    private static final String KEY_PHASES = "PHASES";
 
     private final Context context;
     private final ContentResolver contentResolver;
     private boolean isCancelled = false;
 
-    /**
-     * Keys in the extras bundle used to select which sync phases to do.
-     * Select a phase by setting a boolean value of true for the appropriate key.
-     */
-    public enum SyncPhase {
-        SYNC_USERS(R.string.syncing_users, new UsersSyncPhaseRunnable()),
-        SYNC_LOCATIONS(R.string.syncing_locations, new LocationsSyncPhaseRunnable()),
-        SYNC_CHART_ITEMS(R.string.syncing_charts, new ChartsSyncPhaseRunnable()),
-        SYNC_CONCEPTS(R.string.syncing_concepts, new ConceptsSyncPhaseRunnable()),
-        SYNC_PATIENTS(R.string.syncing_patients, new PatientsSyncPhaseRunnable()),
-        SYNC_OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncPhaseRunnable()),
-        SYNC_ORDERS(R.string.syncing_orders, new OrdersSyncPhaseRunnable()),
-        SYNC_FORMS(R.string.syncing_forms, new FormsSyncPhaseRunnable());
+    /** The available phases, in the default order in which to run them. */
+    public enum Phase {
+        USERS(R.string.syncing_users, new UsersSyncPhaseRunnable()),
+        OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncPhaseRunnable()),
+        ORDERS(R.string.syncing_orders, new OrdersSyncPhaseRunnable()),
+        PATIENTS(R.string.syncing_patients, new PatientsSyncPhaseRunnable()),
+        LOCATIONS(R.string.syncing_locations, new LocationsSyncPhaseRunnable()),
+        CHART_ITEMS(R.string.syncing_charts, new ChartsSyncPhaseRunnable()),
+        FORMS(R.string.syncing_forms, new FormsSyncPhaseRunnable()),
+        CONCEPTS(R.string.syncing_concepts, new ConceptsSyncPhaseRunnable());
 
         public final @StringRes int message;
         public final SyncPhaseRunnable runnable;
+        public static final Phase[] ALL = Phase.values();
 
-        SyncPhase(int message, SyncPhaseRunnable runnable) {
+        Phase(int message, SyncPhaseRunnable runnable) {
             this.message = message;
             this.runnable = runnable;
         }
-    }
-
-    public enum SyncOption {
-        /**
-         * If this key is present with boolean value true, then the starting
-         * and ending times of the entire sync operation will be recorded (as a
-         * way of recording whether a full sync has ever successfully completed).
-         */
-        FULL_SYNC
     }
 
     public BuendiaSyncEngine(Context context) {
@@ -99,18 +90,23 @@ public class BuendiaSyncEngine implements SyncEngine {
         LOG.i("Received a cancel() request");
     }
 
+    public static Bundle buildOptions(Phase... phases) {
+        return Utils.putString(KEY_PHASES, Joiner.on(",").join(phases), new Bundle());
+    }
+
+    public static Phase[] getPhases(Bundle options) {
+        String[] names = options.getString(KEY_PHASES, "").split(",");
+        Phase[] phases = new Phase[names.length];
+        for (int i = 0; i < names.length; i++) {
+            phases[i] = Phase.valueOf(names[i]);
+        }
+        return phases;
+    }
+
     /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
     @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
         isCancelled = false;
         broadcastSyncStatus(SyncManager.STARTED);
-
-        Intent syncFailedIntent =
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class);
-        syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
-
-        Intent syncCanceledIntent =
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class);
-        syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
 
         // If we can't access the Buendia API, short-circuit. Before this check was added, sync
         // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
@@ -129,41 +125,26 @@ public class BuendiaSyncEngine implements SyncEngine {
             return;
         }
 
-        LOG.start("sync");
+        Phase[] phases = getPhases(options);
+        boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL));
+        LOG.start("sync", "phases=%s, fullSync=%s", Utils.repr(phases), fullSync);
 
-        // Decide which phases to do.  If FULL_SYNC is set or no phases
-        // are specified, do them all.
-        Set<SyncPhase> phases = new HashSet<>();
-        for (SyncPhase phase : SyncPhase.values()) {
-            if (options.getBoolean(phase.name())) {
-                phases.add(phase);
-            }
-        }
-        boolean fullSync = phases.isEmpty() || options.getBoolean(SyncOption.FULL_SYNC.name());
-        if (fullSync) {
-            Collections.addAll(phases, SyncPhase.values());
-        }
-
-        LOG.i("Starting sync with phases: %s", phases);
         broadcastSyncProgress(0, R.string.sync_in_progress);
 
         BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
-        try (DatabaseTransaction tx = provider.startTransaction(SYNC_SAVEPOINT_NAME)) {
+        try (DatabaseTransaction tx = provider.startTransaction(SAVEPOINT_NAME)) {
             try {
                 if (fullSync) {
                     storeFullSyncStartTime(client, Instant.now());
                 }
-
-                int completedPhases = 0;
                 LOG.elapsed("sync", "Starting phases");
-                for (SyncPhase phase : SyncPhase.values()) {
-                    if (phases.contains(phase)) {
-                        checkCancellation("before " + phase);
-                        broadcastSyncProgress(completedPhases * 100 / phases.size(), phase.message);
-                        phase.runnable.sync(contentResolver, result, client);
-                        LOG.elapsed("sync", "Completed phase %s", phase);
-                        completedPhases++;
-                    }
+                int p = 0;
+                for (Phase phase : phases) {
+                    checkCancellation("before " + phase);
+                    broadcastSyncProgress(p * 100 / phases.length, phase.message);
+                    phase.runnable.sync(contentResolver, result, client);
+                    LOG.elapsed("sync", "Completed phase %s", phase);
+                    p++;
                 }
                 broadcastSyncProgress(100, R.string.completing_sync);
                 if (fullSync) {

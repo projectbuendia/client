@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
@@ -474,6 +475,8 @@ public class Utils {
         return new String(parcel.marshall(), StandardCharsets.ISO_8859_1);
     }
 
+
+
     // ==== User interface ====
 
     /** Shows or hides a dialog based on a boolean flag. */
@@ -684,6 +687,11 @@ public class Utils {
         } catch (Throwable ignored) {
             return "(repr of " + bytes + " failed)";
         }
+    }
+
+    /** Returns a list-like string representation of an array of objects, suitable for logging. */
+    public static String repr(Object[] array) {
+        return "[" + Joiner.on(", ").join(array) + "]";
     }
 
     /** Uses backslash sequences to form a printable representation of a string. */

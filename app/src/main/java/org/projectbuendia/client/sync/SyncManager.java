@@ -12,7 +12,6 @@
 package org.projectbuendia.client.sync;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,8 +21,7 @@ import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.sync.BuendiaSyncEngine.SyncOption;
-import org.projectbuendia.client.sync.BuendiaSyncEngine.SyncPhase;
+import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.utils.Logger;
 
 import de.greenrobot.event.EventBus;
@@ -74,23 +72,13 @@ public class SyncManager {
 
     /** Sets up regularly repeating syncs that run all the time. */
     public void initPeriodicSyncs() {
-        // Run a full sync every FULL_SYNC_PERIOD_SEC.
-        Bundle options = new Bundle();
-        options.putBoolean(SyncOption.FULL_SYNC.name(), true);
-        setPeriodicSync(options, FULL_SYNC_PERIOD_SEC);
+        setPeriodicSync(FULL_SYNC_PERIOD_SEC, BuendiaSyncEngine.buildOptions(Phase.ALL));
     }
 
     /** Starts a full sync as soon as possible. */
     public void startFullSync() {
-        Bundle options = new Bundle();
-        // Request aggressively that the sync should start straight away.
-        options.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        options.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-        // Fetch everything
-        options.putBoolean(SyncOption.FULL_SYNC.name(), true);
         LOG.i("Requesting full sync");
-        mScheduler.requestSync(options);
+        mScheduler.requestSync(BuendiaSyncEngine.buildOptions(Phase.ALL));
     }
 
     /**
@@ -98,27 +86,17 @@ public class SyncManager {
      * one such repeating loop; any periodic sync from a previous call is replaced
      * with this new one.  Specifying a period of zero stops the periodic sync.
      */
-    public void setPeriodicSync(Bundle options, int periodSec) {
-        mScheduler.setPeriodicSync(options, periodSec);
+    public void setPeriodicSync(int periodSec, Bundle options) {
+        mScheduler.setPeriodicSync(periodSec, options);
     }
 
-    /** Starts a sync of only observations and orders. */
+    /** Starts a sync of only observations, orders, and patients. */
     public void startObservationsAndOrdersSync() {
-        // Start by canceling any existing syncs, which may delay this one.
+        // Cancel any existing syncs, which may delay this one.
         mScheduler.stopSyncing();
-
-        Bundle options = new Bundle();
-        // Request aggressively that the sync should start straight away.
-        options.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        options.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-        // Fetch just the newly added observations.
-        options.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
-        options.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
-        options.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
-
         LOG.i("Requesting incremental observations / orders / patients sync");
-        mScheduler.requestSync(options);
+        mScheduler.requestSync(BuendiaSyncEngine.buildOptions(
+            Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS));
     }
 
     /** Listens for sync status events that are broadcast by the BuendiaSyncEngine. */
