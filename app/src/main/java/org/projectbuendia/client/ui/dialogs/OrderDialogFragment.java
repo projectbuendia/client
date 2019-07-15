@@ -14,13 +14,16 @@ package org.projectbuendia.client.ui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AutoCompleteTextView;
@@ -275,6 +278,42 @@ public class OrderDialogFragment extends DialogFragment {
         field.requestFocus();
     }
 
+    private static void addClearButton(final TextView view, int drawableId) {
+        final Drawable icon = view.getResources().getDrawable(drawableId);
+        icon.setColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY);  // draw icon in black
+        final int iw = icon.getIntrinsicWidth();
+        final int ih = icon.getIntrinsicHeight();
+        icon.setBounds(0, 0, iw, ih);
+
+        final Drawable cd[] = view.getCompoundDrawables();
+        view.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override public void afterTextChanged(Editable s) {
+                boolean show = view.getText().length() > 0;
+                view.setCompoundDrawables(cd[0], cd[1], show ? icon : cd[2], cd[3]);
+            }
+        });
+
+        view.setMinimumHeight(view.getPaddingTop() + ih + view.getPaddingBottom());
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    int x = (int) event.getX();
+                    int y = (int) event.getY();
+                    if (x >= view.getWidth() - view.getPaddingRight() - iw && x < view.getWidth() &&
+                        y >= 0 && y < view.getHeight()) {
+                        view.setText("");
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
@@ -286,19 +325,19 @@ public class OrderDialogFragment extends DialogFragment {
         populateFields(args);
 
         addListeners();
+        addClearButton(mMedication, R.drawable.abc_ic_clear_mtrl_alpha);
         mMedication.setThreshold(1);
         mMedication.setAdapter(new AutocompleteAdapter(
             getActivity(), R.layout.captioned_item, new MedCompleter()));
 
         final AlertDialog dialog = new AlertDialog.Builder(getActivity())
-            .setCancelable(false) // Disable auto-cancel.
+            .setCancelable(false)
             .setTitle(title)
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialog, int which) {
                     onSubmit(dialog);
                 }
             })
-            // The positive button uses dialog, so we have to set it below, after dialog is assigned.
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();
