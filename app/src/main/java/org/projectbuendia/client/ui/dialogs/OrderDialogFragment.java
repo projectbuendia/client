@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -21,6 +22,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,6 +52,8 @@ public class OrderDialogFragment extends DialogFragment {
     public static final String[] ROUTE_LABELS = {
         "PO", "IV", "IM", "SC"
     };
+    // This should match the left/right padding in the TextViews in captioned_item.xml.
+    private static final int ITEM_HORIZONTAL_PADDING = 12;
 
     @InjectView(R.id.order_medication) AutoCompleteTextView mMedication;
     @InjectView(R.id.order_route) EditText mRoute;
@@ -62,6 +66,7 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_delete) Button mDelete;
 
     private LayoutInflater mInflater;
+    private String mOrderUuid;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderDialogFragment newInstance(String patientUuid, Order order) {
@@ -96,16 +101,18 @@ public class OrderDialogFragment extends DialogFragment {
 
     @Override public void onResume() {
         super.onResume();
-        // Replace the existing button listener so we can control whether the dialog is dismissed.
-        final AlertDialog dialog = (AlertDialog) getDialog();
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        onSubmit(dialog);
-                    }
-                }
-        );
+
+        // Open the keyboard, ready to type into the medication field.
+        mMedication.requestFocus();
+
+        // After the dialog has been laid out and positioned, we can figure out
+        // how to position and size the autocompletion dropdown.
+        mMedication.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override public boolean onPreDraw() {
+                adjustDropDownSize(mMedication, ITEM_HORIZONTAL_PADDING);
+                return true;
+            }
+        });
     }
 
     private void populateFields(Bundle args) {
@@ -129,7 +136,7 @@ public class OrderDialogFragment extends DialogFragment {
     }
 
     private void addListeners() {
-        // TODO(ping): Replace this EditText with a properly styled Spinner.
+        // TODO(ping): Replace the mRoute EditText with a properly styled Spinner.
         mRoute.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) v.callOnClick();
@@ -141,7 +148,8 @@ public class OrderDialogFragment extends DialogFragment {
                 new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.route_of_administration)
                     .setSingleChoiceItems(ROUTE_LABELS, index, new DialogInterface.OnClickListener() {
-                        @Override public void onClick(DialogInterface dialog, int which) {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
                             mRoute.setText(ROUTE_LABELS[which]);
                             dialog.dismiss();
                         }
@@ -153,16 +161,39 @@ public class OrderDialogFragment extends DialogFragment {
 
         mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
 
-        mMedication.setThreshold(1);
-        /*
-        mMedication.setAdapter(new AutocompleteAdapter(
-            getActivity(), android.R.layout.simple_dropdown_item_1line, new MedCompleter()));
-            */
-        mMedication.setAdapter(new AutocompleteAdapter(
-            getActivity(), R.layout.medication_item, new MedCompleter()));
+        mDelete.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                onDelete(getDialog(), mOrderUuid);
+            }
+        });
     }
 
-    public void onSubmit(Dialog dialog) {
+    /** Adjusts the size of the autocomplete dropdown according to other UI elements. */
+    private void adjustDropDownSize(AutoCompleteTextView textView, int itemHorizontalPadding) {
+        // Get the visible area of the activity, excluding the soft keyboard.
+        View activityRoot = getActivity().getWindow().getDecorView().getRootView();
+        Rect visibleFrame = new Rect();
+        activityRoot.getWindowVisibleDisplayFrame(visibleFrame);
+
+        // Find the bottom of the text field, where the dropdown list is attached.
+        int[] textViewLocation = new int[2];
+        textView.getLocationOnScreen(textViewLocation);
+        int textViewTop = textViewLocation[1];
+        int textViewBottom = textViewTop + textView.getHeight();
+
+        // Limit the height of the autocomplete dropdown list to stay within the
+        // visible area of the activity; otherwise, the list will extend to the
+        // bottom of the screen, where it is covered up by the soft keyboard.
+        textView.setDropDownHeight(visibleFrame.bottom - textViewBottom);
+
+        // Expand the dropdown window left and right to accommodate left/right
+        // padding inside dropdown list items, so that the text in the list items
+        // is horizontally aligned with the text in the input field.
+        textView.setDropDownHorizontalOffset(-itemHorizontalPadding);
+        textView.setDropDownWidth(mMedication.getWidth() + itemHorizontalPadding * 2);
+    }
+
+    public void onSubmit(DialogInterface dialog) {
         String uuid = getArguments().getString("uuid");
         String patientUuid = getArguments().getString("patientUuid");
         String medication = mMedication.getText().toString().trim();
@@ -223,7 +254,7 @@ public class OrderDialogFragment extends DialogFragment {
             uuid, patientUuid, instructions.format(), start, durationDays));
     }
 
-    public void onDelete(Dialog dialog, final String orderUuid) {
+    public void onDelete(DialogInterface dialog, final String orderUuid) {
         dialog.dismiss();
 
         new AlertDialog.Builder(getActivity())
@@ -251,41 +282,35 @@ public class OrderDialogFragment extends DialogFragment {
         Bundle args = getArguments();
         boolean newOrder = args.getBoolean("new");
         String title = getString(newOrder ? R.string.title_new_order : R.string.title_edit_order);
-        final String orderUuid = args.getString("uuid");
+        mOrderUuid = args.getString("uuid");
         populateFields(args);
 
         addListeners();
+        mMedication.setThreshold(1);
+        mMedication.setAdapter(new AutocompleteAdapter(
+            getActivity(), R.layout.captioned_item, new MedCompleter()));
 
-        final Dialog dialog = new AlertDialog.Builder(getActivity())
+        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(title)
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface dialog, int which) {
+                    onSubmit(dialog);
+                }
+            })
             // The positive button uses dialog, so we have to set it below, after dialog is assigned.
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();
-
-        ((AlertDialog) dialog).setButton(Dialog.BUTTON_POSITIVE,
-            getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    onSubmit(dialog);
-                }
-            });
-
-        mDelete.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                onDelete(dialog, orderUuid);
-            }
-        });
 
         // Hide or show the "Stop" and "Delete" buttons appropriately.
         Long stopMillis = Utils.getLong(args, "stop_millis");
         Long nowMillis = Utils.getLong(args, "now_millis");
         Utils.showIf(mDelete, !newOrder);
 
-        // Open the keyboard, ready to type into the medication field.
-        mMedication.requestFocus();
         return dialog;
     }
+
 
     /** Updates the various labels in the form that react to changes in input fields. */
     void updateLabels() {
