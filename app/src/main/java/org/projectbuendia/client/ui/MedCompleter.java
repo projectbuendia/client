@@ -392,11 +392,33 @@ public class MedCompleter implements Completer {
     }
 
     @Override public Collection<? extends Completion> suggestCompletions(CharSequence constraint) {
-        String searchKey = normalize(" " + constraint);
+        String[] searchKeys = normalize(constraint).trim().split(" ");
+        for (int i = 0; i < searchKeys.length; i++) {
+            searchKeys[i] = " " + searchKeys[i];
+        }
+
         List<Med> results = new ArrayList<>();
         for (Med med : MEDS) {
-            if (med.filterTarget.contains(searchKey)) {
+            // Look for words matching the words in the input as prefixes.
+            int score = 0;
+            for (String searchKey : searchKeys) {
+                score += med.filterTarget.contains(searchKey) ? 1 : 0;
+            }
+            if (score == searchKeys.length) {
                 results.add(med);
+                continue;
+            }
+
+            if (searchKeys.length == 1) {
+                // Look for words matching the letters in the input as initials.
+                score = 0;
+                char[] initials = searchKeys[0].trim().toCharArray();
+                for (char ch : initials) {
+                    score += med.filterTarget.contains(" " + ch) ? 1 : 0;
+                }
+                if (score == initials.length) {
+                    results.add(med);
+                }
             }
         }
         return results;
