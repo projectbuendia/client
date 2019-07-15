@@ -7,9 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
-import android.widget.TextView;
-
-import org.projectbuendia.client.R;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,13 +49,7 @@ public class AutocompleteAdapter extends ArrayAdapter<AutocompleteAdapter.Comple
         if (view == null) {
             view = inflater.inflate(resourceId, parent, false);
         }
-        View textView = view.findViewById(R.id.name);
-        if (textView instanceof TextView) {
-            Completion completion = getItem(position);
-            ((TextView) textView).setText(completion != null ? completion.getLabel() : "");
-            textView = view.findViewById(R.id.caption);
-            ((TextView) textView).setText(completion != null ? completion.getCaption() : "");
-        }
+        getItem(position).showInView(view);
         return view;
     }
 
@@ -75,8 +66,7 @@ public class AutocompleteAdapter extends ArrayAdapter<AutocompleteAdapter.Comple
     }
 
     public interface Completion {
-        @NonNull String getLabel();
+        void showInView(View itemView);
         @NonNull String getValue();
-        @NonNull String getCaption();
     }
 }

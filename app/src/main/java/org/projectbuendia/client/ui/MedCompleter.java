@@ -1,9 +1,12 @@
 package org.projectbuendia.client.ui;
 
 import android.support.annotation.NonNull;
+import android.view.View;
 
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.AutocompleteAdapter.Completer;
 import org.projectbuendia.client.ui.AutocompleteAdapter.Completion;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,8 +17,45 @@ import java.util.List;
 import java.util.Set;
 
 public class MedCompleter implements Completer {
+
+    // === Style conventions for this list ===
+    //
+    // First argument: Main name of the medication, consisting of a title-cased
+    // part, followed optionally by a comma and a lower-cased part.
+    //   - A good test for the title-cased part is that it should fill the blank
+    //     in the sentence: "The active ingredient in this drug is ______."
+    //   - The title-cased part is the complete chemical name and should be a
+    //     meaningful noun phrase on its own (e.g. "Ascorbic Acid", not
+    //     "Ascorbic acid"; "Ferrous Salts", not "Ferrous salts")
+    //   - When medications are combined, join them with a slash (e.g.
+    //     "Artesunate/Amodiaquine", not "Artesunate + Amodiaquine")
+    //   - Hyphenate the prefix "Co-" in names of combination medicines
+    //     (e.g. "Co-amoxiclav", not "Coamoxiclav")
+    //   - Do not capitalize immediately after a hyphen (e.g. "Co-artemether",
+    //     not "Co-Artemether")
+    //   - The lower-cased part describes the concentration, forumlation, or
+    //     application (e.g. "Diazepam, solution", not "Diazepam Solution";
+    //     "Morphine, immediate-release", not "Morphine Immediate-Release")
+    //   - The concentration comes first, immediately after the comma (e.g.
+    //     "Glucose, 50%" not "Glucose 50%"; "Permethrin, 1% lotion", not
+    //     "Permethrin Lotion 1%" or "Permethrin 1%, lotion")
+    //
+    // Second argument: Primary category of therapeutic action, in lowercase.
+    //   - A good test for this part is that it should have a plural form.
+    //   - Use a noun, not a verb phrase (e.g. "abortifacient", not "causes abortion")
+    //   - Use a noun, not an adjective (e.g. "anticonvulsant", not "anticonvulsive")
+    //   - Describe the drug, not the action (e.g. "laxative", not "laxation")
+    //   - Describe the drug, not the disease (e.g. "antimalarial", not "malaria")
+    //   - For multiple purposes, use a comma (e.g. "antiseptic, disinfectant")
+    //   - If primarily for a specific disease, optionally append "for" and the
+    //     disease name in parentheses (e.g. "insecticide (for scabies)")
+    //
+    // Third and subsequent arguments: Aliases (to be shown in parentheses).
+    //   - These parts should follow the same format as the first argument.
+    //
     public static List<Med> MEDS = deduplicate(
-        // ==== MSF Essential Drugs, 2016 edition, by Sophie Pilon
+
+        // === MSF Essential Drugs, 2016 edition, by Sophie Pilon
 
         // Oral drugs
         new Med("Abacavir", "antiretroviral", "ABC"),
@@ -32,12 +72,12 @@ public class MedCompleter implements Completer {
         new Med("Artesunate/Amodiaquine", "antimalarial", "AS/AQ"),
         new Med("Artesunate/Sulfadoxine/Pyrimethamine", "antimalarial", "AS/SP"),
         new Med("Ascorbic Acid", "vitamin", "Vitamin C"),
-        new Med("Atazanavir", "?", "ATV"),
+        new Med("Atazanavir", "antiretroviral", "ATV"),
         new Med("Azithromycin", "antibacterial"),
-        new Med("Beclometasone aerosol", "corticosteroid"),
+        new Med("Beclometasone, aerosol", "corticosteroid"),
         new Med("Biperiden", "anticholinergic"),
         new Med("Bisacodyl", "laxative"),
-        new Med("Bisoprolol", "beta-blocker"),
+        new Med("Bisoprolol", "beta blocker"),
         new Med("Cabergoline", "lactation inhibitor"),
         new Med("Calcium Folinate", "", "Folinic Acid"),
         new Med("Carbamazepine", "antiepileptic"),
@@ -48,18 +88,18 @@ public class MedCompleter implements Completer {
         new Med("Chloroquine Sulfate", "antimalarial"),
         new Med("Chlorphenamine", "antihistamine", "Chlorpheniramine"),
         new Med("Chlorpromazine", "antipsychotic"),
-        new Med("Cimetidine", "antiulcer"),
+        new Med("Cimetidine", "acid reducer"),
         new Med("Ciprofloxacin", "antibacterial"),
         new Med("Clindamycin", "antibacterial"),
         new Med("Clomipramine", "antidepressant"),
         new Med("Cloxacillin", "antibacterial"),
-        new Med("Co-amoxiclav", "antibacterial", "Amoxicillin/Clavulanic acid"),
+        new Med("Co-amoxiclav", "antibacterial", "Amoxicillin/Clavulanic Acid"),
         new Med("Co-artemether", "antimalarial", "Artemether/Lumefantrine"),
         new Med("Codeine", "analgesic"),
         new Med("Colecalciferol", "supplement", "Vitamin D3"),
         new Med("Co-trimoxazole", "antibacterial", "Sulfamethoxazole/Trimethoprim", "SMX/TMP"),
         new Med("Dapsone", "antibacterial, antileprotic"),
-        new Med("Darunavir", "?", "DRV"),
+        new Med("Darunavir", "antiretroviral", "DRV"),
         new Med("Desogestrel", "contraceptive"),
         new Med("Diazepam", "sedative, anticonvulsant"),
         new Med("Diethylcarbamazine", "anthelminthic"),
@@ -74,12 +114,12 @@ public class MedCompleter implements Completer {
         new Med("Erythromycin", "antibacterial"),
         new Med("Ethambutol", "antituberculous antibacterial",  "E"),
         new Med("Ethinylestradiol/Levonorgestrel", "contraceptive"),
-        new Med("Ferrous Salts", "antianaemia"),
+        new Med("Ferrous Salts", "antianaemic"),
         new Med("Ferrous Salts/Folic Acid"),
         new Med("Fluconazole", "antifungal"),
         new Med("Flucytosine", "antifungal"),
         new Med("Fluoxetine", "antidepressant"),
-        new Med("Folic Acid", "antianaemia", "Vitamin B9"),
+        new Med("Folic Acid", "antianaemic", "Vitamin B9"),
         new Med("Fosfomycin Trometamol", "antibacterial"),
         new Med("Furosemide", "diuretic"),
         new Med("Glibenclamide", "antidiabetic"),
@@ -91,13 +131,13 @@ public class MedCompleter implements Completer {
         new Med("Hydroxyzine", "antihistamine"),
         new Med("Hyoscine Butylbromide", "antispasmodic", "Butylscopolamine"),
         new Med("Ibuprofen", "analgesic, antipyretic"),
-        new Med("Iodized oil", "supplement"),
-        new Med("Ipratropium Bromide nebuliser solution", "bronchodilator"),
-        new Med("Isoniazid", "antituberculous antibacterial", "H"),
+        new Med("Iodized Oil", "supplement"),
+        new Med("Ipratropium Bromide, nebuliser solution", "bronchodilator"),
+        new Med("Isoniazid", "antitubercular", "H"),
         new Med("Isosorbide Dinitrate", "antianginal"),
         new Med("Itraconazole", "antifungal"),
         new Med("Ivermectin", "anthelminthic"),
-        new Med("Labetalol", "beta-blocker"),
+        new Med("Labetalol", "beta blocker"),
         new Med("Lactulose", "laxative"),
         new Med("Lamivudine", "anitretroviral", "3TC"),
         new Med("Levodopa/Carbidopa", "antiparkinsonian", "Co-careldopa"),
@@ -115,8 +155,8 @@ public class MedCompleter implements Completer {
         new Med("Miconazole", "antifungal"),
         new Med("Mifepristone", "abortifacient", "RU-486"),
         new Med("Misoprostol", "abortifacient"),
-        new Med("Morphine immediate-release", "analgesic", "MIR"),
-        new Med("Morphine sustained-release", "analgesic", "MSR"),
+        new Med("Morphine, immediate-release", "analgesic", "MIR"),
+        new Med("Morphine, sustained-release", "analgesic", "MSR"),
         new Med("Multivitamins", "supplement", "Vitamin B complex"),
         new Med("Nevirapine", "antiretroviral", "NVP"),
         new Med("Niclosamide", "anthelminthic"),
@@ -126,37 +166,37 @@ public class MedCompleter implements Completer {
         // ! new Med("Noramidopyrine"),
         new Med("Nystatin", "antifungal"),
         new Med("Olanzapine", "antipsychotic"),
-        new Med("Omeprazole", "antiulcer"),
+        new Med("Omeprazole", "acid reducer"),
         new Med("Oral Rehydration Salts", "fluid replacer", "ORS"),
         new Med("Paracetamol", "analgesic, antipyretic", "Acetaminophen"),
         new Med("Paroxetine", "antidepressant"),
         new Med("Phenobarbital", "sedative, anticonvulsant"),
         new Med("Phenoxymethylpenicillin", "antibacterial", "Penicillin V"),
         new Med("Phenytoin", "anticonvulsant"),
-        new Med("Potassium Chloride Immediate-release", "supplement"),
-        new Med("Potassium Chloride Sustained-release", "supplement"),
+        new Med("Potassium Chloride, immediate-release", "supplement"),
+        new Med("Potassium Chloride, sustained-release", "supplement"),
         new Med("Praziquantel", "anthelminthic"),
         new Med("Prednisolone", "corticosteroid"),
         new Med("Prednisone", "corticosteroid"),
         new Med("Promethazine", "antihistamine"),
         new Med("Pyrantel", "anthelminthic"),
-        new Med("Pyrazinamide", "antituberculous antibacterial", "Z"),
+        new Med("Pyrazinamide", "antitubercular", "Z"),
         new Med("Pyridoxine", "supplement", "Vitamin B6"),
         new Med("Pyrimethamine", "antiprotozoal"),
         new Med("Quinine", "antimalarial"),
         new Med("Resomal", "", "Rehydration Solution for Malnutrition"),
         new Med("Retinol", "supplement", "Vitamin A"),
-        new Med("Rifampicin", "antituberculous antibacterial", "R"),
+        new Med("Rifampicin", "antitubercular", "R"),
         new Med("Risperidone", "antipsychotic"),
         new Med("Ritonavir", "antiretroviral", "RTV"),
         // ! new Med("Salbutamol", "Albuterol"),
-        new Med("Salbutamol aerosol", "bronchodilator", "Albuterol"),
-        new Med("Salbutamol nebuliser solution", "bronchodilator", "Albuterol"),
+        new Med("Salbutamol, aerosol", "bronchodilator", "Albuterol"),
+        new Med("Salbutamol, nebuliser solution", "bronchodilator", "Albuterol"),
         new Med("Sertraline", "antidepressant"),
         new Med("Spironolactone", "diuretic"),
         new Med("Sulfadiazine", "antibacterial"),
         new Med("Sulfadoxine/Pyrimethamine", "antimalarial", "SP"),
-        new Med("Tenofovir disoproxil fumarate", "antiretroviral", "TDF"),
+        new Med("Tenofovir Disoproxil Fumarate", "antiretroviral", "TDF"),
         new Med("Thiamine", "supplement", "Vitamin B1"),
         new Med("Tinidazole", "antiprotozoal, antibacterial"),
         new Med("Tramadol", "analgesic"),
@@ -172,16 +212,15 @@ public class MedCompleter implements Completer {
         new Med("Zinc Sulfate", "supplement"),
 
         // Injectable drugs
-        new Med("Co-amoxiclav", "antibacterial", "Amoxicillin/Clavulanic Acid"),
-        new Med("Amphotericin B conventional", "antifungal"),
-        new Med("Amphotericin B liposomal", "antifungal"),
+        new Med("Amphotericin B, conventional", "antifungal"),
+        new Med("Amphotericin B, liposomal", "antifungal"),
         new Med("Ampicillin", "antibacterial"),
         // ! new Med("Artemether"),
         new Med("Artesunate", "antimalarial"),
         new Med("Atropine", "antispasmodic"),
         new Med("Benzathine Benzylpenicillin", "antibacterial"),
         new Med("Benzylpenicillin", "antibacterial", "Penicillin G"),
-        new Med("Calcium Gluconate"),
+        new Med("Calcium Gluconate", "supplement"),
         new Med("Cefotaxime", "antibacterial"),
         new Med("Ceftriaxone", "antibacterial"),
         new Med("Chloramphenicol", "antibacterial"),
@@ -189,32 +228,33 @@ public class MedCompleter implements Completer {
         new Med("Chlorpromazine", "antipsychotic"),
         new Med("Clindamycin", "antibacterial"),
         new Med("Cloxacillin", "antibacterial"),
+        new Med("Co-amoxiclav", "antibacterial", "Amoxicillin/Clavulanic Acid"),
         new Med("Dexamethasone", "corticosteroid"),
-        new Med("Diazepam emulsion", "sedative, anticonvulsant"),
-        new Med("Diazepam solution", "sedative, anticonvulsant"),
+        new Med("Diazepam, emulsion", "sedative, anticonvulsant"),
+        new Med("Diazepam, solution", "sedative, anticonvulsant"),
         new Med("Diclofenac", "analgesic, antipyretic"),
         new Med("Digoxin", "cardiotonic"),
         // ! new Med("Dipyrone"),
-        new Med("Eflornithine", "trypanocide"),
-        new Med("Epinephrine", "sympathomimetic", "EPN", "Adrenaline"),
-        new Med("Etonogestrel subdermal implant"),
-        new Med("Fluconazole"),
+        new Med("Eflornithine", "antiprotozoal (for sleeping sickness)"),
+        new Med("Epinephrine", "anti-anaphylactic", "EPN", "Adrenaline"),
+        new Med("Etonogestrel, subdermal implant", "contraceptive"),
+        new Med("Fluconazole", "antifungal"),
         new Med("Furosemide"),
         new Med("Gentamicin"),
-        new Med("Glucose 50%", "", "Dextrose 50%"),
+        new Med("Glucose, 50%", "", "Dextrose, 50%"),
         new Med("Haloperidol", "antipsychotic"),
         new Med("Haloperidol Decanoate", "antipsychotic"),
         new Med("Heparin", "anticoagulant"),
         new Med("Hydralazine"),
         new Med("Hydrocortisone", "corticosteroid"),
         new Med("Hyoscine Butylbromide", "antispasmodic", "Butylscopolamine"),
-        new Med("Short-acting Insulin"),
-        new Med("Biphasic Insulin"),
-        new Med("Intermediate-acting Insulin"),
-        new Med("Long-acting Insulin"),
+        new Med("Insulin, biphasic"),
+        new Med("Insulin, intermediate-acting"),
+        new Med("Insulin, long-acting"),
+        new Med("Insulin, short-acting"),
         new Med("Ketamine"),
         new Med("Labetalol"),
-        new Med("Levonorgestrel subdermal implant"),
+        new Med("Levonorgestrel, subdermal implant"),
         new Med("Lidocaine", "anaesthetic", "Lignocaine"),
         new Med("Magnesium Sulfate", "anticonvulsant", "MgSO4"),
         new Med("Medroxyprogesterone"),
@@ -234,12 +274,12 @@ public class MedCompleter implements Completer {
         new Med("Pentamidine"),
         new Med("Phenobarbital"),
         new Med("Phytomenadione", "supplement", "Vitamin K1"),
-        new Med("Potassium Chloride 10%", "", "KCl 10%"),
+        new Med("Potassium Chloride, 10%", "", "KCl, 10%"),
         new Med("Promethazine"),
         new Med("Protamine"),
         new Med("Quinine"),
         new Med("Salbutamol", "bronchodilator", "Albuterol"),
-        new Med("Sodium Bicarbonate 8.4%"),
+        new Med("Sodium Bicarbonate, 8.4%"),
         new Med("Spectinomycin", "antibacterial"),
         new Med("Streptomycin", "antibacterial", "S"),
         new Med("Suramin"),
@@ -248,12 +288,12 @@ public class MedCompleter implements Completer {
         new Med("Tranexamic Acid"),
 
         // Infusion fluids
-        new Med("Glucose 5%", "", "Dextrose 5%"),
-        new Med("Glucose 10%", "", "Dextrose 10%"),
+        new Med("Glucose, 5%", "", "Dextrose, 5%"),
+        new Med("Glucose, 10%", "", "Dextrose, 10%"),
         new Med("Modified Fluid Gelatin", "plasma substitute"),
         new Med("Polygeline", "plasma substitute"),
         new Med("Ringer Lactate", "fluid replacer"),
-        new Med("Sodium Chloride 0.9%", "fluid replacer", "NaCl"),
+        new Med("Sodium Chloride, 0.9%", "fluid replacer", "NaCl"),
 
         // Vaccines, immunoglobulins, and antisera
         new Med("Oral Cholera Vaccine O1+O139"),
@@ -270,10 +310,10 @@ public class MedCompleter implements Completer {
         new Med("Pneumococcal Conjugate Vaccine", "vaccine", "PCV"),
         new Med("Inactivated Poliomyelitis Vaccine", "vaccine", "IPV"),
         new Med("Oral Poliomyelitis Vaccine", "vaccine", "OPV"),
-        new Med("Human Rabies Immunoglobulin", "antirabies", "HRIG"),
+        new Med("Human Rabies Immunoglobulin", "", "HRIG"),
         new Med("Rabies Vaccine", "vaccine"),
         new Med("Oral Rotavirus Vaccine", "vaccine"),
-        new Med("Human Tetanus Immunoglobulin", "antitetanus", "HTIG"),
+        new Med("Human Tetanus Immunoglobulin", "", "HTIG"),
         new Med("Tetanus Vaccine", "TT", "vaccine"),
         new Med("Tetanus-Diphtheria Vaccine", "vaccine", "Td"),
         // ! new Med("Tetanus Antitoxin, Equine"),
@@ -282,41 +322,41 @@ public class MedCompleter implements Completer {
         new Med("Yellow Fever Vaccine", "vaccine"),
 
         // Drugs for external use, antiseptics, and disinfectants
-        new Med("Aciclovir eye ointment", "antiviral", "Acyclovir"),
+        new Med("Aciclovir, eye ointment", "antiviral", "Acyclovir"),
         new Med("Alcohol-based hand rub", "antiseptic"),
-        new Med("Artesunate rectal", "antimalarial"),
+        new Med("Artesunate, rectal", "antimalarial"),
         new Med("Benzoic Acid/Salicylic Acid ointment", "antifungal", "Whitfield's ointment"),
-        new Med("Benzyl Benzoate lotion", "scabicide"),
-        new Med("Calamine lotion", "antipruritic"),
-        new Med("Chlorhexidine 5% solution", "antiseptic"),
-        new Med("Chlorhexidine 7.1% dermal gel", "antiseptic"),
-        new Med("Chlorhexidine 0.2% mouthwash", "antiseptic"),
-        new Med("Ciprofloxacin ear drops", "antibacterial"),
-        new Med("Clotrimazole vaginal tablet", "antifungal"),
-        new Med("Dinoprostone vaginal gel", "labour inducer"),
-        new Med("Ethyl alcohol", "antiseptic, disinfectant", "Ethanol"),
-        new Med("Fluorescein eye drops", "diagnostic staining agent"),
-        new Med("Hydrocortisone cream", "corticosteroid"),
-        new Med("Malathion lotion", "insecticide for lice"),
+        new Med("Benzyl Benzoate, lotion", "insecticide (for scabies)"),
+        new Med("Calamine, lotion", "antipruritic"),
+        new Med("Chlorhexidine, 5% solution", "antiseptic"),
+        new Med("Chlorhexidine, 7.1% dermal gel", "antiseptic"),
+        new Med("Chlorhexidine, 0.2% mouthwash", "antiseptic"),
+        new Med("Ciprofloxacin, ear drops", "antibacterial"),
+        new Med("Clotrimazole, vaginal tablet", "antifungal"),
+        new Med("Dinoprostone, vaginal gel", "labour inducer"),
+        new Med("Ethyl Alcohol", "antiseptic, disinfectant", "Ethanol"),
+        new Med("Fluorescein, eye drops", "diagnostic staining agent"),
+        new Med("Hydrocortisone, cream", "corticosteroid"),
+        new Med("Malathion, lotion", "insecticide (for lice)"),
         // ! new Med("Methylrosanilinium Chloride", "Gentian Violet", "GV", "Crystal violet"),
-        new Med("Miconazole cream", "antifungal"),
-        new Med("Mupirocin ointment", "antibacterial"),
-        new Med("Nystatin vaginal tablet", "antifungal"),
-        new Med("Oxybuprocaine eye drops", "anaesthetic"),
-        new Med("Permethrin 1% lotion", "insecticide for lice"),
-        new Med("Permethrin 5% lotion", "insecticide for scabies"),
-        new Med("Pilocarpine eye drops", "anti-glaucoma agent"),
-        new Med("Podophyllotoxin 0.5% solution", "antiviral for HPV"),
-        new Med("Podophyllum resin solution", "antiviral for HPV"),
-        new Med("Povidone Iodine aqueous solution", "antiseptic, disinfectant", "Polyvidone iodine", "PVI"),
-        new Med("Povidone Iodine scrub solution", "antiseptic, disinfectant", "Polyvidone iodine", "PVI"),
-        new Med("Silver Sulfadiazine cream", "antibacterial"),
+        new Med("Miconazole, cream", "antifungal"),
+        new Med("Mupirocin, ointment", "antibacterial"),
+        new Med("Nystatin, vaginal tablet", "antifungal"),
+        new Med("Oxybuprocaine, eye drops", "anaesthetic"),
+        new Med("Permethrin, 1% lotion", "insecticide (for lice)"),
+        new Med("Permethrin, 5% lotion", "insecticide (for scabies)"),
+        new Med("Pilocarpine, eye drops", "miotic"),
+        new Med("Podophyllotoxin, 0.5% solution", "antiviral (for HPV)"),
+        new Med("Podophyllum Resin, solution", "antiviral (for HPV)"),
+        new Med("Povidone Iodine, aqueous solution", "antiseptic, disinfectant", "Polyvidone iodine", "PVI"),
+        new Med("Povidone Iodine, scrub solution", "antiseptic, disinfectant", "Polyvidone iodine", "PVI"),
+        new Med("Silver Sulfadiazine, cream", "antibacterial"),
         new Med("Sodium Dichloroisocyanurate", "disinfectant", "NaDCC"),
         new Med("Calcium Hypochlorite", "disinfectant", "HTH"),
-        new Med("Sodium Hypochlorite solution", "disinfectant", "Bleach"),
-        new Med("Chlorinated Lime powder", "disinfectant"),
-        new Med("Tetracycline eye ointment", "antibacterial"),
-        new Med("Zinc Oxide ointment", "skin protector"),
+        new Med("Sodium Hypochlorite, solution", "disinfectant", "Bleach"),
+        new Med("Chlorinated Lime, powder", "disinfectant"),
+        new Med("Tetracycline, eye ointment", "antibacterial"),
+        new Med("Zinc Oxide, ointment", "skin protector"),
 
         // ==== Additional Ebola treatments and vaccines
 
@@ -391,14 +431,13 @@ public class MedCompleter implements Completer {
             filterTarget = normalize(" " + filterTarget + " " + collapsed + " ");
         }
 
-        public @NonNull String getLabel() {
-            return label;
+        public void showInView(View itemView) {
+            Utils.setText(itemView, R.id.label, label);
+            Utils.setText(itemView, R.id.caption, caption);
         }
 
         public @NonNull String getValue() {
             return name;
         }
-
-        public @NonNull String getCaption() { return caption; }
     }
 }
