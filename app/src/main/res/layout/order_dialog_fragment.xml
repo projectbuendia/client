@@ -42,7 +42,9 @@
           android:layout_weight="1"
           android:ems="15"
           android:inputType="textCapSentences|textNoSuggestions"
-          android:maxLength="80" />
+          android:maxLength="80"
+          android:imeOptions="actionNext"
+          android:nextFocusDown="@id/order_dosage" />
     </TableRow>
 
     <TableRow
@@ -65,12 +67,15 @@
           android:layout_weight="1"
           android:ems="15"
           android:inputType="textNoSuggestions"
-          android:maxLength="40"/>
+          android:maxLength="40"
+          android:imeOptions="actionNext"
+          android:nextFocusRight="@id/order_frequency" />
 
       <EditText
           android:id="@+id/order_route"
           style="?android:attr/spinnerStyle"
           android:editable="false"
+          android:focusable="false"
           android:textSize="19sp"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
@@ -97,7 +102,9 @@
           android:digits="0123456789"
           android:ems="3"
           android:inputType="numberDecimal"
-          android:maxLength="2"/>
+          android:maxLength="2"
+          android:imeOptions="actionNext"
+          android:nextFocusDown="@id/order_give_for_days"/>
 
       <TextView
           android:id="@+id/order_times_per_day_label"
@@ -128,7 +135,9 @@
           android:digits="0123456789"
           android:ems="3"
           android:inputType="numberDecimal"
-          android:maxLength="2"/>
+          android:maxLength="2"
+          android:imeOptions="actionNext"
+          android:nextFocusDown="@id/order_notes"/>
 
       <TextView
           android:id="@+id/order_give_for_days_label"
@@ -169,12 +178,17 @@
           android:id="@+id/order_notes"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
+          android:layout_marginBottom="12sp"
           android:layout_column="1"
           android:layout_span="2"
           android:layout_weight="1"
           android:ems="15"
-          android:inputType="textCapSentences|textNoSuggestions"
-          android:maxLength="40"/>
+          android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
+          android:lines="2"
+          android:minLines="2"
+          android:maxLines="2"
+          android:gravity="top|start"
+          android:imeOptions="actionNone" />
     </TableRow>
 
   </TableLayout>
