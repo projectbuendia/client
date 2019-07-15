@@ -1,7 +1,6 @@
 package org.projectbuendia.client.sync;
 
 import android.content.ContentProviderClient;
-import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +16,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
     private static Logger LOG = Logger.create();
 
     private final SyncThread thread;
+    private final SyncEngine engine;
 
     // Command codes
     private static final int REQUEST_SYNC = 1;
@@ -28,9 +28,10 @@ public class ThreadedSyncScheduler implements SyncScheduler {
     private static final String KEY_PERIOD_SEC = "PERIOD_SEC";
     private static final String KEY_LOOP_ID = "LOOP_ID";
 
-    public ThreadedSyncScheduler(Context context) {
+    public ThreadedSyncScheduler(SyncEngine engine) {
         LOG.i("> new SyncThread");
-        thread = new SyncThread(context);
+        this.engine = engine;
+        thread = new SyncThread(engine);
         thread.start();
     }
 
@@ -44,8 +45,8 @@ public class ThreadedSyncScheduler implements SyncScheduler {
         thread.stopSyncing();
     }
 
-    @Override public void setPeriodicSync(Bundle options, int periodSec) {
-        LOG.i("> setPeriodicSync(options=%s, periodSec=%d)", options, periodSec);
+    @Override public void setPeriodicSync(int periodSec, Bundle options) {
+        LOG.i("> setPeriodicSync(periodSec=%d, options=%s)", periodSec, options);
         thread.send(SET_PERIODIC_SYNC,
             Utils.putBundle(KEY_OPTIONS, options,
                 Utils.putInt(KEY_PERIOD_SEC, periodSec, new Bundle())));
@@ -56,21 +57,17 @@ public class ThreadedSyncScheduler implements SyncScheduler {
     }
 
     protected static class SyncThread extends Thread {
-        // ==== Fields that belong to external threads ====
-
-        private final Context extContext;
-
         // ==== Fields that belong to this thread ====
 
+        private final SyncEngine engine;
         private Handler handler = null;
-        private SyncEngine engine = null;
         private boolean running = false;
         private int activeLoopId = 0;
 
         // ==== Methods exposed to external threads ====
 
-        public SyncThread(Context context) {
-            extContext = context;
+        public SyncThread(SyncEngine engine) {
+            this.engine = engine;
         }
 
         public void send(int command, Bundle data) {
@@ -98,27 +95,25 @@ public class ThreadedSyncScheduler implements SyncScheduler {
         @Override public void run() {
             LOG.i("* run())");
             try {
-                engine = new BuendiaSyncEngine(extContext);
                 Looper.prepare();
 
                 handler = new Handler(new Handler.Callback() {
                     @Override public boolean handleMessage(Message message) {
                         Bundle data = message.getData();
-                        LOG.i("* handleMessage(what=" + message.what + ", data=" + data + ")");
                         Bundle options = data.getBundle(KEY_OPTIONS);
                         int periodSec = data.getInt(KEY_PERIOD_SEC, 0);
                         int loopId = data.getInt(KEY_LOOP_ID, 0);
 
                         switch (message.what) {
                             case REQUEST_SYNC:
-                                LOG.i("* REQUEST_SYNC");
+                                LOG.i("* handleMessage(REQUEST_SYNC, data=%s)", data);
                                 runSync(options);
                                 return true;
 
                             case SET_PERIODIC_SYNC:
+                                LOG.i("* handleMessage(SET_PERIODIC_SYNC, data=%s)", data);
                                 activeLoopId++;
-                                LOG.i("* SET_PERIODIC_SYNC: periodSec=%d, activeLoopId is now %d", periodSec, activeLoopId);
-
+                                LOG.i("* activeLoopId is now %d", activeLoopId);
                                 if (periodSec > 0) {
                                     LOG.i("* scheduling LOOP_TICK(%d) message in %d sec", activeLoopId, periodSec);
                                     handler.sendMessageDelayed(Utils.newMessage(handler, LOOP_TICK,
@@ -129,7 +124,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
                                 return true;
 
                             case LOOP_TICK:
-                                LOG.i("* LOOP_TICK(%d), activeLoopId=%d, periodSec=%d", loopId, activeLoopId, periodSec);
+                                LOG.i("* handleMessage(LOOP_TICK, data=%s), activeLoopId=%d", data, activeLoopId);
                                 if (loopId == activeLoopId) {
                                     runSync(options);
                                     LOG.i("* scheduling LOOP_TICK(%d) message in %d sec", loopId, periodSec);

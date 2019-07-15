@@ -136,7 +136,7 @@
         </activity>
 
         <service
-            android:name="org.projectbuendia.client.sync.SyncAdapterService"
+            android:name="org.projectbuendia.client.sync.BuendiaSyncAdapterService"
             android:exported="true">
             <!-- Required filter used by the system to launch our sync service. -->
             <intent-filter>
