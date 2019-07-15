@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -64,14 +65,18 @@ public class ChartRenderer {
     private static final Logger LOG = Logger.create();
     private static final ExecutionHistory EMPTY_HISTORY = new ExecutionHistory();
 
-    private WebView mView;  // view into which the HTML table will be rendered
-    private Resources mResources;  // resources used for localizing the rendering
+    private Resources mResources;
     private AppSettings mSettings;
 
-    private List<Obs> mLastRenderedObs;  // last set of observations rendered
-    private List<Order> mLastRenderedOrders;  // last set of orders rendered
-    private int mLastRenderedZoomIndex;  // last zoom level index rendered
-    private String mLastChartName = "";
+    private int mLastZoomIndex;  // last zoom level index rendered
+    private String mLastChartName = "";  // last selected chart rendered
+    private List<Obs> mLastObservations;  // last set of observations rendered
+    private List<Order> mLastOrders;  // last set of orders rendered
+    private LocalDate mLastAdmissionDate;  // last admission date rendered
+    private LocalDate mLastFirstSymptomsDate;  // last first-symptoms date rendered
+
+    private String mLastHtml = null;  // last HTML output of renderer
+    private WebView mLastView = null;  // last WebView that was rendered into
 
     public interface JsInterface {
         @JavascriptInterface void onNewOrderPressed();
@@ -85,75 +90,86 @@ public class ChartRenderer {
         @JavascriptInterface void onPageUnload(int scrollX, int scrollY);
     }
 
-    public ChartRenderer(WebView view, Resources resources, AppSettings settings) {
-        mView = view;
+    public ChartRenderer(Resources resources, AppSettings settings) {
         mResources = resources;
         mSettings = settings;
-        mView.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
-        mView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-        mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
     // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
-    public void render(Chart chart, Map<String, Obs> latestObservations,
+    public void render(WebView view, Chart chart, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        JsInterface controllerInterface) {
         if (chart == null) {
-            mView.loadUrl("file:///android_asset/no_chart.html");
-            return;
-        }
-        LOG.i("Rendering %d observations, %d orders, zoom index %d", observations.size(), orders.size(), mSettings.getChartZoomIndex());
-        if (mLastChartName.equals(chart.name) &&
-            mLastRenderedZoomIndex == mSettings.getChartZoomIndex() &&
-            observations.equals(mLastRenderedObs) &&
-            orders.equals(mLastRenderedOrders)) {
-            LOG.i("Data and zoom index have not changed; skipping render");
+            view.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
 
+        String html;
+        LOG.i("Rendering %d observations, %d orders, zoom index %d", observations.size(), orders.size(), mSettings.getChartZoomIndex());
         LOG.start("render");
+        if (mSettings.getChartZoomIndex() == mLastZoomIndex &&
+            Objects.equals(chart.name, mLastChartName) &&
+            Objects.equals(observations, mLastObservations) &&
+            Objects.equals(orders, mLastOrders) &&
+            Objects.equals(admissionDate, mLastAdmissionDate) &&
+            Objects.equals(firstSymptomsDate, mLastFirstSymptomsDate) &&
+            mLastHtml != null) {
+            LOG.i("Data and zoom index have not changed; skipping HTML generation");
+            html = mLastHtml;
+        } else {
+            html = new GridHtmlGenerator(
+                chart, latestObservations, observations, orders,
+                admissionDate, firstSymptomsDate).getHtml();
+            LOG.elapsed("render", "HTML generated");
+        }
+
+        if (view != mLastView) {
+            view.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+            view.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+            view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            view.getSettings().setJavaScriptEnabled(true);
+            view.setWebChromeClient(new WebChromeClient());
+        }
 
         // setDefaultFontSize is supposed to take a size in sp, but in practice
         // the fonts don't change size when the user font size preference changes.
         // So, we apply the scaling factor explicitly, defining 1 em to be 10 sp.
         DisplayMetrics metrics = mResources.getDisplayMetrics();
-        float defaultFontSize = 10*metrics.scaledDensity/metrics.density;
-        mView.getSettings().setDefaultFontSize((int) defaultFontSize);
+        float defaultFontSize = 10 * metrics.scaledDensity / metrics.density;
+        view.getSettings().setDefaultFontSize((int) defaultFontSize);
+        view.removeJavascriptInterface("controller");
+        view.addJavascriptInterface(controllerInterface, "controller");
+        LOG.elapsed("render", "WebView configured");
 
-        mView.getSettings().setJavaScriptEnabled(true);
-        mView.addJavascriptInterface(controllerInterface, "controller");
-        mView.setWebChromeClient(new WebChromeClient());
-        String html = new GridHtmlGenerator(
-            chart, latestObservations, observations, orders,
-            admissionDate, firstSymptomsDate).getHtml();
-
-        LOG.elapsed("render", "HTML generated");
+        if (view == mLastView && html.equals(mLastHtml)) {
+            LOG.i("HTML and view are unchanged; skipping page load");
+            LOG.finish("render");
+            return;
+        }
 
         // To avoid showing stale, possibly misleading data from a previous
         // patient, clear out any previous chart HTML before showing the WebView.
-        mView.loadUrl("about:blank");
-        mView.clearView();
-        mView.setVisibility(View.VISIBLE);
-        mView.loadDataWithBaseURL(
+        view.loadUrl("about:blank");
+        view.clearView();
+        view.setVisibility(View.VISIBLE);
+        view.loadDataWithBaseURL(
             "file:///android_asset/", html, "text/html; charset=utf-8", "utf-8", null);
-        mView.setWebContentsDebuggingEnabled(true);
+        view.setWebContentsDebuggingEnabled(true);
 
-        LOG.finish("render", "HTML loaded into WebView");
+        LOG.elapsed("render", "HTML page loaded into WebView");
 
+        mLastZoomIndex = mSettings.getChartZoomIndex();
         mLastChartName = chart.name;
-        mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
-        mLastRenderedObs = observations;
-        mLastRenderedOrders = orders;
+        mLastObservations = observations;
+        mLastOrders = orders;
+        mLastAdmissionDate = admissionDate;
+        mLastFirstSymptomsDate = firstSymptomsDate;
+        mLastHtml = html;
+        mLastView = view;
 
         LOG.start("ChartJS");
-    }
-
-    /** Gets the starting times (in ms) of the segments into which the day is divided. */
-    public int[] getSegmentStartTimes() {
-        int index = mSettings.getChartZoomIndex();
-        return Utils.safeIndex(ZOOM_LEVELS, index).segmentStartTimes;
     }
 
     class GridHtmlGenerator {
@@ -252,6 +268,12 @@ public class ChartRenderer {
                     }
                 }
             }
+        }
+
+        /** Gets the starting times (in ms) of the segments into which the day is divided. */
+        public int[] getSegmentStartTimes() {
+            int index = mSettings.getChartZoomIndex();
+            return Utils.safeIndex(ZOOM_LEVELS, index).segmentStartTimes;
         }
 
         /** Gets the n + 1 boundaries of the n segments of a specific day. */

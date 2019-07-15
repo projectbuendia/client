@@ -303,8 +303,10 @@ public class ChartDataHelper {
     public List<Chart> getCharts(String uuid) {
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();
         Map<Long, ChartSection> rowGroupsById = new HashMap<>();
-        List<Chart> Charts = new ArrayList<>();
+        List<Chart> charts = new ArrayList<>();
         Chart currentChart = null;
+
+        LOG.start("ChartDataHelper.getCharts");
 
         try (Cursor c = mContentResolver.query(
             ChartItems.CONTENT_URI, null,
@@ -322,7 +324,7 @@ public class ChartDataHelper {
                                 if ((currentChart != null) &&
                                     ((currentChart.tileGroups.size() != 0)
                                     || (currentChart.rowGroups.size() != 0))) {
-                                    Charts.add(currentChart);
+                                    charts.add(currentChart);
                                 }
                                 break;
                             case "TILE_ROW":
@@ -361,8 +363,10 @@ public class ChartDataHelper {
                 }
             }
         }
-        Charts.add(currentChart);
-        return Charts;
+
+        LOG.finish("ChartDataHelper.getCharts");
+        charts.add(currentChart);
+        return charts;
     }
 
     public List<Form> getForms() {

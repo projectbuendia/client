@@ -459,6 +459,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
     @JavascriptInterface public void finish() {
         LOG.finish("ChartJS");
+        LOG.finish("render");
     }
 
     public void setDate(String conceptUuid, LocalDate date) {

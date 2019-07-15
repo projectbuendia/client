@@ -97,7 +97,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
-    private ChartRenderer mChartRenderer;
     private ProgressDialog mProgressDialog;
     private DatePickerDialog mAdmissionDateDialog;
     private DatePickerDialog mSymptomOnsetDateDialog;
@@ -114,8 +113,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
-    @InjectView(R.id.chart_webview) WebView mGridWebView;
+    @InjectView(R.id.chart_webview) WebView mWebView;
 
+    private static ChartRenderer sChartRenderer;
     private static final String EN_DASH = "\u2013";
 
     public static void start(Context caller, String uuid) {
@@ -206,7 +206,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             R.string.symptoms_onset_date_picker_title, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
 
         // Remembering scroll position and applying it after the chart finished loading.
-        mGridWebView.setWebViewClient(new WebViewClient() {
+        mWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 Point scrollPosition = mController.getLastScrollPosition();
                 if (scrollPosition != null) {
@@ -215,7 +215,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
             }
         });
-        mChartRenderer = new ChartRenderer(mGridWebView, getResources(), mSettings);
+
+        if (sChartRenderer == null) {
+            sChartRenderer = new ChartRenderer(getResources(), mSettings);
+        }
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
             @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
@@ -274,9 +277,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Override protected void onNewIntent(Intent intent) {
         String uuid = intent.getStringExtra("uuid");
         if (uuid != null) {
+            setIntent(intent);
             // Immediately hide the current patient chart, to avoid giving the
             // misleading impression that it applies to the new patient.
-            mGridWebView.setVisibility(View.INVISIBLE);
+            mWebView.setVisibility(View.INVISIBLE);
             mController.setPatient(uuid);
         }
     }
@@ -511,7 +515,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             List<Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate) {
-            mChartRenderer.render(chart, latestObservations, observations, orders,
+            sChartRenderer.render(mWebView, chart, latestObservations, observations, orders,
                                   admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
         }
