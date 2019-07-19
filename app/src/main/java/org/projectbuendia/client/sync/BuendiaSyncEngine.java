@@ -129,7 +129,7 @@ public class BuendiaSyncEngine implements SyncEngine {
         boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL));
         LOG.start("sync", "phases=%s, fullSync=%s", Utils.repr(phases), fullSync);
 
-        //broadcastSyncProgress(0, R.string.sync_in_progress);
+        broadcastSyncProgress(0, R.string.sync_in_progress);
 
         BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
         try (DatabaseTransaction tx = provider.startTransaction(SAVEPOINT_NAME)) {
@@ -141,7 +141,7 @@ public class BuendiaSyncEngine implements SyncEngine {
                 int p = 0;
                 for (Phase phase : phases) {
                     checkCancellation("before " + phase);
-                    //broadcastSyncProgress(p * 100 / phases.length, phase.message);
+                    broadcastSyncProgress(p * 100 / phases.length, phase.message);
                     phase.runnable.sync(contentResolver, result, client);
                     LOG.elapsed("sync", "Completed phase %s", phase);
                     p++;
