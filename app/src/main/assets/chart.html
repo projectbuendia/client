@@ -154,8 +154,15 @@
           {% if ins.notes is not empty %}
             <div class="notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
           {% endif %}
-          <div class="medication">{{ins.medication}}&nbsp;{{ins.route}}</div>
-          <div>{{ins.dosage}}&nbsp;</div>
+          <div class="medication">{{ins.medication}}</div>
+          <div class="dosing">
+            <span class="dosage">{{ins.dosage}}</span
+              >{% if ins.route is not empty %}
+                <span class="route">{{ins.route}}</span
+              >{% endif %}{% if ins.frequency > 0 %},
+                <span class="frequency">{{ins.frequency}}/day</span>
+              {% endif %}
+          </div>
         </th>
         {% set executionHistory = executionHistories[order.uuid] %}
         {% set past = true %}
@@ -389,6 +396,8 @@
     if (x == targetX && y == targetY) seeking = false;
     if (seeking) window.setTimeout(scrollStep, 30);
   }
+
+  gridBody.scrollLeft(homeX);
 
   controller.finish();
 </script>

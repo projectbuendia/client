@@ -53,9 +53,9 @@ public class Contracts {
     // names defined in the constants should exactly match the schemas defined in Database.java.
 
     public interface ChartItems {
-        Uri CONTENT_URI = buildContentUri("chart-items");
-        String GROUP_CONTENT_TYPE = buildGroupType("chart-item");
-        String ITEM_CONTENT_TYPE = buildItemType("chart-item");
+        Uri URI = buildContentUri("chart-items");
+        String GROUP_TYPE = buildGroupType("chart-item");
+        String ITEM_TYPE = buildItemType("chart-item");
 
         // Sections and items from all charts are stored in this table.  Sections are rows with
         // a section_type and no parent_id; items are rows with a parent_id pointing to a section.
@@ -79,9 +79,9 @@ public class Contracts {
     }
 
     public interface ConceptNames {
-        Uri CONTENT_URI = buildContentUri("concept-names");
-        String GROUP_CONTENT_TYPE = buildGroupType("concept-name");
-        String ITEM_CONTENT_TYPE = buildItemType("concept-name");
+        Uri URI = buildContentUri("concept-names");
+        String GROUP_TYPE = buildGroupType("concept-name");
+        String ITEM_TYPE = buildItemType("concept-name");
 
         String CONCEPT_UUID = "concept_uuid";
         String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
@@ -89,9 +89,9 @@ public class Contracts {
     }
 
     public interface Concepts {
-        Uri CONTENT_URI = buildContentUri("concepts");
-        String GROUP_CONTENT_TYPE = buildGroupType("concept");
-        String ITEM_CONTENT_TYPE = buildItemType("concept");
+        Uri URI = buildContentUri("concepts");
+        String GROUP_TYPE = buildGroupType("concept");
+        String ITEM_TYPE = buildItemType("concept");
 
         String UUID = "uuid";
         String XFORM_ID = "xform_id";  // ID for the concept in XForms (OpenMRS ID)
@@ -99,9 +99,9 @@ public class Contracts {
     }
 
     public interface Forms {
-        Uri CONTENT_URI = buildContentUri("forms");
-        String GROUP_CONTENT_TYPE = buildGroupType("form");
-        String ITEM_CONTENT_TYPE = buildItemType("form");
+        Uri URI = buildContentUri("forms");
+        String GROUP_TYPE = buildGroupType("form");
+        String ITEM_TYPE = buildItemType("form");
 
         String UUID = "uuid";
         String NAME = "name";
@@ -109,9 +109,9 @@ public class Contracts {
     }
 
     public interface LocationNames {
-        Uri CONTENT_URI = buildContentUri("location-names");
-        String GROUP_CONTENT_TYPE = buildGroupType("location-name");
-        String ITEM_CONTENT_TYPE = buildItemType("location-name");
+        Uri URI = buildContentUri("location-names");
+        String GROUP_TYPE = buildGroupType("location-name");
+        String ITEM_TYPE = buildItemType("location-name");
 
         String LOCATION_UUID = "location_uuid";
         String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
@@ -119,17 +119,17 @@ public class Contracts {
     }
 
     public interface Locations {
-        Uri CONTENT_URI = buildContentUri("locations");
-        String GROUP_CONTENT_TYPE = buildGroupType("location");
-        String ITEM_CONTENT_TYPE = buildItemType("location");
+        Uri URI = buildContentUri("locations");
+        String GROUP_TYPE = buildGroupType("location");
+        String ITEM_TYPE = buildItemType("location");
 
         String UUID = "uuid";
         String PARENT_UUID = "parent_uuid"; // parent location or null
     }
 
     public interface Misc {
-        Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
-        String ITEM_CONTENT_TYPE = buildItemType("misc");
+        Uri URI = BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
+        String ITEM_TYPE = buildItemType("misc");
 
         /**
          * The start time of the last full sync operation, according to the
@@ -152,16 +152,16 @@ public class Contracts {
     }
 
     public interface SyncTokens {
-        Uri CONTENT_URI = buildContentUri("sync-tokens");
-        String ITEM_CONTENT_TYPE = buildItemType("sync-token");
+        Uri URI = buildContentUri("sync-tokens");
+        String ITEM_TYPE = buildItemType("sync-token");
         String TABLE_NAME = "table_name";
         String SYNC_TOKEN = "sync_token";
     }
 
     public interface Observations {
-        Uri CONTENT_URI = buildContentUri("observations");
-        String GROUP_CONTENT_TYPE = buildGroupType("observation");
-        String ITEM_CONTENT_TYPE = buildItemType("observation");
+        Uri URI = buildContentUri("observations");
+        String GROUP_TYPE = buildGroupType("observation");
+        String ITEM_TYPE = buildItemType("observation");
 
         /**
          * UUID is populated if the record was retrieved from the server. If this observation was
@@ -180,9 +180,9 @@ public class Contracts {
     }
 
     public interface Orders {
-        Uri CONTENT_URI = buildContentUri("orders");
-        String GROUP_CONTENT_TYPE = buildGroupType("order");
-        String ITEM_CONTENT_TYPE = buildItemType("order");
+        Uri URI = buildContentUri("orders");
+        String GROUP_TYPE = buildGroupType("order");
+        String ITEM_TYPE = buildItemType("order");
 
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
@@ -192,9 +192,9 @@ public class Contracts {
     }
 
     public interface Patients {
-        Uri CONTENT_URI = buildContentUri("patients");
-        String GROUP_CONTENT_TYPE = buildGroupType("patient");
-        String ITEM_CONTENT_TYPE = buildItemType("patient");
+        Uri URI = buildContentUri("patients");
+        String GROUP_TYPE = buildGroupType("patient");
+        String ITEM_TYPE = buildItemType("patient");
 
         String UUID = "uuid";
         String ID = "id";
@@ -206,9 +206,9 @@ public class Contracts {
     }
 
     public interface Users {
-        Uri CONTENT_URI = buildContentUri("users");
-        String GROUP_CONTENT_TYPE = buildGroupType("user");
-        String ITEM_CONTENT_TYPE = buildItemType("user");
+        Uri URI = buildContentUri("users");
+        String GROUP_TYPE = buildGroupType("user");
+        String ITEM_TYPE = buildItemType("user");
 
         String UUID = "uuid";
         String FULL_NAME = "full_name";
@@ -219,9 +219,9 @@ public class Contracts {
     // returned by the query() method of the corresponding ProviderDelegate.
 
     public interface LocalizedLocations {
-        Uri CONTENT_URI = buildContentUri("localized-locations");
-        String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
-        String ITEM_CONTENT_TYPE = buildItemType("localized-location");
+        Uri URI = buildContentUri("localized-locations");
+        String GROUP_TYPE = buildGroupType("localized-location");
+        String ITEM_TYPE = buildItemType("localized-location");
 
         String UUID = "uuid";
         String PARENT_UUID = "parent_uuid";
@@ -231,9 +231,9 @@ public class Contracts {
     }
 
     public interface PatientCounts {
-        Uri CONTENT_URI = buildContentUri("patient-counts");
-        String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
-        String ITEM_CONTENT_TYPE = buildItemType("patient-count");
+        Uri URI = buildContentUri("patient-counts");
+        String GROUP_TYPE = buildGroupType("patient-count");
+        String ITEM_TYPE = buildItemType("patient-count");
 
         String LOCATION_UUID = "location_uuid";
         String PATIENT_COUNT = "patient_count";
@@ -253,7 +253,7 @@ public class Contracts {
 
     /** Returns the content URI for the localized locations for a given locale. */
     public static Uri getLocalizedLocationsUri(String locale) {
-        return LocalizedLocations.CONTENT_URI.buildUpon()
+        return LocalizedLocations.URI.buildUpon()
             .appendPath(locale)
             .build();
     }

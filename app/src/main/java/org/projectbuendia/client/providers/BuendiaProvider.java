@@ -11,6 +11,18 @@
 
 package org.projectbuendia.client.providers;
 
+import org.projectbuendia.client.providers.Contracts.ChartItems;
+import org.projectbuendia.client.providers.Contracts.ConceptNames;
+import org.projectbuendia.client.providers.Contracts.Concepts;
+import org.projectbuendia.client.providers.Contracts.Forms;
+import org.projectbuendia.client.providers.Contracts.LocationNames;
+import org.projectbuendia.client.providers.Contracts.Locations;
+import org.projectbuendia.client.providers.Contracts.Misc;
+import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.providers.Contracts.Orders;
+import org.projectbuendia.client.providers.Contracts.Patients;
+import org.projectbuendia.client.providers.Contracts.SyncTokens;
+import org.projectbuendia.client.providers.Contracts.Users;
 import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.providers.Contracts.Table;
 
@@ -29,135 +41,61 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
     @Override protected ProviderDelegateRegistry<Database> getRegistry() {
         ProviderDelegateRegistry<Database> registry = new ProviderDelegateRegistry<>();
 
-        // TODO/cleanup: Factor out all the repetitive code below.
         // Providers for groups of things (e.g., all charts).
-        registry.registerDelegate(
-            Contracts.ChartItems.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.ChartItems.GROUP_CONTENT_TYPE,
-                Table.CHART_ITEMS));
-        registry.registerDelegate(
-            Contracts.Concepts.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.Concepts.GROUP_CONTENT_TYPE,
-                Table.CONCEPTS));
-        registry.registerDelegate(
-            Contracts.ConceptNames.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.ConceptNames.GROUP_CONTENT_TYPE,
-                Table.CONCEPT_NAMES));
-        registry.registerDelegate(
-            Contracts.Forms.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.Forms.GROUP_CONTENT_TYPE,
-                Table.FORMS));
-        registry.registerDelegate(
-            Contracts.Locations.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.Locations.GROUP_CONTENT_TYPE,
-                Table.LOCATIONS));
-        registry.registerDelegate(
-            Contracts.LocationNames.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.LocationNames.GROUP_CONTENT_TYPE,
-                Table.LOCATION_NAMES));
-        registry.registerDelegate(
-            Contracts.Observations.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.Observations.GROUP_CONTENT_TYPE,
-                Table.OBSERVATIONS));
-        registry.registerDelegate(
-            Contracts.Orders.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.Orders.GROUP_CONTENT_TYPE,
-                Table.ORDERS));
-        registry.registerDelegate(
-            Contracts.Patients.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.Patients.GROUP_CONTENT_TYPE,
-                Table.PATIENTS));
-        registry.registerDelegate(
-            Contracts.Users.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.Users.GROUP_CONTENT_TYPE,
-                Table.USERS));
+        registry.registerDelegate(ChartItems.URI.getPath(),
+            new GroupProviderDelegate(ChartItems.GROUP_TYPE, Table.CHART_ITEMS));
+        registry.registerDelegate(Concepts.URI.getPath(),
+            new GroupProviderDelegate(Concepts.GROUP_TYPE, Table.CONCEPTS));
+        registry.registerDelegate(ConceptNames.URI.getPath(),
+            new GroupProviderDelegate(ConceptNames.GROUP_TYPE, Table.CONCEPT_NAMES));
+        registry.registerDelegate(Forms.URI.getPath(),
+            new GroupProviderDelegate(Forms.GROUP_TYPE, Table.FORMS));
+        registry.registerDelegate(Locations.URI.getPath(),
+            new GroupProviderDelegate(Locations.GROUP_TYPE, Table.LOCATIONS));
+        registry.registerDelegate(LocationNames.URI.getPath(),
+            new GroupProviderDelegate(LocationNames.GROUP_TYPE, Table.LOCATION_NAMES));
+        registry.registerDelegate(Observations.URI.getPath(),
+            new GroupProviderDelegate(Observations.GROUP_TYPE, Table.OBSERVATIONS));
+        registry.registerDelegate(Orders.URI.getPath(),
+            new GroupProviderDelegate(Orders.GROUP_TYPE, Table.ORDERS));
+        registry.registerDelegate(Patients.URI.getPath(),
+            new GroupProviderDelegate(Patients.GROUP_TYPE, Table.PATIENTS));
+        registry.registerDelegate(Users.URI.getPath(),
+            new GroupProviderDelegate(Users.GROUP_TYPE, Table.USERS));
 
         // Providers for individual things (e.g., user with a specific ID).
-        registry.registerDelegate(
-            Contracts.Concepts.CONTENT_URI.getPath() + "/*",
-            new ItemProviderDelegate(
-                Contracts.Forms.GROUP_CONTENT_TYPE,
-                Table.CONCEPTS,
-                Contracts.Concepts.UUID));
-        registry.registerDelegate(
-            Contracts.Forms.CONTENT_URI.getPath() + "/*",
-            new ItemProviderDelegate(
-                Contracts.Forms.GROUP_CONTENT_TYPE,
-                Table.FORMS,
-                Contracts.Forms.UUID));
-        registry.registerDelegate(
-            Contracts.Locations.CONTENT_URI.getPath() + "/*",
-            new ItemProviderDelegate(
-                Contracts.Locations.ITEM_CONTENT_TYPE,
-                Table.LOCATIONS,
-                Contracts.Locations.UUID));
-        registry.registerDelegate(
-            Contracts.LocationNames.CONTENT_URI.getPath() + "/*",
-            new InsertableItemProviderDelegate(
-                Contracts.LocationNames.ITEM_CONTENT_TYPE,
-                Table.LOCATION_NAMES,
-                null));
-        registry.registerDelegate(
-            Contracts.Observations.CONTENT_URI.getPath() + "/*",
-            new ItemProviderDelegate(
-                Contracts.Observations.ITEM_CONTENT_TYPE,
-                Table.OBSERVATIONS,
-                Contracts.Observations.UUID));
-        registry.registerDelegate(
-            Contracts.Orders.CONTENT_URI.getPath() + "/*",
-            new InsertableItemProviderDelegate(
-                Contracts.Orders.ITEM_CONTENT_TYPE,
-                Table.ORDERS,
-                Contracts.Orders.UUID));
-        registry.registerDelegate(
-            Contracts.Patients.CONTENT_URI.getPath() + "/*",
-            new ItemProviderDelegate(
-                Contracts.Patients.ITEM_CONTENT_TYPE,
-                Table.PATIENTS,
-                Contracts.Patients.UUID));
-        registry.registerDelegate(
-            Contracts.Users.CONTENT_URI.getPath() + "/*",
-            new ItemProviderDelegate(
-                Contracts.Users.ITEM_CONTENT_TYPE,
-                Table.USERS,
-                Contracts.Users.UUID));
+        registry.registerDelegate(Concepts.URI.getPath() + "/*",
+            new ItemProviderDelegate(Forms.GROUP_TYPE, Table.CONCEPTS, Concepts.UUID));
+        registry.registerDelegate(Forms.URI.getPath() + "/*",
+            new ItemProviderDelegate(Forms.GROUP_TYPE, Table.FORMS, Forms.UUID));
+        registry.registerDelegate(Locations.URI.getPath() + "/*",
+            new ItemProviderDelegate(Locations.ITEM_TYPE, Table.LOCATIONS, Locations.UUID));
+        registry.registerDelegate(LocationNames.URI.getPath() + "/*",
+            new InsertableItemProviderDelegate(LocationNames.ITEM_TYPE, Table.LOCATION_NAMES, null));
+        registry.registerDelegate(Observations.URI.getPath() + "/*",
+            new ItemProviderDelegate(Observations.ITEM_TYPE, Table.OBSERVATIONS, Observations.UUID));
+        registry.registerDelegate(Orders.URI.getPath() + "/*",
+            new InsertableItemProviderDelegate(Orders.ITEM_TYPE, Table.ORDERS, Orders.UUID));
+        registry.registerDelegate(Patients.URI.getPath() + "/*",
+            new ItemProviderDelegate(Patients.ITEM_TYPE, Table.PATIENTS, Patients.UUID));
+        registry.registerDelegate(Users.URI.getPath() + "/*",
+            new ItemProviderDelegate(Users.ITEM_TYPE, Table.USERS, Users.UUID));
 
         // Custom providers, usually with special logic.
-        registry.registerDelegate(
-            Contracts.PatientCounts.CONTENT_URI.getPath(),
+        registry.registerDelegate(Contracts.PatientCounts.URI.getPath(),
             new PatientCountsDelegate());
-        registry.registerDelegate(
-            Contracts.LocalizedLocations.CONTENT_URI.getPath() + "/*",
+        registry.registerDelegate(Contracts.LocalizedLocations.URI.getPath() + "/*",
             new LocalizedLocationsDelegate());
-        // Content provider for our single item table for storing miscellaneous values.
-        registry.registerDelegate(
-            Contracts.Misc.CONTENT_URI.getPath(),
-            new InsertableItemProviderDelegate(
-                Contracts.Misc.ITEM_CONTENT_TYPE,
-                Table.MISC,
-                "rowid"));
 
-        registry.registerDelegate(
-            Contracts.SyncTokens.CONTENT_URI.getPath(),
-            new GroupProviderDelegate(
-                Contracts.SyncTokens.ITEM_CONTENT_TYPE,
-                Table.SYNC_TOKENS));
-        registry.registerDelegate(
-                Contracts.SyncTokens.CONTENT_URI.getPath() + "/*",
-                new ItemProviderDelegate(
-                        Contracts.SyncTokens.ITEM_CONTENT_TYPE,
-                        Table.SYNC_TOKENS,
-                        Contracts.SyncTokens.TABLE_NAME));
+        // Content provider for our single-row table for storing miscellaneous values.
+        registry.registerDelegate(Misc.URI.getPath(),
+            new InsertableItemProviderDelegate(Misc.ITEM_TYPE, Table.MISC, "rowid"));
+
+        // Custom provider for our sync token table.
+        registry.registerDelegate(SyncTokens.URI.getPath(),
+            new GroupProviderDelegate(SyncTokens.ITEM_TYPE, Table.SYNC_TOKENS));
+        registry.registerDelegate(SyncTokens.URI.getPath() + "/*",
+                new ItemProviderDelegate(SyncTokens.ITEM_TYPE, Table.SYNC_TOKENS, SyncTokens.TABLE_NAME));
 
         return registry;
     }

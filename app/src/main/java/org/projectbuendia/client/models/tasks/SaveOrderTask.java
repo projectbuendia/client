@@ -97,7 +97,7 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
         // insert() is implemented as insert or replace, so we use it for both adding and updating.
         Uri uri = mContentResolver.insert(
-            Contracts.Orders.CONTENT_URI, Order.fromJson(json).toContentValues());
+            Contracts.Orders.URI, Order.fromJson(json).toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.CLIENT_ERROR, null);
         }
@@ -115,7 +115,7 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
         // We use the fetch event to trigger UI updates, both for initial load and for this update.
         mBus.register(this);
         mTaskFactory.newFetchItemTask(
-            Contracts.Orders.CONTENT_URI, null, new UuidFilter(), mUuid,
+            Contracts.Orders.URI, null, new UuidFilter(), mUuid,
             mLoaderSet.orderLoader, mBus).execute();
     }
 }

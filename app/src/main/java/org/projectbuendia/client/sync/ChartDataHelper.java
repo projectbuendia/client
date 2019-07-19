@@ -86,7 +86,7 @@ public class ChartDataHelper {
             if (!locale.equals(sLoadedLocale)) {
                 sConceptNames = new HashMap<>();
                 try (Cursor c = mContentResolver.query(
-                    ConceptNames.CONTENT_URI, new String[] {ConceptNames.CONCEPT_UUID, ConceptNames.NAME},
+                    ConceptNames.URI, new String[] {ConceptNames.CONCEPT_UUID, ConceptNames.NAME},
                     ConceptNames.LOCALE + " = ?", new String[] {locale}, null)) {
                     while (c.moveToNext()) {
                         sConceptNames.put(c.getString(0), c.getString(1));
@@ -94,7 +94,7 @@ public class ChartDataHelper {
                 }
                 sConceptTypes = new HashMap<>();
                 try (Cursor c = mContentResolver.query(
-                    Concepts.CONTENT_URI, new String[] {Concepts.UUID, Concepts.CONCEPT_TYPE},
+                    Concepts.URI, new String[] {Concepts.UUID, Concepts.CONCEPT_TYPE},
                     null, null, null)) {
                     while (c.moveToNext()) {
                         try {
@@ -112,7 +112,7 @@ public class ChartDataHelper {
     /** Gets all the orders for a given patient. */
     public List<Order> getOrders(String patientUuid) {
         Cursor c = mContentResolver.query(
-            Orders.CONTENT_URI, null,
+            Orders.URI, null,
             Orders.PATIENT_UUID + " = ?", new String[] {patientUuid},
             Orders.START_MILLIS);
         List<Order> orders = new ArrayList<>();
@@ -172,7 +172,7 @@ public class ChartDataHelper {
         loadConceptData(locale);
         List<Obs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
-            Observations.CONTENT_URI, null,
+            Observations.URI, null,
             Observations.PATIENT_UUID + " = ? and "
                     + Observations.VOIDED + " IS NOT ?",
             new String[] {patientUuid,"1"},null)) {
@@ -199,7 +199,7 @@ public class ChartDataHelper {
 
         ArrayList<ObsRow> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
-            Observations.CONTENT_URI,
+            Observations.URI,
             null,
             Observations.CONCEPT_UUID + " in (" + conceptSet + ") and "
                 + Observations.PATIENT_UUID + " = ? and "
@@ -226,7 +226,7 @@ public class ChartDataHelper {
         String[] values = new String[]{"1",patientUuid, startMillis,stopMillis};
         String order = Observations.ENCOUNTER_MILLIS + " ASC";
 
-        try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
+        try(Cursor c = mContentResolver.query(Observations.URI,null,conditions,values, order))
         {
             while (c.moveToNext()) {
                 ObsRow row = obsrowFromCursor(c);
@@ -248,7 +248,7 @@ public class ChartDataHelper {
         String[] values = new String[]{"1",patientUuid, conceptUuid, StartMillis,StopMillis};
         String order = Observations.ENCOUNTER_MILLIS + " ASC";
 
-        try(Cursor c = mContentResolver.query(Observations.CONTENT_URI,null,conditions,values, order))
+        try(Cursor c = mContentResolver.query(Observations.URI,null,conditions,values, order))
         {
             while (c.moveToNext()) {
                 ObsRow row = obsrowFromCursor(c);
@@ -284,7 +284,7 @@ public class ChartDataHelper {
         String conceptUuid, String locale) {
         loadConceptData(locale);
         try (Cursor c = mContentResolver.query(
-            Observations.CONTENT_URI, null,
+            Observations.URI, null,
                 Observations.VOIDED + " IS NOT ? and "
                     + Observations.CONCEPT_UUID + " = ?",
                 new String[] {"1",conceptUuid},
@@ -307,7 +307,7 @@ public class ChartDataHelper {
         Chart currentChart = null;
 
         try (Cursor c = mContentResolver.query(
-            ChartItems.CONTENT_URI, null,
+            ChartItems.URI, null,
             ChartItems.CHART_UUID + " = ?", new String[] {uuid}, "weight")) {
             while (c.moveToNext()) {
                 Long rowid = Utils.getLong(c, ChartItems.ROWID);
@@ -367,7 +367,7 @@ public class ChartDataHelper {
 
     public List<Form> getForms() {
         Cursor cursor = mContentResolver.query(
-            Contracts.Forms.CONTENT_URI, null, null, null, null);
+            Contracts.Forms.URI, null, null, null, null);
         SortedSet<Form> forms = new TreeSet<>();
         try {
             while (cursor.moveToNext()) {

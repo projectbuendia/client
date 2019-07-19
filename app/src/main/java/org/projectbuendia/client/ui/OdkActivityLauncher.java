@@ -217,7 +217,7 @@ public class OdkActivityLauncher {
         List<OpenMrsXformIndexEntry> entries = new ArrayList<>();
 
         final ContentResolver resolver = App.getInstance().getContentResolver();
-        Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, new String[] {Contracts.Forms.UUID,
+        Cursor c = resolver.query(Contracts.Forms.URI, new String[] {Contracts.Forms.UUID,
             Contracts.Forms.NAME}, null, null, null);
         try {
             while (c.moveToNext()) {
@@ -580,7 +580,7 @@ public class OdkActivityLauncher {
             mapIdToUuid(xformIdToUuid, values, Contracts.Observations.VALUE);
         }
 
-        resolver.bulkInsert(Contracts.Observations.CONTENT_URI,
+        resolver.bulkInsert(Contracts.Observations.URI,
             toInsert.toArray(new ContentValues[toInsert.size()]));
     }
 
@@ -590,7 +590,7 @@ public class OdkActivityLauncher {
         String inClause = Joiner.on(",").join(xformConceptIds);
 
         HashMap<String, String> xformIdToUuid = new HashMap<>();
-        Cursor cursor = resolver.query(Contracts.Concepts.CONTENT_URI,
+        Cursor cursor = resolver.query(Contracts.Concepts.URI,
             new String[] {Contracts.Concepts.UUID, Contracts.Concepts.XFORM_ID},
             Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
             null, null);

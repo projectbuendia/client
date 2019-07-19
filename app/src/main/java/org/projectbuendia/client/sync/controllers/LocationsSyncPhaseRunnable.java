@@ -34,8 +34,8 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
             throws Throwable {
         ArrayList<ContentProviderOperation> ops = getLocationUpdateOps(syncResult);
         providerClient.applyBatch(ops);
-        contentResolver.notifyChange(Locations.CONTENT_URI, null, false);
-        contentResolver.notifyChange(LocationNames.CONTENT_URI, null, false);
+        contentResolver.notifyChange(Locations.URI, null, false);
+        contentResolver.notifyChange(LocationNames.URI, null, false);
     }
 
     /**
@@ -72,8 +72,8 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
         }
 
         // Get list of all items
-        Uri uri = Locations.CONTENT_URI; // Location tree
-        Uri namesUri = LocationNames.CONTENT_URI; // Location names
+        Uri uri = Locations.URI; // Location tree
+        Uri namesUri = LocationNames.URI; // Location names
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
         Cursor namesCur = contentResolver.query(namesUri, namesProjection, null, null, null);
@@ -163,7 +163,7 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
 
         for (JsonLocation location : locationsByUuid.values()) {
             LOG.i("  - will insert location " + location.uuid);
-            batch.add(ContentProviderOperation.newInsert(Locations.CONTENT_URI)
+            batch.add(ContentProviderOperation.newInsert(Locations.URI)
                     .withValue(Locations.UUID, location.uuid)
                     .withValue(Locations.PARENT_UUID, location.parent_uuid)
                     .build());

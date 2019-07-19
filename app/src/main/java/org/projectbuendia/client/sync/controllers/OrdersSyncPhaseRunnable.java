@@ -21,17 +21,14 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
     private static final Logger LOG = Logger.create();
 
     public OrdersSyncPhaseRunnable() {
-        super(
-                "orders",
-                Contracts.Table.ORDERS,
-                JsonOrder.class);
+        super("orders", Contracts.Table.ORDERS, JsonOrder.class);
     }
 
     @Override
     protected ArrayList<ContentProviderOperation> getUpdateOps(
             JsonOrder[] orders, SyncResult syncResult) {
-        int numDeletes = 0;
         int numInserts = 0;
+        int numDeletes = 0;
         ArrayList<ContentProviderOperation> ops = new ArrayList<>(orders.length);
         for (JsonOrder order : orders) {
             if (order.voided) {
@@ -42,14 +39,14 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
                 numInserts++;
             }
         }
-        syncResult.stats.numDeletes += numDeletes;
+        LOG.d("Orders: %d inserts, %d deletes", numInserts, numDeletes);
         syncResult.stats.numInserts += numInserts;
-        LOG.d("Orders processed! Inserts: %d, Deletes: %d", numInserts, numDeletes);
+        syncResult.stats.numDeletes += numDeletes;
         return ops;
     }
 
     private static ContentProviderOperation insertOrReplaceOrder(JsonOrder order) {
-        return ContentProviderOperation.newInsert(Orders.CONTENT_URI)
+        return ContentProviderOperation.newInsert(Orders.URI)
                 .withValue(Orders.UUID, order.uuid)
                 .withValue(Orders.PATIENT_UUID, order.patient_uuid)
                 .withValue(Orders.INSTRUCTIONS, order.instructions)
@@ -59,7 +56,7 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
     }
 
     private static ContentProviderOperation deleteOrderWithUuid(String uuid) {
-        Uri uri = Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
+        Uri uri = Orders.URI.buildUpon().appendPath(uuid).build();
         return ContentProviderOperation.newDelete(uri).build();
     }
 
@@ -68,6 +65,6 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
             ContentResolver contentResolver,
             SyncResult syncResult,
             ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Orders.CONTENT_URI, null, false);
+        contentResolver.notifyChange(Orders.URI, null, false);
     }
 }

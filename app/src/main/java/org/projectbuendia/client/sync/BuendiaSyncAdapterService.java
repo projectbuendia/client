@@ -24,7 +24,7 @@ import android.os.IBinder;
 import org.projectbuendia.client.utils.Logger;
 
 /** A service that holds a singleton SyncAdapter and provides it to the OS on request. */
-public class SyncAdapterService extends Service {
+public class BuendiaSyncAdapterService extends Service {
     private static final Logger LOG = Logger.create();
     private static final Object lock = new Object();
     private static SyncAdapter adapter = null;
@@ -62,9 +62,9 @@ public class SyncAdapterService extends Service {
             engine.cancel();
         }
 
-        @Override public void onPerformSync(Account account, Bundle extras,
+        @Override public void onPerformSync(Account account, Bundle options,
             String authority, ContentProviderClient client, SyncResult result) {
-            engine.sync(extras, client, result);
+            engine.sync(options, client, result);
         }
     }
 }

@@ -21,9 +21,11 @@ import org.projectbuendia.client.models.AppModelModule;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.net.NetModule;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.sync.SyncAdapterSyncScheduler;
+import org.projectbuendia.client.sync.BuendiaSyncEngine;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncAccountService;
+import org.projectbuendia.client.sync.SyncAdapterSyncScheduler;
+import org.projectbuendia.client.sync.SyncEngine;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.sync.ThreadedSyncScheduler;
 import org.projectbuendia.client.ui.BaseActivity;
@@ -112,12 +114,17 @@ public final class AppModule {
     }
 
     @Provides
-    @Singleton SyncManager provideSyncManager(AppSettings settings) {
+    @Singleton SyncManager provideSyncManager(AppSettings settings, SyncEngine engine) {
         return new SyncManager(
             settings.getUseSyncAdapter() ?
-                new SyncAdapterSyncScheduler(SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY) :
-                new ThreadedSyncScheduler(mApp.getApplicationContext())
+                new SyncAdapterSyncScheduler(engine, SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY) :
+                new ThreadedSyncScheduler(engine)
         );
+    }
+
+    @Provides
+    @Singleton SyncEngine provideSyncEngine(Application app) {
+        return new BuendiaSyncEngine(app.getApplicationContext());
     }
 
     @Provides

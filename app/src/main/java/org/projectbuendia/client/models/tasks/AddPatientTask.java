@@ -103,28 +103,17 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         }
 
         if (json.uuid == null) {
-            LOG.e(
-                "Although the server reported a patient successfully added, it did not return "
-                    + "a UUID for that patient. This indicates a server error.");
-
-            return new PatientAddFailedEvent(
-                PatientAddFailedEvent.REASON_SERVER, null /*exception*/);
+            LOG.e("Server successfully added a new patient but returned no UUID");
+            return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_SERVER, null);
         }
 
         Patient patient = Patient.fromJson(json);
-        Uri uri = mContentResolver.insert(
-            Contracts.Patients.CONTENT_URI, patient.toContentValues());
-
-        // Perform incremental observation sync so we get admission date.
-        mSyncManager.startObservationsAndOrdersSync();
-
+        Uri uri = mContentResolver.insert(Contracts.Patients.URI, patient.toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
-            return new PatientAddFailedEvent(
-                PatientAddFailedEvent.REASON_CLIENT, null /*exception*/);
+            return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_CLIENT, null);
         }
 
         mUuid = json.uuid;
-
         return null;
     }
 
@@ -154,7 +143,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
-            Contracts.Patients.CONTENT_URI,
+            Contracts.Patients.URI,
             null,
             new UuidFilter(),
             mUuid,

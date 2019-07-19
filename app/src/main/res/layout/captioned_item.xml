@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+  <TextView
+      android:id="@+id/label"
+      style="?android:attr/dropDownItemStyle"
+      android:textAppearance="?android:attr/textAppearanceLargePopupMenu"
+      android:layout_width="match_parent"
+      android:layout_height="38sp"
+      android:paddingTop="6sp"
+      android:paddingStart="12dp"
+      android:paddingEnd="12dp"
+      android:gravity="top|start"
+      android:singleLine="true"
+      android:ellipsize="marquee"
+      tools:text="Paracetamol" />
+  <TextView
+      android:id="@+id/caption"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:layout_width="match_parent"
+      android:layout_height="26sp"
+      android:paddingBottom="6sp"
+      android:paddingStart="12dp"
+      android:paddingEnd="12dp"
+      android:gravity="bottom|end"
+      android:singleLine="true"
+      android:textColor="#888"
+      tools:text="analgesic, antipyretic" />
+</LinearLayout>

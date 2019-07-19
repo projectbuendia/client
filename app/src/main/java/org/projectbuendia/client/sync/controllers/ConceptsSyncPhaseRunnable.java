@@ -62,9 +62,9 @@ public class ConceptsSyncPhaseRunnable implements SyncPhaseRunnable {
                 syncResult.stats.numInserts++;
             }
         }
-        providerClient.bulkInsert(Contracts.Concepts.CONTENT_URI,
+        providerClient.bulkInsert(Contracts.Concepts.URI,
                 conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
-        providerClient.bulkInsert(Contracts.ConceptNames.CONTENT_URI,
+        providerClient.bulkInsert(Contracts.ConceptNames.URI,
                 conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
 
         ChartDataHelper.invalidateLoadedConceptData();

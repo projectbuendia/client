@@ -14,6 +14,7 @@ package org.projectbuendia.client.events.actions;
 import android.support.annotation.Nullable;
 
 import org.joda.time.DateTime;
+import org.projectbuendia.client.models.Order;
 
 /**
  * Event indicating that the user has entered an order that needs to be saved
@@ -24,13 +25,13 @@ public class OrderSaveRequestedEvent {
     // order; otherwise, the event indicates a creation of a new order.
     public final String orderUuid;
     public final String patientUuid;
-    public final String instructions;
+    public final Order.Instructions instructions;
     public final DateTime start;
     public final Integer durationDays;
 
     public OrderSaveRequestedEvent(
-        @Nullable String orderUuid, String patientUuid,
-        String instructions, DateTime start, @Nullable Integer durationDays) {
+        @Nullable String orderUuid, String patientUuid, Order.Instructions instructions,
+        DateTime start, @Nullable Integer durationDays) {
         this.orderUuid = orderUuid;
         this.patientUuid = patientUuid;
         this.instructions = instructions;

@@ -83,12 +83,12 @@ public class UserStore {
     private void addUserLocally(JsonUser user) {
         LOG.i("Updating user db with newly added user");
         ContentProviderClient client = App.getInstance().getContentResolver()
-            .acquireContentProviderClient(Users.CONTENT_URI);
+            .acquireContentProviderClient(Users.URI);
         try {
             ContentValues values = new ContentValues();
             values.put(Users.UUID, user.id);
             values.put(Users.FULL_NAME, user.fullName);
-            client.insert(Users.CONTENT_URI, values);
+            client.insert(Users.URI, values);
         } catch (RemoteException e) {
             LOG.e(e, "Failed to update database");
         } finally {
@@ -141,7 +141,7 @@ public class UserStore {
     private void  updateDatabase(Set<JsonUser> users) throws RemoteException, OperationApplicationException {
         LOG.i("Updating local database with %d users", users.size());
         ContentProviderClient client = App.getInstance().getContentResolver()
-            .acquireContentProviderClient(Users.CONTENT_URI);
+            .acquireContentProviderClient(Users.URI);
         BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
         try (DatabaseTransaction tx = provider.startTransaction(USER_SYNC_SAVEPOINT_NAME)) {
             try {
@@ -172,10 +172,10 @@ public class UserStore {
         ContentProviderClient client = null;
         try {
             client = App.getInstance().getContentResolver()
-                .acquireContentProviderClient(Users.CONTENT_URI);
+                .acquireContentProviderClient(Users.URI);
 
             // Request users from database.
-            cursor = client.query(Users.CONTENT_URI, new String[]{Users.FULL_NAME, Users.UUID},
+            cursor = client.query(Users.URI, new String[]{Users.FULL_NAME, Users.UUID},
                 null, null, Users.FULL_NAME);
 
             // If no data was retrieved from database
@@ -213,10 +213,10 @@ public class UserStore {
             Set<JsonUser> response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         // Delete all users before inserting.
-        ops.add(ContentProviderOperation.newDelete(Contracts.Users.CONTENT_URI).build());
+        ops.add(ContentProviderOperation.newDelete(Contracts.Users.URI).build());
         // TODO: Update syncResult delete counts.
         for (JsonUser user : response) {
-            ops.add(ContentProviderOperation.newInsert(Contracts.Users.CONTENT_URI)
+            ops.add(ContentProviderOperation.newInsert(Contracts.Users.URI)
                     .withValue(Contracts.Users.UUID, user.id)
                     .withValue(Contracts.Users.FULL_NAME, user.fullName)
                     .build());

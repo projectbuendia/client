@@ -38,7 +38,7 @@ public class ChartsSyncPhaseRunnable implements SyncPhaseRunnable {
         final JsonChart chart = future.get();
 
         // When we do a chart update, delete everything first, then insert all the new rows.
-        providerClient.delete(Contracts.ChartItems.CONTENT_URI, null, null);
+        providerClient.delete(Contracts.ChartItems.URI, null, null);
         syncResult.stats.numDeletes++;
         providerClient.applyBatch(getChartUpdateOps(chart, syncResult));
     }
@@ -55,7 +55,7 @@ public class ChartsSyncPhaseRunnable implements SyncPhaseRunnable {
         int nextWeight = 1;
         for (JsonChartSection section : response.sections) {
             int parentId = nextId;
-            ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.CONTENT_URI)
+            ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.URI)
                     .withValue("rowid", nextId++)
                     .withValue(Contracts.ChartItems.CHART_UUID, response.uuid)
                     .withValue(Contracts.ChartItems.WEIGHT, nextWeight++)
@@ -69,7 +69,7 @@ public class ChartsSyncPhaseRunnable implements SyncPhaseRunnable {
                 for (int i = 0; i < conceptUuids.length; i++) {
                     conceptUuids[i] = Utils.expandUuid(item.concepts[i]);
                 }
-                ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.CONTENT_URI)
+                ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.URI)
                         .withValue("rowid", nextId++)
                         .withValue(Contracts.ChartItems.CHART_UUID, response.uuid)
                         .withValue(Contracts.ChartItems.WEIGHT, nextWeight++)

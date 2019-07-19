@@ -70,7 +70,7 @@ th.gap {
 }
 
 /* Left margin */
-#grid-left th { padding-left: 16px; min-width: 20rem; max-width: 20rem; }
+#grid-left th { padding-left: 16px; min-width: 22rem; max-width: 22rem; }
 
 /* Grid text: should match @style/text */
 th, td, .division, .summary {
@@ -111,9 +111,7 @@ th[scope="rowgroup"] {
   color: #09e;
 }
 #grid-left .order th { padding: 0 4px 0 16px; line-height: 1.1em; vertical-align: middle; }
-.medication { font-weight: bold; }
-.route-IV .medication { color: #c60; }
-.route-PO .medication { color: #084; }
+.dosing { color: #888; }
 
 .order td { position: relative; }  /* contains positioned .divisions and .summary */
 .order .divisions, .order .summary {

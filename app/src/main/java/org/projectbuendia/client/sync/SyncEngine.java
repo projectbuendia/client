@@ -5,7 +5,7 @@ import android.content.SyncResult;
 import android.os.Bundle;
 
 /** Performs the heavy lifting of a sync (network and database operations). */
-interface SyncEngine {
+public interface SyncEngine {
     /** Runs a sync as a long blocking operation. */
     void sync(Bundle options, ContentProviderClient client, SyncResult result);
 

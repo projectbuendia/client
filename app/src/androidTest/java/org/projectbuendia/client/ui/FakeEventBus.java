@@ -16,7 +16,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-import org.projectbuendia.client.events.CleanupSubscriber;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.utils.EventBusInterface;
 
@@ -106,11 +105,5 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
                 }
             }
         }
-    }
-
-    @Override public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
-    }
-
-    @Override public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {
     }
 }

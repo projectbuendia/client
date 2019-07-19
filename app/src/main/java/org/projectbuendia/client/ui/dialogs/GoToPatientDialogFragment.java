@@ -119,10 +119,6 @@ public class GoToPatientDialogFragment extends DialogFragment {
             mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
                 " (" + patient.gender + ", " + Utils.birthdateToAge(
                 patient.birthdate, App.getInstance().getResources()) + ")");
-
-            // Perform incremental observation sync to get the patient's admission date
-            // and any other recent observations.
-            mSyncManager.startObservationsAndOrdersSync();
         }
     }
 
@@ -148,7 +144,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 mPatientSearchResult.setText("");
             } else {
                 try (Cursor cursor = getActivity().getContentResolver().query(
-                    Patients.CONTENT_URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
+                    Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
                     if (cursor.moveToNext()) {
                         String uuid = Utils.getString(cursor, Patients.UUID, null);
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");

@@ -54,7 +54,6 @@ public class SettingsActivity extends PreferenceActivity {
      * Controls whether to always show the simplified UI, where settings are
      * arranged in a single list without a left navigation panel.
      */
-    private static final boolean ALWAYS_SIMPLE_PREFS = false;
     static final String[] PREF_KEYS = {
         "server",
         "openmrs_user",
@@ -65,7 +64,6 @@ public class SettingsActivity extends PreferenceActivity {
         "keep_form_instances",
         "starting_patient_id",
         "xform_update_client_cache",
-        "incremental_observation_update",
         "require_wifi"
     };
     static boolean updatingPrefValues = false;
@@ -148,12 +146,12 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     @Override public boolean onIsMultiPane() {
-        return isXLargeTablet(this) && !isSimplePreferences(this);
+        return isXLargeTablet(this) && !useSimplePreferences(this);
     }
 
     @Override @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
-        if (!isSimplePreferences(this)) {
+        if (!useSimplePreferences(this)) {
             loadHeadersFromResource(R.xml.pref_headers, target);
         }
     }
@@ -245,23 +243,17 @@ public class SettingsActivity extends PreferenceActivity {
      * that a simplified, single-pane UI should be shown.
      */
     private void setupSimplePreferencesScreen() {
-        if (!isSimplePreferences(this)) return;
-
-        // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
-        addPreferencesFromResource(R.xml.pref_general);
-        addPreferencesFromResource(R.xml.pref_advanced);
-        addPreferencesFromResource(R.xml.pref_developer);
-        initPrefs(this);
+        if (useSimplePreferences(this)) {
+            // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
+            addPreferencesFromResource(R.xml.pref_general);
+            addPreferencesFromResource(R.xml.pref_advanced);
+            addPreferencesFromResource(R.xml.pref_developer);
+            initPrefs(this);
+        }
     }
 
-    /**
-     * Determines whether the simplified settings UI should be shown. This is
-     * true if this is forced via {@link #ALWAYS_SIMPLE_PREFS}, or the device
-     * doesn't have newer APIs like {@link PreferenceFragment}, or the device
-     * doesn't have an extra-large screen. In these cases, a single-pane
-     * "simplified" settings UI should be shown.
-     */
-    private static boolean isSimplePreferences(Context context) {
+    /** Determines whether the simplified settings UI should be shown. */
+    private static boolean useSimplePreferences(Context context) {
         return !isXLargeTablet(context);
     }
 

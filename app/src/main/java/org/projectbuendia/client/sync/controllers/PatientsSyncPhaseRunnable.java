@@ -22,6 +22,7 @@ import android.net.Uri;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
 
@@ -30,38 +31,40 @@ import java.util.ArrayList;
  * {@link IncrementalSyncPhaseRunnable} for details.
  */
 public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonPatient> {
+    private static final Logger LOG = Logger.create();
 
     public PatientsSyncPhaseRunnable() {
-        super(
-                "patients",
-                Contracts.Table.PATIENTS,
-                JsonPatient.class);
+        super("patients", Contracts.Table.PATIENTS, JsonPatient.class);
     }
 
     @Override
     protected ArrayList<ContentProviderOperation> getUpdateOps(
-            JsonPatient[] list, SyncResult syncResult) {
+            JsonPatient[] patients, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        for (JsonPatient patient : list) {
+        int numInserts = 0;
+        int numDeletes = 0;
+        for (JsonPatient patient : patients) {
             if (patient.voided) {
-                syncResult.stats.numDeletes++;
+                numDeletes++;
                 ops.add(makeDeleteOpForPatientUuid(patient.uuid));
             } else {
-                syncResult.stats.numInserts++;
+                numInserts++;
                 ops.add(makeInsertOpForPatient(patient));
             }
         }
-
+        LOG.d("Patients: %d inserts, %d deletes", numInserts, numDeletes);
+        syncResult.stats.numInserts += numInserts;
+        syncResult.stats.numDeletes += numDeletes;
         return ops;
     }
 
     private static ContentProviderOperation makeInsertOpForPatient(JsonPatient patient) {
-        return ContentProviderOperation.newInsert(Contracts.Patients.CONTENT_URI)
+        return ContentProviderOperation.newInsert(Contracts.Patients.URI)
                 .withValues(Patient.fromJson(patient).toContentValues()).build();
     }
 
     private static ContentProviderOperation makeDeleteOpForPatientUuid(String uuid) {
-        Uri uri = Contracts.Patients.CONTENT_URI.buildUpon().appendPath(uuid).build();
+        Uri uri = Contracts.Patients.URI.buildUpon().appendPath(uuid).build();
         return ContentProviderOperation.newDelete(uri).build();
     }
 
@@ -70,6 +73,6 @@ public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<Json
             ContentResolver contentResolver,
             SyncResult syncResult,
             ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
+        contentResolver.notifyChange(Contracts.Patients.URI, null, false);
     }
 }
