@@ -156,7 +156,7 @@ def serverLocalhost = '127.0.0.1'
 
 // Just for development.  In production builds, these should be overridden
 // using -Pserver=server -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def serverDefault = serverLan
+def serverDefault = serverDev
 def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs'
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
