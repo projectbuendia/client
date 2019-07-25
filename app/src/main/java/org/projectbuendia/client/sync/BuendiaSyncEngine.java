@@ -21,6 +21,7 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
@@ -47,6 +48,8 @@ import org.projectbuendia.client.sync.controllers.UsersSyncPhaseRunnable;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 
 /** Implementation of sync operations for the Buendia database. */
@@ -94,11 +97,16 @@ public class BuendiaSyncEngine implements SyncEngine {
         return Utils.putString(KEY_PHASES, Joiner.on(",").join(phases), new Bundle());
     }
 
-    public static Phase[] getPhases(Bundle options) {
-        String[] names = options.getString(KEY_PHASES, "").split(",");
-        Phase[] phases = new Phase[names.length];
-        for (int i = 0; i < names.length; i++) {
-            phases[i] = Phase.valueOf(names[i]);
+    public static @NonNull List<Phase> getPhases(Bundle options) {
+        List<Phase> phases = new ArrayList<>();
+        if (options != null) {
+            for (String name : options.getString(KEY_PHASES, "").split(",")) {
+                try {
+                    phases.add(Phase.valueOf(name));
+                } catch (IllegalArgumentException e) {
+                    LOG.w("Unrecognized phase name: %s (in options: %s)", Utils.repr(name, 100), options);
+                }
+            }
         }
         return phases;
     }
@@ -125,9 +133,9 @@ public class BuendiaSyncEngine implements SyncEngine {
             return;
         }
 
-        Phase[] phases = options != null ? getPhases(options) : new Phase[0];
+        List<Phase> phases = getPhases(options);
         boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL));
-        LOG.start("sync", "phases=%s, fullSync=%s", Utils.repr(phases), fullSync);
+        LOG.start("sync", "options = %s", options);
 
         broadcastSyncProgress(0, R.string.sync_in_progress);
 
@@ -141,7 +149,7 @@ public class BuendiaSyncEngine implements SyncEngine {
                 int p = 0;
                 for (Phase phase : phases) {
                     checkCancellation("before " + phase);
-                    broadcastSyncProgress(p * 100 / phases.length, phase.message);
+                    broadcastSyncProgress(p * 100 / phases.size(), phase.message);
                     phase.runnable.sync(contentResolver, result, client);
                     LOG.elapsed("sync", "Completed phase %s", phase);
                     p++;
