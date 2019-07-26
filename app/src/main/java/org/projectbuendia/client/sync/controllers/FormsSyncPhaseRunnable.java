@@ -30,18 +30,35 @@ import java.util.concurrent.ExecutionException;
  */
 public class FormsSyncPhaseRunnable implements SyncPhaseRunnable {
     private static final Logger LOG = Logger.create();
+    private static boolean isDisabled = false;
+    private static final Object lock = new Object();
 
     @Override
     public void sync(ContentResolver contentResolver, SyncResult syncResult,
             ContentProviderClient providerClient)
             throws Throwable {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        ops.addAll(getFormUpdateOps(syncResult));
-        providerClient.applyBatch(ops);
-        LOG.i("Finished updating forms (" + ops.size() + " db ops)");
-        contentResolver.notifyChange(Contracts.Forms.URI, null, false);
+        synchronized (lock) {
+            if (isDisabled) {
+                LOG.w("Form sync is temporarily disabled; skipping this phase");
+                return;
+            }
 
-        OdkActivityLauncher.fetchAndCacheAllXforms();
+            ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+            ops.addAll(getFormUpdateOps(syncResult));
+            providerClient.applyBatch(ops);
+            LOG.i("Finished updating forms (" + ops.size() + " db ops)");
+            contentResolver.notifyChange(Contracts.Forms.URI, null, false);
+
+            OdkActivityLauncher.fetchAndCacheAllXforms();
+        }
+    }
+
+    public static void setDisabled(boolean newValue) {
+        LOG.i("Received a request to %s form sync", newValue ? "disable" : "enable");
+        synchronized (lock) {
+            isDisabled = newValue;
+            LOG.w("Form sync is now %s", isDisabled ? "disabled" : "enabled");
+        }
     }
 
     private static List<ContentProviderOperation> getFormUpdateOps(SyncResult syncResult)
