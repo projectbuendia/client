@@ -54,6 +54,7 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.sync.controllers.FormsSyncPhaseRunnable;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
@@ -344,6 +345,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @Override protected void onStartImpl() {
         super.onStartImpl();
+        FormsSyncPhaseRunnable.setDisabled(false);
         mController.init();
     }
 
@@ -354,6 +356,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mIsFetchingXform = false;
+        FormsSyncPhaseRunnable.setDisabled(false);
         mController.onXFormResult(requestCode, resultCode, data);
     }
 
@@ -574,6 +577,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             Preset preset) {
             if (mIsFetchingXform) return;
 
+            FormsSyncPhaseRunnable.setDisabled(true);
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
                 PatientChartActivity.this, formUuid, requestCode, patient, preset);
