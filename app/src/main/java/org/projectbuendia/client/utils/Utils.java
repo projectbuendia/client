@@ -12,6 +12,7 @@
 package org.projectbuendia.client.utils;
 
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.net.Server;
@@ -572,7 +574,7 @@ public class Utils {
      * - compare(s, s + t) < 0 for any strings s and t.
      * - compare(s + x, s + y) == Integer.compare(x, y) for all integers x, y
      * and strings s that do not end in a digit.
-     * - compare(s + t, s + u) == compare(s, t) for all strings s and strings
+     * - compare(s + t, s + u) == compare(t, u) for all strings s and strings
      * t, u that consist entirely of Unicode letters.
      * For example, the strings ["b1", "a11a", "a11", "a2", "a2b", "a2a", "a1"]
      * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
