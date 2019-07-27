@@ -91,7 +91,7 @@ public class OdkActivityLauncher {
                 for (OpenMrsXformIndexEntry formEntry : response) {
                     fetchAndCacheXForm(formEntry);
                 }
-            }, error -> handleFetchError(error)
+            }, OdkActivityLauncher::handleFetchError
         );
     }
 
@@ -511,7 +511,7 @@ public class OdkActivityLauncher {
             }
             return sb.toString();
         } catch (IOException e) {
-            LOG.e(e, format("Failed to read xml form into a String. FilePath=  ", path));
+            LOG.e(e, format("Failed to read XML form at: %s", path));
             return null;
         }
     }
