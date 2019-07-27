@@ -12,7 +12,6 @@
 package org.projectbuendia.client.utils;
 
 import android.app.Dialog;
-import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -37,7 +36,6 @@ import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.net.Server;
@@ -259,9 +257,6 @@ public class Utils {
         DateTimeFormat.mediumDateTime();
     private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
         DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
-    // Note: Use of \L here assumes a string that is already NFC-normalized.
-    private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
-    private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
@@ -510,6 +505,8 @@ public class Utils {
 
     // ==== OpenMRS ====
 
+    private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
+
     /** Compresses a UUID optionally to a small integer. */
     public static Object compressUuid(String uuid) {
         Matcher matcher = COMPRESSIBLE_UUID.matcher(uuid);
@@ -528,6 +525,10 @@ public class Utils {
         return (String) id;
     }
 
+    /** Expands a UUID from a small integer. */
+    public static String toUuid(int id) {
+        return expandUuid(id);
+    }
 
     // ==== Ordering ====
 
@@ -566,6 +567,9 @@ public class Utils {
             return a.size() - b.size();
         }
     };
+
+    // Note: Use of \L here assumes a string that is already NFC-normalized.
+    private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
 
     /**
      * Compares two strings in a manner that sorts alphabetic parts in alphabetic

@@ -63,7 +63,7 @@ public final class PatientChartControllerTest {
     private static final String PATIENT_ID_1 = "patient-id-1";
 
     private static final Obs OBS_1 = new Obs(
-        0, ConceptUuids.TEMPERATURE_UUID, ConceptType.NUMERIC, "37.2", "");
+        0, ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", "");
 
     private PatientChartController mController;
 

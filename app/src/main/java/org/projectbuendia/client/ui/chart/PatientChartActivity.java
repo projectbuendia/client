@@ -483,22 +483,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void updatePregnancyAndIvStatusUi(Map<String, Obs> observations) {
             // Pregnancy & IV status
             List<String> specialLabels = new ArrayList<>();
-            Obs obs;
-
-            obs = observations.get(ConceptUuids.PREGNANCY_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
                 specialLabels.add(getString(R.string.pregnant));
             }
-            obs = observations.get(ConceptUuids.IV_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
-            obs = observations.get(ConceptUuids.OXYGEN_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.OXYGEN_UUID))) {
                 specialLabels.add(getString(R.string.oxygen));
             }
-            obs = observations.get(ConceptUuids.DYSPHAGIA_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.DYSPHAGIA_UUID))) {
                 specialLabels.add(getString(R.string.cannot_eat));
             }
             mPatientPregnantOrIvView.setText(Joiner.on("\n").join(specialLabels));

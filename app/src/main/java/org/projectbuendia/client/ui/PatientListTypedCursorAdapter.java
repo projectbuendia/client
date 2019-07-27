@@ -144,10 +144,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
 
         // Show pregnancy status and condition, if the data for these has been loaded.
-        Obs obs = mPregnancyObs.get(patient.uuid);
-        boolean pregnant = obs != null && ConceptUuids.YES_UUID.equals(obs.value);
+        boolean pregnant = ConceptUuids.isYes(mPregnancyObs.get(patient.uuid));
 
-        obs = mConditionObs.get(patient.uuid);
+        Obs obs = mConditionObs.get(patient.uuid);
         String condition = obs != null ? obs.value : null;
 
         if (convertView == null) {

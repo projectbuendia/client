@@ -330,19 +330,14 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             preset.clinicianName = user.fullName;
         }
 
-        Map<String, Obs> observations =
-            mChartHelper.getLatestObservations(mPatientUuid);
+        Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
 
-        if (observations.containsKey(ConceptUuids.PREGNANCY_UUID)
-            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.PREGNANCY_UUID).value)) {
+        if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
             preset.pregnant = Preset.YES;
         }
-
-        if (observations.containsKey(ConceptUuids.IV_UUID)
-            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.IV_UUID).value)) {
+        if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
             preset.ivFitted = Preset.YES;
         }
-
         preset.targetGroup = targetGroup;
 
         mUi.showFormLoadingDialog(true);

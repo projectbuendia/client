@@ -87,7 +87,7 @@ public final class Obs implements Comparable<Obs> {
             case TEXT:
                 return ObsValue.newText(value);
             case BOOLEAN:
-                return ObsValue.newCoded(ConceptUuids.YES_UUID.equals(value));
+                return ObsValue.newCoded(ConceptUuids.isYes(value));
             case DATE:
                 return ObsValue.newDate(Utils.toLocalDate(value));
             case DATETIME:
@@ -157,7 +157,7 @@ public final class Obs implements Comparable<Obs> {
     public int getTypeOrdering() {
         switch (conceptType) {
             case BOOLEAN:
-                return ConceptUuids.YES_UUID.equals(value) ? 5 : 1;
+                return ConceptUuids.isYes(value) ? 5 : 1;
             case NUMERIC:
                 return 2;
             case TEXT:

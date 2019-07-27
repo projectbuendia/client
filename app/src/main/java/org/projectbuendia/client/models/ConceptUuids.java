@@ -12,6 +12,10 @@
 package org.projectbuendia.client.models;
 
 import org.projectbuendia.client.resolvables.ResStatus;
+import org.projectbuendia.client.utils.Utils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Defines hardcoded concept ids expected to exist on the OpenMRS server. Over time, values in this
@@ -22,39 +26,35 @@ public class ConceptUuids {
     // ==== UUIDs used for special treatment in the UI.
 
     // Dates shown as day numbers at top left.
-    public static final String FIRST_SYMPTOM_DATE_UUID = "1730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String ADMISSION_DATE_UUID = "162622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String FIRST_SYMPTOM_DATE_UUID = toUuid(1730);
+    public static final String ADMISSION_DATE_UUID = toUuid(162622);
 
     // Ebola lab test results shown in a fixed tile.
-    public static final String PCR_NP_UUID = "162826AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String PCR_L_UUID = "162827AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String PCR_GP_UUID = "777000025AAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String PCR_NP_UUID = toUuid(162826);
+    public static final String PCR_L_UUID = toUuid(162827);
+    public static final String PCR_GP_UUID = toUuid(777000025);
 
     // Essential status flags shown at top right: pregnant, IV access, on O2, cannot eat.
     public static final String IV_UUID = "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07";
-    public static final String DYSPHAGIA_UUID = "888118789AAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String OXYGEN_UUID = "888162738AAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String PREGNANCY_UUID = "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String DYSPHAGIA_UUID = toUuid(888118789);
+    public static final String OXYGEN_UUID = toUuid(888162738);
+    public static final String PREGNANCY_UUID = toUuid(5272);
 
     // Condition question and values.  Used to colour-code patient ID chips in patient lists.
     public static final String GENERAL_CONDITION_UUID = "a3657203-cfed-44b8-8e3f-960f8d4cf3b3";
-    public static final String GENERAL_CONDITION_WELL_UUID = "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_UNWELL_UUID =
-        "137793AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String GENERAL_CONDITION_WELL_UUID = toUuid(1855);
+    public static final String GENERAL_CONDITION_UNWELL_UUID = toUuid(137793);
     public static final String GENERAL_CONDITION_CRITICAL_UUID =
         "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
     public static final String GENERAL_CONDITION_PALLIATIVE_UUID =
         "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
-    public static final String GENERAL_CONDITION_CONVALESCENT_UUID =
-        "119844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE =
+    public static final String GENERAL_CONDITION_CONVALESCENT_UUID = toUuid(119844);
+    public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID =
         "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
-    public static final String GENERAL_CONDITION_CURED =
-        "159791AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_SUSPECTED_DEAD =
+    public static final String GENERAL_CONDITION_DISCHARGED_CURED_UUID = toUuid(159791);
+    public static final String GENERAL_CONDITION_SUSPECTED_DEAD_UUID =
         "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
-    public static final String GENERAL_CONDITION_CONFIRMED_DEAD =
-        "160432AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String GENERAL_CONDITION_CONFIRMED_DEAD_UUID = toUuid(160432);
 
     public static final String[] GENERAL_CONDITION_UUIDS = new String[] {
         GENERAL_CONDITION_WELL_UUID,
@@ -62,127 +62,67 @@ public class ConceptUuids {
         GENERAL_CONDITION_CRITICAL_UUID,
         GENERAL_CONDITION_PALLIATIVE_UUID,
         GENERAL_CONDITION_CONVALESCENT_UUID,
-        GENERAL_CONDITION_SUSPECTED_DEAD,
-        GENERAL_CONDITION_CONFIRMED_DEAD,
-        GENERAL_CONDITION_CURED,
-        GENERAL_CONDITION_DISCHARGED_NON_CASE
+        GENERAL_CONDITION_SUSPECTED_DEAD_UUID,
+        GENERAL_CONDITION_CONFIRMED_DEAD_UUID,
+        GENERAL_CONDITION_DISCHARGED_CURED_UUID,
+        GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID
     };
 
 
     // ==== Pulse; used only for logging messages to the server.
 
     // TODO(ping): We should do remote logging a different way.
-    public static final String PULSE_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String PULSE_UUID = toUuid(5087);
 
 
     // ==== UUIDs referenced only for sorting by severity or interpreting as false/null.
 
-    /** UUID for the (answer) concept of No. */
-    public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept None. */
-    public static final String NONE_UUID = "1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for Normal. */
-    public static final String NORMAL_UUID = "1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for indicating a patient can eat solid food. */
-    public static final String SOLID_FOOD_UUID = "159597AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept Mild. */
-    public static final String MILD_UUID = "1148AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept Moderate. */
-    public static final String MODERATE_UUID = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept Severe. */
-    public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept of Yes. */
-    public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept of the answer is unknown. */
-    public static final String UNKNOWN_UUID = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String NO_UUID = toUuid(1066);  // answer: no
+    public static final String NONE_UUID = toUuid(1107);  // answer: none
+    public static final String NORMAL_UUID = toUuid(1115);  // answer: normal
+    public static final String SOLID_FOOD_UUID = toUuid(159597);  // answer: patient can eat solid food
+    public static final String MILD_UUID = toUuid(1148);  // answer: mild (severity)
+    public static final String MODERATE_UUID = toUuid(1499);  // answer: moderate (severity)
+    public static final String SEVERE_UUID = toUuid(1500);  // answer: severe
+    public static final String YES_UUID = toUuid(1065);  // answer: yes
+    public static final String UNKNOWN_UUID = toUuid(1067);  // answer: answer is unknown
 
 
-    // ==== UUIDs unused in tests only, not production.
+    public static final String toUuid(int id) {
+        return Utils.expandUuid(id);
+    }
 
-    /** UUID for the (question) concept for the temperature. */
-    public static final String TEMPERATURE_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String toUuid(boolean bool) {
+        return bool ? YES_UUID : NO_UUID;
+    }
 
+    public static final boolean isYes(String uuid) {
+        return YES_UUID.equals(uuid);
+    }
 
-    // ==== UUIDs known to be unused.
+    public static final boolean isYes(Obs obs) {
+        return obs != null && YES_UUID.equals(obs.value);
+    }
 
-    public static final String CONSCIOUS_STATE_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String FLUIDS_UUID = "e96f504e-229a-4933-84d1-358abbd687e3";
-    public static final String HYDRATION_UUID = "162653AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String RESPIRATION_UUID = "5242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final Map<String, ResStatus> STATUS_BY_CONDITION_UUID = initStatusMap();
 
-    /** UUID for the (question) concept for the weight. */
-    public static final String WEIGHT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for Diarrhea. */
-    public static final String DIARRHEA_UUID = "1aa247f3-2d83-4efc-94bc-123b1a71b19f";
-
-    /** UUID for the (question) concept for (any) bleeding. */
-    public static final String BLEEDING_UUID = "147241AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** Group name for Bleeding Sites section. */
-    public static final String BLEEDING_SITES_NAME = "Bleeding site";
-
-    /** UUID for the (question) concept for Vomiting. */
-    public static final String VOMITING_UUID = "405ad95d-f6e1-4023-a459-28cffdb055c5";
-
-    /** UUID for the (question) concept for pain. */
-    public static final String PAIN_UUID = "f75da5de-404c-42d0-b484-b69a4896e093";
-
-    /** UUID for the (question) concept for best conscious state (AVPU). */
-    public static final String RESPONSIVENESS_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for (severe) weakness. */
-    public static final String WEAKNESS_UUID = "5226AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for appetite. */
-    public static final String APPETITE_UUID = "777000003AAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for oedema. */
-    public static final String OEDEMA_UUID = "460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for the notes field. */
-    public static final String NOTES_UUID = "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (question) concept for Mobility. */
-    public static final String MOBILITY_UUID = "30143d74-f654-4427-bb92-685f68f92c15";
-
+    public static Map<String, ResStatus> initStatusMap() {
+        Map<String, ResStatus> map = new HashMap<>();
+        map.put(GENERAL_CONDITION_WELL_UUID, ResStatus.WELL);
+        map.put(GENERAL_CONDITION_UNWELL_UUID, ResStatus.UNWELL);
+        map.put(GENERAL_CONDITION_CRITICAL_UUID, ResStatus.CRITICAL);
+        map.put(GENERAL_CONDITION_PALLIATIVE_UUID, ResStatus.PALLIATIVE);
+        map.put(GENERAL_CONDITION_CONVALESCENT_UUID, ResStatus.CONVALESCENT);
+        map.put(GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID, ResStatus.DISCHARGED_NON_CASE);
+        map.put(GENERAL_CONDITION_DISCHARGED_CURED_UUID, ResStatus.DISCHARGED_CURED);
+        map.put(GENERAL_CONDITION_SUSPECTED_DEAD_UUID, ResStatus.SUSPECTED_DEAD);
+        map.put(GENERAL_CONDITION_CONFIRMED_DEAD_UUID, ResStatus.CONFIRMED_DEAD);
+        return map;
+    }
 
     /** Returns the {@link ResStatus} for the specified condition UUID. */
     public static ResStatus getResStatus(String conditionUuid) {
-        if (conditionUuid == null) {
-            return ResStatus.UNKNOWN;
-        }
-
-        switch (conditionUuid) {
-            case ConceptUuids.GENERAL_CONDITION_WELL_UUID:
-                return ResStatus.WELL;
-            case ConceptUuids.GENERAL_CONDITION_UNWELL_UUID:
-                return ResStatus.UNWELL;
-            case ConceptUuids.GENERAL_CONDITION_CRITICAL_UUID:
-                return ResStatus.CRITICAL;
-            case ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID:
-                return ResStatus.PALLIATIVE;
-            case ConceptUuids.GENERAL_CONDITION_CONVALESCENT_UUID:
-                return ResStatus.CONVALESCENT;
-            case ConceptUuids.GENERAL_CONDITION_DISCHARGED_NON_CASE:
-                return ResStatus.DISCHARGED_NON_CASE;
-            case ConceptUuids.GENERAL_CONDITION_CURED:
-                return ResStatus.DISCHARGED_CURED;
-            case ConceptUuids.GENERAL_CONDITION_SUSPECTED_DEAD:
-                return ResStatus.SUSPECTED_DEAD;
-            case ConceptUuids.GENERAL_CONDITION_CONFIRMED_DEAD:
-                return ResStatus.CONFIRMED_DEAD;
-            default:
-                return ResStatus.UNKNOWN;
-        }
+        return Utils.getOrDefault(STATUS_BY_CONDITION_UUID, conditionUuid, ResStatus.UNKNOWN);
     }
 
     private ConceptUuids() {

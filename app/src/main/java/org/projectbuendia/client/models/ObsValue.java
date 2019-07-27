@@ -83,7 +83,7 @@ public final class ObsValue implements Comparable<ObsValue> {
     // All constructors must honour the invariant that exactly one field is non-null.
 
     public static ObsValue newCoded(boolean bool) {
-        return newCoded(bool ? ConceptUuids.YES_UUID : ConceptUuids.NO_UUID);
+        return newCoded(ConceptUuids.toUuid(bool));
     }
 
     public static ObsValue newCoded(@Nonnull String uuid) {
