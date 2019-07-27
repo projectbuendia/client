@@ -19,22 +19,25 @@ import org.projectbuendia.client.resolvables.ResStatus;
  * client.
  */
 public class ConceptUuids {
-    public static final String CONSCIOUS_STATE_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String FLUIDS_UUID = "e96f504e-229a-4933-84d1-358abbd687e3";
-    public static final String GENERAL_CONDITION_UUID = "a3657203-cfed-44b8-8e3f-960f8d4cf3b3";
-    public static final String HYDRATION_UUID = "162653AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    // ==== UUIDs used for special treatment in the UI.
+
+    // Dates shown as day numbers at top left.
+    public static final String FIRST_SYMPTOM_DATE_UUID = "1730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String ADMISSION_DATE_UUID = "162622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    // Ebola lab test results shown in a fixed tile.
+    public static final String PCR_NP_UUID = "162826AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String PCR_L_UUID = "162827AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String PCR_GP_UUID = "777000025AAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    // Essential status flags shown at top right: pregnant, IV access, on O2, cannot eat.
     public static final String IV_UUID = "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07";
     public static final String DYSPHAGIA_UUID = "888118789AAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String OXYGEN_UUID = "888162738AAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String PREGNANCY_UUID = "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String PULSE_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String RESPIRATION_UUID = "5242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String PCR_NP_UUID = "162826AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String PCR_L_UUID = "162827AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String PCR_GP_UUID = "777000025AAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String FIRST_SYMPTOM_DATE_UUID = "1730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String ADMISSION_DATE_UUID = "162622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+    // Condition question and values.  Used to colour-code patient ID chips in patient lists.
+    public static final String GENERAL_CONDITION_UUID = "a3657203-cfed-44b8-8e3f-960f8d4cf3b3";
     public static final String GENERAL_CONDITION_WELL_UUID = "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_UNWELL_UUID =
         "137793AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -65,8 +68,55 @@ public class ConceptUuids {
         GENERAL_CONDITION_DISCHARGED_NON_CASE
     };
 
+
+    // ==== Pulse; used only for logging messages to the server.
+
+    // TODO(ping): We should do remote logging a different way.
+    public static final String PULSE_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+
+    // ==== UUIDs referenced only for sorting by severity or interpreting as false/null.
+
+    /** UUID for the (answer) concept of No. */
+    public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (answer) concept None. */
+    public static final String NONE_UUID = "1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for Normal. */
+    public static final String NORMAL_UUID = "1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for indicating a patient can eat solid food. */
+    public static final String SOLID_FOOD_UUID = "159597AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (answer) concept Mild. */
+    public static final String MILD_UUID = "1148AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (answer) concept Moderate. */
+    public static final String MODERATE_UUID = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (answer) concept Severe. */
+    public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (answer) concept of Yes. */
+    public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (answer) concept of the answer is unknown. */
+    public static final String UNKNOWN_UUID = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+
+    // ==== UUIDs unused in tests only, not production.
+
     /** UUID for the (question) concept for the temperature. */
     public static final String TEMPERATURE_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+
+    // ==== UUIDs known to be unused.
+
+    public static final String CONSCIOUS_STATE_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String FLUIDS_UUID = "e96f504e-229a-4933-84d1-358abbd687e3";
+    public static final String HYDRATION_UUID = "162653AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String RESPIRATION_UUID = "5242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     /** UUID for the (question) concept for the weight. */
     public static final String WEIGHT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -77,7 +127,6 @@ public class ConceptUuids {
     /** UUID for the (question) concept for (any) bleeding. */
     public static final String BLEEDING_UUID = "147241AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    // TODO: This may break localization.
     /** Group name for Bleeding Sites section. */
     public static final String BLEEDING_SITES_NAME = "Bleeding site";
 
@@ -102,35 +151,9 @@ public class ConceptUuids {
     /** UUID for the (question) concept for the notes field. */
     public static final String NOTES_UUID = "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    /** UUID for the (answer) concept None. */
-    public static final String NONE_UUID = "1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept Mild. */
-    public static final String MILD_UUID = "1148AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept Moderate. */
-    public static final String MODERATE_UUID = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept Severe. */
-    public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
     /** UUID for the (question) concept for Mobility. */
     public static final String MOBILITY_UUID = "30143d74-f654-4427-bb92-685f68f92c15";
 
-    /** UUID for the (answer) concept of Yes. */
-    public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept of No. */
-    public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for the (answer) concept of the answer is unknown. */
-    public static final String UNKNOWN_UUID = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for indicating a patient can eat solid food. */
-    public static final String SOLID_FOOD_UUID = "159597AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /** UUID for Normal. */
-    public static final String NORMAL_UUID = "1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     /** Returns the {@link ResStatus} for the specified condition UUID. */
     public static ResStatus getResStatus(String conditionUuid) {
