@@ -51,7 +51,7 @@ public class OpenMrsChartServer {
         GsonRequest<JsonConceptResponse> request = new GsonRequest<JsonConceptResponse>(
             mConnectionDetails.getBuendiaApiUrl() + "/concepts",
             JsonConceptResponse.class,
-            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+            mConnectionDetails.addAuthHeader(new HashMap<>()),
             successListener, errorListener) {
         };
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
@@ -70,7 +70,7 @@ public class OpenMrsChartServer {
         GsonRequest<JsonChart> request = new GsonRequest<JsonChart>(
             mConnectionDetails.getBuendiaApiUrl() + "/charts/" + uuid + "?v=full",
             JsonChart.class,
-            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+            mConnectionDetails.addAuthHeader(new HashMap<>()),
             successListener, errorListener) {
         };
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));

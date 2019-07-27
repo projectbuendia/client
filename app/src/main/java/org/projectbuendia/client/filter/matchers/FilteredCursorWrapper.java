@@ -35,7 +35,7 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
     public FilteredCursorWrapper(
         TypedCursor<T> cursor, MatchingFilter<T> filter, CharSequence constraint) {
         mCursor = cursor;
-        mIndices = new ArrayList<Integer>();
+        mIndices = new ArrayList<>();
 
         int count = cursor.getCount();
         for (int i = 0; i < count; i++) {

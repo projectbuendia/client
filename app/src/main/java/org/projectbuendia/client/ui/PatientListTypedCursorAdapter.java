@@ -70,7 +70,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     public PatientListTypedCursorAdapter(Context context, LocationTree locationTree) {
         mContext = context;
 
-        mPatientsByLocation = new HashMap<Location, List<Patient>>();
+        mPatientsByLocation = new HashMap<>();
 
         mLocationTree = locationTree;
         mChartDataHelper = new ChartDataHelper(context.getContentResolver());
@@ -251,7 +251,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         Location location = mLocationTree.findByUuid(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
-                mPatientsByLocation.put(location, new ArrayList<Patient>());
+                mPatientsByLocation.put(location, new ArrayList<>());
             }
             mPatientsByLocation.get(location).add(patient);
         }

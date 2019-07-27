@@ -80,7 +80,7 @@ public class Encounter extends Base<String> {
      * {@link JsonEncounter} object and corresponding patient UUID.
      */
     public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
-        List<Observation> observations = new ArrayList<Observation>();
+        List<Observation> observations = new ArrayList<>();
         if (encounter.observations != null) {
             for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
                 observations.add(new Observation(

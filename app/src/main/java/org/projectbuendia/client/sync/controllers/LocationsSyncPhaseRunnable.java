@@ -95,7 +95,7 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
             if (locationUuid == null || locale == null || name == null) continue;
 
             if (!dbLocationNames.containsKey(locationUuid)) {
-                dbLocationNames.put(locationUuid, new HashMap<String, String>());
+                dbLocationNames.put(locationUuid, new HashMap<>());
             }
 
             dbLocationNames.get(locationUuid).put(locale, name);

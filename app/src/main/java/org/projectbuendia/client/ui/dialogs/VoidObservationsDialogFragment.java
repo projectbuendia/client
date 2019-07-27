@@ -59,7 +59,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         String Title;
 
         listDataHeader = new ArrayList<>();
-        listDataChild = new HashMap<String, ArrayList<ObsRow>>();
+        listDataChild = new HashMap<>();
 
         for (ObsRow row: rows) {
 
@@ -73,7 +73,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
         for (String header: listDataHeader){
 
-            child = new ArrayList<ObsRow>();
+            child = new ArrayList<>();
 
             for (ObsRow row: rows){
 

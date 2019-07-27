@@ -98,7 +98,7 @@ public class PatientSearchControllerTest {
 
     private TypedCursor<Patient> getFakeAppPatientCursor() {
         Patient patient = Patient.builder().build();
-        return new FakeTypedCursor<Patient>(new Patient[] {patient});
+        return new FakeTypedCursor<>(new Patient[] {patient});
     }
 
     /** Tests that patients are passed to the activity UI after retrieval. */

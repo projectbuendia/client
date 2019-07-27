@@ -53,7 +53,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     protected ProgressBar mIndeterminateProgressBar;
     protected int mShortAnimationDuration;
     private State mState = State.LOADING;
-    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<ChangeStateSubscriber>();
+    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<>();
 
     public enum State {
         LOADING,
