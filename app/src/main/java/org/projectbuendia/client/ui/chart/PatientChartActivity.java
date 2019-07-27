@@ -247,7 +247,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mPcr.setOnClickListener(view -> mController.onPcrResultsPressed());
 
-        initChartMenu();
+        initChartTabs();
     }
 
     @Override protected void onNewIntent(Intent intent) {
@@ -288,7 +288,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
-    private void initChartMenu() {
+    private void initChartTabs() {
         List<Chart> charts = mController.getCharts();
         if (charts.size() > 1) {
             final ActionBar actionBar = getActionBar();
@@ -308,9 +308,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
             };
 
-            String[] menuArray = new String[charts.size()];
             for (int i = 0; i < charts.size(); i++) {
-                menuArray[i] = charts.get(i).name;
                 actionBar.addTab(
                     actionBar.newTab()
                         .setText(charts.get(i).name)
