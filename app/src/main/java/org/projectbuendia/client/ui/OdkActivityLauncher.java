@@ -642,7 +642,7 @@ public class OdkActivityLauncher {
         try {
          return  ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
         } catch (IllegalArgumentException e) {
-            LOG.e("Could not parse datetime" + dateTimeValue.getValue());
+            LOG.e("Could not parse datetime: %s", dateTimeValue.getValue());
             return null;
         }
     }

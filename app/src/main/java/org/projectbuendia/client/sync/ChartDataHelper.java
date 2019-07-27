@@ -56,7 +56,7 @@ public class ChartDataHelper {
     private static final Logger LOG = Logger.create();
 
     /** When non-null, sConceptNames and sConceptTypes contain valid data for this locale. */
-    private static Object sLoadingLock = new Object();
+    private static final Object sLoadingLock = new Object();
     private static String sLoadedLocale;
 
     private static Map<String, String> sConceptNames;

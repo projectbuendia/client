@@ -106,7 +106,7 @@ public class Utils {
     }
 
     /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
-    public static <K, V> V getOrDefault(Map<K, V> map, Object key, V defaultValue) {
+    public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
         return map.containsKey(key) ? map.get(key) : defaultValue;
     }
 
@@ -537,7 +537,7 @@ public class Utils {
      * null sorts before everything; all integers sort before all strings; integers
      * sort according to numeric value; strings sort according to string value.
      */
-    public static Comparator<Object> nullIntStrComparator = (a, b) -> {
+    public static final Comparator<Object> NULL_INT_STR_COMPARATOR = (a, b) -> {
         BigInteger intA = toBigInteger(a);
         BigInteger intB = toBigInteger(b);
         if (intA != null && intB != null) {
@@ -556,7 +556,7 @@ public class Utils {
      */
     public static Comparator<List<Object>> nullIntStrListComparator = (a, b) -> {
         for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-            int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+            int result = NULL_INT_STR_COMPARATOR.compare(a.get(i), b.get(i));
             if (result != 0) {
                 return result;
             }
