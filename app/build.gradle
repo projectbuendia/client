@@ -76,9 +76,9 @@ dependencies {
     // Screenshots, multiple android devices on same computer support
     androidTestImplementation 'com.squareup.spoon:spoon-client:1.1.1'
     // Mockito
-    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.25.0'
-    androidTestImplementation 'com.linkedin.dexmaker:dexmaker:2.25.0'
-    androidTestImplementation 'org.mockito:mockito-core:2.25.0'
+    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.21.0'
+    androidTestImplementation 'com.linkedin.dexmaker:dexmaker:2.21.0'
+    androidTestImplementation 'org.mockito:mockito-core:2.21.0'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'androidx.test:rules:1.1.0'
     // Optional -- Hamcrest library
@@ -87,6 +87,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
     // Optional -- UI testing with UI Automator
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestAnnotationProcessor 'com.jakewharton:butterknife:5.1.2' // View injection
 }
 
 apply plugin: 'spoon'
