@@ -13,7 +13,7 @@ package org.projectbuendia.client.utils;
 
 import com.google.common.base.Preconditions;
 
-import java.util.Objects;
+import java.util.Arrays;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -92,7 +92,7 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
     }
 
     @Override public int hashCode() {
-        return Objects.hash(mParts);
+        return Arrays.hashCode(mParts);
     }
 
     private LexicographicVersion(String raw, int[] parts) {
