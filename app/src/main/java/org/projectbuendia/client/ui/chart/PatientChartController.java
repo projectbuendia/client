@@ -462,11 +462,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     public void showAssignGeneralConditionDialog(
         Context context, final String generalConditionUuid) {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
-            new AssignGeneralConditionDialog.ConditionSelectedCallback() {
-                @Override public void onNewConditionSelected(String newConditionUuid) {
-                    mUi.showWaitDialog(R.string.title_updating_patient);
-                    setCondition(newConditionUuid);
-                }
+            newConditionUuid -> {
+                mUi.showWaitDialog(R.string.title_updating_patient);
+                setCondition(newConditionUuid);
             };
         mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
             context, generalConditionUuid, callback);
@@ -493,20 +491,14 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         if (mAssignLocationDialog != null) return;
 
         AssignLocationDialog.LocationSelectedCallback callback =
-            new AssignLocationDialog.LocationSelectedCallback() {
-                @Override public void onLocationSelected(String locationUuid) {
-                    mUi.showWaitDialog(R.string.title_updating_patient);
-                    PatientDelta delta = new PatientDelta();
-                    delta.assignedLocationUuid = Optional.of(locationUuid);
-                    mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, delta);
-                }
+            locationUuid -> {
+                mUi.showWaitDialog(R.string.title_updating_patient);
+                PatientDelta delta = new PatientDelta();
+                delta.assignedLocationUuid = Optional.of(locationUuid);
+                mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, delta);
             };
 
-        Runnable onDismiss = new Runnable() {
-            @Override public void run() {
-                mAssignLocationDialog = null;
-            }
-        };
+        Runnable onDismiss = () -> mAssignLocationDialog = null;
 
         mAssignLocationDialog = new AssignLocationDialog(
             context,
@@ -657,21 +649,11 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             // slightly. We need this hack because we load observations on the main thread. We
             // should change this to use a background thread. Either an async task or using
             // CrudEventBus events.
-            mMainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePatientObsUi();
-                }
-            });
+            mMainThreadHandler.post(PatientChartController.this::updatePatientObsUi);
         }
 
         public void onEventMainThread(ItemDeletedEvent event) {
-            mMainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePatientObsUi();
-                }
-            });
+            mMainThreadHandler.post(PatientChartController.this::updatePatientObsUi);
         }
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
@@ -681,12 +663,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         }
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {
-            mMainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updatePatientObsUi();
-                    mUi.showFormSubmissionDialog(false);
-                }
+            mMainThreadHandler.post(() -> {
+                updatePatientObsUi();
+                mUi.showFormSubmissionDialog(false);
             });
         }
 

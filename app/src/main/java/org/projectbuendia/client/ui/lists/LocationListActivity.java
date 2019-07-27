@@ -13,7 +13,6 @@ package org.projectbuendia.client.ui.lists;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -100,25 +99,19 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             .setTitle(getString(R.string.sync_failed_dialog_title))
             .setMessage(R.string.sync_failed_dialog_message)
             .setNegativeButton(
-                R.string.sync_failed_back, new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int which) {
-                        Utils.logEvent("sync_failed_back_pressed");
-                        finish();
-                    }
+                R.string.sync_failed_back, (dialog, which) -> {
+                    Utils.logEvent("sync_failed_back_pressed");
+                    finish();
                 })
             .setNeutralButton(
-                R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int which) {
-                        Utils.logEvent("sync_failed_settings_pressed");
-                        SettingsActivity.start(LocationListActivity.this);
-                    }
+                R.string.sync_failed_settings, (dialog, which) -> {
+                    Utils.logEvent("sync_failed_settings_pressed");
+                    SettingsActivity.start(LocationListActivity.this);
                 })
             .setPositiveButton(
-                R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int which) {
-                        Utils.logEvent("sync_failed_retry_pressed");
-                        mController.onSyncRetry();
-                    }
+                R.string.sync_failed_retry, (dialog, which) -> {
+                    Utils.logEvent("sync_failed_retry_pressed");
+                    mController.onSyncRetry();
                 })
             .setCancelable(false)
             .create();

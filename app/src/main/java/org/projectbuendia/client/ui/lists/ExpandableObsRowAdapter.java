@@ -32,11 +32,7 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
         mSections = new ArrayList<>(rowsBySection.keySet());
         mSectionRows = new ArrayList<>();
 
-        Comparator<ObsRow> orderByTime = new Comparator<ObsRow>() {
-            @Override public int compare(ObsRow a, ObsRow b) {
-                return a.time.compareTo(b.time);
-            }
-        };
+        Comparator<ObsRow> orderByTime = (a, b) -> a.time.compareTo(b.time);
 
         for (int i = 0; i < mSections.size(); i++) {
             Section section = mSections.get(i);

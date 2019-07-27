@@ -66,14 +66,12 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
                 R.layout.patient_list_spinner_expanded_section_divider,
                 filters);
 
-            ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
-                @Override public boolean onNavigationItemSelected(int position, long id) {
-                    getSearchController().setFilter(filters[position]);
-                    Utils.logUserAction("filter_selected",
-                        "filter", filters[position].toString());
-                    getSearchController().loadSearchResults();
-                    return true;
-                }
+            ActionBar.OnNavigationListener callback = (position, id) -> {
+                getSearchController().setFilter(filters[position]);
+                Utils.logUserAction("filter_selected",
+                    "filter", filters[position].toString());
+                getSearchController().loadSearchResults();
+                return true;
             };
 
             final ActionBar actionBar = getActionBar();

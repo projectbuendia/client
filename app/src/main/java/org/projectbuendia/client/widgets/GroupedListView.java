@@ -14,7 +14,6 @@ package org.projectbuendia.client.widgets;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
@@ -44,12 +43,7 @@ public class GroupedListView extends ExpandableListView {
         setGroupIndicator(null);
 
         // Ignore clicks on groups by default.
-        setOnGroupClickListener(new OnGroupClickListener() {
-            @Override public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                return true;
-            }
-        });
+        setOnGroupClickListener((parent, v, groupPosition, id) -> true);
     }
 
     // Everything is expanded all the time.

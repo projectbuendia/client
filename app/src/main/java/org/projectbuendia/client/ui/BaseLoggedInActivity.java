@@ -106,25 +106,16 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         MenuItem searchByIdItem = menu.findItem(R.id.action_go_to);
         setMenuBarIcon(searchByIdItem, FontAwesomeIcons.fa_search);
 
-        searchByIdItem.setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("go_to_patient_pressed");
-                        GoToPatientDialogFragment.newInstance()
-                                .show(getSupportFragmentManager(), null);
-                        return true;
-                    }
-                });
+        searchByIdItem.setOnMenuItemClickListener(menuItem -> {
+            Utils.logUserAction("go_to_patient_pressed");
+            GoToPatientDialogFragment.newInstance().show(getSupportFragmentManager(), null);
+            return true;
+        });
 
         mPopupWindow = new MenuPopupWindow();
 
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
-        userView.setOnClickListener(new View.OnClickListener() {
-
-            @Override public void onClick(View view) {
-                mPopupWindow.showAsDropDown(userView);
-            }
-        });
+        userView.setOnClickListener(view -> mPopupWindow.showAsDropDown(userView));
 
         updateActiveUser();
 

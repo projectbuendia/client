@@ -11,7 +11,6 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -383,11 +382,7 @@ public class MedCompleter implements Completer {
                 result.add(med);
             }
         }
-        Collections.sort(result, new Comparator<Med>() {
-            @Override public int compare(Med a, Med b) {
-                return a.name.compareToIgnoreCase(b.name);
-            }
-        });
+        Collections.sort(result, (a, b) -> a.name.compareToIgnoreCase(b.name));
         return result;
     }
 

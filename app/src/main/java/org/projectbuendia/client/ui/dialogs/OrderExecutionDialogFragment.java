@@ -13,14 +13,12 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -93,19 +91,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         ButterKnife.inject(this, fragment);
 
         updateUi(false);
-        mMarkToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                updateUi(checked);
-            }
-        });
+        mMarkToggle.setOnCheckedChangeListener((compoundButton, checked) -> updateUi(checked));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
             .setTitle(getResources().getString(R.string.order_execution_title))
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    onSubmit();
-                }
-            })
+            .setPositiveButton(R.string.ok, (dialogInterface, i) -> onSubmit())
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment);
 

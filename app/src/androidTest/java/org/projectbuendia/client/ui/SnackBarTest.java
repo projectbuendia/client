@@ -14,11 +14,11 @@ package org.projectbuendia.client.ui;
 import android.support.test.espresso.NoMatchingViewException;
 import android.view.View;
 
-import androidx.test.annotation.UiThreadTest;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.projectbuendia.client.R;
+
+import androidx.test.annotation.UiThreadTest;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -31,12 +31,7 @@ public class SnackBarTest extends FunctionalTestCase {
     @UiThreadTest
     public void testSimpleMessageSnackBar() {
         final BaseActivity activity = (BaseActivity) getActivity();
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                activity.snackBar(R.string.troubleshoot_wifi_disabled);
-            }
-        });
+        activity.runOnUiThread(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled));
         expectVisibleSoon(viewWithText("Wifi is disabled"));
     }
 
@@ -44,12 +39,7 @@ public class SnackBarTest extends FunctionalTestCase {
     public void testSnackBarWithAction() {
         final View.OnClickListener mockListener = mock(View.OnClickListener.class);
         final BaseActivity activity = (BaseActivity) getActivity();
-        getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                activity.snackBar(R.string.troubleshoot_wifi_disabled, R.string.troubleshoot_wifi_disabled_action_enable, mockListener);
-            }
-        });
+        getInstrumentation().runOnMainSync(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled, R.string.troubleshoot_wifi_disabled_action_enable, mockListener));
         expectVisibleSoon(viewWithText("Wifi is disabled"));
         expectVisible(viewWithId(R.id.snackbar_action));
         expectVisible(viewThat(hasText("Enable")));
@@ -62,12 +52,7 @@ public class SnackBarTest extends FunctionalTestCase {
     @UiThreadTest
     public void testSnackBarDismiss() {
         final BaseActivity activity = getActivity();
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                activity.snackBar(R.string.troubleshoot_wifi_disabled, 0, null, 1, true, 0);
-            }
-        });
+        activity.runOnUiThread(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled, 0, null, 1, true, 0));
         expectVisibleSoon(viewWithText("Wifi is disabled"));
         expectVisible(viewWithId(R.id.snackbar_dismiss));
         click(viewWithId(R.id.snackbar_dismiss));

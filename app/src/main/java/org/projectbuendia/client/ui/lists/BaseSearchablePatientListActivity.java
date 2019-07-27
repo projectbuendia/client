@@ -76,14 +76,11 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         inflater.inflate(R.menu.main, menu);
 
         menu.findItem(R.id.action_new_patient).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                    Utils.logEvent("add_patient_pressed");
-                    EditPatientDialogFragment.newInstance(null)
-                        .show(getSupportFragmentManager(), null);
-                    return true;
-                }
+            menuItem -> {
+                Utils.logEvent("add_patient_pressed");
+                EditPatientDialogFragment.newInstance(null)
+                    .show(getSupportFragmentManager(), null);
+                return true;
             });
 
         MenuItem search = menu.findItem(R.id.action_search);

@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import org.projectbuendia.client.R;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -398,11 +397,7 @@ public class SnackBar {
                 // Set Dismiss handler
                 ImageView dismissButton = (ImageView) newView.findViewById(R.id.snackbar_dismiss);
                 if (m.isDismissible) {
-                    dismissButton.setOnClickListener(new View.OnClickListener() {
-                        @Override public void onClick(View v) {
-                            dismiss(m.key);
-                        }
-                    });
+                    dismissButton.setOnClickListener(v -> dismiss(m.key));
                     dismissButton.setVisibility(View.VISIBLE);
                 } else {
                     dismissButton.setVisibility(View.INVISIBLE);

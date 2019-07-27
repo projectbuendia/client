@@ -15,13 +15,13 @@ import android.support.annotation.IdRes;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
+
+import androidx.test.filters.SmallTest;
 
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static junit.framework.TestCase.assertTrue;
@@ -90,15 +90,12 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
         // Make sure we're on a PatientChartActivity
         // TODO(sdspikes): shouldn't this already be on ui thread because of @UiThreadTest annotation?
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    assertTrue("Expected PatientChartActivity, got something else",
-                            getCurrentActivity() instanceof PatientChartActivity);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
+        runOnUiThread(() -> {
+            try {
+                assertTrue("Expected PatientChartActivity, got something else",
+                        getCurrentActivity() instanceof PatientChartActivity);
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
             }
         });
 

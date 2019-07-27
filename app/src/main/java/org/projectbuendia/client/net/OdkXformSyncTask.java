@@ -18,8 +18,6 @@ import android.database.SQLException;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.common.base.Preconditions;
 
 import org.odk.collect.android.application.Collect;
@@ -126,18 +124,14 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
         OpenMrsXformsConnection openMrsXformsConnection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
-        openMrsXformsConnection.getXform(uuid, new Response.Listener<String>() {
-            @Override public void onResponse(String response) {
-                LOG.i("adding form '%s' to db", uuid);
-                new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
-                    .execute(new FormToWrite(response, proposedPath));
-            }
-        }, new Response.ErrorListener() {
-            @Override public void onErrorResponse(VolleyError error) {
-                LOG.e(error, "failed to fetch file");
-                EventBus.getDefault().post(new FetchXformFailedEvent(
-                    FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
-            }
+        openMrsXformsConnection.getXform(uuid, response -> {
+            LOG.i("adding form '%s' to db", uuid);
+            new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
+                .execute(new FormToWrite(response, proposedPath));
+        }, error -> {
+            LOG.e(error, "failed to fetch file");
+            EventBus.getDefault().post(new FetchXformFailedEvent(
+                FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
         });
     }
 

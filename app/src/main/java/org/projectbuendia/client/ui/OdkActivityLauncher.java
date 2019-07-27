@@ -87,17 +87,12 @@ public class OdkActivityLauncher {
      */
     public static void fetchAndCacheAllXforms() {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
-            new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
-                    for (OpenMrsXformIndexEntry formEntry : response) {
-                        fetchAndCacheXForm(formEntry);
-                    }
+            response -> {
+                for (OpenMrsXformIndexEntry formEntry : response) {
+                    fetchAndCacheXForm(formEntry);
                 }
-            }, new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    handleFetchError(error);
-                }
-            });
+            }, error -> handleFetchError(error)
+        );
     }
 
     /**
@@ -135,22 +130,18 @@ public class OdkActivityLauncher {
         }
 
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
-            new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
-                    if (response.isEmpty()) {
-                        LOG.i("No forms found");
-                        EventBus.getDefault().post(new FetchXformFailedEvent(
-                            FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
-                        return;
-                    }
-                    showForm(callingActivity, requestCode, patient, fields, findUuid(response,
-                        uuidToShow));
+            response -> {
+                if (response.isEmpty()) {
+                    LOG.i("No forms found");
+                    EventBus.getDefault().post(new FetchXformFailedEvent(
+                        FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
+                    return;
                 }
-            }, new Response.ErrorListener() {
-                @Override public void onErrorResponse(VolleyError error) {
-                    LOG.e(error, "Fetching xform list from server failed. ");
-                    handleFetchError(error);
-                }
+                showForm(callingActivity, requestCode, patient, fields, findUuid(response,
+                    uuidToShow));
+            }, error -> {
+                LOG.e(error, "Fetching xform list from server failed. ");
+                handleFetchError(error);
             });
     }
 
@@ -251,16 +242,10 @@ public class OdkActivityLauncher {
                                  @Nullable final org.odk.collect.android.model.Patient patient,
                                  @Nullable final Preset fields,
                                  final OpenMrsXformIndexEntry formToShow) {
-        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
-            @Override public void formWritten(File path, String uuid) {
-                LOG.i("wrote form " + path);
-                showOdkCollect(
-                    callingActivity,
-                    requestCode,
-                    OdkDatabase.getFormIdForPath(path),
-                    patient,
-                    fields);
-            }
+        new OdkXformSyncTask((path, uuid) -> {
+            LOG.i("wrote form " + path);
+            showOdkCollect(callingActivity, requestCode,
+                OdkDatabase.getFormIdForPath(path), patient, fields);
         }).execute(formToShow);
     }
 
@@ -322,23 +307,19 @@ public class OdkActivityLauncher {
             }
 
             sendFormToServer(patientUuid, xml,
-                new Response.Listener<JSONObject>() {
-                    @Override public void onResponse(JSONObject response) {
-                        LOG.i("Created new encounter successfully on server" + response.toString());
-                        // Only locally cache new observations, not new patients.
-                        if (patientUuid != null) {
-                            updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
-                        }
-                        if (!settings.getKeepFormInstancesLocally()) {
-                            deleteLocalFormInstances(formIdToDelete);
-                        }
-                        EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                response -> {
+                    LOG.i("Created new encounter successfully on server" + response.toString());
+                    // Only locally cache new observations, not new patients.
+                    if (patientUuid != null) {
+                        updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
                     }
-                }, new Response.ErrorListener() {
-                    @Override public void onErrorResponse(VolleyError error) {
-                        LOG.e(error, "Error submitting form to server");
-                        handleSubmitError(error);
+                    if (!settings.getKeepFormInstancesLocally()) {
+                        deleteLocalFormInstances(formIdToDelete);
                     }
+                    EventBus.getDefault().post(new SubmitXformSucceededEvent());
+                }, error -> {
+                    LOG.e(error, "Error submitting form to server");
+                    handleSubmitError(error);
                 });
         } catch(ValidationException ve) {
             LOG.e(ve.getMessage());

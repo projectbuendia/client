@@ -5,7 +5,6 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 
 import org.projectbuendia.client.App;
@@ -98,42 +97,40 @@ public class ThreadedSyncScheduler implements SyncScheduler {
             try {
                 Looper.prepare();
 
-                handler = new Handler(new Handler.Callback() {
-                    @Override public boolean handleMessage(Message message) {
-                        Bundle data = message.getData();
-                        Bundle options = data.getBundle(KEY_OPTIONS);
-                        int periodSec = data.getInt(KEY_PERIOD_SEC, 0);
-                        int loopId = data.getInt(KEY_LOOP_ID, 0);
-                        Loop loop = getLoop(options);
+                handler = new Handler(message -> {
+                    Bundle data = message.getData();
+                    Bundle options = data.getBundle(KEY_OPTIONS);
+                    int periodSec = data.getInt(KEY_PERIOD_SEC, 0);
+                    int loopId = data.getInt(KEY_LOOP_ID, 0);
+                    Loop loop = getLoop(options);
 
-                        switch (message.what) {
-                            case REQUEST_SYNC:
-                                LOG.i("* handleMessage(REQUEST_SYNC, %s)", data);
+                    switch (message.what) {
+                        case REQUEST_SYNC:
+                            LOG.i("* handleMessage(REQUEST_SYNC, %s)", data);
+                            runSync(options);
+                            return true;
+
+                        case SET_PERIODIC_SYNC:
+                            LOG.i("* handleMessage(SET_PERIODIC_SYNC, %s), loop=%s", data, loop);
+                            loop.set(periodSec);
+                            LOG.i("* activeLoopId is now %d for options=%s", loop.activeLoopId, options);
+
+                            if (loop.periodSec > 0) {
+                                sendLoopTick(loop);
+                            }
+                            return true;
+
+                        case LOOP_TICK:
+                            LOG.i("* handleMessage(LOOP_TICK, %s), loop=%s", data, loop);
+                            if (loopId == loop.activeLoopId) {
                                 runSync(options);
-                                return true;
-
-                            case SET_PERIODIC_SYNC:
-                                LOG.i("* handleMessage(SET_PERIODIC_SYNC, %s), loop=%s", data, loop);
-                                loop.set(periodSec);
-                                LOG.i("* activeLoopId is now %d for options=%s", loop.activeLoopId, options);
-
-                                if (loop.periodSec > 0) {
-                                    sendLoopTick(loop);
-                                }
-                                return true;
-
-                            case LOOP_TICK:
-                                LOG.i("* handleMessage(LOOP_TICK, %s), loop=%s", data, loop);
-                                if (loopId == loop.activeLoopId) {
-                                    runSync(options);
-                                    sendLoopTick(loop);
-                                } else {
-                                    LOG.i("* loopId=%d is no longer active; ignoring", loopId);
-                                }
-                                return true;
-                        }
-                        return false;
+                                sendLoopTick(loop);
+                            } else {
+                                LOG.i("* loopId=%d is no longer active; ignoring", loopId);
+                            }
+                            return true;
                     }
+                    return false;
                 });
 
                 Looper.loop();
