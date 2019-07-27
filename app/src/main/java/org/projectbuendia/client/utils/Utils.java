@@ -698,7 +698,7 @@ public class Utils {
 
     /** Uses backslash sequences to form a printable representation of a string. */
     private static String escape(String str, int maxLength) {
-        StringBuffer buffer = new StringBuffer(format("(length %d) \"", str.length()));
+        StringBuilder buffer = new StringBuilder(format("(length %d) \"", str.length()));
         for (int i = 0; i < str.length() && i < maxLength; i++) {
             char c = str.charAt(i);
             switch (str.charAt(i)) {
