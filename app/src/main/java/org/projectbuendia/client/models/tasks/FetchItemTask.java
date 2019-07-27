@@ -57,24 +57,14 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
     }
 
     @Override protected Object doInBackground(Void... params) {
-        Cursor cursor = null;
-        try {
-            cursor = mContentResolver.query(
-                mContentUri,
-                mProjectionColumns,
-                mFilter.getSelectionString(),
-                mFilter.getSelectionArgs(mConstraint),
-                null);
-
+        try (Cursor cursor = mContentResolver.query(
+            mContentUri, mProjectionColumns,
+            mFilter.getSelectionString(), mFilter.getSelectionArgs(mConstraint), null
+        )) {
             if (cursor == null || !cursor.moveToFirst()) {
                 return new ItemFetchFailedEvent("no results");
             }
-
             return new ItemFetchedEvent<>(mLoader.fromCursor(cursor));
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
     }
 

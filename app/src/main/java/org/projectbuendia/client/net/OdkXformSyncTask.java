@@ -63,13 +63,11 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             final File proposedPath = formInfo.makeFileForForm();
 
             // Check if the uuid already exists in the database.
-            Cursor cursor = null;
             boolean isNew;
             final boolean usersHaveChanged = App.getUserManager().isDirty();
-            try {
-                cursor = getCursorForFormFile(proposedPath, new String[] {
-                    FormsProviderAPI.FormsColumns.DATE
-                });
+            try (Cursor cursor = getCursorForFormFile(proposedPath, new String[] {
+                FormsProviderAPI.FormsColumns.DATE
+            })) {
                 boolean isInDatabase = cursor.getCount() > 0;
                 if (isInDatabase) {
                     if (cursor.getCount() != 1) {
@@ -91,10 +89,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 } else {
                     LOG.i("Form " + formInfo.uuid + " not found in database.");
                     isNew = true;
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
                 }
             }
 

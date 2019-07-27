@@ -208,19 +208,16 @@ public class OdkActivityLauncher {
         List<OpenMrsXformIndexEntry> entries = new ArrayList<>();
 
         final ContentResolver resolver = App.getInstance().getContentResolver();
-        Cursor c = resolver.query(Contracts.Forms.URI, new String[] {Contracts.Forms.UUID,
-            Contracts.Forms.NAME}, null, null, null);
-        try {
+        try (Cursor c = resolver.query(Contracts.Forms.URI, new String[] {
+            Contracts.Forms.UUID, Contracts.Forms.NAME
+        }, null, null, null)) {
             while (c.moveToNext()) {
                 String uuid = Utils.getString(c, Contracts.Forms.UUID);
                 String name = Utils.getString(c, Contracts.Forms.NAME);
                 long date = 0; // date is not important here
                 entries.add(new OpenMrsXformIndexEntry(uuid, name, date));
             }
-        } finally {
-            c.close();
         }
-
         return entries;
     }
 
@@ -381,16 +378,9 @@ public class OdkActivityLauncher {
      * @param uri               the URI containing the form file path
      */
     private static String getFormFilePath(final Context context, final Uri uri) {
-        Cursor instanceCursor = null;
-        try {
-            instanceCursor = getCursorAtRightPosition(context, uri);
-            if(instanceCursor == null) return null;
-
+        try (Cursor instanceCursor = getCursorAtRightPosition(context, uri)) {
+            if (instanceCursor == null) return null;
             return instanceCursor.getString(instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
-        } finally {
-            if (instanceCursor != null) {
-                instanceCursor.close();
-            }
         }
     }
 
@@ -401,19 +391,13 @@ public class OdkActivityLauncher {
      * @param uri               the URI containing the id to be deleted
      */
     private static Long getIdToDeleteAfterUpload(final Context context, final Uri uri) {
-        Cursor instanceCursor = null;
-        try {
-            instanceCursor = getCursorAtRightPosition(context, uri);
-            if(instanceCursor == null) return null;
+        try (Cursor instanceCursor = getCursorAtRightPosition(context, uri)) {
+            if (instanceCursor == null) return null;
 
             int columnIndex = instanceCursor.getColumnIndex(_ID);
-            if (columnIndex == -1) return  null;
+            if (columnIndex == -1) return null;
 
-           return instanceCursor.getLong(columnIndex);
-        } finally {
-            if (instanceCursor != null) {
-                instanceCursor.close();
-            }
+            return instanceCursor.getLong(columnIndex);
         }
     }
 
@@ -569,20 +553,18 @@ public class OdkActivityLauncher {
     private static Map<String, String> mapFormConceptIdToUuid(Set<Integer> xformConceptIds,
                                                               ContentResolver resolver) {
         String inClause = Joiner.on(",").join(xformConceptIds);
-
         HashMap<String, String> xformIdToUuid = new HashMap<>();
-        Cursor cursor = resolver.query(Contracts.Concepts.URI,
+
+        try (Cursor cursor = resolver.query(
+            Contracts.Concepts.URI,
             new String[] {Contracts.Concepts.UUID, Contracts.Concepts.XFORM_ID},
             Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
-            null, null);
-
-        try {
+            null, null
+        )) {
             while (cursor.moveToNext()) {
                 xformIdToUuid.put(Utils.getString(cursor, Contracts.Concepts.XFORM_ID),
                     Utils.getString(cursor, Contracts.Concepts.UUID));
             }
-        } finally {
-            cursor.close();
         }
 
         return xformIdToUuid;
