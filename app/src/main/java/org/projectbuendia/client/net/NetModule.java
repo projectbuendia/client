@@ -16,11 +16,7 @@ import android.app.Application;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.json.DateTimeSerializer;
-import org.projectbuendia.client.json.LocalDateSerializer;
 import org.projectbuendia.client.json.Serializers;
 
 import javax.inject.Singleton;
