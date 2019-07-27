@@ -22,6 +22,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -33,6 +34,10 @@ import org.joda.time.Period;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemUpdatedEvent;
+import org.projectbuendia.client.events.data.PatientAddFailedEvent;
+import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
@@ -64,6 +69,8 @@ public class EditPatientDialogFragment extends DialogFragment {
     private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
     private LayoutInflater mInflater;
+
+    PatientSubmissionSubscriber mSubscriber;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static EditPatientDialogFragment newInstance(Patient patient) {
@@ -208,19 +215,67 @@ public class EditPatientDialogFragment extends DialogFragment {
         String title = args.getBoolean("new") ? getString(R.string.title_activity_patient_add) : getString(R.string.action_edit_patient);
         populateFields(args);
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(title)
-            .setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    onSubmit();
-                }
-            })
+            .setPositiveButton(getResources().getString(R.string.ok), null)
             .setNegativeButton(getResources().getString(R.string.cancel), null)
             .setView(fragment)
             .create();
 
         focusFirstEmptyField(dialog);
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                final Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mSubscriber = new PatientSubmissionSubscriber(dialog, button);
+                        mCrudEventBus.register(mSubscriber);
+                        button.setEnabled(false);
+                        onSubmit();
+                    }
+                });
+            }
+        });
+
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                mCrudEventBus.unregister(mSubscriber);
+            }
+        });
+
         return dialog;
+    }
+
+    private static class PatientSubmissionSubscriber {
+
+        private final AlertDialog dialog;
+        private final Button button;
+
+        PatientSubmissionSubscriber(final AlertDialog dialog, final Button button) {
+            this.dialog = dialog;
+            this.button = button;
+        }
+
+        public void onEventMainThread(ItemCreatedEvent<Patient> event) {
+            dialog.dismiss();
+        }
+
+        public void onEventMainThread(ItemUpdatedEvent<Patient> event) {
+            dialog.dismiss();
+        }
+
+        public void onEventMainThread(PatientUpdateFailedEvent event) {
+            button.setEnabled(true);
+        }
+
+        public void onEventMainThread(PatientAddFailedEvent event) {
+            button.setEnabled(true);
+        }
+
     }
 }
