@@ -20,8 +20,7 @@
     <EditTextPreference
         android:key="starting_patient_id"
         android:title="@string/pref_title_starting_patient_id"
-        android:summary="@string/pref_desc_starting_patient_id"
-        android:defaultValue="" />
+        android:summary="@string/pref_desc_starting_patient_id" />
 
     <!-- Whether to use the SyncAdapter framework; default is to use our own scheduler. -->
     <CheckBoxPreference

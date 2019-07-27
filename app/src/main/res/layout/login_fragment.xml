@@ -26,6 +26,6 @@
         android:stretchMode="spacingWidthUniform"
         android:columnWidth="144sp"
         android:numColumns="auto_fit"
-        tools:listitem="@layout/grid_item_user"/>
+        tools:listitem="@layout/login_grid_user_item" />
 
 </RelativeLayout>

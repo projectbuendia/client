@@ -339,7 +339,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private String getFormattedPcrString(double pcrValue) {
         return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
             getResources().getString(R.string.pcr_negative) :
-            String.format("%1$.1f", pcrValue);
+            Utils.format("%1$.1f", pcrValue);
     }
 
     private void showZoomDialog() {
