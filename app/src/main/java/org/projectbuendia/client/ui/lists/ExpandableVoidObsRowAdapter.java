@@ -43,12 +43,12 @@ public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.item_void_observation, null);
         }
 
-        TextView txtListChild = (TextView) convertView
+        TextView txtListChild = convertView
                 .findViewById(R.id.tvVoidValue);
 
         txtListChild.setText(childRow.time + " " + childRow.valueName);
 
-        CheckBox cbVoid = (CheckBox) convertView.findViewById(R.id.cbVoid);
+        CheckBox cbVoid = convertView.findViewById(R.id.cbVoid);
         cbVoid.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 mCheckedItems.add(childRow.uuid);
@@ -71,7 +71,7 @@ public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.obs_section, null);
         }
 
-        TextView lblListHeader = (TextView) convertView
+        TextView lblListHeader = convertView
                 .findViewById(R.id.section_heading);
         lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);

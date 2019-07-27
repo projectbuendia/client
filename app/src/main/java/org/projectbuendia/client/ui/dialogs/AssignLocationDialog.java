@@ -113,7 +113,7 @@ public final class AssignLocationDialog
         // AlertDialog because calling findViewById() before show() causes a crash. See
         // http://stackoverflow.com/a/15572855/996592 for the gory details.
         View contents = View.inflate(mContext, R.layout.dialog_assign_location, null);
-        mGridView = (GridView) contents.findViewById(R.id.location_selection_locations);
+        mGridView = contents.findViewById(R.id.location_selection_locations);
         startListeningForLocations();
 
         mDialog = new AlertDialog.Builder(mContext)

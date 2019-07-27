@@ -49,6 +49,6 @@ public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
         AsyncTask<ParamsT, ProgressT, ResultT> asyncTask, ParamsT... params) {
         mQueuedTasks.add(Pair.create(
             (AsyncTask<Object, Object, Object>) asyncTask,
-            (Object[]) params));
+            params));
     }
 }

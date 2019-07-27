@@ -128,8 +128,8 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
             inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
         mProgressBarLayout.setLayoutParams(relativeLayout);
         mProgressBar =
-            (ProgressBar) mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
-        mProgressBarLabel = (TextView) mProgressBarLayout.findViewById(R.id.progress_fragment_label);
+            mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
+        mProgressBarLabel = mProgressBarLayout.findViewById(R.id.progress_fragment_label);
 
         RelativeLayout.LayoutParams fullLayout = new RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,

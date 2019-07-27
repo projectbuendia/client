@@ -110,7 +110,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         ExpandableListView expandableListView = (ExpandableListView) parent;
         expandableListView.expandGroup(groupPosition);
 
-        TextView item = (TextView) convertView.findViewById(R.id.patient_list_tent_tv);
+        TextView item = convertView.findViewById(R.id.patient_list_tent_tv);
         item.setText(PatientCountDisplay.getPatientCountTitle(mContext, patientCount, tentName));
 
         return convertView;

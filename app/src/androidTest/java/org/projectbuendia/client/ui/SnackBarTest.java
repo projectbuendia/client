@@ -30,7 +30,7 @@ public class SnackBarTest extends FunctionalTestCase {
     @Test
     @UiThreadTest
     public void testSimpleMessageSnackBar() {
-        final BaseActivity activity = (BaseActivity) getActivity();
+        final BaseActivity activity = getActivity();
         activity.runOnUiThread(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled));
         expectVisibleSoon(viewWithText("Wifi is disabled"));
     }
@@ -38,7 +38,7 @@ public class SnackBarTest extends FunctionalTestCase {
     @Test
     public void testSnackBarWithAction() {
         final View.OnClickListener mockListener = mock(View.OnClickListener.class);
-        final BaseActivity activity = (BaseActivity) getActivity();
+        final BaseActivity activity = getActivity();
         getInstrumentation().runOnMainSync(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled, R.string.troubleshoot_wifi_disabled_action_enable, mockListener));
         expectVisibleSoon(viewWithText("Wifi is disabled"));
         expectVisible(viewWithId(R.id.snackbar_action));
