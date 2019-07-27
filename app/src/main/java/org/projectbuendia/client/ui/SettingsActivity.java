@@ -71,43 +71,40 @@ public class SettingsActivity extends PreferenceActivity {
     static final Map<String, EditTextPreference> textPrefs = new HashMap<>();
 
     /** A listener that performs updates when any preference's value changes. */
-    static final Preference.OnPreferenceChangeListener sPrefListener =
-        new Preference.OnPreferenceChangeListener() {
-            @Override public boolean onPreferenceChange(Preference pref, Object value) {
-                updatePrefSummary(pref, value);
-                if (updatingPrefValues)
-                    return true; // prevent endless recursion
+    static final Preference.OnPreferenceChangeListener sPrefListener = (pref, value) -> {
+        updatePrefSummary(pref, value);
+        if (updatingPrefValues)
+            return true; // prevent endless recursion
 
-                SharedPreferences prefs =
-                    PreferenceManager.getDefaultSharedPreferences(pref.getContext());
-                String server = prefs.getString("server", "");
-                String str = "" + value;
-                try {
-                    updatingPrefValues = true;
-                    switch (pref.getKey()) {
-                        case "server":
-                            if (!str.equals("")) {
-                                setTextAndSummary(prefs, "openmrs_root_url", "http://" + str + ":9000/openmrs");
-                                setTextAndSummary(prefs, "package_server_root_url", "http://" + str + ":9001");
-                            }
-                            break;
-                        case "openmrs_root_url":
-                            if (!str.equals("http://" + server + ":9000/openmrs")) {
-                                setTextAndSummary(prefs, "server", "");
-                            }
-                            break;
-                        case "package_server_root_url":
-                            if (!str.equals("http://" + server + ":9001")) {
-                                setTextAndSummary(prefs, "server", "");
-                            }
-                            break;
+        SharedPreferences prefs =
+            PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+        String server = prefs.getString("server", "");
+        String str = "" + value;
+        try {
+            updatingPrefValues = true;
+            switch (pref.getKey()) {
+                case "server":
+                    if (!str.equals("")) {
+                        setTextAndSummary(prefs, "openmrs_root_url", "http://" + str + ":9000/openmrs");
+                        setTextAndSummary(prefs, "package_server_root_url", "http://" + str + ":9001");
                     }
-                } finally {
-                    updatingPrefValues = false;
-                }
-                return true;
+                    break;
+                case "openmrs_root_url":
+                    if (!str.equals("http://" + server + ":9000/openmrs")) {
+                        setTextAndSummary(prefs, "server", "");
+                    }
+                    break;
+                case "package_server_root_url":
+                    if (!str.equals("http://" + server + ":9001")) {
+                        setTextAndSummary(prefs, "server", "");
+                    }
+                    break;
             }
-        };
+        } finally {
+            updatingPrefValues = false;
+        }
+        return true;
+    };
 
     @Inject AppModel mAppModel;
 

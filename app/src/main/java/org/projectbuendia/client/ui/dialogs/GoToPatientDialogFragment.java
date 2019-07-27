@@ -75,18 +75,10 @@ public class GoToPatientDialogFragment extends DialogFragment {
         final View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mPatientId.addTextChangedListener(new IdWatcher());
-        mPatientSearchResult.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                onSubmit();
-            }
-        });
+        mPatientSearchResult.setOnClickListener(view -> onSubmit());
         return new AlertDialog.Builder(getActivity())
             .setTitle(R.string.go_to_patient_title)
-            .setPositiveButton(R.string.go_to_patient_go, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    onSubmit();
-                }
-            })
+            .setPositiveButton(R.string.go_to_patient_go, (dialogInterface, i) -> onSubmit())
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();
@@ -103,11 +95,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
             // Handler is necessary to get the numeric keypad to close.  If we
             // post the event to the EventBus immediately, the numeric keypad
             // stays up even as the new activity launches underneath it!
-            new Handler().postDelayed(new Runnable() {
-                @Override public void run() {
-                    EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
-                }
-            }, 100);
+            new Handler().postDelayed(() -> EventBus.getDefault().post(
+                new PatientChartRequestedEvent(mPatientUuid)), 100);
         }
     }
 

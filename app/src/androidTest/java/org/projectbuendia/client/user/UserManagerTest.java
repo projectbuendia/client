@@ -13,8 +13,6 @@ package org.projectbuendia.client.user;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import com.google.common.collect.ImmutableSet;
 
 import org.junit.Before;
@@ -22,13 +20,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.projectbuendia.client.FakeAsyncTaskRunner;
 import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
+
+import androidx.test.filters.SmallTest;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static junit.framework.TestCase.assertTrue;
@@ -73,11 +71,8 @@ public final class UserManagerTest   {
     @Test
     public void testLoadKnownUsers_GeneratesEventOnFailure() throws Exception {
         // GIVEN the user store throws an exception when trying to load the users
-        when(mMockUserStore.loadKnownUsers()).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                throw new InterruptedException("INTENDED FOR TEST");
-            }
+        when(mMockUserStore.loadKnownUsers()).thenAnswer(invocationOnMock -> {
+            throw new InterruptedException("INTENDED FOR TEST");
         });
         // WHEN loadKnownUsers is called and the async task is run
         mUserManager.loadKnownUsers();

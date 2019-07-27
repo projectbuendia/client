@@ -55,16 +55,14 @@ public class OpenMrsXformsConnection {
         Request request = new OpenMrsJsonRequest(mConnectionDetails,
             "/xforms/" + uuid + "?v=full",
             null, // null implies GET
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        String xml = response.getString("xml");
-                        resultListener.onResponse(xml);
-                    } catch (JSONException e) {
-                        // The result was not in the expected format. Just log, and return
-                        // results so far.
-                        LOG.e(e, "response was in bad format: " + response);
-                    }
+            response -> {
+                try {
+                    String xml = response.getString("xml");
+                    resultListener.onResponse(xml);
+                } catch (JSONException e) {
+                    // The result was not in the expected format. Just log, and return
+                    // results so far.
+                    LOG.e(e, "response was in bad format: " + response);
                 }
             }, errorListener
         );
@@ -83,41 +81,39 @@ public class OpenMrsXformsConnection {
                            final Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xforms", // list all forms
             null, // null implies GET
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    LOG.i("got forms: " + response);
-                    ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
-                    try {
-                        // This seems quite code heavy (parsing manually), but is reasonably
-                        // efficient as we only look at the fields we need, so we are robust to
-                        // changes in the rest of the object.
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            JSONObject entry = results.getJSONObject(i);
+            response -> {
+                LOG.i("got forms: " + response);
+                ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
+                try {
+                    // This seems quite code heavy (parsing manually), but is reasonably
+                    // efficient as we only look at the fields we need, so we are robust to
+                    // changes in the rest of the object.
+                    JSONArray results = response.getJSONArray("results");
+                    for (int i = 0; i < results.length(); i++) {
+                        JSONObject entry = results.getJSONObject(i);
 
-                            // Sometimes date_changed is not set; in this case, date_changed is
-                            // simply date_created.
-                            long dateChanged;
-                            if (entry.get("date_changed") == JSONObject.NULL) {
-                                dateChanged = entry.getLong("date_created");
-                            } else {
-                                dateChanged = entry.getLong("date_changed");
-                            }
-
-                            OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
-                                entry.getString("uuid"),
-                                entry.getString("name"),
-                                dateChanged);
-                            result.add(indexEntry);
+                        // Sometimes date_changed is not set; in this case, date_changed is
+                        // simply date_created.
+                        long dateChanged;
+                        if (entry.get("date_changed") == JSONObject.NULL) {
+                            dateChanged = entry.getLong("date_created");
+                        } else {
+                            dateChanged = entry.getLong("date_changed");
                         }
-                    } catch (JSONException e) {
-                        // The result was not in the expected format. Just log, and return
-                        // results so far.
-                        LOG.e(e, "response was in bad format: " + response);
+
+                        OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
+                            entry.getString("uuid"),
+                            entry.getString("name"),
+                            dateChanged);
+                        result.add(indexEntry);
                     }
-                    LOG.i("returning response: " + response);
-                    listener.onResponse(result);
+                } catch (JSONException e) {
+                    // The result was not in the expected format. Just log, and return
+                    // results so far.
+                    LOG.e(e, "response was in bad format: " + response);
                 }
+                LOG.i("returning response: " + response);
+                listener.onResponse(result);
             },
             errorListener
         );
@@ -163,11 +159,7 @@ public class OpenMrsXformsConnection {
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
             mConnectionDetails, "/xforminstances",
             postBody, // non-null implies POST
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    resultListener.onResponse(response);
-                }
-            }, errorListener
+            resultListener::onResponse, errorListener
         );
         // Set a permissive timeout.
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));

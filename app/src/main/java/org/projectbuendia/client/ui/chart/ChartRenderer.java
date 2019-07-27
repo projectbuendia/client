@@ -37,7 +37,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -365,12 +364,10 @@ public class ChartRenderer {
 
         List<Order> getSortedOrders() {
             List<Order> sortedOrders = new ArrayList<>(mOrders);
-            Collections.sort(sortedOrders, new Comparator<Order>() {
-                @Override public int compare(Order a, Order b) {
-                    int result = a.instructions.route.compareTo(b.instructions.route);
-                    if (result != 0) return result;
-                    return a.start.compareTo(b.start);
-                }
+            Collections.sort(sortedOrders, (a, b) -> {
+                int result = a.instructions.route.compareTo(b.instructions.route);
+                if (result != 0) return result;
+                return a.start.compareTo(b.start);
             });
             return sortedOrders;
         }

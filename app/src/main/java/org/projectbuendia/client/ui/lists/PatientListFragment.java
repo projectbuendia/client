@@ -102,11 +102,9 @@ public class PatientListFragment extends ProgressFragment implements
 
         mSwipeToRefresh =
             (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
-        mSwipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override public void onRefresh() {
-                Utils.logUserAction("refresh_requested");
-                mListController.onRefreshRequested();
-            }
+        mSwipeToRefresh.setOnRefreshListener(() -> {
+            Utils.logUserAction("refresh_requested");
+            mListController.onRefreshRequested();
         });
 
         // Restore the previously serialized activated item position.

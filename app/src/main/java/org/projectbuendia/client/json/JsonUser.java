@@ -19,28 +19,20 @@ import java.util.Comparator;
 /** JSON reprsentation of a user (an OpenMRS Provider). */
 public class JsonUser implements Serializable, Comparable<JsonUser> {
     public String id;
-    public static final Comparator<JsonUser> COMPARATOR_BY_ID = new Comparator<JsonUser>() {
-
-        @Override public int compare(JsonUser a, JsonUser b) {
-            return a.id.compareTo(b.id);
-        }
-    };
+    public static final Comparator<JsonUser> COMPARATOR_BY_ID = (a, b) -> a.id.compareTo(b.id);
     public String fullName;
     // TODO/i18n: This will be tricky to internationalize as it's stored on the server.
     // Perhaps create the guest account with a special name like "*" on the server, and replace
     // "*" with the localized string for "Guest User" on the client when displaying the user?
     private static final String GUEST_ACCOUNT_NAME = "Guest User";
-    public static final Comparator<JsonUser> COMPARATOR_BY_NAME = new Comparator<JsonUser>() {
-
-        @Override public int compare(JsonUser a, JsonUser b) {
-            // Special case: the guest account should always appear first if present.
-            int aSection = a.isGuestUser() ? 1 : 2;
-            int bSection = b.isGuestUser() ? 1 : 2;
-            if (aSection != bSection) {
-                return aSection - bSection;
-            }
-            return a.fullName.compareTo(b.fullName);
+    public static final Comparator<JsonUser> COMPARATOR_BY_NAME = (a, b) -> {
+        // Special case: the guest account should always appear first if present.
+        int aSection = a.isGuestUser() ? 1 : 2;
+        int bSection = b.isGuestUser() ? 1 : 2;
+        if (aSection != bSection) {
+            return aSection - bSection;
         }
+        return a.fullName.compareTo(b.fullName);
     };
 
     /** Default constructor for serialization. */

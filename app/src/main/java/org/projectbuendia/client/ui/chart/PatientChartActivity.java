@@ -16,7 +16,6 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -28,7 +27,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.DatePicker;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -133,12 +131,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuItem zoomItem = menu.findItem(R.id.action_zoom);
         setMenuBarIcon(zoomItem, FontAwesomeIcons.fa_arrows_h);
         zoomItem.setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    Utils.logUserAction("zoom_chart_pressed");
-                    showZoomDialog();
-                    return true;
-                }
+            item -> {
+                Utils.logUserAction("zoom_chart_pressed");
+                showZoomDialog();
+                return true;
             }
         );
 
@@ -147,25 +143,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // edit submenu includes edit patient (in xml) and forms
         Menu editSubmenu = editItem.getSubMenu();
         editSubmenu.getItem(0).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("edit_patient_pressed");
-                        mController.onEditPatientPressed();
-                        return true;
-                    }
-                });
+            menuItem -> {
+                Utils.logUserAction("edit_patient_pressed");
+                mController.onEditPatientPressed();
+                return true;
+            });
 
         boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
             MenuItem item = editSubmenu.add(form.name);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                        mController.onOpenFormPressed(form.uuid);
-                        return true;
-                    }
+                menuItem -> {
+                    mController.onOpenFormPressed(form.uuid);
+                    return true;
                 }
             );
             if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
@@ -218,13 +209,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mChartRenderer = new ChartRenderer(mGridWebView, getResources(), mSettings);
 
-        final OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(
-                    PatientChartActivity.this, mSettings,
-                    patientUuid, resultCode, data);
-            }
-        };
+        final OdkResultSender odkResultSender = (patientUuid, resultCode, data) ->
+            OdkActivityLauncher.sendOdkResultToServer(
+                PatientChartActivity.this, mSettings,
+                patientUuid, resultCode, data);
         final MinimalHandler minimalHandler = new MinimalHandler() {
             private final Handler mHandler = new Handler();
 
@@ -245,29 +233,19 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mSyncManager,
             minimalHandler);
 
-        mAdmissionDaysView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("admission_days_pressed");
-                mAdmissionDateDialog.show();
-            }
+        mAdmissionDaysView.setOnClickListener(view -> {
+            Utils.logUserAction("admission_days_pressed");
+            mAdmissionDateDialog.show();
         });
-        mSymptomOnsetDaysView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("symptom_onset_days_pressed");
-                mSymptomOnsetDateDialog.show();
-            }
+        mSymptomOnsetDaysView.setOnClickListener(view -> {
+            Utils.logUserAction("symptom_onset_days_pressed");
+            mSymptomOnsetDateDialog.show();
         });
-        mPatientLocationView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("location_view_pressed");
-                mController.showAssignLocationDialog(PatientChartActivity.this);
-            }
+        mPatientLocationView.setOnClickListener(view -> {
+            Utils.logUserAction("location_view_pressed");
+            mController.showAssignLocationDialog(PatientChartActivity.this);
         });
-        mPcr.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                mController.onPcrResultsPressed();
-            }
-        });
+        mPcr.setOnClickListener(view -> mController.onPcrResultsPressed());
 
         initChartMenu();
     }
@@ -288,11 +266,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public DateObsDialog(String title, final String conceptUuid, final LocalDate date) {
             super(
                 PatientChartActivity.this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override public void onDateSet(DatePicker picker, int year, int zeroBasedMonth, int day) {
-                        int month = zeroBasedMonth + 1;
-                        mController.setDate(conceptUuid, new LocalDate(year, month, day));
-                    }
+                (picker, year, zeroBasedMonth, day) -> {
+                    int month = zeroBasedMonth + 1;
+                    mController.setDate(conceptUuid, new LocalDate(year, month, day));
                 },
                 date.getYear(),
                 date.getMonthOfYear() - 1,
@@ -374,11 +350,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         int selected = mSettings.getChartZoomIndex();
         new AlertDialog.Builder(this)
             .setTitle(R.string.title_zoom)
-            .setSingleChoiceItems(labels, selected, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialog, int which) {
-                    mController.setZoomIndex(which);
-                    dialog.dismiss();
-                }
+            .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                mController.setZoomIndex(which);
+                dialog.dismiss();
             })
             .setNegativeButton(R.string.cancel, null)
             .show();

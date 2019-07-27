@@ -537,35 +537,31 @@ public class Utils {
      * null sorts before everything; all integers sort before all strings; integers
      * sort according to numeric value; strings sort according to string value.
      */
-    public static Comparator<Object> nullIntStrComparator = new Comparator<Object>() {
-        @Override public int compare(Object a, Object b) {
-            BigInteger intA = toBigInteger(a);
-            BigInteger intB = toBigInteger(b);
-            if (intA != null && intB != null) {
-                return intA.compareTo(intB);
-            }
-            if (a instanceof String && b instanceof String) {
-                return ((String) a).compareTo((String) b);
-            }
-            return (a == null ? 0 : intA != null ? 1 : 2)
-                - (b == null ? 0 : intB != null ? 1 : 2);
+    public static Comparator<Object> nullIntStrComparator = (a, b) -> {
+        BigInteger intA = toBigInteger(a);
+        BigInteger intB = toBigInteger(b);
+        if (intA != null && intB != null) {
+            return intA.compareTo(intB);
         }
+        if (a instanceof String && b instanceof String) {
+            return ((String) a).compareTo((String) b);
+        }
+        return (a == null ? 0 : intA != null ? 1 : 2)
+            - (b == null ? 0 : intB != null ? 1 : 2);
     };
 
     /**
      * Compares two lists, each of whose elements is a null, Integer, Long,
      * BigInteger, or String, lexicographically by element, just like Python.
      */
-    public static Comparator<List<Object>> nullIntStrListComparator = new Comparator<List<Object>>() {
-        @Override public int compare(List<Object> a, List<Object> b) {
-            for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-                int result = nullIntStrComparator.compare(a.get(i), b.get(i));
-                if (result != 0) {
-                    return result;
-                }
+    public static Comparator<List<Object>> nullIntStrListComparator = (a, b) -> {
+        for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+            int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+            if (result != 0) {
+                return result;
             }
-            return a.size() - b.size();
         }
+        return a.size() - b.size();
     };
 
     // Note: Use of \L here assumes a string that is already NFC-normalized.

@@ -13,8 +13,6 @@ package org.projectbuendia.client.filter.matchers;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import com.google.common.collect.Iterators;
 
 import org.junit.Test;
@@ -24,17 +22,15 @@ import org.projectbuendia.client.models.TypedCursor;
 
 import java.util.Iterator;
 
+import androidx.test.filters.SmallTest;
+
 import static junit.framework.TestCase.assertEquals;
 
 /** Tests for {@link FilteredCursorWrapper}. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class FilteredCursorWrapperTest {
-    private static final MatchingFilter<String> SUBSTRING_FILTER = new MatchingFilter<String>() {
-        @Override public boolean matches(String object, CharSequence constraint) {
-            return object.contains(constraint);
-        }
-    };
+    private static final MatchingFilter<String> SUBSTRING_FILTER = String::contains;
 
     private static final String[] SAMPLE_DATA = new String[] {
         "apple", "orange", "pear", "grapefruit"
