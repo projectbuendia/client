@@ -32,7 +32,7 @@ public class LocationComparator implements Comparator<Location> {
             Location locationB = pathB.get(i);
             int result = (i == LocationTree.ABSOLUTE_DEPTH_ZONE)
                 ? Zones.compare(locationA, locationB)
-                : Utils.alphanumericComparator.compare(locationA.name, locationB.name);
+                : Utils.ALPHANUMERIC_COMPARATOR.compare(locationA.name, locationB.name);
             if (result != 0) {
                 return result;
             }

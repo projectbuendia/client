@@ -81,6 +81,7 @@ public @Immutable class Order extends Base<String> {
 
     public Order(@Nullable String uuid, String patientUuid,
                  Instructions instructions, DateTime start, @Nullable DateTime stop) {
+        super(null);  // Order objects never have an id
         this.uuid = uuid;
         this.patientUuid = patientUuid;
         this.instructions = instructions;

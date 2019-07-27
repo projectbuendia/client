@@ -73,7 +73,7 @@ public final class Obs implements Comparable<Obs> {
     /** Returns the time and value of this observation as an ObsPoint. */
     public @Nullable ObsPoint getObsPoint() {
         ObsValue ov = getObsValue();
-        return ov != null ? new ObsPoint(time, getObsValue()) : null;
+        return ov != null ? new ObsPoint(time, ov) : null;
     }
 
     /** Returns the value of this observation as an ObsValue. */

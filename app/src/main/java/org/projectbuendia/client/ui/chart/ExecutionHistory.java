@@ -42,7 +42,7 @@ public class ExecutionHistory extends AbstractList<List<Integer>> {
         }
         int index = order.getDivisionIndex(time);
         if (timesByIndex.get(index) == null) {
-            timesByIndex.put(index, new ArrayList<Integer>());
+            timesByIndex.put(index, new ArrayList<>());
         }
         Interval division = order.getDivision(index);
         long startMillis = division.getStartMillis();

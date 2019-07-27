@@ -53,7 +53,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     protected ProgressBar mIndeterminateProgressBar;
     protected int mShortAnimationDuration;
     private State mState = State.LOADING;
-    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<ChangeStateSubscriber>();
+    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<>();
 
     public enum State {
         LOADING,
@@ -128,8 +128,8 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
             inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
         mProgressBarLayout.setLayoutParams(relativeLayout);
         mProgressBar =
-            (ProgressBar) mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
-        mProgressBarLabel = (TextView) mProgressBarLayout.findViewById(R.id.progress_fragment_label);
+            mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
+        mProgressBarLabel = mProgressBarLayout.findViewById(R.id.progress_fragment_label);
 
         RelativeLayout.LayoutParams fullLayout = new RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,

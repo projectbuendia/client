@@ -191,8 +191,8 @@ public class SnackBar {
      */
     public void dismiss(int[] id) {
         boolean changed = false;
-        for (int i = 0; i < id.length; i++) {
-            MessageKey key = getKey(id[i]);
+        for (int i1 : id) {
+            MessageKey key = getKey(i1);
             if (key != null) {
                 mMessagesList.remove(key);
                 changed = true;
@@ -337,7 +337,7 @@ public class SnackBar {
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
                                  ViewGroup parent) {
             View header = getView(convertView, parent, groupPosition);
-            TextView count = (TextView) header.findViewById(R.id.snackbar_count);
+            TextView count = header.findViewById(R.id.snackbar_count);
             View indicator = header.findViewById(R.id.snackbar_indicator);
             if (mMessagesList.size() > 1) {
                 indicator.setVisibility(View.VISIBLE);
@@ -378,10 +378,10 @@ public class SnackBar {
                 Resources res = mContext.getResources();
 
                 String messageString = res.getString(m.message);
-                TextView message = (TextView) newView.findViewById(R.id.snackbar_message);
+                TextView message = newView.findViewById(R.id.snackbar_message);
                 message.setText(messageString);
 
-                TextView action = (TextView) newView.findViewById(R.id.snackbar_action);
+                TextView action = newView.findViewById(R.id.snackbar_action);
                 if (m.actionString != 0) {
                     String actionString = res.getString(m.actionString);
                     action.setText(actionString);
@@ -395,7 +395,7 @@ public class SnackBar {
                 }
 
                 // Set Dismiss handler
-                ImageView dismissButton = (ImageView) newView.findViewById(R.id.snackbar_dismiss);
+                ImageView dismissButton = newView.findViewById(R.id.snackbar_dismiss);
                 if (m.isDismissible) {
                     dismissButton.setOnClickListener(v -> dismiss(m.key));
                     dismissButton.setVisibility(View.VISIBLE);
@@ -413,9 +413,8 @@ public class SnackBar {
      * Helps the {@code TreeMap} maintain it's balance using priority as a parameter.
      */
     public class MessageKey implements Comparable<MessageKey> {
-
-        protected int id;
-        protected int priority;
+        protected final int id;
+        protected final int priority;
 
         public MessageKey(@StringRes int id, int priority) {
             this.id = id;

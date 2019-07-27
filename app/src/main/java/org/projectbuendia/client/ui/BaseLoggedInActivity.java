@@ -145,7 +145,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         }
         mLastActiveUser = user;
 
-        TextView initials = (TextView) mMenu
+        TextView initials = mMenu
             .getItem(mMenu.size() - 1)
             .getActionView()
             .findViewById(R.id.user_initials);

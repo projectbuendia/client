@@ -17,7 +17,7 @@ public class AutocompleteAdapter extends ArrayAdapter<AutocompleteAdapter.Comple
     private final Filter filter;
 
     public AutocompleteAdapter(Context context, int resourceId, final Completer completer) {
-        super(context, resourceId, 0, new ArrayList<Completion>());
+        super(context, resourceId, 0, new ArrayList<>());
         this.inflater = LayoutInflater.from(context);
         this.resourceId = resourceId;
         this.filter = new Filter() {

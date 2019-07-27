@@ -95,13 +95,13 @@ public class PatientListFragment extends ProgressFragment implements
     @Override public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mListView = (ExpandableListView) view.findViewById(R.id.fragment_patient_list);
+        mListView = view.findViewById(R.id.fragment_patient_list);
         mListView.setEmptyView(view.findViewById(R.id.empty));
         mListView.setOnChildClickListener(this);
         // The list view adapter will be set once locations are available.
 
         mSwipeToRefresh =
-            (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
+            view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
         mSwipeToRefresh.setOnRefreshListener(() -> {
             Utils.logUserAction("refresh_requested");
             mListController.onRefreshRequested();

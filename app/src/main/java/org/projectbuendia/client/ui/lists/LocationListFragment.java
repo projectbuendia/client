@@ -120,7 +120,7 @@ public final class LocationListFragment extends ProgressFragment {
 
         @Override public void setLocations(LocationTree locationTree, List<Location> locations) {
             mAdapter = new LocationListAdapter(
-                getActivity(), locations, locationTree, Optional.<String> absent());
+                getActivity(), locations, locationTree, Optional.absent());
             mLocationGrid.setAdapter(mAdapter);
         }
 

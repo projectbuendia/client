@@ -66,7 +66,7 @@ public class PatientSearchController {
     private final LocationTreeUpdatedSubscriber mLocationTreeUpdatedSubscriber;
     private boolean mWaitingOnLocationTree = false;
     private final MatchingFilter<Patient> mSearchFilter =
-        new MatchingFilterGroup<Patient>(OR, new IdFilter(), new NameFilter());
+        new MatchingFilterGroup<>(OR, new IdFilter(), new NameFilter());
     private TypedCursor<Patient> mPatientsCursor;
     private final SyncSubscriber mSyncSubscriber;
     private final CreationSubscriber mCreationSubscriber;
@@ -158,7 +158,7 @@ public class PatientSearchController {
 
         if (mPatientsCursor != null) {
             FilteredCursorWrapper<Patient> filteredCursorWrapper =
-                new FilteredCursorWrapper<Patient>(
+                new FilteredCursorWrapper<>(
                     mPatientsCursor, mSearchFilter, mFilterQueryTerm);
             fragmentUi.setPatients(filteredCursorWrapper);
         }
@@ -210,7 +210,7 @@ public class PatientSearchController {
 
     private void updatePatients() {
         FilteredCursorWrapper<Patient> filteredCursorWrapper =
-            new FilteredCursorWrapper<Patient>(
+            new FilteredCursorWrapper<>(
                 mPatientsCursor, mSearchFilter, mFilterQueryTerm);
         mUi.setPatients(filteredCursorWrapper);
         for (FragmentUi fragmentUi : mFragmentUis) {

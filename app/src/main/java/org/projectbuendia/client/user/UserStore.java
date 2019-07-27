@@ -59,7 +59,7 @@ public class UserStore {
             users = syncKnownUsers();
         }
 
-        LOG.i(String.format("Found %d users in db", users.size()));
+        LOG.i("Found %d users in db", users.size());
         return users;
     }
 

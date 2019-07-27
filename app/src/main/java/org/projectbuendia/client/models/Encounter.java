@@ -67,9 +67,9 @@ public class Encounter extends Base<String> {
         DateTime timestamp,
         Observation[] observations,
         String[] orderUuids) {
-        id = encounterUuid;
+        super(encounterUuid);
         this.patientUuid = patientUuid;
-        this.encounterUuid = id;
+        this.encounterUuid = encounterUuid;
         this.timestamp = timestamp;
         this.observations = Utils.orDefault(observations, new Observation[0]);
         this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
@@ -80,7 +80,7 @@ public class Encounter extends Base<String> {
      * {@link JsonEncounter} object and corresponding patient UUID.
      */
     public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
-        List<Observation> observations = new ArrayList<Observation>();
+        List<Observation> observations = new ArrayList<>();
         if (encounter.observations != null) {
             for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
                 observations.add(new Observation(

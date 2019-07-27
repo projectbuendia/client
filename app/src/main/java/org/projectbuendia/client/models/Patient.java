@@ -71,7 +71,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
     }
 
     @Override public int compareTo(Patient other) {
-        return Utils.alphanumericComparator.compare(id, other.id);
+        return Utils.ALPHANUMERIC_COMPARATOR.compare(id, other.id);
     }
 
     public org.odk.collect.android.model.Patient toOdkPatient() {
@@ -132,7 +132,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
     }
 
     private Patient(Builder builder) {
-        this.id = builder.mId;
+        super(builder.mId);
         this.uuid = builder.mUuid;
         this.givenName = builder.mGivenName;
         this.familyName = builder.mFamilyName;

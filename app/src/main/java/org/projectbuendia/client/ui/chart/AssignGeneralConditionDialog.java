@@ -68,7 +68,7 @@ public final class AssignGeneralConditionDialog
     public void show() {
         FrameLayout frameLayout = new FrameLayout(mContext); // needed for outer margins to work
         View.inflate(mContext, R.layout.condition_grid, frameLayout);
-        mGridView = (GridView) frameLayout.findViewById(R.id.condition_selection_conditions);
+        mGridView = frameLayout.findViewById(R.id.condition_selection_conditions);
 
         if (mGridView != null) {
             mAdapter = new GeneralConditionAdapter(

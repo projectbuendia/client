@@ -71,7 +71,7 @@ public class ObsDetailDialogFragment extends DialogFragment {
                 if (row.valueName != null) {
                     Section section = new Section(row);
                     if (!rowsBySection.containsKey(section)) {
-                        rowsBySection.put(section, new ArrayList<ObsRow>());
+                        rowsBySection.put(section, new ArrayList<>());
                     }
                     rowsBySection.get(section).add(row);
                 }

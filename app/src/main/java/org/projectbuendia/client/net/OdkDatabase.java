@@ -15,8 +15,6 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.google.common.base.Preconditions;
-
 import java.io.File;
 
 /** A wrapper around basic ODK database operations. */
@@ -30,14 +28,11 @@ public class OdkDatabase {
      */
     public static long getFormIdForPath(File path) {
         long formId = -1;
-        Cursor cursor = null;
-        try {
-            cursor = OdkXformSyncTask.getCursorForFormFile(
-                path, new String[] {
-                    BaseColumns._ID
-                });
+        try (Cursor cursor = OdkXformSyncTask.getCursorForFormFile(
+            path, new String[] {BaseColumns._ID}
+        )) {
             //if any form was found by the given file.
-            if(cursor.getCount() >= 1) {
+            if (cursor.getCount() >= 1) {
                 // There should only ever be one form per UUID. But if something goes wrong, we want
                 // the app to keep working. Assume the latest one is correct.
                 if (cursor.getCount() > 1) {
@@ -50,12 +45,7 @@ public class OdkDatabase {
                 cursor.moveToNext();
                 formId = cursor.getLong(0);
             }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
-
         return formId;
     }
 }

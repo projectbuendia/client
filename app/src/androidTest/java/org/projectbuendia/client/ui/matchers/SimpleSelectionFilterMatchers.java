@@ -35,8 +35,8 @@ public class SimpleSelectionFilterMatchers {
          */
         @Override
         public boolean matches(SimpleSelectionFilter[] filterArr) {
-            for (int i = 0; i < filterArr.length; i++) {
-                if (filterArr[i].toString().equals(mFilterName)) {
+            for (SimpleSelectionFilter filter : filterArr) {
+                if (filter.toString().equals(mFilterName)) {
                     return true;
                 }
             }

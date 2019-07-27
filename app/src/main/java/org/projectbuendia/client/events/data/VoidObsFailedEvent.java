@@ -1,7 +1,5 @@
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.events.DefaultCrudEventBus;
-
 public class VoidObsFailedEvent {
 
     public final Reason reason;

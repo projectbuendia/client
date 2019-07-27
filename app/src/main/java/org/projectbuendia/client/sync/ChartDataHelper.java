@@ -14,8 +14,6 @@ package org.projectbuendia.client.sync;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
-import com.google.common.collect.ImmutableSet;
-
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
@@ -58,7 +56,7 @@ public class ChartDataHelper {
     private static final Logger LOG = Logger.create();
 
     /** When non-null, sConceptNames and sConceptTypes contain valid data for this locale. */
-    private static Object sLoadingLock = new Object();
+    private static final Object sLoadingLock = new Object();
     private static String sLoadedLocale;
 
     private static Map<String, String> sConceptNames;
@@ -359,18 +357,15 @@ public class ChartDataHelper {
     }
 
     public List<Form> getForms() {
-        Cursor cursor = mContentResolver.query(
-            Contracts.Forms.URI, null, null, null, null);
         SortedSet<Form> forms = new TreeSet<>();
-        try {
+        try (Cursor cursor = mContentResolver.query(
+            Contracts.Forms.URI, null, null, null, null)) {
             while (cursor.moveToNext()) {
                 forms.add(new Form(
                     Utils.getString(cursor, Contracts.Forms.UUID),
                     Utils.getString(cursor, Contracts.Forms.NAME),
                     Utils.getString(cursor, Contracts.Forms.VERSION)));
             }
-        } finally {
-            cursor.close();
         }
         List<Form> sortedForms = new ArrayList<>();
         sortedForms.addAll(forms);

@@ -88,7 +88,7 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
         mEventLog.add(event);
         // Clone the receivers set so receivers can unregister themselves after responding to an
         // event.
-        Set<Object> receivers = new HashSet<Object>(mRegisteredReceivers);
+        Set<Object> receivers = new HashSet<>(mRegisteredReceivers);
         for (Object receiver : receivers) {
             for (Method method : receiver.getClass().getMethods()) {
                 if (method.getName().equals(METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD)) {

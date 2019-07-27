@@ -53,7 +53,7 @@ public final class User extends Base<Integer> {
     }
 
     private User(Builder builder) {
-        this.id = builder.mId;
+        super(builder.mId);
         this.uuid = builder.mUuid;
         this.fullName = builder.mFullName;
     }

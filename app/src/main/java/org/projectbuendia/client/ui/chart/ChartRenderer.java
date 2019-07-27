@@ -306,7 +306,7 @@ public class ChartRenderer {
 
         void addObs(Column column, Obs obs) {
             if (!column.pointSetByConceptUuid.containsKey(obs.conceptUuid)) {
-                column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<ObsPoint>());
+                column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<>());
             }
             ObsPoint point = obs.getObsPoint();
             if (point != null) {

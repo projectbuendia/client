@@ -106,7 +106,7 @@ public class Utils {
     }
 
     /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
-    public static <K, V> V getOrDefault(Map<K, V> map, Object key, V defaultValue) {
+    public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
         return map.containsKey(key) ? map.get(key) : defaultValue;
     }
 
@@ -537,7 +537,7 @@ public class Utils {
      * null sorts before everything; all integers sort before all strings; integers
      * sort according to numeric value; strings sort according to string value.
      */
-    public static Comparator<Object> nullIntStrComparator = (a, b) -> {
+    public static final Comparator<Object> NULL_INT_STR_COMPARATOR = (a, b) -> {
         BigInteger intA = toBigInteger(a);
         BigInteger intB = toBigInteger(b);
         if (intA != null && intB != null) {
@@ -556,7 +556,7 @@ public class Utils {
      */
     public static Comparator<List<Object>> nullIntStrListComparator = (a, b) -> {
         for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-            int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+            int result = NULL_INT_STR_COMPARATOR.compare(a.get(i), b.get(i));
             if (result != 0) {
                 return result;
             }
@@ -579,7 +579,7 @@ public class Utils {
      * For example, the strings ["b1", "a11a", "a11", "a2", "a2b", "a2a", "a1"]
      * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
      */
-    public static Comparator<String> alphanumericComparator = new Comparator<String>() {
+    public static final Comparator<String> ALPHANUMERIC_COMPARATOR = new Comparator<String>() {
         @Override public int compare(String a, String b) {
             String aNormalized = Normalizer.normalize(Utils.toNonnull(a), Normalizer.Form.NFC);
             String bNormalized = Normalizer.normalize(Utils.toNonnull(b), Normalizer.Form.NFC);
@@ -698,7 +698,7 @@ public class Utils {
 
     /** Uses backslash sequences to form a printable representation of a string. */
     private static String escape(String str, int maxLength) {
-        StringBuffer buffer = new StringBuffer(format("(length %d) \"", str.length()));
+        StringBuilder buffer = new StringBuilder(format("(length %d) \"", str.length()));
         for (int i = 0; i < str.length() && i < maxLength; i++) {
             char c = str.charAt(i);
             switch (str.charAt(i)) {

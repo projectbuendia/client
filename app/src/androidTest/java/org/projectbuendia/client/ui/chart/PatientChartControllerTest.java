@@ -35,7 +35,6 @@ import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
@@ -122,7 +121,7 @@ public final class PatientChartControllerTest {
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
         verify(mMockUi).updateTilesAndGrid(
-                mFakeChart, recentObservations, allObservations, ImmutableList.<Order> of(), null, null);
+                mFakeChart, recentObservations, allObservations, ImmutableList.of(), null, null);
         verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
         verify(mMockUi).updateEbolaPcrTestResultUi(recentObservations);
         verify(mMockUi).updatePregnancyAndIvStatusUi(recentObservations);

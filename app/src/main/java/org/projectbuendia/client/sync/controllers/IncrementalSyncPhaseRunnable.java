@@ -141,7 +141,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
         GsonRequest<IncrementalSyncResponse<T>> request = new GsonRequest<>(
                 url.build().toString(),
                 new IncrementalSyncResponseType(clazz),
-                connectionDetails.addAuthHeader(new HashMap<String, String>()),
+                connectionDetails.addAuthHeader(new HashMap<>()),
                 successListener,
                 wrapErrorListener(errorListener));
         Serializers.registerTo(request.getGson());

@@ -124,7 +124,7 @@ public abstract class BaseActivity extends FragmentActivity {
         super.setContentView(mWrapperView);
 
         mInnerContent =
-            (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_inner_content);
+            mWrapperView.findViewById(R.id.status_wrapper_inner_content);
     }
 
     private void initializeSnackBar() {

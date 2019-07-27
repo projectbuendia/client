@@ -17,5 +17,4 @@
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
-    tools:context="org.projectbuendia.client.ui.PatientListActivity"
-    tools:layout="@android:layout/list_content" />
+    tools:layout="@layout/fragment_patient_list" />

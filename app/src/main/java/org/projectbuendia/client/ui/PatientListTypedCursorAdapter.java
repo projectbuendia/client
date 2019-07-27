@@ -70,7 +70,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     public PatientListTypedCursorAdapter(Context context, LocationTree locationTree) {
         mContext = context;
 
-        mPatientsByLocation = new HashMap<Location, List<Patient>>();
+        mPatientsByLocation = new HashMap<>();
 
         mLocationTree = locationTree;
         mChartDataHelper = new ChartDataHelper(context.getContentResolver());
@@ -110,13 +110,13 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         ExpandableListView expandableListView = (ExpandableListView) parent;
         expandableListView.expandGroup(groupPosition);
 
-        TextView item = (TextView) convertView.findViewById(R.id.patient_list_tent_tv);
+        TextView item = convertView.findViewById(R.id.patient_list_tent_tv);
         item.setText(PatientCountDisplay.getPatientCountTitle(mContext, patientCount, tentName));
 
         return convertView;
     }
 
-    @Override public Object getGroup(int groupPosition) {
+    @Override public Location getGroup(int groupPosition) {
         if (mLocations == null) {
             LOG.e("getGroup: mLocations is null! (see issue #352)");
             return null;
@@ -126,12 +126,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     @Override public int getChildrenCount(int groupPosition) {
         LOG.d("getChildrenCount: mLocations = %s (%d), groupPosition = %d", mLocations, mLocations != null ? mLocations.length : -1, groupPosition);
-        Object patientsForLocation = getGroup(groupPosition);
-        if (mPatientsByLocation == null || patientsForLocation == null) {
+        Location location = getGroup(groupPosition);
+        if (mPatientsByLocation == null || location == null) {
             return 0;
         }
 
-        return mPatientsByLocation.get(patientsForLocation).size();
+        return mPatientsByLocation.get(location).size();
     }
 
     protected View newGroupView() {
@@ -251,7 +251,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         Location location = mLocationTree.findByUuid(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
-                mPatientsByLocation.put(location, new ArrayList<Patient>());
+                mPatientsByLocation.put(location, new ArrayList<>());
             }
             mPatientsByLocation.get(location).add(patient);
         }

@@ -29,7 +29,6 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public final class Location extends Base<String> {
-
     public final String uuid;
     public final String parentUuid;
     public final String name;
@@ -37,6 +36,7 @@ public final class Location extends Base<String> {
 
     /** Creates an instance of {@link Location}. */
     public Location(String uuid, String parentUuid, String name, long patientCount) {
+        super(null);  // Location objects never have an id
         this.uuid = uuid;
         this.parentUuid = parentUuid;
         this.name = name;
