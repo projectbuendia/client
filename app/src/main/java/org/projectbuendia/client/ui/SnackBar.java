@@ -191,8 +191,8 @@ public class SnackBar {
      */
     public void dismiss(int[] id) {
         boolean changed = false;
-        for (int i = 0; i < id.length; i++) {
-            MessageKey key = getKey(id[i]);
+        for (int i1 : id) {
+            MessageKey key = getKey(i1);
             if (key != null) {
                 mMessagesList.remove(key);
                 changed = true;
