@@ -18,13 +18,13 @@ import org.projectbuendia.client.BuildConfig;
 
 /** The external contracts for {@link BuendiaProvider}. */
 @SuppressWarnings("unused")
-public class Contracts {
-    public static final String CONTENT_AUTHORITY = BuildConfig.CONTENT_AUTHORITY;
-    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-    private static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
+public interface Contracts {
+    String CONTENT_AUTHORITY = BuildConfig.CONTENT_AUTHORITY;
+    Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
 
     /** Names of tables in the local datastore. */
-    public enum Table {
+    enum Table {
         CHART_ITEMS("chart_items"),
         CONCEPT_NAMES("concept_names"),
         CONCEPTS("concepts"),
@@ -52,7 +52,7 @@ public class Contracts {
     // Each interface below corresponds to one SQLite table in the local datastore.  The column
     // names defined in the constants should exactly match the schemas defined in Database.java.
 
-    public interface ChartItems {
+    interface ChartItems {
         Uri URI = buildContentUri("chart-items");
         String GROUP_TYPE = buildGroupType("chart-item");
         String ITEM_TYPE = buildItemType("chart-item");
@@ -78,7 +78,7 @@ public class Contracts {
         String SCRIPT = "script";  // JavaScript for fancy rendering
     }
 
-    public interface ConceptNames {
+    interface ConceptNames {
         Uri URI = buildContentUri("concept-names");
         String GROUP_TYPE = buildGroupType("concept-name");
         String ITEM_TYPE = buildItemType("concept-name");
@@ -88,7 +88,7 @@ public class Contracts {
         String NAME = "name";
     }
 
-    public interface Concepts {
+    interface Concepts {
         Uri URI = buildContentUri("concepts");
         String GROUP_TYPE = buildGroupType("concept");
         String ITEM_TYPE = buildItemType("concept");
@@ -98,7 +98,7 @@ public class Contracts {
         String CONCEPT_TYPE = "concept_type";  // data type name, e.g. NUMERIC, TEXT
     }
 
-    public interface Forms {
+    interface Forms {
         Uri URI = buildContentUri("forms");
         String GROUP_TYPE = buildGroupType("form");
         String ITEM_TYPE = buildItemType("form");
@@ -108,7 +108,7 @@ public class Contracts {
         String VERSION = "version";
     }
 
-    public interface LocationNames {
+    interface LocationNames {
         Uri URI = buildContentUri("location-names");
         String GROUP_TYPE = buildGroupType("location-name");
         String ITEM_TYPE = buildItemType("location-name");
@@ -118,7 +118,7 @@ public class Contracts {
         String NAME = "name";
     }
 
-    public interface Locations {
+    interface Locations {
         Uri URI = buildContentUri("locations");
         String GROUP_TYPE = buildGroupType("location");
         String ITEM_TYPE = buildItemType("location");
@@ -127,7 +127,7 @@ public class Contracts {
         String PARENT_UUID = "parent_uuid"; // parent location or null
     }
 
-    public interface Misc {
+    interface Misc {
         Uri URI = BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
         String ITEM_TYPE = buildItemType("misc");
 
@@ -151,14 +151,14 @@ public class Contracts {
 
     }
 
-    public interface SyncTokens {
+    interface SyncTokens {
         Uri URI = buildContentUri("sync-tokens");
         String ITEM_TYPE = buildItemType("sync-token");
         String TABLE_NAME = "table_name";
         String SYNC_TOKEN = "sync_token";
     }
 
-    public interface Observations {
+    interface Observations {
         Uri URI = buildContentUri("observations");
         String GROUP_TYPE = buildGroupType("observation");
         String ITEM_TYPE = buildItemType("observation");
@@ -179,7 +179,7 @@ public class Contracts {
         String VOIDED = "voided";
     }
 
-    public interface Orders {
+    interface Orders {
         Uri URI = buildContentUri("orders");
         String GROUP_TYPE = buildGroupType("order");
         String ITEM_TYPE = buildItemType("order");
@@ -191,7 +191,7 @@ public class Contracts {
         String STOP_MILLIS = "stop_millis";  // milliseconds since epoch
     }
 
-    public interface Patients {
+    interface Patients {
         Uri URI = buildContentUri("patients");
         String GROUP_TYPE = buildGroupType("patient");
         String ITEM_TYPE = buildItemType("patient");
@@ -205,7 +205,7 @@ public class Contracts {
         String GENDER = "gender";
     }
 
-    public interface Users {
+    interface Users {
         Uri URI = buildContentUri("users");
         String GROUP_TYPE = buildGroupType("user");
         String ITEM_TYPE = buildItemType("user");
@@ -218,7 +218,7 @@ public class Contracts {
     // ProviderDelegate.  The column name constants should match the columns
     // returned by the query() method of the corresponding ProviderDelegate.
 
-    public interface LocalizedLocations {
+    interface LocalizedLocations {
         Uri URI = buildContentUri("localized-locations");
         String GROUP_TYPE = buildGroupType("localized-location");
         String ITEM_TYPE = buildItemType("localized-location");
@@ -230,7 +230,7 @@ public class Contracts {
         String PATIENT_COUNT = "patient_count";
     }
 
-    public interface PatientCounts {
+    interface PatientCounts {
         Uri URI = buildContentUri("patient-counts");
         String GROUP_TYPE = buildGroupType("patient-count");
         String ITEM_TYPE = buildItemType("patient-count");
@@ -239,24 +239,22 @@ public class Contracts {
         String PATIENT_COUNT = "patient_count";
     }
 
-    public static Uri buildContentUri(String path) {
+    static Uri buildContentUri(String path) {
         return BASE_CONTENT_URI.buildUpon().appendPath(path).build();
     }
 
-    public static String buildGroupType(String name) {
+    static String buildGroupType(String name) {
         return ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
     }
 
-    public static String buildItemType(String name) {
+    static String buildItemType(String name) {
         return ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
     }
 
     /** Returns the content URI for the localized locations for a given locale. */
-    public static Uri getLocalizedLocationsUri(String locale) {
+    static Uri getLocalizedLocationsUri(String locale) {
         return LocalizedLocations.URI.buildUpon()
             .appendPath(locale)
             .build();
     }
-
-    private Contracts() { /* prevent instantiation */ }
 }
