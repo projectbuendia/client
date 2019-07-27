@@ -28,6 +28,7 @@ public final class Form extends Base<String> implements Comparable<Form> {
     public final String version;
 
     public Form(String uuid, String name, String version) {
+        super(null);  // Form objects never have an id
         this.uuid = uuid;
         this.name = name;
         this.version = version;

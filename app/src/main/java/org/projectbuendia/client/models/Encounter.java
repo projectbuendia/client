@@ -67,9 +67,9 @@ public class Encounter extends Base<String> {
         DateTime timestamp,
         Observation[] observations,
         String[] orderUuids) {
-        id = encounterUuid;
+        super(encounterUuid);
         this.patientUuid = patientUuid;
-        this.encounterUuid = id;
+        this.encounterUuid = encounterUuid;
         this.timestamp = timestamp;
         this.observations = Utils.orDefault(observations, new Observation[0]);
         this.orderUuids = Utils.orDefault(orderUuids, new String[0]);

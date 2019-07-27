@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class BundleWrapper {
-    private Bundle bundle;
+    private final Bundle bundle;
 
     public BundleWrapper(Bundle bundle) {
         this.bundle = bundle;

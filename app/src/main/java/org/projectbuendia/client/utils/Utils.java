@@ -579,7 +579,7 @@ public class Utils {
      * For example, the strings ["b1", "a11a", "a11", "a2", "a2b", "a2a", "a1"]
      * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
      */
-    public static Comparator<String> alphanumericComparator = new Comparator<String>() {
+    public static final Comparator<String> ALPHANUMERIC_COMPARATOR = new Comparator<String>() {
         @Override public int compare(String a, String b) {
             String aNormalized = Normalizer.normalize(Utils.toNonnull(a), Normalizer.Form.NFC);
             String bNormalized = Normalizer.normalize(Utils.toNonnull(b), Normalizer.Form.NFC);

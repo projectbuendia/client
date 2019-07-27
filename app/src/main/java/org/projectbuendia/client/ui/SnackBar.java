@@ -413,9 +413,8 @@ public class SnackBar {
      * Helps the {@code TreeMap} maintain it's balance using priority as a parameter.
      */
     public class MessageKey implements Comparable<MessageKey> {
-
-        protected int id;
-        protected int priority;
+        protected final int id;
+        protected final int priority;
 
         public MessageKey(@StringRes int id, int priority) {
             this.id = id;
