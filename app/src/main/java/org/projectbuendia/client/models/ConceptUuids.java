@@ -11,10 +11,11 @@
 
 package org.projectbuendia.client.models;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.utils.Utils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,16 +45,12 @@ public class ConceptUuids {
     public static final String GENERAL_CONDITION_UUID = "a3657203-cfed-44b8-8e3f-960f8d4cf3b3";
     public static final String GENERAL_CONDITION_WELL_UUID = toUuid(1855);
     public static final String GENERAL_CONDITION_UNWELL_UUID = toUuid(137793);
-    public static final String GENERAL_CONDITION_CRITICAL_UUID =
-        "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
-    public static final String GENERAL_CONDITION_PALLIATIVE_UUID =
-        "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
+    public static final String GENERAL_CONDITION_CRITICAL_UUID = "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
+    public static final String GENERAL_CONDITION_PALLIATIVE_UUID = "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
     public static final String GENERAL_CONDITION_CONVALESCENT_UUID = toUuid(119844);
-    public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID =
-        "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
+    public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID = "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
     public static final String GENERAL_CONDITION_DISCHARGED_CURED_UUID = toUuid(159791);
-    public static final String GENERAL_CONDITION_SUSPECTED_DEAD_UUID =
-        "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
+    public static final String GENERAL_CONDITION_SUSPECTED_DEAD_UUID = "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
     public static final String GENERAL_CONDITION_CONFIRMED_DEAD_UUID = toUuid(160432);
 
     public static final String[] GENERAL_CONDITION_UUIDS = new String[] {
@@ -62,10 +59,10 @@ public class ConceptUuids {
         GENERAL_CONDITION_CRITICAL_UUID,
         GENERAL_CONDITION_PALLIATIVE_UUID,
         GENERAL_CONDITION_CONVALESCENT_UUID,
-        GENERAL_CONDITION_SUSPECTED_DEAD_UUID,
-        GENERAL_CONDITION_CONFIRMED_DEAD_UUID,
+        GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID,
         GENERAL_CONDITION_DISCHARGED_CURED_UUID,
-        GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID
+        GENERAL_CONDITION_SUSPECTED_DEAD_UUID,
+        GENERAL_CONDITION_CONFIRMED_DEAD_UUID
     };
 
 
@@ -104,21 +101,25 @@ public class ConceptUuids {
         return obs != null && YES_UUID.equals(obs.value);
     }
 
-    public static final Map<String, ResStatus> STATUS_BY_CONDITION_UUID = initStatusMap();
-
-    public static Map<String, ResStatus> initStatusMap() {
-        Map<String, ResStatus> map = new HashMap<>();
-        map.put(GENERAL_CONDITION_WELL_UUID, ResStatus.WELL);
-        map.put(GENERAL_CONDITION_UNWELL_UUID, ResStatus.UNWELL);
-        map.put(GENERAL_CONDITION_CRITICAL_UUID, ResStatus.CRITICAL);
-        map.put(GENERAL_CONDITION_PALLIATIVE_UUID, ResStatus.PALLIATIVE);
-        map.put(GENERAL_CONDITION_CONVALESCENT_UUID, ResStatus.CONVALESCENT);
-        map.put(GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID, ResStatus.DISCHARGED_NON_CASE);
-        map.put(GENERAL_CONDITION_DISCHARGED_CURED_UUID, ResStatus.DISCHARGED_CURED);
-        map.put(GENERAL_CONDITION_SUSPECTED_DEAD_UUID, ResStatus.SUSPECTED_DEAD);
-        map.put(GENERAL_CONDITION_CONFIRMED_DEAD_UUID, ResStatus.CONFIRMED_DEAD);
-        return map;
+    /** UUIDs for concepts that mean everything is normal; there is no worrying symptom. */
+    public static boolean isNormal(String uuid) {
+        return NORMAL_UUID.equals(uuid)
+            || NONE_UUID.equals(uuid)
+            || NO_UUID.equals(uuid)
+            || SOLID_FOOD_UUID.equals(uuid);
     }
+
+    public static final Map<String, ResStatus> STATUS_BY_CONDITION_UUID = new ImmutableMap.Builder<String, ResStatus>()
+        .put(GENERAL_CONDITION_WELL_UUID, ResStatus.WELL)
+        .put(GENERAL_CONDITION_UNWELL_UUID, ResStatus.UNWELL)
+        .put(GENERAL_CONDITION_CRITICAL_UUID, ResStatus.CRITICAL)
+        .put(GENERAL_CONDITION_PALLIATIVE_UUID, ResStatus.PALLIATIVE)
+        .put(GENERAL_CONDITION_CONVALESCENT_UUID, ResStatus.CONVALESCENT)
+        .put(GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID, ResStatus.DISCHARGED_NON_CASE)
+        .put(GENERAL_CONDITION_DISCHARGED_CURED_UUID, ResStatus.DISCHARGED_CURED)
+        .put(GENERAL_CONDITION_SUSPECTED_DEAD_UUID, ResStatus.SUSPECTED_DEAD)
+        .put(GENERAL_CONDITION_CONFIRMED_DEAD_UUID, ResStatus.CONFIRMED_DEAD)
+        .build();
 
     /** Returns the {@link ResStatus} for the specified condition UUID. */
     public static ResStatus getResStatus(String conditionUuid) {

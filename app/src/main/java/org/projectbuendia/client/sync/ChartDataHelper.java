@@ -53,13 +53,6 @@ public class ChartDataHelper {
     public static final String CHART_TILES_UUID = "975afbce-d4e3-4060-a25f-afcd0e5564ef";
     public static final String ENGLISH_LOCALE = "en";
 
-    /** UUIDs for concepts that mean everything is normal; there is no worrying symptom. */
-    public static final ImmutableSet<String> NO_SYMPTOM_VALUES = ImmutableSet.of(
-        ConceptUuids.NO_UUID, // NO
-        ConceptUuids.SOLID_FOOD_UUID, // Solid food
-        ConceptUuids.NORMAL_UUID, // NORMAL
-        ConceptUuids.NONE_UUID); // None
-
     private final ContentResolver mContentResolver;
 
     private static final Logger LOG = Logger.create();

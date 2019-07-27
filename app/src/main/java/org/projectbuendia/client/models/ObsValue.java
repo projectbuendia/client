@@ -12,7 +12,6 @@
 package org.projectbuendia.client.models;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
@@ -23,7 +22,6 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -72,14 +70,6 @@ public final class ObsValue implements Comparable<ObsValue> {
             .put(ConceptUuids.SEVERE_UUID, 3)
             .put(ConceptUuids.YES_UUID, 100).build();
 
-    /** Coded values that are considered false by asBoolean(). */
-    private static final Set<String> FALSE_CONCEPT_UUIDS = ImmutableSet.of(
-        ConceptUuids.NO_UUID,
-        ConceptUuids.NONE_UUID,
-        ConceptUuids.NORMAL_UUID,
-        ConceptUuids.UNKNOWN_UUID
-    );
-
     // All constructors must honour the invariant that exactly one field is non-null.
 
     public static ObsValue newCoded(boolean bool) {
@@ -118,7 +108,12 @@ public final class ObsValue implements Comparable<ObsValue> {
 
     public boolean asBoolean() {
         if (uuid != null) {
-            return !FALSE_CONCEPT_UUIDS.contains(uuid);
+            return !(
+                uuid.equals(ConceptUuids.NO_UUID) ||
+                uuid.equals(ConceptUuids.NONE_UUID) ||
+                uuid.equals(ConceptUuids.NORMAL_UUID) ||
+                uuid.equals(ConceptUuids.UNKNOWN_UUID)
+            );
         } else if (number != null) {
             return number != 0;
         } else if (text != null) {
