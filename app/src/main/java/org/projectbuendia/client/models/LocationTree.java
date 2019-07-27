@@ -125,7 +125,7 @@ public class LocationTree implements Observable {
         }
 
         ImmutableSet<Location> children = mUuidsToChildren.get(location.uuid);
-        return Utils.orDefault(children, ImmutableSet.<Location> of());
+        return Utils.orDefault(children, ImmutableSet.of());
     }
 
     /**
