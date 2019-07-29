@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client.models;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
@@ -20,7 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.utils.Utils;
 
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -58,17 +56,6 @@ public final class ObsValue implements Comparable<ObsValue> {
     public static final ObsValue ZERO = ObsValue.newNumber(0);
     public static final ObsValue FALSE = ObsValue.newCoded(false);
     public static final ObsValue TRUE = ObsValue.newCoded(true);
-
-    private static final Map<String, Integer> CODED_VALUE_ORDERING =
-        new ImmutableMap.Builder<String, Integer>()
-            .put(ConceptUuids.NO_UUID, -100)
-            .put(ConceptUuids.NONE_UUID, -1)
-            .put(ConceptUuids.NORMAL_UUID, -1)
-            .put(ConceptUuids.SOLID_FOOD_UUID, -1)
-            .put(ConceptUuids.MILD_UUID, 1)
-            .put(ConceptUuids.MODERATE_UUID, 2)
-            .put(ConceptUuids.SEVERE_UUID, 3)
-            .put(ConceptUuids.YES_UUID, 100).build();
 
     // All constructors must honour the invariant that exactly one field is non-null.
 
@@ -169,9 +156,9 @@ public final class ObsValue implements Comparable<ObsValue> {
     }
 
     @Override public int hashCode() {
-        return Objects.hashCode(number)  // hash only the final fields
-            + Objects.hashCode(text) + Objects.hashCode(uuid)
-            + Objects.hashCode(date) + Objects.hashCode(instant);
+        return Arrays.hashCode(new Object[] {
+            number, text, uuid, date, instant  // hash only the final fields
+        });
     }
 
     /**
@@ -195,9 +182,7 @@ public final class ObsValue implements Comparable<ObsValue> {
         result = Integer.compare(getTypeOrdering(), other.getTypeOrdering());
         if (result != 0) return result;
         if (uuid != null) {
-            result = Integer.compare(getUuidOrdering(), other.getUuidOrdering());
-            if (result != 0) return result;
-            result = uuid.compareTo(other.uuid);
+            result = ConceptUuids.compareUuids(uuid, other.uuid);
         } else if (number != null) {
             result = Double.compare(number, other.number);
         } else if (text != null) {
@@ -217,7 +202,7 @@ public final class ObsValue implements Comparable<ObsValue> {
         this.number = number;
         this.text = text;
         this.date = date;
-        this.instant = new Instant(instant);
+        this.instant = instant != null ? new Instant(instant) : null;
     }
 
     /** Gets a number specifying the ordering of ObsValues of different types. */
@@ -228,14 +213,5 @@ public final class ObsValue implements Comparable<ObsValue> {
             : date != null ? 4
             : instant != null ? 5
             : 0;  // this 0 case should never happen
-    }
-
-    /**
-     * Gets a number specifying the ordering of coded values.  These are arranged from least to
-     * most severe, or earliest to latest in typical temporal sequence, so that the maximum value
-     * in a list of values for a particular concept is the most severe value or latest value.
-     */
-    private int getUuidOrdering() {
-        return Utils.toNonnull(CODED_VALUE_ORDERING.get(uuid), 0);
     }
 }

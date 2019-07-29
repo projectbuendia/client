@@ -26,6 +26,10 @@ import java.util.Map;
 public class ConceptUuids {
     // ==== UUIDs used for special treatment in the UI.
 
+    private static String toUuid(int id) {
+        return Utils.expandUuid(id);
+    }
+
     // Dates shown as day numbers at top left.
     public static final String FIRST_SYMPTOM_DATE_UUID = toUuid(1730);
     public static final String ADMISSION_DATE_UUID = toUuid(162622);
@@ -72,7 +76,7 @@ public class ConceptUuids {
     public static final String PULSE_UUID = toUuid(5087);
 
 
-    // ==== UUIDs referenced only for sorting by severity or interpreting as false/null.
+    // ==== UUIDs referenced only for sort ordering.
 
     public static final String NO_UUID = toUuid(1066);  // answer: no
     public static final String NONE_UUID = toUuid(1107);  // answer: none
@@ -84,10 +88,32 @@ public class ConceptUuids {
     public static final String YES_UUID = toUuid(1065);  // answer: yes
     public static final String UNKNOWN_UUID = toUuid(1067);  // answer: answer is unknown
 
+    /**
+     * A number specifying the ordering of coded values.  These are arranged from least to
+     * most severe, or earliest to latest in typical temporal sequence, so that the maximum value
+     * in a list of values for a particular concept is the most severe value or latest value.
+     */
+    private static final Map<String, Integer> CODED_VALUE_ORDERING =
+        new ImmutableMap.Builder<String, Integer>()
+            .put(ConceptUuids.NO_UUID, -100)
+            .put(ConceptUuids.NONE_UUID, -1)
+            .put(ConceptUuids.NORMAL_UUID, -1)
+            .put(ConceptUuids.SOLID_FOOD_UUID, -1)
+            .put(ConceptUuids.MILD_UUID, 1)
+            .put(ConceptUuids.MODERATE_UUID, 2)
+            .put(ConceptUuids.SEVERE_UUID, 3)
+            .put(ConceptUuids.YES_UUID, 100).build();
 
-    public static final String toUuid(int id) {
-        return Utils.expandUuid(id);
+    public static final int compareUuids(String a, String b) {
+        int result = Integer.compare(
+            Utils.getOrDefault(CODED_VALUE_ORDERING, a, 0),
+            Utils.getOrDefault(CODED_VALUE_ORDERING, b, 0));
+        if (result != 0) return result;
+        return a.compareTo(b);
     }
+
+
+    // ==== Boolean interpretation of UUIDs.
 
     public static final String toUuid(boolean bool) {
         return bool ? YES_UUID : NO_UUID;
@@ -101,13 +127,15 @@ public class ConceptUuids {
         return obs != null && YES_UUID.equals(obs.value);
     }
 
-    /** UUIDs for concepts that mean everything is normal; there is no worrying symptom. */
     public static boolean isNormal(String uuid) {
         return NORMAL_UUID.equals(uuid)
             || NONE_UUID.equals(uuid)
             || NO_UUID.equals(uuid)
             || SOLID_FOOD_UUID.equals(uuid);
     }
+
+
+    // ==== Mapping of general condition values to ResStatus values.
 
     public static final Map<String, ResStatus> STATUS_BY_CONDITION_UUID = new ImmutableMap.Builder<String, ResStatus>()
         .put(GENERAL_CONDITION_WELL_UUID, ResStatus.WELL)

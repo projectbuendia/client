@@ -13,13 +13,11 @@ package org.projectbuendia.client.models;
 
 import android.support.annotation.NonNull;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.joda.time.DateTime;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.utils.Utils;
 
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -45,17 +43,6 @@ public final class Obs implements Comparable<Obs> {
 
     /** The name of the answer concept, if the value is an answer concept. */
     public final @Nullable String valueName;
-
-    private static final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
-        .put(ConceptUuids.NO_UUID, 0)
-        .put(ConceptUuids.NONE_UUID, 1)
-        .put(ConceptUuids.NORMAL_UUID, 2)
-        .put(ConceptUuids.SOLID_FOOD_UUID, 3)
-        .put(ConceptUuids.MILD_UUID, 4)
-        .put(ConceptUuids.MODERATE_UUID, 5)
-        .put(ConceptUuids.SEVERE_UUID, 6)
-        .put(ConceptUuids.YES_UUID, 7)
-        .build();
 
     public Obs(
         long millis,
@@ -118,10 +105,9 @@ public final class Obs implements Comparable<Obs> {
     }
 
     @Override public int hashCode() {
-        return (int) time.getMillis()
-            + conceptUuid.hashCode() + conceptType.hashCode()
-            + (value != null ? value.hashCode() : 0)
-            + (valueName != null ? valueName.hashCode() : 0);
+        return Arrays.hashCode(new Object[] {
+            time, conceptUuid, conceptType, value, valueName
+        });
     }
 
     /**
@@ -148,7 +134,7 @@ public final class Obs implements Comparable<Obs> {
             return Double.valueOf(value).compareTo(Double.valueOf(other.value));
         }
         if (conceptType == ConceptType.CODED || conceptType == ConceptType.BOOLEAN) {
-            return getCodedValueOrdering().compareTo(other.getCodedValueOrdering());
+            return ConceptUuids.compareUuids(value, other.value);
         }
         return value.compareTo(other.value);
     }
@@ -166,14 +152,5 @@ public final class Obs implements Comparable<Obs> {
                 return 4;
         }
         return 0;
-    }
-
-    /**
-     * Gets a number defining the ordering of coded values.  These are
-     * arranged from least to most severe so that using the Pebble "max" filter
-     * will select the most severe value from a list of values.
-     */
-    public Integer getCodedValueOrdering() {
-        return Utils.toNonnull(CODED_VALUE_ORDERING.get(value), 0);
     }
 }
