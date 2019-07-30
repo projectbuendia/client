@@ -30,6 +30,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -201,7 +202,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     static void updatePrefSummary(Preference pref, Object value) {
-        String str = value.toString();
+        String str = Utils.toNonnullString(value);
         switch (pref.getKey()) {
             case "server":
             case "openmrs_user":

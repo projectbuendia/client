@@ -157,8 +157,18 @@ public class Utils {
     }
 
     /** Calls toString() on a nullable object, returning an empty string if null. */
-    public static @Nonnull String toStringNonnull(@Nullable Object obj) {
+    public static @Nonnull String toNonnullString(@Nullable Object obj) {
         return obj != null ? obj.toString() : "";
+    }
+
+    /** Calls toString() on a nullable object, returning null if the object is null. */
+    public static @Nullable String toNullableString(@Nullable Object obj) {
+        return obj != null ? obj.toString() : null;
+    }
+
+    /** Calls toString() on a nullable object, returning a default value if the object is null. */
+    public static @Nonnull String toStringOrDefault(@Nullable Object obj, @Nonnull String defaultValue) {
+        return obj != null ? obj.toString() : defaultValue;
     }
 
     /** Formats a string using ASCII encoding. */

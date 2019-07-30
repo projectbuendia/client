@@ -74,8 +74,8 @@ public class NewUserDialogFragment extends DialogFragment {
         dialog.setOnShowListener(dialogInterface -> dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
             view -> {
                 // Validate the user.
-                String givenName = Utils.toStringNonnull(mGivenName.getText()).trim();
-                String familyName = Utils.toStringNonnull(mFamilyName.getText()).trim();
+                String givenName = Utils.toNonnullString(mGivenName.getText()).trim();
+                String familyName = Utils.toNonnullString(mFamilyName.getText()).trim();
                 boolean valid = true;
                 if (givenName.isEmpty()) {
                     setError(mGivenName, R.string.given_name_cannot_be_null);
