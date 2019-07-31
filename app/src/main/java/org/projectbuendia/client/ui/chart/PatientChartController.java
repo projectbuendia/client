@@ -20,8 +20,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
 
-import com.google.common.base.Optional;
-
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
@@ -57,7 +55,6 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -183,6 +180,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
         void showObsDetailDialog(List<ObsRow> obsRows, List<String> orderedConceptUuids);
+        void showPatientLocationDialog(Patient patient);
     }
 
     /** Sends ODK form data. */
@@ -488,6 +486,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void showAssignLocationDialog(Context context) {
+        mUi.showPatientLocationDialog(mPatient);
+/*
         if (mAssignLocationDialog != null) return;
 
         AssignLocationDialog.LocationSelectedCallback callback =
@@ -509,6 +509,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             Optional.of(mPatient.locationUuid),
             callback);
         mAssignLocationDialog.show();
+*/
     }
 
     public void setZoomIndex(int index) {

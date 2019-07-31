@@ -22,4 +22,13 @@ public class LocaleSelector {
     public static Locale getCurrentLocale() {
         return Locale.ENGLISH;
     }
+
+    public static String getCurrentLocaleTag() {
+        Locale locale = getCurrentLocale();
+        String tag = locale.getLanguage();
+        if (!locale.getCountry().isEmpty()) {
+            tag += "-" + locale.getCountry();
+        }
+        return tag;
+    }
 }

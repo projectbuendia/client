@@ -62,6 +62,7 @@ import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -580,6 +581,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void showEditPatientDialog(Patient patient) {
             EditPatientDialogFragment.newInstance(patient)
+                .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showPatientLocationDialog(Patient patient) {
+            PatientLocationDialogFragment.newInstance(patient)
                 .show(getSupportFragmentManager(), null);
         }
     }

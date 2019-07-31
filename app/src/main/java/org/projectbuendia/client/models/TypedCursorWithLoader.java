@@ -30,7 +30,7 @@ import java.util.Iterator;
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
  * does, however, pass along {@link ContentObserver} callbacks.
  */
-class TypedCursorWithLoader<T, U extends CursorLoader<T>> implements TypedCursor<T> {
+public class TypedCursorWithLoader<T, U extends CursorLoader<T>> implements TypedCursor<T> {
 
     private final U mLoader;
     private final Cursor mCursor;
