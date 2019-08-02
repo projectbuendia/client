@@ -50,6 +50,23 @@ public class LocationListAdapter extends ArrayAdapter<NewLocation> {
         mSelectedLocationUuid = Preconditions.checkNotNull(selectedLocation);
     }
 
+    /** Returns the {@link ResZone} for the specified zone UUID. */
+    private static ResZone getResZone(String uuid) {
+        switch (uuid) {
+            case Zones.SUSPECT_ZONE_UUID:
+                return ResZone.SUSPECT;
+            case Zones.PROBABLE_ZONE_UUID:
+                return ResZone.PROBABLE;
+            case Zones.CONFIRMED_ZONE_UUID:
+                return ResZone.CONFIRMED;
+            case Zones.MORGUE_ZONE_UUID:
+            case Zones.OUTSIDE_ZONE_UUID:
+            case Zones.TRIAGE_ZONE_UUID:
+            default:
+                return ResZone.UNKNOWN;
+        }
+    }
+
     public Optional<String> getSelectedLocationUuid() {
         return mSelectedLocationUuid;
     }
@@ -76,7 +93,7 @@ public class LocationListAdapter extends ArrayAdapter<NewLocation> {
         }
 
         NewLocation location = getItem(position);
-        ResZone.Resolved zone = Zones.getResZone(mLocationTree.getParent(location).uuid)
+        ResZone.Resolved zone = getResZone(mLocationTree.getParent(location).uuid)
             .resolve(mContext.getResources());
 
         long count = mLocationTree.countPatientsIn(location);

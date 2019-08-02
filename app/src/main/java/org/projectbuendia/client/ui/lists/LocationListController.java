@@ -20,7 +20,6 @@ import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.NewLocation;
 import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Zones;
@@ -41,12 +40,6 @@ final class LocationListController {
 
     private static final Logger LOG = Logger.create();
 
-    // TODO/feature: Allow LOCATIONS_DEPTH to be specified.
-    /**
-     * The depth of locations to display. Only locations at this depth in the location tree will be
-     * displayed.
-     */
-    private static final int LOCATIONS_DEPTH = LocationTree.ABSOLUTE_DEPTH_TENT;
     private final AppModel mAppModel;
     private final AppSettings mSettings;
     private final CrudEventBus mCrudEventBus;

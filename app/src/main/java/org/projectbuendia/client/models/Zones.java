@@ -11,11 +11,6 @@
 
 package org.projectbuendia.client.models;
 
-import org.projectbuendia.client.resolvables.ResZone;
-
-import java.util.Arrays;
-import java.util.List;
-
 /** Defines a hardcoded set of possible zones returned by the server and their semantics and UI. */
 // TODO/robustness: Get rid of these constants and use the actual locations on the server!
 public class Zones {
@@ -29,37 +24,6 @@ public class Zones {
     public static final String DISCHARGED_ZONE_UUID = "d7ca63c3-6ea0-4357-82fd-0910cc17a2cb";
     // Where to place patients with no location.
     public static final String DEFAULT_LOCATION_UUID = TRIAGE_ZONE_UUID;
-    private static final List<String> ORDERED_ZONES = Arrays.asList(
-        TRIAGE_ZONE_UUID,
-        SUSPECT_ZONE_UUID,
-        PROBABLE_ZONE_UUID,
-        CONFIRMED_ZONE_UUID,
-        MORGUE_ZONE_UUID,
-        OUTSIDE_ZONE_UUID,
-        DISCHARGED_ZONE_UUID
-    );
-
-    /** Compares two zones so that they sort in the order given in ORDERED_ZONES. */
-    public static int compare(Location a, Location b) {
-        return Integer.compare(ORDERED_ZONES.indexOf(a.uuid), ORDERED_ZONES.indexOf(b.uuid));
-    }
-
-    /** Returns the {@link ResZone} for the specified zone UUID. */
-    public static ResZone getResZone(String uuid) {
-        switch (uuid) {
-            case SUSPECT_ZONE_UUID:
-                return ResZone.SUSPECT;
-            case PROBABLE_ZONE_UUID:
-                return ResZone.PROBABLE;
-            case CONFIRMED_ZONE_UUID:
-                return ResZone.CONFIRMED;
-            case MORGUE_ZONE_UUID:
-            case OUTSIDE_ZONE_UUID:
-            case TRIAGE_ZONE_UUID:
-            default:
-                return ResZone.UNKNOWN;
-        }
-    }
 
     private Zones() {
         // Zone contains only static methods.
