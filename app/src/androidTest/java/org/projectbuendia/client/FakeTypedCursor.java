@@ -12,7 +12,6 @@
 package org.projectbuendia.client;
 
 import android.database.ContentObserver;
-import android.net.Uri;
 
 import com.google.common.collect.Iterators;
 
@@ -39,11 +38,6 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
 
     @Override public T get(int position) {
         return mObjects[position];
-    }
-
-    /** Returns {@code null}. */
-    @Override public Uri getNotificationUri() {
-        return null;
     }
 
     /** No-op. */

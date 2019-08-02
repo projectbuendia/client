@@ -12,7 +12,6 @@
 package org.projectbuendia.client.filter.matchers;
 
 import android.database.ContentObserver;
-import android.net.Uri;
 
 import org.projectbuendia.client.models.TypedCursor;
 
@@ -44,10 +43,6 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
                 mIndices.add(i);
             }
         }
-    }
-
-    @Override public Uri getNotificationUri() {
-        return mCursor.getNotificationUri();
     }
 
     @Override public void registerContentObserver(ContentObserver observer) {
