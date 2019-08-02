@@ -176,22 +176,22 @@ public class NewLocationTree {
         return Arrays.asList(locations);
     }
 
-    /** Given a node, returns an ordered list of its children. */
+    /** Given a node, returns an ordered list of its immediate children. */
     public @Nonnull List<NewLocation> getChildren(@Nonnull NewLocation parent) {
         List<NewLocation> children = new ArrayList<>();
         for (NewLocation location : locations) {
-            if (location.isInSubtree(parent) && location.depth == parent.depth + 1) {
+            if (eq(parentUuidsByUuid.get(location.uuid), parent.uuid)) {
                 children.add(location);
             }
         }
         return children;
     }
 
-    /** Given a node, returns a list of its descendants in depth-first order. */
-    public @Nonnull List<NewLocation> getDescendants(@Nonnull NewLocation root) {
+    /** Given a node, returns a list containing it and its descendants in depth-first order. */
+    public @Nonnull List<NewLocation> getSubtree(@Nonnull NewLocation root) {
         List<NewLocation> descendants = new ArrayList<>();
         for (NewLocation location : locations) {
-            if (location.isInSubtree(root) && !eq(location, root)) {
+            if (location.isInSubtree(root)) {
                 descendants.add(location);
             }
         }

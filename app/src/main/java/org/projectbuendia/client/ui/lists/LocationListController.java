@@ -343,11 +343,6 @@ final class LocationListController {
             }
 
             updateUi();
-
-            // Update the search controller immediately -- it does not listen for location updates
-            // on this controller's bus and would otherwise be unaware of changes.
-            // TODO/cleanup: Remove -- likely unnecessary.
-            mPatientSearchController.setLocations(mLocationTree);
         }
     }
 }

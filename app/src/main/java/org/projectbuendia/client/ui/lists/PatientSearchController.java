@@ -31,7 +31,7 @@ import org.projectbuendia.client.filter.matchers.MatchingFilterGroup;
 import org.projectbuendia.client.filter.matchers.patient.IdFilter;
 import org.projectbuendia.client.filter.matchers.patient.NameFilter;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.sync.SyncManager;
@@ -57,7 +57,7 @@ public class PatientSearchController {
     private final SyncManager mSyncManager;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
     private final String mLocale;
-    private LocationTree mLocationTree;
+    private NewLocationTree mLocationTree;
     private String mRootLocationUuid;
     private SimpleSelectionFilter mFilter;
     private String mFilterQueryTerm = "";
@@ -77,7 +77,7 @@ public class PatientSearchController {
     }
 
     public interface FragmentUi {
-        void setLocationTree(LocationTree locationTree);
+        void setLocationTree(NewLocationTree locationTree);
         void setPatients(TypedCursor<Patient> patients);
         void showSpinner(boolean show);
     }
@@ -135,9 +135,6 @@ public class PatientSearchController {
         // Close any outstanding cursors. New results will be fetched when requested.
         if (mPatientsCursor != null) {
             mPatientsCursor.close();
-        }
-        if (mLocationTree != null) {
-            mLocationTree.close();
         }
     }
 
@@ -252,18 +249,11 @@ public class PatientSearchController {
         SimpleSelectionFilter filter;
 
         // Tack on a location filter to the filter to show only known locations.
-        if (mLocationTree == null || mLocationTree.getRoot() == null) {
+        if (mLocationTree == null || mRootLocationUuid == null) {
             filter = mFilter;
         } else {
-            // Tack on a location filter to the filter to show only known locations in the subtree
-            // of the current root.
-            if (mRootLocationUuid == null) {
-                filter = new SimpleSelectionFilterGroup(
-                    new LocationUuidFilter(mLocationTree), mFilter);
-            } else {
-                filter = new SimpleSelectionFilterGroup(new LocationUuidFilter(
-                    mLocationTree, mLocationTree.findByUuid(mRootLocationUuid)), mFilter);
-            }
+            filter = new SimpleSelectionFilterGroup(new LocationUuidFilter(
+                mLocationTree, mLocationTree.get(mRootLocationUuid)), mFilter);
         }
 
         return filter;
@@ -290,7 +280,7 @@ public class PatientSearchController {
      * Manually sets the locations for this controller, which is useful if locations have been
      * updated from an outside context.
      */
-    public void setLocations(LocationTree locationTree) {
+    public void setLocations(NewLocationTree locationTree) {
         mLocationTree = locationTree;
     }
 
@@ -318,13 +308,10 @@ public class PatientSearchController {
             synchronized (mFilterSubscriberLock) {
                 mFilterSubscriber = null;
             }
+            mLocationTree = null;
             for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.setLocationTree(event.tree);
+                fragmentUi.setLocationTree(mLocationTree);
             }
-            if (mLocationTree != null) {
-                mLocationTree.close();
-            }
-            mLocationTree = event.tree;
 
             // If showing results was blocked on having a location tree, request results
             // immediately.

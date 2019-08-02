@@ -94,7 +94,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
         List<LocationOption> options = new ArrayList<>();
         options.add(new LocationOption(
             null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1));
-        for (NewLocation location : tree.getDescendants(null)) {
+        for (NewLocation location : tree.allNodes()) {
             if (!eq(location, discharged)) {
                 // A parenthesized number can be included at the front of the location name
                 // to determine its sorting order; the number will not be displayed.

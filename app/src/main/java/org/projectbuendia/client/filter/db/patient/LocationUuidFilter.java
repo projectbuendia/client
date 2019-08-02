@@ -12,19 +12,14 @@
 package org.projectbuendia.client.filter.db.patient;
 
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.NewLocation;
+import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
 
 import java.util.List;
 
-/**
- * LocationUuidFilter matches all patients who reside in the specified subtree of locations.
- * <p/>
- * <p>For example, a LocationUuidFilter given a UUID of a zone will return all patients assigned to
- * that zone, tents within that zone, beds within those tents, etc.
- */
+/** LocationUuidFilter matches all patients in a specified subtree of locations. */
 public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
 
     private final String mTentSelectionString;
@@ -32,13 +27,8 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
     private final String mUuid;
     private final String mDescription;
 
-    /** Creates a filter that returns all patients in a valid location. */
-    public LocationUuidFilter(LocationTree tree) {
-        this(tree, tree != null ? tree.getRoot() : null);
-    }
-
     /** Creates a filter returning only patients under a subroot of the given location tree. */
-    public LocationUuidFilter(LocationTree tree, Location subroot) {
+    public LocationUuidFilter(NewLocationTree tree, NewLocation subroot) {
         if (tree == null || subroot == null) {
             mTentSelectionString = "";
             mTentSelectionArgs = new String[0];
@@ -46,7 +36,7 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
             mDescription = "";
             return;
         }
-        List<Location> allPossibleLocations = tree.locationsInSubtree(subroot);
+        List<NewLocation> allPossibleLocations = tree.getSubtree(subroot);
 
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.

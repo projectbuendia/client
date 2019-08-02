@@ -16,8 +16,9 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.AllFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.NewLocation;
+import org.projectbuendia.client.models.NewLocationTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +45,7 @@ public final class PatientDbFilters {
     public static SimpleSelectionFilter[] getFiltersForDisplay(LocationTree locationTree) {
         List<SimpleSelectionFilter> allFilters = new ArrayList<>();
         allFilters.add(new PresentFilter());
-        Collections.addAll(allFilters, getZoneFilters(locationTree));
+        Collections.addAll(allFilters, getLocationFilters(locationTree));
         allFilters.add(null); // Section break
         Collections.addAll(allFilters, getOtherFilters());
 
@@ -54,12 +55,12 @@ public final class PatientDbFilters {
     }
 
     /** Returns an array of {@link SimpleSelectionFilter}s, each representing a zone. */
-    public static SimpleSelectionFilter[] getZoneFilters(LocationTree locationTree) {
+    public static SimpleSelectionFilter[] getLocationFilters(LocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
+        NewLocationTree tree = null;
 
-        for (Location zone :
-            locationTree.getDescendantsAtDepth(LocationTree.ABSOLUTE_DEPTH_ZONE)) {
-            filters.add(new LocationUuidFilter(locationTree, zone));
+        for (NewLocation location : tree.allNodes()) {
+            filters.add(new LocationUuidFilter(tree, location));
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
         filters.toArray(filterArray);
