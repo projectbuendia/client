@@ -36,7 +36,6 @@ import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
@@ -50,7 +49,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
@@ -61,7 +60,6 @@ import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
-import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -92,7 +90,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private static final int PATIENT_UPDATE_PERIOD_MILLIS = 10000;
 
     private Patient mPatient = Patient.builder().build();
-    private LocationTree mLocationTree;
+    private NewLocationTree mLocationTree;
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
@@ -143,7 +141,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         void updatePatientConditionUi(String generalConditionUuid);
 
         /** Updates the UI with the patient's location. */
-        void updatePatientLocationUi(LocationTree locationTree, Patient patient);
+        void updatePatientLocationUi(NewLocationTree locationTree, Patient patient);
 
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updateTilesAndGrid(
@@ -245,7 +243,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
-        mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().toString());
+        mLocationTree = mAppModel.getLocationTree(mSettings.getLocaleTag());
+        updatePatientLocationUi();
 
         mSyncManager.sync(Phase.OBSERVATIONS, Phase.ORDERS);
         mSyncManager.setPeriodicSync(10, Phase.OBSERVATIONS, Phase.ORDERS);
@@ -600,14 +599,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
-
-        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            if (mLocationTree != null) {
-                mLocationTree.close();
-            }
-            mLocationTree = event.tree;
-            updatePatientLocationUi();
-        }
 
         public void onEventMainThread(SyncSucceededEvent event) {
             updatePatientObsUi();

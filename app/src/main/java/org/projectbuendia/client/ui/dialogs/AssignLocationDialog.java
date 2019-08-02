@@ -22,7 +22,6 @@ import com.google.common.base.Optional;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
@@ -55,11 +54,9 @@ public final class AssignLocationDialog
     private final String mLocale;
     private final Runnable mOnDismiss;
     private final CrudEventBus mEventBus;
-    private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final Optional<String> mCurrentLocationUuid;
     private final LocationSelectedCallback mLocationSelectedCallback;
     private LocationTree mLocationTree;
-    private boolean mRegistered;
 
     // TODO: Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
@@ -125,9 +122,7 @@ public final class AssignLocationDialog
     }
 
     private void startListeningForLocations() {
-        mRegistered = true;
-        mEventBus.register(mEventBusSubscriber);
-        mAppModel.fetchLocationTree(mEventBus, mLocale);
+        //mAppModel.fetchLocationTree(mEventBus, mLocale);   setTents(mLocationTree)
     }
 
     /**
@@ -183,9 +178,6 @@ public final class AssignLocationDialog
     // TODO: Consider adding the ability to re-enable buttons if a server request fails.
 
     @Override public void onDismiss(DialogInterface dialog) {
-        if (mRegistered) {
-            mEventBus.unregister(mEventBusSubscriber);
-        }
         mOnDismiss.run();
     }
 
@@ -201,19 +193,6 @@ public final class AssignLocationDialog
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
             mGridView.setSelection(1);
-        }
-    }
-
-    private final class EventBusSubscriber {
-
-        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            if (event.tree.getRoot() == null) {
-                LOG.d("LocationTree has a null root, suggesting something went wrong.");
-                return;
-            }
-
-            mLocationTree = event.tree;
-            setTents(event.tree);
         }
     }
 }

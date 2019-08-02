@@ -21,7 +21,6 @@ import android.os.Handler;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
@@ -201,15 +200,6 @@ public class AppModel {
         );
     }
 
-    /**
-     * Asynchronously fetches all locations as a tree, posting an
-     * {@link AppLocationTreeFetchedEvent} on the specified event bus when complete.
-     */
-    public void fetchLocationTree(CrudEventBus bus, String locale) {
-        new FetchLocationTreeAsyncTask(
-            mContentResolver, locale, mLoaderSet.locationLoader, bus).execute();
-    }
-
     /** Asynchronously downloads one patient from the server and saves it locally. */
     public void downloadSinglePatient(CrudEventBus bus, String patientId) {
         mTaskFactory.newDownloadSinglePatientTask(patientId, bus).execute();
@@ -309,45 +299,6 @@ public class AppModel {
 
     public void voidObservation(CrudEventBus bus, VoidObs obs) {
         mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
-    }
-
-    private static class FetchLocationTreeAsyncTask extends AsyncTask<Void, Void, LocationTree> {
-
-        private final ContentResolver mContentResolver;
-        private final String mLocale;
-        private final CursorLoader<Location> mLoader;
-        private final CrudEventBus mBus;
-
-        public FetchLocationTreeAsyncTask(
-            ContentResolver contentResolver,
-            String locale,
-            CursorLoader<Location> loader,
-            CrudEventBus bus) {
-            mContentResolver = contentResolver;
-            mLocale = locale;
-            mLoader = loader;
-            mBus = bus;
-        }
-
-        @Override protected LocationTree doInBackground(Void... voids) {
-            Cursor cursor = null;
-            try {
-                // TODO: Ensure this cursor is closed.  A straightforward try/finally doesn't do the
-                // job here because the cursor has to stay open for the TypedCursor to work.
-                cursor = mContentResolver.query(
-                    Contracts.getLocalizedLocationsUri(mLocale), null, null, null, null);
-                return LocationTree.forTypedCursor(new TypedCursorWithLoader<>(cursor, mLoader));
-            } catch (Exception e) {
-                if (cursor != null) {
-                    cursor.close();
-                }
-                throw e;
-            }
-        }
-
-        @Override protected void onPostExecute(LocationTree result) {
-            mBus.post(new AppLocationTreeFetchedEvent(result));
-        }
     }
 
     private static class FetchTypedCursorAsyncTask<T extends Base>

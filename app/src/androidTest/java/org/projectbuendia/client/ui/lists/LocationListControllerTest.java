@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.FakeSyncManager;
 import org.projectbuendia.client.R;
@@ -45,6 +46,7 @@ public final class LocationListControllerTest {
     private FakeEventBus mFakeEventBus;
     private FakeSyncManager mFakeSyncManager;
     @Mock private AppModel mMockAppModel;
+    @Mock private AppSettings mMockSettings;
     @Mock private LocationListController.Ui mMockUi;
     @Mock private LocationListController.LocationFragmentUi mMockFragmentUi;
     @Mock private PatientSearchController mMockSearchController;
@@ -53,13 +55,12 @@ public final class LocationListControllerTest {
     @Test
     @UiThreadTest
     public void testInit_RequestsLoadLocationsWhenDataModelAvailable() {
-        // GIVEN initialized data model and the controller hasn't previously fetched the location
-        // tree
+        // GIVEN initialized data model and the controller hasn't previously fetched the location tree
         when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller asks the location manager to provide the location tree
-        verify(mMockAppModel).fetchLocationTree(mFakeEventBus, "en");
+        verify(mMockAppModel).getLocationTree("en");
     }
 
     /** Tests that init does not result in a new sync if data model is available. */
@@ -110,6 +111,7 @@ public final class LocationListControllerTest {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN the location tree is loaded and sync is not in progress
         mFakeSyncManager.setSyncing(false);
+        when(mMockAppModel.getLocationTree("en")).thenReturn()
         LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller hides the progress spinner
@@ -383,6 +385,7 @@ public final class LocationListControllerTest {
         mFakeSyncManager = new FakeSyncManager();
         mController = new LocationListController(
             mMockAppModel,
+            mMockSettings,
             mFakeEventBus,
             mMockUi,
             mFakeEventBus,
