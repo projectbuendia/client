@@ -86,8 +86,8 @@ public class PatientLocationDialogFragment extends DialogFragment {
 
     private List<LocationOption> getLocationOptions(NewLocationTree tree) {
         NewLocation discharged = tree.get(Zones.DISCHARGED_ZONE_UUID);
-        int numDischarged = discharged != null ? tree.getNumPatientsInSubtree(discharged) : 0;
-        int numPatients = tree.getNumPatientsInSubtree(null);
+        int numDischarged = discharged != null ? tree.countPatientsIn(discharged) : 0;
+        int numPatients = tree.countAllPatients();
 
         int fg = c.color(R.color.vital_fg_light);
         int bg = c.color(R.color.zone_confirmed);
@@ -101,7 +101,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
                 // to determine its sorting order; the number will not be displayed.
                 String displayName = location.name.replaceAll("^\\(.*?\\)\\s*", "");
                 options.add(new LocationOption(
-                    location.uuid, displayName, location.numPatients, fg, bg, 0.5));
+                    location.uuid, displayName, tree.countPatientsIn(location), fg, bg, 0.5));
             }
         }
         if (discharged != null) {

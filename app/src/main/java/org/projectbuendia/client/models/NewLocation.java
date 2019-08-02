@@ -22,16 +22,14 @@ public final class NewLocation extends Base<String> implements Comparable<NewLoc
     public final @Nonnull String uuid;  // permanent unique identifier
     public final @Nonnull String path;  // short IDs from root to this node, separated by slashes
     public final @Nonnull String name;
-    public final int numPatients;  // counting only this node, not its children
     public final int depth;
 
     /** Creates an instance of {@link NewLocation}. */
-    public NewLocation(@Nonnull String uuid, @Nonnull String path, String name, int numPatients) {
+    public NewLocation(@Nonnull String uuid, @Nonnull String path, String name) {
         super(null);
         this.uuid = uuid;
         this.path = path;
         this.name = Utils.toNonnull(name);
-        this.numPatients = numPatients;
         this.depth = path.split("/").length - 1;
     }
 
@@ -44,7 +42,7 @@ public final class NewLocation extends Base<String> implements Comparable<NewLoc
     }
 
     public boolean isInSubtree(NewLocation other) {
-        return other == null || path.startsWith(other.path);
+        return path.startsWith(other.path);
     }
 
     @Override public int compareTo(NewLocation other) {
