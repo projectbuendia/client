@@ -17,13 +17,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import java.util.List;
+
 /**
  * An {@link ArrayAdapter} that uses null values to indicate 'section' boundaries. Section
  * boundaries are represented by an arbitrary resource (such as a horizontal divider) and are not
  * clickable.
  */
 public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
-    private final T[] mItems;
+    private final List<T> mItems;
     private final int mSectionBorderResource;
     private final LayoutInflater mInflater;
 
@@ -40,7 +42,7 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
      */
     public SectionedSpinnerAdapter(
         Context context, int collapsedResource, int dropDownResource,
-        int sectionBorderResource, T[] items) {
+        int sectionBorderResource, List<T> items) {
         super(context, collapsedResource, items);
         mItems = items;
         mSectionBorderResource = sectionBorderResource;
@@ -68,7 +70,7 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
     }
 
     private boolean isSectionBorder(int position) {
-        return position < mItems.length && mItems[position] == null;
+        return position < mItems.size() && mItems.get(position) == null;
     }
 
     private View getSectionBorder(View convertView, ViewGroup parent) {

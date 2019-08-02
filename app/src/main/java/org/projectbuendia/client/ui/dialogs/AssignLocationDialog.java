@@ -197,8 +197,7 @@ public final class AssignLocationDialog
             locations.add(0, triageZone);
             Location dischargedZone = locationTree.findByUuid(Zones.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
-            mAdapter = new LocationListAdapter(
-                mContext, locations, locationTree, mCurrentLocationUuid);
+            mAdapter = null;
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
             mGridView.setSelection(1);

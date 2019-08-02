@@ -19,10 +19,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.NewLocation;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
@@ -43,6 +44,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
     private AlertDialog mSyncFailedDialog;
 
     @Inject AppModel mAppModel;
+    @Inject AppSettings mAppSettings;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject SyncManager mSyncManager;
 
@@ -88,6 +90,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
 
         mController = new LocationListController(
             mAppModel,
+            mAppSettings,
             mCrudEventBusProvider.get(),
             new Ui(),
             new EventBusWrapper(EventBus.getDefault()),
@@ -111,7 +114,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             .setPositiveButton(
                 R.string.sync_failed_retry, (dialog, which) -> {
                     Utils.logEvent("sync_failed_retry_pressed");
-                    mController.onSyncRetry();
+                    mController.startSync();
                 })
             .setCancelable(false)
             .create();
@@ -152,9 +155,8 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             LocationListActivity.this.finish();
         }
 
-        @Override public void openSingleLocation(Location location) {
-            SingleLocationActivity.start(LocationListActivity.this,
-                location.uuid, location.name, location.patientCount);
+        @Override public void openSingleLocation(NewLocation location) {
+            SingleLocationActivity.start(LocationListActivity.this, location);
         }
     }
 }

@@ -12,10 +12,11 @@
 package org.projectbuendia.client.ui.lists;
 
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
 import org.projectbuendia.client.models.AppModel;
+
+import java.util.List;
 
 /** A controller for setting up user-selectable filters in a patient list. */
 public class PatientFilterController {
@@ -25,7 +26,7 @@ public class PatientFilterController {
     private final Ui mUi;
 
     public interface Ui {
-        public void populateActionBar(SimpleSelectionFilter[] filters);
+        public void populateActionBar(List<SimpleSelectionFilter<?>> filters);
     }
 
     /**
@@ -42,19 +43,8 @@ public class PatientFilterController {
         mAppModel = appModel;
         mCrudEventBus = crudEventBus;
         mLocale = locale;
-    }
-
-    /** Asynchronously adds filters to the action bar based on location data. */
-    public void setupActionBarAsync() {
-        mCrudEventBus.register(new AppLocationTreeFetchedSubscriber());
-        mAppModel.fetchLocationTree(mCrudEventBus, mLocale);
-    }
-
-    private final class AppLocationTreeFetchedSubscriber {
-        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            mCrudEventBus.unregister(this);
-            mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(event.tree));
-            event.tree.close();
-        }
+        mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(
+            mAppModel.getLocationTree(mLocale)
+        ));
     }
 }

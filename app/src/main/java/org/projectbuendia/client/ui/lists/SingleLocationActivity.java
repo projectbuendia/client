@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.NewLocation;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.utils.PatientCountDisplay;
@@ -26,11 +27,10 @@ public class SingleLocationActivity extends BaseSearchablePatientListActivity {
     private String mLocationUuid;
     private long mPatientCount;
 
-    public static void start(Context caller, String locationUuid, String locationName, long patientCount) {
+    public static void start(Context caller, NewLocation location) {
         Intent intent = new Intent(caller, SingleLocationActivity.class);
-        intent.putExtra("uuid", locationUuid);
-        intent.putExtra("name", locationName);
-        intent.putExtra("count", patientCount);
+        intent.putExtra("uuid", location.uuid);
+        intent.putExtra("name", location.name);
         caller.startActivity(intent);
     }
 
@@ -39,8 +39,6 @@ public class SingleLocationActivity extends BaseSearchablePatientListActivity {
 
         mLocationUuid = getIntent().getStringExtra("uuid");
         mLocationName = getIntent().getStringExtra("name");
-        mPatientCount = getIntent().getLongExtra("count", 0);
-        setTitle(PatientCountDisplay.getPatientCountTitle(this, mPatientCount, mLocationName));
         setContentView(R.layout.activity_round);
         getSearchController().setLocationFilter(mLocationUuid);
     }

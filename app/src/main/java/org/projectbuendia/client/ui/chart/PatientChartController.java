@@ -275,9 +275,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
-        if (mLocationTree != null) {
-            mLocationTree.close();
-        }
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {

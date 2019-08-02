@@ -111,14 +111,8 @@ public class AppModel {
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
-    public NewLocationTree getLocationTree() {
-        synchronized (loadedTreeLock) {
-            return loadedTree;
-        }
-    }
-
-    public void getLocationTree(String locale, Receiver<NewLocationTree> receiver) {
-        NewLocationTree result = null;
+    public NewLocationTree getLocationTree(String locale) {
+        NewLocationTree tree;
         synchronized (loadedTreeLock) {
             if (loadedTree == null || !eq(locale, loadedTreeLocale)) {
                 loadedTree = loadLocationTree(locale);
@@ -129,15 +123,26 @@ public class AppModel {
                 registerTreeContentObservers();
                 treeObserversRegistered = true;
             }
-            onLocationTreeRebuiltListener = rebuiltListener;
-            onLocationTreeUpdatedListener = updatedListener;
         }
         return tree;
     }
 
-    public void removeLocationTreeListeners() {
-        onLocationTreeRebuiltListener = null;
-        onLocationTreeUpdatedListener = null;
+    public void setLocationTreeRebuiltListener(Receiver<NewLocationTree> listener) {
+        synchronized (loadedTreeLock) {
+            onLocationTreeRebuiltListener = listener;
+            if (listener != null && loadedTree == null && loadedTreeLocale != null) {
+                loadedTree = loadLocationTree(loadedTreeLocale);
+            }
+        }
+    }
+
+    public void setLocationTreeUpdatedListener(Receiver<NewLocationTree> listener) {
+        synchronized (loadedTreeLock) {
+            onLocationTreeUpdatedListener = listener;
+            if (listener != null && loadedTree == null && loadedTreeLocale != null) {
+                loadedTree = loadLocationTree(loadedTreeLocale);
+            }
+        }
     }
 
     private NewLocationTree loadLocationTree(String locale) {

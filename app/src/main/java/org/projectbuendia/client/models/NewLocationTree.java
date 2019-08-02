@@ -140,6 +140,11 @@ public class NewLocationTree {
         return locationsByUuid.get(uuid);
     }
 
+    /** Gets the number of locations in this tree. */
+    public int size() {
+        return locations.length;
+    }
+
     /** Gets the parent location of the given location. */
     public @Nullable NewLocation getParent(@Nonnull NewLocation location) {
         return get(parentUuidsByUuid.get(location.uuid));
@@ -176,6 +181,15 @@ public class NewLocationTree {
         return Arrays.asList(locations);
     }
 
+    /** Gets a list of all the leaf nodes in depth-first order. */
+    public @Nonnull List<NewLocation> getLeaves() {
+        List<NewLocation> leaves = new ArrayList<>();
+        for (NewLocation location : locations) {
+            if (isLeaf(location)) leaves.add(location);
+        }
+        return leaves;
+    }
+
     /** Given a node, returns an ordered list of its immediate children. */
     public @Nonnull List<NewLocation> getChildren(@Nonnull NewLocation parent) {
         List<NewLocation> children = new ArrayList<>();
@@ -186,6 +200,7 @@ public class NewLocationTree {
         }
         return children;
     }
+
 
     /** Given a node, returns a list containing it and its descendants in depth-first order. */
     public @Nonnull List<NewLocation> getSubtree(@Nonnull NewLocation root) {

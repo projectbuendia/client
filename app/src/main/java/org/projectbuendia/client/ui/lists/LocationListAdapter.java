@@ -21,8 +21,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.NewLocation;
+import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
@@ -33,16 +33,16 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /** {@link ArrayAdapter} for displaying a list of locations. */
-public class LocationListAdapter extends ArrayAdapter<Location> {
+public class LocationListAdapter extends ArrayAdapter<NewLocation> {
 
     private final Context mContext;
-    private final LocationTree mLocationTree;
+    private final NewLocationTree mLocationTree;
     private Optional<String> mSelectedLocationUuid;
 
     public LocationListAdapter(
         Context context,
-        List<Location> locations,
-        LocationTree locationTree,
+        List<NewLocation> locations,
+        NewLocationTree locationTree,
         Optional<String> selectedLocation) {
         super(context, R.layout.listview_cell_location_selection, locations);
         mContext = context;
@@ -75,12 +75,11 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
             view.setTag(holder);
         }
 
-        Location location = getItem(position);
-        // TODO/robustness: This line only works if 'location' is a tent; otherwise zone is ResZone.UNKNOWN.
-        ResZone.Resolved zone = Zones.getResZone(
-            location.parentUuid).resolve(mContext.getResources());
+        NewLocation location = getItem(position);
+        ResZone.Resolved zone = Zones.getResZone(mLocationTree.getParent(location).uuid)
+            .resolve(mContext.getResources());
 
-        long count = mLocationTree.getTotalPatientCount(location);
+        long count = mLocationTree.countPatientsIn(location);
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle("" + count);
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());
