@@ -11,6 +11,7 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonLocation;
+import org.projectbuendia.client.providers.Contracts.LocalizedLocations;
 import org.projectbuendia.client.providers.Contracts.LocationNames;
 import org.projectbuendia.client.providers.Contracts.Locations;
 import org.projectbuendia.client.utils.Logger;
@@ -36,6 +37,7 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
         providerClient.applyBatch(ops);
         contentResolver.notifyChange(Locations.URI, null, false);
         contentResolver.notifyChange(LocationNames.URI, null, false);
+        contentResolver.notifyChange(LocalizedLocations.URI, null, false);
     }
 
     /**

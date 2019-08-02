@@ -11,15 +11,10 @@
 
 package org.projectbuendia.client.models;
 
-import android.content.ContentResolver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 
-import com.google.common.collect.ImmutableList;
-
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.utils.Receiver;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -37,51 +32,15 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
 /** An ordered hierarchy of locations with their localized names. */
 public class NewLocationTree {
-    private static ContentResolver resolver = null;
-
-    private static NewLocationTree loadedTree = null;
-    private static String requestedLocale = null;
-
     private final NewLocation[] locations;
     private final Map<String, NewLocation> locationsByUuid = new HashMap<>();
     private final Map<String, String> parentUuidsByUuid = new HashMap<>();
-    private final Set<String> nonleafLocations = new HashSet<>();
+    private final Set<String> nonleafUuids = new HashSet<>();
 
     private final Object patientCountLock = new Object();
     private final Map<String, Integer> numPatientsAtNode = new HashMap<>();
     private final Map<String, Integer> numPatientsInSubtree = new HashMap<>();
     private int totalNumPatients;
-
-    public static void load(ContentResolver newResolver, String locale, Receiver<NewLocationTree> receiver) {
-        synchronized (NewLocationTree.class) {
-            if (loadedTree != null && eq(requestedLocale, locale)) {
-                receiver.receive(loadedTree);
-            }
-        }
-        // Utils.runInBackground(() -> loadTree(newResolver, locale), receiver);
-        receiver.receive(loadTree(newResolver, locale));
-    }
-
-    public static void invalidate() {
-        synchronized (NewLocationTree.class) {
-            resolver = null;
-            requestedLocale = null;
-        }
-    };
-
-    private static NewLocationTree loadTree(ContentResolver newResolver, String locale) {
-        synchronized (NewLocationTree.class) {
-            resolver = newResolver;
-            loadedTree = null;
-            requestedLocale = locale;
-
-            Uri uri = Contracts.getLocalizedLocationsUri(locale);
-            try (Cursor cursor = resolver.query(uri, null, null, null, null)) {
-                loadedTree = new NewLocationTree(cursor, locale);
-            }
-            return loadedTree;
-        }
-    }
 
     public NewLocationTree(Cursor cursor, String locale) {
         List<String> uuids = new ArrayList<>();
@@ -104,7 +63,7 @@ public class NewLocationTree {
             numPatientsInSubtree.put(uuid, 0);  // counts will be added below
             totalNumPatients += numPatients;
             if (parentUuid != null) {
-                nonleafLocations.add(parentUuid);
+                nonleafUuids.add(parentUuid);
             }
         }
 
@@ -171,14 +130,9 @@ public class NewLocationTree {
         }
     }
 
-    /** Returns true if the specified UUID exists in this tree. */
-    private boolean contains(String uuid) {
-        return locationsByUuid.containsKey(uuid);
-    }
-
     /** Returns true if the specified location exists in this tree. */
     public boolean contains(NewLocation location) {
-        return contains(location.uuid);
+        return locationsByUuid.containsKey(location.uuid);
     }
 
     /** Gets the location with a given UUID. */
@@ -186,48 +140,28 @@ public class NewLocationTree {
         return locationsByUuid.get(uuid);
     }
 
-    /** Given the UUID of a location, gets the UUID of its parent location. */
-    private @Nullable String getParent(@Nonnull String uuid) {
-        return parentUuidsByUuid.get(uuid);
-    }
-
     /** Gets the parent location of the given location. */
     public @Nullable NewLocation getParent(@Nonnull NewLocation location) {
-        return get(getParent(location.uuid));
-    }
-
-    /** Returns true if the specified location is a leaf node. */
-    private boolean isLeaf(@Nonnull String uuid) {
-        return !nonleafLocations.contains(uuid);
+        return get(parentUuidsByUuid.get(location.uuid));
     }
 
     /** Returns true if the given location is a leaf node. */
     public boolean isLeaf(@Nonnull NewLocation location) {
-        return isLeaf(location.uuid);
+        return !nonleafUuids.contains(location.uuid);
     }
 
     /** Given a UUID, counts the patients just at its node. */
-    private int countPatientsAt(@Nonnull String uuid) {
-        synchronized (patientCountLock) {
-            return Utils.toNonnull(numPatientsAtNode.get(uuid), 0);
-        }
-    }
-
-    /** Given a node, counts the patients just at this node. */
     public int countPatientsAt(@Nonnull NewLocation node) {
-        return countPatientsAt(node.uuid);
+        synchronized (patientCountLock) {
+            return Utils.toNonnull(numPatientsAtNode.get(node.uuid), 0);
+        }
     }
 
     /** Given a UUID, counts all the patients in its subtree. */
-    private int countPatientsIn(@Nonnull String uuid) {
-        synchronized (patientCountLock) {
-            return Utils.toNonnull(numPatientsInSubtree.get(uuid), 0);
-        }
-    }
-
-    /** Given a node, counts all the patients in its subtree. */
     public int countPatientsIn(@Nonnull NewLocation root) {
-        return countPatientsIn(root.uuid);
+        synchronized (patientCountLock) {
+            return Utils.toNonnull(numPatientsInSubtree.get(root.uuid), 0);
+        }
     }
 
     /** Gets the count of all patients in the forest. */
@@ -237,15 +171,9 @@ public class NewLocationTree {
         }
     }
 
-    /** Returns an ordered list of the roots of all the trees. */
-    public @Nonnull List<NewLocation> getRoots() {
-        List<NewLocation> roots = new ArrayList<>();
-        for (NewLocation location : locations) {
-            if (location.depth == 1) {
-                roots.add(location);
-            }
-        }
-        return roots;
+    /** Iterate over all the nodes in depth-first order. */
+    public @Nonnull Iterable<NewLocation> allNodes() {
+        return Arrays.asList(locations);
     }
 
     /** Given a node, returns an ordered list of its children. */
@@ -259,14 +187,14 @@ public class NewLocationTree {
         return children;
     }
 
-    /** Given a node, returns an iterator over all its descendants. */
-    public @Nonnull Iterable<NewLocation> getDescendants(@Nonnull NewLocation root) {
+    /** Given a node, returns a list of its descendants in depth-first order. */
+    public @Nonnull List<NewLocation> getDescendants(@Nonnull NewLocation root) {
         List<NewLocation> descendants = new ArrayList<>();
         for (NewLocation location : locations) {
             if (location.isInSubtree(root) && !eq(location, root)) {
                 descendants.add(location);
             }
         }
-        return ImmutableList.copyOf(descendants);
+        return descendants;
     }
 }

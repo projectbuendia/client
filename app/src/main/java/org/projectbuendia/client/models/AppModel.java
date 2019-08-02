@@ -13,9 +13,11 @@ package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.events.CrudEventBus;
@@ -33,7 +35,10 @@ import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Receiver;
 import org.projectbuendia.client.utils.Utils;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * A model that manages all data access within the application.
@@ -57,6 +62,12 @@ public class AppModel {
     private final ContentResolver mContentResolver;
     private final LoaderSet mLoaderSet;
     private final TaskFactory mTaskFactory;
+
+    private final Object loadedTreeLock = new Object();
+    private NewLocationTree loadedTree = null;
+    private String loadedTreeLocale = null;
+    private ContentObserver onLocationChangeObserver = null;
+    private ContentObserver onPatientChangeObserver = null;
 
     /**
      * Returns true iff the model has previously been fully downloaded from the server--that is, if
@@ -97,6 +108,55 @@ public class AppModel {
         values.put(Contracts.Observations.VOIDED,1);
         mContentResolver.update(Contracts.Observations.URI, values, conditions, new String[]{voidObs.Uuid});
         mTaskFactory.voidObsTask(bus, voidObs).execute();
+    }
+
+    public void getLocationTree(String locale, Receiver<NewLocationTree> receiver) {
+        NewLocationTree result = null;
+        synchronized (loadedTreeLock) {
+            if (loadedTree != null && eq(locale, loadedTreeLocale)) {
+                result = loadedTree;
+            }
+        }
+        if (result == null) {
+            // Utils.runInBackground(() -> loadLocationTree(locale), receiver);
+            receiver.receive(loadLocationTree(locale));
+        } else {
+            receiver.receive(result);
+        }
+    }
+
+    private NewLocationTree loadLocationTree(String locale) {
+        Uri uri = Contracts.getLocalizedLocationsUri(locale);
+
+        if (onLocationChangeObserver == null || onPatientChangeObserver == null) {
+            onLocationChangeObserver = new ContentObserver(new Handler()) {
+                @Override public void onChange(boolean selfChange) {
+                    loadLocationTree(null);
+                }
+            };
+            onPatientChangeObserver = new ContentObserver(new Handler()) {
+                @Override public void onChange(boolean selfChange) {
+                    try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
+                        loadedTree.updatePatientCounts(cursor);
+                    }
+                }
+            };
+        }
+
+        synchronized (loadedTreeLock) {
+            mContentResolver.unregisterContentObserver(onLocationChangeObserver);
+            mContentResolver.unregisterContentObserver(onPatientChangeObserver);
+            if (locale == null) {
+                locale = loadedTreeLocale;
+            }
+            try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
+                loadedTree = new NewLocationTree(cursor, locale);
+                loadedTreeLocale = locale;
+            }
+            mContentResolver.registerContentObserver(uri, true, onLocationChangeObserver);
+            mContentResolver.registerContentObserver(Contracts.Patients.URI, true, onPatientChangeObserver);
+            return loadedTree;
+        }
     }
 
     /**

@@ -21,6 +21,7 @@ import android.view.WindowManager;
 import com.google.android.flexbox.FlexboxLayout;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
@@ -31,7 +32,6 @@ import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.lists.LocationOption;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
 import org.projectbuendia.client.utils.ContextUtils;
-import org.projectbuendia.client.utils.LocaleSelector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +43,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 /** A {@link DialogFragment} for updating a patient's location and bed number. */
 public class PatientLocationDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
+    @Inject AppSettings mSettings;
     @Inject CrudEventBus mCrudEventBus;
     private ContextUtils c;
 
@@ -77,7 +78,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
 
         mContainer = c.findView(R.id.list_container);
         mList = new LocationOptionList(mContainer);
-        NewLocationTree.load(c.getContentResolver(), LocaleSelector.getCurrentLocaleTag(), tree -> {
+        mModel.getLocationTree(mSettings.getLocaleTag(), tree -> {
             mList.setOptions(getLocationOptions(tree));
             mList.setSelectedUuid(getArguments().getString("locationUuid"));
         });
