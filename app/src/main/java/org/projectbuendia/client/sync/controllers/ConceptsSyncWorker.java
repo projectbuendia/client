@@ -19,16 +19,15 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Handles syncing concepts. All concepts are fetched everytime. This is okay because concepts are
+ * Handles syncing concepts. All concepts are fetched every time. This is okay because concepts are
  * not a particularly huge data set.
  */
 public class ConceptsSyncWorker implements SyncWorker {
     private static final Logger LOG = Logger.create();
 
-    @Override
-    public void sync(ContentResolver contentResolver, SyncResult syncResult,
-            ContentProviderClient providerClient)
-            throws Throwable {
+    @Override public boolean sync(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<JsonConceptResponse> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
@@ -42,7 +41,7 @@ public class ConceptsSyncWorker implements SyncWorker {
             conceptInsert.put(Contracts.Concepts.XFORM_ID, concept.xform_id);
             conceptInsert.put(Contracts.Concepts.CONCEPT_TYPE, concept.type.name());
             conceptInserts.add(conceptInsert);
-            syncResult.stats.numInserts++;
+            result.stats.numInserts++;
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
                 String locale = entry.getKey();
                 if (locale == null) {
@@ -59,14 +58,15 @@ public class ConceptsSyncWorker implements SyncWorker {
                 conceptNameInsert.put(Contracts.ConceptNames.LOCALE, locale);
                 conceptNameInsert.put(Contracts.ConceptNames.NAME, name);
                 conceptNameInserts.add(conceptNameInsert);
-                syncResult.stats.numInserts++;
+                result.stats.numInserts++;
             }
         }
-        providerClient.bulkInsert(Contracts.Concepts.URI,
+        client.bulkInsert(Contracts.Concepts.URI,
                 conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
-        providerClient.bulkInsert(Contracts.ConceptNames.URI,
+        client.bulkInsert(Contracts.ConceptNames.URI,
                 conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
 
         ChartDataHelper.invalidateLoadedConceptData();
+        return true;
     }
 }

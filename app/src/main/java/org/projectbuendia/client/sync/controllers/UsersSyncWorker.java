@@ -16,10 +16,11 @@ import java.util.concurrent.ExecutionException;
  * users is fairly small.
  */
 public class UsersSyncWorker implements SyncWorker {
-    @Override
-    public void sync(ContentResolver contentResolver, SyncResult syncResult, ContentProviderClient providerClient)
-            throws InterruptedException, ExecutionException, UserManager.UserSyncException,
+    @Override public boolean sync(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws InterruptedException, ExecutionException, UserManager.UserSyncException,
             RemoteException, OperationApplicationException {
         App.getUserManager().syncKnownUsersSynchronously();
+        return true;
     }
 }

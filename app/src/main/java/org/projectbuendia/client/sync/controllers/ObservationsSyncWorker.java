@@ -76,13 +76,11 @@ public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservatio
         return cvs;
     }
 
-    @Override
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws RemoteException {
+    @Override public void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws RemoteException {
         // Remove all temporary observations now we have the real ones
-        providerClient.delete(Observations.URI,
+        client.delete(Observations.URI,
                 Observations.UUID + " IS NULL",
                 new String[0]);
     }

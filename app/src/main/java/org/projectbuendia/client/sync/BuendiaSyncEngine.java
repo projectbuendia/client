@@ -66,17 +66,17 @@ public class BuendiaSyncEngine implements SyncEngine {
     /** The available phases, in the default order in which to run them. */
     public enum Phase {
         USERS(R.string.syncing_users, new UsersSyncWorker()),
+        LOCATIONS(R.string.syncing_locations, new LocationsSyncWorker()),
+        PATIENTS(R.string.syncing_patients, new PatientsSyncWorker()),
         OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncWorker()),
         ORDERS(R.string.syncing_orders, new OrdersSyncWorker()),
-        PATIENTS(R.string.syncing_patients, new PatientsSyncWorker()),
-        LOCATIONS(R.string.syncing_locations, new LocationsSyncWorker()),
         CHART_ITEMS(R.string.syncing_charts, new ChartsSyncWorker()),
         FORMS(R.string.syncing_forms, new FormsSyncWorker()),
         CONCEPTS(R.string.syncing_concepts, new ConceptsSyncWorker());
 
         public final @StringRes int message;
         public final SyncWorker worker;
-        public static final Phase[] ALL = Phase.values();
+        public static final Phase[] ALL_PHASES = Phase.values();
 
         Phase(int message, SyncWorker worker) {
             this.message = message;
@@ -134,7 +134,7 @@ public class BuendiaSyncEngine implements SyncEngine {
         }
 
         List<Phase> phases = getPhases(options);
-        boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL));
+        boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL_PHASES));
         LOG.start("sync", "options = %s", options);
 
         broadcastSyncProgress(0, 1, R.string.sync_in_progress);
@@ -146,20 +146,29 @@ public class BuendiaSyncEngine implements SyncEngine {
                     storeFullSyncStartTime(client, Instant.now());
                 }
                 LOG.elapsed("sync", "Starting phases");
-                int p = 0;
+                int completedWork = 0;
+                int totalWork = phases.size();
+
                 for (Phase phase : phases) {
                     checkCancellation("before " + phase);
-                    broadcastSyncProgress(p, phases.size(), phase.message);
-                    phase.worker.sync(contentResolver, result, client);
+                    broadcastSyncProgress(completedWork, totalWork, phase.message);
+                    phase.worker.initialize(contentResolver, result, client);
+                    boolean done = false;
+                    while (!done) {
+                        done = phase.worker.sync(contentResolver, result, client);
+                        completedWork++;
+                        if (!done) totalWork++;
+                        broadcastSyncProgress(completedWork, totalWork, phase.message);
+                    }
+                    phase.worker.finalize(contentResolver, result, client);
                     LOG.elapsed("sync", "Completed phase %s", phase);
-                    p++;
                 }
                 broadcastSyncProgress(1, 1, R.string.completing_sync);
                 if (fullSync) {
                     storeFullSyncEndTime(client, Instant.now());
                 }
             } catch (CancellationException e) {
-                LOG.i(e, "Sync canceled");
+                LOG.i(e, "Sync cancelled");
                 tx.rollback();
                 // Reset canceled state so that it doesn't interfere with next sync.
                 broadcastSyncStatus(SyncStatus.CANCELLED);

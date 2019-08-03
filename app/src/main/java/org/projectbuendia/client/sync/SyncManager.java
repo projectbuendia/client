@@ -68,7 +68,7 @@ public class SyncManager {
     public void initPeriodicSyncs() {
         setPeriodicSync(30, Phase.PATIENTS);
         setPeriodicSync(60, Phase.OBSERVATIONS, Phase.ORDERS);
-        setPeriodicSync(180, Phase.ALL);
+        setPeriodicSync(180, Phase.ALL_PHASES);
     }
 
     /** Starts a sync now. */
@@ -79,7 +79,7 @@ public class SyncManager {
 
     /** Starts a sync of everything now. */
     public void syncAll() {
-        sync(Phase.ALL);
+        sync(Phase.ALL_PHASES);
     }
 
     /**
@@ -107,6 +107,7 @@ public class SyncManager {
                     int numerator = intent.getIntExtra(SYNC_NUMERATOR, 0);
                     int denominator = intent.getIntExtra(SYNC_DENOMINATOR, 1);
                     int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, R.string.sync_in_progress);
+                    LOG.i("SyncStatus: IN_PROGRESS: %d/%d", numerator, denominator);
                     EventBus.getDefault().post(new SyncProgressEvent(numerator, denominator, messageId));
                     break;
                 case COMPLETED:

@@ -37,9 +37,8 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
         super("patients", Contracts.Table.PATIENTS, JsonPatient.class);
     }
 
-    @Override
-    protected ArrayList<ContentProviderOperation> getUpdateOps(
-            JsonPatient[] patients, SyncResult syncResult) {
+    @Override protected ArrayList<ContentProviderOperation> getUpdateOps(
+        JsonPatient[] patients, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         int numInserts = 0;
         int numDeletes = 0;
@@ -68,11 +67,8 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
         return ContentProviderOperation.newDelete(uri).build();
     }
 
-    @Override
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Contracts.Patients.URI, null, false);
+    @Override public void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client) {
+        resolver.notifyChange(Contracts.Patients.URI, null, false);
     }
 }

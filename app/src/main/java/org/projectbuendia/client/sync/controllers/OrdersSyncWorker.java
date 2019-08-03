@@ -60,11 +60,8 @@ public class OrdersSyncWorker extends IncrementalSyncWorker<JsonOrder> {
         return ContentProviderOperation.newDelete(uri).build();
     }
 
-    @Override
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Orders.URI, null, false);
+    @Override public void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client) {
+        resolver.notifyChange(Orders.URI, null, false);
     }
 }

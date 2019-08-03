@@ -76,57 +76,30 @@ public abstract class IncrementalSyncWorker<T> implements SyncWorker {
         this.clazz = clazz;
     }
 
-    @Override
-    public final void sync(ContentResolver contentResolver, SyncResult syncResult,
+    @Override public final boolean sync(ContentResolver contentResolver, SyncResult syncResult,
         ContentProviderClient providerClient) throws Throwable {
-
-        beforeSyncStarted(contentResolver, syncResult, providerClient);
 
         String syncToken = BuendiaSyncEngine.getLastSyncToken(providerClient, dbTable);
         LOG.i("%s: Using sync token %s", dbTable, syncToken);
 
-        IncrementalSyncResponse<T> response;
-
-        do {
-            RequestFuture<IncrementalSyncResponse<T>> future = RequestFuture.newFuture();
-            createRequest(syncToken, future, future);
-            response = future.get();
-            ArrayList<ContentProviderOperation> ops = getUpdateOps(response.results, syncResult);
-            providerClient.applyBatch(ops);
-            LOG.i("%s: Applied %d db ops", dbTable, ops.size());
-            syncToken = response.syncToken;
-        } while (response.more);
+        RequestFuture<IncrementalSyncResponse<T>> future = RequestFuture.newFuture();
+        createRequest(syncToken, future, future);
+        IncrementalSyncResponse<T> response = future.get();
+        ArrayList<ContentProviderOperation> ops = getUpdateOps(response.results, syncResult);
+        providerClient.applyBatch(ops);
+        LOG.i("%s: Applied %d db ops", dbTable, ops.size());
+        syncToken = response.syncToken;
 
         LOG.i("%s: Saving sync token %s", dbTable, syncToken);
         BuendiaSyncEngine.storeSyncToken(providerClient, dbTable, response.syncToken);
-
-        afterSyncFinished(contentResolver, syncResult, providerClient);
+        return !response.more;
     }
 
     // Mandatory callback
 
-    /**
-     * Produces a list of the operations needed to bring the local database in sync with the server.
-     */
-    protected abstract ArrayList<ContentProviderOperation> getUpdateOps(
-            T[] list, SyncResult syncResult);
+    /** Produces a list of the operations needed to bring the local database in sync with the server. */
+    protected abstract ArrayList<ContentProviderOperation> getUpdateOps(T[] list, SyncResult result);
 
-    // Optional callbacks
-
-    /** Called before any records have been synced from the server. */
-    protected void beforeSyncStarted(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws Throwable {}
-
-    /**
-     * Called after all records have been synced from the server, even if the number of synced
-     * records was zero.
-     */
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws Throwable {}
 
     private void createRequest(
             @Nullable String lastSyncToken,

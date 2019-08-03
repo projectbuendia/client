@@ -27,10 +27,9 @@ import java.util.ArrayList;
 public class ChartsSyncWorker implements SyncWorker {
     private static final Logger LOG = Logger.create();
 
-    @Override
-    public void sync(ContentResolver contentResolver, SyncResult syncResult,
-            ContentProviderClient providerClient)
-            throws Throwable {
+    @Override public boolean sync(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<JsonChart> future = RequestFuture.newFuture();
         // errors handled by caller
@@ -38,9 +37,11 @@ public class ChartsSyncWorker implements SyncWorker {
         final JsonChart chart = future.get();
 
         // When we do a chart update, delete everything first, then insert all the new rows.
-        providerClient.delete(Contracts.ChartItems.URI, null, null);
-        syncResult.stats.numDeletes++;
-        providerClient.applyBatch(getChartUpdateOps(chart, syncResult));
+        client.delete(Contracts.ChartItems.URI, null, null);
+        result.stats.numDeletes++;
+        client.applyBatch(getChartUpdateOps(chart, result));
+
+        return true;
     }
 
     /** Converts a JsonChart response into appropriate inserts in the chart table. */

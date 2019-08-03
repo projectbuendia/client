@@ -33,23 +33,23 @@ public class FormsSyncWorker implements SyncWorker {
     private static boolean isDisabled = false;
     private static final Object lock = new Object();
 
-    @Override
-    public void sync(ContentResolver contentResolver, SyncResult syncResult,
-            ContentProviderClient providerClient)
-            throws Throwable {
+    @Override public boolean sync(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable {
         synchronized (lock) {
             if (isDisabled) {
                 LOG.w("Form sync is temporarily disabled; skipping this phase");
-                return;
+                return true;
             }
 
             ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-            ops.addAll(getFormUpdateOps(syncResult));
-            providerClient.applyBatch(ops);
+            ops.addAll(getFormUpdateOps(result));
+            client.applyBatch(ops);
             LOG.i("Finished updating forms (" + ops.size() + " db ops)");
-            contentResolver.notifyChange(Contracts.Forms.URI, null, false);
+            resolver.notifyChange(Contracts.Forms.URI, null, false);
 
             OdkActivityLauncher.fetchAndCacheAllXforms();
+            return true;
         }
     }
 

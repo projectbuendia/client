@@ -5,15 +5,25 @@ import android.content.ContentResolver;
 import android.content.SyncResult;
 
 /**
- * A SyncWorker executes the unit of work for a specific sync phase. Each
- * SyncWorker should be a lightweight object that does all work in the {@link
- * #sync(ContentResolver, SyncResult, ContentProviderClient)} method.
+ * A SyncWorker executes the work for a specific sync phase.  First, initialize()
+ * is called; then sync() is called repeatedly until it returns true to indicate
+ * completion; and finally finalize() is called.
+ *
+ * An exception thrown in any of the three methods aborts the entire sync,
+ * skipping any remaining phases.
  */
 public interface SyncWorker {
-    // TODO: Replace `throws Throwable` with something more focussed.
-    void sync(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient)
-            throws Throwable;
+    // TODO: Replace Throwable with something more specific.
+
+    default void initialize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable { }
+
+    boolean sync(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable;
+
+    default void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable { }
 }
