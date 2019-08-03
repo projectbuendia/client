@@ -16,10 +16,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
-import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.utils.Logger;
@@ -31,11 +31,10 @@ public class SyncManager {
     private static final Logger LOG = Logger.create();
 
     static final String SYNC_STATUS = "sync-status";
-    static final int STARTED = 1;
-    static final int COMPLETED = 2;
-    static final int FAILED = 3;
-    static final int IN_PROGRESS = 4;
-    static final int CANCELED = 5;
+    enum SyncStatus {
+        IN_PROGRESS, COMPLETED, FAILED, CANCELLED
+    }
+
     /**
      * Intent extras using this key are integers representing the sync progress completed so far,
      * as a percentage.
@@ -105,11 +104,12 @@ public class SyncManager {
     /** Listens for sync status events that are broadcast by the BuendiaSyncEngine. */
     public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
-            int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
-            switch (syncStatus) {
-                case STARTED:
-                    LOG.i("SyncStatus: STARTED");
-                    EventBus.getDefault().post(new SyncStartedEvent());
+            SyncStatus status = (SyncStatus) intent.getSerializableExtra(SYNC_STATUS);
+            switch (status) {
+                case IN_PROGRESS:
+                    int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
+                    int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, R.string.sync_in_progress);
+                    EventBus.getDefault().post(new SyncProgressEvent(progress, messageId));
                     break;
                 case COMPLETED:
                     LOG.i("SyncStatus: COMPLETED");
@@ -119,17 +119,10 @@ public class SyncManager {
                     LOG.i("SyncStatus: FAILED");
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
-                case IN_PROGRESS:
-                    int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
-                    int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, 0);
-                    EventBus.getDefault().post(new SyncProgressEvent(progress, messageId));
-                    break;
-                case CANCELED:
-                    LOG.i("SyncStatus: CANCELED");
+                case CANCELLED:
+                    LOG.i("SyncStatus: CANCELLED");
                     EventBus.getDefault().post(new SyncCanceledEvent());
                     break;
-                default:
-                    LOG.i("SyncStatus: unknown code %d", syncStatus);
             }
         }
     }

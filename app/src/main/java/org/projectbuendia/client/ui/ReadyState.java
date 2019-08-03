@@ -11,12 +11,10 @@
 
 package org.projectbuendia.client.ui;
 
-/**
- * Represents the current loading state of the app--getting data locally, syncing from a remote
- * source, or not waiting on data.
- */
-public enum LoadingState {
-    SYNCING,
-    LOADING,
-    LOADED
+/** The readiness state of an activity that uses data from a remote or local source. */
+public enum ReadyState {
+    SYNCING,  // syncing data from a remote source
+    LOADING,  // loading data from the local database
+    READY,  // all necessary data is available
+    ERROR;  // necessary data could not be obtained
 }

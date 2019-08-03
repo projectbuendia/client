@@ -24,7 +24,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.LoadingState;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -71,7 +71,7 @@ final class LocationListController {
 
         void showSyncFailedDialog(boolean show);
 
-        void setLoadingState(LoadingState loadingState);
+        void setReadyState(ReadyState state);
 
         void finish();
     }
@@ -86,11 +86,9 @@ final class LocationListController {
 
         void setDischargedPatientCount(long dischargedPatientCount);
 
-        void setBusyLoading(boolean busy);
+        void setReadyState(ReadyState state);
 
-        void showIncrementalSyncProgress(int progress, int messageId);
-
-        void resetSyncProgress();
+        void showSyncProgress(int progress, Integer messageId);
 
         void showSyncCancelRequested();
     }
@@ -141,19 +139,19 @@ final class LocationListController {
     public void startInitialSync() {
         mInitialSyncRunning = true;
         if (!mSyncManager.isSyncRunningOrPending()) {
-            mUi.setLoadingState(LoadingState.SYNCING);
+            mUi.setReadyState(ReadyState.SYNCING);
             for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.resetSyncProgress();
+                fragmentUi.showSyncProgress(0, 0);
             }
             mSyncManager.syncAll();
         }
     }
 
     private void updateUi() {
-        updateLoadingState();
-        for (LocationFragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.setBusyLoading(mForest == null);
-            if (mForest != null) {
+        updateReadyState();
+
+        if (mForest != null) {
+            for (LocationFragmentUi fragmentUi : mFragmentUis) {
                 long dischargedPatientCount = mForest.countPatientsIn(mDischargedZone);
                 long totalPatientCount = mForest.countAllPatients();
                 fragmentUi.setLocations(mForest, mForest.getLeaves());
@@ -164,9 +162,14 @@ final class LocationListController {
         }
     }
 
-    private void updateLoadingState() {
-        mUi.setLoadingState(mForest != null ? LoadingState.LOADED :
-            mInitialSyncRunning ? LoadingState.SYNCING : LoadingState.LOADING);
+    private void updateReadyState() {
+        ReadyState state = mForest != null ? ReadyState.READY :
+            mInitialSyncRunning ? ReadyState.SYNCING : ReadyState.LOADING;
+
+        mUi.setReadyState(state);
+        for (LocationFragmentUi fragmentUi : mFragmentUis) {
+            fragmentUi.setReadyState(state);
+        }
     }
 
     public void attachFragmentUi(LocationFragmentUi fragmentUi) {
@@ -244,7 +247,7 @@ final class LocationListController {
         public void onEventMainThread(SyncProgressEvent event) {
             if (mInitialSyncRunning) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.showIncrementalSyncProgress(event.progress, event.messageId);
+                    fragmentUi.showSyncProgress(event.progress, event.messageId);
                 }
             }
         }
@@ -252,7 +255,7 @@ final class LocationListController {
         public void onEventMainThread(SyncStartedEvent event) {
             if (mInitialSyncRunning) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.resetSyncProgress();
+                    fragmentUi.showSyncProgress(0, 0);
                 }
             }
         }
@@ -266,7 +269,7 @@ final class LocationListController {
         public void onEventMainThread(SyncFailedEvent event) {
             if (mInitialSyncRunning) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.resetSyncProgress();
+                    fragmentUi.showSyncProgress(0, 0);
                 }
                 mUi.showSyncFailedDialog(true);
                 Utils.logEvent("sync_failed_dialog_shown");

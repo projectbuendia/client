@@ -28,6 +28,7 @@ import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.PatientListTypedCursorAdapter;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -182,7 +183,7 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         @Override public void showSpinner(boolean show) {
-            changeState(show ? State.LOADING : State.LOADED);
+            setReadyState(show ? ReadyState.LOADING : ReadyState.READY);
         }
     }
 

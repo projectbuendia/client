@@ -33,7 +33,7 @@ import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
-import org.projectbuendia.client.ui.LoadingState;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
@@ -83,11 +83,11 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
         MenuItem search = menu.findItem(R.id.action_search);
         setMenuBarIcon(search, FontAwesomeIcons.fa_filter);
-        search.setVisible(getLoadingState() == LoadingState.LOADED);
+        search.setVisible(getReadyState() == ReadyState.READY);
 
         MenuItem addPatient = menu.findItem(R.id.action_new_patient);
         setMenuBarIcon(addPatient, FontAwesomeIcons.fa_user_plus);
-        addPatient.setVisible(getLoadingState() == LoadingState.LOADED);
+        addPatient.setVisible(getReadyState() == ReadyState.READY);
 
         mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);

@@ -36,6 +36,7 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
 import org.projectbuendia.client.providers.DatabaseTransaction;
+import org.projectbuendia.client.sync.SyncManager.SyncStatus;
 import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseRunnable;
 import org.projectbuendia.client.sync.controllers.FormsSyncPhaseRunnable;
@@ -114,7 +115,6 @@ public class BuendiaSyncEngine implements SyncEngine {
     /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
     @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
         isCancelled = false;
-        broadcastSyncStatus(SyncManager.STARTED);
 
         // If we can't access the Buendia API, short-circuit. Before this check was added, sync
         // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
@@ -122,14 +122,14 @@ public class BuendiaSyncEngine implements SyncEngine {
         // made a determination that the server is definitely accessible.
         if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
             LOG.e("Abort sync: Buendia API is unavailable.");
-            broadcastSyncStatus(SyncManager.FAILED);
+            broadcastSyncStatus(SyncStatus.FAILED);
             return;
         }
 
         try {
             checkCancellation("before work started");
         } catch (CancellationException e) {
-            broadcastSyncStatus(SyncManager.CANCELED);
+            broadcastSyncStatus(SyncStatus.CANCELLED);
             return;
         }
 
@@ -162,23 +162,23 @@ public class BuendiaSyncEngine implements SyncEngine {
                 LOG.i(e, "Sync canceled");
                 tx.rollback();
                 // Reset canceled state so that it doesn't interfere with next sync.
-                broadcastSyncStatus(SyncManager.CANCELED);
+                broadcastSyncStatus(SyncStatus.CANCELLED);
                 return;
             } catch (OperationApplicationException e) {
                 LOG.e(e, "Error updating database during sync");
                 tx.rollback();
                 result.databaseError = true;
-                broadcastSyncStatus(SyncManager.FAILED);
+                broadcastSyncStatus(SyncStatus.FAILED);
                 return;
             } catch (Throwable e) {
                 LOG.e(e, "Error during sync");
                 tx.rollback();
                 result.stats.numIoExceptions++;
-                broadcastSyncStatus(SyncManager.FAILED);
+                broadcastSyncStatus(SyncStatus.FAILED);
                 return;
             }
         }
-        broadcastSyncStatus(SyncManager.COMPLETED);
+        broadcastSyncStatus(SyncStatus.COMPLETED);
         LOG.finish("sync");
     }
 
@@ -196,7 +196,7 @@ public class BuendiaSyncEngine implements SyncEngine {
         }
     }
 
-    private void broadcastSyncStatus(int status) {
+    private void broadcastSyncStatus(SyncStatus status) {
         context.sendBroadcast(
             new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
                 .putExtra(SyncManager.SYNC_STATUS, status)
@@ -207,7 +207,7 @@ public class BuendiaSyncEngine implements SyncEngine {
     private void broadcastSyncProgress(int progress, @StringRes int messageId) {
         context.sendBroadcast(
             new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
-                .putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS)
+                .putExtra(SyncManager.SYNC_STATUS, SyncStatus.IN_PROGRESS)
                 .putExtra(SyncManager.SYNC_PROGRESS, progress)
                 .putExtra(SyncManager.SYNC_MESSAGE_ID, messageId)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)

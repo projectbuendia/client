@@ -59,7 +59,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     protected UpdateNotificationController mUpdateNotificationController = null;
 
-    private LoadingState mLoadingState = LoadingState.LOADED;
+    private ReadyState mReadyState = ReadyState.READY;
 
     /**
      * {@inheritDoc}
@@ -228,17 +228,14 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onStop();
     }
 
-    protected LoadingState getLoadingState() {
-        return mLoadingState;
+    protected ReadyState getReadyState() {
+        return mReadyState;
     }
 
-    /**
-     * Changes the state of this activity, changing the set of available buttons if necessary.
-     * @param loadingState the new activity state
-     */
-    protected void setLoadingState(LoadingState loadingState) {
-        if (mLoadingState != loadingState) {
-            mLoadingState = loadingState;
+    /** Changes the activity's ready state and updates the set of available buttons. */
+    protected void setReadyState(ReadyState state) {
+        if (mReadyState != state) {
+            mReadyState = state;
             invalidateOptionsMenu();
         }
     }
