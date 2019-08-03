@@ -70,7 +70,7 @@ public class LoginActivityTest extends FunctionalTestCase {
     @UiThreadTest
     public void testGuestLoginLogout() {
         // Click guest user
-        expectVisible(viewWithText("GU"));
+        expectVisible(firstViewWithText("GU"));
         screenshot("Test Start");
         click(viewWithText("Guest User"));
 

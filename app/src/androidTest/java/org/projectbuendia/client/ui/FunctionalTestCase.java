@@ -269,36 +269,38 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      * TODO/robustness: Investigate why the current activity isn't available during setUp().
      */
     protected void waitForProgressFragment() {
-        return;
         /* TODO(sdspikes): determine if this function is needed (skipping it makes more tests pass).
          *   It seems to be a busy-loop, which seems not to play nicely with the ui thread, but it's
          *   possible that there's something I'm missing.
          */
-//        Activity activity;
-//        try {
-//            activity = getCurrentActivity();
-//        } catch (Throwable throwable) {
-//            throw new IllegalStateException("Error retrieving current activity", throwable);
-//        }
-//
-//        if (!(activity instanceof FragmentActivity)) {
-//            throw new IllegalStateException("Activity is not a FragmentActivity");
-//        }
-//
-//        FragmentActivity fragmentActivity = (FragmentActivity) activity;
-//        try {
-//            for (Fragment fragment : fragmentActivity.getSupportFragmentManager().getFragments()) {
-//                if (fragment instanceof ProgressFragment) {
-//                    waitForProgressFragment((ProgressFragment) fragment);
-//                    return;
-//                }
-//            }
-//        } catch (NullPointerException e) {
-//            LOG.w("Unable to wait for ProgressFragment to initialize.");
-//            return;
-//        }
-//
-//        throw new IllegalStateException("Could not find a progress fragment to wait on.");
+        return;
+        /*
+        Activity activity;
+        try {
+            activity = getCurrentActivity();
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Error retrieving current activity", throwable);
+        }
+
+        if (!(activity instanceof FragmentActivity)) {
+            throw new IllegalStateException("Activity is not a FragmentActivity");
+        }
+
+        FragmentActivity fragmentActivity = (FragmentActivity) activity;
+        try {
+            for (Fragment fragment : fragmentActivity.getSupportFragmentManager().getFragments()) {
+                if (fragment instanceof ProgressFragment) {
+                    waitForProgressFragment((ProgressFragment) fragment);
+                    return;
+                }
+            }
+        } catch (NullPointerException e) {
+            LOG.w("Unable to wait for ProgressFragment to initialize.");
+            return;
+        }
+
+        throw new IllegalStateException("Could not find a progress fragment to wait on.");
+        */
     }
 
     /**
@@ -317,12 +319,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     /** Checks that the expected zones and tents are shown. */
     protected void inLocationSelectionCheckZonesAndTentsDisplayed() {
         // Should be at location selection screen
-        expectVisibleSoon(viewWithText("ALL PRESENT PATIENTS"));
-
-        // Zones and tents should be visible
-        expectVisible(viewWithText("Triage"));
+        expectVisibleSoon(viewWithText("ALL PATIENTS"));
         expectVisible(viewWithText(LOCATION_NAME));
-        expectVisible(viewWithText("Discharged"));
     }
 
     /** In the location selection activity, click a location tile. */

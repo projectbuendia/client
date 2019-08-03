@@ -42,11 +42,10 @@ public class PatientFilterControllerTest {
     @Test
     @UiThreadTest
     public void testSetupActionBarAsync_passesLocationFilters() {
-        // GIVEN initialized PatientFilterController, after setupActionBarAsync called
-        mController = new PatientFilterController(
-            mMockUi, mMockAppModel, LOCALE);
-        // WHEN location forest fetched
+        // GIVEN a valid location forest
         when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+        // WHEN the PatientFilterController starts
+        mController = new PatientFilterController(mMockUi, mMockAppModel, LOCALE);
         // THEN location filters are passed to the Ui
         verify(mMockUi).populateActionBar(
             argThat(new SimpleSelectionFilterMatchers.ContainsFilterWithName("Triage")));
