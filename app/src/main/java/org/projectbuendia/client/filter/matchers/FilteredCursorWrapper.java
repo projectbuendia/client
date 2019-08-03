@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client.filter.matchers;
 
-import android.database.ContentObserver;
-
 import org.projectbuendia.client.models.TypedCursor;
 
 import java.util.ArrayList;
@@ -43,14 +41,6 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
                 mIndices.add(i);
             }
         }
-    }
-
-    @Override public void registerContentObserver(ContentObserver observer) {
-        mCursor.registerContentObserver(observer);
-    }
-
-    @Override public void unregisterContentObserver(ContentObserver observer) {
-        mCursor.unregisterContentObserver(observer);
     }
 
     @Override public void close() {

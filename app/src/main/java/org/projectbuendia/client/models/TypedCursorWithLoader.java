@@ -85,14 +85,6 @@ public class TypedCursorWithLoader<T> implements TypedCursor<T> {
         mCursor.close();
     }
 
-    @Override public void registerContentObserver(ContentObserver observer) {
-        mCursor.registerContentObserver(observer);
-    }
-
-    @Override public void unregisterContentObserver(ContentObserver observer) {
-        mCursor.unregisterContentObserver(observer);
-    }
-
     private class LazyLoaderIterator implements Iterator<T> {
 
         @Override public boolean hasNext() {

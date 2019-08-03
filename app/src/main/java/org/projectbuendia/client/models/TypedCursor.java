@@ -17,10 +17,13 @@ import android.database.Cursor;
  * A {@link Cursor}-like object that returns items of a specific type.
  * Implementations are most likely NOT thread-safe.
  */
-public interface TypedCursor<T> extends Iterable<T>, Observable {
+public interface TypedCursor<T> extends Iterable<T> {
     /** Returns the number of items available. */
     int getCount();
 
     /** Returns the item at a given index, or null if the index is out of range. */
     T get(int index);
+
+    /** Releases any held resources. */
+    void close();
 }

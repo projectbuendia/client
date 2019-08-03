@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client;
 
-import android.database.ContentObserver;
-
 import com.google.common.collect.Iterators;
 
 import org.projectbuendia.client.models.TypedCursor;
@@ -38,14 +36,6 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
 
     @Override public T get(int position) {
         return mObjects[position];
-    }
-
-    /** No-op. */
-    @Override public void registerContentObserver(ContentObserver observer) {
-    }
-
-    /** No-op. */
-    @Override public void unregisterContentObserver(ContentObserver observer) {
     }
 
     @Override public void close() {
