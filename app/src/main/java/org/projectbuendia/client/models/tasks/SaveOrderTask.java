@@ -25,7 +25,6 @@ import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.events.data.OrderSaveFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonOrder;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
@@ -45,7 +44,6 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
     private static final Logger LOG = Logger.create();
 
     private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final Order mOrder;
@@ -56,13 +54,11 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
     /** Creates a new {@link SaveOrderTask}. */
     public SaveOrderTask(
         TaskFactory taskFactory,
-        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         Order order,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mOrder = order;
@@ -115,7 +111,7 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
         // We use the fetch event to trigger UI updates, both for initial load and for this update.
         mBus.register(this);
         mTaskFactory.newFetchItemTask(
-            Contracts.Orders.URI, null, new UuidFilter(), mUuid,
-            mLoaderSet.orderLoader, mBus).execute();
+            Contracts.Orders.URI, null, new UuidFilter(), mUuid, Order.LOADER, mBus
+        ).execute();
     }
 }

@@ -24,7 +24,6 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.CursorLoader;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 
@@ -33,58 +32,53 @@ import org.projectbuendia.client.net.Server;
  * operations.
  */
 public class TaskFactory {
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
 
     /** Creates a new {@link TaskFactory}. */
     public TaskFactory(
-        LoaderSet loaderSet, Server server, ContentResolver contentResolver) {
-        mLoaderSet = loaderSet;
+        Server server, ContentResolver contentResolver) {
         mServer = server;
         mContentResolver = contentResolver;
     }
 
     /** Creates a new {@link AddPatientTask}. */
     public AddPatientTask newAddPatientTask(PatientDelta patientDelta, CrudEventBus bus) {
-        return new AddPatientTask(this, mLoaderSet, mServer, mContentResolver, patientDelta, bus);
+        return new AddPatientTask(this, mServer, mContentResolver, patientDelta, bus);
     }
 
     public DownloadSinglePatientTask newDownloadSinglePatientTask(
         String patientId, CrudEventBus bus) {
         return new DownloadSinglePatientTask(
-            this, mLoaderSet, mServer, mContentResolver, patientId, bus);
+            this, mServer, mContentResolver, patientId, bus);
     }
 
     public VoidObsTask voidObsTask(CrudEventBus bus, VoidObs voidObs) {
-        return new VoidObsTask(
-                this, mLoaderSet, mServer, mContentResolver, voidObs, bus);
+        return new VoidObsTask(this, mServer, mContentResolver, voidObs, bus);
     }
 
     /** Creates a new {@link UpdatePatientTask}. */
     public UpdatePatientTask newUpdatePatientTask(
         String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
         return new UpdatePatientTask(
-            this, mLoaderSet, mServer, mContentResolver, patientUuid, patientDelta, bus);
+            this, mServer, mContentResolver, patientUuid, patientDelta, bus);
     }
 
     /** Creates a new {@link AddEncounterTask}. */
     public AddEncounterTask newAddEncounterTask(
         Patient patient, Encounter encounter, CrudEventBus bus) {
         return new AddEncounterTask(
-            this, mLoaderSet, mServer, mContentResolver, patient, encounter, bus);
+            this, mServer, mContentResolver, patient, encounter, bus);
     }
 
     /** Creates a new {@link SaveOrderTask}. */
     public SaveOrderTask newSaveOrderTask(Order order, CrudEventBus bus) {
-        return new SaveOrderTask(this, mLoaderSet, mServer, mContentResolver, order, bus);
+        return new SaveOrderTask(this, mServer, mContentResolver, order, bus);
     }
 
     // DO NOT SUBMIT: work out why there's two of these.
-    public VoidObsTask newVoidObsAsyncTask(
-            VoidObs obs, CrudEventBus bus) {
-        return new VoidObsTask(
-                this, mLoaderSet, mServer, mContentResolver, obs, bus);
+    public VoidObsTask newVoidObsAsyncTask(VoidObs obs, CrudEventBus bus) {
+        return new VoidObsTask(this, mServer, mContentResolver, obs, bus);
     }
 
     /** Creates a new {@link DeleteOrderTask}. */

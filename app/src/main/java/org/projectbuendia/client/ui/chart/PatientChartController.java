@@ -614,7 +614,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         // We get a ItemFetchedEvent when the initial patient data is loaded
         // from SQLite or after an edit has been successfully posted to the server.
-        public void onEventMainThread(ItemFetchedEvent event) {
+        public void onEventMainThread(ItemFetchedEvent<?> event) {
             if (event.item instanceof Patient) {
                 mUi.hideWaitDialog();
 

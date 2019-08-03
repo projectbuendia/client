@@ -59,7 +59,6 @@ public class AppModel {
 
     private static final Logger LOG = Logger.create();
     private final ContentResolver mContentResolver;
-    private final LoaderSet mLoaderSet;
     private final TaskFactory mTaskFactory;
 
     private final Object loadedTreeLock = new Object();
@@ -147,14 +146,16 @@ public class AppModel {
     private NewLocationTree loadLocationTree(String locale) {
         Uri uri = Contracts.getLocalizedLocationsUri(locale);
         try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            return new NewLocationTree(cursor, locale);
+            return new NewLocationTree(
+                new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
         }
     }
 
     private void updateLocationTree(NewLocationTree tree) {
         Uri uri = Contracts.getLocalizedLocationsUri("-");
         try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            tree.updatePatientCounts(cursor);
+            tree.updatePatientCounts(
+                new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
         }
     }
 
@@ -222,7 +223,7 @@ public class AppModel {
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
                 //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.GENDER, Patients.LOCATION_UUID},
             Patient.class, mContentResolver,
-            filter, constraint, mLoaderSet.patientLoader, bus);
+            filter, constraint, Patient.LOADER, bus);
         task.execute();
     }
 
@@ -232,8 +233,8 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         mTaskFactory.newFetchItemTask(
-                Contracts.Patients.URI, null, new UuidFilter(), uuid,
-                mLoaderSet.patientLoader, bus).execute();
+            Contracts.Patients.URI, null, new UuidFilter(), uuid, Patient.LOADER, bus
+        ).execute();
     }
 
     /**
@@ -290,10 +291,8 @@ public class AppModel {
     }
 
     AppModel(ContentResolver contentResolver,
-             LoaderSet loaderSet,
              TaskFactory taskFactory) {
         mContentResolver = contentResolver;
-        mLoaderSet = loaderSet;
         mTaskFactory = taskFactory;
     }
 

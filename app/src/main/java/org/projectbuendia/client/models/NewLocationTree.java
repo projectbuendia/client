@@ -11,10 +11,8 @@
 
 package org.projectbuendia.client.models;
 
-import android.database.Cursor;
 import android.support.annotation.Nullable;
 
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -42,28 +40,22 @@ public class NewLocationTree {
     private final Map<String, Integer> numPatientsInSubtree = new HashMap<>();
     private int totalNumPatients;
 
-    public NewLocationTree(Cursor cursor, String locale) {
+    public NewLocationTree(TypedCursor<LocationQueryResult> cursor) {
         List<String> uuids = new ArrayList<>();
+        Map<String, LocationQueryResult> resultsByUuid = new HashMap<>();
         Map<String, String> namesByUuid = new HashMap<>();
         Map<String, String> shortIdsByUuid = new HashMap<>();
         totalNumPatients = 0;
 
-        while (!cursor.isLast() && !cursor.isAfterLast()) {
-            cursor.moveToNext();
-
-            String uuid = Utils.getString(cursor, Contracts.LocalizedLocations.UUID);
-            String parentUuid = Utils.getString(cursor, Contracts.LocalizedLocations.PARENT_UUID);
-            String name = Utils.getString(cursor, Contracts.LocalizedLocations.NAME);
-            int numPatients = Utils.getInt(cursor, Contracts.LocalizedLocations.PATIENT_COUNT, 0);
-
-            uuids.add(uuid);
-            parentUuidsByUuid.put(uuid, parentUuid);
-            namesByUuid.put(uuid, name);
-            numPatientsAtNode.put(uuid, numPatients);
-            numPatientsInSubtree.put(uuid, 0);  // counts will be added below
-            totalNumPatients += numPatients;
-            if (parentUuid != null) {
-                nonleafUuids.add(parentUuid);
+        for (LocationQueryResult result : cursor) {
+            uuids.add(result.uuid);
+            resultsByUuid.put(result.uuid, result);
+            parentUuidsByUuid.put(result.uuid, result.parentUuid);
+            numPatientsAtNode.put(result.uuid, result.numPatients);
+            numPatientsInSubtree.put(result.uuid, 0);  // counts will be added below
+            totalNumPatients += result.numPatients;
+            if (result.parentUuid != null) {
+                nonleafUuids.add(result.parentUuid);
             }
         }
 
@@ -104,27 +96,21 @@ public class NewLocationTree {
         Arrays.sort(locations);
     }
 
-    public void updatePatientCounts(Cursor cursor) {
+    public void updatePatientCounts(TypedCursor<LocationQueryResult> cursor) {
         synchronized (patientCountLock) {
             numPatientsAtNode.clear();
             numPatientsInSubtree.clear();
             totalNumPatients = 0;
 
-            while (!cursor.isLast() && !cursor.isAfterLast()) {
-                cursor.moveToNext();
-
-                String uuid = Utils.getString(cursor, Contracts.LocalizedLocations.UUID);
-                int numPatients = Utils.getInt(cursor, Contracts.LocalizedLocations.PATIENT_COUNT, 0);
-
-                numPatientsAtNode.put(uuid, numPatients);
-                numPatientsInSubtree.put(uuid, 0);  // counts will be added below
-                totalNumPatients += numPatients;
+            for (NewLocation location : locations) {
+                numPatientsInSubtree.put(location.uuid, 0);  // counts will be added below
             }
 
-            for (NewLocation location : locations) {
-                int count = numPatientsAtNode.get(location.uuid);
-                for (String u = location.uuid; u != null; u = parentUuidsByUuid.get(u)) {
-                    numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + count);
+            for (LocationQueryResult result : cursor) {
+                numPatientsAtNode.put(result.uuid, result.numPatients);
+                totalNumPatients += result.numPatients;
+                for (String u = result.uuid; u != null; u = parentUuidsByUuid.get(u)) {
+                    numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + result.numPatients);
                 }
             }
         }

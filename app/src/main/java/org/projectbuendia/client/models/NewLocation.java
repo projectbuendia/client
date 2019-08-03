@@ -19,8 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 /** The app model for a location, including its localized name. */
-@Immutable
-public final class NewLocation extends Base<String> implements Comparable<NewLocation> {
+public final @Immutable class NewLocation extends Base<String> implements Comparable<NewLocation> {
     public final @Nonnull String uuid;  // permanent unique identifier
     public final @Nonnull String path;  // short IDs from root to this node, separated by slashes
     public final @Nonnull String name;
