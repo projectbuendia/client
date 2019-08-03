@@ -30,9 +30,11 @@ import com.google.common.base.Optional;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.utils.Utils;
@@ -48,6 +50,7 @@ import butterknife.InjectView;
 /** A {@link DialogFragment} for adding or editing a patient. */
 public class EditPatientDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
+    @Inject AppSettings mSettings;
     @Inject CrudEventBus mCrudEventBus;
 
     @InjectView(R.id.patient_id_prefix) EditText mIdPrefix;
@@ -172,6 +175,8 @@ public class EditPatientDialogFragment extends DialogFragment {
         if (args.getBoolean("new")) {
             if (id != null || givenName != null || familyName != null || birthdate != null
                 || sex != Patient.GENDER_UNKNOWN) {
+                LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
+                delta.assignedLocationUuid = Optional.of(forest.getDefaultLocation().uuid);
                 mModel.addPatient(mCrudEventBus, delta);
             }
         } else {

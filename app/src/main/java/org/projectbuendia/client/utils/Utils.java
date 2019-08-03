@@ -742,9 +742,11 @@ public class Utils {
         return sw.toString();
     }
 
-    /** Converts a string to a C identifier by turning all non-identifier characters into underscores. */
-    public static String removeUnsafeChars(String input) {
-        return input.replaceAll("[\\W]", "_");
+    /** Converts a string to a CSS-safe identifier by replacing characters into underscores. */
+    // We use this to give predictable class names to HTML rows so that tests
+    // can verify the values in the patient chart.  See PatientChartActivityTest.
+    public static String toCssIdentifier(String input) {
+        return input.trim().replaceAll("[\\W]", "_");
     }
 
     /** Returns an unambiguous string representation of a string, prefixed with its length. */

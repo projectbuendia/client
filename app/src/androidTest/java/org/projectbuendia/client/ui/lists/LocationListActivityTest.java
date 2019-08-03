@@ -97,6 +97,7 @@ public class LocationListActivityTest extends FunctionalTestCase {
         screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");
+        click(viewWithText("OK"));
 
         pressBack(); // back to location selection screen
         inLocationSelectionCheckZonesAndTentsDisplayed();

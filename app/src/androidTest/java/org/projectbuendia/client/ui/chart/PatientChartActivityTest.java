@@ -39,6 +39,7 @@ import java.util.UUID;
 
 import androidx.test.filters.MediumTest;
 
+import static android.support.test.espresso.matcher.ViewMatchers.isJavascriptEnabled;
 import static android.support.test.espresso.web.assertion.WebViewAssertions.webMatches;
 import static android.support.test.espresso.web.sugar.Web.onWebView;
 import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
@@ -255,6 +256,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     private void saveForm() {
         IdlingResource xformWaiter = getXformSubmissionIdlingResource();
         click(viewWithText("Save"));
+        click(viewWithText("Yes"));
         Espresso.registerIdlingResources(xformWaiter);
     }
 
@@ -331,7 +333,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * @param value the text inside the table cell.
      */
     private void checkObservationValueEquals(String obsName, String value) {
-        String cssSelector = "tr." + Utils.removeUnsafeChars(obsName) + " td:last-child";
+        String cssSelector = "tr." + Utils.toCssIdentifier(obsName) + " td:last-child";
         onWebView()
             .withElement(findElement(Locator.CSS_SELECTOR, cssSelector))
             .check(webMatches(getText(), containsString(value)));
@@ -351,65 +353,37 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerTextQuestion("saturation", "95");
         answerTextQuestion(BP_SYS, "80");
         answerTextQuestion(BP_DIA, "100");
+        answerMultipleCodedQuestion("Other symptoms", "Hiccups");
         saveForm();
 
         // Enter second set of observations for this encounter.
-        waitForProgressFragment();
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException ignored) {
-        }
-
+        expectVisibleWithin(10000, viewWithId(R.id.patient_chart_root));
         openEncounterForm(VITALS_FORM);
-//        TODO(sdspikes): should these be on the form? they currently are not
-//        answerTextQuestion("Weight", "80.4");
-//        answerTextQuestion("Height", "170");
-//        answerSingleCodedQuestion("Shock", "Mild");
         answerSingleCodedQuestion("Consciousness", "Responds to voice");
         answerMultipleCodedQuestion("Other symptoms", "Cough");
         saveForm();
 
         // Enter third set of observations for this encounter.
-//        waitForProgressFragment();
-//        openEncounterForm();
-//        answerMultipleCodedQuestion("Other symptoms", "Hiccups");
-//        answerMultipleCodedQuestion("Other symptoms", "Headache");
-//        answerMultipleCodedQuestion("Other symptoms", "Sore throat");
-//        answerMultipleCodedQuestion("Other symptoms", "Heartburn");
-////        answerSingleCodedQuestion("Hiccups", "No");
-////        answerSingleCodedQuestion("Headache", "No");
-////        answerSingleCodedQuestion("Sore throat", "Yes");
-////        answerSingleCodedQuestion("Heartburn", "No");
-//        answerMultipleCodedQuestion("Additional details", "Pregnant");
-//        answerMultipleCodedQuestion("Additional details", "IV access present");
-////        answerSingleCodedQuestion("Pregnant", "Yes");
-//        answerSingleCodedQuestion("Condition", "Unwell");
-//        answerTextQuestion("Notes", "Call family");
-//        saveForm();
+        expectVisibleWithin(10000, viewWithId(R.id.patient_chart_root));
+        openEncounterForm(VITALS_FORM);
+        answerTextQuestion("Temperature", "37.7");
+        answerSingleCodedQuestion("Condition", "Unwell");
+        answerTextQuestion("Notes", "Call family");
+        saveForm();
 
         // Check that all values are now visible.
-//        waitForProgressFragment();
-//        // Expect a WebView with JS enabled to be visible soon (the chart).
-//        expectVisibleSoon(viewThat(isJavascriptEnabled()));
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException ignored) {
-//        }
-//        checkObservationValueEquals("Temperature (°C)", "36.5");
-//        checkObservationValueEquals("Respiratory rate (bpm)", "23");
-//        checkObservationValueEquals("SpO₂ oxygen sat (%)", "95");
-//        checkObservationValueEquals(BP_SYS, "80");
-//        checkObservationValueEquals(BP_DIA, "100");
-//        checkObservationValueEquals("Weight (kg)", "80.4");
-//        checkObservationValueEquals("Height (cm)", "170");
-//        checkObservationValueEquals("Shock", "Mild");
-//        checkObservationValueEquals("Consciousness (AVPU)", "V");
-//        checkObservationValueEquals("Cough", YES);
-//        checkObservationValueEquals("Hiccups", NO);
-//        checkObservationValueEquals("Headache", NO);
-//        checkObservationValueEquals("Sore throat", YES);
-//        checkObservationValueEquals("Condition", "2");
-//        checkObservationValueEquals("Notes", "Call …");
+        // Expect a WebView with JS enabled to be visible soon (the chart).
+        expectVisibleWithin(10000, viewThat(isJavascriptEnabled()));
+        checkObservationValueEquals("Temperature (°C)", "37.7");
+        checkObservationValueEquals("Respiratory rate (bpm)", "23");
+        checkObservationValueEquals("O₂ saturation", "95");
+        checkObservationValueEquals(BP_SYS, "80");
+        checkObservationValueEquals(BP_DIA, "100");
+        checkObservationValueEquals("AVPU", "V");
+        checkObservationValueEquals("Cough", YES);
+        checkObservationValueEquals("Hiccups", YES);
+        checkObservationValueEquals("Condition", "2");
+        checkObservationValueEquals("Notes", "Call …");
     }
 
     private void checkObservationSet(int row, String dateKey) {
@@ -427,58 +401,110 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
 
         openEncounterForm(VITALS_FORM);
-        answerTextQuestion("Temperature", "36.5");
+        answerTextQuestion("Heart rate", "70");
         answerTextQuestion("Respiratory rate", "23");
         answerTextQuestion("saturation", "95");
-        answerTextQuestion(BP_SYS, "80");
-        answerTextQuestion(BP_DIA, "100");
-//        answerTextQuestion("Weight", "80.5");
-//        answerTextQuestion("Height", "170");
-//        answerSingleCodedQuestion("Shock", "Severe");
+        answerTextQuestion(BP_SYS, "110");
+        answerTextQuestion(BP_DIA, "75");
+        answerTextQuestion("Cap Refill Time", "2");
+        answerTextQuestion("Temperature", "36.1");
         answerSingleCodedQuestion("Consciousness", "Unresponsive");
-//        answerMultipleCodedQuestion("Other symptoms", "Gingivitis");
-//        answerSingleCodedQuestion("Hiccups", "Unknown");
-//        answerSingleCodedQuestion("Headache", "Yes");
-//        answerSingleCodedQuestion("Sore throat", "No");
-//        answerSingleCodedQuestion("Heartburn", "Yes");
-//        answerSingleCodedQuestion("Pregnant", "No");
+        answerSingleCodedQuestion("Urinary function", "Oliguria");
+        answerSingleCodedQuestion("Anorexia", "++");
+
+        answerTextQuestion("Vomiting", "1");
+        answerTextQuestion("Diarrhea", "2");
+        answerMultipleCodedQuestion("Other symptoms", "Headache");
+        answerMultipleCodedQuestion("Other symptoms", "Asthenia");
+        answerMultipleCodedQuestion("Other symptoms", "Cough");
+        answerMultipleCodedQuestion("Other symptoms", "Chest pain");
+        answerMultipleCodedQuestion("Other symptoms", "Nausea");
+        answerMultipleCodedQuestion("Other symptoms", "Back pain");
+        answerMultipleCodedQuestion("Other symptoms", "Photophobia");
+        answerMultipleCodedQuestion("Other symptoms", "Dysphagia");
+        answerMultipleCodedQuestion("Other symptoms", "Hiccups");
+        answerMultipleCodedQuestion("Other symptoms", "Dyspnea");
+        answerMultipleCodedQuestion("Other symptoms", "Abdominal pain");
+        answerMultipleCodedQuestion("Other symptoms", "Myalgia");
+
         answerSingleCodedQuestion("Condition", "Stable");
+        answerMultipleCodedQuestion("Appearance", "Pallor");
+        answerMultipleCodedQuestion("Appearance", "Jaundice");
+        answerMultipleCodedQuestion("Appearance", "Cyanosis");
+        answerSingleCodedQuestion("Dehydration", "Mild");
+        answerSingleCodedQuestion("Neuro", "Confusion");
+
+        // This is not all of the bleeding answers.
+        answerMultipleCodedQuestion("Bleeding", "Epistaxis");
+        answerMultipleCodedQuestion("Bleeding", "Hemoptysis");
+        answerMultipleCodedQuestion("Bleeding", "Hematuria");
+        answerMultipleCodedQuestion("Bleeding", "Petechiae");
+
+        answerSingleCodedQuestion("Respiratory", "Mild dyspnea");
+        answerSingleCodedQuestion("Circulation", "Weak pulse");
+        answerSingleCodedQuestion("Abdomen", "Soft");
+        answerSingleCodedQuestion("Abdomen", "Distended");
+        answerSingleCodedQuestion("Abdomen", "Painful");
+        answerSingleCodedQuestion("Abdomen", "Hepatomegaly");
+        answerSingleCodedQuestion("Abdomen", "Splenomegaly");
+
         answerTextQuestion("Notes", "Possible malaria.");
         saveForm();
 
-////        waitForProgressFragment();
-////        // TODO: implement IdlingResource for webview to remove this sleep.
-////        // Wait for webview to reload and scripts to run
-////        try{
-////            Thread.sleep(30000);
-////        } catch (InterruptedException e){}
-////
-////        checkObservationValueEquals("Temperature (°C)", "36.5");
-////        checkObservationValueEquals("Respiratory rate (bpm)", "23");
-////        checkObservationValueEquals("SpO₂ oxygen sat (%)", "95");
-////        checkObservationValueEquals(BP_SYS, "80");
-////        checkObservationValueEquals(BP_DIA, "100");
-////        checkObservationValueEquals("Weight (kg)", "80.5");
-////        checkObservationValueEquals("Height (cm)", "170");
-////        checkObservationValueEquals("Shock", "Severe");
-//        checkObservationValueEquals("Consciousness (AVPU)", "U");
-//        checkObservationValueEquals("Gingivitis", YES);
-////        checkObservationValueEquals("Hiccups", NO);
-////        checkObservationValueEquals("Headache", YES);
-////        checkObservationValueEquals("Sore throat", NO);
-//        checkObservationValueEquals("Condition", "6");
-//        checkObservationValueEquals("Notes", "Possi…");
+        // Check that all values are now visible.
+        // Expect a WebView with JS enabled to be visible soon (the chart).
+        expectVisibleWithin(10000, viewThat(isJavascriptEnabled()));
+        // Wait for WebView to render and scripts to run.
+        try { Thread.sleep(10000); } catch (InterruptedException e) { }
 
-/*
-        TODO: for now tests are not checking Vital values. We will implement a Test profile to correct this.
-        checkVitalValueContains("Pulse", "80");
-        checkVitalValueContains("Respiration", "20");
-        checkVitalValueContains("Consciousness", "Responds to voice");
-        checkVitalValueContains("Mobility", "Assisted");
-        checkVitalValueContains("Diet", "Fluids");
-        checkVitalValueContains("Hydration", "Needs ORS");
-        checkVitalValueContains("Condition", "5");
-        checkVitalValueContains("Pain level", "Severe");
-*/
+        checkObservationValueEquals("Heart rate", "70");
+        checkObservationValueEquals("Respiratory rate", "23");
+        checkObservationValueEquals("O₂ saturation", "95");
+        checkObservationValueEquals(BP_SYS, "110");
+        checkObservationValueEquals(BP_DIA, "75");
+        checkObservationValueEquals("Cap Refill Time (s)", "2");
+        checkObservationValueEquals("Temperature (°C)", "36.1");
+        checkObservationValueEquals("AVPU", "U");
+        checkObservationValueEquals("Oliguria", YES);
+        checkObservationValueEquals("Anorexia", "++");
+
+        checkObservationValueEquals("Vomiting in 24h", "1");
+        checkObservationValueEquals("Diarrhea in 24h", "2");
+        checkObservationValueEquals("Anorexia", "++");
+
+        checkObservationValueEquals("Headache", YES);
+        checkObservationValueEquals("Asthenia", YES);
+        checkObservationValueEquals("Cough", YES);
+        checkObservationValueEquals("Chest pain", YES);
+        checkObservationValueEquals("Nausea", YES);
+        checkObservationValueEquals("Back pain", YES);
+        checkObservationValueEquals("Photophobia", YES);
+        checkObservationValueEquals("Dysphagia", YES);
+        checkObservationValueEquals("Hiccups", YES);
+        checkObservationValueEquals("Dyspnea", YES);
+        checkObservationValueEquals("Abdominal pain", YES);
+        checkObservationValueEquals("Myalgia", YES);
+
+        checkObservationValueEquals("Condition", "1");
+        checkObservationValueEquals("Pallor", YES);
+        checkObservationValueEquals("Jaundice", YES);
+        checkObservationValueEquals("Cyanosis", YES);
+        checkObservationValueEquals("Dehydration", "A");
+        checkObservationValueEquals("Confusion", YES);
+
+        checkObservationValueEquals("Epistaxis", YES);
+        checkObservationValueEquals("Hemoptysis", YES);
+        checkObservationValueEquals("Hematuria", YES);
+        checkObservationValueEquals("Petechiae", YES);
+
+        checkObservationValueEquals("Mild dyspnea", YES);
+        checkObservationValueEquals("Weak pulse", YES);
+        checkObservationValueEquals("Soft", YES);
+        checkObservationValueEquals("Distended", YES);
+        checkObservationValueEquals("Painful", YES);
+        checkObservationValueEquals("Hepatomegaly", YES);
+        checkObservationValueEquals("Splenomegaly", YES);
+
+        checkObservationValueEquals("Notes", "Possi…");
     }
 }

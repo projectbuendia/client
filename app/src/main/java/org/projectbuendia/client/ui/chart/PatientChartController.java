@@ -476,30 +476,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void showAssignLocationDialog(Context context) {
-        mUi.showPatientLocationDialog(mPatient);
-/*
-        if (mAssignLocationDialog != null) return;
-
-        AssignLocationDialog.LocationSelectedCallback callback =
-            locationUuid -> {
-                mUi.showWaitDialog(R.string.title_updating_patient);
-                PatientDelta delta = new PatientDelta();
-                delta.assignedLocationUuid = Optional.of(locationUuid);
-                mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, delta);
-            };
-
-        Runnable onDismiss = () -> mAssignLocationDialog = null;
-
-        mAssignLocationDialog = new AssignLocationDialog(
-            context,
-            mAppModel,
-            LocaleSelector.getCurrentLocale().getLanguage(),
-            onDismiss,
-            mCrudEventBus,
-            Optional.of(mPatient.locationUuid),
-            callback);
-        mAssignLocationDialog.show();
-*/
+        if (mPatient != null) {
+            mUi.showPatientLocationDialog(mPatient);
+        }
     }
 
     public void setZoomIndex(int index) {

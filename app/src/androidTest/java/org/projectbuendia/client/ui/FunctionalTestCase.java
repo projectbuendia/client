@@ -251,6 +251,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void inUserLoginGoToLocationSelection() {
         click(viewWithText("Guest User"));
+        expectVisibleWithin(20000, viewWithText("ALL PATIENTS"));
         waitForProgressFragment(); // wait for locations to load
     }
 
