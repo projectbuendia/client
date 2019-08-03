@@ -110,7 +110,8 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
     }
 
     @Override public int getViewTypeCount() {
-        return 2;
+        // For targetSdkVersion >= LOLLIPOP (21), this is required to return 1.
+        return 1;
     }
 
     /**
