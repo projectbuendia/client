@@ -91,6 +91,10 @@ public class LocationOptionList {
         setSelectedIndex(-1);
     }
 
+    public String getSelectedUuid() {
+        return selectedIndex >= 0 ? options.get(selectedIndex).locationUuid : null;
+    }
+
     public interface OnItemSelectedListener {
         void onSelected(@Nullable LocationOption option);
     }

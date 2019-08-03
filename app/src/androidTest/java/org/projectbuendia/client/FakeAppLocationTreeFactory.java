@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client;
 
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Zones;
 
 /** Constructs a fake {@link LocationTree} for use in tests. */

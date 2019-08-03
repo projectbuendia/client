@@ -19,6 +19,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.WindowManager;
 
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.common.base.Optional;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
@@ -28,10 +29,13 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.NewLocation;
 import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.Zones;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.lists.LocationOption;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
 import org.projectbuendia.client.utils.ContextUtils;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +53,13 @@ public class PatientLocationDialogFragment extends DialogFragment {
 
     private FlexboxLayout mContainer;
     private LocationOptionList mList;
+    private String patientUuid;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static PatientLocationDialogFragment newInstance(Patient patient) {
         PatientLocationDialogFragment fragment = new PatientLocationDialogFragment();
         Bundle args = new Bundle();
-        args.putString("uuid", patient.uuid);
+        args.putString("patientUuid", patient.uuid);
         args.putString("locationUuid", patient.locationUuid);
         fragment.setArguments(args);
         return fragment;
@@ -67,6 +72,8 @@ public class PatientLocationDialogFragment extends DialogFragment {
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+        patientUuid = getArguments().getString("patientUuid");
+
         AlertDialog dialog = c.buildDialog(R.layout.patient_location_dialog_fragment)
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(R.string.action_assign_location)
@@ -111,5 +118,12 @@ public class PatientLocationDialogFragment extends DialogFragment {
     }
 
     public void onSubmit() {
+        Utils.logUserAction("location_assigned");
+        ((PatientChartActivity) getActivity()).getUi().showWaitDialog(R.string.title_updating_patient);
+        PatientDelta delta = new PatientDelta();
+        String locationUuid = mList.getSelectedUuid();
+        delta.assignedLocationUuid = Optional.of(locationUuid);
+        mModel.updatePatient(mCrudEventBus, patientUuid, delta);
+        dismiss();
     }
 }

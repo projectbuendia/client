@@ -22,14 +22,12 @@ import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.FakeSyncManager;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.FakeEventBus;
 
 import static junit.framework.TestCase.assertEquals;

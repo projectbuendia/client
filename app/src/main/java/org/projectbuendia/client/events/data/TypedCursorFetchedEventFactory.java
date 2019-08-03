@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.models.User;
@@ -31,8 +30,6 @@ public class TypedCursorFetchedEventFactory {
             return new AppPatientsFetchedEvent((TypedCursor<Patient>) cursor);
         } else if (clazz.equals(User.class)) {
             return new AppUsersFetchedEvent((TypedCursor<User>) cursor);
-        } else if (clazz.equals(Location.class)) {
-            return new AppLocationsFetchedEvent((TypedCursor<Location>) cursor);
         } else {
             throw new IllegalArgumentException(
                 "Unable to create an event for unknown type " + clazz.getName());

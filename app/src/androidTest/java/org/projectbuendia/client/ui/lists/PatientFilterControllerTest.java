@@ -18,9 +18,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 

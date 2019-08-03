@@ -58,7 +58,6 @@ import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -105,7 +104,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
     private final SyncManager mSyncManager;
     private final MinimalHandler mMainThreadHandler;
-    private AssignLocationDialog mAssignLocationDialog;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
     private Runnable mActivePatientUpdater;
 
@@ -179,6 +177,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         void showEditPatientDialog(Patient patient);
         void showObsDetailDialog(List<ObsRow> obsRows, List<String> orderedConceptUuids);
         void showPatientLocationDialog(Patient patient);
+        void showPatientUpdateFailed(int reason);
     }
 
     /** Sends ODK form data. */
@@ -227,10 +226,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         if (mAssignGeneralConditionDialog != null) {
             mAssignGeneralConditionDialog.dismiss();
             mAssignGeneralConditionDialog = null;
-        }
-        if (mAssignLocationDialog != null) {
-            mAssignLocationDialog.dismiss();
-            mAssignLocationDialog = null;
         }
 
         // Load a new patient, which will trigger UI updates.
@@ -347,8 +342,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     private boolean dialogShowing() {
-        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
-            || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing());
     }
 
     FormRequest newFormRequest(String formUuid, String patientUuid) {
@@ -648,7 +642,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             LOG.e(event.exception, "Patient update failed.");
             mUi.hideWaitDialog();
-            mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+            mUi.showPatientUpdateFailed(event.reason);
         }
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {
