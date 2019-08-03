@@ -25,7 +25,6 @@ import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
-import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -344,7 +343,7 @@ public final class LocationListControllerTest {
         // WHEN a periodic sync reports progress
         mFakeEventBus.post(new SyncProgressEvent(10, R.string.syncing_users));
         // THEN the activity does not notify the UI
-        verify(mMockFragmentUi, times(0)).showSyncProgress(10, R.string.syncing_users);
+        verify(mMockFragmentUi, times(0)).setSyncProgress(10, R.string.syncing_users);
     }
 
     /** Tests that 'sync failed' messages are ignored when the data model is already available. */

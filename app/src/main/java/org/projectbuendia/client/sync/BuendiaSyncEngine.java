@@ -137,7 +137,7 @@ public class BuendiaSyncEngine implements SyncEngine {
         boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL));
         LOG.start("sync", "options = %s", options);
 
-        broadcastSyncProgress(0, R.string.sync_in_progress);
+        broadcastSyncProgress(0, 1, R.string.sync_in_progress);
 
         BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
         try (DatabaseTransaction tx = provider.startTransaction(SAVEPOINT_NAME)) {
@@ -149,12 +149,12 @@ public class BuendiaSyncEngine implements SyncEngine {
                 int p = 0;
                 for (Phase phase : phases) {
                     checkCancellation("before " + phase);
-                    broadcastSyncProgress(p * 100 / phases.size(), phase.message);
+                    broadcastSyncProgress(p, phases.size(), phase.message);
                     phase.runnable.sync(contentResolver, result, client);
                     LOG.elapsed("sync", "Completed phase %s", phase);
                     p++;
                 }
-                broadcastSyncProgress(100, R.string.completing_sync);
+                broadcastSyncProgress(1, 1, R.string.completing_sync);
                 if (fullSync) {
                     storeFullSyncEndTime(client, Instant.now());
                 }
@@ -204,11 +204,12 @@ public class BuendiaSyncEngine implements SyncEngine {
         );
     }
 
-    private void broadcastSyncProgress(int progress, @StringRes int messageId) {
+    private void broadcastSyncProgress(int numerator, int denominator, @StringRes int messageId) {
         context.sendBroadcast(
             new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
                 .putExtra(SyncManager.SYNC_STATUS, SyncStatus.IN_PROGRESS)
-                .putExtra(SyncManager.SYNC_PROGRESS, progress)
+                .putExtra(SyncManager.SYNC_NUMERATOR, numerator)
+                .putExtra(SyncManager.SYNC_DENOMINATOR, denominator)
                 .putExtra(SyncManager.SYNC_MESSAGE_ID, messageId)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );

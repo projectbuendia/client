@@ -59,6 +59,8 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
     private final class FilterUi implements PatientFilterController.Ui {
 
+        private int lastPosition = 0;
+
         @Override public void populateActionBar(List<SimpleSelectionFilter<?>> filters) {
             SectionedSpinnerAdapter<SimpleSelectionFilter<?>> adapter = new SectionedSpinnerAdapter<>(
                 FilteredPatientListActivity.this,
@@ -68,10 +70,13 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
                 filters);
 
             ActionBar.OnNavigationListener callback = (position, id) -> {
-                SimpleSelectionFilter<?> filter = filters.get(position);
-                getSearchController().setFilter(filter);
-                Utils.logUserAction("filter_selected", "filter", filter.toString());
-                getSearchController().loadSearchResults();
+                if (position != lastPosition) {
+                    SimpleSelectionFilter<?> filter = filters.get(position);
+                    getSearchController().setFilter(filter);
+                    Utils.logUserAction("filter_selected", "filter", filter.toString());
+                    getSearchController().loadSearchResults();
+                    lastPosition = position;
+                }
                 return true;
             };
 

@@ -30,20 +30,17 @@ import de.greenrobot.event.EventBus;
 public class SyncManager {
     private static final Logger LOG = Logger.create();
 
-    static final String SYNC_STATUS = "sync-status";
+    /** Key for the current sync status. */
+    static final String SYNC_STATUS = "SYNC_STATUS";
     enum SyncStatus {
         IN_PROGRESS, COMPLETED, FAILED, CANCELLED
     }
 
-    /**
-     * Intent extras using this key are integers representing the sync progress completed so far,
-     * as a percentage.
-     */
-    static final String SYNC_PROGRESS = "sync-progress";
-    /**
-     * Intent extras using this key are nullable strings representing the current sync status.
-     * They are localized and are suitable for presentation to the user.
-     */
+    /** Keys for the amount of progress so far, expressed as a fraction. */
+    static final String SYNC_NUMERATOR = "SYNC_NUMERATOR";
+    static final String SYNC_DENOMINATOR = "SYNC_DENOMINATOR";
+
+    /** Key for a nullable string describing the sync status to the user. */
     static final String SYNC_MESSAGE_ID = "sync-message-id";
 
     private final SyncScheduler mScheduler;
@@ -107,9 +104,10 @@ public class SyncManager {
             SyncStatus status = (SyncStatus) intent.getSerializableExtra(SYNC_STATUS);
             switch (status) {
                 case IN_PROGRESS:
-                    int progress = intent.getIntExtra(SYNC_PROGRESS, 0);
+                    int numerator = intent.getIntExtra(SYNC_NUMERATOR, 0);
+                    int denominator = intent.getIntExtra(SYNC_DENOMINATOR, 1);
                     int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, R.string.sync_in_progress);
-                    EventBus.getDefault().post(new SyncProgressEvent(progress, messageId));
+                    EventBus.getDefault().post(new SyncProgressEvent(numerator, denominator, messageId));
                     break;
                 case COMPLETED:
                     LOG.i("SyncStatus: COMPLETED");

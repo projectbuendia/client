@@ -32,6 +32,7 @@ import com.google.common.base.Charsets;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.List;
 /** A Fragment that shows a spinner or progress bar when content is not ready. */
 public abstract class ProgressFragment extends Fragment implements Response.ErrorListener {
 
+    private static final Logger LOG = Logger.create();
     protected View mContent;
     protected RelativeLayout mFrame;
     protected TextView mErrorTextView;
@@ -67,17 +69,19 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     }
 
     @Override public void onErrorResponse(VolleyError error) {
-        changeErrorState(error.toString());
+        setErrorState(error.toString());
         Log.e("server", new String(error.networkResponse.data, Charsets.UTF_8));
     }
 
-    protected void changeErrorState(String message) {
+    public void setErrorState(String message) {
         mErrorTextView.setText(message);
         setReadyState(ReadyState.ERROR);
     }
 
     /** Changes the state of this fragment, hiding or showing the spinner as necessary. */
     public void setReadyState(ReadyState state) {
+        LOG.w("setReadyState %s", state);
+
         mState = state;
         mProgressBarLayout.setVisibility(state == ReadyState.SYNCING ? View.VISIBLE : View.GONE);
         mIndeterminateProgressBar.setVisibility(state == ReadyState.LOADING ? View.VISIBLE : View.GONE);
@@ -118,6 +122,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mProgressBar =
             mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
         mProgressBarLabel = mProgressBarLayout.findViewById(R.id.progress_fragment_label);
+        mProgressBarLabel.setText(R.string.sync_in_progress);
 
         RelativeLayout.LayoutParams fullLayout = new RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -128,7 +133,10 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mErrorTextView.setGravity(Gravity.CENTER);
 
         mContent.setVisibility(View.GONE);
+        mIndeterminateProgressBar.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
+        mErrorTextView.setVisibility(View.GONE);
+
         mFrame.addView(mIndeterminateProgressBar);
         mFrame.addView(mProgressBarLayout);
         mFrame.addView(mContent);
@@ -159,8 +167,9 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mContent = LayoutInflater.from(getActivity()).inflate(layout, null, false);
     }
 
-    protected void setProgress(int progress) {
-        mProgressBar.setProgress(progress);
+    protected void setProgress(int numerator, int denominator) {
+        if (denominator > 0) mProgressBar.setMax(denominator);
+        mProgressBar.setProgress(numerator);
     }
 
     protected void setProgressMessage(int messageId) {

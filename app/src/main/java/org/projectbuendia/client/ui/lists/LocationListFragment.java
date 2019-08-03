@@ -129,12 +129,10 @@ public final class LocationListFragment extends ProgressFragment {
             LocationListFragment.this.setReadyState(state);
         }
 
-        @Override public void showSyncProgress(int progress, Integer messageId) {
-            setProgress(progress);
+        @Override public void setSyncProgress(int numerator, int denominator, Integer messageId) {
+            setProgress(numerator, denominator);
             if (messageId != null) {
                 setProgressMessage(messageId);
-            } else if (progress == 0) {
-                setProgressMessage(R.string.sync_in_progress);
             }
         }
 

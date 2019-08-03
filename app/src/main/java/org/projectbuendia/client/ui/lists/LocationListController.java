@@ -17,7 +17,6 @@ import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
-import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
@@ -33,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** Controller for {@link LocationListActivity}. */
@@ -54,8 +54,11 @@ final class LocationListController {
     @Nullable private Location mTriageZone;
     @Nullable private Location mDischargedZone;
 
-    /** True when there is no data model yet and the initial sync is running. */
-    private boolean mInitialSyncRunning = false;
+    /**
+     * The ready state is SYNCING only when there is no data model yet and the
+     * initial sync is running.  LOADING is the default non-ready state.
+     */
+    private ReadyState mReadyState = ReadyState.LOADING;
 
     /** True when the user has requested to cancel a sync and the sync hasn't stopped yet. */
     private boolean mUserCancelRequestPending = false;
@@ -88,7 +91,7 @@ final class LocationListController {
 
         void setReadyState(ReadyState state);
 
-        void showSyncProgress(int progress, Integer messageId);
+        void setSyncProgress(int numerator, int denominator, Integer messageId);
 
         void showSyncCancelRequested();
     }
@@ -120,16 +123,14 @@ final class LocationListController {
             LOG.w("Model not available; starting initial sync.");
             startInitialSync();
         }
-        updateUi();
     }
 
     public void loadForest() {
+        setReadyState(ReadyState.LOADING);
         LocationForest forest = mAppModel.getForest(mSettings.getLocaleTag());
-        if (forest.size() > 0) mForest = forest;
-        if (mForest != null) {
-            mTriageZone = mForest.get(Zones.TRIAGE_ZONE_UUID);
-            mDischargedZone = mForest.get(Zones.DISCHARGED_ZONE_UUID);
-            updateUi();
+        if (forest.size() > 0) {
+            setForest(forest);
+            setReadyState(ReadyState.READY);
         } else {
             LOG.w("Invalid forest; retrying initial sync.");
             startInitialSync();
@@ -137,35 +138,34 @@ final class LocationListController {
     }
 
     public void startInitialSync() {
-        mInitialSyncRunning = true;
+        setReadyState(ReadyState.SYNCING);
         if (!mSyncManager.isSyncRunningOrPending()) {
-            mUi.setReadyState(ReadyState.SYNCING);
-            for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showSyncProgress(0, 0);
-            }
             mSyncManager.syncAll();
         }
     }
 
-    private void updateUi() {
-        updateReadyState();
-
-        if (mForest != null) {
-            for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                long dischargedPatientCount = mForest.countPatientsIn(mDischargedZone);
-                long totalPatientCount = mForest.countAllPatients();
-                fragmentUi.setLocations(mForest, mForest.getLeaves());
-                fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
-                fragmentUi.setDischargedPatientCount(mForest.countPatientsIn(mDischargedZone));
-                fragmentUi.setTriagePatientCount(mForest.countPatientsIn(mTriageZone));
-            }
+    private void setForest(@Nonnull LocationForest forest) {
+        mForest = forest;
+        mTriageZone = mForest.get(Zones.TRIAGE_ZONE_UUID);
+        mDischargedZone = mForest.get(Zones.DISCHARGED_ZONE_UUID);
+        for (LocationFragmentUi fragmentUi : mFragmentUis) {
+            updateFragmentUi(fragmentUi);
         }
     }
 
-    private void updateReadyState() {
-        ReadyState state = mForest != null ? ReadyState.READY :
-            mInitialSyncRunning ? ReadyState.SYNCING : ReadyState.LOADING;
+    private void updateFragmentUi(LocationFragmentUi fragmentUi) {
+        if (mForest != null) {
+            long dischargedPatientCount = mForest.countPatientsIn(mDischargedZone);
+            long totalPatientCount = mForest.countAllPatients();
+            fragmentUi.setLocations(mForest, mForest.getLeaves());
+            fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
+            fragmentUi.setDischargedPatientCount(mForest.countPatientsIn(mDischargedZone));
+            fragmentUi.setTriagePatientCount(mForest.countPatientsIn(mTriageZone));
+        }
+    }
 
+    private void setReadyState(ReadyState state) {
+        mReadyState = state;
         mUi.setReadyState(state);
         for (LocationFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.setReadyState(state);
@@ -174,7 +174,7 @@ final class LocationListController {
 
     public void attachFragmentUi(LocationFragmentUi fragmentUi) {
         mFragmentUis.add(fragmentUi);
-        updateUi();
+        updateFragmentUi(fragmentUi);
     }
 
     public void detachFragmentUi(LocationFragmentUi fragmentUi) {
@@ -221,7 +221,7 @@ final class LocationListController {
     private final class EventBusSubscriber {
 
         public void onEventMainThread(SyncCancelRequestedEvent event) {
-            if (mInitialSyncRunning) {
+            if (mReadyState == ReadyState.SYNCING) {
                 synchronized (mSyncCancelLock) {
                     mUserCancelRequestPending = true;
                     for (LocationFragmentUi fragmentUi : mFragmentUis) {
@@ -245,36 +245,25 @@ final class LocationListController {
         }
 
         public void onEventMainThread(SyncProgressEvent event) {
-            if (mInitialSyncRunning) {
-                for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.showSyncProgress(event.progress, event.messageId);
-                }
-            }
-        }
-
-        public void onEventMainThread(SyncStartedEvent event) {
-            if (mInitialSyncRunning) {
-                for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.showSyncProgress(0, 0);
-                }
+            for (LocationFragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.setSyncProgress(event.numerator, event.denominator, event.messageId);
             }
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
             mUi.showSyncFailedDialog(false);
-            mInitialSyncRunning = false;
             loadForest();
         }
 
         public void onEventMainThread(SyncFailedEvent event) {
-            if (mInitialSyncRunning) {
+            if (mReadyState == ReadyState.SYNCING) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.showSyncProgress(0, 0);
+                    fragmentUi.setSyncProgress(0, 0, null);
                 }
+                setReadyState(ReadyState.ERROR);
                 mUi.showSyncFailedDialog(true);
                 Utils.logEvent("sync_failed_dialog_shown");
             }
         }
-
     }
 }
