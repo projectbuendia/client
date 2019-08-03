@@ -97,7 +97,7 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
             .resolve(mContext.getResources());
 
         long count = mForest.countPatientsIn(location);
-        holder.mButton.setTitle(location.toString());
+        holder.mButton.setTitle(location.name);
         holder.mButton.setSubtitle("" + count);
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());
         holder.mButton.setTextColor(zone.getForegroundColor());

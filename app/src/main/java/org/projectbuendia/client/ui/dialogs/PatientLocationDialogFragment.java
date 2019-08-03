@@ -103,11 +103,8 @@ public class PatientLocationDialogFragment extends DialogFragment {
             null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1));
         for (Location location : forest.allNodes()) {
             if (!eq(location, discharged)) {
-                // A parenthesized number can be included at the front of the location name
-                // to determine its sorting order; the number will not be displayed.
-                String displayName = location.name.replaceAll("^\\(.*?\\)\\s*", "");
                 options.add(new LocationOption(
-                    location.uuid, displayName, forest.countPatientsIn(location), fg, bg, 0.5));
+                    location.uuid, location.name, forest.countPatientsIn(location), fg, bg, 0.5));
             }
         }
         if (discharged != null) {

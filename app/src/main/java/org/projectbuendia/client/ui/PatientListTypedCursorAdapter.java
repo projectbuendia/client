@@ -98,21 +98,14 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     @Override public View getGroupView(
         int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         Location location = getGroup(groupPosition);
-
-        int patientCount = getChildrenCount(groupPosition);
-        String tentName = location.toString();
-
-        if (convertView == null) {
-            convertView = newGroupView();
-        }
+        View view = convertView != null ? convertView : newGroupView();
 
         ExpandableListView expandableListView = (ExpandableListView) parent;
         expandableListView.expandGroup(groupPosition);
-
-        TextView item = convertView.findViewById(R.id.patient_list_tent_tv);
-        item.setText(PatientCountDisplay.getPatientCountTitle(mContext, patientCount, tentName));
-
-        return convertView;
+        TextView item = view.findViewById(R.id.patient_list_tent_tv);
+        item.setText(PatientCountDisplay.getPatientCountTitle(
+            mContext, getChildrenCount(groupPosition), location.name));
+        return view;
     }
 
     @Override public Location getGroup(int groupPosition) {
