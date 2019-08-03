@@ -42,8 +42,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import static org.projectbuendia.client.utils.Utils.eq;
-
 /** A {@link DialogFragment} for updating a patient's location and bed number. */
 public class PatientLocationDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
@@ -102,14 +100,11 @@ public class PatientLocationDialogFragment extends DialogFragment {
         options.add(new LocationOption(
             null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1));
         for (Location location : forest.allNodes()) {
-            if (!eq(location, discharged)) {
+            if (forest.isLeaf(location)) {
+                double size = location.depth > 1 ? 0.5 : 1;
                 options.add(new LocationOption(
-                    location.uuid, location.name, forest.countPatientsIn(location), fg, bg, 0.5));
+                    location.uuid, location.name, forest.countPatientsIn(location), fg, bg, size));
             }
-        }
-        if (discharged != null) {
-            options.add(new LocationOption(
-                Zones.DISCHARGED_ZONE_UUID, c.str(R.string.discharged), numDischarged, fg, bg, 1));
         }
         return options;
     }
