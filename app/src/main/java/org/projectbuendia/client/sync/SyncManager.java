@@ -66,8 +66,7 @@ public class SyncManager {
 
     /** Sets up regularly repeating syncs that run all the time. */
     public void initPeriodicSyncs() {
-        setPeriodicSync(30, Phase.PATIENTS);
-        setPeriodicSync(60, Phase.OBSERVATIONS, Phase.ORDERS);
+        setPeriodicSync(60, Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS);
         setPeriodicSync(180, Phase.ALL_PHASES);
     }
 

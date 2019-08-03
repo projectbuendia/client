@@ -22,6 +22,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Zones;
+import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -123,6 +124,8 @@ final class LocationListController {
             LOG.w("Model not available; starting initial sync.");
             startInitialSync();
         }
+
+        mSyncManager.setPeriodicSync(10, Phase.PATIENTS);
     }
 
     public void loadForest() {
@@ -155,9 +158,11 @@ final class LocationListController {
 
     private void updateFragmentUi(LocationListFragmentUi fragmentUi) {
         if (mForest != null) {
+            fragmentUi.setLocations(mForest, mForest.getLeaves());
+        }
+        if (mForest != null && mTriageZone != null && mDischargedZone != null) {
             long dischargedPatientCount = mForest.countPatientsIn(mDischargedZone);
             long totalPatientCount = mForest.countAllPatients();
-            fragmentUi.setLocations(mForest, mForest.getLeaves());
             fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
             fragmentUi.setDischargedPatientCount(mForest.countPatientsIn(mDischargedZone));
             fragmentUi.setTriagePatientCount(mForest.countPatientsIn(mTriageZone));
@@ -183,6 +188,7 @@ final class LocationListController {
 
     /** Frees any resources used by the controller. */
     public void suspend() {
+        mSyncManager.setPeriodicSync(0, Phase.PATIENTS);
         mCrudEventBus.unregister(mEventBusSubscriber);
         mEventBus.unregister(mEventBusSubscriber);
     }
