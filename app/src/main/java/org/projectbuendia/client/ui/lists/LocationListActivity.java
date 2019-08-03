@@ -23,7 +23,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.NewLocation;
+import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
@@ -155,7 +155,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             LocationListActivity.this.finish();
         }
 
-        @Override public void openSingleLocation(NewLocation location) {
+        @Override public void openSingleLocation(Location location) {
             SingleLocationActivity.start(LocationListActivity.this, location);
         }
     }

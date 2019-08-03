@@ -19,14 +19,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 /** The app model for a location, including its localized name. */
-public final @Immutable class NewLocation extends Base<String> implements Comparable<NewLocation> {
+public final @Immutable class Location extends Base<String> implements Comparable<Location> {
     public final @Nonnull String uuid;  // permanent unique identifier
     public final @Nonnull String path;  // short IDs from root to this node, separated by slashes
     public final @Nonnull String name;
     public final int depth;
 
-    /** Creates an instance of {@link NewLocation}. */
-    public NewLocation(@Nonnull String uuid, @Nonnull String path, String name) {
+    /** Creates an instance of {@link Location}. */
+    public Location(@Nonnull String uuid, @Nonnull String path, String name) {
         super(null);
         this.uuid = uuid;
         this.path = path;
@@ -39,18 +39,18 @@ public final @Immutable class NewLocation extends Base<String> implements Compar
     }
 
     @Override public boolean equals(Object other) {
-        return other instanceof NewLocation && uuid.equals(((NewLocation) other).uuid);
+        return other instanceof Location && uuid.equals(((Location) other).uuid);
     }
 
     @Override public int hashCode() {
         return Objects.hashCode(uuid);
     }
 
-    public boolean isInSubtree(NewLocation other) {
+    public boolean isInSubtree(Location other) {
         return path.startsWith(other.path);
     }
 
-    @Override public int compareTo(NewLocation other) {
+    @Override public int compareTo(Location other) {
         return path.compareTo(other.path);
     }
 }

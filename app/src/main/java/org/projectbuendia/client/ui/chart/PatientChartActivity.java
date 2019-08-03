@@ -45,8 +45,8 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
-import org.projectbuendia.client.models.NewLocation;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
@@ -493,8 +493,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mRootView.invalidate();
         }
 
-        public void updatePatientLocationUi(NewLocationTree locationTree, Patient patient) {
-            NewLocation location = locationTree.get(patient.locationUuid);
+        public void updatePatientLocationUi(LocationForest forest, Patient patient) {
+            Location location = forest.get(patient.locationUuid);
             String locationText = Utils.toStringOrDefault(location, "Unknown"); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);

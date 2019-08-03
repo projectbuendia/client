@@ -74,7 +74,7 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
         }
 
         // Get list of all items
-        Uri uri = Locations.URI; // Location tree
+        Uri uri = Locations.URI; // Location forest
         Uri namesUri = LocationNames.URI; // Location names
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;

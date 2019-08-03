@@ -13,8 +13,8 @@ package org.projectbuendia.client;
 
 import org.projectbuendia.client.models.Zones;
 
-/** Constructs a fake {@link LocationTree} for use in tests. */
-public class FakeAppLocationTreeFactory {
+/** Constructs a fake {@link LocationForest} for use in tests. */
+public class FakeAppForestFactory {
     public static final String ROOT_UUID = "foo";
     public static final String SUSPECT_1_UUID = "tent_s1";
     public static final String SUSPECT_2_UUID = "tent_s2";
@@ -27,11 +27,11 @@ public class FakeAppLocationTreeFactory {
     public static final String SUSPECT_2_TENT_NAME = "S2";
 
     /**
-     * Builds an {@link LocationTree} with a facility, the Triage and Discharged zones, and
+     * Builds an {@link LocationForest} with a facility, the Triage and Discharged zones, and
      * a Suspect zone containing two tents.
-     * @return the constructed {@link LocationTree}
+     * @return the constructed {@link LocationForest}
      */
-    public static LocationTree build() {
+    public static LocationForest build() {
         FakeTypedCursor<Location> locationCursor =
             new FakeTypedCursor<>(
                 getSiteLocation(),
@@ -41,7 +41,7 @@ public class FakeAppLocationTreeFactory {
                 getSuspect1TentLocation(),
                 getSuspect2TentLocation()
             );
-        return LocationTree.forTypedCursor(locationCursor);
+        return LocationForest.forTypedCursor(locationCursor);
     }
 
     private static Location getSiteLocation() {
@@ -68,8 +68,8 @@ public class FakeAppLocationTreeFactory {
         return new Location(SUSPECT_2_UUID, Zones.SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME, 0);
     }
 
-    public static LocationTree emptyTree() {
+    public static LocationForest emptyForest() {
         FakeTypedCursor<Location> locationCursor = new FakeTypedCursor<>();
-        return LocationTree.forTypedCursor(locationCursor);
+        return LocationForest.forTypedCursor(locationCursor);
     }
 }

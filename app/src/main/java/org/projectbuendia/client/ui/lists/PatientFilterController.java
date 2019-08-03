@@ -44,7 +44,7 @@ public class PatientFilterController {
         mCrudEventBus = crudEventBus;
         mLocale = locale;
         mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(
-            mAppModel.getLocationTree(mLocale)
+            mAppModel.getForest(mLocale)
         ));
     }
 }

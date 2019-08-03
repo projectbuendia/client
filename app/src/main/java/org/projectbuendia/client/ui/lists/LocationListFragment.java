@@ -20,8 +20,8 @@ import android.widget.GridView;
 import com.google.common.base.Optional;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.NewLocation;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
@@ -118,9 +118,9 @@ public final class LocationListFragment extends ProgressFragment {
             setPatientCount(mAllPatientsButton, patientCount);
         }
 
-        @Override public void setLocations(NewLocationTree locationTree, List<NewLocation> locations) {
+        @Override public void setLocations(LocationForest forest, List<Location> locations) {
             mAdapter = new LocationListAdapter(
-                getActivity(), locations, locationTree, Optional.absent());
+                getActivity(), locations, forest, Optional.absent());
             mLocationGrid.setAdapter(mAdapter);
         }
 

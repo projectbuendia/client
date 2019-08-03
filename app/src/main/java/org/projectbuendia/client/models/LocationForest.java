@@ -29,9 +29,9 @@ import javax.annotation.Nonnull;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /** An ordered hierarchy of locations with their localized names. */
-public class NewLocationTree {
-    private final NewLocation[] locations;
-    private final Map<String, NewLocation> locationsByUuid = new HashMap<>();
+public class LocationForest {
+    private final Location[] locations;
+    private final Map<String, Location> locationsByUuid = new HashMap<>();
     private final Map<String, String> parentUuidsByUuid = new HashMap<>();
     private final Set<String> nonleafUuids = new HashSet<>();
 
@@ -40,7 +40,7 @@ public class NewLocationTree {
     private final Map<String, Integer> numPatientsInSubtree = new HashMap<>();
     private int totalNumPatients;
 
-    public NewLocationTree(TypedCursor<LocationQueryResult> cursor) {
+    public LocationForest(TypedCursor<LocationQueryResult> cursor) {
         List<String> uuids = new ArrayList<>();
         Map<String, LocationQueryResult> resultsByUuid = new HashMap<>();
         Map<String, String> namesByUuid = new HashMap<>();
@@ -72,7 +72,7 @@ public class NewLocationTree {
             shortIdsByUuid.put(uuids.get(i), Utils.format(format, i));
         }
 
-        locations = new NewLocation[uuids.size()];
+        locations = new Location[uuids.size()];
         for (int i = 0; i < uuids.size(); i++) {
             String uuid = uuids.get(i);
             String name = namesByUuid.get(uuid);
@@ -87,7 +87,7 @@ public class NewLocationTree {
                 numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + count);
             }
 
-            locations[i] = new NewLocation(uuid, path, name);
+            locations[i] = new Location(uuid, path, name);
             locationsByUuid.put(uuid, locations[i]);
         }
 
@@ -102,7 +102,7 @@ public class NewLocationTree {
             numPatientsInSubtree.clear();
             totalNumPatients = 0;
 
-            for (NewLocation location : locations) {
+            for (Location location : locations) {
                 numPatientsInSubtree.put(location.uuid, 0);  // counts will be added below
             }
 
@@ -116,40 +116,40 @@ public class NewLocationTree {
         }
     }
 
-    /** Returns true if the specified location exists in this tree. */
-    public boolean contains(NewLocation location) {
+    /** Returns true if the specified location exists in this forest. */
+    public boolean contains(Location location) {
         return locationsByUuid.containsKey(location.uuid);
     }
 
     /** Gets the location with a given UUID. */
-    public NewLocation get(String uuid) {
+    public Location get(String uuid) {
         return locationsByUuid.get(uuid);
     }
 
-    /** Gets the number of locations in this tree. */
+    /** Gets the number of locations in this forest. */
     public int size() {
         return locations.length;
     }
 
     /** Gets the parent location of the given location. */
-    public @Nullable NewLocation getParent(@Nonnull NewLocation location) {
+    public @Nullable Location getParent(@Nonnull Location location) {
         return get(parentUuidsByUuid.get(location.uuid));
     }
 
     /** Returns true if the given location is a leaf node. */
-    public boolean isLeaf(@Nonnull NewLocation location) {
+    public boolean isLeaf(@Nonnull Location location) {
         return !nonleafUuids.contains(location.uuid);
     }
 
     /** Given a UUID, counts the patients just at its node. */
-    public int countPatientsAt(@Nonnull NewLocation node) {
+    public int countPatientsAt(@Nonnull Location node) {
         synchronized (patientCountLock) {
             return Utils.toNonnull(numPatientsAtNode.get(node.uuid), 0);
         }
     }
 
     /** Given a UUID, counts all the patients in its subtree. */
-    public int countPatientsIn(@Nonnull NewLocation root) {
+    public int countPatientsIn(@Nonnull Location root) {
         synchronized (patientCountLock) {
             return Utils.toNonnull(numPatientsInSubtree.get(root.uuid), 0);
         }
@@ -163,23 +163,23 @@ public class NewLocationTree {
     }
 
     /** Iterate over all the nodes in depth-first order. */
-    public @Nonnull Iterable<NewLocation> allNodes() {
+    public @Nonnull Iterable<Location> allNodes() {
         return Arrays.asList(locations);
     }
 
     /** Gets a list of all the leaf nodes in depth-first order. */
-    public @Nonnull List<NewLocation> getLeaves() {
-        List<NewLocation> leaves = new ArrayList<>();
-        for (NewLocation location : locations) {
+    public @Nonnull List<Location> getLeaves() {
+        List<Location> leaves = new ArrayList<>();
+        for (Location location : locations) {
             if (isLeaf(location)) leaves.add(location);
         }
         return leaves;
     }
 
     /** Given a node, returns an ordered list of its immediate children. */
-    public @Nonnull List<NewLocation> getChildren(@Nonnull NewLocation parent) {
-        List<NewLocation> children = new ArrayList<>();
-        for (NewLocation location : locations) {
+    public @Nonnull List<Location> getChildren(@Nonnull Location parent) {
+        List<Location> children = new ArrayList<>();
+        for (Location location : locations) {
             if (eq(parentUuidsByUuid.get(location.uuid), parent.uuid)) {
                 children.add(location);
             }
@@ -189,9 +189,9 @@ public class NewLocationTree {
 
 
     /** Given a node, returns a list containing it and its descendants in depth-first order. */
-    public @Nonnull List<NewLocation> getSubtree(@Nonnull NewLocation root) {
-        List<NewLocation> descendants = new ArrayList<>();
-        for (NewLocation location : locations) {
+    public @Nonnull List<Location> getSubtree(@Nonnull Location root) {
+        List<Location> descendants = new ArrayList<>();
+        for (Location location : locations) {
             if (location.isInSubtree(root)) {
                 descendants.add(location);
             }

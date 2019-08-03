@@ -12,8 +12,8 @@
 package org.projectbuendia.client.filter.db.patient;
 
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.models.NewLocation;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
 
@@ -27,16 +27,16 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
     private final String mUuid;
     private final String mDescription;
 
-    /** Creates a filter returning only patients under a subroot of the given location tree. */
-    public LocationUuidFilter(NewLocationTree tree, NewLocation subroot) {
-        if (tree == null || subroot == null) {
+    /** Creates a filter returning only patients under a subroot of the given location forest. */
+    public LocationUuidFilter(LocationForest forest, Location subroot) {
+        if (forest == null || subroot == null) {
             mTentSelectionString = "";
             mTentSelectionArgs = new String[0];
             mUuid = null;
             mDescription = "";
             return;
         }
-        List<NewLocation> allPossibleLocations = tree.getSubtree(subroot);
+        List<Location> allPossibleLocations = forest.getSubtree(subroot);
 
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.

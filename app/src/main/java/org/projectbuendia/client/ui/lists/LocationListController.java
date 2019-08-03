@@ -20,8 +20,8 @@ import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.NewLocation;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.LoadingState;
@@ -49,9 +49,9 @@ final class LocationListController {
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final SyncManager mSyncManager;
     private final PatientSearchController mPatientSearchController;
-    @Nullable private NewLocationTree mLocationTree;
-    @Nullable private NewLocation mTriageZone;
-    @Nullable private NewLocation mDischargedZone;
+    @Nullable private LocationForest mForest;
+    @Nullable private Location mTriageZone;
+    @Nullable private Location mDischargedZone;
     // True when the data model is unavailable and either a sync is already in progress or has been
     // requested by this controller.
     private boolean mWaitingOnSync = false;
@@ -67,7 +67,7 @@ final class LocationListController {
 
         void switchToPatientList();
 
-        void openSingleLocation(NewLocation location);
+        void openSingleLocation(Location location);
 
         void showSyncFailedDialog(boolean show);
 
@@ -78,7 +78,7 @@ final class LocationListController {
 
     public interface LocationFragmentUi {
 
-        void setLocations(NewLocationTree locationTree, List<NewLocation> locations);
+        void setLocations(LocationForest forest, List<Location> locations);
 
         void setPresentPatientCount(long patientCount);
 
@@ -116,16 +116,16 @@ final class LocationListController {
         mWaitingOnSyncCancel = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        if (mAppModel.isFullModelAvailable()) loadOrSyncLocationTree();
+        if (mAppModel.isFullModelAvailable()) loadOrSyncForest();
         updateUi();
     }
 
-    public void loadOrSyncLocationTree() {
-        NewLocationTree tree = mAppModel.getLocationTree(mSettings.getLocaleTag());
-        if (tree.size() > 0) mLocationTree = tree;
-        if (mLocationTree != null) {
-            mTriageZone = mLocationTree.get(Zones.TRIAGE_ZONE_UUID);
-            mDischargedZone = mLocationTree.get(Zones.DISCHARGED_ZONE_UUID);
+    public void loadOrSyncForest() {
+        LocationForest forest = mAppModel.getForest(mSettings.getLocaleTag());
+        if (forest.size() > 0) mForest = forest;
+        if (mForest != null) {
+            mTriageZone = mForest.get(Zones.TRIAGE_ZONE_UUID);
+            mDischargedZone = mForest.get(Zones.DISCHARGED_ZONE_UUID);
             updateUi();
         } else startSync();
     }
@@ -144,20 +144,20 @@ final class LocationListController {
     private void updateUi() {
         updateLoadingState();
         for (LocationFragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.setBusyLoading(mLocationTree == null);
-            if (mLocationTree != null) {
-                long dischargedPatientCount = mLocationTree.countPatientsIn(mDischargedZone);
-                long totalPatientCount = mLocationTree.countAllPatients();
-                fragmentUi.setLocations(mLocationTree, mLocationTree.getLeaves());
+            fragmentUi.setBusyLoading(mForest == null);
+            if (mForest != null) {
+                long dischargedPatientCount = mForest.countPatientsIn(mDischargedZone);
+                long totalPatientCount = mForest.countAllPatients();
+                fragmentUi.setLocations(mForest, mForest.getLeaves());
                 fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
-                fragmentUi.setDischargedPatientCount(mLocationTree.countPatientsIn(mDischargedZone));
-                fragmentUi.setTriagePatientCount(mLocationTree.countPatientsIn(mTriageZone));
+                fragmentUi.setDischargedPatientCount(mForest.countPatientsIn(mDischargedZone));
+                fragmentUi.setTriagePatientCount(mForest.countPatientsIn(mTriageZone));
             }
         }
     }
 
     private void updateLoadingState() {
-        mUi.setLoadingState(mLocationTree != null ? LoadingState.LOADED :
+        mUi.setLoadingState(mForest != null ? LoadingState.LOADED :
             mWaitingOnSync ? LoadingState.SYNCING : LoadingState.LOADING);
     }
 
@@ -203,7 +203,7 @@ final class LocationListController {
     }
 
     /** Call when the user presses a location. */
-    public void onLocationSelected(NewLocation location) {
+    public void onLocationSelected(Location location) {
         Utils.logUserAction("location_pressed", "location", location.name);
         mUi.openSingleLocation(location);
     }
@@ -256,7 +256,7 @@ final class LocationListController {
         public void onEventMainThread(SyncSucceededEvent event) {
             mUi.showSyncFailedDialog(false);
             mWaitingOnSync = false;
-            loadOrSyncLocationTree();
+            loadOrSyncForest();
         }
 
         public void onEventMainThread(SyncFailedEvent event) {

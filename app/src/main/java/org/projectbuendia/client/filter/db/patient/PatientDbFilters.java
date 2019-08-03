@@ -18,8 +18,8 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.AllFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.NewLocation;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,20 +31,20 @@ public final class PatientDbFilters {
     }
 
     /** Returns a list of all {@link SimpleSelectionFilter}s that should be displayed to the user. */
-    public static List<SimpleSelectionFilter<?>> getFiltersForDisplay(NewLocationTree locationTree) {
+    public static List<SimpleSelectionFilter<?>> getFiltersForDisplay(LocationForest forest) {
         List<SimpleSelectionFilter<?>> allFilters = new ArrayList<>();
         allFilters.add(new PresentFilter());
-        allFilters.addAll(getLocationFilters(locationTree));
+        allFilters.addAll(getLocationFilters(forest));
         allFilters.add(null); // Section break
         allFilters.addAll(getOtherFilters());
         return allFilters;
     }
 
     /** Returns a list of filters, each representing a location. */
-    public static List<SimpleSelectionFilter<?>> getLocationFilters(NewLocationTree tree) {
+    public static List<SimpleSelectionFilter<?>> getLocationFilters(LocationForest forest) {
         List<SimpleSelectionFilter<?>> filters = new ArrayList<>();
-        for (NewLocation location : tree.allNodes()) {
-            filters.add(new LocationUuidFilter(tree, location));
+        for (Location location : forest.allNodes()) {
+            filters.add(new LocationUuidFilter(forest, location));
         }
         return filters;
     }

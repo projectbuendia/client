@@ -61,12 +61,12 @@ public class AppModel {
     private final ContentResolver mContentResolver;
     private final TaskFactory mTaskFactory;
 
-    private final Object loadedTreeLock = new Object();
-    private NewLocationTree loadedTree = null;
-    private String loadedTreeLocale = null;
-    private boolean treeObserversRegistered = false;
-    private Receiver<NewLocationTree> onLocationTreeRebuiltListener = null;
-    private Receiver<NewLocationTree> onLocationTreeUpdatedListener = null;
+    private final Object loadedForestLock = new Object();
+    private LocationForest loadedForest = null;
+    private String loadedForestLocale = null;
+    private boolean forestObserversRegistered = false;
+    private Receiver<LocationForest> onForestRebuiltListener = null;
+    private Receiver<LocationForest> onForestUpdatedListener = null;
 
     /**
      * Returns true iff the model has previously been fully downloaded from the server--that is, if
@@ -109,72 +109,72 @@ public class AppModel {
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
-    public NewLocationTree getLocationTree(String locale) {
-        NewLocationTree tree;
-        synchronized (loadedTreeLock) {
-            if (loadedTree == null || !eq(locale, loadedTreeLocale)) {
-                loadedTree = loadLocationTree(locale);
-                loadedTreeLocale = locale;
+    public LocationForest getForest(String locale) {
+        LocationForest forest;
+        synchronized (loadedForestLock) {
+            if (loadedForest == null || !eq(locale, loadedForestLocale)) {
+                loadedForest = loadForest(locale);
+                loadedForestLocale = locale;
             }
-            tree = loadedTree;
-            if (!treeObserversRegistered) {
-                registerTreeContentObservers();
-                treeObserversRegistered = true;
-            }
-        }
-        return tree;
-    }
-
-    public void setLocationTreeRebuiltListener(Receiver<NewLocationTree> listener) {
-        synchronized (loadedTreeLock) {
-            onLocationTreeRebuiltListener = listener;
-            if (listener != null && loadedTree == null && loadedTreeLocale != null) {
-                loadedTree = loadLocationTree(loadedTreeLocale);
+            forest = loadedForest;
+            if (!forestObserversRegistered) {
+                registerForestObservers();
+                forestObserversRegistered = true;
             }
         }
+        return forest;
     }
 
-    public void setLocationTreeUpdatedListener(Receiver<NewLocationTree> listener) {
-        synchronized (loadedTreeLock) {
-            onLocationTreeUpdatedListener = listener;
-            if (listener != null && loadedTree == null && loadedTreeLocale != null) {
-                loadedTree = loadLocationTree(loadedTreeLocale);
+    public void setForestRebuiltListener(Receiver<LocationForest> listener) {
+        synchronized (loadedForestLock) {
+            onForestRebuiltListener = listener;
+            if (listener != null && loadedForest == null && loadedForestLocale != null) {
+                loadedForest = loadForest(loadedForestLocale);
             }
         }
     }
 
-    private NewLocationTree loadLocationTree(String locale) {
+    public void setForestUpdatedListener(Receiver<LocationForest> listener) {
+        synchronized (loadedForestLock) {
+            onForestUpdatedListener = listener;
+            if (listener != null && loadedForest == null && loadedForestLocale != null) {
+                loadedForest = loadForest(loadedForestLocale);
+            }
+        }
+    }
+
+    private LocationForest loadForest(String locale) {
         Uri uri = Contracts.getLocalizedLocationsUri(locale);
         try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            return new NewLocationTree(
+            return new LocationForest(
                 new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
         }
     }
 
-    private void updateLocationTree(NewLocationTree tree) {
+    private void updateForest(LocationForest forest) {
         Uri uri = Contracts.getLocalizedLocationsUri("-");
         try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            tree.updatePatientCounts(
+            forest.updatePatientCounts(
                 new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
         }
     }
 
-    private void registerTreeContentObservers() {
+    private void registerForestObservers() {
         mContentResolver.registerContentObserver(
             Contracts.LocalizedLocations.URI, true, new ContentObserver(new Handler()) {
                 @Override public void onChange(boolean selfChange) {
-                    NewLocationTree tree = null;
-                    synchronized (loadedTreeLock) {
-                        if (onLocationTreeRebuiltListener != null) {
-                            // Someone is listening, so get a new tree for them now.
-                            tree = loadedTree = loadLocationTree(loadedTreeLocale);
+                    LocationForest forest = null;
+                    synchronized (loadedForestLock) {
+                        if (onForestRebuiltListener != null) {
+                            // Someone is listening, so get a new forest for them now.
+                            forest = loadedForest = loadForest(loadedForestLocale);
                         } else {
-                            // No one is listening; ensure the tree is reloaded later.
-                            loadedTree = null;
+                            // No one is listening; ensure the forest is reloaded later.
+                            loadedForest = null;
                         }
                     }
-                    if (onLocationTreeRebuiltListener != null) {
-                        onLocationTreeRebuiltListener.receive(tree);
+                    if (onForestRebuiltListener != null) {
+                        onForestRebuiltListener.receive(forest);
                     }
                 }
             }
@@ -182,19 +182,19 @@ public class AppModel {
         mContentResolver.registerContentObserver(
             Contracts.Patients.URI, true, new ContentObserver(new Handler()) {
                 @Override public void onChange(boolean selfChange) {
-                    NewLocationTree tree = null;
-                    synchronized (loadedTreeLock) {
-                        if (onLocationTreeUpdatedListener != null) {
-                            // Someone is listening, so update the tree for them now.
-                            updateLocationTree(loadedTree);
-                            tree = loadedTree;
+                    LocationForest forest = null;
+                    synchronized (loadedForestLock) {
+                        if (onForestUpdatedListener != null) {
+                            // Someone is listening, so update the forest for them now.
+                            updateForest(loadedForest);
+                            forest = loadedForest;
                         } else {
-                            // No one is listening; ensure the tree is reloaded later.
-                            loadedTree = null;
+                            // No one is listening; ensure the forest is reloaded later.
+                            loadedForest = null;
                         }
                     }
-                    if (onLocationTreeUpdatedListener != null) {
-                        onLocationTreeUpdatedListener.receive(tree);
+                    if (onForestUpdatedListener != null) {
+                        onForestUpdatedListener.receive(forest);
                     }
                 }
             }

@@ -26,8 +26,8 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.NewLocation;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.Zones;
@@ -83,17 +83,17 @@ public class PatientLocationDialogFragment extends DialogFragment {
         dialog.getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        NewLocationTree tree = mModel.getLocationTree(mSettings.getLocaleTag());
+        LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
         mList = new LocationOptionList(c.findView(R.id.list_container));
-        mList.setOptions(getLocationOptions(tree));
+        mList.setOptions(getLocationOptions(forest));
         mList.setSelectedUuid(getArguments().getString("locationUuid"));
         return dialog;
     }
 
-    private List<LocationOption> getLocationOptions(NewLocationTree tree) {
-        NewLocation discharged = tree.get(Zones.DISCHARGED_ZONE_UUID);
-        int numDischarged = discharged != null ? tree.countPatientsIn(discharged) : 0;
-        int numPatients = tree.countAllPatients();
+    private List<LocationOption> getLocationOptions(LocationForest forest) {
+        Location discharged = forest.get(Zones.DISCHARGED_ZONE_UUID);
+        int numDischarged = discharged != null ? forest.countPatientsIn(discharged) : 0;
+        int numPatients = forest.countAllPatients();
 
         int fg = c.color(R.color.vital_fg_light);
         int bg = c.color(R.color.zone_confirmed);
@@ -101,13 +101,13 @@ public class PatientLocationDialogFragment extends DialogFragment {
         List<LocationOption> options = new ArrayList<>();
         options.add(new LocationOption(
             null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1));
-        for (NewLocation location : tree.allNodes()) {
+        for (Location location : forest.allNodes()) {
             if (!eq(location, discharged)) {
                 // A parenthesized number can be included at the front of the location name
                 // to determine its sorting order; the number will not be displayed.
                 String displayName = location.name.replaceAll("^\\(.*?\\)\\s*", "");
                 options.add(new LocationOption(
-                    location.uuid, displayName, tree.countPatientsIn(location), fg, bg, 0.5));
+                    location.uuid, displayName, forest.countPatientsIn(location), fg, bg, 0.5));
             }
         }
         if (discharged != null) {

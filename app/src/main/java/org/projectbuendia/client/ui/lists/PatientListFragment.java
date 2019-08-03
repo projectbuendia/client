@@ -21,7 +21,7 @@ import android.widget.ListView;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.net.Common;
@@ -127,8 +127,8 @@ public class PatientListFragment extends ProgressFragment implements
         mActivatedPosition = position;
     }
 
-    public PatientListTypedCursorAdapter getAdapterInstance(NewLocationTree locationTree) {
-        return new PatientListTypedCursorAdapter(getActivity(), locationTree);
+    public PatientListTypedCursorAdapter getAdapterInstance(LocationForest forest) {
+        return new PatientListTypedCursorAdapter(getActivity(), forest);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -170,8 +170,8 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
-        @Override public void setLocationTree(NewLocationTree locationTree) {
-            mPatientAdapter = getAdapterInstance(locationTree);
+        @Override public void setForest(LocationForest forest) {
+            mPatientAdapter = getAdapterInstance(forest);
             mListView.setAdapter(mPatientAdapter);
         }
 

@@ -575,7 +575,7 @@ public class OdkActivityLauncher {
      * all answered observations. Returns a empty {@link List} if no observation was answered.
      *
      * @param common                        the current content values.
-     * @param savedRoot                     the root tree form element
+     * @param savedRoot                     the root forest form element
      * @param xformConceptIdsAccumulator    the set to store the form concept ids found
      */
     private static List<ContentValues> getAnsweredObservations(ContentValues common,

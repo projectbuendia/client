@@ -49,7 +49,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
@@ -89,7 +89,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private static final int PATIENT_UPDATE_PERIOD_MILLIS = 10000;
 
     private Patient mPatient = Patient.builder().build();
-    private NewLocationTree mLocationTree;
+    private LocationForest mForest;
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
@@ -139,7 +139,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         void updatePatientConditionUi(String generalConditionUuid);
 
         /** Updates the UI with the patient's location. */
-        void updatePatientLocationUi(NewLocationTree locationTree, Patient patient);
+        void updatePatientLocationUi(LocationForest forest, Patient patient);
 
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updateTilesAndGrid(
@@ -238,7 +238,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
-        mLocationTree = mAppModel.getLocationTree(mSettings.getLocaleTag());
+        mForest = mAppModel.getForest(mSettings.getLocaleTag());
         updatePatientLocationUi();
 
         mSyncManager.sync(Phase.OBSERVATIONS, Phase.ORDERS);
@@ -573,8 +573,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     private synchronized void updatePatientLocationUi() {
-        if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
-            mUi.updatePatientLocationUi(mLocationTree, mPatient);
+        if (mForest != null && mPatient != null && mPatient.locationUuid != null) {
+            mUi.updatePatientLocationUi(mForest, mPatient);
         }
     }
 

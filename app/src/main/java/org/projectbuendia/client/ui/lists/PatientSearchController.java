@@ -27,7 +27,7 @@ import org.projectbuendia.client.filter.matchers.MatchingFilterGroup;
 import org.projectbuendia.client.filter.matchers.patient.IdFilter;
 import org.projectbuendia.client.filter.matchers.patient.NameFilter;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.NewLocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.sync.SyncManager;
@@ -53,7 +53,7 @@ public class PatientSearchController {
     private final SyncManager mSyncManager;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
     private final String mLocale;
-    private NewLocationTree mLocationTree;
+    private LocationForest mForest;
     private String mRootLocationUuid;
     private SimpleSelectionFilter mFilter;
     private String mFilterQueryTerm = "";
@@ -71,7 +71,7 @@ public class PatientSearchController {
     }
 
     public interface FragmentUi {
-        void setLocationTree(NewLocationTree locationTree);
+        void setForest(LocationForest forest);
         void setPatients(TypedCursor<Patient> patients);
         void showSpinner(boolean show);
     }
@@ -105,7 +105,7 @@ public class PatientSearchController {
         mFilter = PatientDbFilters.getDefaultFilter();
         mSyncSubscriber = new SyncSubscriber();
         mCreationSubscriber = new CreationSubscriber();
-        mLocationTree = mModel.getLocationTree(mLocale);
+        mForest = mModel.getForest(mLocale);
     }
 
     /**
@@ -115,7 +115,7 @@ public class PatientSearchController {
     public void init() {
         mGlobalEventBus.register(mSyncSubscriber);
         mCrudEventBus.register(mCreationSubscriber);
-        mModel.setLocationTreeRebuiltListener(this::onLocationTreeRebuilt);
+        mModel.setForestRebuiltListener(this::onForestRebuilt);
     }
 
     /** Releases resources required by this controller. */
@@ -126,13 +126,13 @@ public class PatientSearchController {
         if (mPatientsCursor != null) {
             mPatientsCursor.close();
         }
-        mModel.setLocationTreeRebuiltListener(null);
+        mModel.setForestRebuiltListener(null);
     }
 
     /** Registers a {@link FragmentUi} with this controller. */
     public void attachFragmentUi(FragmentUi fragmentUi) {
         mFragmentUis.add(fragmentUi);
-        fragmentUi.setLocationTree(mLocationTree);
+        fragmentUi.setForest(mForest);
 
         if (mPatientsCursor != null) {
             FilteredCursorWrapper<Patient> filteredCursorWrapper =
@@ -142,7 +142,7 @@ public class PatientSearchController {
         }
 
         // If all data is loaded, no need for a spinner.
-        if (mLocationTree != null && mPatientsCursor != null) {
+        if (mForest != null && mPatientsCursor != null) {
             fragmentUi.showSpinner(false);
         }
     }
@@ -210,11 +210,11 @@ public class PatientSearchController {
         SimpleSelectionFilter filter;
 
         // Tack on a location filter to the filter to show only known locations.
-        if (mLocationTree == null || mRootLocationUuid == null) {
+        if (mForest == null || mRootLocationUuid == null) {
             filter = mFilter;
         } else {
             filter = new SimpleSelectionFilterGroup(new LocationUuidFilter(
-                mLocationTree, mLocationTree.get(mRootLocationUuid)), mFilter);
+                mForest, mForest.get(mRootLocationUuid)), mFilter);
         }
 
         return filter;
@@ -252,10 +252,10 @@ public class PatientSearchController {
         }
     }
 
-    private void onLocationTreeRebuilt(NewLocationTree tree) {
-        mLocationTree = tree;
+    private void onForestRebuilt(LocationForest forest) {
+        mForest = forest;
         for (FragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.setLocationTree(mLocationTree);
+            fragmentUi.setForest(mForest);
         }
     }
 
