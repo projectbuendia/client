@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client;
 
+import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.SyncManager;
 
 /**
@@ -37,4 +38,6 @@ public class FakeSyncManager extends SyncManager {
     @Override public void syncAll() {
         mSyncing = true;
     }
+
+    @Override public void setPeriodicSync(int periodSec, Phase... phases) { }
 }

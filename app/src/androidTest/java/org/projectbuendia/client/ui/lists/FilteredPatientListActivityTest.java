@@ -34,8 +34,8 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
 
     /** Opens the patient list. */
     private void openPatientList() {
-        waitForProgressFragment(); // Wait for tents.
-        click(viewWithId(R.id.location_selection_all_patients));
+        waitForProgressFragment(); // Wait for locations to load.
+        click(viewWithId(R.id.all_patients));
         waitForProgressFragment(); // Wait for patients.
     }
 

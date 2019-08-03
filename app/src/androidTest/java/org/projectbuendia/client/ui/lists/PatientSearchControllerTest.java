@@ -14,8 +14,6 @@ package org.projectbuendia.client.ui.lists;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,12 +35,15 @@ import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 
+import androidx.test.filters.SmallTest;
+
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /** Tests for {@link PatientSearchController}. */
 @RunWith(AndroidJUnit4.class)
@@ -202,9 +203,7 @@ public class PatientSearchControllerTest {
     public void testLoadSearchResults_fetchesFilteredPatientsOnceLocationsPresent() {
         // GIVEN PatientSearchController with locations available and specified Triage root
         mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
-        LocationForest forest = FakeForestFactory.build();
-        AppForestFetchedEvent event = new AppForestFetchedEvent(forest);
-        mFakeCrudEventBus.post(event);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         // WHEN search results are requested
         mController.loadSearchResults();
         // THEN patients are fetched from Triage

@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
 import org.projectbuendia.client.models.AppModel;
@@ -20,9 +19,6 @@ import java.util.List;
 
 /** A controller for setting up user-selectable filters in a patient list. */
 public class PatientFilterController {
-    private final AppModel mAppModel;
-    private final CrudEventBus mCrudEventBus;
-    private final String mLocale;
     private final Ui mUi;
 
     public interface Ui {
@@ -31,20 +27,14 @@ public class PatientFilterController {
 
     /**
      * Creates a {@link PatientFilterController} with the specified UI implementation, event
-     * bus, model, and locale.
-     * @param ui           a {@link Ui} that will receive UI events
-     * @param crudEventBus a {@link CrudEventBus} that will listen for filter events
+     * bus, model, and locale.  @param ui           a {@link Ui} that will receive UI events
      * @param appModel     an {@link AppModel} used to retrieve patients
      * @param locale       a language code/locale for presenting localized information (e.g. en)
      */
-    public PatientFilterController(
-        Ui ui, CrudEventBus crudEventBus, AppModel appModel, String locale) {
+    public PatientFilterController(Ui ui, AppModel appModel, String locale) {
         mUi = ui;
-        mAppModel = appModel;
-        mCrudEventBus = crudEventBus;
-        mLocale = locale;
         mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(
-            mAppModel.getForest(mLocale)
+            appModel.getForest(locale)
         ));
     }
 }

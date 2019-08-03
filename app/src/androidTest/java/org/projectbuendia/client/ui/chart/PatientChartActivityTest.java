@@ -21,8 +21,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
-import androidx.test.filters.MediumTest;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.odk.collect.android.views.MediaLayout;
@@ -38,6 +36,8 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.UUID;
+
+import androidx.test.filters.MediumTest;
 
 import static android.support.test.espresso.web.assertion.WebViewAssertions.webMatches;
 import static android.support.test.espresso.web.sugar.Web.onWebView;
@@ -57,6 +57,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     private static final String BP_DIA = "BP, diastolic";
 
     private static final int ROW_HEIGHT = 84;
+
+    private static final String VITALS_FORM = "Vitals and physical exam";
+    private static final String ATTRIBUTES_FORM = "Patient attributes";
 
     public PatientChartActivityTest() {
         super();
@@ -100,7 +103,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
         inUserLoginGoToDemoPatientChart();
         // Load the form once and dismiss it
-        openEncounterForm();
+        openEncounterForm(ATTRIBUTES_FORM);
         click(viewWithText("Discard"));
 
         try {
@@ -110,7 +113,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
 
         // Load the form again and dismiss it
-        openEncounterForm();
+        openEncounterForm(ATTRIBUTES_FORM);
         click(viewWithText("Discard"));
     }
 
@@ -170,14 +173,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }*/
 
     // TODO(sdspikes): this method is somewhat flaky, the click sometimes doesn't bring up the menu
-    protected void openEncounterForm() {
+    protected void openEncounterForm(String menuLabel) {
         // Wait until the edit menu button is available.
         expectVisibleSoon(viewWithId(R.id.action_edit));
         click(viewWithId(R.id.action_edit));
 
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
-        ViewInteraction testForm = viewWithText("Clinical observation");
+        ViewInteraction testForm = viewWithText(menuLabel);
         expectVisibleSoon(testForm);
         click(testForm);
         Espresso.registerIdlingResources(xformIdlingResource);
@@ -192,7 +195,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     @Ignore
     public void testDismissButtonReturnsImmediatelyWithNoChanges() {
         inUserLoginGoToDemoPatientChart();
-        openEncounterForm();
+        openEncounterForm(ATTRIBUTES_FORM);
         click(viewWithText("Discard"));
     }
 
@@ -201,7 +204,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     @UiThreadTest
     public void testDismissButtonShowsDialogWithChanges() {
         inUserLoginGoToDemoPatientChart();
-        openEncounterForm();
+        openEncounterForm(VITALS_FORM);
         answerTextQuestion("Temperature", "29.2");
 
         // Try to discard and give up.
@@ -275,7 +278,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
         // count), and verify that the latest value is visible for each.
         for (int i = 0; i < 3; i++) {
-            openEncounterForm();
+            openEncounterForm(VITALS_FORM);
 
             String temp = Integer.toString(i + 35) + ".7";
             String respiratoryRate = Integer.toString(i + 80);
@@ -342,10 +345,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
 
         // Enter first set of observations for this encounter.
-        openEncounterForm();
+        openEncounterForm(VITALS_FORM);
         answerTextQuestion("Temperature", "36.5");
         answerTextQuestion("Respiratory rate", "23");
-        answerTextQuestion("oxygen sat", "95");
+        answerTextQuestion("saturation", "95");
         answerTextQuestion(BP_SYS, "80");
         answerTextQuestion(BP_DIA, "100");
         saveForm();
@@ -357,13 +360,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         } catch (InterruptedException ignored) {
         }
 
-        openEncounterForm();
+        openEncounterForm(VITALS_FORM);
 //        TODO(sdspikes): should these be on the form? they currently are not
 //        answerTextQuestion("Weight", "80.4");
 //        answerTextQuestion("Height", "170");
 //        answerSingleCodedQuestion("Shock", "Mild");
         answerSingleCodedQuestion("Consciousness", "Responds to voice");
-        answerMultipleCodedQuestion("Symptoms", "Cough");
+        answerMultipleCodedQuestion("Other symptoms", "Cough");
         saveForm();
 
         // Enter third set of observations for this encounter.
@@ -423,10 +426,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         inUserLoginGoToDemoPatientChart();
         waitForProgressFragment();
 
-        openEncounterForm();
+        openEncounterForm(VITALS_FORM);
         answerTextQuestion("Temperature", "36.5");
         answerTextQuestion("Respiratory rate", "23");
-        answerTextQuestion("oxygen sat", "95");
+        answerTextQuestion("saturation", "95");
         answerTextQuestion(BP_SYS, "80");
         answerTextQuestion(BP_DIA, "100");
 //        answerTextQuestion("Weight", "80.5");
@@ -439,7 +442,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 //        answerSingleCodedQuestion("Sore throat", "No");
 //        answerSingleCodedQuestion("Heartburn", "Yes");
 //        answerSingleCodedQuestion("Pregnant", "No");
-        answerSingleCodedQuestion("Condition", "6. Confirmed dead");
+        answerSingleCodedQuestion("Condition", "Stable");
         answerTextQuestion("Notes", "Possible malaria.");
         saveForm();
 

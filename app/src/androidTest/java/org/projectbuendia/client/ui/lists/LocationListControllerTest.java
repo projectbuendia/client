@@ -20,18 +20,19 @@ import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.FakeSyncManager;
-import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
-import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.FakeEventBus;
+import org.projectbuendia.client.ui.ReadyState;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,16 +58,16 @@ public final class LocationListControllerTest {
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller asks the location manager to provide the location forest
-        verify(mMockAppModel).getForest("en");
+        verify(mMockAppModel).getForest(any());
     }
 
     /** Tests that init does not result in a new sync if data model is available. */
     @Test
     @UiThreadTest
     public void testInit_DoesNotStartSyncWhenDataModelAvailable() {
-        // GIVEN initialized data model and the controller hasn't previously fetched the location
-        // forest
+        // GIVEN initialized data model and an available forest
         when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller does not start a new sync
@@ -103,47 +104,50 @@ public final class LocationListControllerTest {
     @Test
     @UiThreadTest
     public void testLoadLocations_HidesSpinner() {
+        // GIVEN a valid location forest and sync not in progress
+        mFakeSyncManager.setSyncing(false);
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         // GIVEN an initialized controller with a fragment attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN the location forest is loaded and sync is not in progress
-        mFakeSyncManager.setSyncing(false);
-        when(mMockAppModel.getForest("en")).thenReturn()
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller hides the progress spinner
-        verify(mMockFragmentUi).setReadyState(false);
+        verify(mMockFragmentUi).setReadyState(ReadyState.READY);
     }
 
-    /** Tests that the spinner is not hidden if locations are loaded but a sync is in progress. */
+    /** Tests that the spinner is not shown while a sync is in progress if the model and locations are available. */
     @Test
     @UiThreadTest
-    public void testLoadLocations_DoesNotHideSpinnerWhenSyncInProgress() {
-        // GIVEN an initialized controller with a fragment attached
+    public void testLoadLocations_DoesNotShowSpinnerWhenSyncInProgress() {
+        // GIVEN a valid location forest while sync is still in progress
+        mFakeSyncManager.setSyncing(true);
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+        // WHEN a controller starts with a fragment attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN the location forest is loaded but sync is still in progress
-        mFakeSyncManager.setSyncing(true);
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
-        // THEN the controller does not hide the progress spinner
-        verify(mMockFragmentUi).setReadyState(true);
+        // THEN the controller does not show the progress spinner
+        verify(mMockFragmentUi).setReadyState(ReadyState.READY);
     }
 
     /** Tests that the spinner is hidden if locations are loaded and a sync is completed. */
     @Test
     @UiThreadTest
     public void testSpinnerHiddenAfterSyncCompletes() {
-        // GIVEN an initialized controller with a fragment attached
+        // GIVEN an incomplete model while sync is still in progress
+        mFakeSyncManager.setSyncing(true);
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
+        // WHEN a controller starts with a fragment attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN the location forest is loaded AND sync has completed
-        mFakeSyncManager.setSyncing(true);
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
+        // THEN the controller shows the sync progress bar
+        verify(mMockFragmentUi).setReadyState(ReadyState.SYNCING);
+        // WHEN the sync succeeds
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         mFakeEventBus.post(new SyncSucceededEvent());
-        // THEN the controller hides the progress spinner
-        verify(mMockFragmentUi).setReadyState(false);
+        // THEN the controller shows the spinner, loads the tree, and hides the spinner
+        verify(mMockFragmentUi, atLeast(0)).setReadyState(ReadyState.LOADING);
+        verify(mMockFragmentUi).setReadyState(ReadyState.READY);
     }
 
     /** Tests that a sync failure causes the error dialog to appear when no locations are present. */
@@ -167,16 +171,21 @@ public final class LocationListControllerTest {
     @Test
     @UiThreadTest
     public void testSyncSuccessHidesSyncDialog() {
-        // GIVEN an initialized controller with a fragment attached and a failed sync
+        // GIVEN an initialized controller with an incomplete model
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN a sync fails, the sync failed dialog is shown
         mFakeEventBus.post(new SyncFailedEvent());
-        // WHEN the location forest is loaded and a sync succeeds
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
+        verify(mMockUi).showSyncFailedDialog(true);
+        verify(mMockFragmentUi).setReadyState(ReadyState.ERROR);
+        // WHEN a sync succeeds
         mFakeEventBus.post(new SyncSucceededEvent());
-        // THEN the controller hides the sync failed dialog
+        // THEN the controller hides the sync failed dialog, loads the forest, and is ready for use
         verify(mMockUi).showSyncFailedDialog(false);
+        verify(mMockFragmentUi, atLeast(0)).setReadyState(ReadyState.LOADING);
+        verify(mMockFragmentUi).setReadyState(ReadyState.READY);
     }
 
     /** Tests that loading an empty location forest results in a new sync if sync has completed. */
@@ -188,8 +197,7 @@ public final class LocationListControllerTest {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location forest is loaded after sync completed
         mFakeEventBus.post(new SyncSucceededEvent());
-        LocationForest forest = FakeForestFactory.emptyForest();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         // THEN the controller starts a new sync
         assertTrue(mFakeSyncManager.isSyncRunningOrPending());
     }
@@ -198,13 +206,12 @@ public final class LocationListControllerTest {
     @Test
     @UiThreadTest
     public void testFetchingIncompleteForest_retainsSyncFailedDialog() {
-        // GIVEN an initialized controller with a fragment attached
+        // GIVEN an empty forest
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.emptyForest());
+        // WHEN the controller starts up and a fragment is attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN an empty location forest is loaded
-        LocationForest forest = FakeForestFactory.emptyForest();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
-        // THEN the loading dialog is not hidden
+        // THEN the sync failed dialog is not hidden
         verify(mMockUi, times(0)).showSyncFailedDialog(false);
     }
 
@@ -212,27 +219,26 @@ public final class LocationListControllerTest {
     @Test
     @UiThreadTest
     public void testFetchingIncompleteForest_retainsLoadingDialog() {
-        // GIVEN an initialized controller with a fragment attached
+        // GIVEN an empty forest
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.emptyForest());
+        // WHEN the controller starts up and a fragment is attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN an empty location forest is loaded
-        LocationForest forest = FakeForestFactory.emptyForest();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
-        // THEN the loading dialog is not hidden
-        verify(mMockFragmentUi).setReadyState(true);
+        // THEN the sync progress bar is shown
+        verify(mMockFragmentUi).setReadyState(ReadyState.SYNCING);
     }
 
     /** Tests that loading a populated location forest does not result in a new sync. */
     @Test
     @UiThreadTest
     public void testFetchingPopulatedForest_doesNotCauseNewSync() {
-        // GIVEN an initialized controller with a fragment attached
+        // GIVEN a valid model and a populated forest
         when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+        // WHEN the controller starts up and a fragment is attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN a populated location forest is loaded
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller does not start a new sync
         assertTrue(!mFakeSyncManager.isSyncRunningOrPending());
     }
@@ -244,15 +250,15 @@ public final class LocationListControllerTest {
     @Test
     @UiThreadTest
     public void testAttachFragmentUi_doesNotShowSpinnerDuringSyncWhenLocationsPresent() {
-        // GIVEN an initialized controller with a location forest, with a sync in progress
+        // GIVEN a sync in progress and a valid location forest
         mFakeSyncManager.setSyncing(true);
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+        // WHEN a fragment is attached to a new controller
         mController.init();
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
-        // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
-        // THEN the loading dialog is not displayed
-        verify(mMockFragmentUi).setReadyState(false);
+        // THEN the loading spinner is hidden
+        verify(mMockFragmentUi).setReadyState(ReadyState.READY);
     }
 
     /**
@@ -262,15 +268,15 @@ public final class LocationListControllerTest {
     @Test
     @UiThreadTest
     public void testAttachFragmentUi_showsSpinnerDuringSyncWhenForestEmpty() {
-        // GIVEN an initialized controller with a location forest, with a sync in progress
+        // GIVEN a sync in progress and an empty location forest
         mFakeSyncManager.setSyncing(true);
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.emptyForest());
+        // WHEN a fragment is attached to a new controller
         mController.init();
-        LocationForest forest = FakeForestFactory.emptyForest();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
-        // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
-        // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).setReadyState(true);
+        // THEN the sync progress bar is shown
+        verify(mMockFragmentUi).setReadyState(ReadyState.SYNCING);
     }
 
     /**
@@ -282,11 +288,12 @@ public final class LocationListControllerTest {
     public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationsNotPresent() {
         // GIVEN an initialized controller with a sync in progress and no location forest
         mFakeSyncManager.setSyncing(true);
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
         mController.init();
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
-        // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).setReadyState(true);
+        // THEN the sync progress bar is shown
+        verify(mMockFragmentUi).setReadyState(ReadyState.SYNCING);
     }
 
     /** Tests that user-initiated sync cancellation closes the activity. */
@@ -313,8 +320,7 @@ public final class LocationListControllerTest {
         mController.init();
         // WHEN user initiates a sync cancellation right before the data model is fetched
         mFakeEventBus.post(new SyncCancelRequestedEvent());
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         mFakeEventBus.post(new SyncCanceledEvent());
         // THEN the activity is closed
         verify(mMockUi).finish();
@@ -332,46 +338,18 @@ public final class LocationListControllerTest {
         verify(mMockUi, times(0)).finish();
     }
 
-    /** Tests that 'sync progress' messages are ignored when the data model is already available. */
-    @Test
-    @UiThreadTest
-    public void testSyncProgress_ignoredWhenDataModelAvailable() {
-        // GIVEN an initialized controller with a location forest
-        mController.init();
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
-        // WHEN a periodic sync reports progress
-        mFakeEventBus.post(new SyncProgressEvent(10, R.string.syncing_users));
-        // THEN the activity does not notify the UI
-        verify(mMockFragmentUi, times(0)).setSyncProgress(10, R.string.syncing_users);
-    }
-
     /** Tests that 'sync failed' messages are ignored when the data model is already available. */
     @Test
     @UiThreadTest
     public void testSyncFailed_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location forest
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
         mController.init();
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // WHEN a periodic sync fails
         mFakeEventBus.post(new SyncFailedEvent());
-        // THEN the activity does not notify the UI
+        // THEN the activity does not show the Sync Failed dialog
         verify(mMockUi, times(0)).showSyncFailedDialog(true);
-    }
-
-    /** Tests that 'sync started' messages are ignored when the data model is already available. */
-    @Test
-    @UiThreadTest
-    public void testSyncStarted_ignoredWhenDataModelAvailable() {
-        // GIVEN an initialized controller with a location forest
-        mController.init();
-        LocationForest forest = FakeForestFactory.build();
-        mFakeEventBus.post(new AppForestFetchedEvent(forest));
-        // WHEN a periodic sync starts
-        mFakeEventBus.post(new SyncStartedEvent());
-        // THEN the activity does not notify the UI
-        verify(mMockFragmentUi, times(0)).resetSyncProgress();
     }
 
     @Before

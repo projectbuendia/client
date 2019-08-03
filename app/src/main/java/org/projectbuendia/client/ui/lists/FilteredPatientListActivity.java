@@ -45,7 +45,6 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
         mFilterController = new PatientFilterController(
             new FilterUi(),
-            mCrudEventBus,
             mAppModel,
             mLocale);
 

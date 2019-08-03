@@ -19,29 +19,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /** Tests for {@link PatientFilterController}. */
 public class PatientFilterControllerTest {
     private static final String LOCALE = "en";
     private PatientFilterController mController;
-    private FakeEventBus mFakeCrudEventBus;
     @Mock private AppModel mMockAppModel;
     @Mock private PatientFilterController.Ui mMockUi;
 
-    /** Tests that requesting an action bar initialization fetches a location forest. */
-    @Test
-    @UiThreadTest
-    public void testSetupActionBarAsync_fetchesForest() {
-        // GIVEN initialized PatientFilterController
-        // WHEN setupActionBarAsync called
-        mController.setupActionBarAsync();
-        // THEN location forest is fetched from model
-        verify(mMockAppModel).fetchForest(mFakeCrudEventBus, LOCALE);
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
     }
 
     /** Tests that filters are correctly initialized once a location forest is retrieved. */
@@ -49,22 +43,12 @@ public class PatientFilterControllerTest {
     @UiThreadTest
     public void testSetupActionBarAsync_passesLocationFilters() {
         // GIVEN initialized PatientFilterController, after setupActionBarAsync called
-        mController.setupActionBarAsync();
+        mController = new PatientFilterController(
+            mMockUi, mMockAppModel, LOCALE);
         // WHEN location forest fetched
-        LocationForest forest = FakeForestFactory.build();
-        AppForestFetchedEvent event = new AppForestFetchedEvent(forest);
-        mFakeCrudEventBus.post(event);
-        // THEN location filters passed to the Ui
+        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+        // THEN location filters are passed to the Ui
         verify(mMockUi).populateActionBar(
             argThat(new SimpleSelectionFilterMatchers.ContainsFilterWithName("Triage")));
-    }
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-
-        mFakeCrudEventBus = new FakeEventBus();
-        mController = new PatientFilterController(
-            mMockUi, mFakeCrudEventBus, mMockAppModel, LOCALE);
     }
 }

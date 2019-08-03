@@ -123,7 +123,7 @@ final class LocationListController {
     public void loadForest() {
         setReadyState(ReadyState.LOADING);
         LocationForest forest = mAppModel.getForest(mSettings.getLocaleTag());
-        if (forest.size() > 0) {
+        if (forest != null && forest.size() > 0) {
             setForest(forest);
             setReadyState(ReadyState.READY);
         } else {
@@ -151,6 +151,7 @@ final class LocationListController {
             fragmentUi.setLocations(mForest, mForest.allNodes());
             fragmentUi.setAllPatientsCount(mForest.countAllPatients());
         }
+        fragmentUi.setReadyState(mReadyState);
     }
 
     private void setReadyState(ReadyState state) {
@@ -235,12 +236,13 @@ final class LocationListController {
 
         public void onEventMainThread(SyncFailedEvent event) {
             if (mReadyState == ReadyState.SYNCING) {
+                // Show the dialog only if the UI is waiting for this sync.
+                mUi.showSyncFailedDialog(true);
+                Utils.logEvent("sync_failed_dialog_shown");
                 for (LocationListFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.setSyncProgress(0, 0, null);
                 }
                 setReadyState(ReadyState.ERROR);
-                mUi.showSyncFailedDialog(true);
-                Utils.logEvent("sync_failed_dialog_shown");
             }
         }
     }

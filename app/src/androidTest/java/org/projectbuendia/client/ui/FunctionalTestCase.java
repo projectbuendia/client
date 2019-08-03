@@ -56,7 +56,7 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
 public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity> {
     private static final Logger LOG = Logger.create();
 
-    public static final String LOCATION_NAME = "Discharged";
+    public static final String LOCATION_NAME = "Triage";
 
     // For now, we create a new demo patient for tests using the real patient
     // creation UI on each test run (see {@link #inUserLoginInitDemoPatient()}).
@@ -86,7 +86,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             Espresso.registerIdlingResources(resource);
         }
         // TODO(sdspikes): shouldn't be needed since launchActivity is set to true in the call to
-        //  the ActivityTestRule constructor, but without this we don't seem to launch anything.
+        // the ActivityTestRule constructor, but without this we don't seem to launch anything.
         launchActivity(null);
     }
 
