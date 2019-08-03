@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
  * Handles syncing forms. All forms are always fetched, which is okay because there are only a few
  * forms; usually less than 10.
  */
-public class FormsSyncPhaseRunnable implements SyncPhaseRunnable {
+public class FormsSyncWorker implements SyncWorker {
     private static final Logger LOG = Logger.create();
     private static boolean isDisabled = false;
     private static final Object lock = new Object();

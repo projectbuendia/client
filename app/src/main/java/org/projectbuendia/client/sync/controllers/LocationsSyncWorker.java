@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
  * Handles syncing locations. All locations are always fetched, which is ok because the full set of
  * locations is fairly smaller.
  */
-public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
+public class LocationsSyncWorker implements SyncWorker {
     private static final Logger LOG = Logger.create();
 
     @Override

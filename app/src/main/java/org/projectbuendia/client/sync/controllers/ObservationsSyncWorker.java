@@ -30,12 +30,12 @@ import java.util.ArrayList;
 
 /**
  * Handles syncing observations. Uses an incremental sync mechanism - see
- * {@link IncrementalSyncPhaseRunnable} for details.
+ * {@link IncrementalSyncWorker} for details.
  */
-public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonObservation> {
+public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservation> {
     private static final Logger LOG = Logger.create();
 
-    public ObservationsSyncPhaseRunnable() {
+    public ObservationsSyncWorker() {
         super("observations", Contracts.Table.OBSERVATIONS, JsonObservation.class);
     }
 

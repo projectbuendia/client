@@ -28,12 +28,12 @@ import java.util.ArrayList;
 
 /**
  * Handles syncing patients. Uses an incremental sync mechanism - see
- * {@link IncrementalSyncPhaseRunnable} for details.
+ * {@link IncrementalSyncWorker} for details.
  */
-public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonPatient> {
+public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
     private static final Logger LOG = Logger.create();
 
-    public PatientsSyncPhaseRunnable() {
+    public PatientsSyncWorker() {
         super("patients", Contracts.Table.PATIENTS, JsonPatient.class);
     }
 

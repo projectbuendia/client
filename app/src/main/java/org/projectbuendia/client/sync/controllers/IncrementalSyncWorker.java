@@ -45,7 +45,7 @@ import static org.projectbuendia.client.net.OpenMrsServer.wrapErrorListener;
  * Implements the basic logic for an incremental sync phase.
  * <p>
  * To implement an incremental sync phase, create a subclass, supply the appropriate arguments to
- * {@link IncrementalSyncPhaseRunnable}'s constructor from the subclasses' public, no-arg
+ * {@link IncrementalSyncWorker}'s constructor from the subclasses' public, no-arg
  * constructor, and then implement the {@link #getUpdateOps(Object[], SyncResult)} method.
  * <p>
  * Note: you may also wish to undertake an action at the start and end of the sync phase - hooks are
@@ -53,7 +53,7 @@ import static org.projectbuendia.client.net.OpenMrsServer.wrapErrorListener;
  * ContentProviderClient)} and {@link #afterSyncFinished(ContentResolver, SyncResult,
  * ContentProviderClient)}.
  */
-public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnable {
+public abstract class IncrementalSyncWorker<T> implements SyncWorker {
 
     private static final Logger LOG = Logger.create();
 
@@ -62,7 +62,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
     private final Class<T> clazz;
 
     /**
-     * Instantiate a new IncrementalSyncPhaseRunnable. This is designed to be called from a no-arg
+     * Instantiate a new IncrementalSyncWorker. This is designed to be called from a no-arg
      * constructor of subclasses.
      *
      * @param resourceType The path name appended to {@link OpenMrsConnectionDetails#getBuendiaApiUrl()}
@@ -70,7 +70,7 @@ public abstract class IncrementalSyncPhaseRunnable<T> implements SyncPhaseRunnab
      * @param dbTable      The database table in which to store the fetched data.
      * @param clazz        The Class object for the JSON response model.
      */
-    protected IncrementalSyncPhaseRunnable(String resourceType, Contracts.Table dbTable, Class<T> clazz) {
+    protected IncrementalSyncWorker(String resourceType, Contracts.Table dbTable, Class<T> clazz) {
         this.resourceType = resourceType;
         this.dbTable = dbTable;
         this.clazz = clazz;

@@ -5,11 +5,11 @@ import android.content.ContentResolver;
 import android.content.SyncResult;
 
 /**
- * A SyncPhaseRunnable executes the unit of work for a specific sync phase. Each
- * SyncPhaseRunnable should be a lightweight object that does all work in the {@link
+ * A SyncWorker executes the unit of work for a specific sync phase. Each
+ * SyncWorker should be a lightweight object that does all work in the {@link
  * #sync(ContentResolver, SyncResult, ContentProviderClient)} method.
  */
-public interface SyncPhaseRunnable {
+public interface SyncWorker {
     // TODO: Replace `throws Throwable` with something more focussed.
     void sync(
             ContentResolver contentResolver,
