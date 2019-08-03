@@ -548,31 +548,35 @@ public class Utils {
      * null sorts before everything; all integers sort before all strings; integers
      * sort according to numeric value; strings sort according to string value.
      */
-    public static final Comparator<Object> NULL_INT_STR_COMPARATOR = (a, b) -> {
-        BigInteger intA = toBigInteger(a);
-        BigInteger intB = toBigInteger(b);
-        if (intA != null && intB != null) {
-            return intA.compareTo(intB);
+    public static final Comparator<Object> NULL_INT_STR_COMPARATOR = new Comparator<Object>() {
+        @Override public int compare(Object a, Object b) {
+            BigInteger intA = toBigInteger(a);
+            BigInteger intB = toBigInteger(b);
+            if (intA != null && intB != null) {
+                return intA.compareTo(intB);
+            }
+            if (a instanceof String && b instanceof String) {
+                return ((String) a).compareTo((String) b);
+            }
+            return (a == null ? 0 : intA != null ? 1 : 2)
+                - (b == null ? 0 : intB != null ? 1 : 2);
         }
-        if (a instanceof String && b instanceof String) {
-            return ((String) a).compareTo((String) b);
-        }
-        return (a == null ? 0 : intA != null ? 1 : 2)
-            - (b == null ? 0 : intB != null ? 1 : 2);
     };
 
     /**
      * Compares two lists, each of whose elements is a null, Integer, Long,
      * BigInteger, or String, lexicographically by element, just like Python.
      */
-    public static Comparator<List<Object>> nullIntStrListComparator = (a, b) -> {
-        for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-            int result = NULL_INT_STR_COMPARATOR.compare(a.get(i), b.get(i));
-            if (result != 0) {
-                return result;
+    public static final Comparator<List<Object>> NULL_INT_STR_LIST_COMPARATOR = new Comparator<List<Object>>() {
+        @Override public int compare(List<Object> a, List<Object> b) {
+            for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+                int result = NULL_INT_STR_COMPARATOR.compare(a.get(i), b.get(i));
+                if (result != 0) {
+                    return result;
+                }
             }
+            return a.size() - b.size();
         }
-        return a.size() - b.size();
     };
 
     // Note: Use of \L here assumes a string that is already NFC-normalized.
@@ -592,8 +596,8 @@ public class Utils {
      */
     public static final Comparator<String> ALPHANUMERIC_COMPARATOR = new Comparator<String>() {
         @Override public int compare(String a, String b) {
-            String aNormalized = Normalizer.normalize(Utils.toNonnull(a), Normalizer.Form.NFC);
-            String bNormalized = Normalizer.normalize(Utils.toNonnull(b), Normalizer.Form.NFC);
+            String aNormalized = Normalizer.normalize(a == null ? "" : a, Normalizer.Form.NFC);
+            String bNormalized = Normalizer.normalize(b == null ? "" : b, Normalizer.Form.NFC);
             List<Object> aParts = getParts(aNormalized);
             List<Object> bParts = getParts(bNormalized);
             // Add a separator to ensure that the tiebreakers added below are never
@@ -608,7 +612,7 @@ public class Utils {
             // using the non-normalized string as a further tiebreaker.
             aParts.add(a);
             bParts.add(b);
-            return nullIntStrListComparator.compare(aParts, bParts);
+            return NULL_INT_STR_LIST_COMPARATOR.compare(aParts, bParts);
         }
 
         /**
