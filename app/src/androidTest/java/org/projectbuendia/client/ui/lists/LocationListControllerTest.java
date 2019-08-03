@@ -45,7 +45,7 @@ public final class LocationListControllerTest {
     @Mock private AppModel mMockAppModel;
     @Mock private AppSettings mMockSettings;
     @Mock private LocationListController.Ui mMockUi;
-    @Mock private LocationListController.LocationFragmentUi mMockFragmentUi;
+    @Mock private LocationListController.LocationListFragmentUi mMockFragmentUi;
     @Mock private PatientSearchController mMockSearchController;
 
     /** Tests that locations are loaded during initialization, when available. */

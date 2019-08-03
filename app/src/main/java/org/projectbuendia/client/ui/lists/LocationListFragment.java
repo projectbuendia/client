@@ -106,7 +106,7 @@ public final class LocationListFragment extends ProgressFragment {
         mController.onTriagePressed();
     }
 
-    private final class Ui implements LocationListController.LocationFragmentUi {
+    private final class Ui implements LocationListController.LocationListFragmentUi {
         @Override public void setDischargedPatientCount(long patientCount) {
             setPatientCount(mDischargedButton, patientCount);
         }

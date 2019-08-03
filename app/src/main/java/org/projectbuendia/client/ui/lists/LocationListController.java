@@ -44,7 +44,7 @@ final class LocationListController {
     private final AppSettings mSettings;
     private final CrudEventBus mCrudEventBus;
     private final Ui mUi;
-    private final Set<LocationFragmentUi> mFragmentUis = new HashSet<>();
+    private final Set<LocationListFragmentUi> mFragmentUis = new HashSet<>();
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final SyncManager mSyncManager;
@@ -79,7 +79,7 @@ final class LocationListController {
         void finish();
     }
 
-    public interface LocationFragmentUi {
+    public interface LocationListFragmentUi {
 
         void setLocations(LocationForest forest, List<Location> locations);
 
@@ -148,12 +148,12 @@ final class LocationListController {
         mForest = forest;
         mTriageZone = mForest.get(Zones.TRIAGE_ZONE_UUID);
         mDischargedZone = mForest.get(Zones.DISCHARGED_ZONE_UUID);
-        for (LocationFragmentUi fragmentUi : mFragmentUis) {
+        for (LocationListFragmentUi fragmentUi : mFragmentUis) {
             updateFragmentUi(fragmentUi);
         }
     }
 
-    private void updateFragmentUi(LocationFragmentUi fragmentUi) {
+    private void updateFragmentUi(LocationListFragmentUi fragmentUi) {
         if (mForest != null) {
             long dischargedPatientCount = mForest.countPatientsIn(mDischargedZone);
             long totalPatientCount = mForest.countAllPatients();
@@ -167,17 +167,17 @@ final class LocationListController {
     private void setReadyState(ReadyState state) {
         mReadyState = state;
         mUi.setReadyState(state);
-        for (LocationFragmentUi fragmentUi : mFragmentUis) {
+        for (LocationListFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.setReadyState(state);
         }
     }
 
-    public void attachFragmentUi(LocationFragmentUi fragmentUi) {
+    public void attachFragmentUi(LocationListFragmentUi fragmentUi) {
         mFragmentUis.add(fragmentUi);
         updateFragmentUi(fragmentUi);
     }
 
-    public void detachFragmentUi(LocationFragmentUi fragmentUi) {
+    public void detachFragmentUi(LocationListFragmentUi fragmentUi) {
         mFragmentUis.remove(fragmentUi);
     }
 
@@ -224,7 +224,7 @@ final class LocationListController {
             if (mReadyState == ReadyState.SYNCING) {
                 synchronized (mSyncCancelLock) {
                     mUserCancelRequestPending = true;
-                    for (LocationFragmentUi fragmentUi : mFragmentUis) {
+                    for (LocationListFragmentUi fragmentUi : mFragmentUis) {
                         fragmentUi.showSyncCancelRequested();
                     }
                 }
@@ -245,7 +245,7 @@ final class LocationListController {
         }
 
         public void onEventMainThread(SyncProgressEvent event) {
-            for (LocationFragmentUi fragmentUi : mFragmentUis) {
+            for (LocationListFragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.setSyncProgress(event.numerator, event.denominator, event.messageId);
             }
         }
@@ -257,7 +257,7 @@ final class LocationListController {
 
         public void onEventMainThread(SyncFailedEvent event) {
             if (mReadyState == ReadyState.SYNCING) {
-                for (LocationFragmentUi fragmentUi : mFragmentUis) {
+                for (LocationListFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.setSyncProgress(0, 0, null);
                 }
                 setReadyState(ReadyState.ERROR);
