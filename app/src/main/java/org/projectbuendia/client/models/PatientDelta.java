@@ -119,12 +119,12 @@ public class PatientDelta {
                 observations.put(observation);
             }
             if (observations != null) {
-                json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observations);
+                json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
             }
 
             if (assignedLocationUuid.isPresent()) {
                 json.put(
-                    Server.PATIENT_ASSIGNED_LOCATION,
+                    Server.PATIENT_ASSIGNED_LOCATION_KEY,
                     getLocationObject(assignedLocationUuid.get()));
             }
 
