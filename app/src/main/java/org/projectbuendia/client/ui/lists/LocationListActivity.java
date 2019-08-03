@@ -114,7 +114,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             .setPositiveButton(
                 R.string.sync_failed_retry, (dialog, which) -> {
                     Utils.logEvent("sync_failed_retry_pressed");
-                    mController.startSync();
+                    mController.startInitialSync();
                 })
             .setCancelable(false)
             .create();

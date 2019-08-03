@@ -49,16 +49,16 @@ final class LocationListController {
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final SyncManager mSyncManager;
     private final PatientSearchController mPatientSearchController;
+
     @Nullable private LocationForest mForest;
     @Nullable private Location mTriageZone;
     @Nullable private Location mDischargedZone;
-    // True when the data model is unavailable and either a sync is already in progress or has been
-    // requested by this controller.
-    private boolean mWaitingOnSync = false;
-    // True when the user has explicitly requested that a sync be canceled (e.g. via the sync cancel
-    // button). Sync operations may be cancelled and rescheduled by Android without the user
-    // requesting a sync cancellation. In these cases, this flag will remain false.
-    private boolean mWaitingOnSyncCancel = false;
+
+    /** True when there is no data model yet and the initial sync is running. */
+    private boolean mInitialSyncRunning = false;
+
+    /** True when the user has requested to cancel a sync and the sync hasn't stopped yet. */
+    private boolean mUserCancelRequestPending = false;
     private final Object mSyncCancelLock = new Object();
 
     public interface Ui {
@@ -113,25 +113,33 @@ final class LocationListController {
     }
 
     public void init() {
-        mWaitingOnSyncCancel = false;
+        mUserCancelRequestPending = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        if (mAppModel.isFullModelAvailable()) loadOrSyncForest();
+        if (mAppModel.isFullModelAvailable()) {
+            loadForest();
+        } else {
+            LOG.w("Model not available; starting initial sync.");
+            startInitialSync();
+        }
         updateUi();
     }
 
-    public void loadOrSyncForest() {
+    public void loadForest() {
         LocationForest forest = mAppModel.getForest(mSettings.getLocaleTag());
         if (forest.size() > 0) mForest = forest;
         if (mForest != null) {
             mTriageZone = mForest.get(Zones.TRIAGE_ZONE_UUID);
             mDischargedZone = mForest.get(Zones.DISCHARGED_ZONE_UUID);
             updateUi();
-        } else startSync();
+        } else {
+            LOG.w("Invalid forest; retrying initial sync.");
+            startInitialSync();
+        }
     }
 
-    public void startSync() {
-        mWaitingOnSync = true;
+    public void startInitialSync() {
+        mInitialSyncRunning = true;
         if (!mSyncManager.isSyncRunningOrPending()) {
             mUi.setLoadingState(LoadingState.SYNCING);
             for (LocationFragmentUi fragmentUi : mFragmentUis) {
@@ -158,17 +166,15 @@ final class LocationListController {
 
     private void updateLoadingState() {
         mUi.setLoadingState(mForest != null ? LoadingState.LOADED :
-            mWaitingOnSync ? LoadingState.SYNCING : LoadingState.LOADING);
+            mInitialSyncRunning ? LoadingState.SYNCING : LoadingState.LOADING);
     }
 
     public void attachFragmentUi(LocationFragmentUi fragmentUi) {
-        LOG.d("Attached new fragment UI: " + fragmentUi);
         mFragmentUis.add(fragmentUi);
         updateUi();
     }
 
     public void detachFragmentUi(LocationFragmentUi fragmentUi) {
-        LOG.d("Detached fragment UI: " + fragmentUi);
         mFragmentUis.remove(fragmentUi);
     }
 
@@ -212,9 +218,9 @@ final class LocationListController {
     private final class EventBusSubscriber {
 
         public void onEventMainThread(SyncCancelRequestedEvent event) {
-            if (mWaitingOnSync) {
+            if (mInitialSyncRunning) {
                 synchronized (mSyncCancelLock) {
-                    mWaitingOnSyncCancel = true;
+                    mUserCancelRequestPending = true;
                     for (LocationFragmentUi fragmentUi : mFragmentUis) {
                         fragmentUi.showSyncCancelRequested();
                     }
@@ -226,19 +232,17 @@ final class LocationListController {
             // If user-initiated cancellation occurred, close the activity even if we're no longer
             // waiting on a sync (continuing to load the activity might be jarring).
             synchronized (mSyncCancelLock) {
-                if (!mWaitingOnSyncCancel) {
-                    LOG.d("Detected non-user-initiated sync cancellation, ignoring.");
-                    return;
+                if (mUserCancelRequestPending) {
+                    LOG.d("User-initiated sync cancellation completed; finishing activity.");
+                    mUi.finish();
+                } else {
+                    LOG.d("Sync cancelled, but not by the user.");
                 }
-
-                mWaitingOnSyncCancel = false;
-                LOG.d("Detected sync cancellation while waiting on sync, finishing activity.");
-                mUi.finish();
             }
         }
 
         public void onEventMainThread(SyncProgressEvent event) {
-            if (mWaitingOnSync) {
+            if (mInitialSyncRunning) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.showIncrementalSyncProgress(event.progress, event.messageId);
                 }
@@ -246,7 +250,7 @@ final class LocationListController {
         }
 
         public void onEventMainThread(SyncStartedEvent event) {
-            if (mWaitingOnSync) {
+            if (mInitialSyncRunning) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.resetSyncProgress();
                 }
@@ -255,12 +259,12 @@ final class LocationListController {
 
         public void onEventMainThread(SyncSucceededEvent event) {
             mUi.showSyncFailedDialog(false);
-            mWaitingOnSync = false;
-            loadOrSyncForest();
+            mInitialSyncRunning = false;
+            loadForest();
         }
 
         public void onEventMainThread(SyncFailedEvent event) {
-            if (mWaitingOnSync) {
+            if (mInitialSyncRunning) {
                 for (LocationFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.resetSyncProgress();
                 }
