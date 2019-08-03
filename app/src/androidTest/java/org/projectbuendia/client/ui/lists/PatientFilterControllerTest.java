@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.projectbuendia.client.FakeAppForestFactory;
+import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
@@ -51,7 +51,7 @@ public class PatientFilterControllerTest {
         // GIVEN initialized PatientFilterController, after setupActionBarAsync called
         mController.setupActionBarAsync();
         // WHEN location forest fetched
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         AppForestFetchedEvent event = new AppForestFetchedEvent(forest);
         mFakeCrudEventBus.post(event);
         // THEN location filters passed to the Ui

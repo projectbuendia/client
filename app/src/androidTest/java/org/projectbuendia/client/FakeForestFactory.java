@@ -11,10 +11,12 @@
 
 package org.projectbuendia.client;
 
+import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.client.models.LocationQueryResult;
 import org.projectbuendia.client.models.Zones;
 
 /** Constructs a fake {@link LocationForest} for use in tests. */
-public class FakeAppForestFactory {
+public class FakeForestFactory {
     public static final String ROOT_UUID = "foo";
     public static final String SUSPECT_1_UUID = "tent_s1";
     public static final String SUSPECT_2_UUID = "tent_s2";
@@ -32,44 +34,41 @@ public class FakeAppForestFactory {
      * @return the constructed {@link LocationForest}
      */
     public static LocationForest build() {
-        FakeTypedCursor<Location> locationCursor =
-            new FakeTypedCursor<>(
-                getSiteLocation(),
-                getTriageZoneLocation(),
-                getDischargedZoneLocation(),
-                getSuspectZoneLocation(),
-                getSuspect1TentLocation(),
-                getSuspect2TentLocation()
-            );
-        return LocationForest.forTypedCursor(locationCursor);
+        return new LocationForest(new FakeTypedCursor<>(
+            getSiteLocation(),
+            getTriageZoneLocation(),
+            getDischargedZoneLocation(),
+            getSuspectZoneLocation(),
+            getSuspect1TentLocation(),
+            getSuspect2TentLocation()
+        ));
     }
 
-    private static Location getSiteLocation() {
-        return new Location(ROOT_UUID, null, SITE_NAME, 0);
+    private static LocationQueryResult getSiteLocation() {
+        return new LocationQueryResult(ROOT_UUID, null, SITE_NAME, 0);
     }
 
-    private static Location getTriageZoneLocation() {
-        return new Location(Zones.TRIAGE_ZONE_UUID, ROOT_UUID, TRIAGE_ZONE_NAME, 0);
+    private static LocationQueryResult getTriageZoneLocation() {
+        return new LocationQueryResult(Zones.TRIAGE_ZONE_UUID, ROOT_UUID, TRIAGE_ZONE_NAME, 0);
     }
 
-    private static Location getDischargedZoneLocation() {
-        return new Location(Zones.DISCHARGED_ZONE_UUID, ROOT_UUID, DISCHARGED_ZONE_NAME, 0);
+    private static LocationQueryResult getDischargedZoneLocation() {
+        return new LocationQueryResult(Zones.DISCHARGED_ZONE_UUID, ROOT_UUID, DISCHARGED_ZONE_NAME, 0);
     }
 
-    private static Location getSuspectZoneLocation() {
-        return new Location(Zones.SUSPECT_ZONE_UUID, ROOT_UUID, SUSPECT_ZONE_NAME, 0);
+    private static LocationQueryResult getSuspectZoneLocation() {
+        return new LocationQueryResult(Zones.SUSPECT_ZONE_UUID, ROOT_UUID, SUSPECT_ZONE_NAME, 0);
     }
 
-    private static Location getSuspect1TentLocation() {
-        return new Location(SUSPECT_1_UUID, Zones.SUSPECT_ZONE_UUID, SUSPECT_1_TENT_NAME, 0);
+    private static LocationQueryResult getSuspect1TentLocation() {
+        return new LocationQueryResult(SUSPECT_1_UUID, Zones.SUSPECT_ZONE_UUID, SUSPECT_1_TENT_NAME, 0);
     }
 
-    private static Location getSuspect2TentLocation() {
-        return new Location(SUSPECT_2_UUID, Zones.SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME, 0);
+    private static LocationQueryResult getSuspect2TentLocation() {
+        return new LocationQueryResult(SUSPECT_2_UUID, Zones.SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME, 0);
     }
 
     public static LocationForest emptyForest() {
-        FakeTypedCursor<Location> locationCursor = new FakeTypedCursor<>();
-        return LocationForest.forTypedCursor(locationCursor);
+        return new LocationForest(new FakeTypedCursor<>());
     }
 }

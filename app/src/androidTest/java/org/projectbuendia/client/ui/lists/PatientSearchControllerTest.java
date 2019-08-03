@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.projectbuendia.client.FakeAppForestFactory;
+import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.FakeTypedCursor;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
@@ -202,7 +202,7 @@ public class PatientSearchControllerTest {
     public void testLoadSearchResults_fetchesFilteredPatientsOnceLocationsPresent() {
         // GIVEN PatientSearchController with locations available and specified Triage root
         mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         AppForestFetchedEvent event = new AppForestFetchedEvent(forest);
         mFakeCrudEventBus.post(event);
         // WHEN search results are requested

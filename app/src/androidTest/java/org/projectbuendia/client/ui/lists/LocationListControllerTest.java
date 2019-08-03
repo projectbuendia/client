@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.FakeAppForestFactory;
+import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.FakeSyncManager;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
@@ -110,7 +110,7 @@ public final class LocationListControllerTest {
         // WHEN the location forest is loaded and sync is not in progress
         mFakeSyncManager.setSyncing(false);
         when(mMockAppModel.getForest("en")).thenReturn()
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller hides the progress spinner
         verify(mMockFragmentUi).setBusyLoading(false);
@@ -125,7 +125,7 @@ public final class LocationListControllerTest {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN the location forest is loaded but sync is still in progress
         mFakeSyncManager.setSyncing(true);
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller does not hide the progress spinner
         verify(mMockFragmentUi).setBusyLoading(true);
@@ -140,7 +140,7 @@ public final class LocationListControllerTest {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN the location forest is loaded AND sync has completed
         mFakeSyncManager.setSyncing(true);
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         mFakeEventBus.post(new SyncSucceededEvent());
         // THEN the controller hides the progress spinner
@@ -173,7 +173,7 @@ public final class LocationListControllerTest {
         mController.attachFragmentUi(mMockFragmentUi);
         mFakeEventBus.post(new SyncFailedEvent());
         // WHEN the location forest is loaded and a sync succeeds
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         mFakeEventBus.post(new SyncSucceededEvent());
         // THEN the controller hides the sync failed dialog
@@ -189,7 +189,7 @@ public final class LocationListControllerTest {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location forest is loaded after sync completed
         mFakeEventBus.post(new SyncSucceededEvent());
-        LocationForest forest = FakeAppForestFactory.emptyForest();
+        LocationForest forest = FakeForestFactory.emptyForest();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller starts a new sync
         assertTrue(mFakeSyncManager.isSyncRunningOrPending());
@@ -203,7 +203,7 @@ public final class LocationListControllerTest {
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location forest is loaded
-        LocationForest forest = FakeAppForestFactory.emptyForest();
+        LocationForest forest = FakeForestFactory.emptyForest();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the loading dialog is not hidden
         verify(mMockUi, times(0)).showSyncFailedDialog(false);
@@ -217,7 +217,7 @@ public final class LocationListControllerTest {
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location forest is loaded
-        LocationForest forest = FakeAppForestFactory.emptyForest();
+        LocationForest forest = FakeForestFactory.emptyForest();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the loading dialog is not hidden
         verify(mMockFragmentUi).setBusyLoading(true);
@@ -232,7 +232,7 @@ public final class LocationListControllerTest {
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN a populated location forest is loaded
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller does not start a new sync
         assertTrue(!mFakeSyncManager.isSyncRunningOrPending());
@@ -248,7 +248,7 @@ public final class LocationListControllerTest {
         // GIVEN an initialized controller with a location forest, with a sync in progress
         mFakeSyncManager.setSyncing(true);
         mController.init();
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
@@ -266,7 +266,7 @@ public final class LocationListControllerTest {
         // GIVEN an initialized controller with a location forest, with a sync in progress
         mFakeSyncManager.setSyncing(true);
         mController.init();
-        LocationForest forest = FakeAppForestFactory.emptyForest();
+        LocationForest forest = FakeForestFactory.emptyForest();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
@@ -314,7 +314,7 @@ public final class LocationListControllerTest {
         mController.init();
         // WHEN user initiates a sync cancellation right before the data model is fetched
         mFakeEventBus.post(new SyncCancelRequestedEvent());
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         mFakeEventBus.post(new SyncCanceledEvent());
         // THEN the activity is closed
@@ -339,7 +339,7 @@ public final class LocationListControllerTest {
     public void testSyncProgress_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location forest
         mController.init();
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // WHEN a periodic sync reports progress
         mFakeEventBus.post(new SyncProgressEvent(10, R.string.syncing_users));
@@ -353,7 +353,7 @@ public final class LocationListControllerTest {
     public void testSyncFailed_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location forest
         mController.init();
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // WHEN a periodic sync fails
         mFakeEventBus.post(new SyncFailedEvent());
@@ -367,7 +367,7 @@ public final class LocationListControllerTest {
     public void testSyncStarted_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location forest
         mController.init();
-        LocationForest forest = FakeAppForestFactory.build();
+        LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // WHEN a periodic sync starts
         mFakeEventBus.post(new SyncStartedEvent());
