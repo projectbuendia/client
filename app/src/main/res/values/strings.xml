@@ -359,6 +359,7 @@
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>
+  <string name="all_patients">ALL PATIENTS</string>
   <string name="all_present_patients">ALL PRESENT PATIENTS</string>
   <string name="discharged">Discharged</string>
   <string name="admission">Since admission</string>

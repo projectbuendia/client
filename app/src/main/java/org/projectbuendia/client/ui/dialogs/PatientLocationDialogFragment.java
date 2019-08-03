@@ -98,12 +98,12 @@ public class PatientLocationDialogFragment extends DialogFragment {
 
         List<LocationOption> options = new ArrayList<>();
         options.add(new LocationOption(
-            null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1));
+            null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1, false));
         for (Location location : forest.allNodes()) {
             if (forest.isLeaf(location)) {
                 double size = location.depth > 1 ? 0.5 : 1;
                 options.add(new LocationOption(
-                    location.uuid, location.name, forest.countPatientsIn(location), fg, bg, size));
+                    location.uuid, location.name, forest.countPatientsIn(location), fg, bg, size, false));
             }
         }
         return options;

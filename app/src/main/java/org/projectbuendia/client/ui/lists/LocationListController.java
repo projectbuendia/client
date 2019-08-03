@@ -21,7 +21,6 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
-import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.ReadyState;
@@ -30,7 +29,6 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -52,8 +50,6 @@ final class LocationListController {
     private final PatientSearchController mPatientSearchController;
 
     @Nullable private LocationForest mForest;
-    @Nullable private Location mTriageZone;
-    @Nullable private Location mDischargedZone;
 
     /**
      * The ready state is SYNCING only when there is no data model yet and the
@@ -82,13 +78,9 @@ final class LocationListController {
 
     public interface LocationListFragmentUi {
 
-        void setLocations(LocationForest forest, List<Location> locations);
+        void setLocations(LocationForest forest, Iterable<Location> locations);
 
-        void setPresentPatientCount(long patientCount);
-
-        void setTriagePatientCount(long patientCount);
-
-        void setDischargedPatientCount(long dischargedPatientCount);
+        void setAllPatientsCount(long patientCount);
 
         void setReadyState(ReadyState state);
 
@@ -149,8 +141,6 @@ final class LocationListController {
 
     private void setForest(@Nonnull LocationForest forest) {
         mForest = forest;
-        mTriageZone = mForest.get(Zones.TRIAGE_ZONE_UUID);
-        mDischargedZone = mForest.get(Zones.DISCHARGED_ZONE_UUID);
         for (LocationListFragmentUi fragmentUi : mFragmentUis) {
             updateFragmentUi(fragmentUi);
         }
@@ -158,14 +148,8 @@ final class LocationListController {
 
     private void updateFragmentUi(LocationListFragmentUi fragmentUi) {
         if (mForest != null) {
-            fragmentUi.setLocations(mForest, mForest.getLeaves());
-        }
-        if (mForest != null && mTriageZone != null && mDischargedZone != null) {
-            long dischargedPatientCount = mForest.countPatientsIn(mDischargedZone);
-            long totalPatientCount = mForest.countAllPatients();
-            fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
-            fragmentUi.setDischargedPatientCount(mForest.countPatientsIn(mDischargedZone));
-            fragmentUi.setTriagePatientCount(mForest.countPatientsIn(mTriageZone));
+            fragmentUi.setLocations(mForest, mForest.allNodes());
+            fragmentUi.setAllPatientsCount(mForest.countAllPatients());
         }
     }
 
@@ -205,22 +189,10 @@ final class LocationListController {
         mUi.switchToLocationList();
     }
 
-    /** Call when the user presses the discharged zone. */
-    public void onDischargedPressed() {
-        Utils.logUserAction("location_pressed", "location", mDischargedZone.name);
-        mUi.openSingleLocation(mDischargedZone);
-    }
-
-    /** Call when the user presses the triage zone. */
-    public void onTriagePressed() {
-        Utils.logUserAction("location_pressed", "location", mTriageZone.name);
-        mUi.openSingleLocation(mTriageZone);
-    }
-
     /** Call when the user presses a location. */
-    public void onLocationSelected(Location location) {
-        Utils.logUserAction("location_pressed", "location", location.name);
-        mUi.openSingleLocation(location);
+    public void onLocationSelected(LocationOption option) {
+        Utils.logUserAction("location_pressed", "location", option.name);
+        mUi.openSingleLocation(mForest.get(option.uuid));
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus
