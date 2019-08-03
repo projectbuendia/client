@@ -72,6 +72,16 @@ public final class LocationListFragment extends ProgressFragment {
         }
     }
 
+    @Override public void onResume() {
+        super.onResume();
+        if (mController != null) mController.init();
+    }
+
+    @Override public void onPause() {
+        if (mController != null) mController.suspend();
+        super.onPause();
+    }
+
     @Override public void onDestroyView() {
         if (mController == null) {
             LOG.w("No controller for " + getActivity().getClass().getSimpleName());
