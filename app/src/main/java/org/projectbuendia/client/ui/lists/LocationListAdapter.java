@@ -23,7 +23,6 @@ import com.google.common.base.Preconditions;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
-import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
 
@@ -48,23 +47,6 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
         mContext = context;
         mForest = forest;
         mSelectedLocationUuid = Preconditions.checkNotNull(selectedLocation);
-    }
-
-    /** Returns the {@link ResZone} for the specified zone UUID. */
-    private static ResZone getResZone(String uuid) {
-        switch (uuid) {
-            case Zones.SUSPECT_ZONE_UUID:
-                return ResZone.SUSPECT;
-            case Zones.PROBABLE_ZONE_UUID:
-                return ResZone.PROBABLE;
-            case Zones.CONFIRMED_ZONE_UUID:
-                return ResZone.CONFIRMED;
-            case Zones.MORGUE_ZONE_UUID:
-            case Zones.OUTSIDE_ZONE_UUID:
-            case Zones.TRIAGE_ZONE_UUID:
-            default:
-                return ResZone.UNKNOWN;
-        }
     }
 
     public Optional<String> getSelectedLocationUuid() {
@@ -93,7 +75,7 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
         }
 
         Location location = getItem(position);
-        ResZone.Resolved zone = getResZone(mForest.getParent(location).uuid)
+        ResZone.Resolved zone = ResZone.getResZone(mForest.getParent(location).uuid)
             .resolve(mContext.getResources());
 
         long count = mForest.countPatientsIn(location);

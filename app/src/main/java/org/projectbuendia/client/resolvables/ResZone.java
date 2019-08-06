@@ -14,6 +14,7 @@ package org.projectbuendia.client.resolvables;
 import android.content.res.Resources;
 
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.Zones;
 
 /** Zones and the resources associated with them. */
 public enum ResZone implements Resolvable<ResZone.Resolved> {
@@ -53,4 +54,20 @@ public enum ResZone implements Resolvable<ResZone.Resolved> {
         this.backgroundColorId = backgroundColorId;
         this.foregroundColorId = foregroundColorId;
     }
-}
+
+    /** Returns the {@link ResZone} for the specified zone UUID. */
+    public static ResZone getResZone(String uuid) {
+        switch (uuid) {
+            case Zones.SUSPECT_ZONE_UUID:
+                return SUSPECT;
+            case Zones.PROBABLE_ZONE_UUID:
+                return PROBABLE;
+            case Zones.CONFIRMED_ZONE_UUID:
+                return CONFIRMED;
+            case Zones.MORGUE_ZONE_UUID:
+            case Zones.OUTSIDE_ZONE_UUID:
+            case Zones.TRIAGE_ZONE_UUID:
+            default:
+                return UNKNOWN;
+        }
+    }}
