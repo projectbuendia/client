@@ -76,6 +76,7 @@ public class Utils {
     public static final int DAY = 24 * HOUR;  // in ms
 
     private static Map<Integer, String> sHttpMethods = initHttpMethods();
+
     private static Map<Integer, String> initHttpMethods() {
         Map<Integer, String> map = new HashMap<>();
         map.put(Request.Method.DEPRECATED_GET_OR_POST, "DEPRECATED_GET_OR_POST");
@@ -423,19 +424,36 @@ public class Utils {
         return millis == null ? null : new DateTime(millis);
     }
 
-    /** Gets a nullable long value from a cursor. */
-    public static Long getLong(Cursor c, String columnName) {
-        return getLong(c, columnName, null);
+    /** Gets a nullable integer value from a cursor. */
+    public static Integer getInt(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : (int) c.getLong(index);
     }
 
-    /** Gets a long integer value from a cursor, returning a default value instead of null. */
-    public static Long getLong(Cursor c, String columnName, @Nullable Long defaultValue) {
+    /** Gets an integer value from a cursor, returning a default value instead of null. */
+    public static int getInt(Cursor c, String columnName, @Nonnull int defaultValue) {
         int index = c.getColumnIndex(columnName);
         // The cast (Long) c.getLong(index) is necessary to work around the fact that
         // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
         // causing an NPE when defaultValue is null.  The correct superset of (Long) and
         // (long) is obviously (Long); the Java specification (15.25) is incorrect.
-        return c.isNull(index) ? defaultValue : (Long) c.getLong(index);
+        return c.isNull(index) ? defaultValue : (int) c.getLong(index);
+    }
+
+    /** Gets a nullable long value from a cursor. */
+    public static Long getLong(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : c.getLong(index);
+    }
+
+    /** Gets a long integer value from a cursor, returning a default value instead of null. */
+    public static long getLong(Cursor c, String columnName, @Nonnull long defaultValue) {
+        int index = c.getColumnIndex(columnName);
+        // The cast (Long) c.getLong(index) is necessary to work around the fact that
+        // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
+        // causing an NPE when defaultValue is null.  The correct superset of (Long) and
+        // (long) is obviously (Long); the Java specification (15.25) is incorrect.
+        return c.isNull(index) ? defaultValue : c.getLong(index);
     }
 
 
@@ -556,6 +574,7 @@ public class Utils {
     public static String toUuid(int id) {
         return expandUuid(id);
     }
+
 
     // ==== Ordering ====
 
@@ -703,6 +722,16 @@ public class Utils {
         return input.replaceAll("[\\W]", "_");
     }
 
+    /** Returns an unambiguous string representation of a string, prefixed with its length. */
+    public static String reprWithLen(String str) {
+        return format("(length %d) ", str.length()) + repr(str);
+    }
+
+    /** Returns an unambiguous string representation of a string, suitable for logging. */
+    public static String repr(String str) {
+        return repr(str, 100);
+    }
+
     /** Returns an unambiguous string representation of a string, suitable for logging. */
     public static String repr(String str, int maxLength) {
         try {
@@ -729,7 +758,7 @@ public class Utils {
 
     /** Uses backslash sequences to form a printable representation of a string. */
     private static String escape(String str, int maxLength) {
-        StringBuilder buffer = new StringBuilder(format("(length %d) \"", str.length()));
+        StringBuilder buffer = new StringBuilder("\"");
         for (int i = 0; i < str.length() && i < maxLength; i++) {
             char c = str.charAt(i);
             switch (str.charAt(i)) {

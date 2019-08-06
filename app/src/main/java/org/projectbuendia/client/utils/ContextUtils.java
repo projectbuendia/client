@@ -3,9 +3,13 @@ package org.projectbuendia.client.utils;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.database.Cursor;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.projectbuendia.client.App;
 
 import javax.annotation.Nonnull;
 
@@ -27,6 +31,11 @@ public class ContextUtils extends ContextWrapper {
 
     private ContextUtils(Context context) {
         super(context);
+    }
+
+    /** Queries the ContentResolver. */
+    public Cursor query(Uri uri, String[] columns, String selection, String... args) {
+        return getContentResolver().query(uri, columns, selection, args, null);
     }
 
     /** Always use this method, never the awful, confusing LayoutInflater.inflate(). */
@@ -55,6 +64,11 @@ public class ContextUtils extends ContextWrapper {
     /** Finds a view in the last view that was inflated. */
     public <T extends View> T findView(int id) {
         return lastView != null ? lastView.findViewById(id) : null;
+    }
+
+    /** Strings are always available in the app-wide resources. */
+    public String str(int id) {
+        return App.getInstance().getApplicationContext().getResources().getString(id);
     }
 
     /** getColor() doesn't exist for API < 23, but it's final, so this can't be named getColor(). */
