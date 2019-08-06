@@ -18,13 +18,20 @@ import java.util.Comparator;
 
 /** JSON reprsentation of a user (an OpenMRS Provider). */
 public class JsonUser implements Serializable, Comparable<JsonUser> {
-    public String id;
-    public static final Comparator<JsonUser> COMPARATOR_BY_ID = (a, b) -> a.id.compareTo(b.id);
+    public String uuid;
     public String fullName;
+
+    // GUEST_ACCOUNT_NAME must match the name defined in UserResource on the server side.
+    // The only special handling for this user is that (a) the server automatically
+    // creates this user and (b) the client always sorts it first when showing a list.
+
     // TODO/i18n: This will be tricky to internationalize as it's stored on the server.
     // Perhaps create the guest account with a special name like "*" on the server, and replace
     // "*" with the localized string for "Guest User" on the client when displaying the user?
     private static final String GUEST_ACCOUNT_NAME = "Guest User";
+
+    public static final Comparator<JsonUser> COMPARATOR_BY_UUID = (a, b) -> a.uuid.compareTo(b.uuid);
+
     public static final Comparator<JsonUser> COMPARATOR_BY_NAME = (a, b) -> {
         // Special case: the guest account should always appear first if present.
         int aSection = a.isGuestUser() ? 1 : 2;
@@ -41,10 +48,10 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
     }
 
     /** Creates a user with the given unique id and full name. */
-    public JsonUser(String id, String fullName) {
-        Preconditions.checkNotNull(id);
+    public JsonUser(String uuid, String fullName) {
+        Preconditions.checkNotNull(uuid);
         Preconditions.checkNotNull(fullName);
-        this.id = id;
+        this.uuid = uuid;
         this.fullName = fullName;
     }
 
@@ -67,7 +74,7 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
     }
 
     @Override public int compareTo(JsonUser other) {
-        return COMPARATOR_BY_ID.compare(this, other);
+        return COMPARATOR_BY_UUID.compare(this, other);
     }
 
     public final boolean isGuestUser() {

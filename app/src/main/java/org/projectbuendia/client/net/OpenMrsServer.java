@@ -80,10 +80,10 @@ public class OpenMrsServer implements Server {
         List<String> params = new ArrayList<>();
         JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
-            params.add("user_id=" + user.id);
-            if (user.isGuestUser()) {
-                params.add("guest_user=1");
-            }
+            pairs.add("user_name");
+            pairs.add(user.fullName);
+            pairs.add("user_uuid");
+            pairs.add(user.uuid);
         }
         for (int i = 0; i + 1 < pairs.size(); i += 2) {
             params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
@@ -279,7 +279,7 @@ public class OpenMrsServer implements Server {
             json = order.toJson();
             JsonUser user = App.getUserManager().getActiveUser();
             if (user != null) {
-                json.put("orderer_uuid", user.id);
+                json.put("orderer_uuid", user.uuid);
             }
         } catch (Exception e) {
             errorListener.onErrorResponse(new VolleyError("failed to serialize request", e));

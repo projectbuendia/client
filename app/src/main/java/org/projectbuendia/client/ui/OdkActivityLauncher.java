@@ -441,7 +441,7 @@ public class OdkActivityLauncher {
             new OpenMrsXformsConnection(App.getConnectionDetails());
         JsonUser activeUser = App.getUserManager().getActiveUser();
         connection.postXformInstance(
-                patientUuid, activeUser.id, xml, successListener, errorListener);
+                patientUuid, activeUser.uuid, xml, successListener, errorListener);
     }
 
     private static void handleSubmitError(VolleyError error) {

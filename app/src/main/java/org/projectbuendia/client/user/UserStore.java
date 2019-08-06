@@ -85,7 +85,7 @@ public class UserStore {
             .acquireContentProviderClient(Users.URI);
         try {
             ContentValues values = new ContentValues();
-            values.put(Users.UUID, user.id);
+            values.put(Users.UUID, user.uuid);
             values.put(Users.FULL_NAME, user.fullName);
             client.insert(Users.URI, values);
         } catch (RemoteException e) {
@@ -210,7 +210,7 @@ public class UserStore {
         // TODO: Update syncResult delete counts.
         for (JsonUser user : response) {
             ops.add(ContentProviderOperation.newInsert(Contracts.Users.URI)
-                    .withValue(Contracts.Users.UUID, user.id)
+                    .withValue(Contracts.Users.UUID, user.uuid)
                     .withValue(Contracts.Users.FULL_NAME, user.fullName)
                     .build());
             syncResult.stats.numInserts++;
