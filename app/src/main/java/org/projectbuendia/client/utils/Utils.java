@@ -96,6 +96,15 @@ public class Utils {
 
     // ==== Basic types ====
 
+    /**
+     * Java's default .equals() and == are both broken whereas Objects.equals is
+     * usually correct, so let's make its logic available under a short, easy name.
+     */
+    public static boolean eq(Object a, Object b) {
+        // noinspection EqualsReplaceableByObjectsCall (this is deliberately inlined)
+        return (a == b) || (a != null && a.equals(b));
+    }
+
     /** Returns a value if that value is not null, or a specified default value otherwise. */
     public static @Nonnull <T> T orDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value != null ? value : defaultValue;
@@ -483,6 +492,13 @@ public class Utils {
         return new String(parcel.marshall(), StandardCharsets.ISO_8859_1);
     }
 
+
+    // ==== Colour ====
+
+    public static int colorWithOpacity(int color, double opacity) {
+        byte alpha = (byte) (255 * opacity);
+        return (color & 0x00_ff_ff_ff) | (alpha * 0x01_00_00_00);
+    }
 
 
     // ==== User interface ====
