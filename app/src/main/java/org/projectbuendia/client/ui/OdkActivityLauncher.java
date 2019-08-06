@@ -154,7 +154,7 @@ public class OdkActivityLauncher {
      * @param formId          the id of the form to fetch
      * @param patient         the {@link org.odk.collect.android.model.Patient} that this form entry will
      *                        correspond to
-     * @param fields          a {@link Preset} object with any form fields that should be
+     * @param preset          a {@link Preset} object with any form fields that should be
      *                        pre-populated
      */
     public static void showOdkCollect(
@@ -162,7 +162,7 @@ public class OdkActivityLauncher {
         int requestCode,
         long formId,
         @Nullable org.odk.collect.android.model.Patient patient,
-        @Nullable Preset fields) {
+        @Nullable Preset preset) {
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
@@ -170,8 +170,8 @@ public class OdkActivityLauncher {
         if (patient != null) {
             intent.putExtra("patient", patient);
         }
-        if (fields != null) {
-            intent.putExtra("fields", fields);
+        if (preset != null) {
+            intent.putExtra("fields", preset);
         }
         callingActivity.startActivityForResult(intent, requestCode);
     }

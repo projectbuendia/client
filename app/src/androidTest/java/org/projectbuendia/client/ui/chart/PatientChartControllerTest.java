@@ -157,26 +157,14 @@ public final class PatientChartControllerTest {
             any(Encounter.class));
     }
 
-    /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */
+    /** Tests that selecting a form from the menu shows loading dialog. */
     @Test
     @UiThreadTest
-    public void testAddObservation_showsLoadingDialog() {
-        // GIVEN controller is initialized
-        mController.init();
-        // WHEN 'add observation' is pressed
-        mController.onAddObservationPressed();
-        // THEN the controller displays the loading dialog
-        verify(mMockUi).showFormLoadingDialog(true);
-    }
-
-    /** Tests that requesting an xform through clicking on a vital shows loading dialog. */
-    @Test
-    @UiThreadTest
-    public void testVitalClick_showsLoadingDialog() {
+    public void testOpenForm_showsLoadingDialog() {
         // GIVEN controller is initialized
         mController.init();
         // WHEN a vital is pressed
-        mController.onAddObservationPressed("foo");
+        mController.onOpenFormPressed("foo");
         // THEN the controller displays the loading dialog
         verify(mMockUi).showFormLoadingDialog(true);
     }
