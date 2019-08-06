@@ -17,8 +17,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.google.android.flexbox.FlexboxLayout;
@@ -29,28 +27,30 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.CursorLoader;
+import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursorWithLoader;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.ui.lists.LocationOption;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.LocaleSelector;
-import org.projectbuendia.client.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A {@link DialogFragment} for updating a patient's location and bed number. */
 public class PatientLocationDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
     @Inject CrudEventBus mCrudEventBus;
-    private LayoutInflater mInflater;
+    private ContextUtils c;
 
-    @InjectView(R.id.list_container) FlexboxLayout mContainer;
+    private FlexboxLayout mContainer;
     private LocationOptionList mList;
 
     /** Creates a new instance and registers the given UI, if specified. */
@@ -66,43 +66,62 @@ public class PatientLocationDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
-        mInflater = LayoutInflater.from(getActivity());
+        c = ContextUtils.from(getActivity());
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.patient_location_dialog_fragment, null);
-        ButterKnife.inject(this, fragment);
-        populateDialog(getArguments());
-
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+        AlertDialog dialog = c.buildDialog(R.layout.patient_location_dialog_fragment)
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(R.string.action_assign_location)
             .setPositiveButton(getResources().getString(R.string.ok), (dialogInterface, i) -> onSubmit())
             .setNegativeButton(getResources().getString(R.string.cancel), null)
-            .setView(fragment)
             .create();
         dialog.getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+        mContainer = c.findView(R.id.list_container);
+        mList = new LocationOptionList(mContainer);
+        mList.setOptions(getLocationOptions());
+        mList.setSelectedUuid(getArguments().getString("locationUuid"));
         return dialog;
     }
 
-    private void populateDialog(Bundle args) {
-        String locale = LocaleSelector.getCurrentLocaleTag();
-        CursorLoader<LocationOption> loader = cursor -> new LocationOption(
-            Utils.getString(cursor, Contracts.LocalizedLocations.UUID),
-            Utils.getString(cursor, Contracts.LocalizedLocations.NAME),
-            Utils.getLong(cursor, Contracts.LocalizedLocations.PATIENT_COUNT),
-            0,
-            0
-        );
+    private List<LocationOption> getLocationOptions() {
+        List<Location> locations = getLocations();
 
+        int numPresentPatients = 0;
+        int numDischarged = 0;
+        for (Location location : locations) {
+            if (eq(location.uuid, Zones.DISCHARGED_ZONE_UUID)) {
+                numDischarged += location.patientCount;
+            } else {
+                numPresentPatients += location.patientCount;
+            }
+        }
+
+        int fg = c.color(R.color.vital_fg_light);
+        int bg = c.color(R.color.zone_confirmed);
+
+        List<LocationOption> options = new ArrayList<>();
+        options.add(new LocationOption(
+            null, getString(R.string.all_present_patients), numPresentPatients, fg, bg, 1));
+        for (Location location : locations) {
+            if (!eq(location.uuid, Zones.DISCHARGED_ZONE_UUID)) {
+                options.add(new LocationOption(
+                    location.uuid, location.name, location.patientCount, fg, bg, 0.5));
+            }
+        }
+        options.add(new LocationOption(
+            Zones.DISCHARGED_ZONE_UUID, getString(R.string.discharged), numDischarged, fg, bg, 1));
+        return options;
+    }
+
+    private List<Location> getLocations() {
+        CursorLoader<Location> loader = new Location.Loader();
+        String locale = LocaleSelector.getCurrentLocaleTag();
         try (Cursor cursor = getActivity().getContentResolver().query(
             Contracts.getLocalizedLocationsUri(locale), null, null, null, null)) {
-            List<LocationOption> options =
-                ImmutableList.copyOf(new TypedCursorWithLoader<>(cursor, loader));
-            mList = new LocationOptionList(getActivity(), mContainer);
-            mList.setOptions(options);
-            mList.setSelectedUuid(args.getString("locationUuid"));
+            return ImmutableList.copyOf(new TypedCursorWithLoader<>(cursor, loader));
         }
     }
 

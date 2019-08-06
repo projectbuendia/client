@@ -1,13 +1,13 @@
 package org.projectbuendia.client.ui.lists;
 
-import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.flexbox.FlexboxLayout;
 
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.utils.ContextUtils;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,19 +16,14 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 public class LocationOptionList {
-    protected final Context context;
-    protected final LayoutInflater inflater;
+    protected final ContextUtils c;
     protected final FlexboxLayout container;
     protected final List<LocationOption> options;
     protected int selectedIndex;
     protected OnItemSelectedListener onItemSelectedListener;
 
-    private static final int DEFAULT_FG_COLOR_ID = R.color.vital_fg_light;
-    private static final int DEFAULT_BG_COLOR_ID = R.color.zone_confirmed;
-
-    public LocationOptionList(Context context, FlexboxLayout container) {
-        this.context = context;
-        this.inflater = LayoutInflater.from(context);
+    public LocationOptionList(FlexboxLayout container) {
+        c = ContextUtils.from(container);
         this.container = container;
         this.options = new ArrayList<>();
         this.selectedIndex = -1;
@@ -37,36 +32,33 @@ public class LocationOptionList {
 
     public void setOptions(List<LocationOption> newOptions) {
         options.clear();
-        int i = 0;
+        while (container.getChildCount() > 0) {  // ViewGroup doesn't have a child iterator
+            container.getChildAt(0).setOnClickListener(null);
+            container.removeViewAt(0);
+        }
         for (LocationOption option : newOptions) {
             options.add(option);
-            container.addView(createItem(option), i);
-            i++;
-        }
-        while (i < container.getChildCount()) {
-            container.getChildAt(i).setOnClickListener(null);
-            container.removeViewAt(i);
+            container.addView(createItem(option));
         }
     }
 
     protected View createItem(LocationOption option) {
-        View item = inflater.inflate(R.layout.location_list_item, null);
-        View box = item.findViewById(R.id.box);
+        View item = c.inflate(R.layout.location_list_item, container);
+        View button = item.findViewById(R.id.button);
         TextView title = item.findViewById(R.id.title);
         TextView content = item.findViewById(R.id.content);
 
         title.setText(option.name);
         content.setText("" + option.numPatients);
 
-        int titleColor = getColor(DEFAULT_FG_COLOR_ID);
-        int contentColor = option.numPatients > 0 ?
-            titleColor : (0x40_00_00_00 | titleColor & 0x00_ff_ff_ff);
-        int bgColor = getColor(DEFAULT_BG_COLOR_ID);
+        title.setTextColor(option.fgColor);
+        content.setTextColor(Utils.colorWithOpacity(option.fgColor, option.numPatients > 0 ? 1 : 0.25));
+        button.setBackgroundColor(option.bgColor);
 
-        title.setTextColor(titleColor);
-        content.setTextColor(contentColor);
-        box.setBackgroundColor(bgColor);
-        item.setBackgroundResource(R.drawable.border_grey_1dp);
+        FlexboxLayout.LayoutParams params = (FlexboxLayout.LayoutParams) item.getLayoutParams();
+        // The method refers to "percent", but it takes a value between 0 and 1, not 0 and 100!
+        params.setFlexBasisPercent((float) option.relWidth);
+        item.setLayoutParams(params);
 
         item.setOnClickListener(clickedItem -> {
             int index = container.indexOfChild(clickedItem);
@@ -82,9 +74,7 @@ public class LocationOptionList {
         selectedIndex = index;
 
         for (int i = 0; i < container.getChildCount(); i++) {
-            container.getChildAt(i).setBackgroundResource(
-                (i == selectedIndex) ? R.color.zone_location_selected_padding
-                    : R.drawable.location_selector);
+            container.getChildAt(i).setSelected(i == selectedIndex);
         }
         if (onItemSelectedListener != null) {
             onItemSelectedListener.onSelected(options.get(index));
@@ -99,10 +89,6 @@ public class LocationOptionList {
             }
         }
         setSelectedIndex(-1);
-    }
-
-    private int getColor(int id) {
-        return context.getResources().getColor(id);
     }
 
     public interface OnItemSelectedListener {

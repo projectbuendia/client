@@ -8,23 +8,25 @@ import org.projectbuendia.client.models.Location;
 public class LocationOption {
     public final String locationUuid;
     public final String name;
-    public final long numPatients;
+    public final int numPatients;
     public final int fgColor;
     public final int bgColor;
+    public final double relWidth;
 
     public static final int DEFAULT_FG = App.getInstance().getResources().getColor(R.color.vital_fg_light);
     public static final int DEFAULT_BG = App.getInstance().getResources().getColor(R.color.zone_confirmed);
 
     public LocationOption(Location location, long numPatients) {
-        this(location.uuid, location.name, numPatients, DEFAULT_FG, DEFAULT_BG);
+        this(location.uuid, location.name, numPatients, DEFAULT_FG, DEFAULT_BG, 1);
     }
 
     public LocationOption(
-        String locationUuid, String name, long numPatients, int fgColor, int bgColor) {
+        String locationUuid, String name, long numPatients, int fgColor, int bgColor, double relWidth) {
         this.locationUuid = locationUuid;
         this.name = name;
-        this.numPatients = numPatients;
+        this.numPatients = (int) numPatients;
         this.fgColor = fgColor;
         this.bgColor = bgColor;
+        this.relWidth = relWidth;
     }
 }

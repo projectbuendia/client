@@ -12,39 +12,56 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:padding="6sp"
-    android:background="@drawable/location_selector">
+    app:layout_flexBasisPercent="50%">
 
-    <LinearLayout
-        android:id="@+id/box"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
+    <!-- Selection frame around each box -->
+    <FrameLayout
+        android:id="@+id/frame"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground">
+        android:padding="6sp"
+        android:background="@drawable/location_selector">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="12sp"
-            android:gravity="center_vertical"
-            android:singleLine="true"
-            tools:text="Triage" />
+        <!-- Configurable background colour for the button -->
+        <FrameLayout
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/content"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12sp"
-            android:layout_marginRight="12sp"
-            android:layout_marginBottom="12sp"
-            android:layout_marginTop="0sp"
-            android:textAppearance="@style/text.huge"
-            android:gravity="center_vertical"
-            tools:text="89" />
+            <!-- selectableItemBackground lights up the button when touched -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground">
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12sp"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    tools:text="Triage" />
+
+                <TextView
+                    android:id="@+id/content"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12sp"
+                    android:layout_marginRight="12sp"
+                    android:layout_marginBottom="12sp"
+                    android:layout_marginTop="0sp"
+                    android:textAppearance="@style/text.huge"
+                    android:gravity="center_vertical"
+                    tools:text="89" />
+
+            </LinearLayout>
+        </FrameLayout>
+    </FrameLayout>
 </FrameLayout>
