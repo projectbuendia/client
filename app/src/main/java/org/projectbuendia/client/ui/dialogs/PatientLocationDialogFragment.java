@@ -13,25 +13,21 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.WindowManager;
 
 import com.google.android.flexbox.FlexboxLayout;
-import com.google.common.collect.ImmutableList;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.CursorLoader;
-import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.NewLocation;
+import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.TypedCursorWithLoader;
 import org.projectbuendia.client.models.Zones;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.ui.lists.LocationOption;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
 import org.projectbuendia.client.utils.ContextUtils;
@@ -81,48 +77,38 @@ public class PatientLocationDialogFragment extends DialogFragment {
 
         mContainer = c.findView(R.id.list_container);
         mList = new LocationOptionList(mContainer);
-        mList.setOptions(getLocationOptions());
-        mList.setSelectedUuid(getArguments().getString("locationUuid"));
+        NewLocationTree.load(c.getContentResolver(), LocaleSelector.getCurrentLocaleTag(), tree -> {
+            mList.setOptions(getLocationOptions(tree));
+            mList.setSelectedUuid(getArguments().getString("locationUuid"));
+        });
         return dialog;
     }
 
-    private List<LocationOption> getLocationOptions() {
-        List<Location> locations = getLocations();
-
-        int numPresentPatients = 0;
-        int numDischarged = 0;
-        for (Location location : locations) {
-            if (eq(location.uuid, Zones.DISCHARGED_ZONE_UUID)) {
-                numDischarged += location.patientCount;
-            } else {
-                numPresentPatients += location.patientCount;
-            }
-        }
+    private List<LocationOption> getLocationOptions(NewLocationTree tree) {
+        NewLocation discharged = tree.get(Zones.DISCHARGED_ZONE_UUID);
+        int numDischarged = discharged != null ? tree.getNumPatientsInSubtree(discharged) : 0;
+        int numPatients = tree.getNumPatientsInSubtree(null);
 
         int fg = c.color(R.color.vital_fg_light);
         int bg = c.color(R.color.zone_confirmed);
 
         List<LocationOption> options = new ArrayList<>();
         options.add(new LocationOption(
-            null, getString(R.string.all_present_patients), numPresentPatients, fg, bg, 1));
-        for (Location location : locations) {
-            if (!eq(location.uuid, Zones.DISCHARGED_ZONE_UUID)) {
+            null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1));
+        for (NewLocation location : tree.getDescendants(null)) {
+            if (!eq(location, discharged)) {
+                // A parenthesized number can be included at the front of the location name
+                // to determine its sorting order; the number will not be displayed.
+                String displayName = location.name.replaceAll("^\\(.*?\\)\\s*", "");
                 options.add(new LocationOption(
-                    location.uuid, location.name, location.patientCount, fg, bg, 0.5));
+                    location.uuid, displayName, location.numPatients, fg, bg, 0.5));
             }
         }
-        options.add(new LocationOption(
-            Zones.DISCHARGED_ZONE_UUID, getString(R.string.discharged), numDischarged, fg, bg, 1));
-        return options;
-    }
-
-    private List<Location> getLocations() {
-        CursorLoader<Location> loader = new Location.Loader();
-        String locale = LocaleSelector.getCurrentLocaleTag();
-        try (Cursor cursor = getActivity().getContentResolver().query(
-            Contracts.getLocalizedLocationsUri(locale), null, null, null, null)) {
-            return ImmutableList.copyOf(new TypedCursorWithLoader<>(cursor, loader));
+        if (discharged != null) {
+            options.add(new LocationOption(
+                Zones.DISCHARGED_ZONE_UUID, c.str(R.string.discharged), numDischarged, fg, bg, 1));
         }
+        return options;
     }
 
     public void onSubmit() {
