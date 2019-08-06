@@ -14,6 +14,7 @@ package org.projectbuendia.client.utils;
 import android.app.Dialog;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -669,6 +670,30 @@ public class Utils {
             return parts;
         }
     };
+
+
+    // ==== Concurrency ====
+
+    public static void runInBackground(Runnable runnable) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override protected Void doInBackground(Void... voids) {
+                runnable.run();
+                return null;
+            }
+        }.execute();
+    }
+
+    public static <T> void runInBackground(Provider<T> provider, Receiver<T> receiver) {
+        new AsyncTask<Void, Void, T>() {
+            @Override protected T doInBackground(Void... voids) {
+                return provider.provide();
+            }
+
+            @Override protected void onPostExecute(T result) {
+                if (receiver != null) receiver.receive(result);
+            }
+        }.execute();
+    }
 
 
     // ==== Logging ====
