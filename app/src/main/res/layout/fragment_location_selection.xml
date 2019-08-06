@@ -15,29 +15,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
+
+    <com.google.android.flexbox.FlexboxLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/list_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:context="org.projectbuendia.client.ui.lists.LocationListFragment">
+        android:layout_margin="12sp"
+        app:flexWrap="wrap"
+        app:alignItems="stretch"
+        app:alignContent="stretch" />
 
-        <org.projectbuendia.client.widgets.SubtitledButtonView
-            android:id="@+id/all_patients"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="10dp"
-            android:clickable="true"
-            app:subtitledButtonTitle="@string/all_patients"
-            app:subtitledButtonSubtitle="@string/no_patients"/>
-
-        <com.google.android.flexbox.FlexboxLayout
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/list_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:flexWrap="wrap"
-            app:alignItems="stretch"
-            app:alignContent="stretch" />
-
-    </LinearLayout>
 </ScrollView>

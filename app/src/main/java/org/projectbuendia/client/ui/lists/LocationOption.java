@@ -6,6 +6,7 @@ import org.projectbuendia.client.R;
 /** Data model for a button shown as an option in a LocationOptionList. */
 public class LocationOption {
     public final String uuid;
+    public final String parentUuid;
     public final String name;
     public final int numPatients;
     public final int fgColor;
@@ -17,8 +18,10 @@ public class LocationOption {
     public static final int DEFAULT_BG = App.getInstance().getResources().getColor(R.color.zone_confirmed);
 
     public LocationOption(
-        String uuid, String name, long numPatients, int fgColor, int bgColor, double relWidth, boolean wrapBefore) {
+        String uuid, String parentUuid, String name, long numPatients,
+        int fgColor, int bgColor, double relWidth, boolean wrapBefore) {
         this.uuid = uuid;
+        this.parentUuid = parentUuid;
         this.name = name;
         this.numPatients = (int) numPatients;
         this.fgColor = fgColor;

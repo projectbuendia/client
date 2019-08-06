@@ -26,19 +26,13 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
-import org.projectbuendia.client.ui.lists.LocationOption;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -82,31 +76,10 @@ public class PatientLocationDialogFragment extends DialogFragment {
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
-        mList = new LocationOptionList(c.findView(R.id.list_container));
-        mList.setOptions(getLocationOptions(forest));
+        mList = new LocationOptionList(c.findView(R.id.list_container), true);
+        mList.setLocations(forest, forest.getLeaves());
         mList.setSelectedUuid(getArguments().getString("locationUuid"));
         return dialog;
-    }
-
-    private List<LocationOption> getLocationOptions(LocationForest forest) {
-        Location discharged = forest.get(Zones.DISCHARGED_ZONE_UUID);
-        int numDischarged = discharged != null ? forest.countPatientsIn(discharged) : 0;
-        int numPatients = forest.countAllPatients();
-
-        int fg = c.color(R.color.vital_fg_light);
-        int bg = c.color(R.color.zone_confirmed);
-
-        List<LocationOption> options = new ArrayList<>();
-        options.add(new LocationOption(
-            null, c.str(R.string.all_present_patients), numPatients - numDischarged, fg, bg, 1, false));
-        for (Location location : forest.allNodes()) {
-            if (forest.isLeaf(location)) {
-                double size = location.depth > 1 ? 0.5 : 1;
-                options.add(new LocationOption(
-                    location.uuid, location.name, forest.countPatientsIn(location), fg, bg, size, false));
-            }
-        }
-        return options;
     }
 
     public void onSubmit() {

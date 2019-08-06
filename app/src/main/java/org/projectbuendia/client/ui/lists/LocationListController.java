@@ -80,8 +80,6 @@ final class LocationListController {
 
         void setLocations(LocationForest forest, Iterable<Location> locations);
 
-        void setAllPatientsCount(long patientCount);
-
         void setReadyState(ReadyState state);
 
         void setSyncProgress(int numerator, int denominator, Integer messageId);
@@ -149,7 +147,6 @@ final class LocationListController {
     private void updateFragmentUi(LocationListFragmentUi fragmentUi) {
         if (mForest != null) {
             fragmentUi.setLocations(mForest, mForest.allNodes());
-            fragmentUi.setAllPatientsCount(mForest.countAllPatients());
         }
         fragmentUi.setReadyState(mReadyState);
     }

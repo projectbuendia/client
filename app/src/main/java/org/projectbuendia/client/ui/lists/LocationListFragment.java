@@ -28,9 +28,6 @@ import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 /** Displays a list of all locations. */
@@ -45,7 +42,6 @@ public final class LocationListFragment extends ProgressFragment {
     private final Ui mUi = new Ui();
 
     private LocationListAdapter mAdapter;
-    private SubtitledButtonView mAllPatientsButton;
     private LocationOptionList mList;
 
     public LocationListFragment() {
@@ -64,10 +60,8 @@ public final class LocationListFragment extends ProgressFragment {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
         LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
-        mAllPatientsButton = view.findViewById(R.id.all_patients);
-        setPatientCount(mAllPatientsButton, forest.countAllPatients());
-        mList = new LocationOptionList(view.findViewById(R.id.list_container));
-        mList.setOptions(getLocationOptions(forest, forest.allNodes()));
+        mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
+        mList.setLocations(forest, forest.allNodes());
         return view;
     }
 
@@ -84,13 +78,11 @@ public final class LocationListFragment extends ProgressFragment {
     @Override public void onResume() {
         super.onResume();
         if (mController != null) mController.init();
-        mAllPatientsButton.setOnClickListener(v -> FilteredPatientListActivity.start(getActivity()));
         mList.setOnItemSelectedListener(option -> mController.onLocationSelected(option));
     }
 
     @Override public void onPause() {
         mList.setOnItemSelectedListener(null);
-        mAllPatientsButton.setOnClickListener(null);
         if (mController != null) mController.suspend();
         super.onPause();
     }
@@ -110,27 +102,9 @@ public final class LocationListFragment extends ProgressFragment {
         button.setSubtitleColor(count == 0 ? 0x40000000 : 0xff000000);
     }
 
-    private List<LocationOption> getLocationOptions(LocationForest forest, Iterable<Location> locations) {
-        int fg = c.color(R.color.vital_fg_light);
-        int bg = c.color(R.color.zone_confirmed);
-
-        List<LocationOption> options = new ArrayList<>();
-        for (Location location : locations) {
-            double size = 1.0 / (1 << location.depth);
-            boolean wrapBefore = location.depth < 2;
-            options.add(new LocationOption(
-                location.uuid, location.name, forest.countPatientsIn(location), fg, bg, size, false));
-        }
-        return options;
-    }
-
     private final class Ui implements LocationListController.LocationListFragmentUi {
-        @Override public void setAllPatientsCount(long patientCount) {
-            setPatientCount(mAllPatientsButton, patientCount);
-        }
-
         @Override public void setLocations(LocationForest forest, Iterable<Location> locations) {
-            mList.setOptions(getLocationOptions(forest, locations));
+            mList.setLocations(forest, locations);
         }
 
         @Override public void setReadyState(ReadyState state) {

@@ -132,6 +132,8 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mErrorTextView.setLayoutParams(fullLayout);
         mErrorTextView.setGravity(Gravity.CENTER);
 
+        mFrame.setLayoutParams(fullLayout);
+
         mContent.setVisibility(View.GONE);
         mIndeterminateProgressBar.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
