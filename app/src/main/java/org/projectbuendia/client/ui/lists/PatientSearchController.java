@@ -71,8 +71,7 @@ public class PatientSearchController {
     }
 
     public interface FragmentUi {
-        void setForest(LocationForest forest);
-        void setPatients(TypedCursor<Patient> patients);
+        void setPatients(TypedCursor<Patient> patients, LocationForest forest);
         void showSpinner(boolean show);
     }
 
@@ -132,13 +131,12 @@ public class PatientSearchController {
     /** Registers a {@link FragmentUi} with this controller. */
     public void attachFragmentUi(FragmentUi fragmentUi) {
         mFragmentUis.add(fragmentUi);
-        fragmentUi.setForest(mForest);
 
         if (mPatientsCursor != null) {
             FilteredCursorWrapper<Patient> filteredCursorWrapper =
                 new FilteredCursorWrapper<>(
                     mPatientsCursor, mSearchFilter, mFilterQueryTerm);
-            fragmentUi.setPatients(filteredCursorWrapper);
+            fragmentUi.setPatients(filteredCursorWrapper, mForest);
         }
 
         // If all data is loaded, no need for a spinner.
@@ -178,7 +176,7 @@ public class PatientSearchController {
                 mPatientsCursor, mSearchFilter, mFilterQueryTerm);
         mUi.setPatients(filteredCursorWrapper);
         for (FragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.setPatients(filteredCursorWrapper);
+            fragmentUi.setPatients(filteredCursorWrapper, mForest);
             fragmentUi.showSpinner(false);
         }
     }
@@ -254,9 +252,7 @@ public class PatientSearchController {
 
     private void onForestRebuilt(LocationForest forest) {
         mForest = forest;
-        for (FragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.setForest(mForest);
-        }
+        updatePatients();
     }
 
     private final class FilterSubscriber {
