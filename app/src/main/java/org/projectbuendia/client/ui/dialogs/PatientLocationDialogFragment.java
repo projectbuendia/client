@@ -26,6 +26,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
@@ -78,7 +79,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
         LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
         mList = new LocationOptionList(c.findView(R.id.list_container), true);
         mList.setLocations(forest, forest.getLeaves());
-        mList.setSelectedUuid(getArguments().getString("locationUuid"));
+        mList.setSelectedLocation(forest.get(getArguments().getString("locationUuid")));
         return dialog;
     }
 
@@ -86,7 +87,8 @@ public class PatientLocationDialogFragment extends DialogFragment {
         Utils.logUserAction("location_assigned");
         ((PatientChartActivity) getActivity()).getUi().showWaitDialog(R.string.title_updating_patient);
         PatientDelta delta = new PatientDelta();
-        String locationUuid = mList.getSelectedUuid();
+        Location location = mList.getSelectedLocation();
+        String locationUuid = location != null ? location.uuid : null;
         delta.assignedLocationUuid = Optional.of(locationUuid);
         mModel.updatePatient(mCrudEventBus, patientUuid, delta);
         dismiss();

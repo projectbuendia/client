@@ -78,11 +78,11 @@ public final class LocationListFragment extends ProgressFragment {
     @Override public void onResume() {
         super.onResume();
         if (mController != null) mController.init();
-        mList.setOnItemSelectedListener(option -> mController.onLocationSelected(option));
+        mList.setOnLocationSelectedListener(location -> mController.onLocationSelected(location));
     }
 
     @Override public void onPause() {
-        mList.setOnItemSelectedListener(null);
+        mList.setOnLocationSelectedListener(null);
         if (mController != null) mController.suspend();
         super.onPause();
     }
