@@ -27,7 +27,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.LoadingState;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Utils;
@@ -114,7 +114,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             .setPositiveButton(
                 R.string.sync_failed_retry, (dialog, which) -> {
                     Utils.logEvent("sync_failed_retry_pressed");
-                    mController.startSync();
+                    mController.startInitialSync();
                 })
             .setCancelable(false)
             .create();
@@ -147,8 +147,8 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             Utils.showDialogIf(mSyncFailedDialog, show);
         }
 
-        @Override public void setLoadingState(LoadingState loadingState) {
-            LocationListActivity.this.setLoadingState(loadingState);
+        @Override public void setReadyState(ReadyState state) {
+            LocationListActivity.this.setReadyState(state);
         }
 
         @Override public void finish() {

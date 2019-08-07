@@ -28,18 +28,17 @@ import java.util.ArrayList;
 
 /**
  * Handles syncing patients. Uses an incremental sync mechanism - see
- * {@link IncrementalSyncPhaseRunnable} for details.
+ * {@link IncrementalSyncWorker} for details.
  */
-public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonPatient> {
+public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
     private static final Logger LOG = Logger.create();
 
-    public PatientsSyncPhaseRunnable() {
+    public PatientsSyncWorker() {
         super("patients", Contracts.Table.PATIENTS, JsonPatient.class);
     }
 
-    @Override
-    protected ArrayList<ContentProviderOperation> getUpdateOps(
-            JsonPatient[] patients, SyncResult syncResult) {
+    @Override protected ArrayList<ContentProviderOperation> getUpdateOps(
+        JsonPatient[] patients, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         int numInserts = 0;
         int numDeletes = 0;
@@ -68,11 +67,8 @@ public class PatientsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<Json
         return ContentProviderOperation.newDelete(uri).build();
     }
 
-    @Override
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Contracts.Patients.URI, null, false);
+    @Override public void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client) {
+        resolver.notifyChange(Contracts.Patients.URI, null, false);
     }
 }

@@ -17,10 +17,10 @@ import java.util.ArrayList;
  * Handles syncing orders. Currently we always fetch all orders. This won't scale; incremental
  * fetch would help a lot.
  */
-public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOrder> {
+public class OrdersSyncWorker extends IncrementalSyncWorker<JsonOrder> {
     private static final Logger LOG = Logger.create();
 
-    public OrdersSyncPhaseRunnable() {
+    public OrdersSyncWorker() {
         super("orders", Contracts.Table.ORDERS, JsonOrder.class);
     }
 
@@ -60,11 +60,8 @@ public class OrdersSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonOr
         return ContentProviderOperation.newDelete(uri).build();
     }
 
-    @Override
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws Throwable {
-        contentResolver.notifyChange(Orders.URI, null, false);
+    @Override public void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client) {
+        resolver.notifyChange(Orders.URI, null, false);
     }
 }

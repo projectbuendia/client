@@ -25,7 +25,6 @@ import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
-import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -113,7 +112,7 @@ public final class LocationListControllerTest {
         LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller hides the progress spinner
-        verify(mMockFragmentUi).setBusyLoading(false);
+        verify(mMockFragmentUi).setReadyState(false);
     }
 
     /** Tests that the spinner is not hidden if locations are loaded but a sync is in progress. */
@@ -128,7 +127,7 @@ public final class LocationListControllerTest {
         LocationForest forest = FakeForestFactory.build();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the controller does not hide the progress spinner
-        verify(mMockFragmentUi).setBusyLoading(true);
+        verify(mMockFragmentUi).setReadyState(true);
     }
 
     /** Tests that the spinner is hidden if locations are loaded and a sync is completed. */
@@ -144,7 +143,7 @@ public final class LocationListControllerTest {
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         mFakeEventBus.post(new SyncSucceededEvent());
         // THEN the controller hides the progress spinner
-        verify(mMockFragmentUi).setBusyLoading(false);
+        verify(mMockFragmentUi).setReadyState(false);
     }
 
     /** Tests that a sync failure causes the error dialog to appear when no locations are present. */
@@ -220,7 +219,7 @@ public final class LocationListControllerTest {
         LocationForest forest = FakeForestFactory.emptyForest();
         mFakeEventBus.post(new AppForestFetchedEvent(forest));
         // THEN the loading dialog is not hidden
-        verify(mMockFragmentUi).setBusyLoading(true);
+        verify(mMockFragmentUi).setReadyState(true);
     }
 
     /** Tests that loading a populated location forest does not result in a new sync. */
@@ -253,7 +252,7 @@ public final class LocationListControllerTest {
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
         // THEN the loading dialog is not displayed
-        verify(mMockFragmentUi).setBusyLoading(false);
+        verify(mMockFragmentUi).setReadyState(false);
     }
 
     /**
@@ -271,7 +270,7 @@ public final class LocationListControllerTest {
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
         // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).setBusyLoading(true);
+        verify(mMockFragmentUi).setReadyState(true);
     }
 
     /**
@@ -287,7 +286,7 @@ public final class LocationListControllerTest {
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
         // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).setBusyLoading(true);
+        verify(mMockFragmentUi).setReadyState(true);
     }
 
     /** Tests that user-initiated sync cancellation closes the activity. */
@@ -344,7 +343,7 @@ public final class LocationListControllerTest {
         // WHEN a periodic sync reports progress
         mFakeEventBus.post(new SyncProgressEvent(10, R.string.syncing_users));
         // THEN the activity does not notify the UI
-        verify(mMockFragmentUi, times(0)).showIncrementalSyncProgress(10, R.string.syncing_users);
+        verify(mMockFragmentUi, times(0)).setSyncProgress(10, R.string.syncing_users);
     }
 
     /** Tests that 'sync failed' messages are ignored when the data model is already available. */

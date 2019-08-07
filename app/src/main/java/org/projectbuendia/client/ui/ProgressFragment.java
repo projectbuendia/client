@@ -32,39 +32,30 @@ import com.google.common.base.Charsets;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A {@link Fragment} that shows a spinner or progress bar when fragment content is not ready to
- * be displayed.
- */
+/** A Fragment that shows a spinner or progress bar when content is not ready. */
 public abstract class ProgressFragment extends Fragment implements Response.ErrorListener {
 
+    private static final Logger LOG = Logger.create();
     protected View mContent;
     protected RelativeLayout mFrame;
     protected TextView mErrorTextView;
-    // Fancy progress bar.
+
     protected View mProgressBarLayout;
     protected ProgressBar mProgressBar;
     protected TextView mProgressBarLabel;
-    // Indeterminate progress bar.
     protected ProgressBar mIndeterminateProgressBar;
+
     protected int mShortAnimationDuration;
-    private State mState = State.LOADING;
-    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<>();
+    private ReadyState mState = ReadyState.LOADING;
+    private List<ReadyStateSubscriber> mSubscribers = new ArrayList<>();
 
-    public enum State {
-        LOADING,
-        LOADED,
-        ERROR
-    }
-
-    /** Subscriber for listening for state changes. */
-    public interface ChangeStateSubscriber {
-        /** Called whenever the state is changed. */
-        public void onChangeState(State newState);
+    public interface ReadyStateSubscriber {
+        public void onChangeState(ReadyState state);
     }
 
     public ProgressFragment() {
@@ -78,24 +69,25 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     }
 
     @Override public void onErrorResponse(VolleyError error) {
-        changeErrorState(error.toString());
+        setErrorState(error.toString());
         Log.e("server", new String(error.networkResponse.data, Charsets.UTF_8));
     }
 
-    protected void changeErrorState(String message) {
+    public void setErrorState(String message) {
         mErrorTextView.setText(message);
-        changeState(State.ERROR);
+        setReadyState(ReadyState.ERROR);
     }
 
     /** Changes the state of this fragment, hiding or showing the spinner as necessary. */
-    public void changeState(State state) {
+    public void setReadyState(ReadyState state) {
+        LOG.w("setReadyState %s", state);
+
         mState = state;
-        // On state change, always start with the indeterminate loader.
-        mProgressBarLayout.setVisibility(View.GONE);
-        mIndeterminateProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
-        mContent.setVisibility(state == State.LOADED ? View.VISIBLE : View.GONE);
-        mErrorTextView.setVisibility(state == State.ERROR ? View.VISIBLE : View.GONE);
-        for (ChangeStateSubscriber subscriber : mSubscribers) {
+        mProgressBarLayout.setVisibility(state == ReadyState.SYNCING ? View.VISIBLE : View.GONE);
+        mIndeterminateProgressBar.setVisibility(state == ReadyState.LOADING ? View.VISIBLE : View.GONE);
+        mContent.setVisibility(state == ReadyState.READY ? View.VISIBLE : View.GONE);
+        mErrorTextView.setVisibility(state == ReadyState.ERROR ? View.VISIBLE : View.GONE);
+        for (ReadyStateSubscriber subscriber : mSubscribers) {
             subscriber.onChangeState(mState);
         }
     }
@@ -130,6 +122,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mProgressBar =
             mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
         mProgressBarLabel = mProgressBarLayout.findViewById(R.id.progress_fragment_label);
+        mProgressBarLabel.setText(R.string.sync_in_progress);
 
         RelativeLayout.LayoutParams fullLayout = new RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -140,7 +133,10 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mErrorTextView.setGravity(Gravity.CENTER);
 
         mContent.setVisibility(View.GONE);
+        mIndeterminateProgressBar.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
+        mErrorTextView.setVisibility(View.GONE);
+
         mFrame.addView(mIndeterminateProgressBar);
         mFrame.addView(mProgressBarLayout);
         mFrame.addView(mContent);
@@ -155,19 +151,15 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         }
     }
 
-    /** Registers a {@link ChangeStateSubscriber}. */
-    public void registerSubscriber(ChangeStateSubscriber subscriber) {
+    public void registerSubscriber(ReadyStateSubscriber subscriber) {
         mSubscribers.add(subscriber);
     }
 
-    /** Unregisters a {@link ChangeStateSubscriber} if the subscriber is currently registered. */
-    public void unregisterSubscriber(ChangeStateSubscriber subscriber) {
-        if (mSubscribers.contains(subscriber)) {
-            mSubscribers.remove(subscriber);
-        }
+    public void unregisterSubscriber(ReadyStateSubscriber subscriber) {
+        mSubscribers.remove(subscriber);
     }
 
-    public State getState() {
+    public ReadyState getState() {
         return mState;
     }
 
@@ -175,33 +167,13 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mContent = LayoutInflater.from(getActivity()).inflate(layout, null, false);
     }
 
-    protected void incrementProgressBy(int progress) {
-        switchToHorizontalProgressBar();
-        mProgressBar.incrementProgressBy(progress);
-    }
-
-    protected void switchToHorizontalProgressBar() {
-        if (mState == State.LOADING) {
-            mIndeterminateProgressBar.setVisibility(View.GONE);
-            mProgressBarLayout.setVisibility(View.VISIBLE);
-        }
-    }
-
-    protected void setProgress(int progress) {
-        switchToHorizontalProgressBar();
-        mProgressBar.setProgress(progress);
+    protected void setProgress(int numerator, int denominator) {
+        if (denominator > 0) mProgressBar.setMax(denominator);
+        mProgressBar.setProgress(numerator);
     }
 
     protected void setProgressMessage(int messageId) {
-        switchToHorizontalProgressBar();
         mProgressBarLabel.setText(messageId);
-    }
-
-    protected void switchToCircularProgressBar() {
-        if (mState == State.LOADING) {
-            mIndeterminateProgressBar.setVisibility(View.VISIBLE);
-            mProgressBarLayout.setVisibility(View.GONE);
-        }
     }
 
     private void crossfade(View inView, final View outView) {

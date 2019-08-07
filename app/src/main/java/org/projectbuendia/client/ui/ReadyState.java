@@ -9,8 +9,12 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.events.sync;
+package org.projectbuendia.client.ui;
 
-/** An event bus event indicating that a sync has started. */
-public class SyncStartedEvent {
+/** The readiness state of an activity that uses data from a remote or local source. */
+public enum ReadyState {
+    SYNCING,  // syncing data from a remote source
+    LOADING,  // loading data from the local database
+    READY,  // all necessary data is available
+    ERROR;  // necessary data could not be obtained
 }

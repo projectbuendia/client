@@ -30,12 +30,12 @@ import java.util.ArrayList;
 
 /**
  * Handles syncing observations. Uses an incremental sync mechanism - see
- * {@link IncrementalSyncPhaseRunnable} for details.
+ * {@link IncrementalSyncWorker} for details.
  */
-public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<JsonObservation> {
+public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservation> {
     private static final Logger LOG = Logger.create();
 
-    public ObservationsSyncPhaseRunnable() {
+    public ObservationsSyncWorker() {
         super("observations", Contracts.Table.OBSERVATIONS, JsonObservation.class);
     }
 
@@ -76,13 +76,11 @@ public class ObservationsSyncPhaseRunnable extends IncrementalSyncPhaseRunnable<
         return cvs;
     }
 
-    @Override
-    protected void afterSyncFinished(
-            ContentResolver contentResolver,
-            SyncResult syncResult,
-            ContentProviderClient providerClient) throws RemoteException {
+    @Override public void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws RemoteException {
         // Remove all temporary observations now we have the real ones
-        providerClient.delete(Observations.URI,
+        client.delete(Observations.URI,
                 Observations.UUID + " IS NULL",
                 new String[0]);
     }

@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
@@ -54,8 +55,8 @@ public final class LocationListFragment extends ProgressFragment {
         setContentView(R.layout.fragment_location_selection);
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    @Override public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         ButterKnife.inject(this, view);
         return view;
@@ -124,19 +125,15 @@ public final class LocationListFragment extends ProgressFragment {
             mLocationGrid.setAdapter(mAdapter);
         }
 
-        @Override public void setBusyLoading(boolean busy) {
-            changeState(busy ? State.LOADING : State.LOADED);
+        @Override public void setReadyState(ReadyState state) {
+            LocationListFragment.this.setReadyState(state);
         }
 
-        @Override public void showIncrementalSyncProgress(int progress, int messageId) {
-            setProgress(progress);
-            if (messageId > 0) {
+        @Override public void setSyncProgress(int numerator, int denominator, Integer messageId) {
+            setProgress(numerator, denominator);
+            if (messageId != null) {
                 setProgressMessage(messageId);
             }
-        }
-
-        @Override public void resetSyncProgress() {
-            switchToCircularProgressBar();
         }
 
         @Override public void showSyncCancelRequested() {

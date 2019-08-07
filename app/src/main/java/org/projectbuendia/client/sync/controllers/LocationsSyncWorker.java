@@ -26,18 +26,18 @@ import java.util.concurrent.ExecutionException;
  * Handles syncing locations. All locations are always fetched, which is ok because the full set of
  * locations is fairly smaller.
  */
-public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
+public class LocationsSyncWorker implements SyncWorker {
     private static final Logger LOG = Logger.create();
 
-    @Override
-    public void sync(ContentResolver contentResolver, SyncResult syncResult,
-            ContentProviderClient providerClient)
-            throws Throwable {
-        ArrayList<ContentProviderOperation> ops = getLocationUpdateOps(syncResult);
-        providerClient.applyBatch(ops);
-        contentResolver.notifyChange(Locations.URI, null, false);
-        contentResolver.notifyChange(LocationNames.URI, null, false);
-        contentResolver.notifyChange(LocalizedLocations.URI, null, false);
+    @Override public boolean sync(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable {
+        ArrayList<ContentProviderOperation> ops = getLocationUpdateOps(result);
+        client.applyBatch(ops);
+        resolver.notifyChange(Locations.URI, null, false);
+        resolver.notifyChange(LocationNames.URI, null, false);
+        resolver.notifyChange(LocalizedLocations.URI, null, false);
+        return true;
     }
 
     /**

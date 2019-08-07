@@ -30,7 +30,9 @@ import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.PatientListTypedCursorAdapter;
 import org.projectbuendia.client.ui.ProgressFragment;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.EventBusWrapper;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
@@ -40,6 +42,7 @@ import de.greenrobot.event.EventBus;
 /** A fragment showing a filterable list of patients. */
 public class PatientListFragment extends ProgressFragment implements
     ExpandableListView.OnChildClickListener {
+    private static final Logger LOG = Logger.create();
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -182,7 +185,8 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         @Override public void showSpinner(boolean show) {
-            changeState(show ? State.LOADING : State.LOADED);
+            LOG.w("showSpinner %s", show);
+            setReadyState(show ? ReadyState.LOADING : ReadyState.READY);
         }
     }
 
