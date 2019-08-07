@@ -19,34 +19,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:id="@+id/tent_selection_layout"
         tools:context="org.projectbuendia.client.ui.lists.LocationListFragment">
+
         <org.projectbuendia.client.widgets.SubtitledButtonView
-            android:id="@+id/location_selection_all_patients"
+            android:id="@+id/all_patients"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_margin="10dp"
             android:clickable="true"
-            app:subtitledButtonTitle="@string/all_present_patients"
+            app:subtitledButtonTitle="@string/all_patients"
             app:subtitledButtonSubtitle="@string/no_patients"/>
-        <org.projectbuendia.client.widgets.SubtitledButtonView
-            android:id="@+id/location_selection_triage"
+
+        <com.google.android.flexbox.FlexboxLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/list_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="10dp"
-            app:subtitledButtonTitle="Triage"
-            app:subtitledButtonSubtitle="@string/no_patients"/>
-        <org.projectbuendia.client.widgets.ScrollViewCompatibleGridView
-            style="@style/TentGrid"
-            android:id="@+id/location_selection_locations"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <org.projectbuendia.client.widgets.SubtitledButtonView
-            android:id="@+id/location_selection_discharged"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="10dp"
-            app:subtitledButtonTitle="@string/discharged"
-            app:subtitledButtonSubtitle="@string/no_patients"/>
+            app:flexWrap="wrap"
+            app:alignItems="stretch"
+            app:alignContent="stretch" />
+
     </LinearLayout>
 </ScrollView>

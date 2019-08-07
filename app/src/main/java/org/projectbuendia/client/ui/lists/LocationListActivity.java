@@ -52,16 +52,6 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
         caller.startActivity(new Intent(caller, LocationListActivity.class));
     }
 
-    @Override public void onResumeImpl() {
-        super.onResumeImpl();
-        mController.init();
-    }
-
-    @Override public void onPauseImpl() {
-        super.onPauseImpl();
-        mController.suspend();
-    }
-
     @Override public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
 

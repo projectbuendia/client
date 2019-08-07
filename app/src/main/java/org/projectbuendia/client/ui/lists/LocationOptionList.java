@@ -58,6 +58,7 @@ public class LocationOptionList {
         FlexboxLayout.LayoutParams params = (FlexboxLayout.LayoutParams) item.getLayoutParams();
         // The method refers to "percent", but it takes a value between 0 and 1, not 0 and 100!
         params.setFlexBasisPercent((float) option.relWidth);
+        params.setWrapBefore(option.wrapBefore);
         item.setLayoutParams(params);
 
         item.setOnClickListener(clickedItem -> {
@@ -83,7 +84,7 @@ public class LocationOptionList {
 
     public void setSelectedUuid(String uuid) {
         for (int i = 0; i < options.size(); i++) {
-            if (Objects.equals(options.get(i).locationUuid, uuid)) {
+            if (Objects.equals(options.get(i).uuid, uuid)) {
                 setSelectedIndex(i);
                 return;
             }
@@ -92,7 +93,11 @@ public class LocationOptionList {
     }
 
     public String getSelectedUuid() {
-        return selectedIndex >= 0 ? options.get(selectedIndex).locationUuid : null;
+        return selectedIndex >= 0 ? options.get(selectedIndex).uuid : null;
+    }
+
+    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+        onItemSelectedListener = listener;
     }
 
     public interface OnItemSelectedListener {

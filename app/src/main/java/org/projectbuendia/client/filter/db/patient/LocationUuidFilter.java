@@ -57,7 +57,11 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
         }
 
         mUuid = subroot.uuid;
-        mDescription = subroot.name;
+        String indentedName = subroot.name;
+        for (int i = 1; i < subroot.depth; i++) {
+            indentedName = "        " + indentedName;
+        }
+        mDescription = indentedName;
     }
 
     /** Returns the UUID of the root location used for filtering. */
