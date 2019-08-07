@@ -45,7 +45,7 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
         + "     location_names.name AS name,"
         + "     COUNT(patients.location_uuid) AS patient_count"
         + " FROM locations"
-        + "     INNER JOIN location_names"
+        + "     LEFT JOIN location_names"
         + "     ON locations.uuid = location_names.location_uuid"
         + "     LEFT JOIN patients"
         + "     ON locations.uuid = patients.location_uuid"

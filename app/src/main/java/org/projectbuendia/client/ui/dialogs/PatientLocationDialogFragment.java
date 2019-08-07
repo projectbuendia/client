@@ -76,12 +76,10 @@ public class PatientLocationDialogFragment extends DialogFragment {
         dialog.getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        mContainer = c.findView(R.id.list_container);
-        mList = new LocationOptionList(mContainer);
-        mModel.getLocationTree(mSettings.getLocaleTag(), tree -> {
-            mList.setOptions(getLocationOptions(tree));
-            mList.setSelectedUuid(getArguments().getString("locationUuid"));
-        });
+        NewLocationTree tree = mModel.getLocationTree(mSettings.getLocaleTag(), null, null);
+        mList = new LocationOptionList(c.findView(R.id.list_container));
+        mList.setOptions(getLocationOptions(tree));
+        mList.setSelectedUuid(getArguments().getString("locationUuid"));
         return dialog;
     }
 
