@@ -77,8 +77,7 @@ public final @Immutable class Patient extends Base<String> implements Comparable
             gender == JsonPatient.GENDER_MALE ? "M" :
                 gender == JsonPatient.GENDER_FEMALE ? "F" : "U");
         cv.put(Contracts.Patients.BIRTHDATE, Utils.formatDate(birthdate));
-        cv.put(Contracts.Patients.LOCATION_UUID,
-            locationUuid == null ? Zones.DEFAULT_LOCATION_UUID : locationUuid);
+        cv.put(Contracts.Patients.LOCATION_UUID, locationUuid);
         return cv;
     }
 
