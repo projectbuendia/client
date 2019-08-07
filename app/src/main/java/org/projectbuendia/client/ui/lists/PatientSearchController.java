@@ -104,7 +104,6 @@ public class PatientSearchController {
         mFilter = PatientDbFilters.getDefaultFilter();
         mSyncSubscriber = new SyncSubscriber();
         mCreationSubscriber = new CreationSubscriber();
-        mForest = mModel.getForest(mLocale);
     }
 
     /**
@@ -114,6 +113,7 @@ public class PatientSearchController {
     public void init() {
         mGlobalEventBus.register(mSyncSubscriber);
         mCrudEventBus.register(mCreationSubscriber);
+        mForest = mModel.getForest(mLocale);
         mModel.setForestRebuiltListener(this::onForestRebuilt);
     }
 

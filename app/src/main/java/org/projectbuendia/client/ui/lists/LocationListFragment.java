@@ -57,9 +57,9 @@ public final class LocationListFragment extends ProgressFragment {
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
-        LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
         mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
-        mList.setLocations(forest, forest.allNodes());
+        LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
+        if (forest != null) mList.setLocations(forest, forest.allNodes());
         return view;
     }
 

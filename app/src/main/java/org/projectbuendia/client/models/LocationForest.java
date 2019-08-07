@@ -13,6 +13,7 @@ package org.projectbuendia.client.models;
 
 import android.support.annotation.Nullable;
 
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
 /** An ordered hierarchy of locations with their localized names. */
 public class LocationForest {
+    private static final Logger LOG = Logger.create();
+
     private final Location[] locations;
     private final Map<String, Location> locationsByUuid = new HashMap<>();
     private final Map<String, String> parentUuidsByUuid = new HashMap<>();
@@ -43,7 +46,12 @@ public class LocationForest {
     private final Map<String, Integer> numPatientsInSubtree = new HashMap<>();
     private int totalNumPatients;
 
-    public LocationForest(TypedCursor<LocationQueryResult> cursor) {
+    public static LocationForest createFromCursor(TypedCursor<LocationQueryResult> cursor) {
+        if (cursor.get(0) == null) return null;
+        return new LocationForest(cursor);
+    }
+
+    private LocationForest(TypedCursor<LocationQueryResult> cursor) {
         List<String> uuids = new ArrayList<>();
         Map<String, String> namesByUuid = new HashMap<>();
         Map<String, String> shortIdsByUuid = new HashMap<>();
@@ -115,8 +123,11 @@ public class LocationForest {
 
         // The default location is either set with an asterisk in the name
         // (see above) or defaults to the first root node.
-        defaultLocation =
-            defaultUuid != null ? locationsByUuid.get(defaultUuid) : locations[0];
+        defaultLocation = defaultUuid != null ? locationsByUuid.get(defaultUuid)
+            : locations.length > 0 ? locations[0] : null;
+
+        LOG.i("Constructed new LocationForest with %d locations; default = %s",
+            locations.length, defaultLocation);
     }
 
     public void updatePatientCounts(TypedCursor<LocationQueryResult> cursor) {
@@ -137,6 +148,7 @@ public class LocationForest {
                 }
             }
         }
+        LOG.i("Updated existing LocationForest; total patients: %d", totalNumPatients);
     }
 
     /** Returns true if the specified location exists in this forest. */

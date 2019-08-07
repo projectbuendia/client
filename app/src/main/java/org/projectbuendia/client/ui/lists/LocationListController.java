@@ -108,14 +108,8 @@ final class LocationListController {
         mUserCancelRequestPending = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        if (mAppModel.isFullModelAvailable()) {
-            loadForest();
-        } else {
-            LOG.w("Model not available; starting initial sync.");
-            startInitialSync();
-        }
-
         mSyncManager.setPeriodicSync(10, Phase.PATIENTS);
+        loadForest();
     }
 
     public void loadForest() {
@@ -125,7 +119,7 @@ final class LocationListController {
             setForest(forest);
             setReadyState(ReadyState.READY);
         } else {
-            LOG.w("Invalid forest; retrying initial sync.");
+            LOG.w("Forest not available; retrying initial sync.");
             startInitialSync();
         }
     }

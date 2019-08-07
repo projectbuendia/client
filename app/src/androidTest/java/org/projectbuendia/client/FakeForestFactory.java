@@ -36,7 +36,7 @@ public class FakeForestFactory {
      * @return the constructed {@link LocationForest}
      */
     public static LocationForest build() {
-        return new LocationForest(new FakeTypedCursor<>(
+        return LocationForest.createFromCursor(new FakeTypedCursor<>(
             getSiteLocation(),
             getTriageZoneLocation(),
             getDischargedZoneLocation(),
@@ -71,6 +71,6 @@ public class FakeForestFactory {
     }
 
     public static LocationForest emptyForest() {
-        return new LocationForest(new FakeTypedCursor<>());
+        return LocationForest.createFromCursor(new FakeTypedCursor<>());
     }
 }

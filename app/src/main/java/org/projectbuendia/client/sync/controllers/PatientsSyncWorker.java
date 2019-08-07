@@ -69,6 +69,8 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
 
     @Override public void finalize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client) {
-        resolver.notifyChange(Contracts.Patients.URI, null, false);
+        if (result.stats.numInserts + result.stats.numDeletes > 0) {
+            resolver.notifyChange(Contracts.Patients.URI, null, false);
+        }
     }
 }

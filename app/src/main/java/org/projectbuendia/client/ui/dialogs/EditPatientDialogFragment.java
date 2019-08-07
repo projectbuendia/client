@@ -176,7 +176,9 @@ public class EditPatientDialogFragment extends DialogFragment {
             if (id != null || givenName != null || familyName != null || birthdate != null
                 || sex != Patient.GENDER_UNKNOWN) {
                 LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
-                delta.assignedLocationUuid = Optional.of(forest.getDefaultLocation().uuid);
+                if (forest != null) {
+                    delta.assignedLocationUuid = Optional.of(forest.getDefaultLocation().uuid);
+                }
                 mModel.addPatient(mCrudEventBus, delta);
             }
         } else {

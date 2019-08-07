@@ -26,6 +26,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
@@ -59,6 +60,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
     private static boolean sSkippedPatientList;
+    private final EventBusSubscriber mSubscriber = new EventBusSubscriber();
 
     // TODO/i18n: Populate properly.
     protected final String mLocale = "en";
@@ -147,12 +149,21 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
     @Override protected void onResumeImpl() {
         super.onResumeImpl();
-        mSearchController.init();
-        mSearchController.loadSearchResults();
+        attemptInit();
+    }
+
+    protected void attemptInit() {
+        if (mAppModel.isFullModelAvailable()) {
+            mSearchController.init();
+            mSearchController.loadSearchResults();
+        } else {
+            mEventBus.register(mSubscriber);
+        }
     }
 
     @Override protected void onPauseImpl() {
         super.onPauseImpl();
+        if (mEventBus.isRegistered(mSubscriber)) mEventBus.unregister(mSubscriber);
         mSearchController.suspend();
     }
 
@@ -169,6 +180,13 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         @Override public void goToPatientChart(String patientUuid) {
             BigToast.show(BaseSearchablePatientListActivity.this, R.string.patient_creation_success);
             PatientChartActivity.start(BaseSearchablePatientListActivity.this, patientUuid);
+        }
+    }
+
+    private final class EventBusSubscriber {
+        public void onEventMainThread(SyncSucceededEvent event) {
+            mEventBus.unregister(mSubscriber);
+            attemptInit();
         }
     }
 }
