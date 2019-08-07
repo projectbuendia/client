@@ -122,7 +122,7 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
 
                 if (location.parent_uuid != null && !location.parent_uuid.equals(parentUuid)) {
                     // Update existing record
-                    LOG.i("  - will update location " + uuid);
+                    LOG.i("  - will reparent location " + uuid);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
                             .withValue(Locations.UUID, uuid)
                             .withValue(Locations.PARENT_UUID, parentUuid)
@@ -132,15 +132,16 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
 
                 if (location.names != null
                         && (locationNames == null || !location.names.equals(locationNames))) {
-                    Uri existingNamesUri = namesUri.buildUpon().appendPath(
-                            String.valueOf(uuid)).build();
                     // Update location names by deleting any existing location names and
                     // repopulating.
-                    batch.add(ContentProviderOperation.newDelete(existingNamesUri).build());
+                    LOG.i("  - will update names for location " + uuid);
+                    batch.add(ContentProviderOperation.newDelete(namesUri)
+                        .withSelection(LocationNames.LOCATION_UUID + " = ?", new String[] {uuid})
+                        .build());
                     syncResult.stats.numDeletes++;
                     for (String locale : location.names.keySet()) {
 
-                        batch.add(ContentProviderOperation.newInsert(existingNamesUri)
+                        batch.add(ContentProviderOperation.newInsert(namesUri)
                                 .withValue(LocationNames.LOCATION_UUID, uuid)
                                 .withValue(LocationNames.LOCALE, locale)
                                 .withValue(LocationNames.NAME, location.names.get(locale))
@@ -171,9 +172,7 @@ public class LocationsSyncPhaseRunnable implements SyncPhaseRunnable {
 
             if (location.names != null) {
                 for (String locale : location.names.keySet()) {
-                    Uri existingNamesUri = namesUri.buildUpon().appendPath(
-                            String.valueOf(location.uuid)).build();
-                    batch.add(ContentProviderOperation.newInsert(existingNamesUri)
+                    batch.add(ContentProviderOperation.newInsert(namesUri)
                             .withValue(LocationNames.LOCATION_UUID, location.uuid)
                             .withValue(LocationNames.LOCALE, locale)
                             .withValue(LocationNames.NAME, location.names.get(locale))
