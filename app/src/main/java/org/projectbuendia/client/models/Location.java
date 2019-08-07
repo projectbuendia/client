@@ -35,7 +35,7 @@ public final @Immutable class Location extends Base<String> implements Comparabl
     }
 
     @Override public String toString() {
-        return Utils.format("<Location %s: \"%s\" [%s]>", path, Utils.repr(name), uuid);
+        return Utils.format("<Location %s: %s [%s]>", path, Utils.repr(name), uuid);
     }
 
     @Override public boolean equals(Object other) {

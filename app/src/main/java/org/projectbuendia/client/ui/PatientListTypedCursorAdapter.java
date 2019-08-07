@@ -143,7 +143,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
         ResStatus.Resolved status =
             ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
-        LOG.i("getChildView: patient %s has condition = %s (%s)", patient.id, status.getMessage(), condition);
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
         String givenName = Utils.orDefault(patient.givenName, EN_DASH);
@@ -220,7 +219,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         // Produce a sorted list of all the locations that have patients.
-        LOG.i("setPatients: count = %d, mLocations = new Location[%d]", count, mPatientsByLocation.size());
         mLocations = new Location[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
         Arrays.sort(mLocations);

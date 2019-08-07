@@ -106,19 +106,19 @@ public class SyncManager {
                     int numerator = intent.getIntExtra(SYNC_NUMERATOR, 0);
                     int denominator = intent.getIntExtra(SYNC_DENOMINATOR, 1);
                     int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, R.string.sync_in_progress);
-                    LOG.i("SyncStatus: IN_PROGRESS: %d/%d", numerator, denominator);
+                    LOG.d("SyncStatus: IN_PROGRESS: %d/%d", numerator, denominator);
                     EventBus.getDefault().post(new SyncProgressEvent(numerator, denominator, messageId));
                     break;
                 case COMPLETED:
-                    LOG.i("SyncStatus: COMPLETED");
+                    LOG.d("SyncStatus: COMPLETED");
                     EventBus.getDefault().post(new SyncSucceededEvent());
                     break;
                 case FAILED:
-                    LOG.i("SyncStatus: FAILED");
+                    LOG.d("SyncStatus: FAILED");
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case CANCELLED:
-                    LOG.i("SyncStatus: CANCELLED");
+                    LOG.d("SyncStatus: CANCELLED");
                     EventBus.getDefault().post(new SyncCanceledEvent());
                     break;
             }

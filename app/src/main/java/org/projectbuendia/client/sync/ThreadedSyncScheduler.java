@@ -71,12 +71,12 @@ public class ThreadedSyncScheduler implements SyncScheduler {
         }
 
         public void send(int command, Bundle data) {
-            LOG.i("> send(command=%d, data=%s)", command, data);
+            LOG.d("> send(command=%d, data=%s)", command, data);
             handler.sendMessage(Utils.newMessage(handler, command, data));
         }
 
         public boolean isSyncRunning() {
-            LOG.i("> isSyncRunning() = " + running);
+            LOG.d("> isSyncRunning() = " + running);
             return running;
         }
 
@@ -106,14 +106,14 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
                     switch (message.what) {
                         case REQUEST_SYNC:
-                            LOG.i("* handleMessage(REQUEST_SYNC, %s)", data);
+                            LOG.d("* handleMessage(REQUEST_SYNC, %s)", data);
                             runSync(options);
                             return true;
 
                         case SET_PERIODIC_SYNC:
-                            LOG.i("* handleMessage(SET_PERIODIC_SYNC, %s), loop=%s", data, loop);
+                            LOG.d("* handleMessage(SET_PERIODIC_SYNC, %s), loop=%s", data, loop);
                             loop.set(periodSec);
-                            LOG.i("* activeLoopId is now %d for options=%s", loop.activeLoopId, options);
+                            LOG.d("* activeLoopId is now %d for options=%s", loop.activeLoopId, options);
 
                             if (loop.periodSec > 0) {
                                 sendLoopTick(loop);
@@ -121,12 +121,12 @@ public class ThreadedSyncScheduler implements SyncScheduler {
                             return true;
 
                         case LOOP_TICK:
-                            LOG.i("* handleMessage(LOOP_TICK, %s), loop=%s", data, loop);
+                            LOG.d("* handleMessage(LOOP_TICK, %s), loop=%s", data, loop);
                             if (loopId == loop.activeLoopId) {
                                 runSync(options);
                                 sendLoopTick(loop);
                             } else {
-                                LOG.i("* loopId=%d is no longer active; ignoring", loopId);
+                                LOG.d("* loopId=%d is no longer active; ignoring", loopId);
                             }
                             return true;
                     }
@@ -152,7 +152,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
         }
 
         private void sendLoopTick(Loop loop) {
-            LOG.i("* scheduling LOOP_TICK(%d) in %d sec for %s", loop.activeLoopId, loop.periodSec, loop);
+            LOG.d("* scheduling LOOP_TICK(%d) in %d sec for %s", loop.activeLoopId, loop.periodSec, loop);
             handler.sendMessageDelayed(Utils.newMessage(handler, LOOP_TICK,
                 Utils.putBundle(KEY_OPTIONS, loop.options,
                     Utils.putInt(KEY_PERIOD_SEC, loop.periodSec,

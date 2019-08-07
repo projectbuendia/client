@@ -152,6 +152,7 @@ public class BuendiaSyncEngine implements SyncEngine {
                 for (Phase phase : phases) {
                     checkCancellation("before " + phase);
                     broadcastSyncProgress(completedWork, totalWork, phase.message);
+                    LOG.i("Start phase: %s", phase);
                     phase.worker.initialize(contentResolver, result, client);
                     boolean done = false;
                     while (!done) {
@@ -168,19 +169,19 @@ public class BuendiaSyncEngine implements SyncEngine {
                     storeFullSyncEndTime(client, Instant.now());
                 }
             } catch (CancellationException e) {
-                LOG.i(e, "Sync cancelled");
+                LOG.i(e, "Cancelled %s", options);
                 tx.rollback();
                 // Reset canceled state so that it doesn't interfere with next sync.
                 broadcastSyncStatus(SyncStatus.CANCELLED);
                 return;
             } catch (OperationApplicationException e) {
-                LOG.e(e, "Error updating database during sync");
+                LOG.e(e, "Failed due to database error");
                 tx.rollback();
                 result.databaseError = true;
                 broadcastSyncStatus(SyncStatus.FAILED);
                 return;
             } catch (Throwable e) {
-                LOG.e(e, "Error during sync");
+                LOG.e(e, "Failed due to exception");
                 tx.rollback();
                 result.stats.numIoExceptions++;
                 broadcastSyncStatus(SyncStatus.FAILED);
@@ -189,6 +190,7 @@ public class BuendiaSyncEngine implements SyncEngine {
         }
         broadcastSyncStatus(SyncStatus.COMPLETED);
         LOG.finish("sync");
+        LOG.i("Completed", options);
     }
 
     /**

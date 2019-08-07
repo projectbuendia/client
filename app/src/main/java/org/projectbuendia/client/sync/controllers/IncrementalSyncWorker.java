@@ -80,7 +80,7 @@ public abstract class IncrementalSyncWorker<T> implements SyncWorker {
         ContentProviderClient providerClient) throws Throwable {
 
         String syncToken = BuendiaSyncEngine.getLastSyncToken(providerClient, dbTable);
-        LOG.i("%s: Using sync token %s", dbTable, syncToken);
+        LOG.d("%s: Using sync token %s", dbTable, syncToken);
 
         RequestFuture<IncrementalSyncResponse<T>> future = RequestFuture.newFuture();
         createRequest(syncToken, future, future);
@@ -90,7 +90,7 @@ public abstract class IncrementalSyncWorker<T> implements SyncWorker {
         LOG.i("%s: Applied %d db ops", dbTable, ops.size());
         syncToken = response.syncToken;
 
-        LOG.i("%s: Saving sync token %s", dbTable, syncToken);
+        LOG.d("%s: Saving sync token %s", dbTable, syncToken);
         BuendiaSyncEngine.storeSyncToken(providerClient, dbTable, response.syncToken);
         return !response.more;
     }
