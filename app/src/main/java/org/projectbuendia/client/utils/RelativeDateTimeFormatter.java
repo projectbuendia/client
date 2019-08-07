@@ -12,8 +12,9 @@
 package org.projectbuendia.client.utils;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 
 /**
  * An object that pretty-prints JODA {@link LocalDate}s using relative phrases
@@ -32,8 +33,7 @@ public class RelativeDateTimeFormatter {
         if (date.isAfter(anchor)) {
             return "in the future"; // TODO/i18n
         }
-        Period period = new Period(date, anchor);
-        int daysAgo = period.toStandardDays().getDays();
+        int daysAgo = Days.daysBetween(date, anchor).getDays();
         return daysAgo > 1 ? daysAgo + " days ago" : // TODO/i18n
             daysAgo == 1 ? "yesterday" : "today"; // TODO/i18n
     }
@@ -47,10 +47,11 @@ public class RelativeDateTimeFormatter {
         if (dateTime.isAfter(anchor)) {
             return "in the future"; // TODO/i18n
         }
-        Period period = new Period(dateTime, anchor);
-        int daysAgo = period.toStandardDays().getDays();
-        int hoursAgo = period.toStandardHours().getHours();
-        int minutesAgo = period.toStandardMinutes().getMinutes();
+
+        long millis = new Duration(dateTime, anchor).getMillis();
+        long daysAgo = millis / Utils.DAY;
+        long hoursAgo = millis / Utils.HOUR;
+        long minutesAgo = millis / Utils.MINUTE;
 
         return daysAgo > 1 ? daysAgo + " days ago" : // TODO/i18n
             hoursAgo > 1 ? hoursAgo + " hours ago" : // TODO/i18n
