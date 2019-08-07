@@ -12,25 +12,18 @@
 package org.projectbuendia.client.models;
 
 import android.database.Cursor;
-import android.net.Uri;
 
 /**
- * A {@link Cursor}-like data structure that exposes a type-safe interface.
- * <p/>
- * <p>Implementations are most likely NOT thread-safe.
- * @param <T> the type of the array elements
+ * A {@link Cursor}-like object that returns items of a specific type.
+ * Implementations are most likely NOT thread-safe.
  */
-public interface TypedCursor<T> extends Iterable<T>, Observable {
-
-    /** Returns the number of items in this lazy array. */
+public interface TypedCursor<T> extends Iterable<T> {
+    /** Returns the number of items available. */
     int getCount();
 
-    /**
-     * Returns the item at the specified position or {@code null} if the specified position is
-     * invalid.
-     */
-    T get(int position);
+    /** Returns the item at a given index, or null if the index is out of range. */
+    T get(int index);
 
-    /** Returns the URI for which notifications are received. */
-    Uri getNotificationUri();
+    /** Releases any held resources. */
+    void close();
 }

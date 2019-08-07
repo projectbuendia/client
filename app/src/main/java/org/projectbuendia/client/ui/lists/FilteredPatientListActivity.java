@@ -22,6 +22,8 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.ui.SectionedSpinnerAdapter;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.List;
+
 /** A list of patients with a choice of several filters in a dropdown menu. */
 public class FilteredPatientListActivity extends BaseSearchablePatientListActivity {
     private static final String SELECTED_FILTER_KEY = "selected_filter";
@@ -46,7 +48,6 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
             mCrudEventBus,
             mAppModel,
             mLocale);
-        mFilterController.setupActionBarAsync();
 
         App.getInstance().inject(this);
     }
@@ -58,8 +59,8 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
     private final class FilterUi implements PatientFilterController.Ui {
 
-        @Override public void populateActionBar(final SimpleSelectionFilter[] filters) {
-            SectionedSpinnerAdapter<SimpleSelectionFilter> adapter = new SectionedSpinnerAdapter<>(
+        @Override public void populateActionBar(List<SimpleSelectionFilter<?>> filters) {
+            SectionedSpinnerAdapter<SimpleSelectionFilter<?>> adapter = new SectionedSpinnerAdapter<>(
                 FilteredPatientListActivity.this,
                 R.layout.patient_list_spinner_dropdown_item,
                 R.layout.patient_list_spinner_expanded_dropdown_item,
@@ -67,9 +68,9 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
                 filters);
 
             ActionBar.OnNavigationListener callback = (position, id) -> {
-                getSearchController().setFilter(filters[position]);
-                Utils.logUserAction("filter_selected",
-                    "filter", filters[position].toString());
+                SimpleSelectionFilter<?> filter = filters.get(position);
+                getSearchController().setFilter(filter);
+                Utils.logUserAction("filter_selected", "filter", filter.toString());
                 getSearchController().loadSearchResults();
                 return true;
             };
@@ -80,7 +81,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
             actionBar.setListNavigationCallbacks(adapter, callback);
             actionBar.setSelectedNavigationItem(mSelectedFilter);
 
-            getSearchController().setFilter(filters[mSelectedFilter]);
+            getSearchController().setFilter(filters.get(mSelectedFilter));
         }
     }
 }

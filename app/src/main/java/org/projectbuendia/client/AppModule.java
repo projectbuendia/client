@@ -34,6 +34,7 @@ import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
@@ -75,6 +76,7 @@ import dagger.Provides;
         PatientListController.class,
         GoToPatientDialogFragment.class,
         EditPatientDialogFragment.class,
+        PatientLocationDialogFragment.class,
         BaseSearchablePatientListActivity.class,
         SingleLocationActivity.class,
         LocationListActivity.class,

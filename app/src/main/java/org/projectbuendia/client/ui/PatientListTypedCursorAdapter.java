@@ -24,13 +24,12 @@ import android.widget.TextView;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationComparator;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
@@ -54,7 +53,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
     private final HashMap<Location, List<Patient>> mPatientsByLocation;
-    private final LocationTree mLocationTree;
+    private final LocationForest mForest;
     private final ChartDataHelper mChartDataHelper;
     private static final Logger LOG = Logger.create();
     private static final String EN_DASH = "\u2013";
@@ -67,12 +66,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      * Creates a {@link PatientListTypedCursorAdapter}.
      * @param context an activity context
      */
-    public PatientListTypedCursorAdapter(Context context, LocationTree locationTree) {
+    public PatientListTypedCursorAdapter(Context context, LocationForest forest) {
         mContext = context;
 
         mPatientsByLocation = new HashMap<>();
 
-        mLocationTree = locationTree;
+        mForest = forest;
         mChartDataHelper = new ChartDataHelper(context.getContentResolver());
     }
 
@@ -98,7 +97,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     @Override public View getGroupView(
         int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        Location location = (Location) getGroup(groupPosition);
+        Location location = getGroup(groupPosition);
 
         int patientCount = getChildrenCount(groupPosition);
         String tentName = location.toString();
@@ -235,7 +234,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         LOG.i("setPatients: count = %d, mLocations = new Location[%d]", count, mPatientsByLocation.size());
         mLocations = new Location[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
-        Arrays.sort(mLocations, new LocationComparator(mLocationTree));
+        Arrays.sort(mLocations);
 
         // Sort the patient lists within each location using the default comparator.
         for (List<Patient> patients : mPatientsByLocation.values()) {
@@ -248,7 +247,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     // Add a single patient to relevant data structures.
     private void addPatient(Patient patient) {
-        Location location = mLocationTree.findByUuid(patient.locationUuid);
+        Location location = mForest.get(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
                 mPatientsByLocation.put(location, new ArrayList<>());

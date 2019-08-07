@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.events;
 
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
 
 import de.greenrobot.event.EventBus;
@@ -45,8 +44,6 @@ public final class DefaultCrudEventBus implements CrudEventBus {
             // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
             // the event won't be managed by anyone else; therefore, we close it ourselves.
             ((TypedCursorFetchedEvent<?>) event.originalEvent).cursor.close();
-        } else if (event.originalEvent instanceof AppLocationTreeFetchedEvent) {
-            ((AppLocationTreeFetchedEvent) event.originalEvent).tree.close();
         }
     }
 }

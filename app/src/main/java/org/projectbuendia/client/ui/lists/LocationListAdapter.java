@@ -22,7 +22,7 @@ import com.google.common.base.Preconditions;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
@@ -36,18 +36,35 @@ import butterknife.InjectView;
 public class LocationListAdapter extends ArrayAdapter<Location> {
 
     private final Context mContext;
-    private final LocationTree mLocationTree;
+    private final LocationForest mForest;
     private Optional<String> mSelectedLocationUuid;
 
     public LocationListAdapter(
         Context context,
         List<Location> locations,
-        LocationTree locationTree,
+        LocationForest forest,
         Optional<String> selectedLocation) {
         super(context, R.layout.listview_cell_location_selection, locations);
         mContext = context;
-        mLocationTree = locationTree;
+        mForest = forest;
         mSelectedLocationUuid = Preconditions.checkNotNull(selectedLocation);
+    }
+
+    /** Returns the {@link ResZone} for the specified zone UUID. */
+    private static ResZone getResZone(String uuid) {
+        switch (uuid) {
+            case Zones.SUSPECT_ZONE_UUID:
+                return ResZone.SUSPECT;
+            case Zones.PROBABLE_ZONE_UUID:
+                return ResZone.PROBABLE;
+            case Zones.CONFIRMED_ZONE_UUID:
+                return ResZone.CONFIRMED;
+            case Zones.MORGUE_ZONE_UUID:
+            case Zones.OUTSIDE_ZONE_UUID:
+            case Zones.TRIAGE_ZONE_UUID:
+            default:
+                return ResZone.UNKNOWN;
+        }
     }
 
     public Optional<String> getSelectedLocationUuid() {
@@ -76,11 +93,10 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
         }
 
         Location location = getItem(position);
-        // TODO/robustness: This line only works if 'location' is a tent; otherwise zone is ResZone.UNKNOWN.
-        ResZone.Resolved zone = Zones.getResZone(
-            location.parentUuid).resolve(mContext.getResources());
+        ResZone.Resolved zone = getResZone(mForest.getParent(location).uuid)
+            .resolve(mContext.getResources());
 
-        long count = mLocationTree.getTotalPatientCount(location);
+        long count = mForest.countPatientsIn(location);
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle("" + count);
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());

@@ -40,12 +40,13 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
@@ -62,6 +63,7 @@ import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -100,6 +102,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ProgressDialog mProgressDialog;
     private DatePickerDialog mAdmissionDateDialog;
     private DatePickerDialog mSymptomOnsetDateDialog;
+    private Ui mUi;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -220,12 +223,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mHandler.post(runnable);
             }
         };
+        mUi = new Ui();
         mController = new PatientChartController(
             mAppModel,
             mSettings,
             new EventBusWrapper(mEventBus),
             mCrudEventBusProvider.get(),
-            new Ui(),
+            mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
             mChartDataHelper,
@@ -248,6 +252,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mPcr.setOnClickListener(view -> mController.onPcrResultsPressed());
 
         initChartTabs();
+    }
+
+    public Ui getUi() {
+        return mUi;
     }
 
     @Override protected void onNewIntent(Intent intent) {
@@ -356,7 +364,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             .show();
     }
 
-    private final class Ui implements PatientChartController.Ui {
+    public final class Ui implements PatientChartController.Ui {
         @Override public void setTitle(String title) {
             PatientChartActivity.this.setTitle(title);
         }
@@ -485,8 +493,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mRootView.invalidate();
         }
 
-        public void updatePatientLocationUi(LocationTree locationTree, Patient patient) {
-            Location location = locationTree.findByUuid(patient.locationUuid);
+        public void updatePatientLocationUi(LocationForest forest, Patient patient) {
+            Location location = forest.get(patient.locationUuid);
             String locationText = Utils.toStringOrDefault(location, "Unknown"); // TODO/i18n
 
             mPatientLocationView.setValue(locationText);
@@ -581,6 +589,32 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void showEditPatientDialog(Patient patient) {
             EditPatientDialogFragment.newInstance(patient)
                 .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showPatientLocationDialog(Patient patient) {
+            PatientLocationDialogFragment.newInstance(patient)
+                .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showPatientUpdateFailed(int reason) {
+            int messageId;
+            switch (reason) {
+                case PatientUpdateFailedEvent.REASON_INTERRUPTED:
+                    messageId = R.string.patient_location_error_interrupted;
+                    break;
+                case PatientUpdateFailedEvent.REASON_NETWORK:
+                case PatientUpdateFailedEvent.REASON_SERVER:
+                    messageId = R.string.patient_location_error_network;
+                    break;
+                case PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT:
+                    messageId = R.string.patient_location_error_no_such_patient;
+                    break;
+                case PatientUpdateFailedEvent.REASON_CLIENT:
+                default:
+                    messageId = R.string.patient_location_error_unknown;
+                    break;
+            }
+            BigToast.show(PatientChartActivity.this, messageId);
         }
     }
 }

@@ -114,4 +114,9 @@ public class AppSettings {
         return mSharedPreferences.getBoolean("require_wifi",
             mResources.getBoolean(R.bool.require_wifi_default));
     }
+
+    /** Gets the currently selected locale as a BCP 47 tag. */
+    public String getLocaleTag() {
+        return "en";
+    }
 }

@@ -20,8 +20,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
 
-import com.google.common.base.Optional;
-
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
@@ -38,7 +36,6 @@ import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
@@ -52,19 +49,16 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
-import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -95,7 +89,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private static final int PATIENT_UPDATE_PERIOD_MILLIS = 10000;
 
     private Patient mPatient = Patient.builder().build();
-    private LocationTree mLocationTree;
+    private LocationForest mForest;
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
@@ -110,7 +104,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
     private final SyncManager mSyncManager;
     private final MinimalHandler mMainThreadHandler;
-    private AssignLocationDialog mAssignLocationDialog;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
     private Runnable mActivePatientUpdater;
 
@@ -146,7 +139,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         void updatePatientConditionUi(String generalConditionUuid);
 
         /** Updates the UI with the patient's location. */
-        void updatePatientLocationUi(LocationTree locationTree, Patient patient);
+        void updatePatientLocationUi(LocationForest forest, Patient patient);
 
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updateTilesAndGrid(
@@ -183,6 +176,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
         void showObsDetailDialog(List<ObsRow> obsRows, List<String> orderedConceptUuids);
+        void showPatientLocationDialog(Patient patient);
+        void showPatientUpdateFailed(int reason);
     }
 
     /** Sends ODK form data. */
@@ -232,10 +227,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             mAssignGeneralConditionDialog.dismiss();
             mAssignGeneralConditionDialog = null;
         }
-        if (mAssignLocationDialog != null) {
-            mAssignLocationDialog.dismiss();
-            mAssignLocationDialog = null;
-        }
 
         // Load a new patient, which will trigger UI updates.
         mPatientUuid = uuid;
@@ -247,7 +238,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
-        mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().toString());
+        mForest = mAppModel.getForest(mSettings.getLocaleTag());
+        updatePatientLocationUi();
 
         mSyncManager.sync(Phase.OBSERVATIONS, Phase.ORDERS);
         mSyncManager.setPeriodicSync(10, Phase.OBSERVATIONS, Phase.ORDERS);
@@ -277,9 +269,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
-        if (mLocationTree != null) {
-            mLocationTree.close();
-        }
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
@@ -353,8 +342,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     private boolean dialogShowing() {
-        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
-            || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing());
     }
 
     FormRequest newFormRequest(String formUuid, String patientUuid) {
@@ -488,6 +476,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void showAssignLocationDialog(Context context) {
+        mUi.showPatientLocationDialog(mPatient);
+/*
         if (mAssignLocationDialog != null) return;
 
         AssignLocationDialog.LocationSelectedCallback callback =
@@ -509,6 +499,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             Optional.of(mPatient.locationUuid),
             callback);
         mAssignLocationDialog.show();
+*/
     }
 
     public void setZoomIndex(int index) {
@@ -582,8 +573,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     private synchronized void updatePatientLocationUi() {
-        if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
-            mUi.updatePatientLocationUi(mLocationTree, mPatient);
+        if (mForest != null && mPatient != null && mPatient.locationUuid != null) {
+            mUi.updatePatientLocationUi(mForest, mPatient);
         }
     }
 
@@ -603,14 +594,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
-        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            if (mLocationTree != null) {
-                mLocationTree.close();
-            }
-            mLocationTree = event.tree;
-            updatePatientLocationUi();
-        }
-
         public void onEventMainThread(SyncSucceededEvent event) {
             updatePatientObsUi();
         }
@@ -625,7 +608,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         // We get a ItemFetchedEvent when the initial patient data is loaded
         // from SQLite or after an edit has been successfully posted to the server.
-        public void onEventMainThread(ItemFetchedEvent event) {
+        public void onEventMainThread(ItemFetchedEvent<?> event) {
             if (event.item instanceof Patient) {
                 mUi.hideWaitDialog();
 
@@ -659,7 +642,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             LOG.e(event.exception, "Patient update failed.");
             mUi.hideWaitDialog();
-            mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+            mUi.showPatientUpdateFailed(event.reason);
         }
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {

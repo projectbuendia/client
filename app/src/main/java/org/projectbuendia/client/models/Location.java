@@ -11,50 +11,46 @@
 
 package org.projectbuendia.client.models;
 
-import android.database.Cursor;
-
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-/**
- * A location in the app model.
- * <p/>
- * <p>App model locations are always localized.
- * <p/>
- * <p>Patient counts represent the number of patients assigned directly to this location, and do
- * not include the number of patients in child locations. To get a recursive patient count, use
- * {@link LocationTree#getTotalPatientCount(Location)}.
- */
-@Immutable
-public final class Location extends Base<String> {
-    public final String uuid;
-    public final String parentUuid;
-    public final String name;
-    public final long patientCount;
+/** The app model for a location, including its localized name. */
+public final @Immutable class Location extends Base<String> implements Comparable<Location> {
+    public final @Nonnull String uuid;  // permanent unique identifier
+    public final @Nonnull String path;  // short IDs from root to this node, separated by slashes
+    public final @Nonnull String name;
+    public final int depth;
 
     /** Creates an instance of {@link Location}. */
-    public Location(String uuid, String parentUuid, String name, long patientCount) {
-        super(null);  // Location objects never have an id
+    public Location(@Nonnull String uuid, @Nonnull String path, String name) {
+        super(null);
         this.uuid = uuid;
-        this.parentUuid = parentUuid;
-        this.name = name;
-        this.patientCount = patientCount;
+        this.path = path;
+        this.name = Utils.toNonnull(name);
+        this.depth = path.split("/").length - 1;
     }
 
     @Override public String toString() {
-        return name;
+        return Utils.format("<Location %s: \"%s\" [%s]>", path, Utils.repr(name), uuid);
     }
 
-    /** An {@link CursorLoader} that converts {@link Location}s. */
-    public static class Loader implements CursorLoader<Location> {
-        @Override public Location fromCursor(Cursor cursor) {
-            return new Location(
-                Utils.getString(cursor, Contracts.LocalizedLocations.UUID),
-                Utils.getString(cursor, Contracts.LocalizedLocations.PARENT_UUID),
-                Utils.getString(cursor, Contracts.LocalizedLocations.NAME),
-                Utils.getLong(cursor, Contracts.LocalizedLocations.PATIENT_COUNT));
-        }
+    @Override public boolean equals(Object other) {
+        return other instanceof Location && uuid.equals(((Location) other).uuid);
+    }
+
+    @Override public int hashCode() {
+        return Objects.hashCode(uuid);
+    }
+
+    public boolean isInSubtree(Location other) {
+        return path.startsWith(other.path);
+    }
+
+    @Override public int compareTo(Location other) {
+        return path.compareTo(other.path);
     }
 }

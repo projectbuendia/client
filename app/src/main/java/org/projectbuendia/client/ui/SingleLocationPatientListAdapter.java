@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
 
 /**
  * A {@link PatientListTypedCursorAdapter} that hides its group headings, as the group heading is
@@ -25,8 +25,8 @@ import org.projectbuendia.client.models.LocationTree;
  */
 public class SingleLocationPatientListAdapter extends PatientListTypedCursorAdapter {
     public SingleLocationPatientListAdapter(
-        Context context, LocationTree locationTree) {
-        super(context, locationTree);
+        Context context, LocationForest forest) {
+        super(context, forest);
     }
 
     @Override public View getGroupView(

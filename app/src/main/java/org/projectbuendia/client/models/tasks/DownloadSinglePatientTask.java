@@ -22,10 +22,9 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.LoaderSet;
-import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 
@@ -43,7 +42,6 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
     private static final Logger LOG = Logger.create();
 
     private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mPatientId;
@@ -54,13 +52,11 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
     /** Creates a new {@link DownloadSinglePatientTask}. */
     public DownloadSinglePatientTask(
         TaskFactory taskFactory,
-        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         String patientId,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mPatientId = patientId;
@@ -125,7 +121,7 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         // result of the fetch determines if adding a patient was truly successful
         // and propagates a new event to report success/failure.
         mTaskFactory.newFetchItemTask(
-            Patients.URI, null, new UuidFilter(), mUuid,
-            mLoaderSet.patientLoader, mBus).execute();
+            Patients.URI, null, new UuidFilter(), mUuid, Patient.LOADER, mBus
+        ).execute();
     }
 }

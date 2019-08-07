@@ -26,7 +26,6 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
@@ -59,7 +58,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
-    private CancelButtonListener mCancelListener = new CancelButtonListener();
     private static boolean sSkippedPatientList;
 
     // TODO/i18n: Populate properly.
@@ -93,13 +91,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
         mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);
-
-        /*
-        MenuItem cancel = menu.findItem(R.id.action_cancel);
-        cancel.setIcon(createIcon(Iconify.IconValue.fa_close, 0xccffffff));
-        cancel.setOnMenuItemClickListener(mCancelListener);
-        cancel.setVisible(getLoadingState() == LoadingState.SYNCING);
-        */
 
         InputMethodManager mgr =
             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -178,13 +169,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         @Override public void goToPatientChart(String patientUuid) {
             BigToast.show(BaseSearchablePatientListActivity.this, R.string.patient_creation_success);
             PatientChartActivity.start(BaseSearchablePatientListActivity.this, patientUuid);
-        }
-    }
-
-    private class CancelButtonListener implements MenuItem.OnMenuItemClickListener {
-        @Override public boolean onMenuItemClick(MenuItem item) {
-            mEventBus.post(new SyncCancelRequestedEvent());
-            return true;
         }
     }
 }

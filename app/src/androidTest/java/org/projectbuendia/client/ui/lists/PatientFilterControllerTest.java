@@ -17,10 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.projectbuendia.client.FakeAppLocationTreeFactory;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
+import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 
@@ -35,26 +33,26 @@ public class PatientFilterControllerTest {
     @Mock private AppModel mMockAppModel;
     @Mock private PatientFilterController.Ui mMockUi;
 
-    /** Tests that requesting an action bar initialization fetches a location tree. */
+    /** Tests that requesting an action bar initialization fetches a location forest. */
     @Test
     @UiThreadTest
-    public void testSetupActionBarAsync_fetchesLocationTree() {
+    public void testSetupActionBarAsync_fetchesForest() {
         // GIVEN initialized PatientFilterController
         // WHEN setupActionBarAsync called
         mController.setupActionBarAsync();
-        // THEN location tree is fetched from model
-        verify(mMockAppModel).fetchLocationTree(mFakeCrudEventBus, LOCALE);
+        // THEN location forest is fetched from model
+        verify(mMockAppModel).fetchForest(mFakeCrudEventBus, LOCALE);
     }
 
-    /** Tests that filters are correctly initialized once a location tree is retrieved. */
+    /** Tests that filters are correctly initialized once a location forest is retrieved. */
     @Test
     @UiThreadTest
     public void testSetupActionBarAsync_passesLocationFilters() {
         // GIVEN initialized PatientFilterController, after setupActionBarAsync called
         mController.setupActionBarAsync();
-        // WHEN location tree fetched
-        LocationTree tree = FakeAppLocationTreeFactory.build();
-        AppLocationTreeFetchedEvent event = new AppLocationTreeFetchedEvent(tree);
+        // WHEN location forest fetched
+        LocationForest forest = FakeForestFactory.build();
+        AppForestFetchedEvent event = new AppForestFetchedEvent(forest);
         mFakeCrudEventBus.post(event);
         // THEN location filters passed to the Ui
         verify(mMockUi).populateActionBar(

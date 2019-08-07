@@ -13,13 +13,14 @@ package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
@@ -33,7 +34,10 @@ import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Receiver;
 import org.projectbuendia.client.utils.Utils;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * A model that manages all data access within the application.
@@ -55,8 +59,14 @@ public class AppModel {
 
     private static final Logger LOG = Logger.create();
     private final ContentResolver mContentResolver;
-    private final LoaderSet mLoaderSet;
     private final TaskFactory mTaskFactory;
+
+    private final Object loadedForestLock = new Object();
+    private LocationForest loadedForest = null;
+    private String loadedForestLocale = null;
+    private boolean forestObserversRegistered = false;
+    private Receiver<LocationForest> onForestRebuiltListener = null;
+    private Receiver<LocationForest> onForestUpdatedListener = null;
 
     /**
      * Returns true iff the model has previously been fully downloaded from the server--that is, if
@@ -99,13 +109,96 @@ public class AppModel {
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
-    /**
-     * Asynchronously fetches all locations as a tree, posting an
-     * {@link AppLocationTreeFetchedEvent} on the specified event bus when complete.
-     */
-    public void fetchLocationTree(CrudEventBus bus, String locale) {
-        new FetchLocationTreeAsyncTask(
-            mContentResolver, locale, mLoaderSet.locationLoader, bus).execute();
+    public LocationForest getForest(String locale) {
+        LocationForest forest;
+        synchronized (loadedForestLock) {
+            if (loadedForest == null || !eq(locale, loadedForestLocale)) {
+                loadedForest = loadForest(locale);
+                loadedForestLocale = locale;
+            }
+            forest = loadedForest;
+            if (!forestObserversRegistered) {
+                registerForestObservers();
+                forestObserversRegistered = true;
+            }
+        }
+        return forest;
+    }
+
+    public void setForestRebuiltListener(Receiver<LocationForest> listener) {
+        synchronized (loadedForestLock) {
+            onForestRebuiltListener = listener;
+            if (listener != null && loadedForest == null && loadedForestLocale != null) {
+                loadedForest = loadForest(loadedForestLocale);
+            }
+        }
+    }
+
+    public void setForestUpdatedListener(Receiver<LocationForest> listener) {
+        synchronized (loadedForestLock) {
+            onForestUpdatedListener = listener;
+            if (listener != null && loadedForest == null && loadedForestLocale != null) {
+                loadedForest = loadForest(loadedForestLocale);
+            }
+        }
+    }
+
+    private LocationForest loadForest(String locale) {
+        Uri uri = Contracts.getLocalizedLocationsUri(locale);
+        try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
+            return new LocationForest(
+                new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
+        }
+    }
+
+    private void updateForest(LocationForest forest) {
+        Uri uri = Contracts.getLocalizedLocationsUri("-");
+        try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
+            forest.updatePatientCounts(
+                new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
+        }
+    }
+
+    private void registerForestObservers() {
+        mContentResolver.registerContentObserver(
+            Contracts.LocalizedLocations.URI, true, new ContentObserver(new Handler()) {
+                @Override public void onChange(boolean selfChange) {
+                    LocationForest forest = null;
+                    synchronized (loadedForestLock) {
+                        if (onForestRebuiltListener != null) {
+                            // Someone is listening, so get a new forest for them now.
+                            forest = loadedForest = loadForest(loadedForestLocale);
+                        } else {
+                            // No one is listening; ensure the forest is reloaded later.
+                            loadedForest = null;
+                        }
+                    }
+                    if (onForestRebuiltListener != null) {
+                        onForestRebuiltListener.receive(forest);
+                    }
+                }
+            }
+        );
+        mContentResolver.registerContentObserver(
+            Contracts.Patients.URI, true, new ContentObserver(new Handler()) {
+                @Override public void onChange(boolean selfChange) {
+                    LocationForest forest = null;
+                    synchronized (loadedForestLock) {
+                        if (onForestUpdatedListener != null) {
+                            // Someone is listening, so update the forest for them now.
+                            updateForest(loadedForest);
+                            forest = loadedForest;
+                        } else {
+                            // No one is listening; ensure the forest is reloaded later.
+                            loadedForest = null;
+                        }
+                    }
+                    if (onForestUpdatedListener != null) {
+                        onForestUpdatedListener.receive(forest);
+                    }
+                }
+            }
+        );
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
@@ -130,7 +223,7 @@ public class AppModel {
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
                 //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.GENDER, Patients.LOCATION_UUID},
             Patient.class, mContentResolver,
-            filter, constraint, mLoaderSet.patientLoader, bus);
+            filter, constraint, Patient.LOADER, bus);
         task.execute();
     }
 
@@ -140,8 +233,8 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         mTaskFactory.newFetchItemTask(
-                Contracts.Patients.URI, null, new UuidFilter(), uuid,
-                mLoaderSet.patientLoader, bus).execute();
+            Contracts.Patients.URI, null, new UuidFilter(), uuid, Patient.LOADER, bus
+        ).execute();
     }
 
     /**
@@ -198,54 +291,13 @@ public class AppModel {
     }
 
     AppModel(ContentResolver contentResolver,
-             LoaderSet loaderSet,
              TaskFactory taskFactory) {
         mContentResolver = contentResolver;
-        mLoaderSet = loaderSet;
         mTaskFactory = taskFactory;
     }
 
     public void voidObservation(CrudEventBus bus, VoidObs obs) {
         mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
-    }
-
-    private static class FetchLocationTreeAsyncTask extends AsyncTask<Void, Void, LocationTree> {
-
-        private final ContentResolver mContentResolver;
-        private final String mLocale;
-        private final CursorLoader<Location> mLoader;
-        private final CrudEventBus mBus;
-
-        public FetchLocationTreeAsyncTask(
-            ContentResolver contentResolver,
-            String locale,
-            CursorLoader<Location> loader,
-            CrudEventBus bus) {
-            mContentResolver = contentResolver;
-            mLocale = locale;
-            mLoader = loader;
-            mBus = bus;
-        }
-
-        @Override protected LocationTree doInBackground(Void... voids) {
-            Cursor cursor = null;
-            try {
-                // TODO: Ensure this cursor is closed.  A straightforward try/finally doesn't do the
-                // job here because the cursor has to stay open for the TypedCursor to work.
-                cursor = mContentResolver.query(
-                    Contracts.getLocalizedLocationsUri(mLocale), null, null, null, null);
-                return LocationTree.forTypedCursor(new TypedCursorWithLoader<>(cursor, mLoader));
-            } catch (Exception e) {
-                if (cursor != null) {
-                    cursor.close();
-                }
-                throw e;
-            }
-        }
-
-        @Override protected void onPostExecute(LocationTree result) {
-            mBus.post(new AppLocationTreeFetchedEvent(result));
-        }
     }
 
     private static class FetchTypedCursorAsyncTask<T extends Base>

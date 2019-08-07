@@ -21,17 +21,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.projectbuendia.client.FakeAppLocationTreeFactory;
+import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.FakeTypedCursor;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.models.Zones;
@@ -180,7 +178,7 @@ public class PatientSearchControllerTest {
 
     /**
      * Tests that loadSearchResults() is a no-op for controllers with a specified root location
-     * and no location tree--loadSearchResults() is automatically called when the location tree
+     * and no location forest--loadSearchResults() is automatically called when the location forest
      * is retrieved.
      */
     @Test
@@ -197,15 +195,15 @@ public class PatientSearchControllerTest {
 
     /**
      * Tests that loadSearchResults() is called, and patients correctly filtered, when the location
-     * tree is retrieved.
+     * forest is retrieved.
      */
     @Test
     @UiThreadTest
     public void testLoadSearchResults_fetchesFilteredPatientsOnceLocationsPresent() {
         // GIVEN PatientSearchController with locations available and specified Triage root
         mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
-        LocationTree tree = FakeAppLocationTreeFactory.build();
-        AppLocationTreeFetchedEvent event = new AppLocationTreeFetchedEvent(tree);
+        LocationForest forest = FakeForestFactory.build();
+        AppForestFetchedEvent event = new AppForestFetchedEvent(forest);
         mFakeCrudEventBus.post(event);
         // WHEN search results are requested
         mController.loadSearchResults();

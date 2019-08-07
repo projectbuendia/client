@@ -24,11 +24,10 @@ import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.providers.Contracts;
 
 import java.util.concurrent.ExecutionException;
@@ -44,7 +43,6 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
     private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mUuid;
@@ -53,14 +51,12 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
 
     UpdatePatientTask(
         TaskFactory taskFactory,
-        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         String patientUuid,
         PatientDelta patientDelta,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mUuid = patientUuid;
@@ -114,7 +110,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
             null,
             new UuidFilter(),
             mUuid,
-            mLoaderSet.patientLoader,
+            Patient.LOADER,
             mBus);
         task.execute();
     }

@@ -12,7 +12,6 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -24,7 +23,7 @@ import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.json.JsonOrder;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -63,8 +62,17 @@ import javax.annotation.concurrent.Immutable;
  * multi-word medication name, there are non-breaking spaces betwen the words
  * instead of regular spaces).
  */
-public @Immutable class Order extends Base<String> {
+public final @Immutable class Order extends Base<String> {
     public static final char NON_BREAKING_SPACE = '\u00a0';
+
+    public static final CursorLoader<Order> LOADER = cursor -> new Order(
+        cursor.getString(cursor.getColumnIndex(Orders.UUID)),
+        cursor.getString(cursor.getColumnIndex(Orders.PATIENT_UUID)),
+        cursor.getString(cursor.getColumnIndex(Orders.INSTRUCTIONS)),
+        cursor.getLong(cursor.getColumnIndex(Orders.START_MILLIS)),
+        cursor.getLong(cursor.getColumnIndex(Orders.STOP_MILLIS))
+    );
+
     public final @Nullable String uuid;
     public final String patientUuid;
     public final Instructions instructions;
@@ -240,11 +248,11 @@ public @Immutable class Order extends Base<String> {
 
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(Contracts.Orders.UUID, uuid);
-        cv.put(Contracts.Orders.PATIENT_UUID, patientUuid);
-        cv.put(Contracts.Orders.INSTRUCTIONS, instructions.format());
-        cv.put(Contracts.Orders.START_MILLIS, start.getMillis());
-        cv.put(Contracts.Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());
+        cv.put(Orders.UUID, uuid);
+        cv.put(Orders.PATIENT_UUID, patientUuid);
+        cv.put(Orders.INSTRUCTIONS, instructions.format());
+        cv.put(Orders.START_MILLIS, start.getMillis());
+        cv.put(Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());
         return cv;
     }
 
@@ -353,19 +361,6 @@ public @Immutable class Order extends Base<String> {
 
         public int compareTo(Instructions other) {
             return format().compareTo(other.format());
-        }
-    }
-
-    /** An {@link CursorLoader} that reads a Cursor and creates an {@link Order}. */
-    public static @Immutable class Loader implements CursorLoader<Order> {
-        @Override public Order fromCursor(Cursor cursor) {
-            return new Order(
-                cursor.getString(cursor.getColumnIndex(Contracts.Orders.UUID)),
-                cursor.getString(cursor.getColumnIndex(Contracts.Orders.PATIENT_UUID)),
-                cursor.getString(cursor.getColumnIndex(Contracts.Orders.INSTRUCTIONS)),
-                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.START_MILLIS)),
-                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.STOP_MILLIS))
-            );
         }
     }
 }
