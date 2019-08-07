@@ -112,8 +112,8 @@ public class ChartDataHelper {
                 Utils.getString(c, Orders.UUID, ""),
                 patientUuid,
                 Utils.getString(c, Orders.INSTRUCTIONS, ""),
-                Utils.getLong(c, Orders.START_MILLIS, null),
-                Utils.getLong(c, Orders.STOP_MILLIS, null)));
+                Utils.getLong(c, Orders.START_MILLIS),
+                Utils.getLong(c, Orders.STOP_MILLIS)));
         }
         c.close();
         return orders;

@@ -104,7 +104,7 @@ public class BuendiaSyncEngine implements SyncEngine {
                 try {
                     phases.add(Phase.valueOf(name));
                 } catch (IllegalArgumentException e) {
-                    LOG.w("Unrecognized phase name: %s (in options: %s)", Utils.repr(name, 100), options);
+                    LOG.w("Unrecognized phase name: %s (in options: %s)", Utils.repr(name), options);
                 }
             }
         }

@@ -321,7 +321,7 @@ public @Immutable class Order extends Base<String> {
             } else {
                 Matcher matcher = OLD_PATTERN.matcher(Utils.toNonnull(instructionsText));
                 if (!matcher.matches()) {
-                    throw new IllegalArgumentException("Invalid order instructions: " + Utils.repr(instructionsText, 100));
+                    throw new IllegalArgumentException("Invalid order instructions: " + Utils.repr(instructionsText));
                 }
                 medication = Utils.orDefault(matcher.group(1), matcher.group(4)).replace(NON_BREAKING_SPACE, ' ');
                 route = "";
