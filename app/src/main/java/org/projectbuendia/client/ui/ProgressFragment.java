@@ -80,6 +80,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
 
     /** Changes the state of this fragment, hiding or showing the spinner as necessary. */
     public void setReadyState(ReadyState state) {
+        if (state == mState) return;
         LOG.w("setReadyState %s", state);
 
         mState = state;

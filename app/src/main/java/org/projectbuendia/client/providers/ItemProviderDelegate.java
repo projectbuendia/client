@@ -74,7 +74,7 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
             .where(mIdColumn + "=?", uri.getLastPathSegment())
             .where(selection, selectionArgs)
             .delete(dbHelper.getWritableDatabase());
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
@@ -85,7 +85,7 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
             .where(mIdColumn + "=?", uri.getLastPathSegment())
             .where(selection, selectionArgs)
             .update(dbHelper.getWritableDatabase(), values);
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 }

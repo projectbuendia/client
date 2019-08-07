@@ -34,9 +34,11 @@ public class LocationsSyncWorker implements SyncWorker {
     ) throws Throwable {
         ArrayList<ContentProviderOperation> ops = getLocationUpdateOps(result);
         client.applyBatch(ops);
-        resolver.notifyChange(Locations.URI, null, false);
-        resolver.notifyChange(LocationNames.URI, null, false);
-        resolver.notifyChange(LocalizedLocations.URI, null, false);
+        if (ops.size() > 0) {
+            resolver.notifyChange(Locations.URI, null, false);
+            resolver.notifyChange(LocationNames.URI, null, false);
+            resolver.notifyChange(LocalizedLocations.URI, null, false);
+        }
         return true;
     }
 

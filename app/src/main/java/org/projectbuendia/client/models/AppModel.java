@@ -37,6 +37,8 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Receiver;
 import org.projectbuendia.client.utils.Utils;
 
+import javax.annotation.Nullable;
+
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
@@ -117,12 +119,14 @@ public class AppModel {
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
-    public LocationForest getForest(String locale) {
+    public @Nullable LocationForest getForest(String locale) {
+        if (!isFullModelAvailable()) return null;
+
         LocationForest forest;
         synchronized (loadedForestLock) {
             if (loadedForest == null || !eq(locale, loadedForestLocale)) {
                 loadedForest = loadForest(locale);
-                loadedForestLocale = locale;
+                if (loadedForest != null) loadedForestLocale = locale;
             }
             forest = loadedForest;
             if (!forestObserversRegistered) {
@@ -134,36 +138,28 @@ public class AppModel {
     }
 
     public void setForestRebuiltListener(Receiver<LocationForest> listener) {
-        synchronized (loadedForestLock) {
-            onForestRebuiltListener = listener;
-            if (listener != null && loadedForest == null && loadedForestLocale != null) {
-                loadedForest = loadForest(loadedForestLocale);
-            }
-        }
+        onForestRebuiltListener = listener;
     }
 
     public void setForestUpdatedListener(Receiver<LocationForest> listener) {
-        synchronized (loadedForestLock) {
-            onForestUpdatedListener = listener;
-            if (listener != null && loadedForest == null && loadedForestLocale != null) {
-                loadedForest = loadForest(loadedForestLocale);
-            }
-        }
+        onForestUpdatedListener = listener;
     }
 
-    private LocationForest loadForest(String locale) {
+    private @Nullable LocationForest loadForest(String locale) {
         Uri uri = Contracts.getLocalizedLocationsUri(locale);
         try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            return new LocationForest(
+            return LocationForest.createFromCursor(
                 new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
         }
     }
 
     private void updateForest(LocationForest forest) {
-        Uri uri = Contracts.getLocalizedLocationsUri("-");
-        try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            forest.updatePatientCounts(
-                new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
+        if (loadedForestLocale != null) {
+            Uri uri = Contracts.getLocalizedLocationsUri(loadedForestLocale);
+            try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
+                forest.updatePatientCounts(
+                    new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
+            }
         }
     }
 
@@ -172,16 +168,20 @@ public class AppModel {
             Contracts.LocalizedLocations.URI, true, new ContentObserver(new Handler()) {
                 @Override public void onChange(boolean selfChange) {
                     LocationForest forest = null;
-                    synchronized (loadedForestLock) {
-                        if (onForestRebuiltListener != null) {
-                            // Someone is listening, so get a new forest for them now.
+                    if (onForestRebuiltListener != null) {
+                        // Someone is listening, so get a new forest for them now.
+                        LOG.i("Location content changed; rebuilding a new forest");
+                        synchronized (loadedForestLock) {
                             forest = loadedForest = loadForest(loadedForestLocale);
-                        } else {
-                            // No one is listening; ensure the forest is reloaded later.
+                        }
+                    } else {
+                        // No one is listening; ensure the forest is reloaded later.
+                        LOG.i("Location content changed; invalidating current forest");
+                        synchronized (loadedForestLock) {
                             loadedForest = null;
                         }
                     }
-                    if (onForestRebuiltListener != null) {
+                    if (onForestRebuiltListener != null && forest != null) {
                         onForestRebuiltListener.receive(forest);
                     }
                 }
@@ -191,17 +191,14 @@ public class AppModel {
             Contracts.Patients.URI, true, new ContentObserver(new Handler()) {
                 @Override public void onChange(boolean selfChange) {
                     LocationForest forest = null;
+                    LOG.i("Patient content changed; updating current forest");
                     synchronized (loadedForestLock) {
-                        if (onForestUpdatedListener != null) {
-                            // Someone is listening, so update the forest for them now.
+                        if (loadedForest != null) {
                             updateForest(loadedForest);
-                            forest = loadedForest;
-                        } else {
-                            // No one is listening; ensure the forest is reloaded later.
-                            loadedForest = null;
                         }
+                        forest = loadedForest;
                     }
-                    if (onForestUpdatedListener != null) {
+                    if (onForestUpdatedListener != null && forest != null) {
                         onForestUpdatedListener.receive(forest);
                     }
                 }

@@ -334,6 +334,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             mUi.showError(R.string.no_user);
             return;
         }
+        if (mForest == null) {
+            return;  // we can't submit a form without location information
+        }
 
         // We need to preset the provider and the location so that they don't
         // appear as questions in the form.

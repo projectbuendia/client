@@ -46,7 +46,7 @@ public class FormsSyncWorker implements SyncWorker {
             ops.addAll(getFormUpdateOps(result));
             client.applyBatch(ops);
             LOG.i("Finished updating forms (" + ops.size() + " db ops)");
-            resolver.notifyChange(Contracts.Forms.URI, null, false);
+            if (ops.size() > 0) resolver.notifyChange(Contracts.Forms.URI, null, false);
 
             OdkActivityLauncher.fetchAndCacheAllXforms();
             return true;

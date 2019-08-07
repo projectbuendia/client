@@ -62,6 +62,8 @@ public class OrdersSyncWorker extends IncrementalSyncWorker<JsonOrder> {
 
     @Override public void finalize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client) {
-        resolver.notifyChange(Orders.URI, null, false);
+        if (result.stats.numInserts + result.stats.numDeletes > 0) {
+            resolver.notifyChange(Orders.URI, null, false);
+        }
     }
 }
