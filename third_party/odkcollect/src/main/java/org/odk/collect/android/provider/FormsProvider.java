@@ -553,7 +553,7 @@ public class FormsProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		if (count > 0) getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
 
@@ -712,7 +712,7 @@ public class FormsProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		if (count > 0) getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
 

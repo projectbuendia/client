@@ -134,7 +134,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         int count = new QueryBuilder(mTable)
             .where(selection, selectionArgs)
             .delete(dbHelper.getWritableDatabase());
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
@@ -144,7 +144,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         int count = new QueryBuilder(mTable)
             .where(selection, selectionArgs)
             .update(dbHelper.getWritableDatabase(), values);
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 }
