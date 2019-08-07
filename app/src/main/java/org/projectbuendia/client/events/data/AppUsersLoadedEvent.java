@@ -20,9 +20,9 @@ import org.projectbuendia.client.models.User;
  * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class AppUsersFetchedEvent extends TypedCursorFetchedEvent<User> {
+public class AppUsersLoadedEvent extends TypedCursorLoadedEvent<User> {
 
-    AppUsersFetchedEvent(TypedCursor<User> cursor) {
+    AppUsersLoadedEvent(TypedCursor<User> cursor) {
         super(cursor);
     }
 }

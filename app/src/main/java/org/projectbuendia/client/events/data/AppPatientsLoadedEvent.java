@@ -12,19 +12,18 @@
 package org.projectbuendia.client.events.data;
 
 import org.projectbuendia.client.events.DefaultCrudEventBus;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 
 /**
- * Indicates that a single item has been fetched from the data store.
- * Should only be posted on a {@link DefaultCrudEventBus}.
+ * An event bus event indicating that {@link Patient}s have been fetched from the data store.
  * <p/>
- * <p>Unlike {@link TypedCursorFetchedEvent}, this provides the fetched item
- * (rather than providing a {@link TypedCursor} to lazy-load fetched items).
+ * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class ItemFetchedEvent<T> {
-    public final T item;
+public class AppPatientsLoadedEvent extends TypedCursorLoadedEvent<Patient> {
 
-    public ItemFetchedEvent(T item) {
-        this.item = item;
+    AppPatientsLoadedEvent(TypedCursor<Patient> cursor) {
+        super(cursor);
     }
 }
+

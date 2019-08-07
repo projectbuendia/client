@@ -38,7 +38,7 @@ import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
@@ -228,14 +228,14 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         // Load a new patient, which will trigger UI updates.
         mPatientUuid = uuid;
-        mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
+        mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
     }
 
     /** Sets async operations going to collect data required by the UI. */
     public void init() {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
+        mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
         mForest = mAppModel.getForest(mSettings.getLocaleTag());
         updatePatientLocationUi();
 
@@ -251,7 +251,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mActivePatientUpdater = new Runnable() {
             @Override public void run() {
                 if (this == mActivePatientUpdater && mPatient != null) {
-                    mAppModel.downloadSinglePatient(mCrudEventBus, mPatient.id);
+                    mAppModel.fetchSinglePatient(mCrudEventBus, mPatient.id);
                     handler.postDelayed(this, PATIENT_UPDATE_PERIOD_MILLIS);
                 }
             }
@@ -483,7 +483,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
-        LOG.elapsed("updatePatientObsUi", "Fetched %d obs, %d orders", mObservations.size(), orders.size());
+        LOG.elapsed("updatePatientObsUi", "%d obs, %d orders", mObservations.size(), orders.size());
 
         LocalDate admissionDate = getObservedDate(
             latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
@@ -562,9 +562,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             }
         }
 
-        // We get a ItemFetchedEvent when the initial patient data is loaded
+        // We get a ItemLoadedEvent when the initial patient data is loaded
         // from SQLite or after an edit has been successfully posted to the server.
-        public void onEventMainThread(ItemFetchedEvent<?> event) {
+        public void onEventMainThread(ItemLoadedEvent<?> event) {
             if (event.item instanceof Patient) {
                 mUi.hideWaitDialog();
 

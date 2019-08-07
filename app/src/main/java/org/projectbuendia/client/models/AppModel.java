@@ -22,10 +22,10 @@ import android.os.Handler;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
-import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
-import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
+import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
+import org.projectbuendia.client.events.data.TypedCursorLoadedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
@@ -44,7 +44,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 /**
  * A model that manages all data access within the application.
  * <p/>
- * <p>This model's {@code fetch} methods often provide {@link TypedCursor}s as results, which MUST
+ * <p>This model's {@code load} methods often provide {@link TypedCursor}s as results, which MUST
  * be closed when the consumer is done with them.
  * <p/>
  * <p>Updates done through this model are written through to a backing {@link Server}; callers do
@@ -207,21 +207,21 @@ public class AppModel {
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
-    public void downloadSinglePatient(CrudEventBus bus, String patientId) {
-        mTaskFactory.newDownloadSinglePatientTask(patientId, bus).execute();
+    public void fetchSinglePatient(CrudEventBus bus, String patientId) {
+        mTaskFactory.newFetchSinglePatientTask(patientId, bus).execute();
     }
 
     /**
-     * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
+     * Asynchronously loads patients, posting a {@link TypedCursorLoadedEvent} with
      * {@link Patient}s on the specified event bus when complete.
      */
-    public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
+    public void loadPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         // NOTE: We need to keep the object creation separate from calling #execute() here, because
         // the type inference breaks on Java 8 otherwise, which throws
         // `java.lang.ClassCastException: java.lang.Object[] cannot be cast to java.lang.Void[]`.
         // See http://stackoverflow.com/questions/24136126/fatal-exception-asynctask and
         // https://github.com/projectbuendia/client/issues/7
-        FetchTypedCursorAsyncTask<Patient> task = new FetchTypedCursorAsyncTask<>(
+        LoadTypedCursorAsyncTask<Patient> task = new LoadTypedCursorAsyncTask<>(
             Contracts.Patients.URI,
             // The projection must contain an "_id" column for the ListAdapter as well as all
             // the columns used in Patient.Loader.fromCursor().
@@ -233,11 +233,11 @@ public class AppModel {
     }
 
     /**
-     * Asynchronously fetches a single patient by UUID, posting a {@link ItemFetchedEvent}
+     * Asynchronously loads a single patient by UUID, posting a {@link ItemLoadedEvent}
      * with the {@link Patient} on the specified event bus when complete.
      */
-    public void fetchSinglePatient(CrudEventBus bus, String uuid) {
-        mTaskFactory.newFetchItemTask(
+    public void loadSinglePatient(CrudEventBus bus, String uuid) {
+        mTaskFactory.newLoadItemTask(
             Contracts.Patients.URI, null, new UuidFilter(), uuid, Patient.LOADER, bus
         ).execute();
     }
@@ -305,7 +305,7 @@ public class AppModel {
         mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
     }
 
-    private static class FetchTypedCursorAsyncTask<T extends Base>
+    private static class LoadTypedCursorAsyncTask<T extends Base>
         extends AsyncTask<Void, Void, TypedCursor<T>> {
 
         private final Uri mContentUri;
@@ -317,7 +317,7 @@ public class AppModel {
         private final CursorLoader<T> mLoader;
         private final CrudEventBus mBus;
 
-        public FetchTypedCursorAsyncTask(
+        public LoadTypedCursorAsyncTask(
             Uri contentUri,
             String[] projection,
             Class<T> clazz,
@@ -357,7 +357,7 @@ public class AppModel {
         }
 
         @Override protected void onPostExecute(TypedCursor<T> result) {
-            mBus.post(TypedCursorFetchedEventFactory.createEvent(mClazz, result));
+            mBus.post(TypedCursorLoadedEventFactory.createEvent(mClazz, result));
         }
     }
 }

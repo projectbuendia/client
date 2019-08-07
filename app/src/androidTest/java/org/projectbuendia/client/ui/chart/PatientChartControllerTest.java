@@ -29,7 +29,7 @@ import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
@@ -99,7 +99,7 @@ public final class PatientChartControllerTest {
         // WHEN the controller is inited
         mController.init();
         // THEN it requests that patient's details be fetched
-        mMockAppModel.fetchSinglePatient(mFakeCrudEventBus, PATIENT_UUID_1);
+        mMockAppModel.loadSinglePatient(mFakeCrudEventBus, PATIENT_UUID_1);
     }
 
     /** Tests that observations are updated in the UI when patient details fetched. */
@@ -118,7 +118,7 @@ public final class PatientChartControllerTest {
         // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
-        mFakeCrudEventBus.post(new ItemFetchedEvent<>(PATIENT));
+        mFakeCrudEventBus.post(new ItemLoadedEvent<>(PATIENT));
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
         mFakeHandler.runUntilEmpty();
@@ -137,7 +137,7 @@ public final class PatientChartControllerTest {
         // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
-        mFakeCrudEventBus.post(new ItemFetchedEvent<>(PATIENT));
+        mFakeCrudEventBus.post(new ItemLoadedEvent<>(PATIENT));
         // THEN the controller updates the UI
         verify(mMockUi).updatePatientDetailsUi(PATIENT);
     }

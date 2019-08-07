@@ -19,8 +19,8 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.events.data.OrderSaveFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
@@ -66,14 +66,14 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
     }
 
     @SuppressWarnings("unused") // called by reflection from EventBus
-    public void onEventMainThread(ItemFetchedEvent<Order> event) {
+    public void onEventMainThread(ItemLoadedEvent<Order> event) {
         mBus.post(mOrder.uuid != null ? new ItemUpdatedEvent<>(mOrder.uuid, event.item)
             : new ItemCreatedEvent<>(event.item));
         mBus.unregister(this);
     }
 
     @SuppressWarnings("unused") // called by reflection from EventBus
-    public void onEventMainThread(ItemFetchFailedEvent event) {
+    public void onEventMainThread(ItemLoadFailedEvent event) {
         mBus.post(new OrderSaveFailedEvent(
             OrderSaveFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
         mBus.unregister(this);
@@ -110,7 +110,7 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
         // We use the fetch event to trigger UI updates, both for initial load and for this update.
         mBus.register(this);
-        mTaskFactory.newFetchItemTask(
+        mTaskFactory.newLoadItemTask(
             Contracts.Orders.URI, null, new UuidFilter(), mUuid, Order.LOADER, mBus
         ).execute();
     }

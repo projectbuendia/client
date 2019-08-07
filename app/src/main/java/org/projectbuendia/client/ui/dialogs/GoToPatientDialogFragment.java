@@ -32,8 +32,8 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
@@ -100,7 +100,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
         }
     }
 
-    public void onEventMainThread(ItemFetchedEvent<Patient> event) {
+    public void onEventMainThread(ItemLoadedEvent<Patient> event) {
         String id = mPatientId.getText().toString().trim();
         Patient patient = event.item;
         if (id.equals(patient.id)) {  // server returned the patient we were looking for
@@ -111,7 +111,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
         }
     }
 
-    public void onEventMainThread(ItemFetchFailedEvent event) {
+    public void onEventMainThread(ItemLoadFailedEvent event) {
         String id = mPatientId.getText().toString().trim();
         if (id.equals(event.id)) {  // server returned empty results for the ID we sought
             mPatientUuid = null;
@@ -157,7 +157,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         mPatientSearchResult.setText(message);
 
                         // Immediately check for this patient on the server.
-                        mAppModel.downloadSinglePatient(mBus, id);
+                        mAppModel.fetchSinglePatient(mBus, id);
                     }
                 }
             }

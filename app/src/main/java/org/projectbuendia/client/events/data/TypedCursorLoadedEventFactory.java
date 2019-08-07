@@ -15,27 +15,27 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.models.User;
 
-/** A factory that creates instances of subclasses of {@link TypedCursorFetchedEvent}. */
-public class TypedCursorFetchedEventFactory {
+/** A factory that creates instances of subclasses of {@link TypedCursorLoadedEvent}. */
+public class TypedCursorLoadedEventFactory {
 
     /**
-     * Creates a {@link TypedCursorFetchedEvent} for the specified data type and cursor.
+     * Creates a {@link TypedCursorLoadedEvent} for the specified data type and cursor.
      * @throws IllegalArgumentException if {@code clazz} is unknown
      */
     @SuppressWarnings("unchecked") // Types checked by code.
-    public static <T> TypedCursorFetchedEvent<?> createEvent(
+    public static <T> TypedCursorLoadedEvent<?> createEvent(
         Class<T> clazz,
         TypedCursor<T> cursor) {
         if (clazz.equals(Patient.class)) {
-            return new AppPatientsFetchedEvent((TypedCursor<Patient>) cursor);
+            return new AppPatientsLoadedEvent((TypedCursor<Patient>) cursor);
         } else if (clazz.equals(User.class)) {
-            return new AppUsersFetchedEvent((TypedCursor<User>) cursor);
+            return new AppUsersLoadedEvent((TypedCursor<User>) cursor);
         } else {
             throw new IllegalArgumentException(
                 "Unable to create an event for unknown type " + clazz.getName());
         }
     }
 
-    private TypedCursorFetchedEventFactory() {
+    private TypedCursorLoadedEventFactory() {
     }
 }

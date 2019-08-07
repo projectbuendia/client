@@ -12,18 +12,31 @@
 package org.projectbuendia.client.events.data;
 
 import org.projectbuendia.client.events.DefaultCrudEventBus;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.TypedCursor;
 
 /**
- * An event bus event indicating that {@link Patient}s have been fetched from the data store.
- * <p/>
- * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
+ * Indicates that an item fetch failed.
+ * Should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class AppPatientsFetchedEvent extends TypedCursorFetchedEvent<Patient> {
+public class ItemLoadFailedEvent {
+    public final String error;
+    public final String id;
+    public final Throwable cause;
 
-    AppPatientsFetchedEvent(TypedCursor<Patient> cursor) {
-        super(cursor);
+    public ItemLoadFailedEvent(String error) {
+        this.error = error;
+        this.id = null;
+        this.cause = null;
+    }
+
+    public ItemLoadFailedEvent(String error, String id) {
+        this.error = error;
+        this.id = id;
+        this.cause = null;
+    }
+
+    public ItemLoadFailedEvent(String error, String id, Throwable cause) {
+        this.error = error;
+        this.id = id;
+        this.cause = cause;
     }
 }
-

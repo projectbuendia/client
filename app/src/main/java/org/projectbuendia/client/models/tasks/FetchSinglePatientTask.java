@@ -19,8 +19,8 @@ import android.os.AsyncTask;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
@@ -34,10 +34,10 @@ import java.util.concurrent.ExecutionException;
  * An {@link AsyncTask} that downloads one specific patient from the server and
  * stores it locally (unlike sync, which ensures all patients are stored locally).
  * <p/>
- * <p>Posts an {@link ItemFetchedEvent} or an {@link ItemFetchFailedEvent} on
+ * <p>Posts an {@link ItemLoadedEvent} or an {@link ItemLoadFailedEvent} on
  * the given {@link CrudEventBus} to indicate success or failure.
  */
-public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFailedEvent> {
+public class FetchSinglePatientTask extends AsyncTask<Void, Void, ItemLoadFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
@@ -49,8 +49,8 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
 
     private String mUuid;
 
-    /** Creates a new {@link DownloadSinglePatientTask}. */
-    public DownloadSinglePatientTask(
+    /** Creates a new {@link FetchSinglePatientTask}. */
+    public FetchSinglePatientTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
@@ -63,7 +63,7 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         mBus = bus;
     }
 
-    @Override protected ItemFetchFailedEvent doInBackground(Void... params) {
+    @Override protected ItemLoadFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonPatient> future = RequestFuture.newFuture();
 
         // Try to download the specified patient from the server.
@@ -73,13 +73,13 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         try {
             json = future.get();
         } catch (InterruptedException e) {
-            return new ItemFetchFailedEvent("interrupted", mPatientId, e);
+            return new ItemLoadFailedEvent("interrupted", mPatientId, e);
         } catch (ExecutionException e) {
-            return new ItemFetchFailedEvent("network error", mPatientId, e);
+            return new ItemLoadFailedEvent("network error", mPatientId, e);
         }
         if (json == null) {
             LOG.i("Patient ID %s not found on server", mPatientId);
-            return new ItemFetchFailedEvent("not found", mPatientId);
+            return new ItemLoadFailedEvent("not found", mPatientId);
         }
 
         // Update the patient in the local database.
@@ -101,16 +101,16 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         // Record the UUID to use for fetching the patient back from the local database.
         if (uri == null || uri.equals(Uri.EMPTY)) {
             LOG.i("Patient ID %s not found on server", mPatientId);
-            return new ItemFetchFailedEvent("not found", mPatientId);
+            return new ItemLoadFailedEvent("not found", mPatientId);
         }
         if (json.uuid == null) {
-            return new ItemFetchFailedEvent("server error", mPatientId);
+            return new ItemLoadFailedEvent("server error", mPatientId);
         }
         mUuid = json.uuid;
         return null;
     }
 
-    @Override protected void onPostExecute(ItemFetchFailedEvent event) {
+    @Override protected void onPostExecute(ItemLoadFailedEvent event) {
         // If an error occurred, post the error event.
         if (event != null) {
             mBus.post(event);
@@ -120,7 +120,7 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         // After updating a patient, we fetch the patient from the database. The
         // result of the fetch determines if adding a patient was truly successful
         // and propagates a new event to report success/failure.
-        mTaskFactory.newFetchItemTask(
+        mTaskFactory.newLoadItemTask(
             Patients.URI, null, new UuidFilter(), mUuid, Patient.LOADER, mBus
         ).execute();
     }

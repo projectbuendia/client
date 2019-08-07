@@ -17,20 +17,20 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.Base;
 import org.projectbuendia.client.models.CursorLoader;
 
 /**
- * An {@link AsyncTask} that fetches a single item from the data store.
+ * An {@link AsyncTask} that loads a single item from the data store.
  * <p/>
- * <p>If the operation succeeds, a {@link ItemFetchedEvent} is posted on the given
+ * <p>If the operation succeeds, a {@link ItemLoadedEvent} is posted on the given
  * {@link CrudEventBus} with the retrieved item. If the operation fails, a
- * {@link ItemFetchFailedEvent} is posted instead.
+ * {@link ItemLoadFailedEvent} is posted instead.
  */
-public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object> {
+public class LoadItemTask<T extends Base> extends AsyncTask<Void, Void, Object> {
     private final ContentResolver mContentResolver;
     private final Uri mContentUri;
     private final String[] mProjectionColumns;
@@ -39,7 +39,7 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
     private final CursorLoader<T> mLoader;
     private final CrudEventBus mBus;
 
-    FetchItemTask(
+    LoadItemTask(
         ContentResolver contentResolver,
         Uri contentUri,
         String[] projectionColumns,
@@ -62,9 +62,9 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
             mFilter.getSelectionString(), mFilter.getSelectionArgs(mConstraint), null
         )) {
             if (cursor == null || !cursor.moveToFirst()) {
-                return new ItemFetchFailedEvent("no results");
+                return new ItemLoadFailedEvent("no results");
             }
-            return new ItemFetchedEvent<>(mLoader.fromCursor(cursor));
+            return new ItemLoadedEvent<>(mLoader.fromCursor(cursor));
         }
     }
 

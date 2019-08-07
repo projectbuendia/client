@@ -12,31 +12,19 @@
 package org.projectbuendia.client.events.data;
 
 import org.projectbuendia.client.events.DefaultCrudEventBus;
+import org.projectbuendia.client.models.TypedCursor;
 
 /**
- * Indicates that an item fetch failed.
- * Should only be posted on a {@link DefaultCrudEventBus}.
+ * An abstract event bus event indicating that a {@link TypedCursor} has been fetched from the data
+ * store.
+ * <p/>
+ * <p>Subclasses of this event should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class ItemFetchFailedEvent {
-    public final String error;
-    public final String id;
-    public final Throwable cause;
+public abstract class TypedCursorLoadedEvent<T> {
 
-    public ItemFetchFailedEvent(String error) {
-        this.error = error;
-        this.id = null;
-        this.cause = null;
-    }
+    public final TypedCursor<T> cursor;
 
-    public ItemFetchFailedEvent(String error, String id) {
-        this.error = error;
-        this.id = id;
-        this.cause = null;
-    }
-
-    public ItemFetchFailedEvent(String error, String id, Throwable cause) {
-        this.error = error;
-        this.id = id;
-        this.cause = cause;
+    TypedCursorLoadedEvent(TypedCursor<T> cursor) {
+        this.cursor = cursor;
     }
 }

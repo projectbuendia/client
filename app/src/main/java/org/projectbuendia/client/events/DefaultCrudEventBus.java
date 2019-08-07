@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.events;
 
-import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
+import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.NoSubscriberEvent;
@@ -40,10 +40,10 @@ public final class DefaultCrudEventBus implements CrudEventBus {
 
     @SuppressWarnings("unused") // Called by reflection from event bus.
     public void onEvent(NoSubscriberEvent event) {
-        if (event.originalEvent instanceof TypedCursorFetchedEvent<?>) {
+        if (event.originalEvent instanceof TypedCursorLoadedEvent<?>) {
             // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
             // the event won't be managed by anyone else; therefore, we close it ourselves.
-            ((TypedCursorFetchedEvent<?>) event.originalEvent).cursor.close();
+            ((TypedCursorLoadedEvent<?>) event.originalEvent).cursor.close();
         }
     }
 }

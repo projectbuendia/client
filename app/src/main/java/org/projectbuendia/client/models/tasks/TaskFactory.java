@@ -47,9 +47,9 @@ public class TaskFactory {
         return new AddPatientTask(this, mServer, mContentResolver, patientDelta, bus);
     }
 
-    public DownloadSinglePatientTask newDownloadSinglePatientTask(
+    public FetchSinglePatientTask newFetchSinglePatientTask(
         String patientId, CrudEventBus bus) {
-        return new DownloadSinglePatientTask(
+        return new FetchSinglePatientTask(
             this, mServer, mContentResolver, patientId, bus);
     }
 
@@ -86,15 +86,15 @@ public class TaskFactory {
         return new DeleteOrderTask(mServer, mContentResolver, orderUuid, bus);
     }
 
-    /** Creates a new {@link FetchItemTask}. */
-    public <T extends Base<?>> FetchItemTask<T> newFetchItemTask(
+    /** Creates a new {@link LoadItemTask}. */
+    public <T extends Base<?>> LoadItemTask<T> newLoadItemTask(
         Uri contentUri,
         String[] projectionColumns,
         SimpleSelectionFilter filter,
         String constraint,
         CursorLoader<T> loader,
         CrudEventBus bus) {
-        return new FetchItemTask<>(
+        return new LoadItemTask<>(
             mContentResolver, contentUri, projectionColumns, filter, constraint, loader, bus);
     }
 }

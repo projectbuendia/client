@@ -18,8 +18,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
@@ -105,7 +105,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
-        FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
+        LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
             Contracts.Patients.URI,
             null,
             new UuidFilter(),
@@ -120,12 +120,12 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class UpdateEventSubscriber {
-        public void onEventMainThread(ItemFetchedEvent<Patient> event) {
+        public void onEventMainThread(ItemLoadedEvent<Patient> event) {
             mBus.post(new ItemUpdatedEvent<>(mUuid, event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(ItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemLoadFailedEvent event) {
             mBus.post(new PatientUpdateFailedEvent(
                 PatientUpdateFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);

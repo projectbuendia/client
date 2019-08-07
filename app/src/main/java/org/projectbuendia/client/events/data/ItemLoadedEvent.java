@@ -15,16 +15,16 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
 import org.projectbuendia.client.models.TypedCursor;
 
 /**
- * An abstract event bus event indicating that a {@link TypedCursor} has been fetched from the data
- * store.
+ * Indicates that a single item has been fetched from the data store.
+ * Should only be posted on a {@link DefaultCrudEventBus}.
  * <p/>
- * <p>Subclasses of this event should only be posted on a {@link DefaultCrudEventBus}.
+ * <p>Unlike {@link TypedCursorLoadedEvent}, this provides the fetched item
+ * (rather than providing a {@link TypedCursor} to lazy-load fetched items).
  */
-public abstract class TypedCursorFetchedEvent<T> {
+public class ItemLoadedEvent<T> {
+    public final T item;
 
-    public final TypedCursor<T> cursor;
-
-    TypedCursorFetchedEvent(TypedCursor<T> cursor) {
-        this.cursor = cursor;
+    public ItemLoadedEvent(T item) {
+        this.item = item;
     }
 }
