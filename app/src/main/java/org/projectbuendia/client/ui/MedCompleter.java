@@ -292,10 +292,12 @@ public class MedCompleter implements Completer {
         new Med("Modified Fluid Gelatin", "plasma substitute"),
         new Med("Polygeline", "plasma substitute"),
         new Med("Ringer Lactate", "fluid replacer"),
+        new Med("RLG 5% mix", "fluid replacer", "Ringer Lactate/Glucose, 5%"),
+        new Med("RLG 10% mix", "fluid replacer", "Ringer Lactate/Glucose, 10%"),
         new Med("Sodium Chloride, 0.9%", "fluid replacer", "NaCl"),
 
         // Vaccines, immunoglobulins, and antisera
-        new Med("Oral Cholera Vaccine O1+O139"),
+        new Med("Oral Cholera Vaccine O1+O139", "vaccine"),
         new Med("Diphtheria/Tetanus/Pertussis Vaccine", "vaccine", "DTP"),
         new Med("Diphtheria/Tetanus/Pertussis/Hepatitis B Vaccine", "vaccine"),
         new Med("Diphtheria/Tetanus/Pertussis/Hepatitis B/Hib Vaccine", "vaccine"),
@@ -313,7 +315,7 @@ public class MedCompleter implements Completer {
         new Med("Rabies Vaccine", "vaccine"),
         new Med("Oral Rotavirus Vaccine", "vaccine"),
         new Med("Human Tetanus Immunoglobulin", "", "HTIG"),
-        new Med("Tetanus Vaccine", "TT", "vaccine"),
+        new Med("Tetanus Vaccine", "vaccine", "TT"),
         new Med("Tetanus-Diphtheria Vaccine", "vaccine", "Td"),
         // ! new Med("Tetanus Antitoxin, Equine"),
         new Med("Tuberculosis Vaccine", "vaccine", "BCG Vaccine"),
@@ -362,7 +364,7 @@ public class MedCompleter implements Completer {
         // Experimental Ebola treatments
         new Med("Amodiaquine", "experimental Ebola treatment"),
         new Med("Favipiravir", "experimental Ebola treatment"),
-        new Med("GS-5734", "experimental Ebola treatment"),
+        new Med("Remdesivir", "experimental Ebola treatment"),
         new Med("ZMapp", "experimental Ebola treatment"),
 
         // Experimental Ebola vaccines
