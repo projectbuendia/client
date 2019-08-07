@@ -42,21 +42,18 @@ public class LocationForest {
 
     public LocationForest(TypedCursor<LocationQueryResult> cursor) {
         List<String> uuids = new ArrayList<>();
-        Map<String, LocationQueryResult> resultsByUuid = new HashMap<>();
         Map<String, String> namesByUuid = new HashMap<>();
         Map<String, String> shortIdsByUuid = new HashMap<>();
         totalNumPatients = 0;
 
         for (LocationQueryResult result : cursor) {
             uuids.add(result.uuid);
-            resultsByUuid.put(result.uuid, result);
             parentUuidsByUuid.put(result.uuid, result.parentUuid);
+            nonleafUuids.add(result.parentUuid);
+            namesByUuid.put(result.uuid, result.name);
             numPatientsAtNode.put(result.uuid, result.numPatients);
             numPatientsInSubtree.put(result.uuid, 0);  // counts will be added below
             totalNumPatients += result.numPatients;
-            if (result.parentUuid != null) {
-                nonleafUuids.add(result.parentUuid);
-            }
         }
 
         // Sort into a global ordering that is consistent with the ordering
@@ -75,7 +72,14 @@ public class LocationForest {
         locations = new Location[uuids.size()];
         for (int i = 0; i < uuids.size(); i++) {
             String uuid = uuids.get(i);
-            String name = namesByUuid.get(uuid);
+
+            // If there is prefix in square brackets in front of the name,
+            // we hide it.  This provides a way to control the sorting order
+            // of locations that can be done entirely from the OpenMRS web
+            // interface.  Locations are sorted alphanumerically, so numbers
+            // will sort properly (e.g. "2" will come before "11").
+            // The prefix is not part of the location name and is not shown.
+            String name = namesByUuid.get(uuid).replaceAll("^\\s*\\[.*?\\]\\s*", "");
             int count = numPatientsAtNode.get(uuid);
 
             // Use the short IDs to construct a sortable path string for each node.

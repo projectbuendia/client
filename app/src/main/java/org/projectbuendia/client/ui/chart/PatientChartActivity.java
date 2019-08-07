@@ -495,7 +495,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         public void updatePatientLocationUi(LocationForest forest, Patient patient) {
             Location location = forest.get(patient.locationUuid);
-            String locationText = Utils.toStringOrDefault(location, "Unknown"); // TODO/i18n
+            String locationText = location != null ? location.name : getString(R.string.unknown);
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
