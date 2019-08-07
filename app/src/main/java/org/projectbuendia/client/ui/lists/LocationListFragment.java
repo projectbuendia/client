@@ -40,8 +40,6 @@ public final class LocationListFragment extends ProgressFragment {
 
     private LocationListController mController;
     private final Ui mUi = new Ui();
-
-    private LocationListAdapter mAdapter;
     private LocationOptionList mList;
 
     public LocationListFragment() {
