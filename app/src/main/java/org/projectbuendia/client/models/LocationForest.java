@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
@@ -34,6 +36,7 @@ public class LocationForest {
     private final Map<String, Location> locationsByUuid = new HashMap<>();
     private final Map<String, String> parentUuidsByUuid = new HashMap<>();
     private final Set<String> nonleafUuids = new HashSet<>();
+    private final Location defaultLocation;
 
     private final Object patientCountLock = new Object();
     private final Map<String, Integer> numPatientsAtNode = new HashMap<>();
@@ -69,23 +72,34 @@ public class LocationForest {
             shortIdsByUuid.put(uuids.get(i), Utils.format(format, i));
         }
 
+        Pattern EXTRAS_PATTERN = Pattern.compile("\\[(.*?)\\]");
         locations = new Location[uuids.size()];
+        String defaultUuid = null;
         for (int i = 0; i < uuids.size(); i++) {
             String uuid = uuids.get(i);
 
-            // If there is prefix in square brackets in front of the name,
-            // we hide it.  This provides a way to control the sorting order
-            // of locations that can be done entirely from the OpenMRS web
-            // interface.  Locations are sorted alphanumerically, so numbers
-            // will sort properly (e.g. "2" will come before "11").
-            // The prefix is not part of the location name and is not shown.
-            String name = namesByUuid.get(uuid).replaceAll("^\\s*\\[.*?\\]\\s*", "");
-            int count = numPatientsAtNode.get(uuid);
+            // Parts of the name that are enclosed in square brackets are
+            // not shown; this makes it possible to attach extra information
+            // to locations in a way that can be done entirely from the
+            // OpenMRS web interface.  In particular, putting a number in
+            // a bracketed prefix will control the sorting order of locations,
+            // because locations are sorted alphanumerically by name (e.g.
+            // "2" will come before "11").
+            String name = namesByUuid.get(uuid);
+            Matcher matcher = EXTRAS_PATTERN.matcher(name);
+            if (matcher.find()) {
+                String extras = matcher.group(1);
+                name = EXTRAS_PATTERN.matcher(name).replaceAll("").trim();
+                if (extras.contains("*")) {
+                    defaultUuid = uuid;
+                }
+            }
 
             // Use the short IDs to construct a sortable path string for each node.
             // Each path component ends with a terminating character so that
             // a.path.startsWith(b.path) if and only if a is in b's subtree.
             String path = "";
+            int count = numPatientsAtNode.get(uuid);
             for (String u = uuid; u != null; u = parentUuidsByUuid.get(u)) {
                 path = shortIdsByUuid.get(u) + "/" + path;
                 numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + count);
@@ -98,6 +112,11 @@ public class LocationForest {
         // Finally, sort by path, yielding an array of nodes in depth-first
         // order with every subtree in the proper order.
         Arrays.sort(locations);
+
+        // The default location is either set with an asterisk in the name
+        // (see above) or defaults to the first root node.
+        defaultLocation =
+            defaultUuid != null ? locationsByUuid.get(defaultUuid) : locations[0];
     }
 
     public void updatePatientCounts(TypedCursor<LocationQueryResult> cursor) {
@@ -204,6 +223,6 @@ public class LocationForest {
 
     /** Returns the default location where new patients will be placed. */
     public @Nonnull Location getDefaultLocation() {
-        return locations[0];  // root of the first tree
+        return defaultLocation;
     }
 }

@@ -53,7 +53,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
     private final HashMap<Location, List<Patient>> mPatientsByLocation;
-    private final LocationForest mForest;
     private final ChartDataHelper mChartDataHelper;
     private static final Logger LOG = Logger.create();
     private static final String EN_DASH = "\u2013";
@@ -66,12 +65,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      * Creates a {@link PatientListTypedCursorAdapter}.
      * @param context an activity context
      */
-    public PatientListTypedCursorAdapter(Context context, LocationForest forest) {
+    public PatientListTypedCursorAdapter(Context context) {
         mContext = context;
-
         mPatientsByLocation = new HashMap<>();
-
-        mForest = forest;
         mChartDataHelper = new ChartDataHelper(context.getContentResolver());
     }
 
@@ -214,13 +210,13 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      * Updates the adapter to show all patients from the given cursor.  (Does not
      * take ownership; the original owner remains responsible for closing it.)
      */
-    public void setPatients(TypedCursor<Patient> cursor) {
+    public void setPatients(TypedCursor<Patient> cursor, LocationForest forest) {
         mPatientsByLocation.clear();
 
         // Add all patients from cursor.
         int count = cursor.getCount();
         for (int i = 0; i < count; i++) {
-            addPatient(cursor.get(i));
+            addPatient(cursor.get(i), forest);
         }
 
         // Produce a sorted list of all the locations that have patients.
@@ -239,8 +235,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     // Add a single patient to relevant data structures.
-    private void addPatient(Patient patient) {
-        Location location = mForest.get(patient.locationUuid);
+    private void addPatient(Patient patient, LocationForest forest) {
+        Location location = forest.get(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
                 mPatientsByLocation.put(location, new ArrayList<>());

@@ -30,7 +30,6 @@ import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
@@ -194,14 +193,14 @@ public class PatientSearchControllerTest {
     public void testLoadSearchResults_fetchesFilteredPatientsOnceLocationsPresent() {
         // GIVEN PatientSearchController with locations available and specified Triage root
         initController(true);
-        mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
+        mController.setLocationFilter(FakeForestFactory.TRIAGE_ZONE_UUID);
         // WHEN search results are requested
         mController.loadSearchResults();
         // THEN patients are fetched from Triage
         verify(mMockAppModel).fetchPatients(
             any(CrudEventBus.class),
             argThat(new SimpleSelectionFilterMatchers.IsFilterGroupWithLocationFilter(
-                Zones.TRIAGE_ZONE_UUID)),
+                FakeForestFactory.TRIAGE_ZONE_UUID)),
             anyString());
     }
 

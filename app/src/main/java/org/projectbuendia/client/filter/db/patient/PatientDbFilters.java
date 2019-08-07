@@ -33,7 +33,6 @@ public final class PatientDbFilters {
     /** Returns a list of all {@link SimpleSelectionFilter}s that should be displayed to the user. */
     public static List<SimpleSelectionFilter<?>> getFiltersForDisplay(LocationForest forest) {
         List<SimpleSelectionFilter<?>> allFilters = new ArrayList<>();
-        allFilters.add(new PresentFilter());
         allFilters.addAll(getLocationFilters(forest));
         allFilters.add(null); // Section break
         allFilters.addAll(getOtherFilters());

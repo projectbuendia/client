@@ -16,8 +16,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="6sp"
-    app:layout_flexBasisPercent="50%">
+    android:padding="6sp">
 
     <!-- Selection frame around each box -->
     <FrameLayout
@@ -44,7 +43,10 @@
                     android:id="@+id/title"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="12sp"
+                    android:layout_marginTop="12sp"
+                    android:layout_marginBottom="12sp"
+                    android:layout_marginLeft="18sp"
+                    android:layout_marginRight="18sp"
                     android:gravity="center_vertical"
                     android:singleLine="true"
                     tools:text="Triage" />
@@ -53,14 +55,25 @@
                     android:id="@+id/content"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="12sp"
-                    android:layout_marginRight="12sp"
-                    android:layout_marginBottom="12sp"
                     android:layout_marginTop="0sp"
+                    android:layout_marginBottom="12sp"
+                    android:layout_marginLeft="18sp"
+                    android:layout_marginRight="18sp"
                     android:textAppearance="@style/text.huge"
                     android:gravity="center_vertical"
                     tools:text="89" />
 
+                <!-- Optional container for child locations, inside the button -->
+                <com.google.android.flexbox.FlexboxLayout
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/child_container"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12sp"
+                    app:flexWrap="wrap"
+                    app:alignItems="stretch"
+                    app:alignContent="stretch" />
             </LinearLayout>
         </FrameLayout>
     </FrameLayout>

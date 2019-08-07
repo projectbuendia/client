@@ -80,8 +80,6 @@ final class LocationListController {
 
         void setLocations(LocationForest forest, Iterable<Location> locations);
 
-        void setAllPatientsCount(long patientCount);
-
         void setReadyState(ReadyState state);
 
         void setSyncProgress(int numerator, int denominator, Integer messageId);
@@ -149,7 +147,6 @@ final class LocationListController {
     private void updateFragmentUi(LocationListFragmentUi fragmentUi) {
         if (mForest != null) {
             fragmentUi.setLocations(mForest, mForest.allNodes());
-            fragmentUi.setAllPatientsCount(mForest.countAllPatients());
         }
         fragmentUi.setReadyState(mReadyState);
     }
@@ -191,9 +188,9 @@ final class LocationListController {
     }
 
     /** Call when the user presses a location. */
-    public void onLocationSelected(LocationOption option) {
-        Utils.logUserAction("location_pressed", "location", option.name);
-        mUi.openSingleLocation(mForest.get(option.uuid));
+    public void onLocationSelected(Location location) {
+        Utils.logUserAction("location_pressed", "location", location.name);
+        mUi.openSingleLocation(location);
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus

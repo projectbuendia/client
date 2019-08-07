@@ -31,7 +31,7 @@ public final @Immutable class Location extends Base<String> implements Comparabl
         this.uuid = uuid;
         this.path = path;
         this.name = Utils.toNonnull(name);
-        this.depth = path.split("/").length - 1;
+        this.depth = path.split("/").length;  // split drops trailing empty parts
     }
 
     @Override public String toString() {

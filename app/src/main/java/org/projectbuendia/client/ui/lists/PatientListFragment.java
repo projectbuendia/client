@@ -104,7 +104,8 @@ public class PatientListFragment extends ProgressFragment implements
         mListView = view.findViewById(R.id.fragment_patient_list);
         mListView.setEmptyView(view.findViewById(R.id.empty));
         mListView.setOnChildClickListener(this);
-        // The list view adapter will be set once locations are available.
+        mPatientAdapter = getAdapterInstance();
+        mListView.setAdapter(mPatientAdapter);
 
         mSwipeToRefresh =
             view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
@@ -120,6 +121,10 @@ public class PatientListFragment extends ProgressFragment implements
         }
     }
 
+    protected PatientListTypedCursorAdapter getAdapterInstance() {
+        return new PatientListTypedCursorAdapter(getActivity());
+    }
+
     private void setActivatedPosition(int position) {
         if (position == ListView.INVALID_POSITION) {
             mListView.setItemChecked(mActivatedPosition, false);
@@ -128,10 +133,6 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mActivatedPosition = position;
-    }
-
-    public PatientListTypedCursorAdapter getAdapterInstance(LocationForest forest) {
-        return new PatientListTypedCursorAdapter(getActivity(), forest);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -173,14 +174,9 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
-        @Override public void setForest(LocationForest forest) {
-            mPatientAdapter = getAdapterInstance(forest);
-            mListView.setAdapter(mPatientAdapter);
-        }
-
-        @Override public void setPatients(TypedCursor<Patient> patients) {
+        @Override public void setPatients(TypedCursor<Patient> patients, LocationForest forest) {
             if (mPatientAdapter != null) {
-                mPatientAdapter.setPatients(patients);
+                mPatientAdapter.setPatients(patients, forest);
             }
         }
 

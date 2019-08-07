@@ -75,10 +75,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
     private static final Logger LOG = Logger.create();
     private static final boolean DEBUG = true;
-    private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
     // Form UUIDs specific to Ebola deployments.
-    static final String OBSERVATION_FORM_UUID = "buendia-form-clinical_observation";
     static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
 
     /**
