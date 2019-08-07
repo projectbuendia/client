@@ -13,14 +13,14 @@ package org.projectbuendia.client.utils.date;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
+
+import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -44,6 +44,12 @@ public class RelativeDateTimeFormatterTest   {
     }
 
     @Test
+    public void testFormat_17minutesAgo() throws Exception {
+        assertEquals("17 min ago", mFormatter.format(mNow.minusMinutes(17), mNow));
+    }
+
+
+    @Test
     public void testFormat_60minutesAgo() throws Exception {
         assertEquals("60 min ago", mFormatter.format(mNow.minusHours(1), mNow));
     }
@@ -58,6 +64,11 @@ public class RelativeDateTimeFormatterTest   {
         assertEquals("2 days ago", mFormatter.format(mNow.minusDays(2), mNow));
     }
 
+    // Regression test for https://github.com/projectbuendia/client/issues/389
+    @Test public void testFormat_moreThanAMonthAgo() throws Exception {
+        assertEquals("99 days ago", mFormatter.format(mNow.minusDays(99), mNow));
+    }
+
     @Test
     public void testFormatLocalDate_today() {
         assertEquals("today", mFormatter.format(mToday, mToday));
@@ -65,7 +76,6 @@ public class RelativeDateTimeFormatterTest   {
 
     @Before
     public void setup() {
-
         mFormatter = new RelativeDateTimeFormatter();
         mNow = DateTime.parse("2000-01-01T12:00Z");
         mToday = LocalDate.parse("2000-01-01");
