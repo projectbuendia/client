@@ -191,7 +191,6 @@ public class LocationForest {
         return children;
     }
 
-
     /** Given a node, returns a list containing it and its descendants in depth-first order. */
     public @Nonnull List<Location> getSubtree(@Nonnull Location root) {
         List<Location> descendants = new ArrayList<>();
@@ -201,5 +200,10 @@ public class LocationForest {
             }
         }
         return descendants;
+    }
+
+    /** Returns the default location where new patients will be placed. */
+    public @Nonnull Location getDefaultLocation() {
+        return locations[0];  // root of the first tree
     }
 }

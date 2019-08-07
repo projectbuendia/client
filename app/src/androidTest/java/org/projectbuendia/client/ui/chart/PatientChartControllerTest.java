@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
@@ -60,6 +61,7 @@ public final class PatientChartControllerTest {
     private static final String PATIENT_UUID_1 = "patient-uuid-1";
     private static final String PATIENT_NAME_1 = "Bob";
     private static final String PATIENT_ID_1 = "patient-id-1";
+    private static final Patient PATIENT = Patient.builder().setId(PATIENT_ID_1).setUuid(PATIENT_UUID_1).build();
 
     private static final Obs OBS_1 = new Obs(
         0, ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", "");
@@ -67,6 +69,7 @@ public final class PatientChartControllerTest {
     private PatientChartController mController;
 
     @Mock private AppModel mMockAppModel;
+    @Mock private AppSettings mMockSettings;
     @Mock private PatientChartController.Ui mMockUi;
     @Mock private OdkResultSender mMockOdkResultSender;
     @Mock private ChartDataHelper mMockChartHelper;
@@ -75,6 +78,7 @@ public final class PatientChartControllerTest {
     private FakeEventBus mFakeGlobalEventBus;
     private FakeHandler mFakeHandler;
     private Chart mFakeChart = new Chart(PATIENT_UUID_1, "Test Chart");
+
 
     /** Tests that suspend() unregisters from the event bus. */
     @Test
@@ -114,8 +118,7 @@ public final class PatientChartControllerTest {
         // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
-        Patient patient = Patient.builder().build();
-        mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
+        mFakeCrudEventBus.post(new ItemFetchedEvent<>(PATIENT));
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
         mFakeHandler.runUntilEmpty();
@@ -134,10 +137,9 @@ public final class PatientChartControllerTest {
         // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
-        Patient patient = Patient.builder().build();
-        mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
+        mFakeCrudEventBus.post(new ItemFetchedEvent<>(PATIENT));
         // THEN the controller updates the UI
-        verify(mMockUi).updatePatientDetailsUi(patient);
+        verify(mMockUi).updatePatientDetailsUi(PATIENT);
     }
 
     /** Tests that selecting a new general condition results in adding a new encounter. */
@@ -290,9 +292,10 @@ public final class PatientChartControllerTest {
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
         mFakeHandler = new FakeHandler();
+        when(mMockSettings.getLocaleTag()).thenReturn("en");
         mController = new PatientChartController(
             mMockAppModel,
-            null,
+            mMockSettings,
             mFakeGlobalEventBus,
             mFakeCrudEventBus,
             mMockUi,

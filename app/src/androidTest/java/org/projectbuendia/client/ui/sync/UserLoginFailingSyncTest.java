@@ -80,7 +80,7 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
         screenshot("After Retry Clicked");
 
         // Should be at user selection screen with users available.
-        expectVisible(viewWithText("GU"));
+        expectVisible(firstViewWithText("GU"));
 
         screenshot("After Sync Completed");
     }

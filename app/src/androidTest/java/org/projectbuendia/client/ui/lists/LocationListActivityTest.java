@@ -22,6 +22,8 @@ import static android.support.test.espresso.Espresso.pressBack;
 /** Tests for {@link LocationListActivity}. */
 public class LocationListActivityTest extends FunctionalTestCase {
 
+    private static final String ALL_PATIENTS_LABEL = "ALL PATIENTS";
+
     /** Looks for the expected zones and tents. */
     @Test
     @UiThreadTest
@@ -46,7 +48,7 @@ public class LocationListActivityTest extends FunctionalTestCase {
     public void testZonesAndTentsDisplayed_afterPatientListView() {
         inUserLoginGoToLocationSelection();
         // TODO/i18n: Use a string resource instead of the literal button text.
-        inLocationSelectionClickLocation("ALL PRESENT PATIENTS");
+        inLocationSelectionClickLocation(ALL_PATIENTS_LABEL);
         pressBack();
         inLocationSelectionCheckZonesAndTentsDisplayed();
     }
@@ -58,7 +60,7 @@ public class LocationListActivityTest extends FunctionalTestCase {
         inUserLoginGoToLocationSelection();
 
         // Enter settings view and return.
-        click(viewWithText("GU"));
+        click(firstViewWithText("GU"));
         click(viewWithId(R.id.button_settings));
         pressBack();
         inLocationSelectionCheckZonesAndTentsDisplayed();
@@ -95,6 +97,7 @@ public class LocationListActivityTest extends FunctionalTestCase {
         screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");
+        click(viewWithText("OK"));
 
         pressBack(); // back to location selection screen
         inLocationSelectionCheckZonesAndTentsDisplayed();

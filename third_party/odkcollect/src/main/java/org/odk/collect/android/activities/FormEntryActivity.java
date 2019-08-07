@@ -1749,8 +1749,9 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 						.getSpecialFormQuestionText("constraintMsg");
 				if (constraintText == null) {
-					constraintText = formController.getQuestionPrompt(index).getQuestionText() + " "
-                            + "is invalid.";
+					// TODO(i18n)
+					constraintText = formController.getQuestionPrompt(index).getQuestionText()
+                            + " is invalid.";
 				}
 			}
 			break;
@@ -1766,7 +1767,8 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 						.getSpecialFormQuestionText("requiredMsg");
 				if (constraintText == null) {
-                    constraintText = formController.getQuestionPrompt(index).getQuestionText() + " "
+					// TODO(i18n)
+                    constraintText = formController.getQuestionPrompt(index).getQuestionText()
                             + " is required.";
 				}
 			}
@@ -2006,8 +2008,6 @@ public class FormEntryActivity
             boolean current) {
         // save current answer
         if (!saveAnswers(EVALUATE_CONSTRAINTS)) {
-            Toast.makeText(this, getString(R.string.data_saved_error), Toast.LENGTH_SHORT)
-                    .show();
             return false;
         }
 

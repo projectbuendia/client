@@ -56,6 +56,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         return Espresso.onView(hasText(text));
     }
 
+    public static ViewInteraction firstViewWithText(String text) {
+        return Espresso.onView(isFirstMatchThat(hasText(text)));
+    }
+
     public static Matcher<View> hasText(String text) {
         return new MatcherWithDescription<>(ViewMatchers.withText(text),
             "has the exact text \"" + text + "\"");
@@ -68,6 +72,23 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     public static Matcher<View> hasText(int resourceId) {
         return new MatcherWithDescription<>(ViewMatchers.withText(resourceId),
             "has string resource " + resourceId + " as its text");
+    }
+
+    public static Matcher<View> isFirstMatchThat(final Matcher<View> matcher) {
+        return new TypeSafeMatcher<View>() {
+            int currentIndex = 0;
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("is first match");
+                matcher.describeTo(description);
+            }
+
+            @Override
+            public boolean matchesSafely(View view) {
+                return matcher.matches(view) && currentIndex++ == 0;
+            }
+        };
     }
 
     @SafeVarargs

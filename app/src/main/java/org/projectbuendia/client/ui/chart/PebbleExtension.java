@@ -50,7 +50,7 @@ public class PebbleExtension extends AbstractExtension {
         filters.put("format_date", new FormatDateFilter());
         filters.put("format_time", new FormatTimeFilter());
         filters.put("line_break_html", new LineBreakHtmlFilter());
-        filters.put("tosafechars", new toSafeCharsFilter());
+        filters.put("to_css_identifier", new ToCssIdentifierFilter());
     }
 
     static Map<String, Function> functions = new HashMap<>();
@@ -246,13 +246,13 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
-    static class toSafeCharsFilter implements Filter {
+    static class ToCssIdentifierFilter implements Filter {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("input");
         }
 
         @Override public Object apply(Object input, Map<String, Object> args) {
-            return Utils.removeUnsafeChars(("" + input));
+            return Utils.toCssIdentifier(("" + input));
         }
     }
 

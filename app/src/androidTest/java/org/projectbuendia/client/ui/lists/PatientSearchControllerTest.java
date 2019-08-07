@@ -14,8 +14,6 @@ package org.projectbuendia.client.ui.lists;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,12 +35,15 @@ import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 
+import androidx.test.filters.SmallTest;
+
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /** Tests for {@link PatientSearchController}. */
 @RunWith(AndroidJUnit4.class)
@@ -62,6 +63,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testSyncSubscriber_reloadsResults() {
         // GIVEN initialized PatientSearchController
+        initController(false);
         // WHEN a sync event completes
         mFakeGlobalEventBus.post(new SyncSucceededEvent());
         // THEN results should be reloaded
@@ -74,6 +76,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testSyncSubscriber_doesNotShowSpinnerDuringReload() {
         // GIVEN initialized PatientSearchController
+        initController(false);
         // WHEN a sync event completes
         mFakeGlobalEventBus.post(new SyncSucceededEvent());
         // THEN the spinner is not shown
@@ -85,6 +88,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testFilterSubscriber_passesPatientsToFragments() {
         // GIVEN initialized PatientSearchController
+        initController(false);
         mController.loadSearchResults();
         // WHEN patients are retrieved
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
@@ -104,6 +108,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testFilterSubscriber_passesPatientsToActivity() {
         // GIVEN initialized PatientSearchController
+        initController(false);
         mController.loadSearchResults();
         // WHEN patients are retrieved
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
@@ -118,6 +123,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testFilterSubscriber_closesExistingPatientCursor() {
         // GIVEN initialized PatientSearchController with existing results
+        initController(false);
         mController.loadSearchResults();
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
             Patient.class, getFakeAppPatientCursor());
@@ -136,6 +142,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testSuspend_closesExistingPatientCursor() {
         // GIVEN initialized PatientSearchController with existing results
+        initController(false);
         mController.loadSearchResults();
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
             Patient.class, getFakeAppPatientCursor());
@@ -151,6 +158,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testSuspend_ignoresNullPatientCursor() {
         // GIVEN initialized PatientSearchController with no search results
+        initController(false);
         // WHEN controller is suspended
         mController.suspend();
         // THEN nothing happens (no runtime exception thrown)
@@ -161,6 +169,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testLoadSearchResults_functionalAfterInitSuspendCycle() {
         // GIVEN initialized PatientSearchController with existing results
+        initController(false);
         mController.loadSearchResults();
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
             Patient.class, getFakeAppPatientCursor());
@@ -177,23 +186,6 @@ public class PatientSearchControllerTest {
     }
 
     /**
-     * Tests that loadSearchResults() is a no-op for controllers with a specified root location
-     * and no location forest--loadSearchResults() is automatically called when the location forest
-     * is retrieved.
-     */
-    @Test
-    @UiThreadTest
-    public void testLoadSearchResults_waitsOnLocations() {
-        // GIVEN PatientSearchController with a location filter and no locations available
-        mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
-        // WHEN search results are requested
-        mController.loadSearchResults();
-        // THEN nothing is returned
-        verify(mMockAppModel, times(0)).fetchPatients(
-            any(CrudEventBus.class), any(SimpleSelectionFilter.class), anyString());
-    }
-
-    /**
      * Tests that loadSearchResults() is called, and patients correctly filtered, when the location
      * forest is retrieved.
      */
@@ -201,10 +193,8 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testLoadSearchResults_fetchesFilteredPatientsOnceLocationsPresent() {
         // GIVEN PatientSearchController with locations available and specified Triage root
+        initController(true);
         mController.setLocationFilter(Zones.TRIAGE_ZONE_UUID);
-        LocationForest forest = FakeForestFactory.build();
-        AppForestFetchedEvent event = new AppForestFetchedEvent(forest);
-        mFakeCrudEventBus.post(event);
         // WHEN search results are requested
         mController.loadSearchResults();
         // THEN patients are fetched from Triage
@@ -220,6 +210,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testLoadSearchResults_showsSpinner() {
         // GIVEN initialized PatientSearchController
+        initController(false);
         // WHEN search results are requested
         mController.loadSearchResults();
         // THEN spinner is shown
@@ -231,6 +222,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testLoadSearchResults_hidesSpinnerWhenRequested() {
         // GIVEN initialized PatientSearchController
+        initController(false);
         // WHEN search results are requested with no spinner
         mController.loadSearchResults(false);
         // THEN spinner is shown
@@ -242,6 +234,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testFilterSubscriber_hidesSpinner() {
         // GIVEN initialized PatientSearchController
+        initController(false);
         mController.loadSearchResults();
         // WHEN patients are retrieved
         TypedCursorFetchedEvent event =
@@ -257,6 +250,7 @@ public class PatientSearchControllerTest {
     @UiThreadTest
     public void testOnQuerySubmitted_filtersBySearchTerm() {
         // GIVEN initialized PatientSearchController with no root location
+        initController(true);
         // WHEN search term changes
         mController.onQuerySubmitted("foo");
         // THEN results are requested with that search term
@@ -270,9 +264,14 @@ public class PatientSearchControllerTest {
 
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
+    }
+
+    public void initController(boolean withForest) {
+        if (withForest) {
+            when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+        }
         mController = new PatientSearchController(
-            mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel,
-            mSyncManager, LOCALE);
+            mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel, mSyncManager, LOCALE);
         mController.attachFragmentUi(mFragmentMockUi);
         mController.init();
     }

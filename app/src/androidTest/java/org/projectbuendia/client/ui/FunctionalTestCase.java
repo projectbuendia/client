@@ -56,7 +56,7 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
 public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity> {
     private static final Logger LOG = Logger.create();
 
-    public static final String LOCATION_NAME = "Discharged";
+    public static final String LOCATION_NAME = "Triage";
 
     // For now, we create a new demo patient for tests using the real patient
     // creation UI on each test run (see {@link #inUserLoginInitDemoPatient()}).
@@ -86,7 +86,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             Espresso.registerIdlingResources(resource);
         }
         // TODO(sdspikes): shouldn't be needed since launchActivity is set to true in the call to
-        //  the ActivityTestRule constructor, but without this we don't seem to launch anything.
+        // the ActivityTestRule constructor, but without this we don't seem to launch anything.
         launchActivity(null);
     }
 
@@ -251,6 +251,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void inUserLoginGoToLocationSelection() {
         click(viewWithText("Guest User"));
+        expectVisibleWithin(20000, viewWithText("ALL PATIENTS"));
         waitForProgressFragment(); // wait for locations to load
     }
 
@@ -269,36 +270,38 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      * TODO/robustness: Investigate why the current activity isn't available during setUp().
      */
     protected void waitForProgressFragment() {
-        return;
         /* TODO(sdspikes): determine if this function is needed (skipping it makes more tests pass).
          *   It seems to be a busy-loop, which seems not to play nicely with the ui thread, but it's
          *   possible that there's something I'm missing.
          */
-//        Activity activity;
-//        try {
-//            activity = getCurrentActivity();
-//        } catch (Throwable throwable) {
-//            throw new IllegalStateException("Error retrieving current activity", throwable);
-//        }
-//
-//        if (!(activity instanceof FragmentActivity)) {
-//            throw new IllegalStateException("Activity is not a FragmentActivity");
-//        }
-//
-//        FragmentActivity fragmentActivity = (FragmentActivity) activity;
-//        try {
-//            for (Fragment fragment : fragmentActivity.getSupportFragmentManager().getFragments()) {
-//                if (fragment instanceof ProgressFragment) {
-//                    waitForProgressFragment((ProgressFragment) fragment);
-//                    return;
-//                }
-//            }
-//        } catch (NullPointerException e) {
-//            LOG.w("Unable to wait for ProgressFragment to initialize.");
-//            return;
-//        }
-//
-//        throw new IllegalStateException("Could not find a progress fragment to wait on.");
+        return;
+        /*
+        Activity activity;
+        try {
+            activity = getCurrentActivity();
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Error retrieving current activity", throwable);
+        }
+
+        if (!(activity instanceof FragmentActivity)) {
+            throw new IllegalStateException("Activity is not a FragmentActivity");
+        }
+
+        FragmentActivity fragmentActivity = (FragmentActivity) activity;
+        try {
+            for (Fragment fragment : fragmentActivity.getSupportFragmentManager().getFragments()) {
+                if (fragment instanceof ProgressFragment) {
+                    waitForProgressFragment((ProgressFragment) fragment);
+                    return;
+                }
+            }
+        } catch (NullPointerException e) {
+            LOG.w("Unable to wait for ProgressFragment to initialize.");
+            return;
+        }
+
+        throw new IllegalStateException("Could not find a progress fragment to wait on.");
+        */
     }
 
     /**
@@ -317,12 +320,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     /** Checks that the expected zones and tents are shown. */
     protected void inLocationSelectionCheckZonesAndTentsDisplayed() {
         // Should be at location selection screen
-        expectVisibleSoon(viewWithText("ALL PRESENT PATIENTS"));
-
-        // Zones and tents should be visible
-        expectVisible(viewWithText("Triage"));
+        expectVisibleSoon(viewWithText("ALL PATIENTS"));
         expectVisible(viewWithText(LOCATION_NAME));
-        expectVisible(viewWithText("Discharged"));
     }
 
     /** In the location selection activity, click a location tile. */
