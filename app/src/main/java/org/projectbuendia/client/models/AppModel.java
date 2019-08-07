@@ -68,6 +68,14 @@ public class AppModel {
     private Receiver<LocationForest> onForestRebuiltListener = null;
     private Receiver<LocationForest> onForestUpdatedListener = null;
 
+    /** Clears all in-memory model state. */
+    public void reset() {
+        synchronized (loadedForestLock) {
+            loadedForest = null;
+            loadedForestLocale = null;
+        }
+    }
+
     /**
      * Returns true iff the model has previously been fully downloaded from the server--that is, if
      * locations, patients, users, charts, and observations were all downloaded at some point. Note
