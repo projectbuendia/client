@@ -294,48 +294,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         return request;
     }
 
-    /** Call when the user has indicated they want to add observation data. */
-    public void onAddObservationPressed() {
-        onAddObservationPressed(null);
-    }
-
-    /**
-     * Call when the user has indicated they want to add observation data.
-     * @param targetGroup the description of the corresponding group in the XForm. This corresponds
-     *                    with the "description" field in OpenMRS.
-     */
-    public void onAddObservationPressed(String targetGroup) {
-        // Don't acknowledge this action if a dialog is showing
-        if (dialogShowing()) return;
-
-        Preset preset = new Preset();
-        preset.locationName = "Triage"; // TODO/i18n: Several occurrences of "Triage" in this file.
-
-        JsonUser user = App.getUserManager().getActiveUser();
-        Utils.logUserAction("form_opener_pressed",
-            "form", "round",
-            "group", targetGroup);
-        if (user != null) {
-            preset.clinicianName = user.fullName;
-        }
-
-        Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
-
-        if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
-            preset.pregnant = Preset.YES;
-        }
-        if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
-            preset.ivFitted = Preset.YES;
-        }
-        preset.targetGroup = targetGroup;
-
-        mUi.showFormLoadingDialog(true);
-        FormRequest request = newFormRequest(OBSERVATION_FORM_UUID, mPatientUuid);
-        mUi.fetchAndShowXform(
-                request.requestIndex, request.formUuid,
-                mPatient.toOdkPatient(), preset);
-    }
-
     public void onEditPatientPressed() {
         Utils.logUserAction("edit_patient_pressed", "uuid", mPatientUuid);
         mUi.showEditPatientDialog(mPatient);
@@ -368,20 +326,38 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void onOpenFormPressed(String formUuid) {
-        Preset preset = new Preset();
-        preset.locationName = "Triage";
+        if (!dialogShowing()) openForm(formUuid, null);
+    }
 
+    public void openForm(String formUuid, String targetGroup) {
+        Utils.logUserAction("form_opener_pressed", "form", "round", "group", targetGroup);
         JsonUser user = App.getUserManager().getActiveUser();
-        if (user != null) {
-            preset.clinicianName = user.fullName;
+        if (user == null) {
+            mUi.showError(R.string.no_user);
+            return;
         }
 
-        Utils.logUserAction("form_opener_pressed", "form", formUuid);
+        // We need to preset the provider and the location so that they don't
+        // appear as questions in the form.
+        Preset preset = new Preset();
+        preset.providerUuid = user.id;
+        preset.locationUuid = mPatient.locationUuid;
+        if (preset.locationUuid == null) {
+            preset.locationUuid = mForest.getDefaultLocation().uuid;
+        }
+
+        Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
+        if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
+            preset.pregnant = Preset.YES;
+        }
+        if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
+            preset.ivFitted = Preset.YES;
+        }
+        preset.targetGroup = targetGroup;
+
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(formUuid, mPatientUuid);
-        mUi.fetchAndShowXform(
-                request.requestIndex, request.formUuid,
-                mPatient.toOdkPatient(), preset);
+        mUi.fetchAndShowXform(request.requestIndex, formUuid, mPatient.toOdkPatient(), preset);
     }
 
     @JavascriptInterface public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {

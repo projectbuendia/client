@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2011 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -36,6 +36,7 @@ import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.IFormElement;
 import org.javarosa.core.model.QuestionDef;
+import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.core.model.instance.TreeReference;
 import org.javarosa.form.api.FormEntryCaption;
@@ -59,19 +60,20 @@ import org.odk.collect.android.widgets2.group.WidgetGroupBuilder;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * This class is
- * 
+ *
  * @author carlhartung
  */
 public class ODKView extends LinearLayout {
 
 	// starter random number for view IDs
-    private final static int VIEW_ID = 12345;  
-    
+    private final static int VIEW_ID = 12345;
+
     private final static String t = "ODKView";
     private static final Object GUEST_USER_NAME = "Guest User";
 
@@ -80,7 +82,7 @@ public class ODKView extends LinearLayout {
     private ArrayList<QuestionWidget> mWidgets;
     private WidgetGroup mWidgetGroup;
     private Handler h = null;
-    
+
     public final static String FIELD_LIST = "field-list";
 
     public ODKView(Context context, final FormEntryPrompt[] questionPrompts,
@@ -89,7 +91,7 @@ public class ODKView extends LinearLayout {
     }
 
     public ODKView(Context context, final FormEntryPrompt[] questionPrompts,
-                   FormEntryCaption[] groups, boolean advancingPage, Preset fields) {
+                   FormEntryCaption[] groups, boolean advancingPage, Preset preset) {
         super(context);
 
         mWidgets = new ArrayList<QuestionWidget>();
@@ -123,7 +125,7 @@ public class ODKView extends LinearLayout {
                             Appearance.fromString(p.getAppearanceHint()),
                             readOnlyOverride,
                             VIEW_ID + id++,
-                            fields);
+                            preset);
                 }
                 mWidgetGroup = builder.build(context);
                 mView.addView((View) mWidgetGroup);
@@ -242,25 +244,28 @@ public class ODKView extends LinearLayout {
 
             mWidgets.add(qw);
 
-            String questionText = p.getQuestionText().toLowerCase();
-            if (fields != null && questionText != null) {
-                if (questionText.contains("date and time of encounter")
-                        && qw.forceSetAnswer(fields.encounterTime)) {
-                    continue;
+            // The encounter properties (encounter_datetime, location_id, and
+            // provider_id) are special.  We preset them according to the values
+            // passed to us, and hide them if they are preset.  In particular,
+            // the location_id and provider_id widgets use UUIDs as the item
+            // labels because we need to identify them in order to preselect
+            // them -- so we should always hide the location and provider widgets.
+
+            String refName = p.getIndex().getReference().getNameLast();
+            if (refName.equals("encounter.encounter_datetime")) {
+                if (preset.encounterDatetime != null) {
+                    if (qw.forceSetAnswer(preset.encounterDatetime)) {
+                        continue;
+                    }
                 }
-                if (questionText.equals("location")
-                        && qw.forceSetAnswer(fields.locationName)) {
-                    continue;
-                }
-                // Because of a unicode encoding bug, clinician names may not always match up,
-                // causing the list of clinicians to appear in the xform, which is a confusing
-                // user experience. To avoid this issue, if the logged-in clinician is not found,
-                // select "Guest User" by default.
-                if (questionText.equals("clinician")
-                        && (qw.forceSetAnswer(fields.clinicianName)
-                        || qw.forceSetAnswer(GUEST_USER_NAME))) {
-                    continue;
-                }
+            }
+            if (refName.equals("encounter.location_id")) {
+                preselect(qw, preset.locationUuid);
+                continue;
+            }
+            if (refName.equals("encounter.provider_id")) {
+                preselect(qw, preset.providerUuid);
+                continue;
             }
 
             mView.addView(qw, mLayout);
@@ -268,8 +273,8 @@ public class ODKView extends LinearLayout {
 
         addView(mView);
 
-        // see if there is an autoplay option. 
-        // Only execute it during forward swipes through the form 
+        // see if there is an autoplay option.
+        // Only execute it during forward swipes through the form
         if ( advancingPage && mWidgets.size() == 1 ) {
 	        final String playOption = mWidgets.get(0).getPrompt().getFormElement().getAdditionalAttribute(null, "autoplay");
 	        if ( playOption != null ) {
@@ -289,6 +294,32 @@ public class ODKView extends LinearLayout {
     }
 
     /**
+     * Preselects the option with the given label text for the given
+     * question.  If there is no matching option, preselects the
+     * first option.  When this function returns, something will
+     * be preselected.
+     */
+    protected void preselect(QuestionWidget widget, String label) {
+        if (widget.forceSetAnswer(label)) return;
+
+        // Couldn't find a match, so just preselect the first option.
+        List<SelectChoice> choices = widget.getPrompt().getSelectChoices();
+        if (choices.isEmpty()) {
+            throw new IllegalStateException(String.format(
+                "Form did not provide any choices for \"%s\"",
+                widget.getPrompt().getShortText()
+            ));
+        }
+        boolean success = widget.forceSetAnswer(choices.get(0).getLabelInnerText());
+        if (!success) {
+            throw new IllegalStateException(String.format(
+                "\"%s\" widget failed to preselect its first choice",
+                widget.getPrompt().getShortText()
+            ));
+        }
+    }
+
+    /**
      * http://code.google.com/p/android/issues/detail?id=8488
      */
     public void recycleDrawables() {
@@ -298,7 +329,7 @@ public class ODKView extends LinearLayout {
     		q.recycleDrawables();
     	}
     }
-    
+
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
     	Collect.getInstance().getActivityLogger().logScrollAction(this, t - oldt);
     }
@@ -377,7 +408,7 @@ public class ODKView extends LinearLayout {
 
     /**
      * Called when another activity returns information to answer this question.
-     * 
+     *
      * @param answer
      */
     public void setBinaryData(Object answer) {
@@ -433,7 +464,7 @@ public class ODKView extends LinearLayout {
             }
         }
     }
-    
+
     public void cancelWaitingForBinaryData() {
         int count = 0;
         for (QuestionWidget q : mWidgets) {
