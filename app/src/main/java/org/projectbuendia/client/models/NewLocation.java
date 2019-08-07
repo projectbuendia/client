@@ -13,6 +13,8 @@ package org.projectbuendia.client.models;
 
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -39,6 +41,10 @@ public final class NewLocation extends Base<String> implements Comparable<NewLoc
 
     @Override public boolean equals(Object other) {
         return other instanceof NewLocation && uuid.equals(((NewLocation) other).uuid);
+    }
+
+    @Override public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 
     public boolean isInSubtree(NewLocation other) {

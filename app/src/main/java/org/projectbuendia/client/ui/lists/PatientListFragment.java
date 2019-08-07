@@ -20,7 +20,9 @@ import android.widget.ListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.net.Common;
@@ -50,6 +52,8 @@ public class PatientListFragment extends ProgressFragment implements
     private PatientListTypedCursorAdapter mPatientAdapter;
     private FragmentUi mFragmentUi;
     private ListUi mListUi;
+
+    @Inject AppModel mModel;
     @Inject SyncManager mSyncManager;
 
     /** The current activated item position. Only used on tablets. */
@@ -125,7 +129,8 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
-        return new PatientListTypedCursorAdapter(getActivity(), locationTree);
+        NewLocationTree newLocationTree = mModel.getLocationTree();
+        return new PatientListTypedCursorAdapter(getActivity(), newLocationTree);
     }
 
     @Override public void onAttach(Activity activity) {

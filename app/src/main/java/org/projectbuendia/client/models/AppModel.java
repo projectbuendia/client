@@ -111,9 +111,14 @@ public class AppModel {
         mTaskFactory.voidObsTask(bus, voidObs).execute();
     }
 
-    public NewLocationTree getLocationTree(
-        String locale, Receiver<NewLocationTree> rebuiltListener, Receiver<NewLocationTree> updatedListener) {
-        NewLocationTree tree;
+    public NewLocationTree getLocationTree() {
+        synchronized (loadedTreeLock) {
+            return loadedTree;
+        }
+    }
+
+    public void getLocationTree(String locale, Receiver<NewLocationTree> receiver) {
+        NewLocationTree result = null;
         synchronized (loadedTreeLock) {
             if (loadedTree == null || !eq(locale, loadedTreeLocale)) {
                 loadedTree = loadLocationTree(locale);

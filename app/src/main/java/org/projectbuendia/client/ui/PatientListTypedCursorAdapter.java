@@ -23,9 +23,8 @@ import android.widget.TextView;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationComparator;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.NewLocation;
+import org.projectbuendia.client.models.NewLocationTree;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
@@ -53,13 +52,13 @@ import butterknife.InjectView;
 public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
-    private final HashMap<Location, List<Patient>> mPatientsByLocation;
-    private final LocationTree mLocationTree;
+    private final HashMap<NewLocation, List<Patient>> mPatientsByLocation;
+    private final NewLocationTree mLocationTree;
     private final ChartDataHelper mChartDataHelper;
     private static final Logger LOG = Logger.create();
     private static final String EN_DASH = "\u2013";
 
-    private Location[] mLocations;
+    private NewLocation[] mLocations;
     private Map<String, Obs> mPregnancyObs = new HashMap<>();
     private Map<String, Obs> mConditionObs = new HashMap<>();
 
@@ -67,7 +66,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      * Creates a {@link PatientListTypedCursorAdapter}.
      * @param context an activity context
      */
-    public PatientListTypedCursorAdapter(Context context, LocationTree locationTree) {
+    public PatientListTypedCursorAdapter(Context context, NewLocationTree locationTree) {
         mContext = context;
 
         mPatientsByLocation = new HashMap<>();
@@ -98,7 +97,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     @Override public View getGroupView(
         int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        Location location = (Location) getGroup(groupPosition);
+        NewLocation location = getGroup(groupPosition);
 
         int patientCount = getChildrenCount(groupPosition);
         String tentName = location.toString();
@@ -116,7 +115,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
-    @Override public Location getGroup(int groupPosition) {
+    @Override public NewLocation getGroup(int groupPosition) {
         if (mLocations == null) {
             LOG.e("getGroup: mLocations is null! (see issue #352)");
             return null;
@@ -126,7 +125,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     @Override public int getChildrenCount(int groupPosition) {
         LOG.d("getChildrenCount: mLocations = %s (%d), groupPosition = %d", mLocations, mLocations != null ? mLocations.length : -1, groupPosition);
-        Location location = getGroup(groupPosition);
+        NewLocation location = getGroup(groupPosition);
         if (mPatientsByLocation == null || location == null) {
             return 0;
         }
@@ -233,9 +232,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
         // Produce a sorted list of all the locations that have patients.
         LOG.i("setPatients: count = %d, mLocations = new Location[%d]", count, mPatientsByLocation.size());
-        mLocations = new Location[mPatientsByLocation.size()];
+        mLocations = new NewLocation[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
-        Arrays.sort(mLocations, new LocationComparator(mLocationTree));
+        Arrays.sort(mLocations);
 
         // Sort the patient lists within each location using the default comparator.
         for (List<Patient> patients : mPatientsByLocation.values()) {
@@ -248,7 +247,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     // Add a single patient to relevant data structures.
     private void addPatient(Patient patient) {
-        Location location = mLocationTree.findByUuid(patient.locationUuid);
+        NewLocation location = mLocationTree.get(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
                 mPatientsByLocation.put(location, new ArrayList<>());
