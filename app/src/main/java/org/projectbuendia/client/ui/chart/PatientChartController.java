@@ -16,8 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.webkit.JavascriptInterface;
 
 import org.joda.time.DateTime;
@@ -55,7 +53,6 @@ import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.VoidObs;
-import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -238,31 +235,11 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
         mForest = mAppModel.getForest(mSettings.getLocaleTag());
         updatePatientLocationUi();
-
-        mSyncManager.sync(Phase.OBSERVATIONS, Phase.ORDERS);
-        mSyncManager.setPeriodicSync(10, Phase.OBSERVATIONS, Phase.ORDERS);
-        startPatientSync();
     }
 
-    /** Syncs data for the current patient frequently while the user is viewing the chart. */
-    private void startPatientSync() {
-        final Handler handler = new Handler(Looper.getMainLooper());
-
-        mActivePatientUpdater = new Runnable() {
-            @Override public void run() {
-                if (this == mActivePatientUpdater && mPatient != null) {
-                    mAppModel.fetchSinglePatient(mCrudEventBus, mPatient.id);
-                    handler.postDelayed(this, PATIENT_UPDATE_PERIOD_MILLIS);
-                }
-            }
-        };
-
-        handler.postDelayed(mActivePatientUpdater, 0);
-    }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
-        mSyncManager.setPeriodicSync(0, Phase.OBSERVATIONS, Phase.ORDERS);
         mActivePatientUpdater = null;  // clearing this stops the patient update loop
 
         mCrudEventBus.unregister(mEventBusSubscriber);

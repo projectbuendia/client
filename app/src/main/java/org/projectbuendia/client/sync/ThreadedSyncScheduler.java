@@ -112,6 +112,10 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
                         case SET_PERIODIC_SYNC:
                             LOG.d("* handleMessage(SET_PERIODIC_SYNC, %s), loop=%s", data, loop);
+                            if (periodSec == loop.periodSec) {
+                                LOG.d("* requested period (%s sec) is already in effect", periodSec);
+                                return true;
+                            }
                             loop.set(periodSec);
                             LOG.d("* activeLoopId is now %d for options=%s", loop.activeLoopId, options);
 

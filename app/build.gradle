@@ -156,6 +156,14 @@ def serverFantastica = '192.168.1.161'
 // use this setting, then the device will talk to a locally running server instance.
 def serverLocalhost = '127.0.0.1'
 
+// The interval at which we check for APK updates.
+def apkCheckIntervalDefault = 120
+
+// These control the periodic sync frequency for various categories of data.
+def smallSyncIntervalDefault = 10  // for syncs that take less than 100 ms
+def mediumSyncIntervalDefault = 30  // for syncs that take up to 500 ms
+def largeSyncIntervalDefault = 120  // for syncs that take up to 2000 ms
+
 // Just for development.  In production builds, these should be overridden
 // using -Pserver=server -PopenmrsUser=user -PopenmrsPassword=pass etc.
 def serverDefault = serverDev
@@ -175,6 +183,10 @@ def packageServerRootUrl = project.findProperty('server') ?
     'http://' + project.server + ':9001' :
     project.findProperty('packageServerRootUrl') ?: packageServerRootUrlDefault
 def requireWifi = project.findProperty('requireWifi') ?: 'false'
+def apkCheckInterval = project.findProperty('apkCheckInterval') ?: apkCheckIntervalDefault
+def smallSyncInterval = project.findProperty('smallSyncInterval') ?: smallSyncIntervalDefault
+def mediumSyncInterval = project.findProperty('mediumSyncInterval') ?: mediumSyncIntervalDefault
+def largeSyncInterval = project.findProperty('largeSyncInterval') ?: largeSyncIntervalDefault
 
 // This is the password used to encrypt the SQLite database on the tablet.
 // In development builds, the password is an empty string, which leaves the
@@ -215,13 +227,18 @@ android {
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         testApplicationId appId + '.test'
 
-        // Set the default values of preferences.
+        // Set the default values of preferences.  (Note: The third arg to resValue
+        // must always be a string; it will be converted to the specified data type.)
         resValue 'string', 'server_default', server
         resValue 'string', 'openmrs_root_url_default', openmrsRootUrl
         resValue 'string', 'openmrs_user_default', openmrsUser
         resValue 'string', 'openmrs_password_default', openmrsPassword
         resValue 'string', 'package_server_root_url_default', packageServerRootUrl
-        resValue 'bool', 'require_wifi_default', requireWifi
+        resValue 'bool', 'require_wifi_default', '' + requireWifi
+        resValue 'integer', 'apk_check_interval_default', '' + apkCheckInterval
+        resValue 'integer', 'small_sync_interval_default', '' + smallSyncInterval
+        resValue 'integer', 'medium_sync_interval_default', ''+ mediumSyncInterval
+        resValue 'integer', 'large_sync_interval_default', '' + largeSyncInterval
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue 'string', 'content_authority', contentAuthority

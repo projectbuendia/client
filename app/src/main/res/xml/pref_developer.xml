@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Whether to save filled in forms locally. Normally we won't want to (the file system will fill up
-     but it is useful when developing or debugging -->
-    <CheckBoxPreference
-        android:key="keep_form_instances"
-        android:title="@string/pref_title_keep_form_instances"
-        android:summary="@string/pref_desc_keep_form_instances"
-        android:defaultValue="false" />
+    <PreferenceCategory
+        android:title="@string/pref_header_developer">
 
-    <!-- Whether to assume that no wifi means no network at all -->
-    <CheckBoxPreference
-        android:key="require_wifi"
-        android:title="@string/pref_title_require_wifi"
-        android:summary="@string/pref_desc_require_wifi"
-        android:defaultValue="@bool/require_wifi_default" />
+        <!-- Whether to save filled in forms locally. Normally we won't want to (the file system will fill up
+         but it is useful when developing or debugging -->
+        <CheckBoxPreference
+            android:key="keep_form_instances"
+            android:title="@string/pref_title_keep_form_instances"
+            android:summary="@string/pref_desc_keep_form_instances"
+            android:defaultValue="false" />
 
-    <!-- Whether to launch directly into a patient chart, for faster UX iteration. -->
-    <EditTextPreference
-        android:key="starting_patient_id"
-        android:title="@string/pref_title_starting_patient_id"
-        android:summary="@string/pref_desc_starting_patient_id" />
+        <!-- Whether to assume that no wifi means no network at all -->
+        <CheckBoxPreference
+            android:key="require_wifi"
+            android:title="@string/pref_title_require_wifi"
+            android:summary="@string/pref_desc_require_wifi"
+            android:defaultValue="@bool/require_wifi_default" />
 
-    <!-- Whether to use the SyncAdapter framework; default is to use our own scheduler. -->
-    <CheckBoxPreference
-        android:key="use_sync_adapter"
-        android:title="@string/pref_title_use_sync_adapter"
-        android:summary="@string/pref_desc_use_sync_adapter"
-        android:defaultValue="false" />
+        <!-- Whether to launch directly into a patient chart, for faster UX iteration. -->
+        <EditTextPreference
+            android:key="starting_patient_id"
+            android:title="@string/pref_title_starting_patient_id"
+            android:summary="@string/pref_desc_starting_patient_id" />
 
+        <!-- Whether to use the SyncAdapter framework; default is to use our own scheduler. -->
+        <CheckBoxPreference
+            android:key="use_sync_adapter"
+            android:title="@string/pref_title_use_sync_adapter"
+            android:summary="@string/pref_desc_use_sync_adapter"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
 </PreferenceScreen>

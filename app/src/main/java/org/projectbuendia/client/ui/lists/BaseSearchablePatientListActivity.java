@@ -143,8 +143,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                 }
             }
         }
-
-        mSyncManager.initPeriodicSyncs();
     }
 
     @Override protected void onResumeImpl() {
