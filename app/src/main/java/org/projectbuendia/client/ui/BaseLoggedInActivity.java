@@ -150,7 +150,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             .getActionView()
             .findViewById(R.id.user_initials);
 
-        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.uuid));
+        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.fullName));
         initials.setText(user.getInitials());
     }
 
