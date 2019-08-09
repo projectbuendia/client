@@ -15,6 +15,9 @@ import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Objects;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** JSON reprsentation of a user (an OpenMRS Provider). */
 public class JsonUser implements Serializable, Comparable<JsonUser> {
@@ -75,6 +78,14 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
 
     @Override public int compareTo(JsonUser other) {
         return COMPARATOR_BY_UUID.compare(this, other);
+    }
+
+    @Override public int hashCode() {
+        return Objects.hash(uuid);
+    }
+
+    @Override public boolean equals(Object other) {
+        return other instanceof JsonUser && eq(uuid, ((JsonUser) other).uuid);
     }
 
     public final boolean isGuestUser() {
