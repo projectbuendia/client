@@ -16,9 +16,7 @@ import android.preference.EditTextPreference;
 import android.util.AttributeSet;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.utils.Logger;
 
@@ -55,8 +53,8 @@ public class EditAndClearDataPreference extends EditTextPreference {
     private void clearMemoryState() {
         try {
             App.getUserManager().reset();
-            App.getInstance().get(AppModel.class).reset();
-            App.getInstance().get(AppSettings.class).setSyncAccountInitialized(false);
+            App.getModel().reset();
+            App.getSettings().setSyncAccountInitialized(false);
         } catch (Throwable t) {
             LOG.e(t, "Failed to clear in-memory state");
         }
