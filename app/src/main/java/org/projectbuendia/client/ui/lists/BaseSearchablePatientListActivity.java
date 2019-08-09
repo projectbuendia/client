@@ -62,9 +62,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     private static boolean sSkippedPatientList;
     private final EventBusSubscriber mSubscriber = new EventBusSubscriber();
 
-    // TODO/i18n: Populate properly.
-    protected final String mLocale = "en";
-
     public PatientSearchController getSearchController() {
         return mSearchController;
     }
@@ -123,7 +120,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
             new EventBusWrapper(mEventBus),
             mAppModel,
             mSyncManager,
-            mLocale);
+            mSettings.getLocaleTag());
 
         mUpdateNotificationController = new UpdateNotificationController(
             new UpdateNotificationUi()

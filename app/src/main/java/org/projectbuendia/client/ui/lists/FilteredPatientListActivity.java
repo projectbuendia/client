@@ -44,9 +44,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
         }
 
         mFilterController = new PatientFilterController(
-            new FilterUi(),
-            mAppModel,
-            mLocale);
+            new FilterUi(), mAppModel, mSettings.getLocaleTag());
 
         App.getInstance().inject(this);
     }
