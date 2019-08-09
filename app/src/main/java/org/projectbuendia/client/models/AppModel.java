@@ -151,8 +151,7 @@ public class AppModel {
     private @Nullable LocationForest loadForest(String locale) {
         Uri uri = Contracts.getLocalizedLocationsUri(locale);
         try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            return LocationForest.createFromCursor(
-                new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
+            return new LocationForest(new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
         }
     }
 

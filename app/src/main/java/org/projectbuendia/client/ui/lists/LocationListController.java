@@ -113,7 +113,7 @@ final class LocationListController {
     public void loadForest() {
         setReadyState(ReadyState.LOADING);
         LocationForest forest = mAppModel.getForest(mSettings.getLocaleTag());
-        if (forest != null && forest.size() > 0) {
+        if (forest != null) {
             setForest(forest);
             setReadyState(ReadyState.READY);
         } else {
