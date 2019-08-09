@@ -149,9 +149,11 @@ public class OpenMrsServer implements Server {
         final Response.ErrorListener errorListener) {
         return new OpenMrsErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
-                String message = parseResponse(error);
-                displayErrorMessage(message);
-                errorListener.onErrorResponse(new VolleyError(message, error));
+                super.onErrorResponse(error);
+                if (error.getMessage() == null) {
+                    error = new VolleyError("Error", error);
+                }
+                errorListener.onErrorResponse(error);
             }
         };
     }
