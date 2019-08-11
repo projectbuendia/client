@@ -220,8 +220,9 @@
   <string name="api_health_problem">Unable to contact the server.  Please see the bar along the bottom of the screen for more information about the problem.</string>
   <string name="sync_failed_back">Back</string>
   <string name="no_user">No user is logged in.</string>
+  <string name="no_location">No location information has been loaded yet.</string>
   <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
-  <string name="encounter_add_failed_unknown_server_error">Unknown error occurred on server.</string>
+  <string name="encounter_add_failed_unknown_server_error">An unknown error occurred on the server.</string>
   <string name="encounter_add_failed_interrupted">Network request was interrupted.</string>
   <string name="encounter_add_failed_to_authenticate">Username or password is invalid.</string>
   <string name="encounter_add_failed_invalid_encounter">The server rejected the new observations: %s</string>

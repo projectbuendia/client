@@ -16,8 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
@@ -28,6 +26,11 @@ import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.utils.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
 
@@ -60,33 +63,33 @@ public class SyncManager {
 
     private boolean syncDisabled = false;
     private final SyncScheduler mScheduler;
+    private final List<Runnable> syncStoppedCallbacks = new ArrayList<>();
 
     public SyncManager(SyncScheduler scheduler) {
         mScheduler = scheduler;
-        HandlerThread receiverThread = new HandlerThread("SyncStatus");
-        receiverThread.start();
         App.getInstance().getApplicationContext()
-            .registerReceiver(new StatusReceiver(),
-                new IntentFilter(STATUS_ACTION), null, new Handler(receiverThread.getLooper())
-            );
+            .registerReceiver(new StatusReceiver(), new IntentFilter(STATUS_ACTION));
     }
 
     public boolean getSyncDisabled() {
         return syncDisabled;
     }
 
+    /** If true, prevents new syncs from starting (but does not stop a currently running sync). */
     public void setSyncDisabled(boolean disabled) {
         syncDisabled = disabled;
     }
 
-    /** Cancels an in-flight, non-periodic sync. */
-    public void cancelSync() {
-        mScheduler.stopSyncing();
+    /** Stops any currently running sync; invokes a callback when stopped or if already stopped. */
+    public void stopSyncing(@Nullable Runnable syncStoppedCallback) {
+        if (syncStoppedCallback != null) {
+            syncStoppedCallbacks.add(syncStoppedCallback);
+        }
 
-        // If sync was pending, it should now be idle and we can consider the sync immediately canceled.
-        if (!isSyncRunningOrPending()) {
-            LOG.i("Sync was canceled before it began -- immediately firing SyncCancelledEvent.");
-            EventBus.getDefault().post(new SyncCancelledEvent());
+        if (isSyncRunningOrPending()) {
+            mScheduler.stopSyncing();
+        } else {
+            runSyncStoppedCallbacks();
         }
     }
 
@@ -135,30 +138,36 @@ public class SyncManager {
     }
 
     /** Listens for sync status events that are broadcast by the BuendiaSyncEngine. */
-    public static class StatusReceiver extends BroadcastReceiver {
+    public class StatusReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             SyncStatus status = (SyncStatus) intent.getSerializableExtra(SYNC_STATUS);
-            switch (status) {
-                case IN_PROGRESS:
-                    int numerator = intent.getIntExtra(SYNC_NUMERATOR, 0);
-                    int denominator = intent.getIntExtra(SYNC_DENOMINATOR, 1);
-                    int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, R.string.sync_in_progress);
-                    LOG.d("SyncStatus: IN_PROGRESS: %d/%d", numerator, denominator);
-                    EventBus.getDefault().post(new SyncProgressEvent(numerator, denominator, messageId));
-                    break;
-                case SUCCEEDED:
-                    LOG.d("SyncStatus: SUCCEEDED");
-                    EventBus.getDefault().post(new SyncSucceededEvent());
-                    break;
-                case FAILED:
-                    LOG.d("SyncStatus: FAILED");
-                    EventBus.getDefault().post(new SyncFailedEvent());
-                    break;
-                case CANCELLED:
-                    LOG.d("SyncStatus: CANCELLED");
-                    EventBus.getDefault().post(new SyncCancelledEvent());
-                    break;
+            if (status == SyncStatus.IN_PROGRESS) {
+                int numerator = intent.getIntExtra(SYNC_NUMERATOR, 0);
+                int denominator = intent.getIntExtra(SYNC_DENOMINATOR, 1);
+                int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, R.string.sync_in_progress);
+                LOG.d("SyncStatus: IN_PROGRESS: %d/%d", numerator, denominator);
+                EventBus.getDefault().post(new SyncProgressEvent(numerator, denominator, messageId));
+            } else {
+                // All three other statuses indicate that sync has stopped.
+                LOG.d("SyncStatus: %s", status);
+                runSyncStoppedCallbacks();
+                EventBus.getDefault().post(
+                    status == SyncStatus.SUCCEEDED ? new SyncSucceededEvent() :
+                    status == SyncStatus.FAILED ? new SyncFailedEvent() :
+                    /* status == SyncStatus.CANCELLED */ new SyncCancelledEvent());
             }
         }
+    }
+
+    /** Invokes any callbacks that are waiting for sync to stop. */
+    private void runSyncStoppedCallbacks() {
+        for (Runnable callback : syncStoppedCallbacks) {
+            try {
+                callback.run();
+            } catch (Throwable t) {
+                LOG.e(t, "Exception in cancelSync callback");
+            }
+        }
+        syncStoppedCallbacks.clear();
     }
 }

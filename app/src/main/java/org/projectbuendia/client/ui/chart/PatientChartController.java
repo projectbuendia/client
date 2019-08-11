@@ -38,7 +38,6 @@ import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.events.sync.SyncStoppedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
@@ -102,7 +101,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private final MinimalHandler mMainThreadHandler;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
     private Runnable mActivePatientUpdater;
-    private FormRequest mPendingFormRequest = null;
+
+    /** The user has requested a form, and it's either open or about to be opened. */
+    private boolean mFormPending = false;
 
     private List<Chart> mCharts;
     private int mChartIndex = 0;  // the currently selected tab (chart number)
@@ -248,7 +249,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
-        mPendingFormRequest = null;
+        mFormPending = false;
         mSyncManager.setSyncDisabled(false);
 
         FormRequest request = popFormRequest(requestCode);
@@ -311,8 +312,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void requestForm(String formUuid, String targetGroup) {
         Utils.logUserAction("form_opener_pressed", "form", "round", "group", targetGroup);
-        if (mPendingFormRequest != null) {
-            LOG.w("Form request is already pending; ignoring openForm().");
+        if (mFormPending) {
+            LOG.w("Form request is already pending; not opening another form");
             return;
         }
 
@@ -321,17 +322,19 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             mUi.showError(R.string.no_user);
             return;
         }
-        if (mForest == null) {
-            return;  // we can't submit a form without location information
+        if (mForest == null || mForest.getDefaultLocation() == null) {
+            mUi.showError(R.string.no_location);
+            return;
         }
 
-        // We need to preset the provider and the location so that they don't
-        // appear as questions in the form.
+        // Preset the provider and location so they don't appear as questions in the form.
         Preset preset = new Preset();
         preset.providerUuid = user.uuid;
         preset.locationUuid = mPatient.locationUuid;
         if (preset.locationUuid == null) {
-            preset.locationUuid = mForest.getDefaultLocation().uuid;
+            if (mForest != null && mForest.getDefaultLocation() != null) {
+                preset.locationUuid = mForest.getDefaultLocation().uuid;
+            }
         }
         Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
         if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
@@ -342,16 +345,16 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         }
         preset.targetGroup = targetGroup;
 
+        mFormPending = true;
         mUi.showFormLoadingDialog(true);
-        mPendingFormRequest = createFormRequest(formUuid, mPatientUuid, preset);
-        mSyncManager.setSyncDisabled(true);
 
-        // This will trigger a SyncCancelledEvent even if a sync is not running;
-        // when our subscriber receives the event, it's safe to open the form.
-        mSyncManager.cancelSync();
+        FormRequest request = createFormRequest(formUuid, mPatientUuid, preset);
+        mSyncManager.setSyncDisabled(true);
+        mSyncManager.stopSyncing(() -> openForm(request));
     }
 
     private void openForm(FormRequest request) {
+        LOG.i("Fetching and showing form: %s", request.formUuid);
         mUi.fetchAndShowXform(
             request.requestIndex,
             request.formUuid,
@@ -551,9 +554,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
-        public void onEventMainThread(SyncStoppedEvent event) {
-            if (event instanceof SyncSucceededEvent) updatePatientObsUi();
-            if (mPendingFormRequest != null) openForm(mPendingFormRequest);
+        public void onEventMainThread(SyncSucceededEvent event) {
+            updatePatientObsUi();
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -628,7 +630,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         public void onEventMainThread(FetchXformSucceededEvent event) {
             mUi.showFormLoadingDialog(false);
-            mPendingFormRequest = null;
         }
 
         public void onEventMainThread(FetchXformFailedEvent event) {
@@ -653,9 +654,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
                 default:
                     // Intentionally blank.
             }
-            mUi.showError(errorMessageResource);
+            mFormPending = false;
             mUi.showFormLoadingDialog(false);
-            mPendingFormRequest = null;
+            mUi.showError(errorMessageResource);
         }
 
         public void onEventMainThread(OrderSaveRequestedEvent event) {

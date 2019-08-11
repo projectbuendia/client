@@ -86,8 +86,13 @@ public class OdkActivityLauncher {
      * a failed event is triggered.
      */
     public static void fetchAndCacheAllXforms() {
+        LOG.i("Listing all forms from server (in order to cache them)");
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
             response -> {
+                if (App.getInstance().getSyncManager().getSyncDisabled()) {
+                    LOG.w("Skipping form sync: Sync is disabled by the sync manager.");
+                    return;
+                }
                 for (OpenMrsXformIndexEntry formEntry : response) {
                     fetchAndCacheXForm(formEntry);
                 }
@@ -101,8 +106,8 @@ public class OdkActivityLauncher {
      * @param formEntry the {@link OpenMrsXformIndexEntry} object containing the uuid form
      */
     public static void fetchAndCacheXForm(OpenMrsXformIndexEntry formEntry) {
-        new OdkXformSyncTask(null).fetchAndAddXFormToDb(formEntry.uuid,
-            formEntry.makeFileForForm());
+        new OdkXformSyncTask(null).fetchAndAddXFormToDb(
+            formEntry.uuid, formEntry.getPathForForm());
     }
 
     /**
@@ -124,15 +129,16 @@ public class OdkActivityLauncher {
         final int requestCode,
         @Nullable final org.odk.collect.android.model.Patient patient,
         @Nullable final Preset fields) {
-        LOG.i("Trying to fetch it from cache.");
+        LOG.i("Trying to load from cache: %s", uuidToShow);
         if (loadXformFromCache(callingActivity, uuidToShow, requestCode, patient, fields)) {
             return;
         }
 
+        LOG.i("%s not found in cache; getting form list from server.", uuidToShow);
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
             response -> {
                 if (response.isEmpty()) {
-                    LOG.i("No forms found");
+                    LOG.i("Server returned an empty list of forms.");
                     EventBus.getDefault().post(new FetchXformFailedEvent(
                         FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
                     return;
@@ -140,7 +146,7 @@ public class OdkActivityLauncher {
                 showForm(callingActivity, requestCode, patient, fields, findUuid(response,
                     uuidToShow));
             }, error -> {
-                LOG.e(error, "Fetching xform list from server failed. ");
+                LOG.e(error, "Failed to fetch list of forms from server.");
                 handleFetchError(error);
             });
     }
@@ -163,6 +169,7 @@ public class OdkActivityLauncher {
         long formId,
         @Nullable org.odk.collect.android.model.Patient patient,
         @Nullable Preset preset) {
+        LOG.i("Launching FormEntryActivity with formId = %d", formId);
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
@@ -196,11 +203,13 @@ public class OdkActivityLauncher {
                                               @Nullable final Preset fields) {
         List<OpenMrsXformIndexEntry> entries = getLocalFormEntries();
         OpenMrsXformIndexEntry formToShow = findUuid(entries, uuidToShow);
-        if (!formToShow.makeFileForForm().exists()) return false;
+        File path = formToShow.getPathForForm();
+        boolean exists = path.exists();
+        LOG.i("Checking for form at %s: %s", path, exists ? "file exists" : "no such file");
+        if (!exists) return false;
 
         LOG.i(format("Using form %s from local cache.", uuidToShow));
         showForm(callingActivity, requestCode, patient, fields, formToShow);
-
         return true;
     }
 
@@ -240,7 +249,7 @@ public class OdkActivityLauncher {
                                  @Nullable final Preset fields,
                                  final OpenMrsXformIndexEntry formToShow) {
         new OdkXformSyncTask((path, uuid) -> {
-            LOG.i("wrote form " + path);
+            LOG.i("Wrote form " + path);
             showOdkCollect(callingActivity, requestCode,
                 OdkDatabase.getFormIdForPath(path), patient, fields);
         }).execute(formToShow);
@@ -440,6 +449,7 @@ public class OdkActivityLauncher {
         OpenMrsXformsConnection connection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
         JsonUser activeUser = App.getUserManager().getActiveUser();
+        LOG.i("Submitting form instance to server");
         connection.postXformInstance(
                 patientUuid, activeUser.uuid, xml, successListener, errorListener);
     }

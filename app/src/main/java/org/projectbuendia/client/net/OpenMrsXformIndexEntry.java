@@ -13,7 +13,9 @@ package org.projectbuendia.client.net;
 
 import com.google.common.base.Preconditions;
 
+import org.joda.time.DateTime;
 import org.odk.collect.android.application.Collect;
+import org.projectbuendia.client.utils.Utils;
 
 import java.io.File;
 
@@ -44,8 +46,13 @@ public class OpenMrsXformIndexEntry {
         this.dateChanged = dateChanged;
     }
 
+    public String toString() {
+        return Utils.format("<OpenMrsXformIndexEntry uuid=%s, name=%s, dateChanged=%s>",
+            Utils.repr(uuid), Utils.repr(name), new DateTime(dateChanged));
+    }
+
     /** Returns the unique file path in the ODK file system for storing this form. */
-    public File makeFileForForm() {
+    public File getPathForForm() {
         return new File(Collect.getInstance().getFormsPath() + File.separator + uuid + ".xml");
     }
 }

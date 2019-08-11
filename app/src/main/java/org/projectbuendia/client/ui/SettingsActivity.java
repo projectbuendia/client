@@ -30,7 +30,6 @@ import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.sync.SyncStoppedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.login.LoginActivity;
@@ -42,8 +41,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -58,8 +55,8 @@ import de.greenrobot.event.EventBus;
  */
 public class SettingsActivity extends PreferenceActivity {
     /**
-     * Controls whether to always show the simplified UI, where settings are
-     * arranged in a single list without a left navigation panel.
+     Controls whether to always show the simplified UI, where settings are
+     arranged in a single list without a left navigation panel.
      */
     static final String[] PREF_KEYS = {
         "server",
@@ -115,10 +112,10 @@ public class SettingsActivity extends PreferenceActivity {
                 case "sync_disabled":
                     SyncManager syncManager = App.getInstance().getSyncManager();
                     if (syncManager.isSyncRunningOrPending()) {
-                        syncManager.cancelSync();
                         sSyncPendingDialog = ProgressDialog.show(
                             context, null, context.getString(R.string.waiting_for_sync),
                             true /* indeterminate */, false /* cancelable */);
+                        syncManager.stopSyncing(() -> sSyncPendingDialog.dismiss());
                     }
                     break;
             }
@@ -127,8 +124,6 @@ public class SettingsActivity extends PreferenceActivity {
         }
         return true;
     };
-
-    static EventSubscriber subscriber = new EventSubscriber();
 
     @Inject AppModel mAppModel;
 
@@ -263,8 +258,8 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * Shows the simplified settings UI if the device configuration dictates
-     * that a simplified, single-pane UI should be shown.
+     Shows the simplified settings UI if the device configuration dictates
+     that a simplified, single-pane UI should be shown.
      */
     private void setupSimplePreferencesScreen() {
         if (useSimplePreferences(this)) {
@@ -295,26 +290,11 @@ public class SettingsActivity extends PreferenceActivity {
             & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
-    @Override protected void onResume() {
-        super.onResume();
-        EventBus.getDefault().register(subscriber);
-    }
-
     @Override protected void onPause() {
-        EventBus.getDefault().unregister(subscriber);
         super.onPause();
         if (!mAppModel.isFullModelAvailable()) {
             // The database was cleared; go back to the login activity.
             startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-        }
-    }
-
-    static class EventSubscriber {
-        public void onEventMainThread(SyncStoppedEvent event) {
-            if (sSyncPendingDialog != null) {
-                sSyncPendingDialog.dismiss();;
-                sSyncPendingDialog = null;
-            }
         }
     }
 }

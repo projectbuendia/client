@@ -15,6 +15,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Joiner;
 import com.google.gson.JsonObject;
 
 import org.joda.time.DateTime;
@@ -82,7 +83,7 @@ public class OpenMrsXformsConnection {
         Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xforms", // list all forms
             null, // null implies GET
             response -> {
-                LOG.i("got forms: " + response);
+                LOG.i("Received form list: " + response);
                 ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
                 try {
                     // This seems quite code heavy (parsing manually), but is reasonably
@@ -110,9 +111,9 @@ public class OpenMrsXformsConnection {
                 } catch (JSONException e) {
                     // The result was not in the expected format. Just log, and return
                     // results so far.
-                    LOG.e(e, "response was in bad format: " + response);
+                    LOG.e(e, "Badly formatted response: " + response);
                 }
-                LOG.i("returning response: " + response);
+                LOG.i("Returning index entries: " + Joiner.on(", ").join(result));
                 listener.onResponse(result);
             },
             errorListener

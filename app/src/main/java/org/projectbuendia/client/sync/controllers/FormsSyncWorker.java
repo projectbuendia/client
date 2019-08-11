@@ -48,6 +48,9 @@ public class FormsSyncWorker implements SyncWorker {
             LOG.i("Finished updating forms (" + ops.size() + " db ops)");
             if (ops.size() > 0) resolver.notifyChange(Contracts.Forms.URI, null, false);
 
+            // TODO(ping): Make this next step synchronous; it should run on the
+            // sync thread like everything else so it doesn't overlap with other
+            // operations, and so that it can be suspended during form entry.
             OdkActivityLauncher.fetchAndCacheAllXforms();
             return true;
         }

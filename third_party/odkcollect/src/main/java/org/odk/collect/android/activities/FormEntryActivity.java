@@ -407,6 +407,7 @@ public class FormEntryActivity
 							instanceCursor = getContentResolver().query(uri,
 									null, null, null, null);
 							if (instanceCursor.getCount() != 1) {
+								Log.w(TAG, "No form instance found for URI " + uri);
 								this.createErrorDialog("Bad URI: " + uri, EXIT);
 								return;
 							} else {
@@ -494,6 +495,7 @@ public class FormEntryActivity
 						c = getContentResolver().query(uri, null, null, null,
 								null);
 						if (c.getCount() != 1) {
+							Log.w(TAG, "No form found for URI " + uri);
 							this.createErrorDialog("Bad URI: " + uri, EXIT);
 							return;
 						} else {
