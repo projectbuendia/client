@@ -59,7 +59,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         openPatientList();
         screenshot("Test Start");
         // There should be at least one patient in Triage.
-        expectVisibleSoon(viewThat(hasTextContaining("Triage  ·  ")));
+        waitUntilVisible(viewThat(hasTextContaining("Triage  ·  ")));
         // Click the first patient
         click(dataThat(is(Patient.class))
             .inAdapterView(withId(R.id.fragment_patient_list))

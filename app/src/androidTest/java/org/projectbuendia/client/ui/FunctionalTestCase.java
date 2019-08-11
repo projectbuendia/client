@@ -213,7 +213,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         inUserLoginGoToLocationSelection();
         // There may be a small delay before the search button becomes visible;
         // the button is not displayed while locations are loading.
-        expectVisibleWithin(3000, viewThat(hasId(R.id.action_search)));
+        waitUntilVisible(3000, viewThat(hasId(R.id.action_search)));
 
         // Tap the search button to open the list of all patients.
         click(viewWithId(R.id.action_search));
@@ -255,7 +255,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void inUserLoginGoToLocationSelection() {
         click(viewWithText("Guest User"));
-        expectVisibleWithin(20000, viewWithText("ALL PATIENTS"));
+        waitUntilVisible(20000, viewWithText("ALL PATIENTS"));
         waitForProgressFragment(); // wait for locations to load
     }
 
@@ -324,7 +324,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     /** Checks that the expected zones and tents are shown. */
     protected void inLocationSelectionCheckZonesAndTentsDisplayed() {
         // Should be at location selection screen
-        expectVisibleSoon(viewWithText("ALL PATIENTS"));
+        waitUntilVisible(viewWithText("ALL PATIENTS"));
         expectVisible(viewWithText(LOCATION_NAME));
     }
 
@@ -377,7 +377,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             }
             @Override public void describeTo(Description description) { }
         };
-        expectVisibleSoon(viewThat(matcher, capturer));
+        waitUntilVisible(viewThat(matcher, capturer));
         return holder[0];
     }
 }

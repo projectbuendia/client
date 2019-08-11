@@ -18,7 +18,9 @@ import android.widget.RadioButton;
 
 import com.google.common.base.Optional;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
@@ -33,24 +35,30 @@ import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartController;
+import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
+import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.test.filters.MediumTest;
 
-import static android.support.test.espresso.Espresso.pressBack;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
 import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasItemCount;
 
-/** A test that exercises all the API calls to a clean server. */
+/** A quick test suite that exercises all basic functionality. */
 @MediumTest public class SmokeTest extends FunctionalTestCase {
     public static final String HOSTNAME = "ping.buendia.org";
+    public static final String OPENMRS_USERNAME = "tester";
+    public static final String OPENMRS_PASSWORD = "tester";
+    public static final Logger LOG = Logger.create();
 
-    @Test @UiThreadTest public void test() {
+    /** A test that exercises all the API methods and endpoints. */
+    @Test @UiThreadTest public void testApi() {
         screenshot("Start");
-        waitFor("Guest User");
+        expect("Guest User");
         initSettings();  // step 0
         screenshot("Loaded users");
         final String id = "" + getNextAvailableId(R.id.users);
@@ -63,7 +71,7 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         String patientUuid = PatientChartController.currentPatientUuid;
         String locationUuid = PatientChartController.currentPatientLocationUuid;
         movePatient("Discharged");
-        pressBack();  // back to location list
+        back();  // back to location list
         screenshot("Moved patient away");
         expectPatientCount("Triage", 0);
         internalMovePatient(patientUuid, locationUuid);
@@ -72,6 +80,7 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         expectPatientCount("Triage", 1);
         goToPatientById(id, "Given" + id, "Family" + id);  // step 5
         screenshot("Opened chart by ID");
+        movePatient("Confirmed");  // move elsewhere to avoid interfering with next run
         editPatientAge(22);  // step 6
         screenshot("Edited patient age");
         rewindAdmissionDate(2, "Day 3");  // step 7
@@ -81,8 +90,7 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         answerMultipleCodedQuestion("Attributes", "Oxygen mask");
         submitForm(); // step 9
         screenshot("Submitted form");
-        expectVisibleSoon(viewThat(hasId(R.id.patient_chart_pregnant), hasText("Oxygen")));
-
+        waitFor(viewThat(hasId(R.id.patient_chart_pregnant), hasText("Oxygen")));
         addOrder("Sunshine", "25 rays", "Get outside!");  // step 10
         screenshot("Added new order");
         editOrder("Sunshine", "Exercise!");  // step 11
@@ -93,16 +101,13 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
 
     private void initSettings() {
         click(R.id.settings);
-        enterSetting("App update check interval (seconds)", 3600);
-        enterSetting("Small sync interval (seconds)", 0);
-        enterSetting("Medium sync interval (seconds)", 0);
-        enterSetting("Large sync interval (seconds)", 0);
-        back();  // necessary to apply the above settings and stop all syncs
-
-        click(R.id.settings);
+        clickIfUnchecked(viewThat(
+            isA(CheckBox.class),
+            whoseParent(hasSiblingThat(hasChildThat(hasText("Periodic sync disabled"))))
+        ));
         enterSetting("Buendia server", HOSTNAME, "Apply and clear local data");
-        enterSetting("OpenMRS username", "tester", "Apply and clear local data");
-        enterSetting("OpenMRS password", "tester", "Apply and clear local data");
+        enterSetting("OpenMRS username", OPENMRS_USERNAME, "Apply and clear local data");
+        enterSetting("OpenMRS password", OPENMRS_PASSWORD, "Apply and clear local data");
         back();
     }
 
@@ -124,18 +129,17 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         type(given, R.id.add_user_given_name_tv);
         type(family, R.id.add_user_family_name_tv);
         click("OK");
-        waitFor(given + " " + family);
+        expect(given + " " + family);
     }
 
     private void signInFullSync(String name) {
         click(name);
-
         waitFor("Discharged");
     }
 
     private void addPatient(String id, String given, String family, int age) {
         click(R.id.action_new_patient);
-        expectVisible(viewWithText("New patient"));
+        expect("New patient");
 
         type(id, R.id.patient_id);
         type(given, R.id.patient_given_name);
@@ -143,16 +147,15 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         type(age, R.id.patient_age_years);
         click("OK");
 
-        waitFor(id + ". " + given + " " + family);
-        waitFor(age + " y");
+        expect(id + ". " + given + " " + family);
+        expect(age + " y");
     }
 
     private void movePatient(String location) {
         click(R.id.attribute_location);
         click(location);
         click("OK");
-
-        expectVisibleSoon(viewThat(hasId(R.id.attribute_location),
+        waitFor(viewThat(hasId(R.id.attribute_location),
             hasDescendantThat(hasId(R.id.view_attribute_name), hasText("Location")),
             hasDescendantThat(hasId(R.id.view_attribute_value), hasText(location))
         ));
@@ -174,7 +177,6 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         click(R.id.action_go_to);
         type(id, R.id.go_to_patient_id);
         click("Go to chart");
-
         waitFor(id + ". " + given + " " + family);
     }
 
@@ -183,8 +185,7 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         click("Edit patient");
         clearAndType(age, R.id.patient_age_years);
         click("OK");
-
-        expectVisible(viewContainingText(age + " y"));
+        expect(viewContainingText(age + " y"));
     }
 
     private void rewindAdmissionDate(int numDays, String expected) {
@@ -199,22 +200,20 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
             sleep(50);
         }
         click("OK");
-
         waitFor(expected);
     }
 
     private void openForm(String titleSubstring) {
         click(R.id.action_edit);
-        click(viewThat(hasTextContaining(titleSubstring)));
+        click(viewContainingText(titleSubstring));
     }
 
     private void submitForm() {
         click("Save");
-        waitFor("Submitting form");
     }
 
     private void addOrder(String medication, String dosage, String notes) {
-        clickXpath("//th[@class='command'][contains(text(),'Treatment')]");
+        clickElementWithId("new_treatment");
 
         waitFor("New treatment");
         type(medication, R.id.order_medication);
@@ -222,21 +221,22 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         type(notes, R.id.order_notes);
         click("OK");
 
-        expectXpathText("//div[@class='medication']", is("Sunshine"));
+        waitFor(viewThat(containsElementWithId(Utils.toCssIdentifier(medication))));
     }
 
     private void editOrder(String medication, String notes) {
-        clickXpath(getMedicationXpath(medication));
+        clickElementWithId(Utils.toCssIdentifier(medication) + "_row");
 
         waitFor("Edit treatment");
-        type(notes, R.id.order_notes);
+        clearAndType(notes, R.id.order_notes);
         click("OK");
 
-        expectXpathText("//div[@class='notes']", is(notes));
+        waitFor(viewThat(containsElementWithIdAndText(
+            Utils.toCssIdentifier(medication) + "_notes", notes)));
     }
 
     private void deleteOrder(String medication) {
-        clickXpath(getMedicationXpath(medication));
+        clickElementWithId(Utils.toCssIdentifier(medication) + "_row");
 
         waitFor("Edit treatment");
         click("Delete this treatment");
@@ -244,18 +244,28 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         waitFor("Confirmation");
         click("Delete");
 
-        waitFor("//th[@class='command'][contains(text(),'Treatment')]");
-        expectXpathNotFound(getMedicationXpath(medication));
+        waitFor(viewThat(
+            containsElementWithId("new_treatment"),
+            containsNoElementWithId(Utils.toCssIdentifier(medication))
+        ));
     }
 
-    private String getMedicationXpath(String medication) {
-        return String.format(
-            "//div[@class='medication'][contains(text(),'%s')]",
-            medication);
+    /** Matches Documents that do not have any elements with a given ID. */
+    public static Matcher<Document> hasNoElementWithId(final String id) {
+        checkNotNull(id);
+        return new TypeSafeMatcher<Document>() {
+            @Override public void describeTo(Description description) {
+                description.appendText("has no element with id: " + id);
+            }
+
+            @Override public boolean matchesSafely(Document document) {
+                return document.getElementById(id) == null;
+            }
+        };
     }
 
     private void answerTextQuestion(String questionSubstring, String answerText) {
-        scrollToAndType(answerText, viewThat(
+        type(answerText, viewThat(
             isA(EditText.class),
             hasSiblingThat(
                 isA(MediaLayout.class),
@@ -280,7 +290,7 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         // lost, but Espresso won't detect this case.
         Espresso.closeSoftKeyboard();
 
-        scrollToAndClick(viewThat(
+        click(viewThat(
             isAnyOf(CheckBox.class, RadioButton.class),
             hasAncestorThat(
                 isAnyOf(classes),
@@ -288,20 +298,15 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
             hasTextContaining(answerText)));
     }
 
-
-    private void waitFor(String text) {
-        expectVisibleSoon(viewWithText(text));
-    }
-
     private void expectPatientCount(String location, int count) {
-        expectVisibleSoon(viewThat(hasId(R.id.button), hasChildThat(
+        waitUntilVisible(viewThat(hasId(R.id.button), hasChildThat(
             hasChildThat(hasId(R.id.location_name), hasText(location)),
             hasChildThat(hasId(R.id.patient_count), hasText("" + count))
         )));
     }
 
     private void expectListItemCount(int id, Matcher<Integer> matcher) {
-        expectVisibleSoon(viewWithId(R.id.users).check(hasItemCount(greaterThan(0))));
+        waitUntilVisible(viewWithId(R.id.users).check(hasItemCount(greaterThan(0))));
     }
 
     private int getNextAvailableId(int listId) {
@@ -318,4 +323,6 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         }
         return nextId;
     }
+
+
 }

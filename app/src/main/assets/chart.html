@@ -149,12 +149,13 @@
     {% set top = true %}
     {% for order in orders %}
       {% set ins = order.instructions %}
+      {% set id = ins.medication | to_css_identifier %}
       <tr class="order route-{{ins.route}}">
-        <th scope="row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
+        <th scope="row" id="{{id}}_row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
           {% if ins.notes is not empty %}
-            <div class="notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
+            <div class="notes" id="{{id}}_notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
           {% endif %}
-          <div class="medication">{{ins.medication}}</div>
+          <div class="medication" id="{{id}}">{{ins.medication}}</div>
           <div class="dosing">
             <span class="dosage">{{ins.dosage}}</span
               >{% if ins.route is not empty %}
@@ -238,7 +239,7 @@
     {% endfor %}
 
     <tr>
-      <th scope="row" class="command" onclick="controller.onNewOrderPressed()">
+      <th scope="row" class="command" id="new_treatment" onclick="controller.onNewOrderPressed()">
         Add a New Treatment
       </th>
     </tr>

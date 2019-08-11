@@ -36,7 +36,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
 
-            expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
+            waitUntilVisible(viewWithText(R.string.sync_failed_dialog_message));
             screenshot("After Sync Fails");
 
             expectVisible(viewWithText(R.string.sync_failed_settings));
@@ -54,7 +54,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
 
-            expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
+            waitUntilVisible(viewWithText(R.string.sync_failed_dialog_message));
 
             click(viewWithText(R.string.sync_failed_back));
             screenshot("After Sync Fails");
@@ -73,7 +73,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         setWifiEnabled(false);
         waitForSyncFailure();
 
-        expectVisibleSoon(viewWithText(R.string.sync_failed_settings));
+        waitUntilVisible(viewWithText(R.string.sync_failed_settings));
         screenshot("After Sync Fails");
 
         click(viewWithText(R.string.sync_failed_settings));
@@ -120,7 +120,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
 
-            expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
+            waitUntilVisible(viewWithText(R.string.sync_failed_retry));
             screenshot("After Sync Failed");
 
             setWifiEnabled(true);

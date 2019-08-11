@@ -176,18 +176,18 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     // TODO(sdspikes): this method is somewhat flaky, the click sometimes doesn't bring up the menu
     protected void openEncounterForm(String menuLabel) {
         // Wait until the edit menu button is available.
-        expectVisibleSoon(viewWithId(R.id.action_edit));
+        waitUntilVisible(viewWithId(R.id.action_edit));
         click(viewWithId(R.id.action_edit));
 
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         ViewInteraction testForm = viewWithText(menuLabel);
-        expectVisibleSoon(testForm);
+        waitUntilVisible(testForm);
         click(testForm);
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).
-        expectVisibleSoon(viewWithText("Encounter"));
+        waitUntilVisible(viewWithText("Encounter"));
     }
 
     /** Tests that dismissing a form immediately closes it if no changes have been made. */
@@ -220,7 +220,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     private void answerTextQuestion(String questionText, String answerText) {
-        scrollToAndType(answerText, viewThat(
+        type(answerText, viewThat(
             isA(EditText.class),
             hasSiblingThat(
                 isA(MediaLayout.class),
@@ -245,7 +245,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // lost, but Espresso won't detect this case.
         Espresso.closeSoftKeyboard();
 
-        scrollToAndClick(viewThat(
+        click(viewThat(
             isAnyOf(CheckBox.class, RadioButton.class),
             hasAncestorThat(
                 isAnyOf(classes),
@@ -312,7 +312,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     private void checkVitalValueContains(String vitalName, String vitalValue) {
         // Check for updated vital view.
-        expectVisibleSoon(viewThat(
+        waitUntilVisible(viewThat(
             hasTextContaining(vitalValue),
             hasSiblingThat(hasTextContaining(vitalName))));
     }
@@ -357,14 +357,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         saveForm();
 
         // Enter second set of observations for this encounter.
-        expectVisibleWithin(10000, viewWithId(R.id.patient_chart_root));
+        waitUntilVisible(10000, viewWithId(R.id.patient_chart_root));
         openEncounterForm(VITALS_FORM);
         answerSingleCodedQuestion("Consciousness", "Responds to voice");
         answerMultipleCodedQuestion("Other symptoms", "Cough");
         saveForm();
 
         // Enter third set of observations for this encounter.
-        expectVisibleWithin(10000, viewWithId(R.id.patient_chart_root));
+        waitUntilVisible(10000, viewWithId(R.id.patient_chart_root));
         openEncounterForm(VITALS_FORM);
         answerTextQuestion("Temperature", "37.7");
         answerSingleCodedQuestion("Condition", "Unwell");
@@ -373,7 +373,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Check that all values are now visible.
         // Expect a WebView with JS enabled to be visible soon (the chart).
-        expectVisibleWithin(10000, viewThat(isJavascriptEnabled()));
+        waitUntilVisible(10000, viewThat(isJavascriptEnabled()));
         checkObservationValueEquals("Temperature (°C)", "37.7");
         checkObservationValueEquals("Respiratory rate (bpm)", "23");
         checkObservationValueEquals("O₂ saturation", "95");
@@ -453,7 +453,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Check that all values are now visible.
         // Expect a WebView with JS enabled to be visible soon (the chart).
-        expectVisibleWithin(10000, viewThat(isJavascriptEnabled()));
+        waitUntilVisible(10000, viewThat(isJavascriptEnabled()));
         // Wait for WebView to render and scripts to run.
         try { Thread.sleep(10000); } catch (InterruptedException e) { }
 
