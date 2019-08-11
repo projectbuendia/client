@@ -164,8 +164,11 @@ public class BuendiaSyncEngine implements SyncEngine {
                     while (!done) {
                         done = phase.worker.sync(contentResolver, result, client);
                         completedWork++;
-                        if (!done) totalWork++;
-                        broadcastSyncProgress(completedWork, totalWork, phase.message);
+                        if (!done) {
+                            totalWork++;
+                            broadcastSyncProgress(completedWork, totalWork, phase.message);
+                            checkCancellation("during " + phase);
+                        }
                     }
                     phase.worker.finalize(contentResolver, result, client);
                     LOG.elapsed("sync", "Completed phase %s", phase);
