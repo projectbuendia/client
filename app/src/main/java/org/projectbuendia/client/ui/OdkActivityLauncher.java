@@ -273,7 +273,7 @@ public class OdkActivityLauncher {
         int resultCode,
         Intent data) {
 
-        if(isActivityCanceled(resultCode, data)) return;
+        if (isActivityCanceled(resultCode, data)) return;
 
         try {
             final Uri uri = data.getData();

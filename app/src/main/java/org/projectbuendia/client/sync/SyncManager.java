@@ -71,10 +71,11 @@ public class SyncManager {
             );
     }
 
-    public void setDisabled(boolean disabled) {
-        if (disabled == true) {
-            cancelSync();
-        }
+    public boolean getSyncDisabled() {
+        return syncDisabled;
+    }
+
+    public void setSyncDisabled(boolean disabled) {
         syncDisabled = disabled;
     }
 

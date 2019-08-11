@@ -121,6 +121,11 @@ public class BuendiaSyncEngine implements SyncEngine {
             broadcastSyncStatus(SyncStatus.SUCCEEDED);
             return;
         }
+        if (App.getInstance().getSyncManager().getSyncDisabled()) {
+            LOG.w("Skipping sync: sync is disabled by the sync manager.");
+            broadcastSyncStatus(SyncStatus.SUCCEEDED);
+            return;
+        }
 
         // If we can't access the Buendia API, short-circuit. Before this check was added, sync
         // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
