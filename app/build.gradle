@@ -172,7 +172,7 @@ def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
 def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001'
 
-// Apply overrides such as -Pserver=server -PrequireWifi=true etc.
+// Apply overrides such as -Pserver=server -PnonWifiAllowed=true etc.
 def server = project.findProperty('server') ?: serverDefault
 def openmrsRootUrl = project.findProperty('server') ?
     'http://' + project.server + ':9000/openmrs' :
@@ -182,11 +182,15 @@ def openmrsPassword = project.findProperty('openmrsPassword') ?: openmrsPassword
 def packageServerRootUrl = project.findProperty('server') ?
     'http://' + project.server + ':9001' :
     project.findProperty('packageServerRootUrl') ?: packageServerRootUrlDefault
-def requireWifi = project.findProperty('requireWifi') ?: 'false'
 def apkCheckInterval = project.findProperty('apkCheckInterval') ?: apkCheckIntervalDefault
 def smallSyncInterval = project.findProperty('smallSyncInterval') ?: smallSyncIntervalDefault
 def mediumSyncInterval = project.findProperty('mediumSyncInterval') ?: mediumSyncIntervalDefault
 def largeSyncInterval = project.findProperty('largeSyncInterval') ?: largeSyncIntervalDefault
+def startingPatientId = project.findProperty('startingPatientId') ?: ''
+def syncDisabled = project.findProperty('syncDisabled') ?: false
+def formInstancesRetained = project.findProperty('formInstancesRetained') ?: false
+def nonWifiAllowed = project.findProperty('nonWifiAllowed') ?: false
+def syncAdapterPreferred = project.findProperty('syncAdapterPreferred') ?: false
 
 // This is the password used to encrypt the SQLite database on the tablet.
 // In development builds, the password is an empty string, which leaves the
@@ -234,11 +238,15 @@ android {
         resValue 'string', 'openmrs_user_default', openmrsUser
         resValue 'string', 'openmrs_password_default', openmrsPassword
         resValue 'string', 'package_server_root_url_default', packageServerRootUrl
-        resValue 'bool', 'require_wifi_default', '' + requireWifi
         resValue 'integer', 'apk_check_interval_default', '' + apkCheckInterval
         resValue 'integer', 'small_sync_interval_default', '' + smallSyncInterval
         resValue 'integer', 'medium_sync_interval_default', ''+ mediumSyncInterval
         resValue 'integer', 'large_sync_interval_default', '' + largeSyncInterval
+        resValue 'string', 'starting_patient_id_default', '' + startingPatientId
+        resValue 'bool', 'sync_disabled_default', '' + syncDisabled
+        resValue 'bool', 'form_instances_retained_default', '' + formInstancesRetained
+        resValue 'bool', 'non_wifi_allowed_default', '' + nonWifiAllowed
+        resValue 'bool', 'sync_adapter_preferred_default', '' + syncAdapterPreferred
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue 'string', 'content_authority', contentAuthority

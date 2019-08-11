@@ -36,9 +36,9 @@ public class WifiHealthCheck extends HealthCheck {
         // We will get an event that lets us update the set of active issues whenever
         // the wifi state changes, so we can be confident that the API is definitely
         // unavailable whenever either of the wifi-related issues is active.
-        return mSettings.getRequireWifi() && (
-            mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED) ||
-                mActiveIssues.contains(HealthIssue.WIFI_DISABLED));
+        if (mSettings.getNonWifiAllowed()) return false;
+        return mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED) ||
+            mActiveIssues.contains(HealthIssue.WIFI_DISABLED);
     }
 
     protected WifiHealthCheck(Application application, AppSettings settings) {
@@ -64,7 +64,7 @@ public class WifiHealthCheck extends HealthCheck {
     }
 
     private void checkWifiState() {
-        if (!mSettings.getRequireWifi()) {
+        if (mSettings.getNonWifiAllowed()) {
             resolveIssue(HealthIssue.WIFI_DISABLED);
             resolveIssue(HealthIssue.WIFI_NOT_CONNECTED);
             return;

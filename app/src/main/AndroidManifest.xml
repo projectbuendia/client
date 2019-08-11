@@ -159,6 +159,5 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-        <receiver android:name="org.projectbuendia.client.sync.SyncManager$SyncStatusBroadcastReceiver" />
     </application>
 </manifest>

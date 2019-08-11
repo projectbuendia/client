@@ -14,7 +14,7 @@ package org.projectbuendia.client.ui.lists;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
-import org.projectbuendia.client.events.sync.SyncCanceledEvent;
+import org.projectbuendia.client.events.sync.SyncCancelledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
@@ -198,7 +198,7 @@ final class LocationListController {
             }
         }
 
-        public void onEventMainThread(SyncCanceledEvent event) {
+        public void onEventMainThread(SyncCancelledEvent event) {
             // If user-initiated cancellation occurred, close the activity even if we're no longer
             // waiting on a sync (continuing to load the activity might be jarring).
             synchronized (mSyncCancelLock) {

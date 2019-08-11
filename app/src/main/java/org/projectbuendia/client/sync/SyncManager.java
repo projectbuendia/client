@@ -14,12 +14,15 @@ package org.projectbuendia.client.sync;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.sync.SyncCanceledEvent;
+import org.projectbuendia.client.events.sync.SyncCancelledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
@@ -31,6 +34,7 @@ import de.greenrobot.event.EventBus;
 /** Provides app-facing methods for requesting and cancelling sync operations. */
 public class SyncManager {
     private static final Logger LOG = Logger.create();
+    public static final String STATUS_ACTION = "org.projectbuendia.client.SYNC_STATUS";
 
     // "Small" phases are ones that take <100 ms and send <100 bytes of data, >90% of the time.
     public static final Phase[] SMALL_PHASES = {Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS};
@@ -44,7 +48,7 @@ public class SyncManager {
     /** Key for the current sync status. */
     static final String SYNC_STATUS = "SYNC_STATUS";
     enum SyncStatus {
-        IN_PROGRESS, COMPLETED, FAILED, CANCELLED
+        IN_PROGRESS, SUCCEEDED, FAILED, CANCELLED
     }
 
     /** Keys for the amount of progress so far, expressed as a fraction. */
@@ -54,20 +58,34 @@ public class SyncManager {
     /** Key for a nullable string describing the sync status to the user. */
     static final String SYNC_MESSAGE_ID = "sync-message-id";
 
+    private boolean syncDisabled = false;
     private final SyncScheduler mScheduler;
 
     public SyncManager(SyncScheduler scheduler) {
         mScheduler = scheduler;
+        HandlerThread receiverThread = new HandlerThread("SyncStatus");
+        receiverThread.start();
+        App.getInstance().getApplicationContext()
+            .registerReceiver(new StatusReceiver(),
+                new IntentFilter(STATUS_ACTION), null, new Handler(receiverThread.getLooper())
+            );
+    }
+
+    public void setDisabled(boolean disabled) {
+        if (disabled == true) {
+            cancelSync();
+        }
+        syncDisabled = disabled;
     }
 
     /** Cancels an in-flight, non-periodic sync. */
-    public void cancelOnDemandSync() {
+    public void cancelSync() {
         mScheduler.stopSyncing();
 
         // If sync was pending, it should now be idle and we can consider the sync immediately canceled.
         if (!isSyncRunningOrPending()) {
-            LOG.i("Sync was canceled before it began -- immediately firing SyncCanceledEvent.");
-            EventBus.getDefault().post(new SyncCanceledEvent());
+            LOG.i("Sync was canceled before it began -- immediately firing SyncCancelledEvent.");
+            EventBus.getDefault().post(new SyncCancelledEvent());
         }
     }
 
@@ -116,7 +134,7 @@ public class SyncManager {
     }
 
     /** Listens for sync status events that are broadcast by the BuendiaSyncEngine. */
-    public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
+    public static class StatusReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             SyncStatus status = (SyncStatus) intent.getSerializableExtra(SYNC_STATUS);
             switch (status) {
@@ -127,8 +145,8 @@ public class SyncManager {
                     LOG.d("SyncStatus: IN_PROGRESS: %d/%d", numerator, denominator);
                     EventBus.getDefault().post(new SyncProgressEvent(numerator, denominator, messageId));
                     break;
-                case COMPLETED:
-                    LOG.d("SyncStatus: COMPLETED");
+                case SUCCEEDED:
+                    LOG.d("SyncStatus: SUCCEEDED");
                     EventBus.getDefault().post(new SyncSucceededEvent());
                     break;
                 case FAILED:
@@ -137,7 +155,7 @@ public class SyncManager {
                     break;
                 case CANCELLED:
                     LOG.d("SyncStatus: CANCELLED");
-                    EventBus.getDefault().post(new SyncCanceledEvent());
+                    EventBus.getDefault().post(new SyncCancelledEvent());
                     break;
             }
         }

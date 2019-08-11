@@ -12,5 +12,4 @@
 package org.projectbuendia.client.events.sync;
 
 /** An event bus event indicating that a sync has completed. */
-public class SyncSucceededEvent extends SyncFinishedEvent {
-}
+public class SyncSucceededEvent extends SyncStoppedEvent { }

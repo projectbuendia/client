@@ -21,7 +21,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.FakeSyncManager;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
-import org.projectbuendia.client.events.sync.SyncCanceledEvent;
+import org.projectbuendia.client.events.sync.SyncCancelledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
@@ -304,7 +304,7 @@ public final class LocationListControllerTest {
         mController.init();
         // WHEN user initiates and completes a sync cancellation
         mFakeEventBus.post(new SyncCancelRequestedEvent());
-        mFakeEventBus.post(new SyncCanceledEvent());
+        mFakeEventBus.post(new SyncCancelledEvent());
         // THEN the activity is closed
         verify(mMockUi).finish();
     }
@@ -321,7 +321,7 @@ public final class LocationListControllerTest {
         // WHEN user initiates a sync cancellation right before the data model is fetched
         mFakeEventBus.post(new SyncCancelRequestedEvent());
         when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
-        mFakeEventBus.post(new SyncCanceledEvent());
+        mFakeEventBus.post(new SyncCancelledEvent());
         // THEN the activity is closed
         verify(mMockUi).finish();
     }
@@ -333,7 +333,7 @@ public final class LocationListControllerTest {
         // GIVEN an initialized controller and no location forest
         mController.init();
         // WHEN a sync is canceled, but not by the user
-        mFakeEventBus.post(new SyncCanceledEvent());
+        mFakeEventBus.post(new SyncCancelledEvent());
         // THEN the activity is not closed
         verify(mMockUi, times(0)).finish();
     }

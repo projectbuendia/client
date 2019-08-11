@@ -341,14 +341,14 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_package_server_url">URL du serveur des packages</string>
 
   <string name="pref_title_apk_update_interval">APK mise à jour intervalle de vérification (secondes)</string>
-  <string name="pref_title_keep_form_instances">Instances de formulaire de stocker localement</string>
-  <string name="pref_desc_keep_form_instances">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
-  <string name="pref_title_require_wifi">Exiger connexion wifi</string>
-  <string name="pref_desc_require_wifi">Désactivez cette option pour permettre l\'application de travailler avec des non-wifi (ou émulé captif Bluetooth) en réseau.</string>
+  <string name="pref_title_form_instances_retained">Instances de formulaire de stocker localement</string>
+  <string name="pref_desc_form_instances_retained">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
+  <string name="pref_title_non_wifi_allowed">Permettrer les connexions sans wifi</string>
+  <string name="pref_desc_non_wifi_allowed">Activez cette option pour permettre l\'application de travailler avec des connexions non-wifi (émulé ou Bluetooth) en réseau.</string>
   <string name="pref_title_starting_patient_id">Commencer avec le dossier du patient avec l\'ID</string>
   <string name="pref_desc_starting_patient_id">Entrez un ID du patient pour ouvrir l\'application avec le dossier du patient</string>
-  <string name="pref_title_use_sync_adapter">Utiliser l\'ancien framework SyncAdapter</string>
-  <string name="pref_desc_use_sync_adapter">Activez cette option pour utiliser SyncAdapter (qui necessité une connexion Internet) au lieu du ThreadedSyncScheduler intégré.  L\'app doit être redémarrée pour que cette modification soit prise en compte.</string>
+  <string name="pref_title_sync_adapter_preferred">Utiliser l\'ancien framework SyncAdapter</string>
+  <string name="pref_desc_sync_adapter_preferred">Activez cette option pour utiliser SyncAdapter (qui necessité une connexion Internet) au lieu du ThreadedSyncScheduler intégré.  L\'app doit être redémarrée pour que cette modification soit prise en compte.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Appliquer et effacer les données locales</string>

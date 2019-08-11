@@ -310,7 +310,7 @@ public class OdkActivityLauncher {
                     if (patientUuid != null) {
                         updateObservationCache(patientUuid, savedRoot, context.getContentResolver());
                     }
-                    if (!settings.getKeepFormInstancesLocally()) {
+                    if (!settings.getformInstancesRetainedLocally()) {
                         deleteLocalFormInstances(formIdToDelete);
                     }
                     EventBus.getDefault().post(new SubmitXformSucceededEvent());

@@ -12,6 +12,8 @@
 package org.projectbuendia.client.ui;
 
 import android.annotation.TargetApi;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,7 +30,9 @@ import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.sync.SyncStoppedEvent;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Utils;
 
@@ -38,6 +42,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -65,14 +71,17 @@ public class SettingsActivity extends PreferenceActivity {
         "small_sync_interval",
         "medium_sync_interval",
         "large_sync_interval",
-        "keep_form_instances",
         "starting_patient_id",
-        "xform_update_client_cache",
-        "require_wifi"
+        "sync_disabled",
+        "form_instances_retained",
+        "non_wifi_allowed",
+        "sync_adapter_preferred"
     };
     static boolean updatingPrefValues = false;
 
     static final Map<String, EditTextPreference> textPrefs = new HashMap<>();
+
+    static Dialog sSyncPendingDialog = null;
 
     /** A listener that performs updates when any preference's value changes. */
     static final Preference.OnPreferenceChangeListener sPrefListener = (pref, value) -> {
@@ -80,8 +89,8 @@ public class SettingsActivity extends PreferenceActivity {
         if (updatingPrefValues)
             return true; // prevent endless recursion
 
-        SharedPreferences prefs =
-            PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+        Context context = pref.getContext();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String server = prefs.getString("server", "");
         String str = "" + value;
         try {
@@ -103,12 +112,23 @@ public class SettingsActivity extends PreferenceActivity {
                         setTextAndSummary(prefs, "server", "");
                     }
                     break;
+                case "sync_disabled":
+                    SyncManager syncManager = App.getInstance().getSyncManager();
+                    if (syncManager.isSyncRunningOrPending()) {
+                        syncManager.cancelSync();
+                        sSyncPendingDialog = ProgressDialog.show(
+                            context, null, context.getString(R.string.waiting_for_sync),
+                            true /* indeterminate */, false /* cancelable */);
+                    }
+                    break;
             }
         } finally {
             updatingPrefValues = false;
         }
         return true;
     };
+
+    static EventSubscriber subscriber = new EventSubscriber();
 
     @Inject AppModel mAppModel;
 
@@ -275,11 +295,26 @@ public class SettingsActivity extends PreferenceActivity {
             & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
+    @Override protected void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(subscriber);
+    }
+
     @Override protected void onPause() {
+        EventBus.getDefault().unregister(subscriber);
         super.onPause();
         if (!mAppModel.isFullModelAvailable()) {
             // The database was cleared; go back to the login activity.
             startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        }
+    }
+
+    static class EventSubscriber {
+        public void onEventMainThread(SyncStoppedEvent event) {
+            if (sSyncPendingDialog != null) {
+                sSyncPendingDialog.dismiss();;
+                sSyncPendingDialog = null;
+            }
         }
     }
 }

@@ -67,6 +67,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
         // ==== Methods exposed to external threads ====
 
         public SyncThread(SyncEngine engine) {
+            super("SyncThread");
             this.engine = engine;
         }
 

@@ -353,14 +353,18 @@
   <string name="pref_title_medium_sync_interval">Medium sync interval (seconds)</string>
   <string name="pref_title_large_sync_interval">Large sync interval (seconds)</string>
 
-  <string name="pref_title_keep_form_instances">Store form instances locally</string>
-  <string name="pref_desc_keep_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
-  <string name="pref_title_require_wifi">Require Wi-Fi connection</string>
-  <string name="pref_desc_require_wifi">Turn this off to allow the app to work with non-Wi-Fi (emulated or Bluetooth tethered) networking.</string>
-  <string name="pref_title_starting_patient_id">Start with patient ID</string>
-  <string name="pref_desc_starting_patient_id">Set an ID here to go directly to a patient chart on startup.</string>
-  <string name="pref_title_use_sync_adapter">Use the old SyncAdapter framework</string>
-  <string name="pref_desc_use_sync_adapter">Turn this on to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
+  <string name="waiting_for_sync">Waiting for current sync to finish...</string>
+  <string name="sync_disabled_in_settings">Sync is disabled in the Developer Settings.</string>
+  <string name="pref_title_sync_disabled">Sync disabled</string>
+  <string name="pref_desc_sync_disabled">Disable periodic retrieval of data from the server.</string>
+  <string name="pref_title_form_instances_retained">Form instances retained locally</string>
+  <string name="pref_desc_form_instances_retained">Keep forms on the device instead of deleting them after they are sent to the server.</string>
+  <string name="pref_title_non_wifi_allowed">Non-Wi-Fi connections allowed</string>
+  <string name="pref_desc_non_wifi_allowed">Allow the app to work with non-Wi-Fi (emulated or Bluetooth tethered) networking.</string>
+  <string name="pref_title_starting_patient_id">Starting patient ID</string>
+  <string name="pref_desc_starting_patient_id">If set, cause the app to go directly to a patient chart on startup.</string>
+  <string name="pref_title_sync_adapter_preferred">Old SyncAdapter framework preferred</string>
+  <string name="pref_desc_sync_adapter_preferred">Cause the app to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>

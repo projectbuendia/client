@@ -14,18 +14,18 @@ package org.projectbuendia.client.ui.lists;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.projectbuendia.client.events.sync.SyncEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
-import org.projectbuendia.client.events.sync.SyncFinishedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
+
+import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.times;
@@ -112,7 +112,7 @@ public class PatientListControllerTest {
         mController.init();
         mController.suspend();
         // WHEN a SyncSucceededEvent occurs
-        SyncFinishedEvent event = new SyncSucceededEvent();
+        SyncEvent event = new SyncSucceededEvent();
         mFakeEventBus.post(event);
         // THEN nothing happens
         assertEquals(0, mFakeEventBus.countRegisteredReceivers());
@@ -126,7 +126,7 @@ public class PatientListControllerTest {
         mController.init();
         mController.onRefreshRequested();
         // WHEN a forced sync fails
-        SyncFinishedEvent event = new SyncFailedEvent();
+        SyncEvent event = new SyncFailedEvent();
         mFakeEventBus.post(event);
         // THEN an error is shown
         verify(mMockUi).showRefreshError();
@@ -139,7 +139,7 @@ public class PatientListControllerTest {
         // GIVEN initialized PatientListController
         mController.init();
         // WHEN a background sync fails
-        SyncFinishedEvent event = new SyncFailedEvent();
+        SyncEvent event = new SyncFailedEvent();
         mFakeEventBus.post(event);
         // THEN no error is shown
         verify(mMockUi, times(0)).showRefreshError();
@@ -152,7 +152,7 @@ public class PatientListControllerTest {
         // GIVEN initialized PatientListController
         mController.init();
         // WHEN a sync succeeds
-        SyncFinishedEvent event = new SyncSucceededEvent();
+        SyncEvent event = new SyncSucceededEvent();
         mFakeEventBus.post(event);
         // THEN the refresh indicator disappears
         verify(mMockUi).stopRefreshAnimation();
@@ -165,7 +165,7 @@ public class PatientListControllerTest {
         // GIVEN initialized PatientListController
         mController.init();
         // WHEN a sync fails
-        SyncFinishedEvent event = new SyncFailedEvent();
+        SyncEvent event = new SyncFailedEvent();
         mFakeEventBus.post(event);
         // THEN the refresh indicator disappears
         verify(mMockUi).stopRefreshAnimation();

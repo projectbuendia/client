@@ -116,6 +116,12 @@ public class BuendiaSyncEngine implements SyncEngine {
     @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
         isCancelled = false;
 
+        if (App.getInstance().getSettings().getSyncDisabled()) {
+            LOG.w("Skipping sync: sync is disabled in the developer settings.");
+            broadcastSyncStatus(SyncStatus.SUCCEEDED);
+            return;
+        }
+
         // If we can't access the Buendia API, short-circuit. Before this check was added, sync
         // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
         // change, however, any user-requested sync will instantly fail until the HealthMonitor has
@@ -188,7 +194,7 @@ public class BuendiaSyncEngine implements SyncEngine {
                 return;
             }
         }
-        broadcastSyncStatus(SyncStatus.COMPLETED);
+        broadcastSyncStatus(SyncStatus.SUCCEEDED);
         LOG.finish("sync");
         LOG.i("Completed", options);
     }
@@ -209,7 +215,7 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     private void broadcastSyncStatus(SyncStatus status) {
         context.sendBroadcast(
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
+            new Intent(SyncManager.STATUS_ACTION)
                 .putExtra(SyncManager.SYNC_STATUS, status)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );
@@ -217,7 +223,7 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     private void broadcastSyncProgress(int numerator, int denominator, @StringRes int messageId) {
         context.sendBroadcast(
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
+            new Intent(SyncManager.STATUS_ACTION)
                 .putExtra(SyncManager.SYNC_STATUS, SyncStatus.IN_PROGRESS)
                 .putExtra(SyncManager.SYNC_NUMERATOR, numerator)
                 .putExtra(SyncManager.SYNC_DENOMINATOR, denominator)
