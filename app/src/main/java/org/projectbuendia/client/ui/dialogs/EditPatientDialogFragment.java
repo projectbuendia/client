@@ -198,9 +198,13 @@ public class EditPatientDialogFragment extends DialogFragment {
         for (EditText field : fields) {
             if (field.isShown() && field.getText().toString().isEmpty()) {
                 field.requestFocus();
-                break;
+                return;
             }
         }
+
+        // If all fields are populated, default to the end of the given name field.
+        mGivenName.requestFocus();
+        mGivenName.setSelection(mGivenName.getText().length());
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
