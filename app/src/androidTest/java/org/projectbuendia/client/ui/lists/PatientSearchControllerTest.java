@@ -48,7 +48,6 @@ import static org.mockito.Mockito.when;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PatientSearchControllerTest {
-    private static final String LOCALE = "en";
     private PatientSearchController mController;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
@@ -267,10 +266,10 @@ public class PatientSearchControllerTest {
 
     public void initController(boolean withForest) {
         if (withForest) {
-            when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+            when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         }
         mController = new PatientSearchController(
-            mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel, mSyncManager, LOCALE);
+            mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel, mSyncManager);
         mController.attachFragmentUi(mFragmentMockUi);
         mController.init();
     }

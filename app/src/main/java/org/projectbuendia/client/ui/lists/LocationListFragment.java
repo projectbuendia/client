@@ -61,8 +61,8 @@ public final class LocationListFragment extends ProgressFragment {
 
         mScroll = view.findViewById(R.id.scroll_container);
         mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
-        LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
-        if (forest != null) mList.setLocations(forest, forest.allNodes());
+        LocationForest forest = mModel.getForest();
+        mList.setLocations(forest, forest.allNodes());
         return view;
     }
 

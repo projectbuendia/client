@@ -83,7 +83,7 @@ public class AppModel {
         return getForest().getDefaultLocation();
     }
 
-    public @Nonnull LocationForest getForest(String locale) {
+    private @Nonnull LocationForest getForest(String locale) {
         return forestProvider.getForest(locale);
     }
 

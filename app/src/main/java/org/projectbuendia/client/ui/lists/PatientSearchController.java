@@ -52,7 +52,6 @@ public class PatientSearchController {
     private final AppModel mModel;
     private final SyncManager mSyncManager;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
-    private final String mLocale;
     private LocationForest mForest;
     private String mRootLocationUuid;
     private SimpleSelectionFilter mFilter;
@@ -93,14 +92,13 @@ public class PatientSearchController {
         CrudEventBus crudEventBus,
         EventBusRegistrationInterface globalEventBus,
         AppModel model,
-        SyncManager syncManager,
-        String locale) {
+        SyncManager syncManager
+    ) {
         mUi = ui;
         mCrudEventBus = crudEventBus;
         mGlobalEventBus = globalEventBus;
         mModel = model;
         mSyncManager = syncManager;
-        mLocale = locale;
         mFilter = PatientDbFilters.getDefaultFilter();
         mSyncSubscriber = new SyncSubscriber();
         mCreationSubscriber = new CreationSubscriber();
@@ -113,8 +111,11 @@ public class PatientSearchController {
     public void init() {
         mGlobalEventBus.register(mSyncSubscriber);
         mCrudEventBus.register(mCreationSubscriber);
-        mForest = mModel.getForest(mLocale);
-        mModel.setForestReplacedListener(this::onForestRebuilt);
+        mForest = mModel.getForest();
+        mModel.setOnForestReplacedListener(() -> {
+            mForest = mModel.getForest();
+            updatePatients();
+        });
     }
 
     /** Releases resources required by this controller. */
@@ -124,23 +125,30 @@ public class PatientSearchController {
         // Close any outstanding cursors. New results will be fetched when requested.
         if (mPatientsCursor != null) {
             mPatientsCursor.close();
+            mPatientsCursor = null;
         }
-        mModel.setForestReplacedListener(null);
+        mModel.setOnForestReplacedListener(null);
+    }
+
+    /** Updates the list of patients in the UI. */
+    private void updatePatients() {
+        if (mPatientsCursor != null) {
+            mUi.setPatients(getFilteredCursor());
+        }
+        for (FragmentUi fragmentUi : mFragmentUis) {
+            updateFragmentUi(fragmentUi);
+        }
     }
 
     /** Registers a {@link FragmentUi} with this controller. */
     public void attachFragmentUi(FragmentUi fragmentUi) {
         mFragmentUis.add(fragmentUi);
+        updateFragmentUi(fragmentUi);
+    }
 
+    private void updateFragmentUi(FragmentUi fragmentUi) {
         if (mPatientsCursor != null) {
-            FilteredCursorWrapper<Patient> filteredCursorWrapper =
-                new FilteredCursorWrapper<>(
-                    mPatientsCursor, mSearchFilter, mFilterQueryTerm);
-            fragmentUi.setPatients(filteredCursorWrapper, mForest);
-        }
-
-        // If all data is loaded, no need for a spinner.
-        if (mForest != null && mPatientsCursor != null) {
+            fragmentUi.setPatients(getFilteredCursor(), mForest);
             fragmentUi.showSpinner(false);
         }
     }
@@ -148,6 +156,11 @@ public class PatientSearchController {
     /** Unregisters a {@link FragmentUi} with this controller. */
     public void detachFragmentUi(FragmentUi fragmentUi) {
         mFragmentUis.remove(fragmentUi);
+    }
+
+    /** Gets a cursor that returns the filtered list of patients. */
+    private TypedCursor<Patient> getFilteredCursor() {
+        return new FilteredCursorWrapper<>(mPatientsCursor, mSearchFilter, mFilterQueryTerm);
     }
 
     public void onPatientSelected(Patient patient) {
@@ -168,17 +181,6 @@ public class PatientSearchController {
 
     public void loadSearchResults() {
         loadSearchResults(true); // By default, show spinner.
-    }
-
-    private void updatePatients() {
-        FilteredCursorWrapper<Patient> filteredCursorWrapper =
-            new FilteredCursorWrapper<>(
-                mPatientsCursor, mSearchFilter, mFilterQueryTerm);
-        mUi.setPatients(filteredCursorWrapper);
-        for (FragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.setPatients(filteredCursorWrapper, mForest);
-            fragmentUi.showSpinner(false);
-        }
     }
 
     /**
@@ -208,7 +210,7 @@ public class PatientSearchController {
         SimpleSelectionFilter filter;
 
         // Tack on a location filter to the filter to show only known locations.
-        if (mForest == null || mRootLocationUuid == null) {
+        if (mRootLocationUuid == null) {
             filter = mFilter;
         } else {
             filter = new SimpleSelectionFilterGroup(new LocationUuidFilter(
@@ -248,11 +250,6 @@ public class PatientSearchController {
             // of performing an operation.
             loadSearchResults(false);
         }
-    }
-
-    private void onForestRebuilt(LocationForest forest) {
-        mForest = forest;
-        updatePatients();
     }
 
     private final class FilterSubscriber {

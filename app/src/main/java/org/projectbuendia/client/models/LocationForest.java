@@ -184,6 +184,13 @@ public class LocationForest {
         return get(parentUuidsByUuid.get(location.uuid));
     }
 
+    /** Returns the depth of a node (zero for root nodes, -1 for nonexistent nodes). */
+    public int getDepth(@Nonnull Location location) {
+        String path = Utils.getOrDefault(pathsByUuid, location.uuid, "");
+        // Note: split() omits trailing empty parts; "foo/".split("/").length is 1.
+        return path.split("/").length - 1;
+    }
+
     /** Returns true if the given location is a leaf node. */
     public boolean isLeaf(@Nonnull Location location) {
         return !nonleafUuids.contains(location.uuid);

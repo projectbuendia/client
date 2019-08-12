@@ -119,8 +119,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
             mCrudEventBus,
             new EventBusWrapper(mEventBus),
             mAppModel,
-            mSyncManager,
-            mSettings.getLocaleTag());
+            mSyncManager);
 
         mUpdateNotificationController = new UpdateNotificationController(
             new UpdateNotificationUi()

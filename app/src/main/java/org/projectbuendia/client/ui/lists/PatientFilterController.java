@@ -28,13 +28,10 @@ public class PatientFilterController {
     /**
      * Creates a {@link PatientFilterController} with the specified UI implementation, event
      * bus, model, and locale.  @param ui           a {@link Ui} that will receive UI events
-     * @param appModel     an {@link AppModel} used to retrieve patients
-     * @param locale       a language code/locale for presenting localized information (e.g. en)
+     * @param model     an {@link AppModel} used to retrieve patients
      */
-    public PatientFilterController(Ui ui, AppModel appModel, String locale) {
+    public PatientFilterController(Ui ui, AppModel model) {
         mUi = ui;
-        mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(
-            appModel.getForest(locale)
-        ));
+        mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(model.getForest()));
     }
 }
