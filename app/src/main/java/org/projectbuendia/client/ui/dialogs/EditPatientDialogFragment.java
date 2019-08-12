@@ -34,7 +34,6 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.Sex;
@@ -125,7 +124,7 @@ public class EditPatientDialogFragment extends DialogFragment {
 
     public void onSubmit() {
         String idPrefix = mIdPrefix.getText().toString().trim();
-        String id = mId.getText().toString().trim();
+        String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
         String familyName = Utils.toNonemptyOrNull(mFamilyName.getText().toString().trim());
         String ageYears = mAgeYears.getText().toString().trim();
@@ -151,7 +150,12 @@ public class EditPatientDialogFragment extends DialogFragment {
                 break;
         }
 
-        id = idPrefix.isEmpty() ? id : idPrefix + "/" + id;
+        if (!idPrefix.isEmpty()) {
+            id = idPrefix + "/" + id;
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            pref.edit().putString("last_id_prefix", idPrefix).commit();
+        }
+
         Utils.logUserAction("patient_submitted",
             "id", id,
             "given_name", givenName,
@@ -161,26 +165,18 @@ public class EditPatientDialogFragment extends DialogFragment {
             "sex", "" + sex);
 
         PatientDelta delta = new PatientDelta();
-        delta.id = Optional.of(id);
+        delta.id = Optional.fromNullable(id);
         delta.givenName = Optional.fromNullable(givenName);
         delta.familyName = Optional.fromNullable(familyName);
         delta.birthdate = Optional.fromNullable(birthdate);
         delta.sex = Optional.fromNullable(sex);
         delta.admissionDate = Optional.of(admissionDate);
 
-        if (!idPrefix.isEmpty()) {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            pref.edit().putString("last_id_prefix", idPrefix).commit();
-        }
-
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
-            if (id != null || givenName != null || familyName != null
-                || birthdate != null || sex != null) {
-                LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
-                if (forest != null) {
-                    delta.assignedLocationUuid = Optional.of(forest.getDefaultLocation().uuid);
-                }
+            if (id != null || givenName != null || familyName != null ||
+                birthdate != null || sex != null) {
+                delta.assignedLocationUuid = Optional.of(mModel.getDefaultLocation().uuid);
                 mModel.addPatient(mCrudEventBus, delta);
             }
         } else {

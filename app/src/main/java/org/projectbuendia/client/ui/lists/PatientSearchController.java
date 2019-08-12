@@ -114,7 +114,7 @@ public class PatientSearchController {
         mGlobalEventBus.register(mSyncSubscriber);
         mCrudEventBus.register(mCreationSubscriber);
         mForest = mModel.getForest(mLocale);
-        mModel.setForestRebuiltListener(this::onForestRebuilt);
+        mModel.setForestReplacedListener(this::onForestRebuilt);
     }
 
     /** Releases resources required by this controller. */
@@ -125,7 +125,7 @@ public class PatientSearchController {
         if (mPatientsCursor != null) {
             mPatientsCursor.close();
         }
-        mModel.setForestRebuiltListener(null);
+        mModel.setForestReplacedListener(null);
     }
 
     /** Registers a {@link FragmentUi} with this controller. */

@@ -19,6 +19,7 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,19 +39,31 @@ public class LocationForest {
     private final Location[] locations;
     private final Map<String, Location> locationsByUuid = new HashMap<>();
     private final Map<String, String> parentUuidsByUuid = new HashMap<>();
+    private final Map<String, String> pathsByUuid = new HashMap<>();
     private final Set<String> nonleafUuids = new HashSet<>();
     private final Location defaultLocation;
-
-    private final Object patientCountLock = new Object();
     private final Map<String, Integer> numPatientsAtNode = new HashMap<>();
     private final Map<String, Integer> numPatientsInSubtree = new HashMap<>();
     private int totalNumPatients;
 
-    public LocationForest(TypedCursor<LocationQueryResult> cursor) {
+    private final Object patientCountLock = new Object();
+
+    private final Comparator<Location> PATH_COMPARATOR = (a, b) -> {
+        String pathA = Utils.toNonnull(pathsByUuid.get(a.uuid));
+        String pathB = Utils.toNonnull(pathsByUuid.get(b.uuid));
+        return pathA.compareTo(pathB);
+    };
+
+    public LocationForest() {
+        locations = new Location[0];
+        defaultLocation = null;
+    }
+
+    public LocationForest(Iterable<LocationQueryResult> cursor) {
         List<String> uuids = new ArrayList<>();
         Map<String, String> namesByUuid = new HashMap<>();
         Map<String, String> shortIdsByUuid = new HashMap<>();
-        totalNumPatients = 0;
+        int totalNumPatients = 0;
 
         for (LocationQueryResult result : cursor) {
             uuids.add(result.uuid);
@@ -108,42 +121,47 @@ public class LocationForest {
                 numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + count);
             }
 
-            locations[i] = new Location(uuid, path, name);
+            locations[i] = new Location(uuid, name);
+            pathsByUuid.put(uuid, path);
             locationsByUuid.put(uuid, locations[i]);
         }
 
         // Finally, sort by path, yielding an array of nodes in depth-first
         // order with every subtree in the proper order.
-        Arrays.sort(locations);
+        Arrays.sort(locations, PATH_COMPARATOR);
 
         // The default location is either set with an asterisk in the name
-        // (see above) or defaults to the first root node.
-        defaultLocation = defaultUuid != null ? locationsByUuid.get(defaultUuid)
-            : locations.length > 0 ? locations[0] : null;
-
-        LOG.i("Constructed new LocationForest with %d locations; default = %s",
-            locations.length, defaultLocation);
-    }
-
-    public void updatePatientCounts(TypedCursor<LocationQueryResult> cursor) {
-        synchronized (patientCountLock) {
-            numPatientsAtNode.clear();
-            numPatientsInSubtree.clear();
-            totalNumPatients = 0;
-
+        // (see above) or defaults to the first leaf node.
+        if (defaultUuid != null) {
             for (Location location : locations) {
-                numPatientsInSubtree.put(location.uuid, 0);  // counts will be added below
-            }
-
-            for (LocationQueryResult result : cursor) {
-                numPatientsAtNode.put(result.uuid, result.numPatients);
-                totalNumPatients += result.numPatients;
-                for (String u = result.uuid; u != null; u = parentUuidsByUuid.get(u)) {
-                    numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + result.numPatients);
+                if (isLeaf(location)) {
+                    defaultUuid = location.uuid;
+                    break;
                 }
             }
         }
-        LOG.i("Updated existing LocationForest; total patients: %d", totalNumPatients);
+        defaultLocation = locationsByUuid.get(defaultUuid); // nullable
+
+        LOG.i("Loaded LocationForest with %d locations; default = %s",
+            locations.length, defaultLocation);
+    }
+
+    public void updatePatientCounts(Map<String, Integer> patientCountsByLocationUuid) {
+        synchronized (patientCountLock) {
+            totalNumPatients = 0;
+            numPatientsAtNode.clear();
+            numPatientsInSubtree.clear();
+
+            for (Location location : locations) {
+                int count = Utils.getOrDefault(patientCountsByLocationUuid, location.uuid, 0);
+                numPatientsAtNode.put(location.uuid, count);
+                for (String u = location.uuid; u != null; u = parentUuidsByUuid.get(u)) {
+                    numPatientsInSubtree.put(u,
+                        Utils.getOrDefault(numPatientsInSubtree, u, 0) + count);
+                }
+            }
+            LOG.i("Updated existing LocationForest; total patients: %d", totalNumPatients);
+        }
     }
 
     /** Returns true if the specified location exists in this forest. */
@@ -174,14 +192,14 @@ public class LocationForest {
     /** Given a UUID, counts the patients just at its node. */
     public int countPatientsAt(@Nonnull Location node) {
         synchronized (patientCountLock) {
-            return Utils.toNonnull(numPatientsAtNode.get(node.uuid), 0);
+            return Utils.getOrDefault(numPatientsAtNode, node.uuid, 0);
         }
     }
 
     /** Given a UUID, counts all the patients in its subtree. */
     public int countPatientsIn(@Nonnull Location root) {
         synchronized (patientCountLock) {
-            return Utils.toNonnull(numPatientsInSubtree.get(root.uuid), 0);
+            return Utils.getOrDefault(numPatientsInSubtree, root.uuid, 0);
         }
     }
 
@@ -220,16 +238,19 @@ public class LocationForest {
     /** Given a node, returns a list containing it and its descendants in depth-first order. */
     public @Nonnull List<Location> getSubtree(@Nonnull Location root) {
         List<Location> descendants = new ArrayList<>();
-        for (Location location : locations) {
-            if (location.isInSubtree(root)) {
-                descendants.add(location);
+        String rootPath = pathsByUuid.get(root.uuid);
+        if (rootPath != null) {
+            for (Location location : locations) {
+                if (pathsByUuid.get(location.uuid).startsWith(rootPath)) {
+                    descendants.add(location);
+                }
             }
         }
         return descendants;
     }
 
     /** Returns the default location where new patients will be placed. */
-    public Location getDefaultLocation() {
+    public @Nullable Location getDefaultLocation() {  // null only when size() == 0
         return defaultLocation;
     }
 }
