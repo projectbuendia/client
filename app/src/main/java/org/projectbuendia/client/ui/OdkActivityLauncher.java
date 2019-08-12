@@ -89,8 +89,8 @@ public class OdkActivityLauncher {
         LOG.i("Listing all forms from server (in order to cache them)");
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
             response -> {
-                if (App.getInstance().getSyncManager().getSyncDisabled()) {
-                    LOG.w("Skipping form sync: Sync is disabled by the sync manager.");
+                if (App.getInstance().getSyncManager().getNewSyncsSuppressed()) {
+                    LOG.w("Skipping form sync: New syncs are currently suppressed.");
                     return;
                 }
                 for (OpenMrsXformIndexEntry formEntry : response) {

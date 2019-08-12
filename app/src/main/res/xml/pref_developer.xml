@@ -10,11 +10,11 @@
             android:title="@string/pref_title_starting_patient_id"
             android:summary="@string/pref_desc_starting_patient_id" />
 
-        <!-- Whether to launch directly into a patient chart, for faster UX iteration. -->
+        <!-- Whether to disable the usual periodic syncs. -->
         <CheckBoxPreference
-            android:key="sync_disabled"
-            android:title="@string/pref_title_sync_disabled"
-            android:summary="@string/pref_desc_sync_disabled" />
+            android:key="periodic_sync_disabled"
+            android:title="@string/pref_title_periodic_sync_disabled"
+            android:summary="@string/pref_desc_periodic_sync_disabled" />
 
         <!-- Whether to retain filled-in forms locally.  Normally we won't want to
              (the file system will fill up), but they can be useful for debugging. -->

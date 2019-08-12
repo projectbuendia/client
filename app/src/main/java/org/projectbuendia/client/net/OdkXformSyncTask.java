@@ -119,8 +119,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         OpenMrsXformsConnection openMrsXformsConnection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
         openMrsXformsConnection.getXform(uuid, response -> {
-            if (App.getInstance().getSyncManager().getSyncDisabled()) {
-                LOG.w("Skipping form save: Sync is disabled by the sync manager.");
+            if (App.getInstance().getSyncManager().getNewSyncsSuppressed()) {
+                LOG.w("Skipping form save: New syncs are currently suppressed.");
                 return;
             }
             LOG.i("Saving form %s to local filesystem and database", uuid);

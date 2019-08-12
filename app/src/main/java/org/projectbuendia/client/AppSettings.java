@@ -90,10 +90,10 @@ public class AppSettings {
             mResources.getString(R.string.starting_patient_id_default)).trim();
     }
 
-    /** Returns true if sync has been disabled in the settings. */
-    public boolean getSyncDisabled() {
-        return mSharedPreferences.getBoolean("sync_disabled",
-            mResources.getBoolean(R.bool.sync_disabled_default));
+    /** Returns true if periodic sync has been disabled in the settings. */
+    public boolean getPeriodicSyncDisabled() {
+        return mSharedPreferences.getBoolean("periodic_sync_disabled",
+            mResources.getBoolean(R.bool.periodic_sync_disabled_default));
     }
 
     /** Gets the setting for whether to retain filled-in forms after submission. */

@@ -231,8 +231,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="fetch_xform_failed_server_bad_endpoint">Erreur de récupération de la liste de formulaires de serveur.</string>
   <string name="fetch_xform_failed_server_failed_to_fetch">Impossible de récupérer le formulaire à partir du serveur.</string>
   <string name="fetch_xform_failed_server_unknown">Erreur de récupération du formulaire à partir du serveur.</string>
-  <string name="retrieving_encounter_form_title">Récupération forme</string>
-  <string name="retrieving_encounter_form_message">SVP patienter pendant que la forme demandée est récupéré.</string>
+  <string name="retrieving_form_title">Récupération forme</string>
+  <string name="retrieving_form_message">SVP patienter pendant que la forme demandée est récupéré.</string>
   <string name="syncing_patients">Synchronisation des patients…</string>
   <string name="syncing_concepts">Synchronisation des concepts…</string>
   <string name="syncing_charts">Synchronisation des graphiques…</string>
@@ -246,8 +246,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="submit_xform_failed_unknown_reason">Echec de soumission de formulaire.</string>
   <string name="submit_xform_failed_server_auth">Echec de soumission - erreur d\'authentication.</string>
   <string name="submit_xform_failed_server_timeout">Connexion interrompue après le délai envoyant formulaire au serveur.</string>
-  <string name="submitting_encounter_form_title">Envoi de formulaire</string>
-  <string name="submitting_encounter_form_message">S\'il vous plaît patienter pendant que les données du formulaire sont soumis.</string>
+  <string name="submitting_form_title">Envoi de formulaire</string>
+  <string name="submitting_form_message">S\'il vous plaît patienter pendant que les données du formulaire sont soumis.</string>
   <string name="consciousness">État de conscience</string>
   <string name="condition">État</string>
   <string name="cancel_sync">Annuler synchronisation</string>

@@ -234,8 +234,8 @@
   <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
   <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the form from the server.</string>
   <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
-  <string name="retrieving_encounter_form_title">Retrieving form</string>
-  <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
+  <string name="retrieving_form_title">Retrieving form</string>
+  <string name="retrieving_form_message">Please wait while the form is retrieved.</string>
   <string name="syncing_patients">Syncing patients…</string>
   <string name="syncing_concepts">Syncing concepts…</string>
   <string name="syncing_charts">Syncing charts…</string>
@@ -249,8 +249,8 @@
   <string name="submit_xform_failed_unknown_reason">Could not submit form data.</string>
   <string name="submit_xform_failed_server_auth">Could not submit form data: authentication problem.</string>
   <string name="submit_xform_failed_server_timeout">Could not submit form data: server timed out.</string>
-  <string name="submitting_encounter_form_title">Submitting form</string>
-  <string name="submitting_encounter_form_message">Please wait while form data is submitted.</string>
+  <string name="submitting_form_title">Submitting form</string>
+  <string name="submitting_form_message">Please wait while form data is submitted.</string>
   <string name="consciousness">Consciousness</string>
   <string name="condition">Condition</string>
   <string name="cancel_sync">Cancel Sync</string>
@@ -355,9 +355,9 @@
   <string name="pref_title_large_sync_interval">Large sync interval (seconds)</string>
 
   <string name="waiting_for_sync">Waiting for current sync to finish...</string>
-  <string name="sync_disabled_in_settings">Sync is disabled in the Developer Settings.</string>
-  <string name="pref_title_sync_disabled">Sync disabled</string>
-  <string name="pref_desc_sync_disabled">Disable periodic retrieval of data from the server.</string>
+  <string name="periodic_sync_disabled_in_settings">Periodic sync is currently disabled in the settings.</string>
+  <string name="pref_title_periodic_sync_disabled">Periodic sync disabled</string>
+  <string name="pref_desc_periodic_sync_disabled">Disable periodic retrieval of data from the server.</string>
   <string name="pref_title_form_instances_retained">Form instances retained locally</string>
   <string name="pref_desc_form_instances_retained">Keep forms on the device instead of deleting them after they are sent to the server.</string>
   <string name="pref_title_non_wifi_allowed">Non-Wi-Fi connections allowed</string>

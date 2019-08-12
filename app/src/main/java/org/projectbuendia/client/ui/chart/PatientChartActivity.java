@@ -181,15 +181,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
-        mFormLoadingDialog.setTitle(getString(R.string.retrieving_encounter_form_title));
-        mFormLoadingDialog.setMessage(getString(R.string.retrieving_encounter_form_message));
+        mFormLoadingDialog.setTitle(getString(R.string.retrieving_form_title));
+        mFormLoadingDialog.setMessage(getString(R.string.retrieving_form_message));
         mFormLoadingDialog.setIndeterminate(true);
         mFormLoadingDialog.setCancelable(false);
 
         mFormSubmissionDialog = new ProgressDialog(this);
         mFormSubmissionDialog.setIcon(android.R.drawable.ic_dialog_info);
-        mFormSubmissionDialog.setTitle(getString(R.string.submitting_encounter_form_title));
-        mFormSubmissionDialog.setMessage(getString(R.string.submitting_encounter_form_message));
+        mFormSubmissionDialog.setTitle(getString(R.string.submitting_form_title));
+        mFormSubmissionDialog.setMessage(getString(R.string.submitting_form_message));
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 

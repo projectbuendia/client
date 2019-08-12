@@ -187,7 +187,7 @@ def smallSyncInterval = project.findProperty('smallSyncInterval') ?: smallSyncIn
 def mediumSyncInterval = project.findProperty('mediumSyncInterval') ?: mediumSyncIntervalDefault
 def largeSyncInterval = project.findProperty('largeSyncInterval') ?: largeSyncIntervalDefault
 def startingPatientId = project.findProperty('startingPatientId') ?: ''
-def syncDisabled = project.findProperty('syncDisabled') ?: false
+def periodicSyncDisabled = project.findProperty('periodicSyncDisabled') ?: false
 def formInstancesRetained = project.findProperty('formInstancesRetained') ?: false
 def nonWifiAllowed = project.findProperty('nonWifiAllowed') ?: false
 def syncAdapterPreferred = project.findProperty('syncAdapterPreferred') ?: false
@@ -243,7 +243,7 @@ android {
         resValue 'integer', 'medium_sync_interval_default', ''+ mediumSyncInterval
         resValue 'integer', 'large_sync_interval_default', '' + largeSyncInterval
         resValue 'string', 'starting_patient_id_default', '' + startingPatientId
-        resValue 'bool', 'sync_disabled_default', '' + syncDisabled
+        resValue 'bool', 'periodic_sync_disabled_default', '' + periodicSyncDisabled
         resValue 'bool', 'form_instances_retained_default', '' + formInstancesRetained
         resValue 'bool', 'non_wifi_allowed_default', '' + nonWifiAllowed
         resValue 'bool', 'sync_adapter_preferred_default', '' + syncAdapterPreferred

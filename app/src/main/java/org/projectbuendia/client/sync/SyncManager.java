@@ -61,7 +61,7 @@ public class SyncManager {
     /** Key for a nullable string describing the sync status to the user. */
     static final String SYNC_MESSAGE_ID = "sync-message-id";
 
-    private boolean syncDisabled = false;
+    private boolean newSyncsSuppressed = false;
     private final SyncScheduler mScheduler;
     private final List<Runnable> syncStoppedCallbacks = new ArrayList<>();
 
@@ -71,13 +71,19 @@ public class SyncManager {
             .registerReceiver(new StatusReceiver(), new IntentFilter(STATUS_ACTION));
     }
 
-    public boolean getSyncDisabled() {
-        return syncDisabled;
+    public boolean getNewSyncsSuppressed() {
+        return newSyncsSuppressed;
     }
 
-    /** If true, prevents new syncs from starting (but does not stop a currently running sync). */
-    public void setSyncDisabled(boolean disabled) {
-        syncDisabled = disabled;
+    /**
+     * Sets whether all new syncs should be suppressed.  While this flag is true,
+     * any attempt to start a new sync (by an explicit call to sync() or by any
+     * periodic sync loop) becomes a no-op.  Any loops started by setPeriodicSync
+     * continue to loop but do not trigger any syncs.  Setting this flag has no
+     * effect on any already running sync.
+     */
+    public void setNewSyncsSuppressed(boolean suppressed) {
+        newSyncsSuppressed = suppressed;
     }
 
     /** Stops any currently running sync; invokes a callback when stopped or if already stopped. */
@@ -85,9 +91,8 @@ public class SyncManager {
         if (syncStoppedCallback != null) {
             syncStoppedCallbacks.add(syncStoppedCallback);
         }
-
         if (isSyncRunningOrPending()) {
-            mScheduler.stopSyncing();
+            mScheduler.stopSyncing();  // let the SyncStoppedEvent trigger the callback
         } else {
             runSyncStoppedCallbacks();
         }
@@ -97,23 +102,22 @@ public class SyncManager {
         return mScheduler.isRunningOrPending();
     }
 
-    /** Sets up regularly repeating syncs that run all the time. */
-    public void initPeriodicSyncs() {
+    /** Starts or cancels regularly repeating syncs, according to the settings. */
+    public void applyPeriodicSyncSettings() {
         AppSettings settings = App.getInstance().getSettings();
-        setPeriodicSync(settings.getSmallSyncInterval(), SMALL_PHASES);
-        setPeriodicSync(settings.getMediumSyncInterval(), MEDIUM_PHASES);
-        setPeriodicSync(settings.getLargeSyncInterval(), LARGE_PHASES);
+        if (settings.getPeriodicSyncDisabled()) {
+            mScheduler.clearAllPeriodicSyncs();
+        } else {
+            setPeriodicSync(settings.getSmallSyncInterval(), SMALL_PHASES);
+            setPeriodicSync(settings.getMediumSyncInterval(), MEDIUM_PHASES);
+            setPeriodicSync(settings.getLargeSyncInterval(), LARGE_PHASES);
+        }
     }
 
     /** Starts a sync now. */
     public void sync(Phase... phases) {
         mScheduler.stopSyncing();  // cancel any running syncs to avoid delaying this one
         mScheduler.requestSync(buildOptions(phases));
-    }
-
-    /** Starts a small-size sync. */
-    public void syncMedium() {
-        sync(Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS);
     }
 
     /** Starts a sync of everything now. */

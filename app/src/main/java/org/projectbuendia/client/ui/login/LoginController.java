@@ -100,8 +100,8 @@ public final class LoginController {
      * after this function returns.
      */
     public void init() {
-        if (mSettings.getSyncDisabled()) {
-            BigToast.show(App.getInstance().getApplicationContext(), R.string.sync_disabled_in_settings);
+        if (mSettings.getPeriodicSyncDisabled()) {
+            BigToast.show(App.getInstance().getApplicationContext(), R.string.periodic_sync_disabled_in_settings);
         }
         mEventBus.register(mSubscriber);
         mFragmentUi.showSpinner(true);

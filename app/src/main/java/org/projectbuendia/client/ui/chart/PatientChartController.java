@@ -248,7 +248,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
-        mSyncManager.setSyncDisabled(false);
+        mSyncManager.setNewSyncsSuppressed(false);
         mFormPending = false;
 
         FormRequest request = popFormRequest(requestCode);

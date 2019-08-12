@@ -2,9 +2,13 @@ package org.projectbuendia.client.sync;
 
 import android.accounts.Account;
 import android.content.ContentResolver;
+import android.content.PeriodicSync;
 import android.os.Bundle;
 
 import org.projectbuendia.client.utils.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A SyncScheduler that schedules sync operations by making requests to Android's
@@ -18,6 +22,7 @@ public class SyncAdapterSyncScheduler implements SyncScheduler {
     private final SyncEngine engine;
     private final Account account;
     private final String authority;
+    private final List<PeriodicSync> periodicSyncs = new ArrayList<>();
 
     public SyncAdapterSyncScheduler(SyncEngine engine, Account account, String authority) {
         this.engine = engine;
@@ -44,9 +49,20 @@ public class SyncAdapterSyncScheduler implements SyncScheduler {
             ContentResolver.setSyncAutomatically(account, authority, true);
             ContentResolver.setMasterSyncAutomatically(true);
             ContentResolver.addPeriodicSync(account, authority, options, periodSec);
+            periodicSyncs.add(new PeriodicSync(account, authority, options, periodSec));
         } else {
             ContentResolver.removePeriodicSync(account, authority, options);
         }
+    }
+
+    @Override public void clearAllPeriodicSyncs() {
+        // Even though the same (account, authority, extras) set might appear more
+        // than once in the periodicSyncs list, it's okay to call removePeriodicSync
+        // on all of them; it has no effect if there is no matching item to remove.
+        for (PeriodicSync ps : periodicSyncs) {
+            ContentResolver.removePeriodicSync(ps.account, ps.authority, ps.extras);
+        }
+        periodicSyncs.clear();
     }
 
     @Override public boolean isRunningOrPending() {

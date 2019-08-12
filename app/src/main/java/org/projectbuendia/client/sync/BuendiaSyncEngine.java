@@ -29,7 +29,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 import org.joda.time.Instant;
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
@@ -115,27 +114,6 @@ public class BuendiaSyncEngine implements SyncEngine {
     /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
     @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
         isCancelled = false;
-
-        if (App.getInstance().getSettings().getSyncDisabled()) {
-            LOG.w("Skipping sync: sync is disabled in the developer settings.");
-            broadcastSyncStatus(SyncStatus.SUCCEEDED);
-            return;
-        }
-        if (App.getInstance().getSyncManager().getSyncDisabled()) {
-            LOG.w("Skipping sync: sync is disabled by the sync manager.");
-            broadcastSyncStatus(SyncStatus.SUCCEEDED);
-            return;
-        }
-
-        // If we can't access the Buendia API, short-circuit. Before this check was added, sync
-        // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
-        // change, however, any user-requested sync will instantly fail until the HealthMonitor has
-        // made a determination that the server is definitely accessible.
-        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
-            LOG.e("Abort sync: Buendia API is unavailable.");
-            broadcastSyncStatus(SyncStatus.FAILED);
-            return;
-        }
 
         try {
             checkCancellation("before work started");

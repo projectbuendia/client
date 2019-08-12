@@ -69,7 +69,7 @@ public class SettingsActivity extends PreferenceActivity {
         "medium_sync_interval",
         "large_sync_interval",
         "starting_patient_id",
-        "sync_disabled",
+        "periodic_sync_disabled",
         "form_instances_retained",
         "non_wifi_allowed",
         "sync_adapter_preferred"
@@ -109,8 +109,9 @@ public class SettingsActivity extends PreferenceActivity {
                         setTextAndSummary(prefs, "server", "");
                     }
                     break;
-                case "sync_disabled":
+                case "periodic_sync_disabled":
                     SyncManager syncManager = App.getInstance().getSyncManager();
+                    syncManager.applyPeriodicSyncSettings();
                     if (syncManager.isSyncRunningOrPending()) {
                         sSyncPendingDialog = ProgressDialog.show(
                             context, null, context.getString(R.string.waiting_for_sync),

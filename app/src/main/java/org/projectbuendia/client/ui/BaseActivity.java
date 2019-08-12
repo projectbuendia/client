@@ -423,7 +423,7 @@ public abstract class BaseActivity extends FragmentActivity {
         }
         EventBus.getDefault().registerSticky(this);
         App.getInstance().getHealthMonitor().start();
-        App.getInstance().getSyncManager().initPeriodicSyncs();
+        App.getInstance().getSyncManager().applyPeriodicSyncSettings();
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
     }
 
