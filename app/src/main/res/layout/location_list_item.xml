@@ -40,7 +40,7 @@
                 android:background="?android:attr/selectableItemBackground">
 
                 <TextView
-                    android:id="@+id/title"
+                    android:id="@+id/location_name"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12sp"
@@ -52,7 +52,7 @@
                     tools:text="Triage" />
 
                 <TextView
-                    android:id="@+id/content"
+                    android:id="@+id/patient_count"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="0sp"

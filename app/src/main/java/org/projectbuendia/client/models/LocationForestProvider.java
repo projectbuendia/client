@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Handler;
 
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
@@ -21,7 +22,7 @@ public class LocationForestProvider {
     private Runnable onForestReplacedListener = null;
 
     private final ContentResolver resolver;
-    private final ContentObserver locationChangeObserver = new ContentObserver(null) {
+    private final ContentObserver locationChangeObserver = new ContentObserver(new Handler()) {
         public void onChange(boolean selfChange) {
             currentForest = null;
             if (onForestReplacedListener != null) {
@@ -29,7 +30,7 @@ public class LocationForestProvider {
             }
         }
     };
-    private final ContentObserver patientChangeObserver = new ContentObserver(null) {
+    private final ContentObserver patientChangeObserver = new ContentObserver(new Handler()) {
         public void onChange(boolean selfChange) {
             if (currentForest != null) {
                 currentForest.updatePatientCounts(getPatientCountsByLocationUuid());

@@ -46,6 +46,7 @@ public class LocationForest {
     private int totalNumPatients;
 
     private final Object patientCountLock = new Object();
+    private Runnable onPatientCountsUpdatedListener = null;
 
     public LocationForest() {
         locations = new Location[0];
@@ -163,6 +164,13 @@ public class LocationForest {
             }
             LOG.i("Updated existing LocationForest; total patients: %d", totalNumPatients);
         }
+        if (onPatientCountsUpdatedListener != null) {
+            onPatientCountsUpdatedListener.run();
+        }
+    }
+
+    public void setOnPatientCountsUpdatedListener(Runnable listener) {
+        onPatientCountsUpdatedListener = listener;
     }
 
     /** Returns true if the specified location exists in this forest. */

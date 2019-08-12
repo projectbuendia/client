@@ -33,5 +33,8 @@ public class PatientFilterController {
     public PatientFilterController(Ui ui, AppModel model) {
         mUi = ui;
         mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(model.getForest()));
+        model.setOnForestReplacedListener(() -> {
+            mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(model.getForest()));
+        });
     }
 }
