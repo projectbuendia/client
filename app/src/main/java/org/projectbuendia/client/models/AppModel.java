@@ -32,6 +32,7 @@ import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -91,40 +92,22 @@ public class AppModel {
         forestProvider.setOnForestReplacedListener(listener);
     }
 
-    /**
-     * Returns true iff the model has previously been fully downloaded from the server--that is, if
-     * locations, patients, users, charts, and observations were all downloaded at some point. Note
-     * that this data may be out-of-date, but must be present in some form for proper operation of
-     * the app.
-     */
-    public boolean isFullModelAvailable() {
+    /** Returns true if the model is ready for use. */
+    public boolean isReady() {
         return getLastFullSyncTime() != null;
     }
 
     public DateTime getLastFullSyncTime() {
-        // The sync process is transactional, but in rare cases, a sync may complete without ever
-        // having started--this is the case if user data is cleared mid-sync, for example. To check
-        // that a sync actually completed, we look at the FULL_SYNC_START_MILLIS and
-        // FULL_SYNC_END_MILLIS columns in the Misc table, which are written to as the first and
-        // last operations of a complete sync. If both of these fields are present, and the last
-        // end time is greater than the last start time, then a full sync must have completed.
-        try (Cursor c = mContentResolver.query(
-                Contracts.Misc.URI, null, null, null, null)) {
-            LOG.d("Sync timing result count: %d", c.getCount());
-            if (c.moveToNext()) {
-                DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_MILLIS);
-                DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_MILLIS);
-                LOG.i("full_sync_start_millis = %s, full_sync_end_millis = %s",
-                    fullSyncStart, fullSyncEnd);
-                if (fullSyncEnd != null) {
-                    return fullSyncEnd;
-                }
-                if (fullSyncStart != null && fullSyncEnd != null && fullSyncEnd.isAfter(fullSyncStart)) {
-                    return fullSyncEnd;
-                }
+        // The FULL_SYNC_END_MILLIS field indicates a successful full sync.
+        // It is set to non-null only when the end of a full sync is reached and the
+        // database has not been cleared during the sync (see storeFullSyncEndTime).
+        DateTime fullSyncEnd = null;
+        try (Cursor cursor = mContentResolver.query(Misc.URI, null, null, null, null)) {
+            if (cursor.moveToNext()) {
+                fullSyncEnd = Utils.getDateTime(cursor, Misc.FULL_SYNC_END_MILLIS);
             }
-            return null;
         }
+        return fullSyncEnd;
     }
 
     public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {

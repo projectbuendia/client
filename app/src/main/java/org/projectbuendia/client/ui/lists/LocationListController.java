@@ -107,19 +107,18 @@ final class LocationListController {
         mUserCancelRequestPending = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        loadForest();
+        if (mAppModel.isReady()) {
+            loadForest();
+        } else {
+            LOG.w("Model has not been synced successfully yet; initiating full sync.");
+            startInitialSync();
+        }
     }
 
     public void loadForest() {
         setReadyState(ReadyState.LOADING);
-        LocationForest forest = mAppModel.getForest();
-        if (forest != null) {
-            setForest(forest);
-            setReadyState(ReadyState.READY);
-        } else {
-            LOG.w("Forest not available; retrying initial sync.");
-            startInitialSync();
-        }
+        setForest(mAppModel.getForest());
+        setReadyState(ReadyState.READY);
     }
 
     public void startInitialSync() {

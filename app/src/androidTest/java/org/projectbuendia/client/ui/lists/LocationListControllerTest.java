@@ -53,7 +53,7 @@ public final class LocationListControllerTest {
     @UiThreadTest
     public void testInit_RequestsLoadLocationsWhenDataModelAvailable() {
         // GIVEN initialized data model and the controller hasn't previously fetched the location forest
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller asks the location manager to provide the location forest
@@ -65,7 +65,7 @@ public final class LocationListControllerTest {
     @UiThreadTest
     public void testInit_DoesNotStartSyncWhenDataModelAvailable() {
         // GIVEN initialized data model and an available forest
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         // WHEN the controller is initialized
         mController.init();
@@ -80,7 +80,7 @@ public final class LocationListControllerTest {
         // GIVEN uninitialized data model,the controller hasn't previously fetched the location
         // forest, and no sync is already in progress
         mFakeSyncManager.setSyncing(false);
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
+        when(mMockAppModel.isReady()).thenReturn(false);
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller requests a sync
@@ -105,7 +105,7 @@ public final class LocationListControllerTest {
     public void testLoadLocations_HidesSpinner() {
         // GIVEN a valid location forest and sync not in progress
         mFakeSyncManager.setSyncing(false);
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -120,7 +120,7 @@ public final class LocationListControllerTest {
     public void testLoadLocations_DoesNotShowSpinnerWhenSyncInProgress() {
         // GIVEN a valid location forest while sync is still in progress
         mFakeSyncManager.setSyncing(true);
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         // WHEN a controller starts with a fragment attached
         mController.init();
@@ -135,7 +135,7 @@ public final class LocationListControllerTest {
     public void testSpinnerHiddenAfterSyncCompletes() {
         // GIVEN an incomplete model while sync is still in progress
         mFakeSyncManager.setSyncing(true);
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
+        when(mMockAppModel.isReady()).thenReturn(false);
         // WHEN a controller starts with a fragment attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
@@ -171,7 +171,7 @@ public final class LocationListControllerTest {
     @UiThreadTest
     public void testSyncSuccessHidesSyncDialog() {
         // GIVEN an initialized controller with an incomplete model
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
+        when(mMockAppModel.isReady()).thenReturn(false);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
@@ -219,7 +219,7 @@ public final class LocationListControllerTest {
     @UiThreadTest
     public void testFetchingIncompleteForest_retainsLoadingDialog() {
         // GIVEN an empty forest
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.emptyForest());
         // WHEN the controller starts up and a fragment is attached
         mController.init();
@@ -233,7 +233,7 @@ public final class LocationListControllerTest {
     @UiThreadTest
     public void testFetchingPopulatedForest_doesNotCauseNewSync() {
         // GIVEN a valid model and a populated forest
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         // WHEN the controller starts up and a fragment is attached
         mController.init();
@@ -251,7 +251,7 @@ public final class LocationListControllerTest {
     public void testAttachFragmentUi_doesNotShowSpinnerDuringSyncWhenLocationsPresent() {
         // GIVEN a sync in progress and a valid location forest
         mFakeSyncManager.setSyncing(true);
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         // WHEN a fragment is attached to a new controller
         mController.init();
@@ -269,7 +269,7 @@ public final class LocationListControllerTest {
     public void testAttachFragmentUi_showsSpinnerDuringSyncWhenForestEmpty() {
         // GIVEN a sync in progress and an empty location forest
         mFakeSyncManager.setSyncing(true);
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.emptyForest());
         // WHEN a fragment is attached to a new controller
         mController.init();
@@ -287,7 +287,7 @@ public final class LocationListControllerTest {
     public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationsNotPresent() {
         // GIVEN an initialized controller with a sync in progress and no location forest
         mFakeSyncManager.setSyncing(true);
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
+        when(mMockAppModel.isReady()).thenReturn(false);
         mController.init();
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
@@ -342,7 +342,7 @@ public final class LocationListControllerTest {
     @UiThreadTest
     public void testSyncFailed_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location forest
-        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        when(mMockAppModel.isReady()).thenReturn(true);
         when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         mController.init();
         // WHEN a periodic sync fails

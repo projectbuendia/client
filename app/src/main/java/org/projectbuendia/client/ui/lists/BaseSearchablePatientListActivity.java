@@ -147,7 +147,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     }
 
     protected void attemptInit() {
-        if (mAppModel.isFullModelAvailable()) {
+        if (mAppModel.isReady()) {
             mSearchController.init();
             mSearchController.loadSearchResults();
         } else {

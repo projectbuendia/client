@@ -28,6 +28,7 @@ import android.support.annotation.StringRes;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
+import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.providers.BuendiaProvider;
@@ -131,9 +132,7 @@ public class BuendiaSyncEngine implements SyncEngine {
         BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
         try (DatabaseTransaction tx = provider.startTransaction(SAVEPOINT_NAME)) {
             try {
-                if (fullSync) {
-                    storeFullSyncStartTime(client, Instant.now());
-                }
+                if (fullSync) storeFullSyncStartTime(client, Instant.now());
                 LOG.elapsed("sync", "Starting phases");
                 int completedWork = 0;
                 int totalWork = phases.size();
@@ -157,9 +156,7 @@ public class BuendiaSyncEngine implements SyncEngine {
                     LOG.elapsed("sync", "Completed phase %s", phase);
                 }
                 broadcastSyncProgress(1, 1, R.string.completing_sync);
-                if (fullSync) {
-                    storeFullSyncEndTime(client, Instant.now());
-                }
+                if (fullSync) storeFullSyncEndTime(client, Instant.now());
             } catch (CancellationException e) {
                 LOG.i(e, "Cancelled %s", options);
                 tx.rollback();
@@ -226,9 +223,20 @@ public class BuendiaSyncEngine implements SyncEngine {
     }
 
     private void storeFullSyncEndTime(ContentProviderClient provider, Instant time) throws RemoteException {
-        LOG.i("Recording full sync end time: " + time);
+        DateTime start = null;
+        try (Cursor cursor = provider.query(Misc.URI, null, null, null, null)) {
+            if (cursor.moveToNext()) {
+                start = Utils.getDateTime(cursor, Misc.FULL_SYNC_START_MILLIS);
+            }
+        }
+        Long value = time.getMillis();
+        if (start == null) {
+            LOG.e("Database was cleared during sync!");
+            value = null;
+        }
+        LOG.i("Recording full sync end time: " + value);
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_END_MILLIS, time.getMillis());
+        cv.put(Misc.FULL_SYNC_END_MILLIS, value);
         provider.insert(Misc.URI, cv);
     }
 
