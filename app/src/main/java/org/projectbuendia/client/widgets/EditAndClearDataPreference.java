@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.widgets;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.preference.EditTextPreference;
 import android.util.AttributeSet;
@@ -25,6 +26,7 @@ import java.io.File;
 /** Custom Android preference widget that clears the database if new text is entered. */
 public class EditAndClearDataPreference extends EditTextPreference {
     private static Logger LOG = Logger.create();
+    private ProgressDialog dialog = null;
 
     public EditAndClearDataPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -34,9 +36,20 @@ public class EditAndClearDataPreference extends EditTextPreference {
     public void onDialogClosed(boolean positive) {
         super.onDialogClosed(positive);
         if (positive) {
-            clearDatabase();
-            clearMemoryState();
-            clearOdkState();
+            dialog = ProgressDialog.show(getContext(), "Clearing data", "Clearing all local data...");
+            App.getInstance().getSyncManager().setNewSyncsSuppressed(true);
+            App.getInstance().getSyncManager().stopSyncing(this::clearAllData);
+        }
+    }
+
+    private void clearAllData() {
+        clearDatabase();
+        clearMemoryState();
+        clearOdkState();
+        App.getInstance().getSyncManager().setNewSyncsSuppressed(false);
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
         }
     }
 
