@@ -503,11 +503,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 Utils.orDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
-            if (patient.gender == Patient.GENDER_MALE) {
-                labels.add("M");
-            } else if (patient.gender == Patient.GENDER_FEMALE) {
-                labels.add("F");
-            }
+            labels.add(patient.sex.code);
             labels.add(patient.birthdate == null ? "age unknown"
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);

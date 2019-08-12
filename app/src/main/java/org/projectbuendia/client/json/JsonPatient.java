@@ -19,16 +19,12 @@ import java.io.Serializable;
 
 /** JSON representation of an OpenMRS Patient. */
 public class JsonPatient implements Serializable {
-    public static final int GENDER_UNKNOWN = 0;
-    public static final int GENDER_MALE = 1;
-    public static final int GENDER_FEMALE = 2;
-
     public String uuid;  // OpenMRS record UUID
     public boolean voided; // true if the patient has been voided.
     public String id;  // user-specified patient ID
     public String given_name;
     public String family_name;
-    public String sex; // must be "M" or "F"
+    public String sex; // "U", "M", "F", or "O"
     public LocalDate birthdate;
     public JsonLocation assigned_location; // TODO: make this a plain uuid; API change
 

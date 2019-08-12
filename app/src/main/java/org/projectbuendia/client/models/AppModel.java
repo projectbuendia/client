@@ -232,7 +232,7 @@ public class AppModel {
             // The projection must contain an "_id" column for the ListAdapter as well as all
             // the columns used in Patient.Loader.fromCursor().
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
-                //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.GENDER, Patients.LOCATION_UUID},
+                //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.SEX, Patients.LOCATION_UUID},
             Patient.class, mContentResolver,
             filter, constraint, Patient.LOADER, bus);
         task.execute();

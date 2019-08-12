@@ -37,6 +37,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.regex.Matcher;
@@ -78,7 +79,7 @@ public class EditPatientDialogFragment extends DialogFragment {
             args.putString("givenName", patient.givenName);
             args.putString("familyName", patient.familyName);
             args.putString("birthdate", Utils.formatDate(patient.birthdate));
-            args.putInt("gender", patient.gender);
+            args.putString("sex", patient.sex.code);
         }
         fragment.setArguments(args);
         return fragment;
@@ -112,11 +113,11 @@ public class EditPatientDialogFragment extends DialogFragment {
             mAgeYears.setText(String.valueOf(age.getYears()));
             mAgeMonths.setText(String.valueOf(age.getMonths()));
         }
-        switch (args.getInt("gender", Patient.GENDER_UNKNOWN)) {
-            case Patient.GENDER_FEMALE:
+        switch (Sex.forCode(args.getString("sex", Sex.UNKNOWN.code))) {
+            case FEMALE:
                 mSexFemale.setChecked(true);
                 break;
-            case Patient.GENDER_MALE:
+            case MALE:
                 mSexMale.setChecked(true);
                 break;
         }
@@ -136,16 +137,17 @@ public class EditPatientDialogFragment extends DialogFragment {
             birthdate = LocalDate.now().minusYears(Integer.parseInt("0" + ageYears))
                 .minusMonths(Integer.parseInt("0" + ageMonths));
         }
+
+        Sex sex = null;
         // TODO: This should start out as "Sex sex = null" and then get set to female, male,
         // other, or unknown if any button is selected (there should be four buttons) -- so
         // that we can distinguish "no change to sex" (null) from "change sex to unknown" ("U").
-        int sex = Patient.GENDER_UNKNOWN;
         switch (mSex.getCheckedRadioButtonId()) {
             case R.id.patient_sex_female:
-                sex = Patient.GENDER_FEMALE;
+                sex = Sex.FEMALE;
                 break;
             case R.id.patient_sex_male:
-                sex = Patient.GENDER_MALE;
+                sex = Sex.MALE;
                 break;
         }
 
@@ -163,7 +165,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         delta.givenName = Optional.fromNullable(givenName);
         delta.familyName = Optional.fromNullable(familyName);
         delta.birthdate = Optional.fromNullable(birthdate);
-        delta.gender = Optional.of(sex);
+        delta.sex = Optional.fromNullable(sex);
         delta.admissionDate = Optional.of(admissionDate);
 
         if (!idPrefix.isEmpty()) {
@@ -173,8 +175,8 @@ public class EditPatientDialogFragment extends DialogFragment {
 
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
-            if (id != null || givenName != null || familyName != null || birthdate != null
-                || sex != Patient.GENDER_UNKNOWN) {
+            if (id != null || givenName != null || familyName != null
+                || birthdate != null || sex != null) {
                 LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
                 if (forest != null) {
                     delta.assignedLocationUuid = Optional.of(forest.getDefaultLocation().uuid);
