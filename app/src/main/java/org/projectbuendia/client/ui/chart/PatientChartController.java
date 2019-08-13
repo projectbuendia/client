@@ -549,7 +549,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private final class EventSubscriber {
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientObsUi();
+            updatePatientObsUi(); // if the sync fetched observations
+            mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid); // if the sync touched this patient
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
