@@ -237,7 +237,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
         mForest = mAppModel.getForest(mSettings.getLocaleTag());
         updatePatientLocationUi();
-        mSyncManager.setSyncDisabled(false);
     }
 
     /** Releases any resources used by the controller. */
@@ -249,8 +248,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
-        mFormPending = false;
         mSyncManager.setSyncDisabled(false);
+        mFormPending = false;
 
         FormRequest request = popFormRequest(requestCode);
         if (request == null) {
@@ -347,10 +346,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         mFormPending = true;
         mUi.showFormLoadingDialog(true);
-
-        FormRequest request = createFormRequest(formUuid, mPatientUuid, preset);
-        mSyncManager.setSyncDisabled(true);
-        mSyncManager.stopSyncing(() -> openForm(request));
+        openForm(createFormRequest(formUuid, mPatientUuid, preset));
     }
 
     private void openForm(FormRequest request) {

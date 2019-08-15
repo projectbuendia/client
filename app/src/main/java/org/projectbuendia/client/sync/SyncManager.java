@@ -165,7 +165,7 @@ public class SyncManager {
             try {
                 callback.run();
             } catch (Throwable t) {
-                LOG.e(t, "Exception in cancelSync callback");
+                LOG.e(t, "Exception in stopSyncing callback");
             }
         }
         syncStoppedCallbacks.clear();
