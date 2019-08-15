@@ -44,6 +44,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
+import static org.projectbuendia.client.utils.Utils.eq;
+
 /** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class BaseLoggedInActivity extends BaseActivity {
 
@@ -139,9 +141,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private void updateActiveUser() {
         JsonUser user = App.getUserManager().getActiveUser();
 
-        if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
-            LOG.w("The user has switched. I don't know how to deal with that right now");
-            // TODO: Handle.
+        if (!eq(mLastActiveUser, user)) {
+            LOG.w("User has switched from %s to %s", mLastActiveUser, user);
         }
         mLastActiveUser = user;
 
