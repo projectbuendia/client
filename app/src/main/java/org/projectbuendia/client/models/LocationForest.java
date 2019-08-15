@@ -125,7 +125,7 @@ public class LocationForest {
 
         // The default location is either set with an asterisk in the name
         // (see above) or defaults to the first leaf node.
-        if (defaultUuid != null) {
+        if (defaultUuid == null) {
             for (Location location : locations) {
                 if (isLeaf(location)) {
                     defaultUuid = location.uuid;
