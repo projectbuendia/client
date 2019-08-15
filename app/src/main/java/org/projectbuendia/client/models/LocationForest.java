@@ -19,7 +19,6 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,12 +46,6 @@ public class LocationForest {
     private int totalNumPatients;
 
     private final Object patientCountLock = new Object();
-
-    private final Comparator<Location> PATH_COMPARATOR = (a, b) -> {
-        String pathA = Utils.toNonnull(pathsByUuid.get(a.uuid));
-        String pathB = Utils.toNonnull(pathsByUuid.get(b.uuid));
-        return pathA.compareTo(pathB);
-    };
 
     public LocationForest() {
         locations = new Location[0];
@@ -128,7 +121,7 @@ public class LocationForest {
 
         // Finally, sort by path, yielding an array of nodes in depth-first
         // order with every subtree in the proper order.
-        Arrays.sort(locations, PATH_COMPARATOR);
+        sort(locations);
 
         // The default location is either set with an asterisk in the name
         // (see above) or defaults to the first leaf node.
@@ -144,6 +137,14 @@ public class LocationForest {
 
         LOG.i("Loaded LocationForest with %d locations; default = %s",
             locations.length, defaultLocation);
+    }
+
+    public void sort(Location[] locations) {
+        Arrays.sort(locations, (a, b) -> {
+            String pathA = Utils.toNonnull(pathsByUuid.get(a.uuid));
+            String pathB = Utils.toNonnull(pathsByUuid.get(b.uuid));
+            return pathA.compareTo(pathB);
+        });
     }
 
     public void updatePatientCounts(Map<String, Integer> patientCountsByLocationUuid) {
