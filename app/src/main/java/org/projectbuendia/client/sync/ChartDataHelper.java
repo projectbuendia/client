@@ -14,6 +14,7 @@ package org.projectbuendia.client.sync;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
@@ -49,8 +50,8 @@ public class ChartDataHelper {
     public static final String CHART_GRID_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
     @Deprecated
     public static final String CHART_TILES_UUID = "975afbce-d4e3-4060-a25f-afcd0e5564ef";
-    public static final String ENGLISH_LOCALE = "en";
 
+    private final AppSettings mSettings;
     private final ContentResolver mContentResolver;
 
     private static final Logger LOG = Logger.create();
@@ -62,7 +63,8 @@ public class ChartDataHelper {
     private static Map<String, String> sConceptNames;
     private static Map<String, ConceptType> sConceptTypes;
 
-    public ChartDataHelper(ContentResolver contentResolver) {
+    public ChartDataHelper(AppSettings settings, ContentResolver contentResolver) {
+        mSettings = settings;
         mContentResolver = checkNotNull(contentResolver);
     }
 
@@ -122,7 +124,7 @@ public class ChartDataHelper {
     /** Gets all observations for a given patient from the local cache, localized to English. */
     // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
     public List<Obs> getObservations(String patientUuid) {
-        return getObservations(patientUuid, ENGLISH_LOCALE);
+        return getObservations(patientUuid, mSettings.getLocaleTag());
     }
 
     private Obs obsFromCursor(Cursor c) {
@@ -175,7 +177,7 @@ public class ChartDataHelper {
     }
 
     public ArrayList<ObsRow> getPatientObservationsByConcept(String patientUuid, String... conceptUuids) {
-        loadConceptData(ENGLISH_LOCALE);
+        loadConceptData(mSettings.getLocaleTag());
 
         String[] args = new String[conceptUuids.length + 1];
         String conceptSet = "";
@@ -207,7 +209,7 @@ public class ChartDataHelper {
     }
 
     public ArrayList<ObsRow> getPatientObservationsByMillis(String patientUuid, String startMillis,String stopMillis) {
-        loadConceptData(ENGLISH_LOCALE);
+        loadConceptData(mSettings.getLocaleTag());
         ArrayList<ObsRow> results = new ArrayList<>();
         String conditions = Observations.VOIDED + " IS NOT ? and "
                 + Observations.PATIENT_UUID + " = ? and "
@@ -228,7 +230,7 @@ public class ChartDataHelper {
     }
 
     public ArrayList<ObsRow> getPatientObservationsByConceptMillis(String patientUuid, String conceptUuid, String StartMillis, String StopMillis) {
-        loadConceptData(ENGLISH_LOCALE);
+        loadConceptData(mSettings.getLocaleTag());
         ArrayList<ObsRow> results = new ArrayList<>();
         String conditions = Observations.VOIDED + " IS NOT ? and "
                 + Observations.PATIENT_UUID + " = ? and "
@@ -253,7 +255,7 @@ public class ChartDataHelper {
     // TODO/cleanup: Have this return a Map<String, ObsPoint>.
     public Map<String, Obs> getLatestObservations(String patientUuid) {
         // TODO: i18n
-        return getLatestObservations(patientUuid, ENGLISH_LOCALE);
+        return getLatestObservations(patientUuid, mSettings.getLocaleTag());
     }
 
     /** Gets the latest observation of each concept for a given patient from the app db. */

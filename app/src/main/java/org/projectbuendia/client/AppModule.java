@@ -102,24 +102,20 @@ public final class AppModule {
         mApp = app;
     }
 
-    @Provides
-    @Singleton Application provideApplication() {
+    @Provides @Singleton Application provideApplication() {
         return mApp;
     }
 
-    @Provides
-    @Singleton AppSettings provideAppSettings(Application app) {
+    @Provides @Singleton AppSettings provideAppSettings(Application app) {
         return new AppSettings(
             PreferenceManager.getDefaultSharedPreferences(app), app.getResources());
     }
 
-    @Provides
-    @Singleton ContentResolver provideContentResolver(Application app) {
+    @Provides @Singleton ContentResolver provideContentResolver(Application app) {
         return app.getContentResolver();
     }
 
-    @Provides
-    @Singleton SyncManager provideSyncManager(AppSettings settings, SyncEngine engine) {
+    @Provides @Singleton SyncManager provideSyncManager(AppSettings settings, SyncEngine engine) {
         return new SyncManager(
             settings.getUseSyncAdapter() ?
                 new SyncAdapterSyncScheduler(engine, SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY) :
@@ -127,13 +123,12 @@ public final class AppModule {
         );
     }
 
-    @Provides
-    @Singleton SyncEngine provideSyncEngine(Application app) {
+    @Provides @Singleton SyncEngine provideSyncEngine(Application app) {
         return new BuendiaSyncEngine(app.getApplicationContext());
     }
 
-    @Provides
-    @Singleton ChartDataHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
-        return new ChartDataHelper(contentResolver);
+    @Provides @Singleton ChartDataHelper provideLocalizedChartHelper(
+        AppSettings settings, ContentResolver contentResolver) {
+        return new ChartDataHelper(settings, contentResolver);
     }
 }

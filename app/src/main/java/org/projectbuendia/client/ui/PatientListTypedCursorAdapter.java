@@ -21,6 +21,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Location;
@@ -68,7 +69,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     public PatientListTypedCursorAdapter(Context context) {
         mContext = context;
         mPatientsByLocation = new HashMap<>();
-        mChartDataHelper = new ChartDataHelper(context.getContentResolver());
+        mChartDataHelper = new ChartDataHelper(
+            App.getInstance().getSettings(), context.getContentResolver());
     }
 
     @Override public int getGroupCount() {
@@ -245,8 +247,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
-            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.PREGNANCY_UUID, "en");
-            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID, "en");
+            String localeTag = App.getInstance().getSettings().getLocaleTag();
+            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.PREGNANCY_UUID, localeTag);
+            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID, localeTag);
             return null;
         }
 
