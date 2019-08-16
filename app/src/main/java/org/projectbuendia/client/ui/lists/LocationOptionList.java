@@ -29,6 +29,7 @@ public class LocationOptionList {
     protected final List<Location> locations;
     protected final Map<String, View> itemsByUuid;
     protected final boolean highlightSelection;
+    protected LocationForest forest;
     protected Location selectedLocation;
     protected OnItemSelectedListener onLocationSelectedListener;
 
@@ -71,7 +72,7 @@ public class LocationOptionList {
 
             int numPatients = forest.countPatientsIn(location);
             View item = createItem(
-                location, location.name, numPatients, parentUuid, fgColor, bgColor, size);
+                location.name, numPatients, parentUuid, fgColor, bgColor, size);
 
             item.setTag(location);
             item.setOnClickListener(clickedItem -> {
@@ -81,9 +82,28 @@ public class LocationOptionList {
             this.locations.add(location);
             itemsByUuid.put(location.uuid, item);
         }
+
+        // Watch for updates to the patient counts.
+        if (this.forest != null) {
+            this.forest.setOnPatientCountsUpdatedListener(null);
+        }
+        this.forest = forest;
+        this.forest.setOnPatientCountsUpdatedListener(() -> updateCounts(forest));
     }
 
-    public void clear() {
+    protected void updateCounts(LocationForest forest) {
+        for (Location location : locations) {
+            View item = itemsByUuid.get(location.uuid);
+            TextView patientCount = item.findViewById(R.id.patient_count);
+            int numPatients = forest.countPatientsIn(location);
+            TextView locationName = item.findViewById(R.id.location_name);
+            int fgColor = locationName.getCurrentTextColor();
+            patientCount.setText("" + numPatients);
+            patientCount.setTextColor(Utils.colorWithOpacity(fgColor, numPatients > 0 ? 1 : 0.25));
+        }
+    }
+
+    protected void clear() {
         locations.clear();
         for (View item : itemsByUuid.values()) {
             item.setOnClickListener(null);
@@ -95,19 +115,19 @@ public class LocationOptionList {
     }
 
     protected View createItem(
-        Location location, String label, int numPatients, String parentUuid,
+        String label, int numPatients, String parentUuid,
         int fgColor, int bgColor, double relativeWidth) {
         ViewGroup parent = findContainer(parentUuid);
         View item = c.inflate(R.layout.location_list_item, parent);
         View button = item.findViewById(R.id.button);
-        TextView title = item.findViewById(R.id.title);
-        TextView content = item.findViewById(R.id.content);
+        TextView locationName = item.findViewById(R.id.location_name);
+        TextView patientCount = item.findViewById(R.id.patient_count);
 
-        title.setText(label);
-        content.setText("" + numPatients);
+        locationName.setText(label);
+        patientCount.setText("" + numPatients);
 
-        title.setTextColor(fgColor);
-        content.setTextColor(Utils.colorWithOpacity(fgColor, numPatients > 0 ? 1 : 0.25));
+        locationName.setTextColor(fgColor);
+        patientCount.setTextColor(Utils.colorWithOpacity(fgColor, numPatients > 0 ? 1 : 0.25));
         button.setBackgroundColor(bgColor);
 
         FlexboxLayout.LayoutParams params = (FlexboxLayout.LayoutParams) item.getLayoutParams();

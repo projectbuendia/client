@@ -58,7 +58,7 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
 
         mUuid = subroot.uuid;
         String indentedName = subroot.name;
-        for (int i = 1; i < subroot.depth; i++) {
+        for (int i = 0; i < forest.getDepth(subroot); i++) {
             indentedName = "        " + indentedName;
         }
         mDescription = indentedName;

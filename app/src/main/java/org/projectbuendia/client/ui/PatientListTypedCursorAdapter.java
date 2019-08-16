@@ -36,7 +36,6 @@ import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -229,7 +228,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         // Produce a sorted list of all the locations that have patients.
         mLocations = new Location[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
-        Arrays.sort(mLocations);
+        forest.sort(mLocations);
 
         // Sort the patient lists within each location using the default comparator.
         for (List<Patient> patients : mPatientsByLocation.values()) {

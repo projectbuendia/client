@@ -27,7 +27,6 @@ import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.widgets.SubtitledButtonView;
 
 import javax.inject.Inject;
 
@@ -61,8 +60,8 @@ public final class LocationListFragment extends ProgressFragment {
 
         mScroll = view.findViewById(R.id.scroll_container);
         mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
-        LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
-        if (forest != null) mList.setLocations(forest, forest.allNodes());
+        LocationForest forest = mModel.getForest();
+        mList.setLocations(forest, forest.allNodes());
         return view;
     }
 
@@ -98,12 +97,6 @@ public final class LocationListFragment extends ProgressFragment {
             mController.detachFragmentUi(mUi);
         }
         super.onDestroyView();
-    }
-
-    public void setPatientCount(SubtitledButtonView button, long count) {
-        button.setSubtitle("" + count);
-        button.setTextColor(0xff000000);
-        button.setSubtitleColor(count == 0 ? 0x40000000 : 0xff000000);
     }
 
     private final class Ui implements LocationListController.LocationListFragmentUi {

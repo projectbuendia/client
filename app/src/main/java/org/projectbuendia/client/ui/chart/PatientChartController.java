@@ -84,7 +84,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private static final int PATIENT_UPDATE_PERIOD_MILLIS = 10000;
 
     private Patient mPatient = Patient.builder().build();
-    private LocationForest mForest;
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
@@ -235,7 +234,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
-        mForest = mAppModel.getForest(mSettings.getLocaleTag());
         updatePatientLocationUi();
     }
 
@@ -321,7 +319,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             mUi.showError(R.string.no_user);
             return;
         }
-        if (mForest == null || mForest.getDefaultLocation() == null) {
+        if (mAppModel.getDefaultLocation() == null) {
             mUi.showError(R.string.no_location);
             return;
         }
@@ -331,8 +329,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         preset.providerUuid = user.uuid;
         preset.locationUuid = mPatient.locationUuid;
         if (preset.locationUuid == null) {
-            if (mForest != null && mForest.getDefaultLocation() != null) {
-                preset.locationUuid = mForest.getDefaultLocation().uuid;
+            if (mAppModel.getDefaultLocation() != null) {
+                preset.locationUuid = mAppModel.getDefaultLocation().uuid;
             }
         }
         Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
@@ -527,8 +525,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     private synchronized void updatePatientLocationUi() {
-        if (mForest != null && mPatient != null && mPatient.locationUuid != null) {
-            mUi.updatePatientLocationUi(mForest, mPatient);
+        if (mPatient != null && mPatient.locationUuid != null) {
+            mUi.updatePatientLocationUi(mAppModel.getForest(), mPatient);
         }
     }
 
@@ -551,7 +549,8 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private final class EventSubscriber {
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientObsUi();
+            updatePatientObsUi(); // if the sync fetched observations
+            mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid); // if the sync touched this patient
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {

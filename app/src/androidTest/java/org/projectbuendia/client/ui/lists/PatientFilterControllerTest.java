@@ -21,7 +21,6 @@ import org.projectbuendia.client.FakeForestFactory;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,9 +42,9 @@ public class PatientFilterControllerTest {
     @UiThreadTest
     public void testSetupActionBarAsync_passesLocationFilters() {
         // GIVEN a valid location forest
-        when(mMockAppModel.getForest(any())).thenReturn(FakeForestFactory.build());
+        when(mMockAppModel.getForest()).thenReturn(FakeForestFactory.build());
         // WHEN the PatientFilterController starts
-        mController = new PatientFilterController(mMockUi, mMockAppModel, LOCALE);
+        mController = new PatientFilterController(mMockUi, mMockAppModel);
         // THEN location filters are passed to the Ui
         verify(mMockUi).populateActionBar(
             argThat(new SimpleSelectionFilterMatchers.ContainsFilterWithName("Triage")));

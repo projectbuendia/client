@@ -13,13 +13,12 @@ package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Handler;
 
 import org.joda.time.DateTime;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
@@ -33,13 +32,12 @@ import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.utils.Receiver;
 import org.projectbuendia.client.utils.Utils;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * A model that manages all data access within the application.
@@ -64,57 +62,52 @@ public class AppModel {
     private final ContentResolver mContentResolver;
     private final TaskFactory mTaskFactory;
 
-    private final Object loadedForestLock = new Object();
-    private LocationForest loadedForest = null;
-    private String loadedForestLocale = null;
-    private boolean forestObserversRegistered = false;
-    private Receiver<LocationForest> onForestRebuiltListener = null;
-    private Receiver<LocationForest> onForestUpdatedListener = null;
+    private LocationForestProvider forestProvider = null;
+
+    AppModel(ContentResolver contentResolver, TaskFactory taskFactory) {
+        mContentResolver = contentResolver;
+        mTaskFactory = taskFactory;
+        forestProvider = new LocationForestProvider(mContentResolver);
+    }
 
     /** Clears all in-memory model state. */
     public void reset() {
-        synchronized (loadedForestLock) {
-            loadedForest = null;
-            loadedForestLocale = null;
-            onForestRebuiltListener = null;
-            onForestUpdatedListener = null;
-        }
+        forestProvider.dispose();
+        forestProvider = new LocationForestProvider(mContentResolver);
     }
 
-    /**
-     * Returns true iff the model has previously been fully downloaded from the server--that is, if
-     * locations, patients, users, charts, and observations were all downloaded at some point. Note
-     * that this data may be out-of-date, but must be present in some form for proper operation of
-     * the app.
-     */
-    public boolean isFullModelAvailable() {
+    public @Nonnull LocationForest getForest() {
+        return getForest(App.getInstance().getSettings().getLocaleTag());
+    }
+
+    public @Nullable Location getDefaultLocation() {
+        return getForest().getDefaultLocation();
+    }
+
+    private @Nonnull LocationForest getForest(String locale) {
+        return forestProvider.getForest(locale);
+    }
+
+    public void setOnForestReplacedListener(Runnable listener) {
+        forestProvider.setOnForestReplacedListener(listener);
+    }
+
+    /** Returns true if the model is ready for use. */
+    public boolean isReady() {
         return getLastFullSyncTime() != null;
     }
 
     public DateTime getLastFullSyncTime() {
-        // The sync process is transactional, but in rare cases, a sync may complete without ever
-        // having started--this is the case if user data is cleared mid-sync, for example. To check
-        // that a sync actually completed, we look at the FULL_SYNC_START_MILLIS and
-        // FULL_SYNC_END_MILLIS columns in the Misc table, which are written to as the first and
-        // last operations of a complete sync. If both of these fields are present, and the last
-        // end time is greater than the last start time, then a full sync must have completed.
-        try (Cursor c = mContentResolver.query(
-                Contracts.Misc.URI, null, null, null, null)) {
-            LOG.d("Sync timing result count: %d", c.getCount());
-            if (c.moveToNext()) {
-                DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_MILLIS);
-                DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_MILLIS);
-                LOG.i("full_sync_start_millis = %s, full_sync_end_millis = %s",
-                    fullSyncStart, fullSyncEnd);
-                if (fullSyncEnd != null) {
-                    return fullSyncEnd;
-                }
-                if (fullSyncStart != null && fullSyncEnd != null && fullSyncEnd.isAfter(fullSyncStart)) {
-                    return fullSyncEnd;
-                }
+        // The FULL_SYNC_END_MILLIS field indicates a successful full sync.
+        // It is set to non-null only when the end of a full sync is reached and the
+        // database has not been cleared during the sync (see storeFullSyncEndTime).
+        DateTime fullSyncEnd = null;
+        try (Cursor cursor = mContentResolver.query(Misc.URI, null, null, null, null)) {
+            if (cursor.moveToNext()) {
+                fullSyncEnd = Utils.getDateTime(cursor, Misc.FULL_SYNC_END_MILLIS);
             }
-            return null;
         }
+        return fullSyncEnd;
     }
 
     public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
@@ -123,92 +116,6 @@ public class AppModel {
         values.put(Contracts.Observations.VOIDED,1);
         mContentResolver.update(Contracts.Observations.URI, values, conditions, new String[]{voidObs.Uuid});
         mTaskFactory.voidObsTask(bus, voidObs).execute();
-    }
-
-    public @Nullable LocationForest getForest(String locale) {
-        if (!isFullModelAvailable()) return null;
-
-        LocationForest forest;
-        synchronized (loadedForestLock) {
-            if (loadedForest == null || !eq(locale, loadedForestLocale)) {
-                loadedForest = loadForest(locale);
-                if (loadedForest != null) loadedForestLocale = locale;
-            }
-            forest = loadedForest;
-            if (!forestObserversRegistered) {
-                registerForestObservers();
-                forestObserversRegistered = true;
-            }
-        }
-        return forest;
-    }
-
-    public void setForestRebuiltListener(Receiver<LocationForest> listener) {
-        onForestRebuiltListener = listener;
-    }
-
-    public void setForestUpdatedListener(Receiver<LocationForest> listener) {
-        onForestUpdatedListener = listener;
-    }
-
-    private @Nullable LocationForest loadForest(String locale) {
-        Uri uri = Contracts.getLocalizedLocationsUri(locale);
-        try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-            return new LocationForest(new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
-        }
-    }
-
-    private void updateForest(LocationForest forest) {
-        if (loadedForestLocale != null) {
-            Uri uri = Contracts.getLocalizedLocationsUri(loadedForestLocale);
-            try (Cursor cursor = mContentResolver.query(uri, null, null, null, null)) {
-                forest.updatePatientCounts(
-                    new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));
-            }
-        }
-    }
-
-    private void registerForestObservers() {
-        mContentResolver.registerContentObserver(
-            Contracts.LocalizedLocations.URI, true, new ContentObserver(new Handler()) {
-                @Override public void onChange(boolean selfChange) {
-                    LocationForest forest = null;
-                    if (onForestRebuiltListener != null) {
-                        // Someone is listening, so get a new forest for them now.
-                        LOG.i("Location content changed; rebuilding a new forest");
-                        synchronized (loadedForestLock) {
-                            forest = loadedForest = loadForest(loadedForestLocale);
-                        }
-                    } else {
-                        // No one is listening; ensure the forest is reloaded later.
-                        LOG.i("Location content changed; invalidating current forest");
-                        synchronized (loadedForestLock) {
-                            loadedForest = null;
-                        }
-                    }
-                    if (onForestRebuiltListener != null && forest != null) {
-                        onForestRebuiltListener.receive(forest);
-                    }
-                }
-            }
-        );
-        mContentResolver.registerContentObserver(
-            Contracts.Patients.URI, true, new ContentObserver(new Handler()) {
-                @Override public void onChange(boolean selfChange) {
-                    LocationForest forest = null;
-                    LOG.i("Patient content changed; updating current forest");
-                    synchronized (loadedForestLock) {
-                        if (loadedForest != null) {
-                            updateForest(loadedForest);
-                        }
-                        forest = loadedForest;
-                    }
-                    if (onForestUpdatedListener != null && forest != null) {
-                        onForestUpdatedListener.receive(forest);
-                    }
-                }
-            }
-        );
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
@@ -298,12 +205,6 @@ public class AppModel {
      */
     public void addEncounter(CrudEventBus bus, Patient patient, Encounter encounter) {
         mTaskFactory.newAddEncounterTask(patient, encounter, bus).execute();
-    }
-
-    AppModel(ContentResolver contentResolver,
-             TaskFactory taskFactory) {
-        mContentResolver = contentResolver;
-        mTaskFactory = taskFactory;
     }
 
     public void voidObservation(CrudEventBus bus, VoidObs obs) {

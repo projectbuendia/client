@@ -76,7 +76,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
         dialog.getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
+        LocationForest forest = mModel.getForest();
         mList = new LocationOptionList(c.findView(R.id.list_container), true);
         mList.setLocations(forest, forest.getLeaves());
         mList.setSelectedLocation(forest.get(getArguments().getString("locationUuid")));

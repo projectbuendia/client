@@ -293,7 +293,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onPause() {
         super.onPause();
-        if (!mAppModel.isFullModelAvailable()) {
+        if (!mAppModel.isReady()) {
             // The database was cleared; go back to the login activity.
             startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
         }
