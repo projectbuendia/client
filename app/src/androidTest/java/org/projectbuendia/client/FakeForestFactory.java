@@ -26,9 +26,9 @@ public class FakeForestFactory {
     public static final String SUSPECT_ZONE_NAME = "Suspect";
     public static final String SUSPECT_1_TENT_NAME = "S1";
     public static final String SUSPECT_2_TENT_NAME = "S2";
-    public static final String SUSPECT_ZONE_UUID = "2f1e2418-ede6-481a-ad80-b9939a7fde8e";
-    public static final String TRIAGE_ZONE_UUID = "3f75ca61-ec1a-4739-af09-25a84e3dd237";
-    public static final String DISCHARGED_ZONE_UUID = "d7ca63c3-6ea0-4357-82fd-0910cc17a2cb";
+    public static final String SUSPECT_ZONE_UUID = "test_location_suspect";
+    public static final String TRIAGE_ZONE_UUID = "test_location_triage";
+    public static final String DISCHARGED_ZONE_UUID = "test_location_discharged";
 
     /**
      * Builds an {@link LocationForest} with a facility, the Triage and Discharged zones, and

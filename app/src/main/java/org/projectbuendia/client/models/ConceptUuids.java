@@ -70,9 +70,8 @@ public class ConceptUuids {
     };
 
 
-    // ==== Pulse; used only for logging messages to the server.
+    // ==== Pulse; used only for health checks and logging messages to the server.
 
-    // TODO(ping): We should do remote logging a different way.
     public static final String PULSE_UUID = toUuid(5087);
 
 

@@ -46,10 +46,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A helper class for retrieving and localizing data to show in patient charts. */
 public class ChartDataHelper {
-    @Deprecated
-    public static final String CHART_GRID_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
-    @Deprecated
-    public static final String CHART_TILES_UUID = "975afbce-d4e3-4060-a25f-afcd0e5564ef";
 
     private final AppSettings mSettings;
     private final ContentResolver mContentResolver;
