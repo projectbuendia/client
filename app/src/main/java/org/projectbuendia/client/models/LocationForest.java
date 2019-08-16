@@ -46,12 +46,7 @@ public class LocationForest {
     private final Map<String, Integer> numPatientsInSubtree = new HashMap<>();
     private int totalNumPatients;
 
-    public static LocationForest createFromCursor(TypedCursor<LocationQueryResult> cursor) {
-        if (cursor.get(0) == null) return null;
-        return new LocationForest(cursor);
-    }
-
-    private LocationForest(TypedCursor<LocationQueryResult> cursor) {
+    public LocationForest(TypedCursor<LocationQueryResult> cursor) {
         List<String> uuids = new ArrayList<>();
         Map<String, String> namesByUuid = new HashMap<>();
         Map<String, String> shortIdsByUuid = new HashMap<>();
