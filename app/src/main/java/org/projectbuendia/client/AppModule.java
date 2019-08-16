@@ -68,6 +68,7 @@ import dagger.Provides;
     injects = {
         App.class,
         AppSettings.class,
+        SyncManager.class,
 
         // TODO: Move these into activity-specific modules.
         // Activities

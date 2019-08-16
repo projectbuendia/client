@@ -51,6 +51,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
  * not need to worry about the implementation details of this.
  */
 public class AppModel {
+    // The UUID of the single OpenMRS form that defines all our charts.
     public static final String CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
     // This is a custom Buendia-specific concept to indicate that a treatment order
@@ -75,6 +76,8 @@ public class AppModel {
         synchronized (loadedForestLock) {
             loadedForest = null;
             loadedForestLocale = null;
+            onForestRebuiltListener = null;
+            onForestUpdatedListener = null;
         }
     }
 
