@@ -320,7 +320,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_validation_missing_given_name">Entrez le nom donné</string>
   <string name="patient_validation_missing_id">Entrez l\'ID du patient</string>
   <string name="patient_validation_missing_admission_date">Entrez la date d\'admission</string>
-  <string name="patient_missing_gender">S\'il vous plaît sélectionnez Masculin ou Féminin.</string>
+  <string name="patient_missing_sex">S\'il vous plaît sélectionnez Masculin ou Féminin.</string>
   <string name="patient_validation_future_admission_date">Date d\'admission ne peut pas être dans l\'avenir.</string>
   <string name="patient_validation_future_onset_date">Symptôme date de début ne peut pas être dans l\'avenir.</string>
   <string name="patient_creation_clear_symptom_onset_date">Nettoyer</string>

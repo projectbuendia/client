@@ -106,7 +106,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
         if (id.equals(patient.id)) {  // server returned the patient we were looking for
             mPatientUuid = patient.uuid;
             mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                " (" + patient.gender + ", " + Utils.birthdateToAge(
+                " (" + patient.sex + ", " + Utils.birthdateToAge(
                 patient.birthdate, App.getInstance().getResources()) + ")");
         }
     }
@@ -141,10 +141,10 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
                         String age = birthdate != null ?
                             Utils.birthdateToAge(birthdate, getResources()) : "age unknown";
-                        String gender = Utils.getString(cursor, Patients.GENDER, "");
+                        String sex = Utils.getString(cursor, Patients.SEX, "");
                         mPatientUuid = uuid;
                         mPatientSearchResult.setText(givenName + " " + familyName +
-                            " (" + gender + ", " + age + ")");
+                            " (" + sex + ", " + age + ")");
                     } else {
                         String message = getResources().getString(R.string.go_to_patient_no_data);
                         DateTime lastSyncTime = mAppModel.getLastFullSyncTime();

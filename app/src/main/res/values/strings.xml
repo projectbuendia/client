@@ -325,7 +325,7 @@
   <string name="patient_validation_missing_given_name">Enter the given name</string>
   <string name="patient_validation_missing_id">Enter the patient ID</string>
   <string name="patient_validation_missing_admission_date">Enter the admission date</string>
-  <string name="patient_missing_gender">Please select Male or Female.</string>
+  <string name="patient_missing_sex">Please select Male or Female.</string>
   <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
   <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future.</string>
   <string name="patient_creation_clear_symptom_onset_date">Clear</string>

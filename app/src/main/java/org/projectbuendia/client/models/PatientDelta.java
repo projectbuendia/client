@@ -21,7 +21,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -32,7 +31,7 @@ public class PatientDelta {
     public Optional<String> id = Optional.absent();
     public Optional<String> givenName = Optional.absent();
     public Optional<String> familyName = Optional.absent();
-    public Optional<Integer> gender = Optional.absent();
+    public Optional<Sex> sex = Optional.absent();
     public Optional<LocalDate> birthdate = Optional.absent();
     public Optional<LocalDate> admissionDate = Optional.absent();
     public Optional<LocalDate> firstSymptomDate = Optional.absent();
@@ -52,9 +51,8 @@ public class PatientDelta {
         if (familyName.isPresent()) {
             cv.put(Contracts.Patients.FAMILY_NAME, familyName.get());
         }
-        if (gender.isPresent()) {
-            cv.put(Contracts.Patients.GENDER,
-                gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
+        if (sex.isPresent()) {
+            cv.put(Contracts.Patients.SEX, sex.get().code);
         }
         if (birthdate.isPresent()) {
             cv.put(Contracts.Patients.BIRTHDATE, birthdate.get().toString());
@@ -89,11 +87,8 @@ public class PatientDelta {
             if (familyName.isPresent()) {
                 json.put(Server.PATIENT_FAMILY_NAME_KEY, familyName.get());
             }
-            if (gender.isPresent()) {
-                json.put(
-                    Server.PATIENT_SEX_KEY,
-                    gender.get() == JsonPatient.GENDER_UNKNOWN ? "U"
-                        : gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
+            if (sex.isPresent()) {
+                json.put(Server.PATIENT_SEX_KEY, sex.get().code);
             }
             if (birthdate.isPresent()) {
                 json.put(

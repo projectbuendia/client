@@ -148,7 +148,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             LocalDate admissionDate,
             LocalDate firstSymptomsDate);
 
-        /** Updates the UI with the patient's personal details (name, gender, etc.). */
+        /** Updates the UI with the patient's personal details (name, sex, etc.) */
         void updatePatientDetailsUi(Patient patient);
 
         /** Shows a progress dialog with an indeterminate spinner in it. */

@@ -202,7 +202,7 @@ public interface Contracts {
         String FAMILY_NAME = "family_name";
         String LOCATION_UUID = "location_uuid";
         String BIRTHDATE = "birthdate";  // a local date in yyyy-mm-dd format
-        String GENDER = "gender";
+        String SEX = "sex";
     }
 
     interface Users {

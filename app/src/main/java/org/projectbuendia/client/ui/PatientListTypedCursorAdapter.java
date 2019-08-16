@@ -149,27 +149,33 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         ViewHolder holder = (ViewHolder) convertView.getTag();
         String givenName = Utils.orDefault(patient.givenName, EN_DASH);
         String familyName = Utils.orDefault(patient.familyName, EN_DASH);
-        holder.mPatientName.setText(givenName + " " + familyName);
-        holder.mPatientId.setText(patient.id);
-        holder.mPatientId.setTextColor(status.getForegroundColor());
-        holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
+        holder.mName.setText(givenName + " " + familyName);
+        holder.mId.setText(patient.id);
+        holder.mId.setTextColor(status.getForegroundColor());
+        holder.mId.setBackgroundColor(status.getBackgroundColor());
 
-        holder.mPatientAge.setText(
+        holder.mAge.setText(
             patient.birthdate == null ? "" : Utils.birthdateToAge(
                 patient.birthdate, mContext.getResources()));
 
         boolean isChild = Utils.isChild(patient.birthdate);
 
-        holder.mPatientGender.setVisibility(
-            patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
+        int drawableId = 0;
+        switch (patient.sex) {
+            case MALE:
+                drawableId = isChild ? R.drawable.ic_male_child : R.drawable.ic_male;
+                break;
+            case FEMALE:
+                drawableId = pregnant ? R.drawable.ic_female_pregnant :
+                    isChild ? R.drawable.ic_female_child : R.drawable.ic_female;
+                break;
+        }
 
-        if (patient.gender != Patient.GENDER_UNKNOWN) {
-                holder.mPatientGender.setImageDrawable(mContext.getResources().getDrawable(
-                        patient.gender == Patient.GENDER_MALE ?
-                                isChild ? R.drawable.ic_gender_male_child : R.drawable.ic_gender_male
-                                : pregnant ? R.drawable.ic_gender_female_pregnant
-                                : isChild ? R.drawable.ic_gender_female_child : R.drawable.ic_gender_female
-                ));
+        if (drawableId > 0) {
+            holder.mSex.setVisibility(View.VISIBLE);
+            holder.mSex.setImageDrawable(mContext.getResources().getDrawable(drawableId));
+        } else {
+            holder.mSex.setVisibility(View.GONE);
         }
 
         // Add a bottom border and extra padding to the last item in each group.
@@ -259,10 +265,10 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     static class ViewHolder {
-        @InjectView(R.id.listview_cell_search_results_name) TextView mPatientName;
-        @InjectView(R.id.listview_cell_search_results_id) TextView mPatientId;
-        @InjectView(R.id.listview_cell_search_results_gender) ImageView mPatientGender;
-        @InjectView(R.id.listview_cell_search_results_age) TextView mPatientAge;
+        @InjectView(R.id.listview_cell_search_results_name) TextView mName;
+        @InjectView(R.id.listview_cell_search_results_id) TextView mId;
+        @InjectView(R.id.listview_cell_search_results_sex) ImageView mSex;
+        @InjectView(R.id.listview_cell_search_results_age) TextView mAge;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
