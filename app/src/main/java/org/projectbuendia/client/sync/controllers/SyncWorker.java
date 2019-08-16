@@ -15,14 +15,17 @@ import android.content.SyncResult;
 public interface SyncWorker {
     // TODO: Replace Throwable with something more specific.
 
+    /** Performs any initial tasks before sync() is called. */
     default void initialize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client
     ) throws Throwable { }
 
+    /** Performs a transactional chunk of sync work, returning true if all done. */
     boolean sync(
         ContentResolver resolver, SyncResult result, ContentProviderClient client
     ) throws Throwable;
 
+    /** Performs any final tasks after all calls to sync() are done. */
     default void finalize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client
     ) throws Throwable { }

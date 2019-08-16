@@ -9,7 +9,7 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonConcept;
-import org.projectbuendia.client.json.JsonConceptResponse;
+import org.projectbuendia.client.json.JsonConceptsResponse;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -29,7 +29,7 @@ public class ConceptsSyncWorker implements SyncWorker {
         ContentResolver resolver, SyncResult result, ContentProviderClient client
     ) throws Throwable {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        RequestFuture<JsonConceptResponse> future = RequestFuture.newFuture();
+        RequestFuture<JsonConceptsResponse> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
         ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();

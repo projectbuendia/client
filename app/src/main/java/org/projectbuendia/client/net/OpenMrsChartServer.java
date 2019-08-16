@@ -14,8 +14,8 @@ package org.projectbuendia.client.net;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
-import org.projectbuendia.client.json.JsonChart;
-import org.projectbuendia.client.json.JsonConceptResponse;
+import org.projectbuendia.client.json.JsonChartsResponse;
+import org.projectbuendia.client.json.JsonConceptsResponse;
 
 import java.util.HashMap;
 
@@ -46,14 +46,13 @@ public class OpenMrsChartServer {
      * @param successListener a {@link Response.Listener} that handles successful concept retrieval
      * @param errorListener   a {@link Response.ErrorListener} that handles failed concept retrieval
      */
-    public void getConcepts(Response.Listener<JsonConceptResponse> successListener,
+    public void getConcepts(Response.Listener<JsonConceptsResponse> successListener,
                             Response.ErrorListener errorListener) {
-        GsonRequest<JsonConceptResponse> request = new GsonRequest<JsonConceptResponse>(
+        GsonRequest<JsonConceptsResponse> request = new GsonRequest<>(
             mConnectionDetails.getBuendiaApiUrl() + "/concepts",
-            JsonConceptResponse.class,
+            JsonConceptsResponse.class,
             mConnectionDetails.addAuthHeader(new HashMap<>()),
-            successListener, errorListener) {
-        };
+            successListener, errorListener);
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
@@ -64,15 +63,13 @@ public class OpenMrsChartServer {
      * @param successListener a {@link Response.Listener} that handles successful structure retrieval
      * @param errorListener   a {@link Response.ErrorListener} that handles failed structure retrieval
      */
-    public void getChartStructure(
-        String uuid, Response.Listener<JsonChart> successListener,
-        Response.ErrorListener errorListener) {
-        GsonRequest<JsonChart> request = new GsonRequest<JsonChart>(
-            mConnectionDetails.getBuendiaApiUrl() + "/charts/" + uuid + "?v=full",
-            JsonChart.class,
+    public void getChartStructures(Response.Listener<JsonChartsResponse> successListener,
+                                   Response.ErrorListener errorListener) {
+        GsonRequest<JsonChartsResponse> request = new GsonRequest<>(
+            mConnectionDetails.getBuendiaApiUrl() + "/charts/?v=full",
+            JsonChartsResponse.class,
             mConnectionDetails.addAuthHeader(new HashMap<>()),
-            successListener, errorListener) {
-        };
+            successListener, errorListener);
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }

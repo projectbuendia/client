@@ -288,40 +288,40 @@ public class ChartDataHelper {
         }
     }
 
-    /** Retrieves and assembles a Chart from the local datastore. */
-    public List<Chart> getCharts(String uuid) {
+    /** Retrieves all the chart definitions from the local datastore. */
+    public List<Chart> getCharts() {
         Map<Long, ChartSection> tileGroupsById = new HashMap<>();
         Map<Long, ChartSection> rowGroupsById = new HashMap<>();
-        List<Chart> Charts = new ArrayList<>();
-        Chart currentChart = null;
+        List<Chart> charts = new ArrayList<>();
+        Chart chart = null;
 
-        try (Cursor c = mContentResolver.query(
-            ChartItems.URI, null,
-            ChartItems.CHART_UUID + " = ?", new String[] {uuid}, "weight")) {
+        try (Cursor c = mContentResolver.query(ChartItems.URI, null, null, null, "weight")) {
             while (c.moveToNext()) {
                 Long rowid = Utils.getLong(c, ChartItems.ROWID);
                 Long parentRowid = Utils.getLong(c, ChartItems.PARENT_ROWID);
                 String label = Utils.getString(c, ChartItems.LABEL, "");
                 if (parentRowid == null) {
                     // Add a section.
-                    String SectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
-                    if (SectionType != null) {
-                        switch (SectionType) {
+                    String sectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
+                    if (sectionType != null) {
+                        switch (sectionType) {
+                            // TODO(ping): Get rid of CHART_DIVIDER sections and
+                            // CHART_DIVIDER items, and instead store multiple
+                            // charts each in their own form.
                             case "CHART_DIVIDER":
-                                if ((currentChart != null) &&
-                                    ((currentChart.tileGroups.size() != 0)
-                                    || (currentChart.rowGroups.size() != 0))) {
-                                    Charts.add(currentChart);
+                                if (chart != null &&
+                                    chart.tileGroups.size() + chart.rowGroups.size() > 0) {
+                                    charts.add(chart);
                                 }
                                 break;
                             case "TILE_ROW":
                                 ChartSection tileGroup = new ChartSection(label);
-                                currentChart.tileGroups.add(tileGroup);
+                                chart.tileGroups.add(tileGroup);
                                 tileGroupsById.put(rowid, tileGroup);
                                 break;
                             case "GRID_SECTION":
                                 ChartSection rowGroup = new ChartSection(label);
-                                currentChart.rowGroups.add(rowGroup);
+                                chart.rowGroups.add(rowGroup);
                                 rowGroupsById.put(rowid, rowGroup);
                                 break;
                         }
@@ -344,14 +344,14 @@ public class ChartDataHelper {
                     } else {
                         String type = Utils.getString(c, ChartItems.TYPE);
                         if ((type != null) && (type.equals("CHART_DIVIDER"))) {
-                            currentChart = new Chart(uuid, label);
+                            chart = new Chart(label);
                         }
                     }
                 }
             }
         }
-        Charts.add(currentChart);
-        return Charts;
+        charts.add(chart);
+        return charts;
     }
 
     public List<Form> getForms() {

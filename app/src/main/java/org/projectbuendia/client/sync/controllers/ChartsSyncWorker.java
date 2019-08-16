@@ -12,7 +12,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonChartItem;
 import org.projectbuendia.client.json.JsonChartSection;
-import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.json.JsonChartsResponse;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
@@ -31,48 +31,45 @@ public class ChartsSyncWorker implements SyncWorker {
         ContentResolver resolver, SyncResult result, ContentProviderClient client
     ) throws Throwable {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        RequestFuture<JsonChart> future = RequestFuture.newFuture();
+        RequestFuture<JsonChartsResponse> future = RequestFuture.newFuture();
         // errors handled by caller
-        chartServer.getChartStructure(AppModel.CHART_UUID, future, future);
-        final JsonChart chart = future.get();
+        chartServer.getChartStructures(future, future);
+        final JsonChartsResponse response = future.get();
 
         // When we do a chart update, delete everything first, then insert all the new rows.
-        client.delete(Contracts.ChartItems.URI, null, null);
-        result.stats.numDeletes++;
-        client.applyBatch(getChartUpdateOps(chart, result));
+        result.stats.numDeletes += client.delete(Contracts.ChartItems.URI, null, null);
+        client.applyBatch(getInsertOps(response, result));
 
         return true;
     }
 
     /** Converts a JsonChart response into appropriate inserts in the chart table. */
-    private static ArrayList<ContentProviderOperation> getChartUpdateOps(
-            JsonChart response, SyncResult syncResult) {
-        if (response.uuid == null) {
-            LOG.e("null chart uuid when fetching chart structure");
-        }
+    private static ArrayList<ContentProviderOperation> getInsertOps(
+            JsonChartsResponse response, SyncResult result) {
 
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         int nextId = 1;
         int nextWeight = 1;
-        for (JsonChartSection section : response.sections) {
-            int parentId = nextId;
-            ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.URI)
+        for (JsonChart chart : response.results) {
+            for (JsonChartSection section : chart.sections) {
+                int parentId = nextId;
+                ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.URI)
                     .withValue("rowid", nextId++)
-                    .withValue(Contracts.ChartItems.CHART_UUID, response.uuid)
+                    .withValue(Contracts.ChartItems.CHART_UUID, chart.uuid)
                     .withValue(Contracts.ChartItems.WEIGHT, nextWeight++)
                     .withValue(Contracts.ChartItems.SECTION_TYPE, section.type != null ? section.type.name() : null)
                     .withValue(Contracts.ChartItems.LABEL, section.label)
                     .build());
-            syncResult.stats.numInserts++;
+                result.stats.numInserts++;
 
-            for (JsonChartItem item : section.items) {
-                Object[] conceptUuids = new Object[item.concepts.length];
-                for (int i = 0; i < conceptUuids.length; i++) {
-                    conceptUuids[i] = Utils.expandUuid(item.concepts[i]);
-                }
-                ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.URI)
+                for (JsonChartItem item : section.items) {
+                    Object[] conceptUuids = new Object[item.concepts.length];
+                    for (int i = 0; i < conceptUuids.length; i++) {
+                        conceptUuids[i] = Utils.expandUuid(item.concepts[i]);
+                    }
+                    ops.add(ContentProviderOperation.newInsert(Contracts.ChartItems.URI)
                         .withValue("rowid", nextId++)
-                        .withValue(Contracts.ChartItems.CHART_UUID, response.uuid)
+                        .withValue(Contracts.ChartItems.CHART_UUID, chart.uuid)
                         .withValue(Contracts.ChartItems.WEIGHT, nextWeight++)
                         .withValue(Contracts.ChartItems.PARENT_ROWID, parentId)
                         .withValue(Contracts.ChartItems.LABEL, item.label)
@@ -85,7 +82,8 @@ public class ChartsSyncWorker implements SyncWorker {
                         .withValue(Contracts.ChartItems.CSS_STYLE, item.css_style)
                         .withValue(Contracts.ChartItems.SCRIPT, item.script)
                         .build());
-                syncResult.stats.numInserts++;
+                    result.stats.numInserts++;
+                }
             }
         }
         return ops;

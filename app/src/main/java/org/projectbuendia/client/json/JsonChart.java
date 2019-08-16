@@ -16,7 +16,7 @@ package org.projectbuendia.client.json;
  * displayed, giving the grouping and ordering of fields.
  */
 public class JsonChart {
-    public String version;  // dot-separated decimal integers, e.g. "0.6", "0.7.1"
     public String uuid;  // UUID of the OpenMRS Form
+    public String version;  // dot-separated decimal integers, e.g. "0.6", "0.7.1"
     public JsonChartSection[] sections;  // sections in display order
 }

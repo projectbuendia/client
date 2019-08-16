@@ -215,7 +215,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
         mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
-        mCharts = mChartHelper.getCharts(AppModel.CHART_UUID);
+        mCharts = mChartHelper.getCharts();
     }
 
     public void setPatient(String uuid) {
@@ -392,7 +392,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         Interval interval = new Interval(start, start.plusDays(1));
         List<DateTime> executionTimes = new ArrayList<>();
         for (Obs obs : mObservations) {
-            if (AppModel.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
+            if (ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
                 order.uuid.equals(obs.value)) {
                 executionTimes.add(obs.time);
             }

@@ -103,6 +103,8 @@ public class Database extends SQLiteOpenHelper {
             + "start_millis INTEGER,"
             + "stop_millis INTEGER");
 
+        // TODO(ping): Store multiple charts, sourced from multiple forms,
+        // using a CHARTS table (uuid, name), where order is determined by name.
         SCHEMAS.put(Table.CHART_ITEMS, ""
             + "rowid INTEGER PRIMARY KEY NOT NULL,"
             + "chart_uuid TEXT,"
