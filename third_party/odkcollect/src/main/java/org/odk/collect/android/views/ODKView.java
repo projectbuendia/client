@@ -75,7 +75,6 @@ public class ODKView extends LinearLayout {
     private final static int VIEW_ID = 12345;
 
     private final static String t = "ODKView";
-    private static final Object GUEST_USER_NAME = "Guest User";
 
     private LinearLayout mView;
     private LinearLayout.LayoutParams mLayout;

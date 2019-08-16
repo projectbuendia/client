@@ -13,6 +13,8 @@ package org.projectbuendia.client.json;
 
 import com.google.common.base.Preconditions;
 
+import org.projectbuendia.client.utils.Utils;
+
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Objects;
@@ -20,23 +22,15 @@ import java.util.Objects;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /** JSON reprsentation of a user (an OpenMRS Provider). */
-public class JsonUser implements Serializable, Comparable<JsonUser> {
+public class JsonUser implements Serializable {
     public String uuid;
     public String fullName;
 
-    // GUEST_ACCOUNT_NAME must match the name defined in UserResource on the server side.
-    // The only special handling for this user is that (a) the server automatically
-    // creates this user and (b) the client always sorts it first when showing a list.
-
-    // TODO/i18n: This will be tricky to internationalize as it's stored on the server.
-    // Perhaps create the guest account with a special name like "*" on the server, and replace
-    // "*" with the localized string for "Guest User" on the client when displaying the user?
-    private static final String GUEST_ACCOUNT_NAME = "Guest User";
-
-    public static final Comparator<JsonUser> COMPARATOR_BY_UUID = (a, b) -> a.uuid.compareTo(b.uuid);
+    /** This must match the same constant on the server. */
+    public static final String PROVIDER_GUEST_UUID = "buendia_provider_guest";
 
     public static final Comparator<JsonUser> COMPARATOR_BY_NAME = (a, b) -> {
-        // Special case: the guest account should always appear first if present.
+        // The guest account always sorts first.
         int aSection = a.isGuestUser() ? 1 : 2;
         int bSection = b.isGuestUser() ? 1 : 2;
         if (aSection != bSection) {
@@ -46,9 +40,7 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
     };
 
     /** Default constructor for serialization. */
-    public JsonUser() {
-        // Intentionally blank.
-    }
+    public JsonUser() { }
 
     /** Creates a user with the given unique id and full name. */
     public JsonUser(String uuid, String fullName) {
@@ -61,6 +53,10 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
     public static JsonUser fromNewUser(JsonNewUser newUser) {
         String fullName = newUser.givenName + " " + newUser.familyName;
         return new JsonUser(newUser.username, fullName);
+    }
+
+    public String toString() {
+        return Utils.format("<User %s [%s]>", Utils.repr(fullName), uuid);
     }
 
     /** Returns the user's initials, using the first letter of each word of the user's full name. */
@@ -76,10 +72,6 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
         }
     }
 
-    @Override public int compareTo(JsonUser other) {
-        return COMPARATOR_BY_UUID.compare(this, other);
-    }
-
     @Override public int hashCode() {
         return Objects.hash(uuid);
     }
@@ -89,6 +81,6 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
     }
 
     public final boolean isGuestUser() {
-        return GUEST_ACCOUNT_NAME.equals(fullName);
+        return eq(uuid, PROVIDER_GUEST_UUID);
     }
 }
