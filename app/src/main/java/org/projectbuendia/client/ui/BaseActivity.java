@@ -423,6 +423,7 @@ public abstract class BaseActivity extends FragmentActivity {
         }
         EventBus.getDefault().registerSticky(this);
         App.getInstance().getHealthMonitor().start();
+        App.getInstance().getSyncManager().initPeriodicSyncs();
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
     }
 
@@ -430,7 +431,6 @@ public abstract class BaseActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);
         App.getInstance().getHealthMonitor().stop();
         pausedScaleStep = sScaleStep;
-
         super.onPause();
     }
 

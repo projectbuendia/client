@@ -61,7 +61,10 @@ public class SettingsActivity extends PreferenceActivity {
         "openmrs_password",
         "openmrs_root_url",
         "package_server_root_url",
-        "apk_update_interval_secs",
+        "apk_update_interval",
+        "small_sync_interval",
+        "medium_sync_interval",
+        "large_sync_interval",
         "keep_form_instances",
         "starting_patient_id",
         "xform_update_client_cache",
@@ -208,7 +211,10 @@ public class SettingsActivity extends PreferenceActivity {
             case "openmrs_user":
             case "openmrs_root_url":
             case "package_server_root_url":
-            case "apk_update_interval_secs":
+            case "apk_update_interval":
+            case "small_sync_interval":
+            case "medium_sync_interval":
+            case "large_sync_interval":
                 pref.setSummary(str);
         }
     }

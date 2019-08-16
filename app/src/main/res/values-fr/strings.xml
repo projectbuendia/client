@@ -340,7 +340,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_openmrs_root_url">URL de base d\'OpenMRS</string>
   <string name="pref_title_package_server_url">URL du serveur des packages</string>
 
-  <string name="pref_title_apk_update_interval_secs">APK mise à jour intervalle de vérification (secondes)</string>
+  <string name="pref_title_apk_update_interval">APK mise à jour intervalle de vérification (secondes)</string>
   <string name="pref_title_keep_form_instances">Instances de formulaire de stocker localement</string>
   <string name="pref_desc_keep_form_instances">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
   <string name="pref_title_require_wifi">Exiger connexion wifi</string>

@@ -21,7 +21,6 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
-import org.projectbuendia.client.sync.BuendiaSyncEngine.Phase;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -108,7 +107,6 @@ final class LocationListController {
         mUserCancelRequestPending = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        mSyncManager.setPeriodicSync(10, Phase.PATIENTS);
         loadForest();
     }
 
@@ -164,7 +162,6 @@ final class LocationListController {
 
     /** Frees any resources used by the controller. */
     public void suspend() {
-        mSyncManager.setPeriodicSync(0, Phase.PATIENTS);
         mCrudEventBus.unregister(mEventBusSubscriber);
         mEventBus.unregister(mEventBusSubscriber);
     }

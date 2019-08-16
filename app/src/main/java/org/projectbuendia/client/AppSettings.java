@@ -17,7 +17,6 @@ import android.support.annotation.NonNull;
 
 /** Type-safe access to application settings. */
 public class AppSettings {
-    static final int APK_UPDATE_INTERVAL_DEFAULT = 90; // default to 1.5 minutes.
     SharedPreferences mSharedPreferences;
     Resources mResources;
 
@@ -71,12 +70,13 @@ public class AppSettings {
     }
 
     /**
-     * Gets the minimum period between checks for APK updates, in seconds.
-     * Repeated calls to UpdateManager.checkForUpdate() within this period
-     * will not check the package server for new updates.
+     Gets the minimum period between checks for APK updates, in seconds.
+     Repeated calls to UpdateManager.checkForUpdate() within this period
+     will not check the package server for new updates.
      */
     public int getApkUpdateInterval() {
-        return mSharedPreferences.getInt("apk_update_interval_secs", APK_UPDATE_INTERVAL_DEFAULT);
+        return mSharedPreferences.getInt("apk_update_interval",
+            mResources.getInteger(R.integer.apk_check_interval_default));
     }
 
     /** Gets the setting for whether to save filled-in forms locally. */
@@ -119,4 +119,28 @@ public class AppSettings {
     public String getLocaleTag() {
         return "en";
     }
+
+    /** Gets the interval for fast incremental syncs (patients, orders, observations). */
+    // Syncs in this category should typically take less than 100 ms.
+    public int getSmallSyncInterval() {
+        return mSharedPreferences.getInt("small_sync_interval",
+            mResources.getInteger(R.integer.small_sync_interval_default));
+    }
+
+    /** Gets the interval for syncs that are non-incremental but small (locations, users). */
+    // This category is for syncs expected to take up to 500 ms, for data
+    // that changes (on average) less than once an hour.
+    public int getMediumSyncInterval() {
+       return mSharedPreferences.getInt("medium_sync_interval",
+           mResources.getInteger(R.integer.medium_sync_interval_default));
+    }
+
+    /** Gets the interval for syncs that are non-incremental and large (concepts, forms). */
+    // This category is for syncs expected to take up to 2000 ms, for data
+    // that changes (on average) less than once a day.
+    public int getLargeSyncInterval() {
+        return mSharedPreferences.getInt("large_sync_interval",
+            mResources.getInteger(R.integer.large_sync_interval_default));
+    }
 }
+

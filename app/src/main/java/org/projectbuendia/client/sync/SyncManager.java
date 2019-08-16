@@ -16,6 +16,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
@@ -29,6 +31,15 @@ import de.greenrobot.event.EventBus;
 /** Provides app-facing methods for requesting and cancelling sync operations. */
 public class SyncManager {
     private static final Logger LOG = Logger.create();
+
+    // "Small" phases are ones that take <100 ms and send <100 bytes of data, >90% of the time.
+    public static final Phase[] SMALL_PHASES = {Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS};
+
+    // "Medium" phases are ones that take <500 ms and send <4 kb of data, >90% of the time.
+    public static final Phase[] MEDIUM_PHASES = {Phase.LOCATIONS, Phase.USERS};
+
+    // "Large" phases are ones that take <2000 ms and send <20 kb of data, >90% of the time.
+    public static final Phase[] LARGE_PHASES = Phase.ALL_PHASES;
 
     /** Key for the current sync status. */
     static final String SYNC_STATUS = "SYNC_STATUS";
@@ -66,14 +77,21 @@ public class SyncManager {
 
     /** Sets up regularly repeating syncs that run all the time. */
     public void initPeriodicSyncs() {
-        setPeriodicSync(60, Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS);
-        setPeriodicSync(180, Phase.ALL_PHASES);
+        AppSettings settings = App.getInstance().getSettings();
+        setPeriodicSync(settings.getSmallSyncInterval(), SMALL_PHASES);
+        setPeriodicSync(settings.getMediumSyncInterval(), MEDIUM_PHASES);
+        setPeriodicSync(settings.getLargeSyncInterval(), LARGE_PHASES);
     }
 
     /** Starts a sync now. */
     public void sync(Phase... phases) {
         mScheduler.stopSyncing();  // cancel any running syncs to avoid delaying this one
         mScheduler.requestSync(buildOptions(phases));
+    }
+
+    /** Starts a small-size sync. */
+    public void syncMedium() {
+        sync(Phase.OBSERVATIONS, Phase.ORDERS, Phase.PATIENTS);
     }
 
     /** Starts a sync of everything now. */
