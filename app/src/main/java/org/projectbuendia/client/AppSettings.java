@@ -79,11 +79,6 @@ public class AppSettings {
             mResources.getInteger(R.integer.apk_check_interval_default));
     }
 
-    /** Gets the setting for whether to save filled-in forms locally. */
-    public boolean getKeepFormInstancesLocally() {
-        return mSharedPreferences.getBoolean("keep_form_instances", false);
-    }
-
     /** Returns true if the app should skip directly to a patient chart on startup. */
     public boolean shouldSkipToPatientChart() {
         return !getStartingPatientId().isEmpty();
@@ -91,12 +86,26 @@ public class AppSettings {
 
     /** Gets the patient ID of the chart to skip directly to on startup, or "". */
     public @NonNull String getStartingPatientId() {
-        return mSharedPreferences.getString("starting_patient_id", "").trim();
+        return mSharedPreferences.getString("starting_patient_id",
+            mResources.getString(R.string.starting_patient_id_default)).trim();
+    }
+
+    /** Returns true if periodic sync has been disabled in the settings. */
+    public boolean getPeriodicSyncDisabled() {
+        return mSharedPreferences.getBoolean("periodic_sync_disabled",
+            mResources.getBoolean(R.bool.periodic_sync_disabled_default));
+    }
+
+    /** Gets the setting for whether to retain filled-in forms after submission. */
+    public boolean getformInstancesRetainedLocally() {
+        return mSharedPreferences.getBoolean("form_instances_retained",
+            mResources.getBoolean(R.bool.form_instances_retained_default));
     }
 
     /** Gets the setting for whether to use the unreliable SyncAdapter framework. */
-    public boolean getUseSyncAdapter() {
-        return mSharedPreferences.getBoolean("use_sync_adapter", false);
+    public boolean getSyncAdapterPreferred() {
+        return mSharedPreferences.getBoolean("sync_adapter_preferred",
+            mResources.getBoolean(R.bool.sync_adapter_preferred_default));
     }
 
     /** Gets the flag indicating whether the sync account has been initialized. */
@@ -110,9 +119,9 @@ public class AppSettings {
     }
 
     /** Gets the flag controlling whether to assume no wifi means no network. */
-    public boolean getRequireWifi() {
-        return mSharedPreferences.getBoolean("require_wifi",
-            mResources.getBoolean(R.bool.require_wifi_default));
+    public boolean getNonWifiAllowed() {
+        return mSharedPreferences.getBoolean("non_wifi_allowed",
+            mResources.getBoolean(R.bool.non_wifi_allowed_default));
     }
 
     /** Gets the currently selected locale as a BCP 47 tag. */

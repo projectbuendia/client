@@ -164,7 +164,7 @@ public final class PatientChartControllerTest {
         // GIVEN controller is initialized
         mController.init();
         // WHEN a vital is pressed
-        mController.onOpenFormPressed("foo");
+        mController.onFormRequested("foo");
         // THEN the controller displays the loading dialog
         verify(mMockUi).showFormLoadingDialog(true);
     }

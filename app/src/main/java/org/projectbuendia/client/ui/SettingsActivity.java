@@ -12,6 +12,8 @@
 package org.projectbuendia.client.ui;
 
 import android.annotation.TargetApi;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,6 +31,7 @@ import android.view.MenuItem;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Utils;
 
@@ -52,8 +55,8 @@ import javax.inject.Inject;
  */
 public class SettingsActivity extends PreferenceActivity {
     /**
-     * Controls whether to always show the simplified UI, where settings are
-     * arranged in a single list without a left navigation panel.
+     Controls whether to always show the simplified UI, where settings are
+     arranged in a single list without a left navigation panel.
      */
     static final String[] PREF_KEYS = {
         "server",
@@ -65,14 +68,17 @@ public class SettingsActivity extends PreferenceActivity {
         "small_sync_interval",
         "medium_sync_interval",
         "large_sync_interval",
-        "keep_form_instances",
         "starting_patient_id",
-        "xform_update_client_cache",
-        "require_wifi"
+        "periodic_sync_disabled",
+        "form_instances_retained",
+        "non_wifi_allowed",
+        "sync_adapter_preferred"
     };
     static boolean updatingPrefValues = false;
 
     static final Map<String, EditTextPreference> textPrefs = new HashMap<>();
+
+    static Dialog sSyncPendingDialog = null;
 
     /** A listener that performs updates when any preference's value changes. */
     static final Preference.OnPreferenceChangeListener sPrefListener = (pref, value) -> {
@@ -80,8 +86,8 @@ public class SettingsActivity extends PreferenceActivity {
         if (updatingPrefValues)
             return true; // prevent endless recursion
 
-        SharedPreferences prefs =
-            PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+        Context context = pref.getContext();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String server = prefs.getString("server", "");
         String str = "" + value;
         try {
@@ -101,6 +107,16 @@ public class SettingsActivity extends PreferenceActivity {
                 case "package_server_root_url":
                     if (!str.equals("http://" + server + ":9001")) {
                         setTextAndSummary(prefs, "server", "");
+                    }
+                    break;
+                case "periodic_sync_disabled":
+                    SyncManager syncManager = App.getInstance().getSyncManager();
+                    syncManager.applyPeriodicSyncSettings();
+                    if (syncManager.isSyncRunningOrPending()) {
+                        sSyncPendingDialog = ProgressDialog.show(
+                            context, null, context.getString(R.string.waiting_for_sync),
+                            true /* indeterminate */, false /* cancelable */);
+                        syncManager.stopSyncing(() -> sSyncPendingDialog.dismiss());
                     }
                     break;
             }
@@ -243,8 +259,8 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * Shows the simplified settings UI if the device configuration dictates
-     * that a simplified, single-pane UI should be shown.
+     Shows the simplified settings UI if the device configuration dictates
+     that a simplified, single-pane UI should be shown.
      */
     private void setupSimplePreferencesScreen() {
         if (useSimplePreferences(this)) {

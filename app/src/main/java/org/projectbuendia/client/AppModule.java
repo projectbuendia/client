@@ -117,7 +117,7 @@ public final class AppModule {
 
     @Provides @Singleton SyncManager provideSyncManager(AppSettings settings, SyncEngine engine) {
         return new SyncManager(
-            settings.getUseSyncAdapter() ?
+            settings.getSyncAdapterPreferred() ?
                 new SyncAdapterSyncScheduler(engine, SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY) :
                 new ThreadedSyncScheduler(engine)
         );

@@ -11,18 +11,5 @@
 
 package org.projectbuendia.client.events.sync;
 
-/** Indicates that a sync is running and describes its progress. */
-public class SyncProgressEvent extends SyncEvent {
-    /** The progress completed so far, as a fraction. */
-    public final int numerator;
-    public final int denominator;
-
-    /** The resource ID of a string message to show the user. */
-    public final int messageId;
-
-    public SyncProgressEvent(int numerator, int denominator, int messageId) {
-        this.numerator = numerator;
-        this.denominator = denominator;
-        this.messageId = messageId;
-    }
-}
+/** An event bus event indicating that a sync was canceled. */
+public class SyncCancelledEvent extends SyncStoppedEvent { }

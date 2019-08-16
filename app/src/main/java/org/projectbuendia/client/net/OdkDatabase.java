@@ -28,6 +28,7 @@ public class OdkDatabase {
      */
     public static long getFormIdForPath(File path) {
         long formId = -1;
+        Log.d(TAG, "Looking up formId with path = " + path);
         try (Cursor cursor = OdkXformSyncTask.getCursorForFormFile(
             path, new String[] {BaseColumns._ID}
         )) {
@@ -44,6 +45,7 @@ public class OdkDatabase {
                 // the first one.
                 cursor.moveToNext();
                 formId = cursor.getLong(0);
+                Log.d(TAG, "Found formId = " + formId);
             }
         }
         return formId;

@@ -339,8 +339,7 @@ public class FileUtils {
                     (base64RsaPublicKey == null || base64RsaPublicKey.trim().length() == 0)
                             ? null : base64RsaPublicKey.trim());
         } catch (Exception e) {
-            Log.i(t, xmlFile.getAbsolutePath() + " does not have a submission element");
-            // and that's totally fine.
+            // No <submission> element was found, and that's totally fine.
         }
         return fields;
     }

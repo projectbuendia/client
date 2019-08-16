@@ -53,7 +53,6 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.sync.controllers.FormsSyncWorker;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
@@ -95,7 +94,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final String KEY_CONTROLLER_STATE = "controllerState";
 
     private PatientChartController mController;
-    private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
     private ChartRenderer mChartRenderer;
@@ -158,7 +156,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
                 menuItem -> {
-                    mController.onOpenFormPressed(form.uuid);
+                    mController.onFormRequested(form.uuid);
                     return true;
                 }
             );
@@ -183,15 +181,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
-        mFormLoadingDialog.setTitle(getString(R.string.retrieving_encounter_form_title));
-        mFormLoadingDialog.setMessage(getString(R.string.retrieving_encounter_form_message));
+        mFormLoadingDialog.setTitle(getString(R.string.retrieving_form_title));
+        mFormLoadingDialog.setMessage(getString(R.string.retrieving_form_message));
         mFormLoadingDialog.setIndeterminate(true);
         mFormLoadingDialog.setCancelable(false);
 
         mFormSubmissionDialog = new ProgressDialog(this);
         mFormSubmissionDialog.setIcon(android.R.drawable.ic_dialog_info);
-        mFormSubmissionDialog.setTitle(getString(R.string.submitting_encounter_form_title));
-        mFormSubmissionDialog.setMessage(getString(R.string.submitting_encounter_form_message));
+        mFormSubmissionDialog.setTitle(getString(R.string.submitting_form_title));
+        mFormSubmissionDialog.setMessage(getString(R.string.submitting_form_message));
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
@@ -327,7 +325,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @Override protected void onStartImpl() {
         super.onStartImpl();
-        FormsSyncWorker.setDisabled(false);
         mController.init();
     }
 
@@ -337,8 +334,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mIsFetchingXform = false;
-        FormsSyncWorker.setDisabled(false);
         mController.onXFormResult(requestCode, resultCode, data);
     }
 
@@ -547,18 +542,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override public synchronized void fetchAndShowXform(
-            int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
-            Preset preset) {
-            if (mIsFetchingXform) return;
-
-            FormsSyncWorker.setDisabled(true);
-            mIsFetchingXform = true;
+            int requestCode, String formUuid,
+            org.odk.collect.android.model.Patient patient, Preset preset) {
             OdkActivityLauncher.fetchAndShowXform(
                 PatientChartActivity.this, formUuid, requestCode, patient, preset);
-        }
-
-        @Override public void reEnableFetch() {
-            mIsFetchingXform = false;
         }
 
         @Override public void showFormLoadingDialog(boolean show) {

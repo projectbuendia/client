@@ -229,7 +229,7 @@ public class LocationForest {
     }
 
     /** Returns the default location where new patients will be placed. */
-    public @Nonnull Location getDefaultLocation() {
+    public Location getDefaultLocation() {
         return defaultLocation;
     }
 }

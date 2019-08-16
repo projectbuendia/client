@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui.login;
 
 import com.google.common.collect.Ordering;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
@@ -22,6 +23,7 @@ import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.events.user.UserAddFailedEvent;
 import org.projectbuendia.client.events.user.UserAddedEvent;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -98,6 +100,9 @@ public final class LoginController {
      * after this function returns.
      */
     public void init() {
+        if (mSettings.getPeriodicSyncDisabled()) {
+            BigToast.show(App.getInstance().getApplicationContext(), R.string.periodic_sync_disabled_in_settings);
+        }
         mEventBus.register(mSubscriber);
         mFragmentUi.showSpinner(true);
         mUserManager.loadKnownUsers();

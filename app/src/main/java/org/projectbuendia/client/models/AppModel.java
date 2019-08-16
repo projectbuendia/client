@@ -106,6 +106,9 @@ public class AppModel {
                 DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_MILLIS);
                 LOG.i("full_sync_start_millis = %s, full_sync_end_millis = %s",
                     fullSyncStart, fullSyncEnd);
+                if (fullSyncEnd != null) {
+                    return fullSyncEnd;
+                }
                 if (fullSyncStart != null && fullSyncEnd != null && fullSyncEnd.isAfter(fullSyncStart)) {
                     return fullSyncEnd;
                 }

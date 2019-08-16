@@ -58,9 +58,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     }
 
     @Override protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
-
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
-            final File proposedPath = formInfo.makeFileForForm();
+            final File proposedPath = formInfo.getPathForForm();
+            LOG.i("Looking up local entry for %s (%s)", formInfo.uuid, formInfo.name);
 
             // Check if the uuid already exists in the database.
             boolean isNew;
@@ -87,13 +87,13 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                             + ", (Invalidated by UserManager: " + usersHaveChanged + ")");
                     }
                 } else {
-                    LOG.i("Form " + formInfo.uuid + " not found in database.");
+                    LOG.i("Form %s not found in database.", formInfo.uuid);
                     isNew = true;
                 }
             }
 
             if (!isNew && !usersHaveChanged) {
-                LOG.i("Using form " + formInfo.uuid + " from local cache.");
+                LOG.i("Form %s is up to date and users have not changed.", formInfo.uuid);
                 if (mFormWrittenListener != null) {
                     mFormWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
@@ -114,16 +114,20 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
      *                        added
      */
     public void fetchAndAddXFormToDb(final String uuid, final File proposedPath) {
-        LOG.i("fetching form " + uuid);
+        LOG.i("Fetching form %s from server", uuid);
 
         OpenMrsXformsConnection openMrsXformsConnection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
         openMrsXformsConnection.getXform(uuid, response -> {
-            LOG.i("adding form '%s' to db", uuid);
+            if (App.getInstance().getSyncManager().getNewSyncsSuppressed()) {
+                LOG.w("Skipping form save: New syncs are currently suppressed.");
+                return;
+            }
+            LOG.i("Saving form %s to local filesystem and database", uuid);
             new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
                 .execute(new FormToWrite(response, proposedPath));
         }, error -> {
-            LOG.e(error, "failed to fetch file");
+            LOG.e(error, "Failed to fetch form %s from server", uuid);
             EventBus.getDefault().post(new FetchXformFailedEvent(
                 FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
         });

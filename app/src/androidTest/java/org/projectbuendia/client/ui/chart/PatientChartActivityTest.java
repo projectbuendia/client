@@ -82,7 +82,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         click(viewWithText(R.string.status_well));
 
         // Wait for a sync operation to update the chart.
-        EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
+        EventBusIdlingResource<SyncStoppedEvent> syncFinishedIdlingResource =
             new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncFinishedIdlingResource);
 

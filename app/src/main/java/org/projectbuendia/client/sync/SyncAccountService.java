@@ -58,7 +58,7 @@ public class SyncAccountService extends Service {
         Account account = getAccount();
         AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
         if (accountManager.addAccountExplicitly(account, null, null)) {
-            sSyncManager.initPeriodicSyncs();
+            sSyncManager.applyPeriodicSyncSettings();
             return true;
         }
         return false;

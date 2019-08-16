@@ -29,7 +29,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 import org.joda.time.Instant;
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
@@ -116,16 +115,6 @@ public class BuendiaSyncEngine implements SyncEngine {
     @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
         isCancelled = false;
 
-        // If we can't access the Buendia API, short-circuit. Before this check was added, sync
-        // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
-        // change, however, any user-requested sync will instantly fail until the HealthMonitor has
-        // made a determination that the server is definitely accessible.
-        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
-            LOG.e("Abort sync: Buendia API is unavailable.");
-            broadcastSyncStatus(SyncStatus.FAILED);
-            return;
-        }
-
         try {
             checkCancellation("before work started");
         } catch (CancellationException e) {
@@ -158,8 +147,11 @@ public class BuendiaSyncEngine implements SyncEngine {
                     while (!done) {
                         done = phase.worker.sync(contentResolver, result, client);
                         completedWork++;
-                        if (!done) totalWork++;
-                        broadcastSyncProgress(completedWork, totalWork, phase.message);
+                        if (!done) {
+                            totalWork++;
+                            broadcastSyncProgress(completedWork, totalWork, phase.message);
+                            checkCancellation("during " + phase);
+                        }
                     }
                     phase.worker.finalize(contentResolver, result, client);
                     LOG.elapsed("sync", "Completed phase %s", phase);
@@ -188,7 +180,7 @@ public class BuendiaSyncEngine implements SyncEngine {
                 return;
             }
         }
-        broadcastSyncStatus(SyncStatus.COMPLETED);
+        broadcastSyncStatus(SyncStatus.SUCCEEDED);
         LOG.finish("sync");
         LOG.i("Completed", options);
     }
@@ -209,7 +201,7 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     private void broadcastSyncStatus(SyncStatus status) {
         context.sendBroadcast(
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
+            new Intent(SyncManager.STATUS_ACTION)
                 .putExtra(SyncManager.SYNC_STATUS, status)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );
@@ -217,7 +209,7 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     private void broadcastSyncProgress(int numerator, int denominator, @StringRes int messageId) {
         context.sendBroadcast(
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
+            new Intent(SyncManager.STATUS_ACTION)
                 .putExtra(SyncManager.SYNC_STATUS, SyncStatus.IN_PROGRESS)
                 .putExtra(SyncManager.SYNC_NUMERATOR, numerator)
                 .putExtra(SyncManager.SYNC_DENOMINATOR, denominator)

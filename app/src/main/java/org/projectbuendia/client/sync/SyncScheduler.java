@@ -7,7 +7,7 @@ public interface SyncScheduler<T> {
     /** Queues a request for a sync to begin when the sync engine is available. */
     void requestSync(Bundle options);
 
-    /** Aborts any sync in progress and cancels any currently queued requests. */
+    /** Aborts any sync currently in progress and cancels any queued requests. */
     void stopSyncing();
 
     /**
@@ -19,6 +19,9 @@ public interface SyncScheduler<T> {
      * has elapsed.  Specifying a period of zero stops the loop.
      */
     void setPeriodicSync(int periodSec, Bundle options);
+
+    /** Cancels all periodic sync loops. */
+    void clearAllPeriodicSyncs();
 
     /** Returns true if a sync is currently running or pending on the queue. */
     boolean isRunningOrPending();

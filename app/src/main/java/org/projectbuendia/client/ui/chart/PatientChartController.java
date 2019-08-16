@@ -102,6 +102,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
     private Runnable mActivePatientUpdater;
 
+    /** The user has requested a form, and it's either open or about to be opened. */
+    private boolean mFormPending = false;
+
     private List<Chart> mCharts;
     private int mChartIndex = 0;  // the currently selected tab (chart number)
 
@@ -164,7 +167,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
             int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
             Preset preset);
 
-        void reEnableFetch();
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showOrderDialog(String patientUuid, Order order);
@@ -237,7 +239,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         updatePatientLocationUi();
     }
 
-
     /** Releases any resources used by the controller. */
     public void suspend() {
         mActivePatientUpdater = null;  // clearing this stops the patient update loop
@@ -247,20 +248,24 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
+        mSyncManager.setNewSyncsSuppressed(false);
+        mFormPending = false;
+
         FormRequest request = popFormRequest(requestCode);
         if (request == null) {
             LOG.e("Unknown form request code: " + requestCode);
             return;
         }
 
-        boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
-        String action = (resultCode == Activity.RESULT_CANCELED)
-            ? "form_discard_pressed" : "form_save_pressed";
+        boolean cancelled = (resultCode == Activity.RESULT_CANCELED);
+        String action = cancelled ? "form_discard_pressed" : "form_save_pressed";
         Utils.logUserAction(action,
             "form", request.formUuid,
             "patient_uuid", request.patientUuid);
-        mOdkResultSender.sendOdkResultToServer(request.patientUuid, resultCode, data);
-        mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
+        mUi.showFormSubmissionDialog(!cancelled);
+        if (!cancelled) {
+            mOdkResultSender.sendOdkResultToServer(request.patientUuid, resultCode, data);
+        }
     }
 
     FormRequest popFormRequest(int requestIndex) {
@@ -278,7 +283,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing());
     }
 
-    FormRequest newFormRequest(String formUuid, String patientUuid) {
+    FormRequest createFormRequest(String formUuid, String patientUuid, Preset preset) {
         // Find an empty slot in the array of all existing form requests.
         int requestIndex = 0;
         while (requestIndex < mFormRequests.size() && mFormRequests.get(requestIndex) != null) {
@@ -287,7 +292,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         if (requestIndex >= mFormRequests.size()) {
             mFormRequests.add(null);
         }
-        FormRequest request = new FormRequest(formUuid, patientUuid, requestIndex);
+        FormRequest request = new FormRequest(formUuid, patientUuid, preset, requestIndex);
         mFormRequests.set(requestIndex, request);
         return request;
     }
@@ -300,30 +305,36 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         }
     }
 
-    public void onOpenFormPressed(String formUuid) {
-        if (!dialogShowing()) openForm(formUuid, null);
+    public void onFormRequested(String formUuid) {
+        if (!dialogShowing()) requestForm(formUuid, null);
     }
 
-    public void openForm(String formUuid, String targetGroup) {
+    public void requestForm(String formUuid, String targetGroup) {
         Utils.logUserAction("form_opener_pressed", "form", "round", "group", targetGroup);
+        if (mFormPending) {
+            LOG.w("Form request is already pending; not opening another form");
+            return;
+        }
+
         JsonUser user = App.getUserManager().getActiveUser();
         if (user == null) {
             mUi.showError(R.string.no_user);
             return;
         }
-        if (mForest == null) {
-            return;  // we can't submit a form without location information
+        if (mForest == null || mForest.getDefaultLocation() == null) {
+            mUi.showError(R.string.no_location);
+            return;
         }
 
-        // We need to preset the provider and the location so that they don't
-        // appear as questions in the form.
+        // Preset the provider and location so they don't appear as questions in the form.
         Preset preset = new Preset();
         preset.providerUuid = user.uuid;
         preset.locationUuid = mPatient.locationUuid;
         if (preset.locationUuid == null) {
-            preset.locationUuid = mForest.getDefaultLocation().uuid;
+            if (mForest != null && mForest.getDefaultLocation() != null) {
+                preset.locationUuid = mForest.getDefaultLocation().uuid;
+            }
         }
-
         Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
         if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
             preset.pregnant = Preset.YES;
@@ -333,9 +344,19 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         }
         preset.targetGroup = targetGroup;
 
+        mFormPending = true;
         mUi.showFormLoadingDialog(true);
-        FormRequest request = newFormRequest(formUuid, mPatientUuid);
-        mUi.fetchAndShowXform(request.requestIndex, formUuid, mPatient.toOdkPatient(), preset);
+        openForm(createFormRequest(formUuid, mPatientUuid, preset));
+    }
+
+    private void openForm(FormRequest request) {
+        LOG.i("Fetching and showing form: %s", request.formUuid);
+        mUi.fetchAndShowXform(
+            request.requestIndex,
+            request.formUuid,
+            mPatient.toOdkPatient(),
+            request.preset
+        );
     }
 
     @JavascriptInterface public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
@@ -515,11 +536,13 @@ final class PatientChartController implements ChartRenderer.JsInterface {
     class FormRequest {
         public final String formUuid;
         public final String patientUuid;
+        public final Preset preset;
         public final int requestIndex;
 
-        public FormRequest(String formUuid, String patientUuid, int index) {
+        public FormRequest(String formUuid, String patientUuid, Preset preset, int index) {
             this.formUuid = formUuid;
             this.patientUuid = patientUuid;
+            this.preset = preset;
             this.requestIndex = index;
         }
     }
@@ -603,7 +626,6 @@ final class PatientChartController implements ChartRenderer.JsInterface {
 
         public void onEventMainThread(FetchXformSucceededEvent event) {
             mUi.showFormLoadingDialog(false);
-            mUi.reEnableFetch();
         }
 
         public void onEventMainThread(FetchXformFailedEvent event) {
@@ -628,9 +650,9 @@ final class PatientChartController implements ChartRenderer.JsInterface {
                 default:
                     // Intentionally blank.
             }
-            mUi.showError(errorMessageResource);
+            mFormPending = false;
             mUi.showFormLoadingDialog(false);
-            mUi.reEnableFetch();
+            mUi.showError(errorMessageResource);
         }
 
         public void onEventMainThread(OrderSaveRequestedEvent event) {
