@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
@@ -41,6 +42,7 @@ public final class LocationListFragment extends ProgressFragment {
     private LocationListController mController;
     private final Ui mUi = new Ui();
     private LocationOptionList mList;
+    private ScrollView mScroll;
 
     public LocationListFragment() {
         // Required empty public constructor
@@ -57,6 +59,7 @@ public final class LocationListFragment extends ProgressFragment {
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
+        mScroll = view.findViewById(R.id.scroll_container);
         mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
         LocationForest forest = mModel.getForest(mSettings.getLocaleTag());
         if (forest != null) mList.setLocations(forest, forest.allNodes());
@@ -77,6 +80,9 @@ public final class LocationListFragment extends ProgressFragment {
         super.onResume();
         if (mController != null) mController.init();
         mList.setOnLocationSelectedListener(location -> mController.onLocationSelected(location));
+        ViewGroup.LayoutParams lp = mScroll.getLayoutParams();
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        mScroll.setLayoutParams(lp);
     }
 
     @Override public void onPause() {

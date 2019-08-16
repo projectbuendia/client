@@ -60,7 +60,7 @@ public class LocationOptionList {
         float colorIndex = 0;
         lastParent = null;
         for (Location location : locations) {
-            double size = 0.99 / (1 << (location.depth - 1));
+            double size = forest.isLeaf(location) ? 0.49 : 1;
             Location parent = forest.getParent(location);
             String parentUuid = parent != null ? parent.uuid : null;
 
