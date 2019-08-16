@@ -64,7 +64,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         click(viewWithId(R.id.action_search));
         // waitForProgressFragment() doesn't quite work here as we're actually waiting on the
         // search button in the action bar to finish its loading task.
-        expectVisibleSoon(viewThat(hasTextContaining("Triage (")));
+        waitUntilVisible(viewThat(hasTextContaining("Triage (")));
         // Click first patient.
         click(dataThat(is(Patient.class))
             .inAdapterView(withId(R.id.fragment_patient_list))

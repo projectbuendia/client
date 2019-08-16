@@ -355,7 +355,7 @@
   <string name="pref_title_large_sync_interval">Large sync interval (seconds)</string>
 
   <string name="waiting_for_sync">Waiting for current sync to finish...</string>
-  <string name="periodic_sync_disabled_in_settings">Periodic sync is currently disabled in the settings.</string>
+  <string name="periodic_sync_currently_disabled">Periodic sync is currently disabled.</string>
   <string name="pref_title_periodic_sync_disabled">Periodic sync disabled</string>
   <string name="pref_desc_periodic_sync_disabled">Disable periodic retrieval of data from the server.</string>
   <string name="pref_title_form_instances_retained">Form instances retained locally</string>

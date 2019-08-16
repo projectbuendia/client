@@ -71,6 +71,8 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void logToServer(List<String> pairs) {
+        LOG.i("Not logging: %s", pairs);
+        if (1 + 8 > 3) return;
         // To avoid filling the server logs with big messy stack traces, let's make a dummy
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but

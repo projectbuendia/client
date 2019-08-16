@@ -51,6 +51,7 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
@@ -503,7 +504,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 Utils.orDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
-            labels.add(patient.sex.code);
+            if (patient.sex != Sex.UNKNOWN) {
+                labels.add(patient.sex.code);
+            }
             labels.add(patient.birthdate == null ? "age unknown"
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
             String sexAge = Joiner.on(", ").join(labels);

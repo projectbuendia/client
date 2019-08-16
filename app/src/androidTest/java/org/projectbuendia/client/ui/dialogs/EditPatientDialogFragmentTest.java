@@ -45,14 +45,14 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         // Create the patient
         String id = inUserLoginGoToDemoPatientChart();
 
-        expectVisibleSoon(viewThat(hasTextContaining("Triage")));
+        waitUntilVisible(viewThat(hasTextContaining("Triage")));
 
         // The symptom onset date should not be assigned a default value.
         expectVisible(viewThat(
                 hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
                 hasText("–")));
 
-        expectVisibleWithin(399999, viewThat(
+        waitUntilVisible(399999, viewThat(
                 hasAncestorThat(withId(R.id.attribute_admission_days)),
                 hasText("Day 1")));
 
@@ -62,7 +62,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");
 
-        expectVisibleSoon(viewThat(hasTextContaining(LOCATION_NAME)));
+        waitUntilVisible(viewThat(hasTextContaining(LOCATION_NAME)));
     }
 
     @Test

@@ -33,7 +33,7 @@ public class SnackBarTest extends FunctionalTestCase {
     public void testSimpleMessageSnackBar() {
         final BaseActivity activity = getActivity();
         activity.runOnUiThread(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled));
-        expectVisibleSoon(viewWithText(WIFI_DISABLED_MESSAGE));
+        waitUntilVisible(viewWithText(WIFI_DISABLED_MESSAGE));
     }
 
     @Test
@@ -41,7 +41,7 @@ public class SnackBarTest extends FunctionalTestCase {
         final View.OnClickListener mockListener = mock(View.OnClickListener.class);
         final BaseActivity activity = getActivity();
         getInstrumentation().runOnMainSync(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled, R.string.troubleshoot_wifi_disabled_action_enable, mockListener));
-        expectVisibleSoon(viewWithText(WIFI_DISABLED_MESSAGE));
+        waitUntilVisible(viewWithText(WIFI_DISABLED_MESSAGE));
         expectVisible(viewWithId(R.id.snackbar_action));
         expectVisible(viewThat(hasText("Enable")));
         click(viewWithText("Enable"));
@@ -54,7 +54,7 @@ public class SnackBarTest extends FunctionalTestCase {
     public void testSnackBarDismiss() {
         final BaseActivity activity = getActivity();
         activity.runOnUiThread(() -> activity.snackBar(R.string.troubleshoot_wifi_disabled, 0, null, 1, true, 0));
-        expectVisibleSoon(viewWithText(WIFI_DISABLED_MESSAGE));
+        waitUntilVisible(viewWithText(WIFI_DISABLED_MESSAGE));
         expectVisible(viewWithId(R.id.snackbar_dismiss));
         click(viewWithId(R.id.snackbar_dismiss));
 

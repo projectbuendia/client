@@ -13,26 +13,45 @@ package org.projectbuendia.client.ui.matchers;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.DataInteraction;
 import android.support.test.espresso.Espresso;
+import android.support.test.espresso.UiController;
+import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.action.GeneralClickAction;
+import android.support.test.espresso.action.GeneralLocation;
+import android.support.test.espresso.action.Press;
+import android.support.test.espresso.action.Tap;
 import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
+import android.support.test.espresso.web.assertion.WebAssertion;
+import android.support.test.espresso.web.model.Atom;
+import android.support.test.espresso.web.model.ElementReference;
 import android.support.test.rule.ActivityTestRule;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.Checkable;
 
 import com.estimote.sdk.internal.Preconditions;
 import com.google.common.base.Joiner;
 
+import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
 
+import java.text.MessageFormat;
+
+import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.web.sugar.Web.onWebView;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.webClick;
 import static org.hamcrest.Matchers.allOf;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** Matchers for {@link View}s. */
 public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTestRule<T> {
@@ -52,47 +71,60 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         return new MatcherWithDescription<>(ViewMatchers.withId(id), "has ID " + id);
     }
 
-    public static ViewInteraction viewWithText(String text) {
-        return Espresso.onView(hasText(text));
+    public static ViewInteraction viewWithText(Object obj) {
+        return Espresso.onView(hasText(obj));
     }
 
-    public static ViewInteraction firstViewWithText(String text) {
-        return Espresso.onView(isFirstMatchThat(hasText(text)));
+    public static ViewInteraction viewContainingText(String text) {
+        return Espresso.onView(hasTextContaining(text));
     }
 
-    public static Matcher<View> hasText(String text) {
+    public static ViewInteraction firstViewWithText(Object obj) {
+        return firstViewThat(hasText(obj));
+    }
+
+    public static ViewInteraction firstViewContainingText(String text) {
+        return firstViewThat(hasTextContaining(text));
+    }
+
+    public static Matcher<View> hasText(Object obj) {
+        String text = "" + obj;
         return new MatcherWithDescription<>(ViewMatchers.withText(text),
             "has the exact text \"" + text + "\"");
     }
 
-    public static ViewInteraction viewWithText(int resourceId) {
-        return Espresso.onView(hasText(resourceId));
+    public static ViewInteraction viewWithTextString(int resourceId) {
+        return Espresso.onView(hasTextString(resourceId));
     }
 
-    public static Matcher<View> hasText(int resourceId) {
+    public static Matcher<View> hasTextString(int resourceId) {
         return new MatcherWithDescription<>(ViewMatchers.withText(resourceId),
             "has string resource " + resourceId + " as its text");
     }
 
-    public static Matcher<View> isFirstMatchThat(final Matcher<View> matcher) {
-        return new TypeSafeMatcher<View>() {
+    public static ViewInteraction firstViewThat(Matcher<View>... matchers) {
+        final Matcher matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return Espresso.onView(new TypeSafeMatcher<View>() {
             int currentIndex = 0;
+            View foundView = null;
 
             @Override
             public void describeTo(Description description) {
-                description.appendText("is first match");
+                description.appendText("is the first match that ");
                 matcher.describeTo(description);
             }
 
             @Override
             public boolean matchesSafely(View view) {
-                return matcher.matches(view) && currentIndex++ == 0;
+                if (view == foundView || matcher.matches(view)) {
+                    if (foundView == null) foundView = view;
+                }
+                return (view == foundView);
             }
-        };
+        });
     }
 
-    @SafeVarargs
-    public static ViewInteraction viewThat(Matcher<View>... matchers) {
+    @SafeVarargs public static ViewInteraction viewThat(Matcher<View>... matchers) {
         return Espresso.onView(matchers.length > 1 ? allOf(matchers) : matchers[0]);
     }
 
@@ -100,19 +132,38 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         return Espresso.onData(matchers.length > 1 ? allOf(matchers) : matchers[0]);
     }
 
-    @SafeVarargs
-    public static void expect(ViewInteraction vi, Matcher<View>... matchers) {
-        vi.check(matches(matchers.length == 0 ? isVisible() :
+    @SafeVarargs public static void expect(ViewInteraction vi, Matcher<View>... matchers) {
+        vi.check(matches(matchers.length == 0 ? exists() :
             matchers.length > 1 ? allOf(matchers) : matchers[0]));
     }
 
-    public static Matcher<View> isVisible() {
-        return new MatcherWithDescription<>(ViewMatchers.isDisplayed(),
-            "is visible");
+    @SafeVarargs public static void expect(DataInteraction di, Matcher<View>... matchers) {
+        di.check(matches(matchers.length == 0 ? exists() :
+            matchers.length > 1 ? allOf(matchers) : matchers[0]));
+    }
+
+    public static Matcher<View> exists() {
+        return new TypeSafeMatcher<View>() {
+            @Override public void describeTo(Description description) {
+                description.appendText("exists");
+            }
+
+            @Override public boolean matchesSafely(View view) {
+                return view != null;
+            }
+        };
+    }
+
+    public static void expectVisible(ViewInteraction vi) {
+        expect(vi, isVisible());
     }
 
     public static void expectVisible(DataInteraction di) {
-        di.check(matches(isVisible()));
+        expect(di, isVisible());
+    }
+
+    public static Matcher<View> isVisible() {
+        return new MatcherWithDescription<>(ViewMatchers.isDisplayed(), "is visible");
     }
 
     public static void click(DataInteraction di) {
@@ -123,32 +174,97 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         Espresso.openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
     }
 
-    public static void scrollToAndClick(ViewInteraction vi) {
-        scrollTo(vi);
-        click(vi);
-    }
-
-    public static void scrollTo(ViewInteraction vi) {
-        vi.perform(ViewActions.scrollTo());
+    public static void optionallyScrollTo(ViewInteraction vi) {
+        try {
+            vi.perform(ViewActions.scrollTo());
+        } catch (RuntimeException e) {
+            /* if scrolling isn't possible, proceed anyway */
+        }
     }
 
     public static void click(ViewInteraction vi) {
+        optionallyScrollTo(vi);
         vi.perform(ViewActions.click());
     }
 
-    public static void scrollToAndType(Object obj, ViewInteraction vi) {
-        scrollTo(vi);
-        type(obj, vi);
+    public static void clickIfUnchecked(ViewInteraction vi) {
+        optionallyScrollTo(vi);
+        vi.perform(clickIfUncheckedAction());
+    }
+
+    public static void act(ViewInteraction vi, ViewAction action) {
+        vi.perform(action);
     }
 
     public static void type(Object obj, ViewInteraction vi) {
+        optionallyScrollTo(vi);
         vi.perform(ViewActions.typeText(obj.toString()));
+    }
+
+    public static void clearAndType(Object obj, ViewInteraction vi) {
+        vi.perform(ViewActions.clearText()).perform(ViewActions.typeText(obj.toString()));
+    }
+
+    public static void expect(int id) {
+        expect(viewWithId(id));
+    }
+
+    public static void expect(String text) {
+        expect(firstViewWithText(text));
+    }
+
+    public static void click(int id) {
+        click(viewWithId(id));
+    }
+
+    public static void click(String text) {
+        click(firstViewWithText(text));
+    }
+
+    public static void type(Object obj, int id) {
+        type(obj, viewWithId(id));
+    }
+
+    public static void clearAndType(Object obj, int id) {
+        clearAndType(obj, viewWithId(id));
+    }
+
+    public static void act(int id, ViewAction action) {
+        act(viewWithId(id), action);
+    }
+
+    public static void act(String text, ViewAction action) {
+        act(firstViewWithText(text), action);
+    }
+
+    public static void expect(Atom<ElementReference> atom) {
+        onWebView().check(elementExists(atom));
+    }
+
+    public static WebAssertion<ElementReference> elementExists(Atom<ElementReference> atom) {
+        return new WebAssertion<ElementReference>(atom) {
+            @Override public void checkResult(WebView view, ElementReference result) {
+                ViewMatchers.assertThat(result, new BaseMatcher<ElementReference>() {
+                    @Override public void describeTo(Description description) {
+                        description.appendText("exists");
+                    }
+
+                    @Override public boolean matches(Object item) {
+                        return item != null;
+                    }
+                });
+            }
+        };
+    }
+
+    public static void click(Atom<ElementReference> atom) {
+        onWebView().withElement(atom).perform(webClick());
     }
 
     // Matchers with better descriptions than those in espresso.matcher.ViewMatchers.
 
     public static void scrollToAndExpectVisible(ViewInteraction vi) {
-        scrollTo(vi);
+        optionallyScrollTo(vi);
         vi.check(matches(isVisible()));
     }
 
@@ -196,35 +312,35 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     public static Matcher<View> whoseParent(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.withParent(matcher),
-            "whose parent {1}", matcher);
+            "whose parent {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasChildThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.withChild(matcher),
-            "has a child that {1}", matcher);
+            "has a child that {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasAncestorThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.isDescendantOfA(matcher),
-            "has an ancestor that {1}", matcher);
+            "has an ancestor that {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasDescendantThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.hasDescendant(matcher),
-            "has a descendant that {1}", matcher);
+            "has a descendant that {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasSiblingThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.hasSibling(matcher),
-            "has a sibling that {1}", matcher);
+            "has a sibling that {0}", matcher);
     }
 
     public static Matcher<View> isChecked() {
@@ -239,7 +355,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     public static Matcher<View> hasText(Matcher<String>... matchers) {
         Matcher<String> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.withText(matcher),
-            "has text {1}", matcher);
+            "has text {0}", matcher);
     }
 
     public static Matcher<View> hasTextContaining(String text) {
@@ -331,34 +447,51 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         };
     }
 
-    protected static void expectVisibleSoon(ViewInteraction vi) {
-        expectVisibleWithin(30000, vi);
+    protected static ViewInteraction waitFor(int id) {
+        return waitFor(viewWithId(id));
     }
 
-    protected static void expectVisibleWithin(int timeoutMs, ViewInteraction vi) {
+    protected static ViewInteraction waitFor(String text) {
+        return waitFor(firstViewWithText(text));
+    }
+
+    protected static ViewInteraction waitFor(ViewInteraction vi) {
+        waitUntil(vi, exists());
+        return vi;
+    }
+
+    protected static ViewInteraction waitUntil(ViewInteraction vi, Matcher<View>... matchers) {
+        return waitUntil(30000, vi, matchers);
+    }
+
+    protected static ViewInteraction waitUntilVisible(ViewInteraction vi) {
+        return waitUntilVisible(30000, vi);
+    }
+
+    protected static ViewInteraction waitUntilVisible(int timeoutMs, ViewInteraction vi) {
+        return waitUntil(timeoutMs, vi, isVisible());
+    }
+
+    protected static ViewInteraction waitUntil(int timeoutMs, ViewInteraction vi, Matcher<View>... matchers) {
         long deadline = System.currentTimeMillis() + timeoutMs;
-        boolean found = false;
-        Throwable throwable = null;
-        while (!found && System.currentTimeMillis() < deadline) {
+        while (true) {
             try {
-                expectVisible(vi);
-                found = true;
+                expect(vi, matchers);
+                return vi;
             } catch (Throwable t) {
-                throwable = t;
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e1) {
-                    Thread.yield();
-                }
+                if (System.currentTimeMillis() > deadline) throw t;
             }
-        }
-        if (!found) {
-            throw new RuntimeException(throwable);
+            sleep(100);
         }
     }
 
-    public static void expectVisible(ViewInteraction vi) {
-        vi.check(matches(isVisible()));
+    public static void back() {
+        pressBack();
+        sleep(500);
+    }
+
+    public static void sleep(int millis) {
+        SystemClock.sleep(millis);
     }
 
     /** Replaces the description of an existing matcher. */
@@ -378,13 +511,125 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         }
 
         public void describeTo(Description description) {
-            String[] args = new String[mArgMatchers.length];
+            Object[] args = new String[mArgMatchers.length];
             for (int i = 0; i < mArgMatchers.length; i++) {
                 StringDescription argDescription = new StringDescription();
                 mArgMatchers[i].describeTo(argDescription);
                 args[i] = argDescription.toString();
             }
-            description.appendText(String.format(mFormat, (Object[]) args));
+            description.appendText(MessageFormat.format(mFormat, args));
         }
+    }
+
+    static ViewAction clickIfUncheckedAction() {
+        return new ViewAction() {
+            @Override public BaseMatcher<View> getConstraints() {
+                return new BaseMatcher<View>() {
+                    @Override public boolean matches(Object item) {
+                        return Matchers.isA(Checkable.class).matches(item); }
+
+                    @Override public void describeMismatch(Object item, Description description) { }
+
+                    @Override public void describeTo(Description description) { }
+                };
+            }
+
+            @Override public String getDescription() {
+                return null;
+            }
+
+            @Override public void perform(UiController uiController, View view) {
+                Checkable checkableView = (Checkable) view;
+                if (!checkableView.isChecked()) {
+                    new GeneralClickAction(Tap.SINGLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER)
+                        .perform(uiController, view);
+                }
+            }
+        };
+    }
+
+    /** This matcher is designed only to be used repeatedly in a waitFor() call. */
+    protected Matcher<View> containsElementWithId(String id) {
+        return new TypeSafeMatcher<View>() {
+            private View matchedView = null;
+
+            @Override protected boolean matchesSafely(View view) {
+                if (view == matchedView) return true;
+                if (view instanceof WebView) {
+                    ((WebView) view).evaluateJavascript(
+                        "document.getElementById('" + id + "')",
+                        result -> matchedView = eq(result, "null") ? null : view
+                    );
+                }
+                return false;
+            }
+
+            @Override public void describeTo(Description description) {
+                description.appendText("is a WebView containing an element with ID \"" + id + "\"");
+            }
+        };
+    }
+
+    protected void clickElementWithId(String id) {
+        waitFor(viewThat(containsElementWithId(id))).perform(new ViewAction() {
+            @Override public String getDescription() {
+                return "click element with id = " + id;
+            }
+
+            @Override public Matcher<View> getConstraints() {
+                return isA(WebView.class);
+            }
+
+            @Override public void perform(UiController controller, View view) {
+                ((WebView) view).evaluateJavascript(
+                    "document.getElementById('" + id + "').click()", null
+                );
+            }
+        });
+    }
+
+    /** This matcher is designed only to be used repeatedly in a waitFor() call. */
+    protected Matcher<View> containsElementWithIdAndText(String id, String text) {
+        return new TypeSafeMatcher<View>() {
+            private View matchedView = null;
+
+            @Override protected boolean matchesSafely(View view) {
+                if (view == matchedView) return true;
+                if (view instanceof WebView) {
+                    ((WebView) view).evaluateJavascript(
+                        "document.getElementById('" + id + "').textContent",
+                        result -> matchedView = eq(result, '"' + text + '"') ? view : null
+                    );
+                }
+                return false;
+            }
+
+            @Override public void describeTo(Description description) {
+                description.appendText("is a WebView containing an element with ID \""
+                    + id + "\" and text \"" + text + "\"");
+            }
+        };
+    }
+
+    /** This matcher is designed only to be used repeatedly in a waitFor() call. */
+    protected Matcher<View> containsNoElementWithId(String id) {
+        return new TypeSafeMatcher<View>() {
+            private View matchedView = null;
+
+            @Override protected boolean matchesSafely(View view) {
+                if (view == matchedView) return true;
+                if (view instanceof WebView) {
+                    ((WebView) view).evaluateJavascript(
+                        "document.getElementById('" + id + "')",
+                        result -> matchedView = eq(result, "null") ? view : null
+                    );
+                }
+                return false;
+            }
+
+            @Override public void describeTo(Description description) {
+                description.appendText("is a WebView that does not contain any element with ID \"" + id + "\"");
+            }
+        };
     }
 }
