@@ -34,9 +34,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
 
     /** Opens the patient list. */
     private void openPatientList() {
-        waitForProgressFragment(); // Wait for locations to load.
-        click(viewWithId(R.id.all_patients));
-        waitForProgressFragment(); // Wait for patients.
+        throw new UnsupportedOperationException("There's no button to get to the patient list any more.");
     }
 
     /** Looks for the filter menu. */

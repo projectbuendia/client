@@ -13,12 +13,17 @@ package org.projectbuendia.client.ui.matchers;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.DataInteraction;
 import android.support.test.espresso.Espresso;
+import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
+import android.support.test.espresso.web.model.Atom;
+import android.support.test.espresso.web.model.ElementReference;
+import android.support.test.espresso.web.webdriver.Locator;
 import android.support.test.rule.ActivityTestRule;
 import android.view.View;
 
@@ -31,7 +36,17 @@ import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
 
+import java.text.MessageFormat;
+
+import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.web.assertion.WebViewAssertions.webContent;
+import static android.support.test.espresso.web.matcher.DomMatchers.elementByXPath;
+import static android.support.test.espresso.web.matcher.DomMatchers.hasElementWithXpath;
+import static android.support.test.espresso.web.matcher.DomMatchers.withTextContent;
+import static android.support.test.espresso.web.sugar.Web.onWebView;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.webClick;
 import static org.hamcrest.Matchers.allOf;
 
 /** Matchers for {@link View}s. */
@@ -52,30 +67,40 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         return new MatcherWithDescription<>(ViewMatchers.withId(id), "has ID " + id);
     }
 
-    public static ViewInteraction viewWithText(String text) {
-        return Espresso.onView(hasText(text));
+    public static ViewInteraction viewWithText(Object obj) {
+        return Espresso.onView(hasText(obj));
     }
 
-    public static ViewInteraction firstViewWithText(String text) {
-        return Espresso.onView(isFirstMatchThat(hasText(text)));
+    public static ViewInteraction viewContainingText(String text) {
+        return Espresso.onView(hasTextContaining(text));
     }
 
-    public static Matcher<View> hasText(String text) {
+    public static ViewInteraction firstViewWithText(Object obj) {
+        return firstViewThat(hasText(obj));
+    }
+
+    public static ViewInteraction firstViewContainingText(String text) {
+        return firstViewThat(hasTextContaining(text));
+    }
+
+    public static Matcher<View> hasText(Object obj) {
+        String text = "" + obj;
         return new MatcherWithDescription<>(ViewMatchers.withText(text),
             "has the exact text \"" + text + "\"");
     }
 
-    public static ViewInteraction viewWithText(int resourceId) {
-        return Espresso.onView(hasText(resourceId));
+    public static ViewInteraction viewWithTextString(int resourceId) {
+        return Espresso.onView(hasTextString(resourceId));
     }
 
-    public static Matcher<View> hasText(int resourceId) {
+    public static Matcher<View> hasTextString(int resourceId) {
         return new MatcherWithDescription<>(ViewMatchers.withText(resourceId),
             "has string resource " + resourceId + " as its text");
     }
 
-    public static Matcher<View> isFirstMatchThat(final Matcher<View> matcher) {
-        return new TypeSafeMatcher<View>() {
+    public static ViewInteraction firstViewThat(Matcher<View>... matchers) {
+        final Matcher matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return Espresso.onView(new TypeSafeMatcher<View>() {
             int currentIndex = 0;
 
             @Override
@@ -88,7 +113,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
             public boolean matchesSafely(View view) {
                 return matcher.matches(view) && currentIndex++ == 0;
             }
-        };
+        });
     }
 
     @SafeVarargs
@@ -136,6 +161,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         vi.perform(ViewActions.click());
     }
 
+    public static void act(ViewInteraction vi, ViewAction action) {
+        vi.perform(action);
+    }
+
     public static void scrollToAndType(Object obj, ViewInteraction vi) {
         scrollTo(vi);
         type(obj, vi);
@@ -143,6 +172,60 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
 
     public static void type(Object obj, ViewInteraction vi) {
         vi.perform(ViewActions.typeText(obj.toString()));
+    }
+
+    public static void clearAndType(Object obj, ViewInteraction vi) {
+        vi.perform(ViewActions.clearText()).perform(ViewActions.typeText(obj.toString()));
+    }
+
+    public static void click(int id) {
+        click(viewWithId(id));
+    }
+
+    public static void click(String text) {
+        click(firstViewWithText(text));
+    }
+
+    public static void type(Object obj, int id) {
+        type(obj, viewWithId(id));
+    }
+
+    public static void clearAndType(Object obj, int id) {
+        clearAndType(obj, viewWithId(id));
+    }
+
+    public static void act(int id, ViewAction action) {
+        act(viewWithId(id), action);
+    }
+
+    public static void act(String text, ViewAction action) {
+        act(firstViewWithText(text), action);
+    }
+
+    public static void click(Atom<ElementReference> atom) {
+        onWebView().withElement(atom).perform(webClick());
+    }
+
+    public static void clickXpath(String xpath) {
+        click(findElement(Locator.XPATH, xpath));
+    }
+
+    public static void expectXpath(String xpath) {
+        onWebView().check(webContent(hasElementWithXpath(xpath)));
+    }
+
+    public static void expectXpathText(String xpath, Matcher<String> matcher) {
+        onWebView().check(webContent(elementByXPath(xpath, withTextContent(matcher))));
+    }
+
+    public static void expectXpathNotFound(String xpath) {
+        try {
+            expectXpath(xpath);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return;
+        }
+        throw new AssertionError("XPath unexpectedly present: " + xpath);
     }
 
     // Matchers with better descriptions than those in espresso.matcher.ViewMatchers.
@@ -196,35 +279,35 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     public static Matcher<View> whoseParent(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.withParent(matcher),
-            "whose parent {1}", matcher);
+            "whose parent {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasChildThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.withChild(matcher),
-            "has a child that {1}", matcher);
+            "has a child that {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasAncestorThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.isDescendantOfA(matcher),
-            "has an ancestor that {1}", matcher);
+            "has an ancestor that {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasDescendantThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.hasDescendant(matcher),
-            "has a descendant that {1}", matcher);
+            "has a descendant that {0}", matcher);
     }
 
     @SafeVarargs
     public static Matcher<View> hasSiblingThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.hasSibling(matcher),
-            "has a sibling that {1}", matcher);
+            "has a sibling that {0}", matcher);
     }
 
     public static Matcher<View> isChecked() {
@@ -239,7 +322,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     public static Matcher<View> hasText(Matcher<String>... matchers) {
         Matcher<String> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.withText(matcher),
-            "has text {1}", matcher);
+            "has text {0}", matcher);
     }
 
     public static Matcher<View> hasTextContaining(String text) {
@@ -361,6 +444,15 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         vi.check(matches(isVisible()));
     }
 
+    public static void back() {
+        pressBack();
+        sleep(500);
+    }
+
+    public static void sleep(int millis) {
+        SystemClock.sleep(millis);
+    }
+
     /** Replaces the description of an existing matcher. */
     static class MatcherWithDescription<T> extends TypeSafeMatcher<T> {
         Matcher mMatcher;
@@ -378,13 +470,13 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         }
 
         public void describeTo(Description description) {
-            String[] args = new String[mArgMatchers.length];
+            Object[] args = new String[mArgMatchers.length];
             for (int i = 0; i < mArgMatchers.length; i++) {
                 StringDescription argDescription = new StringDescription();
                 mArgMatchers[i].describeTo(argDescription);
                 args[i] = argDescription.toString();
             }
-            description.appendText(String.format(mFormat, (Object[]) args));
+            description.appendText(MessageFormat.format(mFormat, args));
         }
     }
 }

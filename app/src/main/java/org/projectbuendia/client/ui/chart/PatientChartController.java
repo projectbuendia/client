@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
 import android.webkit.JavascriptInterface;
 
 import org.joda.time.DateTime;
@@ -68,10 +69,13 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Controller for {@link PatientChartActivity}. */
-final class PatientChartController implements ChartRenderer.JsInterface {
+public final class PatientChartController implements ChartRenderer.JsInterface {
 
     private static final Logger LOG = Logger.create();
     private static final boolean DEBUG = true;
+
+    @VisibleForTesting public static String currentPatientUuid;
+    @VisibleForTesting public static String currentPatientLocationUuid;
 
     // Form UUIDs specific to Ebola deployments.
     static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
@@ -205,7 +209,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         mDefaultEventBus = defaultEventBus;
         mCrudEventBus = crudEventBus;
         mUi = ui;
-        mPatientUuid = patientUuid;
+        currentPatientUuid = mPatientUuid = patientUuid;
         mOdkResultSender = odkResultSender;
         mChartHelper = chartHelper;
         mSyncManager = syncManager;
@@ -225,7 +229,7 @@ final class PatientChartController implements ChartRenderer.JsInterface {
         }
 
         // Load a new patient, which will trigger UI updates.
-        mPatientUuid = uuid;
+        currentPatientUuid = mPatientUuid = uuid;
         mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
     }
 

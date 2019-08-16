@@ -93,7 +93,7 @@ public class PatientSearchControllerTest {
             Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to fragment UI's
-        verify(mFragmentMockUi).setPatients(any(TypedCursor.class));
+        verify(mFragmentMockUi).setPatients(any(TypedCursor.class), FakeForestFactory.build());
     }
 
     private TypedCursor<Patient> getFakeAppPatientCursor() {
@@ -180,7 +180,7 @@ public class PatientSearchControllerTest {
         TypedCursorLoadedEvent reloadEvent = TypedCursorLoadedEventFactory.createEvent(
             Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(reloadEvent);
-        verify(mFragmentMockUi, times(2)).setPatients(any(TypedCursor.class));
+        verify(mFragmentMockUi, times(2)).setPatients(any(TypedCursor.class), FakeForestFactory.build());
     }
 
     /**

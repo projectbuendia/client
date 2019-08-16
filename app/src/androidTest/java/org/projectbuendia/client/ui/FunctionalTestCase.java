@@ -20,9 +20,13 @@ import android.support.test.espresso.NoActivityResumedException;
 import android.support.test.espresso.core.deps.guava.collect.Iterables;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
+import android.view.View;
 
 import com.squareup.spoon.Spoon;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
@@ -362,5 +366,18 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         int sex = Integer.parseInt(id) % 2 == 0 ? R.id.patient_sex_female : R.id.patient_sex_male;
         click(viewWithId(sex));
         screenshot("After Patient Populated");
+    }
+
+    public View getViewThat(Matcher matcher) {
+        final View[] holder = {null};
+        Matcher capturer = new TypeSafeMatcher<View>() {
+            @Override protected boolean matchesSafely(View item) {
+                holder[0] = item;
+                return true;
+            }
+            @Override public void describeTo(Description description) { }
+        };
+        expectVisibleSoon(viewThat(matcher, capturer));
+        return holder[0];
     }
 }
