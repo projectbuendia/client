@@ -47,7 +47,7 @@ final class UserListAdapter extends ArrayAdapter<JsonUser> {
         }
 
         JsonUser user = getItem(position);
-        holder.initials.setBackgroundColor(mColorizer.getColorArgb(user.uuid));
+        holder.initials.setBackgroundColor(mColorizer.getColorArgb(user.fullName.trim()));
         holder.initials.setText(user.getInitials());
         holder.fullName.setText(user.fullName);
 
