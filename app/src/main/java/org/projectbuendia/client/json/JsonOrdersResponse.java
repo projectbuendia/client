@@ -1,10 +1,6 @@
 package org.projectbuendia.client.json;
 
-/**
- * JSON representation of a set of patients returned by the server.
- * <p>
- * TODO: Generify this class into e.g. an IncrementalFetchResponse<JsonEncounter>
- */
+/** JSON format of a response to GET /orders?v=full */
 public class JsonOrdersResponse {
     public JsonOrder[] results;
     // TODO(capnfabs): Rename this to syncToken.

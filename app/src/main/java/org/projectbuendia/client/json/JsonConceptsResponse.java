@@ -12,6 +12,6 @@
 package org.projectbuendia.client.json;
 
 /** A list of concept results returned by the server. */
-public class JsonConceptResponse {
+public class JsonConceptsResponse {
     public JsonConcept[] results;
 }

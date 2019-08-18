@@ -16,13 +16,13 @@ import java.util.List;
 
 /** A chart definition. */
 public class Chart {
-    public final String uuid;  // UUID of the OpenMRS Form containing this chart definition
+    // TODO(ping): Support multiple charts stored in multiple forms.  Right now,
+    // there is no UUID field because there is only ever a single chart form.
     public final List<ChartSection> tileGroups;
     public final List<ChartSection> rowGroups;
     public final String name;
 
-    public Chart(String uuid, String name) {
-        this.uuid = uuid;
+    public Chart(String name) {
         this.name = name;
         this.tileGroups = new ArrayList<>();
         this.rowGroups = new ArrayList<>();

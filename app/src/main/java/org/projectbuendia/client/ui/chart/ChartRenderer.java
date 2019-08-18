@@ -22,10 +22,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.Order;
@@ -227,7 +227,7 @@ public class ChartRenderer {
             for (Obs obs : observations) {
                 if (obs == null) continue;
 
-                if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
+                if (obs.conceptUuid.equals(ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Order order = orders.get(obs.value);
                     if (order != null) {
                         if (!mExecutionHistories.containsKey(order.uuid)) {

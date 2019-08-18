@@ -49,14 +49,6 @@ import javax.annotation.Nullable;
  * not need to worry about the implementation details of this.
  */
 public class AppModel {
-    // The UUID of the single OpenMRS form that defines all our charts.
-    public static final String CHART_UUID = "buendia_chart";
-
-    // This is a custom Buendia-specific concept to indicate that a treatment order
-    // has been carried out (e.g. a prescribed medication has been administered).
-    // The timestamp of an observation for this concept should be the time the order
-    // was executed, and the value of the observation should be the UUID of the order.
-    public static final String ORDER_EXECUTED_CONCEPT_UUID = "buendia_concept_order_executed";
 
     private static final Logger LOG = Logger.create();
     private final ContentResolver mContentResolver;

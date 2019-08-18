@@ -77,7 +77,7 @@ public final class PatientChartControllerTest {
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
     private FakeHandler mFakeHandler;
-    private Chart mFakeChart = new Chart(PATIENT_UUID_1, "Test Chart");
+    private Chart mFakeChart = new Chart("Test Chart");
 
 
     /** Tests that suspend() unregisters from the event bus. */
@@ -273,8 +273,7 @@ public final class PatientChartControllerTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         List<Chart> charts = ImmutableList.of(mFakeChart);
-        when(mMockChartHelper.getCharts(AppModel.CHART_UUID))
-                .thenReturn(charts);
+        when(mMockChartHelper.getCharts()).thenReturn(charts);
 
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();

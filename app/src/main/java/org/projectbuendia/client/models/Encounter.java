@@ -140,7 +140,7 @@ public class Encounter extends Base<String> {
         }
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues cv = new ContentValues();
-            cv.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
+            cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID);
             cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
