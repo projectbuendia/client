@@ -118,6 +118,9 @@ public class App extends Application {
         mObjectGraph.inject(this);
         mObjectGraph.injectStatics();
 
+        // Ensure all unset preferences get initialized with default values.
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+
         synchronized (App.class) {
             sModel = mModel;
             sSettings = mSettings;
@@ -128,12 +131,8 @@ public class App extends Application {
             sUserManager = mUserManager; // TODO: Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO: Remove when Daggered.
             sServer = mServer; // TODO: Remove when Daggered.
+            mHealthMonitor.start();
         }
-
-        // Ensure all unset preferences get initialized with default values.
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
-
-        mHealthMonitor.start();
     }
 
     public <T> T get(Class<T> type) {
