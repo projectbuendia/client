@@ -27,6 +27,7 @@ import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -77,7 +78,7 @@ final class LocationListController {
 
     public interface LocationListFragmentUi {
 
-        void setLocations(LocationForest forest, Iterable<Location> locations);
+        void setLocations(LocationForest forest, Collection<Location> locations);
 
         void setReadyState(ReadyState state);
 

@@ -14,10 +14,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:showDividers="middle"
-    android:divider="?android:dividerHorizontal"
-    android:dividerPadding="0dp">
+    android:layout_height="match_parent">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/fragment_patient_list_swipe_to_refresh"
@@ -33,6 +30,7 @@
 
     <TextView android:id="@+id/empty"
               style="@style/text.huge"
+              android:visibility="invisible"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:text="@string/no_patients"

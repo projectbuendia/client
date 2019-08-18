@@ -47,7 +47,7 @@ public class LoginFragment extends ProgressFragment {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
 
-        setContentView(R.layout.login_fragment);
+        setContentLayout(R.layout.login_fragment);
 
         mUserListAdapter = new UserListAdapter(getActivity(), mUserColorizer);
     }

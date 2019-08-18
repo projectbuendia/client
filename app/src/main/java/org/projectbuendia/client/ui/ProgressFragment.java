@@ -41,6 +41,7 @@ import java.util.List;
 public abstract class ProgressFragment extends Fragment implements Response.ErrorListener {
 
     private static final Logger LOG = Logger.create();
+    protected int mContentLayout;
     protected View mContent;
     protected RelativeLayout mFrame;
     protected TextView mErrorTextView;
@@ -110,16 +111,16 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
             RelativeLayout.LayoutParams.MATCH_PARENT);
         mFrame.setLayoutParams(layoutParams);
 
-        RelativeLayout.LayoutParams relativeLayout = new RelativeLayout.LayoutParams(
+        RelativeLayout.LayoutParams centeredLayout = new RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
-        relativeLayout.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        centeredLayout.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         mIndeterminateProgressBar = new ProgressBar(getActivity());
-        mIndeterminateProgressBar.setLayoutParams(relativeLayout);
+        mIndeterminateProgressBar.setLayoutParams(centeredLayout);
 
         mProgressBarLayout =
             inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
-        mProgressBarLayout.setLayoutParams(relativeLayout);
+        mProgressBarLayout.setLayoutParams(centeredLayout);
         mProgressBar =
             mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
         mProgressBarLabel = mProgressBarLayout.findViewById(R.id.progress_fragment_label);
@@ -135,7 +136,9 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
 
         mFrame.setLayoutParams(fullLayout);
 
+        mContent = LayoutInflater.from(getActivity()).inflate(mContentLayout, mFrame, false);
         mContent.setVisibility(View.GONE);
+
         mIndeterminateProgressBar.setVisibility(View.VISIBLE);
         mProgressBarLayout.setVisibility(View.GONE);
         mErrorTextView.setVisibility(View.GONE);
@@ -166,8 +169,8 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         return mState;
     }
 
-    protected void setContentView(int layout) {
-        mContent = LayoutInflater.from(getActivity()).inflate(layout, null, false);
+    protected void setContentLayout(int layout) {
+        mContentLayout = layout;
     }
 
     protected void setProgress(int numerator, int denominator) {
