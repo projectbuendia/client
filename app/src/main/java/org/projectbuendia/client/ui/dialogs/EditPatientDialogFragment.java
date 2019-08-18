@@ -194,7 +194,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         // Set focus.
         EditText[] fields = {mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths};
         for (EditText field : fields) {
-            if (field.isShown() && field.getText().toString().isEmpty()) {
+            if (field.isEnabled() && field.getText().toString().isEmpty()) {
                 field.requestFocus();
                 return;
             }
