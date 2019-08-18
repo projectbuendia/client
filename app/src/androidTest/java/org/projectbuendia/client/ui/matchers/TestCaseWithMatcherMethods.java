@@ -30,6 +30,7 @@ import android.support.test.espresso.web.assertion.WebAssertion;
 import android.support.test.espresso.web.model.Atom;
 import android.support.test.espresso.web.model.ElementReference;
 import android.support.test.rule.ActivityTestRule;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Checkable;
@@ -103,7 +104,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     public static ViewInteraction firstViewThat(Matcher<View>... matchers) {
-        final Matcher matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        final Matcher matcher = combinedMatcher(matchers);
         return Espresso.onView(new TypeSafeMatcher<View>() {
             int currentIndex = 0;
             View foundView = null;
@@ -125,7 +126,20 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     @SafeVarargs public static ViewInteraction viewThat(Matcher<View>... matchers) {
-        return Espresso.onView(matchers.length > 1 ? allOf(matchers) : matchers[0]);
+        return Espresso.onView(combinedMatcher(matchers));
+    }
+
+    public View getViewThat(Matcher<View>... matchers) {
+        final View[] holder = {null};
+        Matcher capturer = new TypeSafeMatcher<View>() {
+            @Override protected boolean matchesSafely(View item) {
+                holder[0] = item;
+                return true;
+            }
+            @Override public void describeTo(Description description) { }
+        };
+        waitUntilVisible(viewThat(combinedMatcher(matchers), capturer));
+        return holder[0];
     }
 
     public static DataInteraction dataThat(Matcher... matchers) {
@@ -133,13 +147,16 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     @SafeVarargs public static void expect(ViewInteraction vi, Matcher<View>... matchers) {
-        vi.check(matches(matchers.length == 0 ? exists() :
-            matchers.length > 1 ? allOf(matchers) : matchers[0]));
+        vi.check(matches(combinedMatcher(matchers)));
     }
 
     @SafeVarargs public static void expect(DataInteraction di, Matcher<View>... matchers) {
-        di.check(matches(matchers.length == 0 ? exists() :
-            matchers.length > 1 ? allOf(matchers) : matchers[0]));
+        di.check(matches(combinedMatcher(matchers)));
+    }
+
+    public static Matcher<View> combinedMatcher(Matcher<View>... matchers) {
+        return matchers.length == 0 ? exists() :
+            matchers.length > 1 ? allOf(matchers) : matchers[0];
     }
 
     public static Matcher<View> exists() {
@@ -197,11 +214,13 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     public static void type(Object obj, ViewInteraction vi) {
+        waitFor(vi);
         optionallyScrollTo(vi);
         vi.perform(ViewActions.typeText(obj.toString()));
     }
 
     public static void clearAndType(Object obj, ViewInteraction vi) {
+        waitFor(vi);
         vi.perform(ViewActions.clearText()).perform(ViewActions.typeText(obj.toString()));
     }
 
@@ -558,7 +577,12 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 if (view instanceof WebView) {
                     ((WebView) view).evaluateJavascript(
                         "document.getElementById('" + id + "')",
-                        result -> matchedView = eq(result, "null") ? null : view
+                        result -> {
+                            if (!eq(result, "null")) {
+                                matchedView = view;
+                                Log.i("buendia/TestCase", "Found element '" + id + "'");
+                            }
+                        }
                     );
                 }
                 return false;
@@ -573,7 +597,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     protected void clickElementWithId(String id) {
         waitFor(viewThat(containsElementWithId(id))).perform(new ViewAction() {
             @Override public String getDescription() {
-                return "click element with id = " + id;
+                return "click element with id \"" + id + "\"";
             }
 
             @Override public Matcher<View> getConstraints() {
@@ -581,8 +605,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
             }
 
             @Override public void perform(UiController controller, View view) {
+                Log.i("buendia/TestCase", "Clicking element '" + id + "'");
                 ((WebView) view).evaluateJavascript(
-                    "document.getElementById('" + id + "').click()", null
+                    "var e = document.getElementById('" + id + "'); " +
+                    "e.dispatchEvent(new Event('touchstart')); e.click()", null
                 );
             }
         });
@@ -598,7 +624,12 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 if (view instanceof WebView) {
                     ((WebView) view).evaluateJavascript(
                         "document.getElementById('" + id + "').textContent",
-                        result -> matchedView = eq(result, '"' + text + '"') ? view : null
+                        result -> {
+                            if (eq(result, '"' + text + '"')) {
+                                matchedView = view;
+                                Log.i("buendia/TestCase", "Found element '" + id + "' with text '" + text + "'");
+                            }
+                        }
                     );
                 }
                 return false;
@@ -621,7 +652,12 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 if (view instanceof WebView) {
                     ((WebView) view).evaluateJavascript(
                         "document.getElementById('" + id + "')",
-                        result -> matchedView = eq(result, "null") ? view : null
+                        result -> {
+                            if (eq(result, "null")) {
+                                matchedView = view;
+                                Log.i("buendia/TestCase", "Confirmed that element '" + id + "' is not present");
+                            }
+                        }
                     );
                 }
                 return false;

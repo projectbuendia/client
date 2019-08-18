@@ -15,7 +15,9 @@ import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
+import com.android.volley.toolbox.RequestFuture;
 import com.google.common.base.Optional;
 
 import org.hamcrest.Description;
@@ -28,9 +30,10 @@ import org.odk.collect.android.widgets2.group.TableWidgetGroup;
 import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FunctionalTestCase;
@@ -41,12 +44,14 @@ import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import androidx.test.filters.MediumTest;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasItemCount;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A quick test suite that exercises all basic functionality. */
 @MediumTest public class SmokeTest extends FunctionalTestCase {
@@ -66,21 +71,22 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         screenshot("Added new user");
         signInFullSync("Test" + id + " User" + id);  // step 2
         screenshot("Signed in");
+        int suspectedCount = getPatientCount("Suspected");
         addPatient(id, "Given" + id, "Family" + id, 11);  // step 3
         screenshot("Added new patient");
         String patientUuid = PatientChartController.currentPatientUuid;
-        String locationUuid = PatientChartController.currentPatientLocationUuid;
-        movePatient("Discharged");
+        movePatient("Suspected");
         back();  // back to location list
         screenshot("Moved patient away");
-        expectPatientCount("Triage", 0);
-        internalMovePatient(patientUuid, locationUuid);
+        expectPatientCount("Suspected", suspectedCount + 1);
+        int dischargedCount = getPatientCount("Discharged");
+        internalMovePatient(patientUuid, internalGetLocationUuid("Discharged"));
         internalIncrementalSync();  // step 4
         screenshot("Moved patient back");
-        expectPatientCount("Triage", 1);
+        expectPatientCount("Suspected", suspectedCount);
+        expectPatientCount("Discharged", dischargedCount + 1);
         goToPatientById(id, "Given" + id, "Family" + id);  // step 5
         screenshot("Opened chart by ID");
-        movePatient("Confirmed");  // move elsewhere to avoid interfering with next run
         editPatientAge(22);  // step 6
         screenshot("Edited patient age");
         rewindAdmissionDate(2, "Day 3");  // step 7
@@ -97,6 +103,7 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         screenshot("Edited order");
         deleteOrder("Sunshine");  // step 12
         screenshot("Deleted order");
+        toast("Smoke test passed!");
     }
 
     private void initSettings() {
@@ -161,15 +168,29 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         ));
     }
 
+    private String internalGetLocationUuid(String name) {
+        LocationForest forest = App.getModel().getForest();
+        for (Location location : forest.allNodes()) {
+            if (eq(location.name, name)) return location.uuid;
+        }
+        throw new RuntimeException("No location named \"" + name + "\" could be found");
+    }
+
+    /** Moves the patient on the server without updating the local data store. */
     private void internalMovePatient(String patientUuid, String locationUuid) {
-        AppModel model = App.getModel();
-        CrudEventBus bus = App.getCrudEventBus();
         PatientDelta delta = new PatientDelta();
         delta.assignedLocationUuid = Optional.of(locationUuid);
-        model.updatePatient(bus, patientUuid, delta);
+        RequestFuture<JsonPatient> future = RequestFuture.newFuture();
+        App.getServer().updatePatient(patientUuid, delta, future, future);
+        try {
+            JsonPatient patient = future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Could not move patient", e);
+        }
     }
 
     private void internalIncrementalSync() {
+        sleep(1000);
         App.getInstance().getSyncManager().sync(SyncManager.SMALL_PHASES);
     }
 
@@ -185,7 +206,7 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
         click("Edit patient");
         clearAndType(age, R.id.patient_age_years);
         click("OK");
-        expect(viewContainingText(age + " y"));
+        waitFor(viewContainingText(age + " y"));
     }
 
     private void rewindAdmissionDate(int numDays, String expected) {
@@ -213,9 +234,13 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
     }
 
     private void addOrder(String medication, String dosage, String notes) {
+        for (int i = 0; i < 10; i++) {
+            clickElementWithId("down");
+            sleep(50);
+        }
         clickElementWithId("new_treatment");
 
-        waitFor("New treatment");
+        waitUntilVisible(viewThat(hasText("New treatment")));
         type(medication, R.id.order_medication);
         type(dosage, R.id.order_dosage);
         type(notes, R.id.order_notes);
@@ -303,6 +328,19 @@ import static org.projectbuendia.client.acceptance.ListItemCountAssertion.hasIte
             hasChildThat(hasId(R.id.location_name), hasText(location)),
             hasChildThat(hasId(R.id.patient_count), hasText("" + count))
         )));
+    }
+
+    private int getPatientCount(String location) {
+        TextView countView = (TextView) getViewThat(
+            hasId(R.id.patient_count),
+            hasSiblingThat(hasId(R.id.location_name), hasText(location))
+        );
+        String text = countView.getText().toString();
+        try {
+            return Integer.valueOf(text);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private void expectListItemCount(int id, Matcher<Integer> matcher) {

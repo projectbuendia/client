@@ -20,13 +20,9 @@ import android.support.test.espresso.NoActivityResumedException;
 import android.support.test.espresso.core.deps.guava.collect.Iterables;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
-import android.view.View;
 
 import com.squareup.spoon.Spoon;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
@@ -361,23 +357,15 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         type(id, viewWithId(R.id.patient_id));
         type(given, viewWithId(R.id.patient_given_name));
         type(family, viewWithId(R.id.patient_family_name));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_years));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
-        int sex = Integer.parseInt(id) % 2 == 0 ? R.id.patient_sex_female : R.id.patient_sex_male;
+        int i = Integer.parseInt(id);
+        type("" + (i % 100), viewWithId(R.id.patient_age_years));
+        type("" + (i % 10), viewWithId(R.id.patient_age_months));
+        int sex = i % 2 == 0 ? R.id.patient_sex_female : R.id.patient_sex_male;
         click(viewWithId(sex));
         screenshot("After Patient Populated");
     }
 
-    public View getViewThat(Matcher matcher) {
-        final View[] holder = {null};
-        Matcher capturer = new TypeSafeMatcher<View>() {
-            @Override protected boolean matchesSafely(View item) {
-                holder[0] = item;
-                return true;
-            }
-            @Override public void describeTo(Description description) { }
-        };
-        waitUntilVisible(viewThat(matcher, capturer));
-        return holder[0];
+    protected void toast(String message) {
+        getActivity().runOnUiThread(() -> BigToast.show(getActivity(), message));
     }
 }
