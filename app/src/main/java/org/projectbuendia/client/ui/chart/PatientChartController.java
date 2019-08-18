@@ -75,7 +75,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     private static final boolean DEBUG = true;
 
     @VisibleForTesting public static String currentPatientUuid;
-    @VisibleForTesting public static String currentPatientLocationUuid;
 
     // Form UUIDs specific to Ebola deployments.
     static final String EBOLA_LAB_TEST_FORM_UUID = "buendia_form_ebola_lab_test";
@@ -530,7 +529,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     private synchronized void updatePatientLocationUi() {
         if (mPatient != null && mPatient.locationUuid != null) {
-            currentPatientLocationUuid = mPatient.locationUuid;
             mUi.updatePatientLocationUi(mAppModel.getForest(), mPatient);
         }
     }
