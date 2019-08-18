@@ -108,9 +108,10 @@ public abstract class IncrementalSyncWorker<T> implements SyncWorker {
         OpenMrsConnectionDetails connectionDetails = App.getConnectionDetails();
         Uri.Builder url = Uri.parse(connectionDetails.getBuendiaApiUrl()).buildUpon();
         url.appendPath(resourceType);
-        if (lastSyncToken != null) {
-            url.appendQueryParameter("since", lastSyncToken);
+        if (lastSyncToken == null) {
+            lastSyncToken = "{\"t\":\"0000-00-00T00:00:00.000Z\"}";
         }
+        url.appendQueryParameter("since", lastSyncToken);
         GsonRequest<IncrementalSyncResponse<T>> request = new GsonRequest<>(
                 url.build().toString(),
                 new IncrementalSyncResponseType(clazz),
