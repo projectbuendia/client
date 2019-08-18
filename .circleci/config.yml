@@ -1,99 +1,121 @@
 version: 2
-jobs:
-  build:
+
+# Use a `references` section to DRY the config with YAML reference syntax.
+# https://discuss.circleci.com/t/using-defaults-syntax-in-config-yaml-aka-yaml-anchors/16168/3
+# For a working example see https://github.com/opendatakit/collect/blob/master/.circleci/config.yml
+references:
+  build_config: &build_config
     working_directory: ~/client
     docker:
-      - image: circleci/android:api-23
+      - image: circleci/android:api-28
     environment:
-      JVM_OPTS: -Xmx3200m
+      # See https://github.com/opendatakit/collect/blob/master/.circleci/config.yml#L86-L92 for -Xm[sx]
+      # Disable pre-dexing because we don't need incremental builds here and it just slows the process down.
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xms128m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError" -DpreDexEnable=false'
+
+  cache_key: &cache_key
+    key: buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+
+  restore_cache: &restore_cache
+    restore_cache:
+      <<: *cache_key
+
+  save_cache: &save_cache
+    save_cache:
+      <<: *cache_key
+      paths:
+        - ~/.gradle
+        - ~/.m2
+
+  init_client_libs: &init_client_libs
+    run:
+      name: Init client-libs submodule
+      command: git submodule update --init client-libs
+
+  get_package_version: &get_package_version
+    run:
+      name: Get package version
+      command: echo "export PACKAGE_VERSION=$(.circleci/get_package_version)" >> $BASH_ENV
+
+  get_dependencies: &get_dependencies
+    run:
+      name: Download dependencies
+      command: ./gradlew androidDependencies
+
+  run_unit_tests: &run_unit_tests
+    run:
+      name: Run unit tests
+      # lint is slightly busted for us here
+      # command: ./gradlew lint test
+      command: ./gradlew test
+
+  make_artifact_store: &make_artifact_store
+    run:
+      name: Make artifact store
+      command: mkdir -p /tmp/artifacts
+
+  store_artifacts: &store_artifacts
+    store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+      path: /tmp/artifacts
+      destination: artifacts
+ 
+jobs:
+  build:
+    <<: *build_config
     steps:
       - checkout
 
-      - run:
-          name: Init client-lib submodule
-          command: git submodule update --init client-libs
+      - *init_client_libs
 
-      - run:
-          name: Get package version
-          command: echo "export PACKAGE_VERSION=$(.circleci/get_package_version)" >> $BASH_ENV
+      - *get_package_version
 
-      - restore_cache:
-          keys:
-            - buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
-            - buendia-client-v1-{{ checksum "build.gradle" }}-
-            - buendia-client-v1-{{ checksum "build.gradle" }}-
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
+      - *restore_cache
 
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - *get_dependencies
+
+      - *save_cache
+
+      - *make_artifact_store
       
       - run:
-          name: Build APK
+          name: Build debug APK
           command: |
-            export ANDROID_PATH=/opt/android/sdk
-            ./gradlew assembleDebug
-            mkdir -p /tmp/artifacts
+            ./gradlew -PversionNumber=${PACKAGE_VERSION} assembleDebug
             cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}-debug.apk
 
-      - run:
-          name: Run Tests
-          # lint is slightly busted for us here
-          # command: ./gradlew lint test
-          command: ./gradlew test
+      - *run_unit_tests
 
-      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
-          path: /tmp/artifacts
-          destination: artifacts
+      - *store_artifacts
 
       #- store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
       #path: app/build/test-results
 
   release:
-    working_directory: ~/client
-    docker:
-      - image: circleci/android:api-23
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *build_config
     steps:
       - checkout
 
-      - run:
-          name: Init client-lib submodule
-          command: git submodule update --init client-libs
+      - *init_client_libs
 
-      - run:
-          name: Get package version
-          command: echo "export PACKAGE_VERSION=$(.circleci/get_package_version)" >> $BASH_ENV
+      - *get_package_version
 
-      - restore_cache:
-          keys:
-            - buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
-            - buendia-client-v1-{{ checksum "build.gradle" }}-
-            - buendia-client-v1-{{ checksum "build.gradle" }}-
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
+      - *restore_cache
 
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: buendia-client-v1-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - *get_dependencies
 
+      - *save_cache
+
+      - *make_artifact_store
+ 
       - run:
-          name: Save keystore
+          name: Generate keystore
           command: |
             echo "$ANDROID_KEYSTORE" | base64 -d > $ANDROID_KEYSTORE_FILE
       
       - run:
           name: Build release APK
           command: |
-            export ANDROID_PATH=/opt/android/sdk
-            ./gradlew -PversionNumber=${PACKAGE_VERSION} --no-daemon assembleRelease
-            mkdir -p /tmp/artifacts
+            ./gradlew -PversionNumber=${PACKAGE_VERSION} assembleRelease
             cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk
 
       - run:
@@ -102,15 +124,9 @@ jobs:
             keytool -list -printcert -jarfile /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk | tee /tmp/cert.txt
             grep -q Buendia /tmp/cert.txt
 
-      - run:
-          name: Run Tests
-          # lint is slightly busted for us here
-          # command: ./gradlew lint test
-          command: ./gradlew test
+      - *run_unit_tests
 
-      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
-          path: /tmp/artifacts
-          destination: artifacts
+      - *store_artifacts
  
 workflows:
   version: 2
