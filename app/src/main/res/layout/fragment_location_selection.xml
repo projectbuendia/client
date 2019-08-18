@@ -9,22 +9,35 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<ScrollView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scroll_container"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.flexbox.FlexboxLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/list_container"
+    <ScrollView
+        android:id="@+id/scroll_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="12sp"
-        app:flexWrap="wrap"
-        app:alignItems="stretch"
-        app:alignContent="stretch" />
+        android:layout_height="match_parent">
 
-</ScrollView>
+        <com.google.android.flexbox.FlexboxLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/list_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12sp"
+            app:flexWrap="wrap"
+            app:alignItems="stretch"
+            app:alignContent="stretch" />
+
+    </ScrollView>
+
+    <TextView android:id="@+id/empty"
+          style="@style/text.huge"
+          android:visibility="invisible"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:text="@string/no_locations"
+          android:gravity="center_vertical|center_horizontal"/>
+</FrameLayout>

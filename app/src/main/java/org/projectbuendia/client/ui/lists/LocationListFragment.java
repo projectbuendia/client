@@ -28,6 +28,8 @@ import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
 
 /** Displays a list of all locations. */
@@ -42,6 +44,7 @@ public final class LocationListFragment extends ProgressFragment {
     private final Ui mUi = new Ui();
     private LocationOptionList mList;
     private ScrollView mScroll;
+    private View mEmpty;
 
     public LocationListFragment() {
         // Required empty public constructor
@@ -59,9 +62,10 @@ public final class LocationListFragment extends ProgressFragment {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
         mScroll = view.findViewById(R.id.scroll_container);
+        mEmpty = view.findViewById(R.id.empty);
         mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
         LocationForest forest = mModel.getForest();
-        mList.setLocations(forest, forest.allNodes());
+        mUi.setLocations(forest, forest.allNodes());
         return view;
     }
 
@@ -100,7 +104,9 @@ public final class LocationListFragment extends ProgressFragment {
     }
 
     private final class Ui implements LocationListController.LocationListFragmentUi {
-        @Override public void setLocations(LocationForest forest, Iterable<Location> locations) {
+        @Override public void setLocations(LocationForest forest, Collection<Location> locations) {
+            mEmpty.setVisibility(locations.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            mScroll.setVisibility(locations.isEmpty() ? View.INVISIBLE : View.VISIBLE);
             mList.setLocations(forest, locations);
         }
 

@@ -18,6 +18,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -227,7 +228,7 @@ public class LocationForest {
     }
 
     /** Iterate over all the nodes in depth-first order. */
-    public @Nonnull Iterable<Location> allNodes() {
+    public @Nonnull Collection<Location> allNodes() {
         return Arrays.asList(locations);
     }
 

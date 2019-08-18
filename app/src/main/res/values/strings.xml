@@ -57,6 +57,7 @@
   <string name="add_user_connection_error">Error connecting to server</string>
   <string name="title_single_location">Patients at this location</string>
 
+  <string name="no_locations">No locations</string>
   <string name="no_patients">No patients</string>
   <string name="one_patient">1 patient</string>
   <string name="n_patients">%d patients</string>
