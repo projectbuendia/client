@@ -54,7 +54,7 @@ public final class LocationListFragment extends ProgressFragment {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
         c = ContextUtils.from(getActivity());
-        setContentView(R.layout.fragment_location_selection);
+        setContentLayout(R.layout.fragment_location_selection);
     }
 
     @Override public View onCreateView(

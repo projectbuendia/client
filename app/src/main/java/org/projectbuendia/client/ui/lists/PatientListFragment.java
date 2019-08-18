@@ -79,7 +79,7 @@ public class PatientListFragment extends ProgressFragment implements
         App.getInstance().inject(this);
         mListController = new PatientListController(
             mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
-        setContentView(R.layout.fragment_patient_list);
+        setContentLayout(R.layout.fragment_patient_list);
     }
 
     @Override public void onResume() {
