@@ -124,7 +124,10 @@
   <string name="female">Feminin</string>
   <string name="unknown">Inconnu</string>
   <string name="title_updating_patient">Mise à jour du patient</string>
+  <string name="title_adding_new_patient">Ajout d\'un nouveau patient</string>
   <string name="please_wait">Attendez SVP</string>
+  <string name="updating_patient_please_wait">Mise à jour du patient, veuillez patienter...</string>
+  <string name="adding_new_patient_please_wait">Ajout d\'un nouveau patient, veuillez patienter...</string>
 
   <string name="title_zoom">Sélectionnez le niveau de zoom</string>
   <string name="zoom_day">1 colonne par jour</string>
@@ -168,7 +171,7 @@
   <string name="latest_pcr_label_with_date">Essai d\'Ebola test (%s)</string>
   <string name="action_add_test_result">Ajouter le résultat du test</string>
   <string name="pregnant">Enceinte</string>
-  <string name="iv_fitted">cathéter intraveineux en place</string>
+  <string name="iv_fitted">Cathéter intraveineux en place</string>
   <string name="cannot_eat">Ne peut pas manger</string>
   <string name="oxygen">Oxygène</string>
   <string name="status_short_desc_unknown">-</string>

@@ -126,7 +126,10 @@
   <string name="female">Female</string>
   <string name="unknown">Unknown</string>
   <string name="title_updating_patient">Updating patient</string>
+  <string name="title_adding_new_patient">Adding new patient</string>
   <string name="please_wait">Please wait&#8230;</string>
+  <string name="updating_patient_please_wait">Updating patient; please wait...</string>
+  <string name="adding_new_patient_please_wait">Adding new patient; please wait...</string>
 
   <string name="title_zoom">Set zoom level</string>
   <string name="zoom_day">1 column per day</string>
@@ -326,14 +329,11 @@
   <string name="patient_validation_missing_given_name">Enter the given name</string>
   <string name="patient_validation_missing_id">Enter the patient ID</string>
   <string name="patient_validation_missing_admission_date">Enter the admission date</string>
+  <string name="patient_validation_age_limit">Age cannot be greater than 120 years</string>
   <string name="patient_missing_sex">Please select Male or Female.</string>
-  <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
-  <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future.</string>
+  <string name="patient_validation_future_admission_date">Admission date cannot be in the future</string>
+  <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future</string>
   <string name="patient_creation_clear_symptom_onset_date">Clear</string>
-  <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
-  <string name="family_name_hint_unknown">–</string>
-  <string name="given_name_hint_unknown">–</string>
-  <string name="unknown_name">–</string>
 
   <!-- UI strings related to settings -->
   <string name="title_activity_settings">Settings</string>
