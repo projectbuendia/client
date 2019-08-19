@@ -169,9 +169,11 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     // report success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(ItemLoadedEvent<Encounter> event) {
-            mBus.post(new ItemCreatedEvent<>(event.item));
-            mBus.unregister(this);
+        public void onEventMainThread(ItemLoadedEvent<?> event) {
+            if (event.item instanceof Encounter) {
+                mBus.post(new ItemCreatedEvent<>((Encounter) event.item));
+                mBus.unregister(this);
+            }
         }
 
         public void onEventMainThread(ItemLoadFailedEvent event) {
