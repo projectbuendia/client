@@ -71,37 +71,42 @@ public class NewUserDialogFragment extends DialogFragment {
             .setView(fragment);
 
         final AlertDialog dialog = dialogBuilder.create();
-        dialog.setOnShowListener(dialogInterface -> dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
-            view -> {
-                // Validate the user.
-                String givenName = Utils.toNonnullString(mGivenName.getText()).trim();
-                String familyName = Utils.toNonnullString(mFamilyName.getText()).trim();
-                boolean valid = true;
-                if (givenName.isEmpty()) {
-                    setError(mGivenName, R.string.given_name_cannot_be_null);
-                    valid = false;
-                }
-                if (familyName.isEmpty()) {
-                    setError(mFamilyName, R.string.family_name_cannot_be_null);
-                    valid = false;
-                }
-                Utils.logUserAction("add_user_submitted",
-                    "valid", "" + valid,
-                    "given_name", givenName,
-                    "family_name", familyName);
-                if (!valid) return;
+        dialog.setOnShowListener(di ->
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(view -> onSubmit(dialog))
+        );
 
-                App.getUserManager().addUser(new JsonNewUser(
-                    givenName, familyName
-                ));
-                if (mActivityUi != null) {
-                    mActivityUi.showSpinner(true);
-                }
-                dialog.dismiss();
-            }));
         // Open the keyboard, ready to type into the given name field.
         dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         return dialog;
+    }
+
+    private void onSubmit(DialogInterface dialog) {
+        // Validate the user.
+        String givenName = Utils.toNonnullString(mGivenName.getText()).trim();
+        String familyName = Utils.toNonnullString(mFamilyName.getText()).trim();
+        boolean valid = true;
+        if (givenName.isEmpty()) {
+            setError(mGivenName, R.string.given_name_cannot_be_null);
+            valid = false;
+        }
+        if (familyName.isEmpty()) {
+            setError(mFamilyName, R.string.family_name_cannot_be_null);
+            valid = false;
+        }
+        Utils.logUserAction("add_user_submitted",
+            "valid", "" + valid,
+            "given_name", givenName,
+            "family_name", familyName);
+        if (!valid) return;
+
+        App.getUserManager().addUser(new JsonNewUser(
+            givenName, familyName
+        ));
+        if (mActivityUi != null) {
+            mActivityUi.showSpinner(true);
+        }
+        dialog.dismiss();
     }
 
     private void setError(EditText field, int resourceId) {

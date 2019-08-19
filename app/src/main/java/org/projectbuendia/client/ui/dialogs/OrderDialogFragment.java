@@ -314,10 +314,17 @@ public class OrderDialogFragment extends DialogFragment {
         final AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false)
             .setTitle(title)
-            .setPositiveButton(R.string.ok, (dialog1, which) -> onSubmit(dialog1))
+            .setPositiveButton(R.string.ok, null)
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();
+
+        // To prevent the dialog from being automatically dismissed, we have to
+        // override the listener instead of passing it in to setPositiveButton.
+        dialog.setOnShowListener(di ->
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(view -> onSubmit(dialog))
+        );
 
         // Hide or show the "Stop" and "Delete" buttons appropriately.
         Long stopMillis = Utils.getLong(args, "stop_millis");

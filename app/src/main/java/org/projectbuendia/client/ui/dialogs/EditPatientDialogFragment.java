@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -37,6 +38,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.Sex;
+import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.regex.Matcher;
@@ -122,7 +124,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         }
     }
 
-    public void onSubmit() {
+    public void onSubmit(DialogInterface dialog) {
         String idPrefix = mIdPrefix.getText().toString().trim();
         String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
@@ -131,11 +133,23 @@ public class EditPatientDialogFragment extends DialogFragment {
         String ageMonths = mAgeMonths.getText().toString().trim();
         LocalDate birthdate = null;
         LocalDate admissionDate = LocalDate.now();
+        boolean valid = true;
 
-        if (!ageYears.isEmpty() || !ageMonths.isEmpty()) {
-            birthdate = LocalDate.now().minusYears(Integer.parseInt("0" + ageYears))
-                .minusMonths(Integer.parseInt("0" + ageMonths));
+        if (id == null) {
+            setError(mId, R.string.patient_validation_missing_id);
+            valid = false;
         }
+        if (!ageYears.isEmpty() || !ageMonths.isEmpty()) {
+            int years = Integer.parseInt("0" + ageYears);
+            int months = Integer.parseInt("0" + ageMonths);
+            birthdate = LocalDate.now().minusYears(years).minusMonths(months);
+        }
+        if (birthdate != null && new Period(
+            birthdate, LocalDate.now().plusDays(1)).getYears() >= 120) {
+            setError(mAgeYears, R.string.patient_validation_age_limit);
+            valid = false;
+        }
+        if (!valid) return;
 
         Sex sex = null;
         // TODO: This should start out as "Sex sex = null" and then get set to female, male,
@@ -172,19 +186,26 @@ public class EditPatientDialogFragment extends DialogFragment {
         delta.sex = Optional.fromNullable(sex);
         delta.admissionDate = Optional.of(admissionDate);
 
+        dialog.dismiss();
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
-            if (id != null || givenName != null || familyName != null ||
-                birthdate != null || sex != null) {
-                delta.assignedLocationUuid = Optional.of(mModel.getDefaultLocation().uuid);
-                mModel.addPatient(mCrudEventBus, delta);
-            }
+            BigToast.show(getActivity(), R.string.adding_new_patient_please_wait);
+            delta.assignedLocationUuid = Optional.of(mModel.getDefaultLocation().uuid);
+            mModel.addPatient(mCrudEventBus, delta);
         } else {
+            BigToast.show(getActivity(), R.string.updating_patient_please_wait);
             mModel.updatePatient(mCrudEventBus, args.getString("uuid"), delta);
         }
         // TODO: While the network request is in progress, show a spinner and/or keep the
         // dialog open but greyed out -- keep the UI blocked to make it clear that there is a
         // modal operation going on, while providing a way for the user to abort the operation.
+    }
+
+    private void setError(EditText field, int resourceId, Object... args) {
+        String message = getResources().getString(resourceId, args);
+        field.setError(message);
+        field.invalidate();
+        field.requestFocus();
     }
 
     public void focusFirstEmptyField(Dialog dialog) {
@@ -216,10 +237,17 @@ public class EditPatientDialogFragment extends DialogFragment {
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(title)
-            .setPositiveButton(getResources().getString(R.string.ok), (dialogInterface, i) -> onSubmit())
+            .setPositiveButton(getResources().getString(R.string.ok), null)
             .setNegativeButton(getResources().getString(R.string.cancel), null)
             .setView(fragment)
             .create();
+
+        // To prevent the dialog from being automatically dismissed, we have to
+        // override the listener instead of passing it in to setPositiveButton.
+        dialog.setOnShowListener(di ->
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(view -> onSubmit(dialog))
+        );
 
         focusFirstEmptyField(dialog);
         return dialog;
