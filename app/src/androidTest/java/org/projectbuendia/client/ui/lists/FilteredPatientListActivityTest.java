@@ -34,9 +34,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
 
     /** Opens the patient list. */
     private void openPatientList() {
-        waitForProgressFragment(); // Wait for tents.
-        click(viewWithId(R.id.location_selection_all_patients));
-        waitForProgressFragment(); // Wait for patients.
+        throw new UnsupportedOperationException("There's no button to get to the patient list any more.");
     }
 
     /** Looks for the filter menu. */
@@ -61,7 +59,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         openPatientList();
         screenshot("Test Start");
         // There should be at least one patient in Triage.
-        expectVisibleSoon(viewThat(hasTextContaining("Triage  ·  ")));
+        waitUntilVisible(viewThat(hasTextContaining("Triage  ·  ")));
         // Click the first patient
         click(dataThat(is(Patient.class))
             .inAdapterView(withId(R.id.fragment_patient_list))

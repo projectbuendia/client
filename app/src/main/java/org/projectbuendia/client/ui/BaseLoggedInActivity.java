@@ -44,6 +44,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
+import static org.projectbuendia.client.utils.Utils.eq;
+
 /** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class BaseLoggedInActivity extends BaseActivity {
 
@@ -59,7 +61,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     protected UpdateNotificationController mUpdateNotificationController = null;
 
-    private LoadingState mLoadingState = LoadingState.LOADED;
+    private ReadyState mReadyState = ReadyState.READY;
 
     /**
      * {@inheritDoc}
@@ -106,25 +108,16 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         MenuItem searchByIdItem = menu.findItem(R.id.action_go_to);
         setMenuBarIcon(searchByIdItem, FontAwesomeIcons.fa_search);
 
-        searchByIdItem.setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("go_to_patient_pressed");
-                        GoToPatientDialogFragment.newInstance()
-                                .show(getSupportFragmentManager(), null);
-                        return true;
-                    }
-                });
+        searchByIdItem.setOnMenuItemClickListener(menuItem -> {
+            Utils.logUserAction("go_to_patient_pressed");
+            GoToPatientDialogFragment.newInstance().show(getSupportFragmentManager(), null);
+            return true;
+        });
 
         mPopupWindow = new MenuPopupWindow();
 
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
-        userView.setOnClickListener(new View.OnClickListener() {
-
-            @Override public void onClick(View view) {
-                mPopupWindow.showAsDropDown(userView);
-            }
-        });
+        userView.setOnClickListener(view -> mPopupWindow.showAsDropDown(userView));
 
         updateActiveUser();
 
@@ -148,18 +141,17 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private void updateActiveUser() {
         JsonUser user = App.getUserManager().getActiveUser();
 
-        if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
-            LOG.w("The user has switched. I don't know how to deal with that right now");
-            // TODO: Handle.
+        if (!eq(mLastActiveUser, user)) {
+            LOG.w("User has switched from %s to %s", mLastActiveUser, user);
         }
         mLastActiveUser = user;
 
-        TextView initials = (TextView) mMenu
+        TextView initials = mMenu
             .getItem(mMenu.size() - 1)
             .getActionView()
             .findViewById(R.id.user_initials);
 
-        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.id));
+        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.fullName));
         initials.setText(user.getInitials());
     }
 
@@ -237,17 +229,14 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onStop();
     }
 
-    protected LoadingState getLoadingState() {
-        return mLoadingState;
+    protected ReadyState getReadyState() {
+        return mReadyState;
     }
 
-    /**
-     * Changes the state of this activity, changing the set of available buttons if necessary.
-     * @param loadingState the new activity state
-     */
-    protected void setLoadingState(LoadingState loadingState) {
-        if (mLoadingState != loadingState) {
-            mLoadingState = loadingState;
+    /** Changes the activity's ready state and updates the set of available buttons. */
+    protected void setReadyState(ReadyState state) {
+        if (mReadyState != state) {
+            mReadyState = state;
             invalidateOptionsMenu();
         }
     }

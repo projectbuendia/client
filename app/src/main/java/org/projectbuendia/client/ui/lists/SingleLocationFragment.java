@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.ui.PatientListTypedCursorAdapter;
 import org.projectbuendia.client.ui.SingleLocationPatientListAdapter;
 
@@ -25,7 +25,7 @@ public class SingleLocationFragment extends PatientListFragment {
         super();
     }
 
-    @Override public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
-        return new SingleLocationPatientListAdapter(getActivity(), locationTree);
+    @Override public PatientListTypedCursorAdapter getAdapterInstance() {
+        return new SingleLocationPatientListAdapter(getActivity());
     }
 }

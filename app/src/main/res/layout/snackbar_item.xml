@@ -83,7 +83,7 @@
         android:gravity="center_vertical"
         android:background="@drawable/snackbar_count_bg"
         android:textColor="@color/white"
-        android:textSize="12dp"
+        android:textSize="12sp"
         android:textAlignment="center"
         tools:text="2"
         android:visibility="invisible" />

@@ -20,7 +20,8 @@ import android.widget.ListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.net.Common;
@@ -29,7 +30,9 @@ import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.PatientListTypedCursorAdapter;
 import org.projectbuendia.client.ui.ProgressFragment;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.EventBusWrapper;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
@@ -39,6 +42,7 @@ import de.greenrobot.event.EventBus;
 /** A fragment showing a filterable list of patients. */
 public class PatientListFragment extends ProgressFragment implements
     ExpandableListView.OnChildClickListener {
+    private static final Logger LOG = Logger.create();
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -50,6 +54,8 @@ public class PatientListFragment extends ProgressFragment implements
     private PatientListTypedCursorAdapter mPatientAdapter;
     private FragmentUi mFragmentUi;
     private ListUi mListUi;
+
+    @Inject AppModel mModel;
     @Inject SyncManager mSyncManager;
 
     /** The current activated item position. Only used on tablets. */
@@ -73,7 +79,7 @@ public class PatientListFragment extends ProgressFragment implements
         App.getInstance().inject(this);
         mListController = new PatientListController(
             mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
-        setContentView(R.layout.fragment_patient_list);
+        setContentLayout(R.layout.fragment_patient_list);
     }
 
     @Override public void onResume() {
@@ -95,18 +101,17 @@ public class PatientListFragment extends ProgressFragment implements
     @Override public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mListView = (ExpandableListView) view.findViewById(R.id.fragment_patient_list);
+        mListView = view.findViewById(R.id.fragment_patient_list);
         mListView.setEmptyView(view.findViewById(R.id.empty));
         mListView.setOnChildClickListener(this);
-        // The list view adapter will be set once locations are available.
+        mPatientAdapter = getAdapterInstance();
+        mListView.setAdapter(mPatientAdapter);
 
         mSwipeToRefresh =
-            (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
-        mSwipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override public void onRefresh() {
-                Utils.logUserAction("refresh_requested");
-                mListController.onRefreshRequested();
-            }
+            view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
+        mSwipeToRefresh.setOnRefreshListener(() -> {
+            Utils.logUserAction("refresh_requested");
+            mListController.onRefreshRequested();
         });
 
         // Restore the previously serialized activated item position.
@@ -114,6 +119,10 @@ public class PatientListFragment extends ProgressFragment implements
             && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
+    }
+
+    protected PatientListTypedCursorAdapter getAdapterInstance() {
+        return new PatientListTypedCursorAdapter(getActivity());
     }
 
     private void setActivatedPosition(int position) {
@@ -124,10 +133,6 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mActivatedPosition = position;
-    }
-
-    public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
-        return new PatientListTypedCursorAdapter(getActivity(), locationTree);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -169,19 +174,15 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
-        @Override public void setLocationTree(LocationTree locationTree) {
-            mPatientAdapter = getAdapterInstance(locationTree);
-            mListView.setAdapter(mPatientAdapter);
-        }
-
-        @Override public void setPatients(TypedCursor<Patient> patients) {
+        @Override public void setPatients(TypedCursor<Patient> patients, LocationForest forest) {
             if (mPatientAdapter != null) {
-                mPatientAdapter.setPatients(patients);
+                mPatientAdapter.setPatients(patients, forest);
             }
         }
 
         @Override public void showSpinner(boolean show) {
-            changeState(show ? State.LOADING : State.LOADED);
+            LOG.w("showSpinner %s", show);
+            setReadyState(show ? ReadyState.LOADING : ReadyState.READY);
         }
     }
 

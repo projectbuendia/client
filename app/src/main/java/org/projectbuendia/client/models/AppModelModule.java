@@ -21,18 +21,9 @@ import dagger.Module;
 import dagger.Provides;
 
 /** A Dagger module that provides bindings for the {@link AppModel}. */
-@Module(
-    includes = {
-        LoaderModule.class,
-        TaskModule.class
-    },
-    complete = false,
-    library = true)
+@Module(includes = {TaskModule.class}, complete = false, library = true)
 public class AppModelModule {
-
-    @Provides
-    @Singleton
-    AppModel provideAppModel(LoaderSet loaderSet, TaskFactory taskFactory) {
-        return new AppModel(App.getInstance().getContentResolver(), loaderSet, taskFactory);
+    @Provides @Singleton AppModel provideAppModel(TaskFactory taskFactory) {
+        return new AppModel(App.getInstance().getContentResolver(), taskFactory);
     }
 }

@@ -16,7 +16,6 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -28,7 +27,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.DatePicker;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -42,16 +40,18 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
@@ -63,6 +63,7 @@ import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -94,13 +95,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final String KEY_CONTROLLER_STATE = "controllerState";
 
     private PatientChartController mController;
-    private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
     private ChartRenderer mChartRenderer;
     private ProgressDialog mProgressDialog;
     private DatePickerDialog mAdmissionDateDialog;
     private DatePickerDialog mSymptomOnsetDateDialog;
+    private Ui mUi;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -132,12 +133,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuItem zoomItem = menu.findItem(R.id.action_zoom);
         setMenuBarIcon(zoomItem, FontAwesomeIcons.fa_arrows_h);
         zoomItem.setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    Utils.logUserAction("zoom_chart_pressed");
-                    showZoomDialog();
-                    return true;
-                }
+            item -> {
+                Utils.logUserAction("zoom_chart_pressed");
+                showZoomDialog();
+                return true;
             }
         );
 
@@ -146,25 +145,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // edit submenu includes edit patient (in xml) and forms
         Menu editSubmenu = editItem.getSubMenu();
         editSubmenu.getItem(0).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("edit_patient_pressed");
-                        mController.onEditPatientPressed();
-                        return true;
-                    }
-                });
+            menuItem -> {
+                Utils.logUserAction("edit_patient_pressed");
+                mController.onEditPatientPressed();
+                return true;
+            });
 
         boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
             MenuItem item = editSubmenu.add(form.name);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                        mController.onOpenFormPressed(form.uuid);
-                        return true;
-                    }
+                menuItem -> {
+                    mController.onFormRequested(form.uuid);
+                    return true;
                 }
             );
             if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
@@ -188,15 +182,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
-        mFormLoadingDialog.setTitle(getString(R.string.retrieving_encounter_form_title));
-        mFormLoadingDialog.setMessage(getString(R.string.retrieving_encounter_form_message));
+        mFormLoadingDialog.setTitle(getString(R.string.retrieving_form_title));
+        mFormLoadingDialog.setMessage(getString(R.string.retrieving_form_message));
         mFormLoadingDialog.setIndeterminate(true);
         mFormLoadingDialog.setCancelable(false);
 
         mFormSubmissionDialog = new ProgressDialog(this);
         mFormSubmissionDialog.setIcon(android.R.drawable.ic_dialog_info);
-        mFormSubmissionDialog.setTitle(getString(R.string.submitting_encounter_form_title));
-        mFormSubmissionDialog.setMessage(getString(R.string.submitting_encounter_form_message));
+        mFormSubmissionDialog.setTitle(getString(R.string.submitting_form_title));
+        mFormSubmissionDialog.setMessage(getString(R.string.submitting_form_message));
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
@@ -217,13 +211,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mChartRenderer = new ChartRenderer(mGridWebView, getResources(), mSettings);
 
-        final OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(
-                    PatientChartActivity.this, mSettings,
-                    patientUuid, resultCode, data);
-            }
-        };
+        final OdkResultSender odkResultSender = (patientUuid, resultCode, data) ->
+            OdkActivityLauncher.sendOdkResultToServer(
+                PatientChartActivity.this, mSettings,
+                patientUuid, resultCode, data);
         final MinimalHandler minimalHandler = new MinimalHandler() {
             private final Handler mHandler = new Handler();
 
@@ -231,12 +222,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mHandler.post(runnable);
             }
         };
+        mUi = new Ui();
         mController = new PatientChartController(
             mAppModel,
             mSettings,
             new EventBusWrapper(mEventBus),
             mCrudEventBusProvider.get(),
-            new Ui(),
+            mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
             mChartDataHelper,
@@ -244,31 +236,25 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mSyncManager,
             minimalHandler);
 
-        mAdmissionDaysView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("admission_days_pressed");
-                mAdmissionDateDialog.show();
-            }
+        mAdmissionDaysView.setOnClickListener(view -> {
+            Utils.logUserAction("admission_days_pressed");
+            mAdmissionDateDialog.show();
         });
-        mSymptomOnsetDaysView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("symptom_onset_days_pressed");
-                mSymptomOnsetDateDialog.show();
-            }
+        mSymptomOnsetDaysView.setOnClickListener(view -> {
+            Utils.logUserAction("symptom_onset_days_pressed");
+            mSymptomOnsetDateDialog.show();
         });
-        mPatientLocationView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Utils.logUserAction("location_view_pressed");
-                mController.showAssignLocationDialog(PatientChartActivity.this);
-            }
+        mPatientLocationView.setOnClickListener(view -> {
+            Utils.logUserAction("location_view_pressed");
+            mController.showAssignLocationDialog(PatientChartActivity.this);
         });
-        mPcr.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                mController.onPcrResultsPressed();
-            }
-        });
+        mPcr.setOnClickListener(view -> mController.onPcrResultsPressed());
 
-        initChartMenu();
+        initChartTabs();
+    }
+
+    public Ui getUi() {
+        return mUi;
     }
 
     @Override protected void onNewIntent(Intent intent) {
@@ -287,11 +273,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public DateObsDialog(String title, final String conceptUuid, final LocalDate date) {
             super(
                 PatientChartActivity.this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override public void onDateSet(DatePicker picker, int year, int zeroBasedMonth, int day) {
-                        int month = zeroBasedMonth + 1;
-                        mController.setDate(conceptUuid, new LocalDate(year, month, day));
-                    }
+                (picker, year, zeroBasedMonth, day) -> {
+                    int month = zeroBasedMonth + 1;
+                    mController.setDate(conceptUuid, new LocalDate(year, month, day));
                 },
                 date.getYear(),
                 date.getMonthOfYear() - 1,
@@ -311,7 +295,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
-    private void initChartMenu() {
+    private void initChartTabs() {
         List<Chart> charts = mController.getCharts();
         if (charts.size() > 1) {
             final ActionBar actionBar = getActionBar();
@@ -331,9 +315,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
             };
 
-            String[] menuArray = new String[charts.size()];
             for (int i = 0; i < charts.size(); i++) {
-                menuArray[i] = charts.get(i).name;
                 actionBar.addTab(
                     actionBar.newTab()
                         .setText(charts.get(i).name)
@@ -353,14 +335,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mIsFetchingXform = false;
         mController.onXFormResult(requestCode, resultCode, data);
     }
 
     private String getFormattedPcrString(double pcrValue) {
         return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
             getResources().getString(R.string.pcr_negative) :
-            String.format("%1$.1f", pcrValue);
+            Utils.format("%1$.1f", pcrValue);
     }
 
     private void showZoomDialog() {
@@ -371,17 +352,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         int selected = mSettings.getChartZoomIndex();
         new AlertDialog.Builder(this)
             .setTitle(R.string.title_zoom)
-            .setSingleChoiceItems(labels, selected, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialog, int which) {
-                    mController.setZoomIndex(which);
-                    dialog.dismiss();
-                }
+            .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                mController.setZoomIndex(which);
+                dialog.dismiss();
             })
             .setNegativeButton(R.string.cancel, null)
             .show();
     }
 
-    private final class Ui implements PatientChartController.Ui {
+    public final class Ui implements PatientChartController.Ui {
         @Override public void setTitle(String title) {
             PatientChartActivity.this.setTitle(title);
         }
@@ -480,22 +459,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void updatePregnancyAndIvStatusUi(Map<String, Obs> observations) {
             // Pregnancy & IV status
             List<String> specialLabels = new ArrayList<>();
-            Obs obs;
-
-            obs = observations.get(ConceptUuids.PREGNANCY_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
                 specialLabels.add(getString(R.string.pregnant));
             }
-            obs = observations.get(ConceptUuids.IV_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
-            obs = observations.get(ConceptUuids.OXYGEN_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.OXYGEN_UUID))) {
                 specialLabels.add(getString(R.string.oxygen));
             }
-            obs = observations.get(ConceptUuids.DYSPHAGIA_UUID);
-            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
+            if (ConceptUuids.isYes(observations.get(ConceptUuids.DYSPHAGIA_UUID))) {
                 specialLabels.add(getString(R.string.cannot_eat));
             }
             mPatientPregnantOrIvView.setText(Joiner.on("\n").join(specialLabels));
@@ -516,9 +489,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mRootView.invalidate();
         }
 
-        public void updatePatientLocationUi(LocationTree locationTree, Patient patient) {
-            Location location = locationTree.findByUuid(patient.locationUuid);
-            String locationText = Utils.orDefault(Utils.toStringNonnull(location), "Unknown"); // TODO/i18n
+        public void updatePatientLocationUi(LocationForest forest, Patient patient) {
+            Location location = forest.get(patient.locationUuid);
+            String locationText = location != null ? location.name : getString(R.string.unknown);
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
@@ -531,10 +504,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 Utils.orDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
-            if (patient.gender == Patient.GENDER_MALE) {
-                labels.add("M");
-            } else if (patient.gender == Patient.GENDER_FEMALE) {
-                labels.add("F");
+            if (patient.sex != Sex.UNKNOWN) {
+                labels.add(patient.sex.code);
             }
             labels.add(patient.birthdate == null ? "age unknown"
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
@@ -570,17 +541,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override public synchronized void fetchAndShowXform(
-            int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
-            Preset preset) {
-            if (mIsFetchingXform) return;
-
-            mIsFetchingXform = true;
+            int requestCode, String formUuid,
+            org.odk.collect.android.model.Patient patient, Preset preset) {
             OdkActivityLauncher.fetchAndShowXform(
                 PatientChartActivity.this, formUuid, requestCode, patient, preset);
-        }
-
-        @Override public void reEnableFetch() {
-            mIsFetchingXform = false;
         }
 
         @Override public void showFormLoadingDialog(boolean show) {
@@ -611,6 +575,32 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void showEditPatientDialog(Patient patient) {
             EditPatientDialogFragment.newInstance(patient)
                 .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showPatientLocationDialog(Patient patient) {
+            PatientLocationDialogFragment.newInstance(patient)
+                .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showPatientUpdateFailed(int reason) {
+            int messageId;
+            switch (reason) {
+                case PatientUpdateFailedEvent.REASON_INTERRUPTED:
+                    messageId = R.string.patient_location_error_interrupted;
+                    break;
+                case PatientUpdateFailedEvent.REASON_NETWORK:
+                case PatientUpdateFailedEvent.REASON_SERVER:
+                    messageId = R.string.patient_location_error_network;
+                    break;
+                case PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT:
+                    messageId = R.string.patient_location_error_no_such_patient;
+                    break;
+                case PatientUpdateFailedEvent.REASON_CLIENT:
+                default:
+                    messageId = R.string.patient_location_error_unknown;
+                    break;
+            }
+            BigToast.show(PatientChartActivity.this, messageId);
         }
     }
 }

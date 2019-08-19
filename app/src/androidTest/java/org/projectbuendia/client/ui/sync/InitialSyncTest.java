@@ -18,7 +18,7 @@ import androidx.test.annotation.UiThreadTest;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.sync.SyncCanceledEvent;
+import org.projectbuendia.client.events.sync.SyncCancelledEvent;
 
 import java.util.UUID;
 
@@ -73,21 +73,21 @@ public class InitialSyncTest extends SyncTestCase {
     // TODO(sdspikes): should there be a cancel button on sync screen?
     public void testSyncCancelButton() {
         // Cancel the sync.
-        EventBusIdlingResource<SyncCanceledEvent> syncCanceledResource =
+        EventBusIdlingResource<SyncCancelledEvent> syncCanceledResource =
             new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         // There may be a slight delay before the cancel button appears.
-        expectVisibleSoon(viewWithId(R.id.cancel_action));
+        waitUntilVisible(viewWithId(R.id.cancel_action));
         click(viewWithId(R.id.cancel_action));
         Espresso.registerIdlingResources(syncCanceledResource);
 
         // Select guest user again -- give plenty of time for cancellation to occur since canceling
         // certain network operations can take an exceedingly long time.
-        expectVisibleWithin(90000, viewWithText("Guest User"));
+        waitUntilVisible(90000, viewWithText("Guest User"));
         click(viewWithText("Guest User"));
 
         // The second sync should actually complete.
         waitForProgressFragment();
-        expectVisibleSoon(viewWithText("ALL PRESENT PATIENTS"));
-        expectVisibleSoon(viewWithText(LOCATION_NAME));
+        waitUntilVisible(viewWithText("ALL PRESENT PATIENTS"));
+        waitUntilVisible(viewWithText(LOCATION_NAME));
     }
 }

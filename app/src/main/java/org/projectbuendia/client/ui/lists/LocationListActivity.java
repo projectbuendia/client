@@ -13,13 +13,13 @@ package org.projectbuendia.client.ui.lists;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
@@ -27,7 +27,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.LoadingState;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Utils;
@@ -44,21 +44,12 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
     private AlertDialog mSyncFailedDialog;
 
     @Inject AppModel mAppModel;
+    @Inject AppSettings mAppSettings;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject SyncManager mSyncManager;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, LocationListActivity.class));
-    }
-
-    @Override public void onResumeImpl() {
-        super.onResumeImpl();
-        mController.init();
-    }
-
-    @Override public void onPauseImpl() {
-        super.onPauseImpl();
-        mController.suspend();
     }
 
     @Override public void onExtendOptionsMenu(Menu menu) {
@@ -89,6 +80,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
 
         mController = new LocationListController(
             mAppModel,
+            mAppSettings,
             mCrudEventBusProvider.get(),
             new Ui(),
             new EventBusWrapper(EventBus.getDefault()),
@@ -100,25 +92,19 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             .setTitle(getString(R.string.sync_failed_dialog_title))
             .setMessage(R.string.sync_failed_dialog_message)
             .setNegativeButton(
-                R.string.sync_failed_back, new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int which) {
-                        Utils.logEvent("sync_failed_back_pressed");
-                        finish();
-                    }
+                R.string.sync_failed_back, (dialog, which) -> {
+                    Utils.logEvent("sync_failed_back_pressed");
+                    finish();
                 })
             .setNeutralButton(
-                R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int which) {
-                        Utils.logEvent("sync_failed_settings_pressed");
-                        SettingsActivity.start(LocationListActivity.this);
-                    }
+                R.string.sync_failed_settings, (dialog, which) -> {
+                    Utils.logEvent("sync_failed_settings_pressed");
+                    SettingsActivity.start(LocationListActivity.this);
                 })
             .setPositiveButton(
-                R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
-                    @Override public void onClick(DialogInterface dialog, int which) {
-                        Utils.logEvent("sync_failed_retry_pressed");
-                        mController.onSyncRetry();
-                    }
+                R.string.sync_failed_retry, (dialog, which) -> {
+                    Utils.logEvent("sync_failed_retry_pressed");
+                    mController.startInitialSync();
                 })
             .setCancelable(false)
             .create();
@@ -151,8 +137,8 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             Utils.showDialogIf(mSyncFailedDialog, show);
         }
 
-        @Override public void setLoadingState(LoadingState loadingState) {
-            LocationListActivity.this.setLoadingState(loadingState);
+        @Override public void setReadyState(ReadyState state) {
+            LocationListActivity.this.setReadyState(state);
         }
 
         @Override public void finish() {
@@ -160,8 +146,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
         }
 
         @Override public void openSingleLocation(Location location) {
-            SingleLocationActivity.start(LocationListActivity.this,
-                location.uuid, location.name, location.patientCount);
+            SingleLocationActivity.start(LocationListActivity.this, location);
         }
     }
 }

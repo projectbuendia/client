@@ -21,32 +21,36 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
+import org.joda.time.DateTime;
 import org.joda.time.Instant;
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
 import org.projectbuendia.client.providers.DatabaseTransaction;
-import org.projectbuendia.client.sync.controllers.ChartsSyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.ConceptsSyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.FormsSyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.LocationsSyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.ObservationsSyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.OrdersSyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.PatientsSyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.SyncPhaseRunnable;
-import org.projectbuendia.client.sync.controllers.UsersSyncPhaseRunnable;
+import org.projectbuendia.client.sync.SyncManager.SyncStatus;
+import org.projectbuendia.client.sync.controllers.ChartsSyncWorker;
+import org.projectbuendia.client.sync.controllers.ConceptsSyncWorker;
+import org.projectbuendia.client.sync.controllers.FormsSyncWorker;
+import org.projectbuendia.client.sync.controllers.LocationsSyncWorker;
+import org.projectbuendia.client.sync.controllers.ObservationsSyncWorker;
+import org.projectbuendia.client.sync.controllers.OrdersSyncWorker;
+import org.projectbuendia.client.sync.controllers.PatientsSyncWorker;
+import org.projectbuendia.client.sync.controllers.SyncWorker;
+import org.projectbuendia.client.sync.controllers.UsersSyncWorker;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 
 /** Implementation of sync operations for the Buendia database. */
@@ -61,22 +65,22 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     /** The available phases, in the default order in which to run them. */
     public enum Phase {
-        USERS(R.string.syncing_users, new UsersSyncPhaseRunnable()),
-        OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncPhaseRunnable()),
-        ORDERS(R.string.syncing_orders, new OrdersSyncPhaseRunnable()),
-        PATIENTS(R.string.syncing_patients, new PatientsSyncPhaseRunnable()),
-        LOCATIONS(R.string.syncing_locations, new LocationsSyncPhaseRunnable()),
-        CHART_ITEMS(R.string.syncing_charts, new ChartsSyncPhaseRunnable()),
-        FORMS(R.string.syncing_forms, new FormsSyncPhaseRunnable()),
-        CONCEPTS(R.string.syncing_concepts, new ConceptsSyncPhaseRunnable());
+        USERS(R.string.syncing_users, new UsersSyncWorker()),
+        LOCATIONS(R.string.syncing_locations, new LocationsSyncWorker()),
+        PATIENTS(R.string.syncing_patients, new PatientsSyncWorker()),
+        OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncWorker()),
+        ORDERS(R.string.syncing_orders, new OrdersSyncWorker()),
+        CHART_ITEMS(R.string.syncing_charts, new ChartsSyncWorker()),
+        FORMS(R.string.syncing_forms, new FormsSyncWorker()),
+        CONCEPTS(R.string.syncing_concepts, new ConceptsSyncWorker());
 
         public final @StringRes int message;
-        public final SyncPhaseRunnable runnable;
-        public static final Phase[] ALL = Phase.values();
+        public final SyncWorker worker;
+        public static final Phase[] ALL_PHASES = Phase.values();
 
-        Phase(int message, SyncPhaseRunnable runnable) {
+        Phase(int message, SyncWorker worker) {
             this.message = message;
-            this.runnable = runnable;
+            this.worker = worker;
         }
     }
 
@@ -94,11 +98,16 @@ public class BuendiaSyncEngine implements SyncEngine {
         return Utils.putString(KEY_PHASES, Joiner.on(",").join(phases), new Bundle());
     }
 
-    public static Phase[] getPhases(Bundle options) {
-        String[] names = options.getString(KEY_PHASES, "").split(",");
-        Phase[] phases = new Phase[names.length];
-        for (int i = 0; i < names.length; i++) {
-            phases[i] = Phase.valueOf(names[i]);
+    public static @NonNull List<Phase> getPhases(Bundle options) {
+        List<Phase> phases = new ArrayList<>();
+        if (options != null) {
+            for (String name : options.getString(KEY_PHASES, "").split(",")) {
+                try {
+                    phases.add(Phase.valueOf(name));
+                } catch (IllegalArgumentException e) {
+                    LOG.w("Unrecognized phase name: %s (in options: %s)", Utils.repr(name), options);
+                }
+            }
         }
         return phases;
     }
@@ -106,72 +115,71 @@ public class BuendiaSyncEngine implements SyncEngine {
     /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
     @Override public void sync(Bundle options, ContentProviderClient client, SyncResult result) {
         isCancelled = false;
-        broadcastSyncStatus(SyncManager.STARTED);
-
-        // If we can't access the Buendia API, short-circuit. Before this check was added, sync
-        // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
-        // change, however, any user-requested sync will instantly fail until the HealthMonitor has
-        // made a determination that the server is definitely accessible.
-        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
-            LOG.e("Abort sync: Buendia API is unavailable.");
-            broadcastSyncStatus(SyncManager.FAILED);
-            return;
-        }
 
         try {
             checkCancellation("before work started");
         } catch (CancellationException e) {
-            broadcastSyncStatus(SyncManager.CANCELED);
+            broadcastSyncStatus(SyncStatus.CANCELLED);
             return;
         }
 
-        Phase[] phases = options != null ? getPhases(options) : new Phase[0];
-        boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL));
-        LOG.start("sync", "phases=%s, fullSync=%s", Utils.repr(phases), fullSync);
+        List<Phase> phases = getPhases(options);
+        boolean fullSync = Sets.newHashSet(phases).equals(Sets.newHashSet(Phase.ALL_PHASES));
+        LOG.start("sync", "options = %s", options);
 
-        broadcastSyncProgress(0, R.string.sync_in_progress);
+        broadcastSyncProgress(0, 1, R.string.sync_in_progress);
 
         BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
         try (DatabaseTransaction tx = provider.startTransaction(SAVEPOINT_NAME)) {
             try {
-                if (fullSync) {
-                    storeFullSyncStartTime(client, Instant.now());
-                }
+                if (fullSync) storeFullSyncStartTime(client, Instant.now());
                 LOG.elapsed("sync", "Starting phases");
-                int p = 0;
+                int completedWork = 0;
+                int totalWork = phases.size();
+
                 for (Phase phase : phases) {
                     checkCancellation("before " + phase);
-                    broadcastSyncProgress(p * 100 / phases.length, phase.message);
-                    phase.runnable.sync(contentResolver, result, client);
+                    broadcastSyncProgress(completedWork, totalWork, phase.message);
+                    LOG.i("Start phase: %s", phase);
+                    phase.worker.initialize(contentResolver, result, client);
+                    boolean done = false;
+                    while (!done) {
+                        done = phase.worker.sync(contentResolver, result, client);
+                        completedWork++;
+                        if (!done) {
+                            totalWork++;
+                            broadcastSyncProgress(completedWork, totalWork, phase.message);
+                            checkCancellation("during " + phase);
+                        }
+                    }
+                    phase.worker.finalize(contentResolver, result, client);
                     LOG.elapsed("sync", "Completed phase %s", phase);
-                    p++;
                 }
-                broadcastSyncProgress(100, R.string.completing_sync);
-                if (fullSync) {
-                    storeFullSyncEndTime(client, Instant.now());
-                }
+                broadcastSyncProgress(1, 1, R.string.completing_sync);
+                if (fullSync) storeFullSyncEndTime(client, Instant.now());
             } catch (CancellationException e) {
-                LOG.i(e, "Sync canceled");
+                LOG.i(e, "Cancelled %s", options);
                 tx.rollback();
                 // Reset canceled state so that it doesn't interfere with next sync.
-                broadcastSyncStatus(SyncManager.CANCELED);
+                broadcastSyncStatus(SyncStatus.CANCELLED);
                 return;
             } catch (OperationApplicationException e) {
-                LOG.e(e, "Error updating database during sync");
+                LOG.e(e, "Failed due to database error");
                 tx.rollback();
                 result.databaseError = true;
-                broadcastSyncStatus(SyncManager.FAILED);
+                broadcastSyncStatus(SyncStatus.FAILED);
                 return;
             } catch (Throwable e) {
-                LOG.e(e, "Error during sync");
+                LOG.e(e, "Failed due to exception");
                 tx.rollback();
                 result.stats.numIoExceptions++;
-                broadcastSyncStatus(SyncManager.FAILED);
+                broadcastSyncStatus(SyncStatus.FAILED);
                 return;
             }
         }
-        broadcastSyncStatus(SyncManager.COMPLETED);
+        broadcastSyncStatus(SyncStatus.SUCCEEDED);
         LOG.finish("sync");
+        LOG.i("Completed", options);
     }
 
     /**
@@ -188,19 +196,20 @@ public class BuendiaSyncEngine implements SyncEngine {
         }
     }
 
-    private void broadcastSyncStatus(int status) {
+    private void broadcastSyncStatus(SyncStatus status) {
         context.sendBroadcast(
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
+            new Intent(SyncManager.STATUS_ACTION)
                 .putExtra(SyncManager.SYNC_STATUS, status)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );
     }
 
-    private void broadcastSyncProgress(int progress, @StringRes int messageId) {
+    private void broadcastSyncProgress(int numerator, int denominator, @StringRes int messageId) {
         context.sendBroadcast(
-            new Intent(context, SyncManager.SyncStatusBroadcastReceiver.class)
-                .putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS)
-                .putExtra(SyncManager.SYNC_PROGRESS, progress)
+            new Intent(SyncManager.STATUS_ACTION)
+                .putExtra(SyncManager.SYNC_STATUS, SyncStatus.IN_PROGRESS)
+                .putExtra(SyncManager.SYNC_NUMERATOR, numerator)
+                .putExtra(SyncManager.SYNC_DENOMINATOR, denominator)
                 .putExtra(SyncManager.SYNC_MESSAGE_ID, messageId)
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         );
@@ -214,9 +223,20 @@ public class BuendiaSyncEngine implements SyncEngine {
     }
 
     private void storeFullSyncEndTime(ContentProviderClient provider, Instant time) throws RemoteException {
-        LOG.i("Recording full sync end time: " + time);
+        DateTime start = null;
+        try (Cursor cursor = provider.query(Misc.URI, null, null, null, null)) {
+            if (cursor.moveToNext()) {
+                start = Utils.getDateTime(cursor, Misc.FULL_SYNC_START_MILLIS);
+            }
+        }
+        Long value = time.getMillis();
+        if (start == null) {
+            LOG.e("Database was cleared during sync!");
+            value = null;
+        }
+        LOG.i("Recording full sync end time: " + value);
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_END_MILLIS, time.getMillis());
+        cv.put(Misc.FULL_SYNC_END_MILLIS, value);
         provider.insert(Misc.URI, cv);
     }
 

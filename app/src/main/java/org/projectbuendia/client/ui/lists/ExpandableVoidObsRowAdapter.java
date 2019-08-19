@@ -1,21 +1,20 @@
 package org.projectbuendia.client.ui.lists;
 
         import android.content.Context;
-        import android.graphics.Typeface;
-        import android.view.LayoutInflater;
-        import android.view.View;
-        import android.view.ViewGroup;
-        import android.widget.BaseExpandableListAdapter;
-        import android.widget.CheckBox;
-        import android.widget.CompoundButton;
-        import android.widget.TextView;
+import android.graphics.Typeface;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.CheckBox;
+import android.widget.TextView;
 
-        import org.projectbuendia.client.R;
-        import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.ObsRow;
 
-        import java.util.ArrayList;
-        import java.util.HashMap;
-        import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
 
@@ -44,23 +43,17 @@ public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.item_void_observation, null);
         }
 
-        TextView txtListChild = (TextView) convertView
+        TextView txtListChild = convertView
                 .findViewById(R.id.tvVoidValue);
 
         txtListChild.setText(childRow.time + " " + childRow.valueName);
 
-        CheckBox cbVoid = (CheckBox) convertView.findViewById(R.id.cbVoid);
-        cbVoid.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView,
-                                         boolean isChecked) {
-                String uuid = childRow.uuid;
-
-                if (isChecked) {
-                    mCheckedItems.add(uuid);
-                } else {
-                    mCheckedItems.remove(uuid);
-                }
+        CheckBox cbVoid = convertView.findViewById(R.id.cbVoid);
+        cbVoid.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                mCheckedItems.add(childRow.uuid);
+            } else {
+                mCheckedItems.remove(childRow.uuid);
             }
         });
 
@@ -78,7 +71,7 @@ public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.obs_section, null);
         }
 
-        TextView lblListHeader = (TextView) convertView
+        TextView lblListHeader = convertView
                 .findViewById(R.id.section_heading);
         lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);

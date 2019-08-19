@@ -20,8 +20,8 @@ import java.util.List;
 
 /** Matchers for {@link SimpleSelectionFilter} objects and arrays. */
 public class SimpleSelectionFilterMatchers {
-    /** Matches any array of filters containing a filter with the specified name. */
-    public static class ContainsFilterWithName implements ArgumentMatcher<SimpleSelectionFilter[]> {
+    /** Matches any list of filters containing a filter with the specified name. */
+    public static class ContainsFilterWithName implements ArgumentMatcher<List<SimpleSelectionFilter<?>>> {
         private String mFilterName;
 
         public ContainsFilterWithName(String filterName) {
@@ -30,20 +30,18 @@ public class SimpleSelectionFilterMatchers {
 
         /**
          * Matches any array of filters containing a filter with the specified name.
-         * @param filterArr an array of {@link SimpleSelectionFilter}'s
+         * @param filters an array of {@link SimpleSelectionFilter}'s
          * @return true if the array contains a filter with the specified name
          */
         @Override
-        public boolean matches(SimpleSelectionFilter[] filterArr) {
-            for (int i = 0; i < filterArr.length; i++) {
-                if (filterArr[i].toString().equals(mFilterName)) {
+        public boolean matches(List<SimpleSelectionFilter<?>> filters) {
+            for (SimpleSelectionFilter filter : filters) {
+                if (filter.toString().equals(mFilterName)) {
                     return true;
                 }
             }
-
             return false;
         }
-
     }
 
     /**
@@ -52,7 +50,7 @@ public class SimpleSelectionFilterMatchers {
      * location UUID.
      */
     public static class IsFilterGroupWithLocationFilter
-            implements ArgumentMatcher<SimpleSelectionFilter> {
+            implements ArgumentMatcher<SimpleSelectionFilter<?>> {
         private String mLocationUuid;
 
         public IsFilterGroupWithLocationFilter(String locationUuid) {

@@ -18,9 +18,9 @@ import com.google.common.base.Optional;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.Sex;
 
 import java.util.UUID;
 
@@ -64,7 +64,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         click(viewWithId(R.id.action_search));
         // waitForProgressFragment() doesn't quite work here as we're actually waiting on the
         // search button in the action bar to finish its loading task.
-        expectVisibleSoon(viewThat(hasTextContaining("Triage (")));
+        waitUntilVisible(viewThat(hasTextContaining("Triage (")));
         // Click first patient.
         click(dataThat(is(Patient.class))
             .inAdapterView(withId(R.id.fragment_patient_list))
@@ -75,7 +75,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         PatientDelta newPatient = new PatientDelta();
         newPatient.familyName = Optional.of("XformSyncTest");
         newPatient.givenName = Optional.of("TestPatientFor");
-        newPatient.gender = Optional.of(JsonPatient.GENDER_FEMALE);
+        newPatient.sex = Optional.of(Sex.FEMALE);
         newPatient.id = Optional.of(UUID.randomUUID().toString().substring(30));
         newPatient.birthdate = Optional.of(LocalDate.now().minusYears(12).minusMonths(3));
         return newPatient;

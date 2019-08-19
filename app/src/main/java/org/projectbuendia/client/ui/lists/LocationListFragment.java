@@ -15,35 +15,36 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
+import android.widget.ScrollView;
 
-import com.google.common.base.Optional;
-
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.ui.ProgressFragment;
+import org.projectbuendia.client.ui.ReadyState;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.widgets.SubtitledButtonView;
 
-import java.util.List;
+import java.util.Collection;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
-import butterknife.OnItemClick;
+import javax.inject.Inject;
 
 /** Displays a list of all locations. */
 public final class LocationListFragment extends ProgressFragment {
-    @InjectView(R.id.location_selection_locations) GridView mLocationGrid;
-    @InjectView(R.id.location_selection_all_patients) SubtitledButtonView mAllPatientsButton;
-    @InjectView(R.id.location_selection_triage) SubtitledButtonView mTriageButton;
-    @InjectView(R.id.location_selection_discharged) SubtitledButtonView mDischargedButton;
-
     private static final Logger LOG = Logger.create();
+
+    @Inject AppModel mModel;
+    @Inject AppSettings mSettings;
+    private ContextUtils c;
+
     private LocationListController mController;
     private final Ui mUi = new Ui();
-    private LocationListAdapter mAdapter;
+    private LocationOptionList mList;
+    private ScrollView mScroll;
+    private View mEmpty;
 
     public LocationListFragment() {
         // Required empty public constructor
@@ -51,13 +52,20 @@ public final class LocationListFragment extends ProgressFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_location_selection);
+        App.getInstance().inject(this);
+        c = ContextUtils.from(getActivity());
+        setContentLayout(R.layout.fragment_location_selection);
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    @Override public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
-        ButterKnife.inject(this, view);
+
+        mScroll = view.findViewById(R.id.scroll_container);
+        mEmpty = view.findViewById(R.id.empty);
+        mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
+        LocationForest forest = mModel.getForest();
+        mUi.setLocations(forest, forest.allNodes());
         return view;
     }
 
@@ -71,6 +79,21 @@ public final class LocationListFragment extends ProgressFragment {
         }
     }
 
+    @Override public void onResume() {
+        super.onResume();
+        if (mController != null) mController.init();
+        mList.setOnLocationSelectedListener(location -> mController.onLocationSelected(location));
+        ViewGroup.LayoutParams lp = mScroll.getLayoutParams();
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        mScroll.setLayoutParams(lp);
+    }
+
+    @Override public void onPause() {
+        mList.setOnLocationSelectedListener(null);
+        if (mController != null) mController.suspend();
+        super.onPause();
+    }
+
     @Override public void onDestroyView() {
         if (mController == null) {
             LOG.w("No controller for " + getActivity().getClass().getSimpleName());
@@ -80,63 +103,20 @@ public final class LocationListFragment extends ProgressFragment {
         super.onDestroyView();
     }
 
-    public void setPatientCount(SubtitledButtonView button, long count) {
-        button.setSubtitle("" + count);
-        button.setTextColor(0xff000000);
-        button.setSubtitleColor(count == 0 ? 0x40000000 : 0xff000000);
-    }
-
-    @OnItemClick(R.id.location_selection_locations)
-    void onLocationGridClicked(int position) {
-        mController.onLocationSelected(mAdapter.getItem(position));
-    }
-
-    @OnClick(R.id.location_selection_all_patients)
-    void onAllPatientsClicked(View v) {
-        FilteredPatientListActivity.start(getActivity());
-    }
-
-    @OnClick(R.id.location_selection_discharged)
-    void onDischargedClicked(View v) {
-        mController.onDischargedPressed();
-    }
-
-    @OnClick(R.id.location_selection_triage) void onTriageClicked(View v) {
-        mController.onTriagePressed();
-    }
-
-    private final class Ui implements LocationListController.LocationFragmentUi {
-        @Override public void setDischargedPatientCount(long patientCount) {
-            setPatientCount(mDischargedButton, patientCount);
+    private final class Ui implements LocationListController.LocationListFragmentUi {
+        @Override public void setLocations(LocationForest forest, Collection<Location> locations) {
+            mEmpty.setVisibility(locations.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            mScroll.setVisibility(locations.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+            mList.setLocations(forest, locations);
         }
 
-        @Override public void setTriagePatientCount(long patientCount) {
-            setPatientCount(mTriageButton, patientCount);
+        @Override public void setReadyState(ReadyState state) {
+            LocationListFragment.this.setReadyState(state);
         }
 
-        @Override public void setPresentPatientCount(long patientCount) {
-            setPatientCount(mAllPatientsButton, patientCount);
-        }
-
-        @Override public void setLocations(LocationTree locationTree, List<Location> locations) {
-            mAdapter = new LocationListAdapter(
-                getActivity(), locations, locationTree, Optional.<String> absent());
-            mLocationGrid.setAdapter(mAdapter);
-        }
-
-        @Override public void setBusyLoading(boolean busy) {
-            changeState(busy ? State.LOADING : State.LOADED);
-        }
-
-        @Override public void showIncrementalSyncProgress(int progress, int messageId) {
-            setProgress(progress);
-            if (messageId > 0) {
-                setProgressMessage(messageId);
-            }
-        }
-
-        @Override public void resetSyncProgress() {
-            switchToCircularProgressBar();
+        @Override public void setSyncProgress(int numerator, int denominator, Integer messageId) {
+            setProgress(numerator, denominator);
+            if (messageId != null) setProgressMessage(messageId);
         }
 
         @Override public void showSyncCancelRequested() {

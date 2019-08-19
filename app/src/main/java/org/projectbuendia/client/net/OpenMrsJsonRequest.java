@@ -17,12 +17,15 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
+import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** Base class for authenticated OpenMRS JSON requests. */
 public class OpenMrsJsonRequest extends JsonObjectRequest {
@@ -84,18 +87,42 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
         return params;
     }
 
-    @Override
-    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+    @Override protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
         LOG.finish("HTTP." + getSequence(), "Response to %s -> %s", Utils.repr(this), Utils.repr(response.data, 500));
         try {
             if (response.data.length == 0) {
                 byte[] responseData = "{}".getBytes("UTF8");
                 response = new NetworkResponse(
-                        response.statusCode, responseData, response.headers, response.notModified);
+                    response.statusCode, responseData, response.headers, response.notModified);
             }
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Should never occur");
         }
+        String requiredVersion = getMinimumVersionHeader(response);
+        LOG.d("Client version is %s; server requires %s",
+            BuildConfig.VERSION_NAME, requiredVersion);
+        if (requiredVersion != null && isProductionVersion(BuildConfig.VERSION_NAME)) {
+            if (Utils.ALPHANUMERIC_COMPARATOR.compare(
+                BuildConfig.VERSION_NAME, requiredVersion) < 0) {
+                LOG.e("Client version is %s, but server requires at least %s",
+                    BuildConfig.VERSION_NAME, requiredVersion);
+            }
+        }
         return super.parseNetworkResponse(response);
+    }
+
+    private boolean isProductionVersion(String version) {
+        return version.contains(".");
+    }
+
+    private String getMinimumVersionHeader(NetworkResponse response) {
+        // HTTP headers are case-insensitive but NetworkResponse stores
+        // them in a case-sensitive Map.  Sigh.
+        for (String key : response.headers.keySet()) {
+            if (eq(key.toLowerCase(), "buendia-client-minimum-version")) {
+                return response.headers.get(key);
+            }
+        }
+        return null;
     }
 }

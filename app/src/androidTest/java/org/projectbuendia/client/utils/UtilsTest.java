@@ -30,7 +30,7 @@ public class UtilsTest {
             "b1", "a11a", "a11", "a2", "a2b", "a02b", "a2a", "a1",
             "b7465829459273654782634", "b7465829459273654782633"};
         String[] sorted = elements.clone();
-        Arrays.sort(sorted, Utils.alphanumericComparator);
+        Arrays.sort(sorted, Utils.ALPHANUMERIC_COMPARATOR);
         Joiner joiner = Joiner.on("/");
         String[] expected = {
             "a1", "a2", "a2a", "a02b", "a2b", "a11", "a11a", "b1",

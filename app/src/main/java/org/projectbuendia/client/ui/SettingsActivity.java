@@ -12,6 +12,8 @@
 package org.projectbuendia.client.ui;
 
 import android.annotation.TargetApi;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,7 +31,9 @@ import android.view.MenuItem;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,8 +55,8 @@ import javax.inject.Inject;
  */
 public class SettingsActivity extends PreferenceActivity {
     /**
-     * Controls whether to always show the simplified UI, where settings are
-     * arranged in a single list without a left navigation panel.
+     Controls whether to always show the simplified UI, where settings are
+     arranged in a single list without a left navigation panel.
      */
     static final String[] PREF_KEYS = {
         "server",
@@ -60,54 +64,67 @@ public class SettingsActivity extends PreferenceActivity {
         "openmrs_password",
         "openmrs_root_url",
         "package_server_root_url",
-        "apk_update_interval_secs",
-        "keep_form_instances",
+        "apk_update_interval",
+        "small_sync_interval",
+        "medium_sync_interval",
+        "large_sync_interval",
         "starting_patient_id",
-        "xform_update_client_cache",
-        "require_wifi"
+        "periodic_sync_disabled",
+        "form_instances_retained",
+        "non_wifi_allowed",
+        "sync_adapter_preferred"
     };
     static boolean updatingPrefValues = false;
 
     static final Map<String, EditTextPreference> textPrefs = new HashMap<>();
 
-    /** A listener that performs updates when any preference's value changes. */
-    static final Preference.OnPreferenceChangeListener sPrefListener =
-        new Preference.OnPreferenceChangeListener() {
-            @Override public boolean onPreferenceChange(Preference pref, Object value) {
-                updatePrefSummary(pref, value);
-                if (updatingPrefValues)
-                    return true; // prevent endless recursion
+    static Dialog sSyncPendingDialog = null;
 
-                SharedPreferences prefs =
-                    PreferenceManager.getDefaultSharedPreferences(pref.getContext());
-                String server = prefs.getString("server", "");
-                String str = "" + value;
-                try {
-                    updatingPrefValues = true;
-                    switch (pref.getKey()) {
-                        case "server":
-                            if (!str.equals("")) {
-                                setTextAndSummary(prefs, "openmrs_root_url", "http://" + str + ":9000/openmrs");
-                                setTextAndSummary(prefs, "package_server_root_url", "http://" + str + ":9001");
-                            }
-                            break;
-                        case "openmrs_root_url":
-                            if (!str.equals("http://" + server + ":9000/openmrs")) {
-                                setTextAndSummary(prefs, "server", "");
-                            }
-                            break;
-                        case "package_server_root_url":
-                            if (!str.equals("http://" + server + ":9001")) {
-                                setTextAndSummary(prefs, "server", "");
-                            }
-                            break;
+    /** A listener that performs updates when any preference's value changes. */
+    static final Preference.OnPreferenceChangeListener sPrefListener = (pref, value) -> {
+        updatePrefSummary(pref, value);
+        if (updatingPrefValues)
+            return true; // prevent endless recursion
+
+        Context context = pref.getContext();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String server = prefs.getString("server", "");
+        String str = "" + value;
+        try {
+            updatingPrefValues = true;
+            switch (pref.getKey()) {
+                case "server":
+                    if (!str.equals("")) {
+                        setTextAndSummary(prefs, "openmrs_root_url", "http://" + str + ":9000/openmrs");
+                        setTextAndSummary(prefs, "package_server_root_url", "http://" + str + ":9001");
                     }
-                } finally {
-                    updatingPrefValues = false;
-                }
-                return true;
+                    break;
+                case "openmrs_root_url":
+                    if (!str.equals("http://" + server + ":9000/openmrs")) {
+                        setTextAndSummary(prefs, "server", "");
+                    }
+                    break;
+                case "package_server_root_url":
+                    if (!str.equals("http://" + server + ":9001")) {
+                        setTextAndSummary(prefs, "server", "");
+                    }
+                    break;
+                case "periodic_sync_disabled":
+                    SyncManager syncManager = App.getInstance().getSyncManager();
+                    syncManager.applyPeriodicSyncSettings();
+                    if (syncManager.isSyncRunningOrPending()) {
+                        sSyncPendingDialog = ProgressDialog.show(
+                            context, null, context.getString(R.string.waiting_for_sync),
+                            true /* indeterminate */, false /* cancelable */);
+                        syncManager.stopSyncing(() -> sSyncPendingDialog.dismiss());
+                    }
+                    break;
             }
-        };
+        } finally {
+            updatingPrefValues = false;
+        }
+        return true;
+    };
 
     @Inject AppModel mAppModel;
 
@@ -204,13 +221,16 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     static void updatePrefSummary(Preference pref, Object value) {
-        String str = value.toString();
+        String str = Utils.toNonnullString(value);
         switch (pref.getKey()) {
             case "server":
             case "openmrs_user":
             case "openmrs_root_url":
             case "package_server_root_url":
-            case "apk_update_interval_secs":
+            case "apk_update_interval":
+            case "small_sync_interval":
+            case "medium_sync_interval":
+            case "large_sync_interval":
                 pref.setSummary(str);
         }
     }
@@ -239,8 +259,8 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * Shows the simplified settings UI if the device configuration dictates
-     * that a simplified, single-pane UI should be shown.
+     Shows the simplified settings UI if the device configuration dictates
+     that a simplified, single-pane UI should be shown.
      */
     private void setupSimplePreferencesScreen() {
         if (useSimplePreferences(this)) {
@@ -273,7 +293,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onPause() {
         super.onPause();
-        if (!mAppModel.isFullModelAvailable()) {
+        if (!mAppModel.isReady()) {
             // The database was cleared; go back to the login activity.
             startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
         }

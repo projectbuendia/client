@@ -11,16 +11,10 @@
 
 package org.projectbuendia.client.net;
 
-import android.graphics.Color;
-import android.view.View;
-import android.widget.Toast;
-
 import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
-import com.android.volley.ParseError;
 import com.android.volley.Response.ErrorListener;
-import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.google.gson.JsonElement;
@@ -29,103 +23,64 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.utils.Logger;
 
 public class OpenMrsErrorListener implements ErrorListener {
 
     private static final Logger LOG = Logger.create();
 
-    private int statusCode;
-    private String errorType;
-
-    /**
-     * intended to be the Default behavior this method could be overridden to better
-     * suit the request's need.
-     * @param error
-     */
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        displayErrorMessage(parseResponse(error));
+    /** Default error-handling behaviour; can be overridden to suit the situation. */
+    @Override public void onErrorResponse(VolleyError error) {
+        displayVolleyError(error);
     }
 
-
-    public String parseResponse(VolleyError error) {
-        String message = "Empty response";
-        String errorMessage = error.getMessage();
-
-        if (error.networkResponse != null) {
-
-            statusCode = error.networkResponse.statusCode;
-
-            if( error instanceof NetworkError) {
-                errorType = "NetworkError";
-            } else if( error instanceof ServerError) {
-                errorType = "ServerError";
-            } else if( error instanceof AuthFailureError) {
-                errorType = "AuthFailureError";
-            } else if( error instanceof ParseError) {
-                errorType = "ParseError";
-            } else if( error instanceof NoConnectionError) {
-                errorType = "NoConnectionError";
-            } else if( error instanceof TimeoutError) {
-                errorType = "TimeoutError";
-            }
-
-            if(error.networkResponse.data != null) {
-                String body = new String(error.networkResponse.data);
-                errorMessage = extractMessageFromJson(body);
-
-                if(errorMessage != null){
-                    message = errorMessage;
-                } else {
-                    message = body;
-                }
-            }
+    /** Displays a VolleyError as a toast, if it can be made meaningful to the user. */
+    public void displayVolleyError(VolleyError error) {
+        // TODO(ping): Hand off to the HealthMonitor or use the snackbar.
+        LOG.w(error.getClass().getSimpleName() + ": " + error.getMessage());
+        if (error.networkResponse == null ||
+            error instanceof NoConnectionError ||
+            error instanceof AuthFailureError ||
+            error instanceof TimeoutError) {
+            // No toast needed; let the BuendiaApiHealthCheck catch these
+            // and show a message in the snackbar.
+            return;
         }
 
-        return errorType + " : " + statusCode + " " + message;
+        int code = error.networkResponse.statusCode;
+        String message = extractErrorMessage(error.networkResponse);
+        BigToast.show(App.getInstance().getApplicationContext(), message);
     }
 
-    /** Parsing the json formatted error response received from the OpenMRS server **/
-    public String extractMessageFromJson(String json) {
-        String message = null;
-        try {
-            JsonObject result = new JsonParser().parse(json).getAsJsonObject();
-            if (result.has("error")) {
-                JsonObject errorObject = result.getAsJsonObject("error");
-                JsonElement element = errorObject.get("message");
-                if (element == null || element.isJsonNull()) {
-                    element = errorObject.get("code");
+    /** Parses a JSON-formatted error response from the OpenMRS server. **/
+    public String extractErrorMessage(NetworkResponse response) {
+        byte[] data = response.data;
+        String problem = "status code " + response.statusCode;
+        if (data != null) {
+            String json = new String(data);
+            LOG.i(json);
+            try {
+                JsonObject result = new JsonParser().parse(json).getAsJsonObject();
+                if (result.has("error")) {
+                    JsonObject error = result.getAsJsonObject("error");
+                    JsonElement message = error.get("message");
+                    if (message != null && message.isJsonPrimitive()) {
+                        return message.getAsString();
+                    }
+                    JsonElement detail = error.get("detail");
+                    if (detail != null && detail.isJsonPrimitive()) {
+                        problem = detail.getAsString().split("\n")[0];
+                    }
+                    JsonElement code = error.get("code");
+                    if (code != null && code.isJsonPrimitive()) {
+                        problem += " at " + code.getAsString();
+                    }
                 }
-                if (element != null && element.isJsonPrimitive()) {
-                    message = element.getAsString();
-                }
+            } catch (JsonParseException | IllegalStateException | UnsupportedOperationException e) {
+                LOG.w("Problem parsing error message: " + e.getMessage());
             }
-        } catch (JsonParseException | IllegalStateException | UnsupportedOperationException e) {
-            LOG.w("Problem parsing error message: " + e.getMessage());
         }
-        return message;
+        return "Sorry, there was a problem communicating with the server (" + problem + ")";
     }
-
-    /** display the error message as a toast **/
-    public void displayErrorMessage(String message) {
-        // TODO: refactor this using eventbus and snackbar.
-        Toast toast = Toast.makeText(
-            App.getInstance().getApplicationContext(),
-            message,
-            Toast.LENGTH_LONG
-        );
-        View view = toast.getView();
-        view.setBackgroundColor(Color.RED);
-        toast.show();
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public String getErrorType() {
-        return errorType;
-    }
-
 }

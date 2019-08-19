@@ -26,7 +26,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
+import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
@@ -34,7 +34,7 @@ import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
-import org.projectbuendia.client.ui.LoadingState;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
@@ -59,11 +59,8 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
-    private CancelButtonListener mCancelListener = new CancelButtonListener();
     private static boolean sSkippedPatientList;
-
-    // TODO/i18n: Populate properly.
-    protected final String mLocale = "en";
+    private final EventBusSubscriber mSubscriber = new EventBusSubscriber();
 
     public PatientSearchController getSearchController() {
         return mSearchController;
@@ -76,33 +73,23 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         inflater.inflate(R.menu.main, menu);
 
         menu.findItem(R.id.action_new_patient).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem menuItem) {
-                    Utils.logEvent("add_patient_pressed");
-                    EditPatientDialogFragment.newInstance(null)
-                        .show(getSupportFragmentManager(), null);
-                    return true;
-                }
+            menuItem -> {
+                Utils.logEvent("add_patient_pressed");
+                EditPatientDialogFragment.newInstance(null)
+                    .show(getSupportFragmentManager(), null);
+                return true;
             });
 
         MenuItem search = menu.findItem(R.id.action_search);
         setMenuBarIcon(search, FontAwesomeIcons.fa_filter);
-        search.setVisible(getLoadingState() == LoadingState.LOADED);
+        search.setVisible(getReadyState() == ReadyState.READY);
 
         MenuItem addPatient = menu.findItem(R.id.action_new_patient);
         setMenuBarIcon(addPatient, FontAwesomeIcons.fa_user_plus);
-        addPatient.setVisible(getLoadingState() == LoadingState.LOADED);
+        addPatient.setVisible(getReadyState() == ReadyState.READY);
 
         mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);
-
-        /*
-        MenuItem cancel = menu.findItem(R.id.action_cancel);
-        cancel.setIcon(createIcon(Iconify.IconValue.fa_close, 0xccffffff));
-        cancel.setOnMenuItemClickListener(mCancelListener);
-        cancel.setVisible(getLoadingState() == LoadingState.SYNCING);
-        */
 
         InputMethodManager mgr =
             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -132,8 +119,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
             mCrudEventBus,
             new EventBusWrapper(mEventBus),
             mAppModel,
-            mSyncManager,
-            mLocale);
+            mSyncManager);
 
         mUpdateNotificationController = new UpdateNotificationController(
             new UpdateNotificationUi()
@@ -153,18 +139,25 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                 }
             }
         }
-
-        mSyncManager.initPeriodicSyncs();
     }
 
     @Override protected void onResumeImpl() {
         super.onResumeImpl();
-        mSearchController.init();
-        mSearchController.loadSearchResults();
+        attemptInit();
+    }
+
+    protected void attemptInit() {
+        if (mAppModel.isReady()) {
+            mSearchController.init();
+            mSearchController.loadSearchResults();
+        } else {
+            mEventBus.register(mSubscriber);
+        }
     }
 
     @Override protected void onPauseImpl() {
         super.onPauseImpl();
+        if (mEventBus.isRegistered(mSubscriber)) mEventBus.unregister(mSubscriber);
         mSearchController.suspend();
     }
 
@@ -184,10 +177,10 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         }
     }
 
-    private class CancelButtonListener implements MenuItem.OnMenuItemClickListener {
-        @Override public boolean onMenuItemClick(MenuItem item) {
-            mEventBus.post(new SyncCancelRequestedEvent());
-            return true;
+    private final class EventBusSubscriber {
+        public void onEventMainThread(SyncSucceededEvent event) {
+            mEventBus.unregister(mSubscriber);
+            attemptInit();
         }
     }
 }

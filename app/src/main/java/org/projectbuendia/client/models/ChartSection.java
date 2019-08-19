@@ -20,7 +20,7 @@ public class ChartSection {
     public final List<ChartItem> items;
 
     public ChartSection(String label) {
-        this(label, new ArrayList<ChartItem>());
+        this(label, new ArrayList<>());
     }
 
     public ChartSection(String label, List<ChartItem> items) {

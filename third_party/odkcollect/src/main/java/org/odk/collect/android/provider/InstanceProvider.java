@@ -115,7 +115,13 @@ public class InstanceProvider extends ContentProvider {
         }
 
         if (mDbHelper != null) {
-        	return mDbHelper;
+            if (new File(mDbHelper.getWritableDatabase().getPath()).exists()) {
+                return mDbHelper;
+            }
+            // If the file has been moved or deleted, we have to close this
+            // database and open a new one.  Otherwise, the invalid database
+            // will be reused indefinitely and all operations will fail.
+            mDbHelper.close();
         }
         mDbHelper = new DatabaseHelper(DATABASE_NAME);
         return mDbHelper;
@@ -330,7 +336,7 @@ public class InstanceProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        if (count > 0) getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 
@@ -385,7 +391,7 @@ public class InstanceProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        if (count > 0) getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 

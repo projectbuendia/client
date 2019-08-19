@@ -69,8 +69,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         ContentValues first = allValues[0];
         String[] columns = first.keySet().toArray(new String[first.size()]);
         try (DatabaseTransaction tx = new DatabaseTransaction(db, BULK_INSERT_SAVEPOINT)) {
-            SQLiteStatement statement = makeInsertStatement(db, mTable.name, columns);
-            try {
+            try (SQLiteStatement statement = makeInsertStatement(db, mTable.name, columns)) {
                 Object[] bindings = new Object[first.size()];
                 for (ContentValues values : allValues) {
                     statement.clearBindings();
@@ -95,8 +94,6 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
             } catch (Throwable t) {
                 // If absolutely anything goes wrong, rollback to the savepoint.
                 tx.rollback();
-            } finally {
-                statement.close();
             }
         }
         contentResolver.notifyChange(uri, null, false);
@@ -137,7 +134,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         int count = new QueryBuilder(mTable)
             .where(selection, selectionArgs)
             .delete(dbHelper.getWritableDatabase());
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
@@ -147,7 +144,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         int count = new QueryBuilder(mTable)
             .where(selection, selectionArgs)
             .update(dbHelper.getWritableDatabase(), values);
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 }

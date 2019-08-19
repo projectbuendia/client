@@ -16,5 +16,9 @@ package org.projectbuendia.client.models;
  * @param <T> the type of the ID of the model
  */
 public abstract class Base<T> {
-    public T id;
+    public final T id;
+
+    protected Base(T id) {
+        this.id = id;
+    }
 }

@@ -68,7 +68,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
         int count = new QueryBuilder(Table.USERS)
             .where(selection, selectionArgs)
             .delete(dbHelper.getWritableDatabase());
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
@@ -78,7 +78,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
         int count = new QueryBuilder(Table.USERS)
             .where(selection, selectionArgs)
             .update(dbHelper.getWritableDatabase(), values);
-        contentResolver.notifyChange(uri, null, false);
+        if (count > 0) contentResolver.notifyChange(uri, null, false);
         return count;
     }
 }

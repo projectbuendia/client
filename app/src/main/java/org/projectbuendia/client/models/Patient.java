@@ -12,7 +12,6 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
-import android.database.Cursor;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.json.JsonPatient;
@@ -21,19 +20,28 @@ import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
-@Immutable
-public final class Patient extends Base<String> implements Comparable<Patient> {
-    public static final int GENDER_UNKNOWN = 0;
-    public static final int GENDER_MALE = 1;
-    public static final int GENDER_FEMALE = 2;
+public final @Immutable class Patient extends Base<String> implements Comparable<Patient> {
+    public static final CursorLoader<Patient> LOADER = cursor -> builder()
+        .setUuid(Utils.getString(cursor, Contracts.Patients.UUID))
+        .setId(Utils.getString(cursor, Contracts.Patients.ID))
+        .setGivenName(Utils.getString(cursor, Contracts.Patients.GIVEN_NAME))
+        .setFamilyName(Utils.getString(cursor, Contracts.Patients.FAMILY_NAME))
+        .setBirthdate(Utils.getLocalDate(cursor, Contracts.Patients.BIRTHDATE))
+        .setSex(Sex.forCode(Utils.getString(cursor, Contracts.Patients.SEX)))
+        .setLocationUuid(Utils.getString(cursor, Contracts.Patients.LOCATION_UUID))
+        .build();
 
     public final String uuid;
     public final String givenName;
     public final String familyName;
-    public final int gender;
+    public final Sex sex;
     // TODO: Make PatientDelta.birthdate and Patient.birthdate same type (LocalDate or DateTime).
     public final LocalDate birthdate;
     public final String locationUuid;
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     /** Creates an instance of {@link Patient} from a network {@link JsonPatient} object. */
     public static Patient fromJson(JsonPatient patient) {
@@ -42,16 +50,15 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
             .setUuid(patient.uuid)
             .setGivenName(patient.given_name)
             .setFamilyName(patient.family_name)
-            .setGender("F".equals(patient.sex) ? GENDER_FEMALE :
-                "M".equals(patient.sex) ? GENDER_MALE : GENDER_UNKNOWN)
+            .setSex(Sex.forCode(patient.sex))
             .setBirthdate(patient.birthdate)
             .setLocationUuid(
                 patient.assigned_location != null ? patient.assigned_location.uuid : null)
             .build();
     }
 
-    public static Builder builder() {
-        return new Builder();
+    @Override public int compareTo(Patient other) {
+        return Utils.ALPHANUMERIC_COMPARATOR.compare(id, other.id);
     }
 
     /** Puts this object's fields in a {@link ContentValues} object for insertion into a database. */
@@ -61,17 +68,10 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         cv.put(Contracts.Patients.ID, id);
         cv.put(Contracts.Patients.GIVEN_NAME, givenName);
         cv.put(Contracts.Patients.FAMILY_NAME, familyName);
-        cv.put(Contracts.Patients.GENDER,
-            gender == JsonPatient.GENDER_MALE ? "M" :
-                gender == JsonPatient.GENDER_FEMALE ? "F" : "U");
+        cv.put(Contracts.Patients.SEX, sex.code);
         cv.put(Contracts.Patients.BIRTHDATE, Utils.formatDate(birthdate));
-        cv.put(Contracts.Patients.LOCATION_UUID,
-            locationUuid == null ? Zones.DEFAULT_LOCATION_UUID : locationUuid);
+        cv.put(Contracts.Patients.LOCATION_UUID, locationUuid);
         return cv;
-    }
-
-    @Override public int compareTo(Patient other) {
-        return Utils.alphanumericComparator.compare(id, other.id);
     }
 
     public org.odk.collect.android.model.Patient toOdkPatient() {
@@ -84,7 +84,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         private String mUuid;
         private String mGivenName;
         private String mFamilyName;
-        private int mGender;
+        private Sex mSex;
         private LocalDate mBirthdate;
         private String mLocationUuid;
 
@@ -108,8 +108,8 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
             return this;
         }
 
-        public Builder setGender(int gender) {
-            this.mGender = gender;
+        public Builder setSex(Sex sex) {
+            this.mSex = sex;
             return this;
         }
 
@@ -132,39 +132,12 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
     }
 
     private Patient(Builder builder) {
-        this.id = builder.mId;
+        super(builder.mId);
         this.uuid = builder.mUuid;
         this.givenName = builder.mGivenName;
         this.familyName = builder.mFamilyName;
-        this.gender = builder.mGender;
+        this.sex = builder.mSex;
         this.birthdate = builder.mBirthdate;
         this.locationUuid = builder.mLocationUuid;
-    }
-
-    /** An {@link CursorLoader} that loads {@link Patient}s. */
-    @Immutable
-    public static class Loader implements CursorLoader<Patient> {
-        @Override public Patient fromCursor(Cursor cursor) {
-            return builder()
-                .setUuid(Utils.getString(cursor, Contracts.Patients.UUID))
-                .setId(Utils.getString(cursor, Contracts.Patients.ID))
-                .setGivenName(Utils.getString(cursor, Contracts.Patients.GIVEN_NAME))
-                .setFamilyName(Utils.getString(cursor, Contracts.Patients.FAMILY_NAME))
-                .setBirthdate(Utils.getLocalDate(cursor, Contracts.Patients.BIRTHDATE))
-                .setGender(getGenderFromString(Utils.getString(cursor, Contracts.Patients.GENDER)))
-                .setLocationUuid(Utils.getString(cursor, Contracts.Patients.LOCATION_UUID))
-                .build();
-        }
-
-        private static int getGenderFromString(String genderString) {
-            switch (genderString) {
-                case "M":
-                    return GENDER_MALE;
-                case "F":
-                    return GENDER_FEMALE;
-                default:
-                    return GENDER_UNKNOWN;
-            }
-        }
     }
 }

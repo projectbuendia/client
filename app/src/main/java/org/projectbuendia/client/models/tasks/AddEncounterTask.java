@@ -21,14 +21,13 @@ import com.android.volley.toolbox.RequestFuture;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
+import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
@@ -54,7 +53,6 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     };
 
     private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final Patient mPatient;
@@ -66,7 +64,6 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     /** Creates a new {@link AddEncounterTask}. */
     public AddEncounterTask(
         TaskFactory taskFactory,
-        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         Patient patient,
@@ -74,7 +71,6 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         CrudEventBus bus
     ) {
         mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mPatient = patient;
@@ -158,7 +154,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
 
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemTask<Encounter> task = mTaskFactory.newFetchItemTask(
+        LoadItemTask<Encounter> task = mTaskFactory.newLoadItemTask(
             Observations.URI,
             ENCOUNTER_PROJECTION,
             new EncounterUuidFilter(),
@@ -173,12 +169,12 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     // report success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(ItemFetchedEvent<Encounter> event) {
+        public void onEventMainThread(ItemLoadedEvent<Encounter> event) {
             mBus.post(new ItemCreatedEvent<>(event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(ItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemLoadFailedEvent event) {
             mBus.post(new EncounterAddFailedEvent(
                 EncounterAddFailedEvent.Reason.FAILED_TO_FETCH_SAVED_OBSERVATION,
                 new Exception(event.error)));

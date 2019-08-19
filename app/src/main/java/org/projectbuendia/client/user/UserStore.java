@@ -20,7 +20,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.os.RemoteException;
 
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.google.common.collect.ImmutableSet;
@@ -60,7 +59,7 @@ public class UserStore {
             users = syncKnownUsers();
         }
 
-        LOG.i(String.format("Found %d users in db", users.size()));
+        LOG.i("Found %d users in db", users.size());
         return users;
     }
 
@@ -86,7 +85,7 @@ public class UserStore {
             .acquireContentProviderClient(Users.URI);
         try {
             ContentValues values = new ContentValues();
-            values.put(Users.UUID, user.id);
+            values.put(Users.UUID, user.uuid);
             values.put(Users.FULL_NAME, user.fullName);
             client.insert(Users.URI, values);
         } catch (RemoteException e) {
@@ -108,23 +107,17 @@ public class UserStore {
         // Make an async call to the server and use a CountDownLatch to block until the result is
         // returned.
         final CountDownLatch latch = new CountDownLatch(1);
-        App.getServer().addUser(
-                user,
-                new Response.Listener<JsonUser>() {
-                    @Override
-                    public void onResponse(JsonUser response) {
-                        result.user = response;
-                        latch.countDown();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        LOG.e(error, "Unexpected error adding user");
-                        result.error = error;
-                        latch.countDown();
-                    }
-                });
+        App.getServer().addUser(user,
+            response -> {
+                result.user = response;
+                latch.countDown();
+            },
+            error -> {
+                LOG.e(error, "Unexpected error adding user");
+                result.error = error;
+                latch.countDown();
+            }
+        );
 
         try {
             latch.await();
@@ -217,7 +210,7 @@ public class UserStore {
         // TODO: Update syncResult delete counts.
         for (JsonUser user : response) {
             ops.add(ContentProviderOperation.newInsert(Contracts.Users.URI)
-                    .withValue(Contracts.Users.UUID, user.id)
+                    .withValue(Contracts.Users.UUID, user.uuid)
                     .withValue(Contracts.Users.FULL_NAME, user.fullName)
                     .build());
             syncResult.stats.numInserts++;

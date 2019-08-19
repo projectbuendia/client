@@ -21,7 +21,7 @@ public class UserAddedEvent extends KnownUsersChangedEvent {
     public final JsonUser addedUser;
 
     public UserAddedEvent(JsonUser addedUser) {
-        super(ImmutableSet.of(addedUser), ImmutableSet.<JsonUser> of());
+        super(ImmutableSet.of(addedUser), ImmutableSet.of());
         this.addedUser = addedUser;
     }
 }

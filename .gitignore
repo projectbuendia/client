@@ -36,6 +36,7 @@ local.properties
 .idea/inspectionProfiles/profiles_settings.xml
 !.idea/inspectionProfiles
 !.idea/copyright
+captures
 
 # User-specific configuration files
 *.iml

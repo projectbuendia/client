@@ -2,7 +2,6 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -72,7 +71,7 @@ public class ObsDetailDialogFragment extends DialogFragment {
                 if (row.valueName != null) {
                     Section section = new Section(row);
                     if (!rowsBySection.containsKey(section)) {
-                        rowsBySection.put(section, new ArrayList<ObsRow>());
+                        rowsBySection.put(section, new ArrayList<>());
                     }
                     rowsBySection.get(section).add(row);
                 }
@@ -93,11 +92,7 @@ public class ObsDetailDialogFragment extends DialogFragment {
         // listView.addFooterView(listFooterView);
 
         return new AlertDialog.Builder(getActivity())
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            })
+            .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
             .setView(fragment)
             .create();
 

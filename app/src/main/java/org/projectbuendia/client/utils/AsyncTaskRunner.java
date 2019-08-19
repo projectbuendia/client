@@ -26,11 +26,7 @@ public interface AsyncTaskRunner {
             // Force the AsyncTask to start from the main thread (since using any other thread will
             // result in an exception, anyway).
             Handler mainHandler = new Handler(Looper.getMainLooper());
-            mainHandler.post(new Runnable() {
-                @Override public void run() {
-                    asyncTask.execute(params);
-                }
-            });
+            mainHandler.post(() -> asyncTask.execute(params));
         }
     };
 

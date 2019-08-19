@@ -18,14 +18,13 @@
 
     <GridView
         android:id="@+id/users"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:horizontalSpacing="0dp"
         android:verticalSpacing="0dp"
         android:stretchMode="spacingWidthUniform"
         android:columnWidth="144sp"
         android:numColumns="auto_fit"
-        tools:listitem="@layout/grid_item_user"/>
+        tools:listitem="@layout/login_grid_user_item" />
 
 </RelativeLayout>

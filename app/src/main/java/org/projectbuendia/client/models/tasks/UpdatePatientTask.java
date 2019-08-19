@@ -18,17 +18,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.providers.Contracts;
 
 import java.util.concurrent.ExecutionException;
@@ -44,7 +43,6 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
     private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mUuid;
@@ -53,14 +51,12 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
 
     UpdatePatientTask(
         TaskFactory taskFactory,
-        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         String patientUuid,
         PatientDelta patientDelta,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mUuid = patientUuid;
@@ -109,12 +105,12 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
-        FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
+        LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
             Contracts.Patients.URI,
             null,
             new UuidFilter(),
             mUuid,
-            mLoaderSet.patientLoader,
+            Patient.LOADER,
             mBus);
         task.execute();
     }
@@ -124,12 +120,12 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class UpdateEventSubscriber {
-        public void onEventMainThread(ItemFetchedEvent<Patient> event) {
+        public void onEventMainThread(ItemLoadedEvent<Patient> event) {
             mBus.post(new ItemUpdatedEvent<>(mUuid, event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(ItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemLoadFailedEvent event) {
             mBus.post(new PatientUpdateFailedEvent(
                 PatientUpdateFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);

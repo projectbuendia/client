@@ -61,13 +61,13 @@
       android:layout_gravity="end">
 
     <ImageView
-        android:id="@+id/listview_cell_search_results_gender"
+        android:id="@+id/listview_cell_search_results_sex"
         android:layout_width="32sp"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:contentDescription="@string/sex"
         android:scaleType="fitCenter"
-        tools:src="@drawable/ic_gender_male"/>
+        tools:src="@drawable/ic_male"/>
 
     <TextView
         android:id="@+id/listview_cell_search_results_age"

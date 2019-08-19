@@ -13,10 +13,10 @@ package org.projectbuendia.client.filter.matchers;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -25,17 +25,11 @@ import static org.junit.Assert.assertFalse;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MatchingFilterGroupTest {
-    private static final MatchingFilter<String> PREFIX_FILTER = new MatchingFilter<String>() {
-        @Override public boolean matches(String object, CharSequence constraint) {
-            return object.startsWith(constraint.toString());
-        }
-    };
+    private static final MatchingFilter<String> PREFIX_FILTER =
+        (object, constraint) -> object.startsWith(constraint.toString());
 
-    private static final MatchingFilter<String> SUFFIX_FILTER = new MatchingFilter<String>() {
-        @Override public boolean matches(String object, CharSequence constraint) {
-            return object.endsWith(constraint.toString());
-        }
-    };
+    private static final MatchingFilter<String> SUFFIX_FILTER =
+        (object, constraint) -> object.endsWith(constraint.toString());
 
     private static final MatchingFilterGroup<String> AND_FILTER_GROUP =
         new MatchingFilterGroup<>(

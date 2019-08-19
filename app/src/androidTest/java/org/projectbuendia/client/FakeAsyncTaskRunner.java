@@ -24,11 +24,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A fake {@link AsyncTaskRunner} for use in tests. */
 public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
-    private static final Executor EXECUTOR = new Executor() {
-        @Override public void execute(Runnable command) {
-            command.run();
-        }
-    };
+    private static final Executor EXECUTOR = Runnable::run;
     private final ArrayDeque<Pair<AsyncTask<Object, Object, Object>, Object[]>>
         mQueuedTasks = new ArrayDeque<>();
     private final Instrumentation mInstrumentation;
@@ -53,6 +49,6 @@ public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
         AsyncTask<ParamsT, ProgressT, ResultT> asyncTask, ParamsT... params) {
         mQueuedTasks.add(Pair.create(
             (AsyncTask<Object, Object, Object>) asyncTask,
-            (Object[]) params));
+            params));
     }
 }

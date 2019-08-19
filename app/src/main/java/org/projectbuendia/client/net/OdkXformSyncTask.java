@@ -18,8 +18,6 @@ import android.database.SQLException;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.common.base.Preconditions;
 
 import org.odk.collect.android.application.Collect;
@@ -60,18 +58,16 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     }
 
     @Override protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
-
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
-            final File proposedPath = formInfo.makeFileForForm();
+            final File proposedPath = formInfo.getPathForForm();
+            LOG.i("Looking up local entry for %s (%s)", formInfo.uuid, formInfo.name);
 
             // Check if the uuid already exists in the database.
-            Cursor cursor = null;
             boolean isNew;
             final boolean usersHaveChanged = App.getUserManager().isDirty();
-            try {
-                cursor = getCursorForFormFile(proposedPath, new String[] {
-                    FormsProviderAPI.FormsColumns.DATE
-                });
+            try (Cursor cursor = getCursorForFormFile(proposedPath, new String[] {
+                FormsProviderAPI.FormsColumns.DATE
+            })) {
                 boolean isInDatabase = cursor.getCount() > 0;
                 if (isInDatabase) {
                     if (cursor.getCount() != 1) {
@@ -91,17 +87,13 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                             + ", (Invalidated by UserManager: " + usersHaveChanged + ")");
                     }
                 } else {
-                    LOG.i("Form " + formInfo.uuid + " not found in database.");
+                    LOG.i("Form %s not found in database.", formInfo.uuid);
                     isNew = true;
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
                 }
             }
 
             if (!isNew && !usersHaveChanged) {
-                LOG.i("Using form " + formInfo.uuid + " from local cache.");
+                LOG.i("Form %s is up to date and users have not changed.", formInfo.uuid);
                 if (mFormWrittenListener != null) {
                     mFormWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
@@ -122,22 +114,22 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
      *                        added
      */
     public void fetchAndAddXFormToDb(final String uuid, final File proposedPath) {
-        LOG.i("fetching form " + uuid);
+        LOG.i("Fetching form %s from server", uuid);
 
         OpenMrsXformsConnection openMrsXformsConnection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
-        openMrsXformsConnection.getXform(uuid, new Response.Listener<String>() {
-            @Override public void onResponse(String response) {
-                LOG.i("adding form '%s' to db", uuid);
-                new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
-                    .execute(new FormToWrite(response, proposedPath));
+        openMrsXformsConnection.getXform(uuid, response -> {
+            if (App.getInstance().getSyncManager().getNewSyncsSuppressed()) {
+                LOG.w("Skipping form save: New syncs are currently suppressed.");
+                return;
             }
-        }, new Response.ErrorListener() {
-            @Override public void onErrorResponse(VolleyError error) {
-                LOG.e(error, "failed to fetch file");
-                EventBus.getDefault().post(new FetchXformFailedEvent(
-                    FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
-            }
+            LOG.i("Saving form %s to local filesystem and database", uuid);
+            new AddFormToDbAsyncTask(mFormWrittenListener, uuid)
+                .execute(new FormToWrite(response, proposedPath));
+        }, error -> {
+            LOG.e(error, "Failed to fetch form %s from server", uuid);
+            EventBus.getDefault().post(new FetchXformFailedEvent(
+                FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
         });
     }
 

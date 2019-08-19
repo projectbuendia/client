@@ -21,12 +21,11 @@ import com.android.volley.toolbox.RequestFuture;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
@@ -50,7 +49,6 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     private static final Logger LOG = Logger.create();
 
     private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final PatientDelta mPatientDelta;
@@ -62,13 +60,11 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     /** Creates a new {@link AddPatientTask}. */
     public AddPatientTask(
         TaskFactory taskFactory,
-        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         PatientDelta patientDelta,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mPatientDelta = patientDelta;
@@ -142,12 +138,12 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
+        LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
             Contracts.Patients.URI,
             null,
             new UuidFilter(),
             mUuid,
-            mLoaderSet.patientLoader,
+            Patient.LOADER,
             mBus);
         task.execute();
     }
@@ -157,12 +153,12 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(ItemFetchedEvent<Patient> event) {
+        public void onEventMainThread(ItemLoadedEvent<Patient> event) {
             mBus.post(new ItemCreatedEvent<>(event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(ItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemLoadFailedEvent event) {
             mBus.post(new PatientAddFailedEvent(
                 PatientAddFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);

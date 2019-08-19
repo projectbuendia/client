@@ -22,10 +22,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.Order;
@@ -37,7 +37,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -228,7 +227,7 @@ public class ChartRenderer {
             for (Obs obs : observations) {
                 if (obs == null) continue;
 
-                if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
+                if (obs.conceptUuid.equals(ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Order order = orders.get(obs.value);
                     if (order != null) {
                         if (!mExecutionHistories.containsKey(order.uuid)) {
@@ -307,7 +306,7 @@ public class ChartRenderer {
 
         void addObs(Column column, Obs obs) {
             if (!column.pointSetByConceptUuid.containsKey(obs.conceptUuid)) {
-                column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<ObsPoint>());
+                column.pointSetByConceptUuid.put(obs.conceptUuid, new TreeSet<>());
             }
             ObsPoint point = obs.getObsPoint();
             if (point != null) {
@@ -365,12 +364,10 @@ public class ChartRenderer {
 
         List<Order> getSortedOrders() {
             List<Order> sortedOrders = new ArrayList<>(mOrders);
-            Collections.sort(sortedOrders, new Comparator<Order>() {
-                @Override public int compare(Order a, Order b) {
-                    int result = a.instructions.route.compareTo(b.instructions.route);
-                    if (result != 0) return result;
-                    return a.start.compareTo(b.start);
-                }
+            Collections.sort(sortedOrders, (a, b) -> {
+                int result = a.instructions.route.compareTo(b.instructions.route);
+                if (result != 0) return result;
+                return a.start.compareTo(b.start);
             });
             return sortedOrders;
         }

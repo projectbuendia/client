@@ -13,13 +13,12 @@ package org.projectbuendia.client.models;
 
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.util.SparseArray;
 
 import java.util.Iterator;
 
 /**
- * A {@link TypedCursor} that's backed by a {@link CursorLoader} and a {@link Cursor}.
+ * A {@link TypedCursor} that uses a {@link CursorLoader} to load items from a {@link Cursor}.
  * <p/>
  * <p>This data structure is NOT thread-safe. It should only be accessed from one thread at a time,
  * generally the main thread. Furthermore, only one {@link Iterator} should be created on it at a
@@ -30,14 +29,13 @@ import java.util.Iterator;
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
  * does, however, pass along {@link ContentObserver} callbacks.
  */
-class TypedCursorWithLoader<T, U extends CursorLoader<T>> implements TypedCursor<T> {
-
-    private final U mLoader;
+public class TypedCursorWithLoader<T> implements TypedCursor<T> {
+    private final CursorLoader<T> mLoader;
     private final Cursor mCursor;
 
     private final SparseArray<T> mLoadedItems;
 
-    public TypedCursorWithLoader(Cursor cursor, U loader) {
+    public TypedCursorWithLoader(Cursor cursor, CursorLoader<T> loader) {
         mLoader = loader;
         mCursor = cursor;
         mLoadedItems = new SparseArray<>();
@@ -79,24 +77,12 @@ class TypedCursorWithLoader<T, U extends CursorLoader<T>> implements TypedCursor
         return convertedItem;
     }
 
-    @Override public Uri getNotificationUri() {
-        return mCursor.isClosed() ? null : mCursor.getNotificationUri();
-    }
-
     @Override public Iterator<T> iterator() {
         return new LazyLoaderIterator();
     }
 
     @Override public void close() {
         mCursor.close();
-    }
-
-    @Override public void registerContentObserver(ContentObserver observer) {
-        mCursor.registerContentObserver(observer);
-    }
-
-    @Override public void unregisterContentObserver(ContentObserver observer) {
-        mCursor.unregisterContentObserver(observer);
     }
 
     private class LazyLoaderIterator implements Iterator<T> {

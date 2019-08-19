@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui.login;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,16 +72,9 @@ public class LoginActivity extends BaseActivity {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setTitle(getString(R.string.sync_failed_dialog_title))
             .setMessage(R.string.user_sync_failed_dialog_message)
-            .setNegativeButton(R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialog, int which) {
-                    SettingsActivity.start(LoginActivity.this);
-                }
-            })
-            .setPositiveButton(R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialog, int which) {
-                    mController.onSyncRetry();
-                }
-            })
+            .setNegativeButton(R.string.sync_failed_settings,
+                (dialog, which) -> SettingsActivity.start(LoginActivity.this))
+            .setPositiveButton(R.string.sync_failed_retry, (dialog, which) -> mController.onSyncRetry())
             .create();
     }
 
@@ -98,24 +90,18 @@ public class LoginActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.login, menu);
 
         menu.findItem(R.id.action_new_user).setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    mController.onAddUserPressed();
-                    return true;
-                }
+            item -> {
+                mController.onAddUserPressed();
+                return true;
             }
         );
 
         MenuItem settingsItem = menu.findItem(R.id.settings);
         setMenuBarIcon(settingsItem, FontAwesomeIcons.fa_cog);
         settingsItem.setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    mController.onSettingsPressed();
-                    return true;
-                }
+            item -> {
+                mController.onSettingsPressed();
+                return true;
             }
         );
 

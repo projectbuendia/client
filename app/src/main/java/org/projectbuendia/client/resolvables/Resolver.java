@@ -43,13 +43,6 @@ class Resolver {
         if (resolved == null) {
             if (ResStatus.Resolved.class.equals(clazz)) {
                 resolved = new ResStatus.Resolved((ResStatus) resolvable, resources);
-            } else if (ResTemperatureRange.Resolved.class.equals(clazz)) {
-                resolved = new ResTemperatureRange.Resolved(
-                    (ResTemperatureRange) resolvable, resources);
-            } else if (ResVital.Resolved.class.equals(clazz)) {
-                resolved = new ResVital.Resolved((ResVital) resolvable, resources);
-            } else if (ResZone.Resolved.class.equals(clazz)) {
-                resolved = new ResZone.Resolved((ResZone) resolvable, resources);
             } else {
                 throw new IllegalArgumentException("Unknown Resolvable class type.");
             }

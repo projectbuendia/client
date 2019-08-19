@@ -34,9 +34,11 @@ import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
+import org.projectbuendia.client.ui.lists.LocationListFragment;
 import org.projectbuendia.client.ui.lists.PatientListController;
 import org.projectbuendia.client.ui.lists.PatientListFragment;
 import org.projectbuendia.client.ui.lists.SingleLocationActivity;
@@ -66,6 +68,7 @@ import dagger.Provides;
     injects = {
         App.class,
         AppSettings.class,
+        SyncManager.class,
 
         // TODO: Move these into activity-specific modules.
         // Activities
@@ -75,6 +78,8 @@ import dagger.Provides;
         PatientListController.class,
         GoToPatientDialogFragment.class,
         EditPatientDialogFragment.class,
+        PatientLocationDialogFragment.class,
+        LocationListFragment.class,
         BaseSearchablePatientListActivity.class,
         SingleLocationActivity.class,
         LocationListActivity.class,
@@ -97,38 +102,33 @@ public final class AppModule {
         mApp = app;
     }
 
-    @Provides
-    @Singleton Application provideApplication() {
+    @Provides @Singleton Application provideApplication() {
         return mApp;
     }
 
-    @Provides
-    @Singleton AppSettings provideAppSettings(Application app) {
+    @Provides @Singleton AppSettings provideAppSettings(Application app) {
         return new AppSettings(
             PreferenceManager.getDefaultSharedPreferences(app), app.getResources());
     }
 
-    @Provides
-    @Singleton ContentResolver provideContentResolver(Application app) {
+    @Provides @Singleton ContentResolver provideContentResolver(Application app) {
         return app.getContentResolver();
     }
 
-    @Provides
-    @Singleton SyncManager provideSyncManager(AppSettings settings, SyncEngine engine) {
+    @Provides @Singleton SyncManager provideSyncManager(AppSettings settings, SyncEngine engine) {
         return new SyncManager(
-            settings.getUseSyncAdapter() ?
+            settings.getSyncAdapterPreferred() ?
                 new SyncAdapterSyncScheduler(engine, SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY) :
                 new ThreadedSyncScheduler(engine)
         );
     }
 
-    @Provides
-    @Singleton SyncEngine provideSyncEngine(Application app) {
+    @Provides @Singleton SyncEngine provideSyncEngine(Application app) {
         return new BuendiaSyncEngine(app.getApplicationContext());
     }
 
-    @Provides
-    @Singleton ChartDataHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
-        return new ChartDataHelper(contentResolver);
+    @Provides @Singleton ChartDataHelper provideLocalizedChartHelper(
+        AppSettings settings, ContentResolver contentResolver) {
+        return new ChartDataHelper(settings, contentResolver);
     }
 }

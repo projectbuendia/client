@@ -20,6 +20,7 @@ import android.widget.GridView;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;
@@ -46,7 +47,7 @@ public class LoginFragment extends ProgressFragment {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
 
-        setContentView(R.layout.login_fragment);
+        setContentLayout(R.layout.login_fragment);
 
         mUserListAdapter = new UserListAdapter(getActivity(), mUserColorizer);
     }
@@ -77,7 +78,7 @@ public class LoginFragment extends ProgressFragment {
     private class FragmentUi implements LoginController.FragmentUi {
 
         @Override public void showSpinner(boolean show) {
-            changeState(show ? State.LOADING : State.LOADED);
+            setReadyState(show ? ReadyState.LOADING : ReadyState.READY);
         }
 
         @Override public void showUsers(List<JsonUser> users) {

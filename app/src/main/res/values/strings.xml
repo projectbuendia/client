@@ -57,6 +57,7 @@
   <string name="add_user_connection_error">Error connecting to server</string>
   <string name="title_single_location">Patients at this location</string>
 
+  <string name="no_locations">No locations</string>
   <string name="no_patients">No patients</string>
   <string name="one_patient">1 patient</string>
   <string name="n_patients">%d patients</string>
@@ -219,8 +220,10 @@
   <string name="patient_list_fragment_sync_error">Error syncing patient data. Please check settings or try again.</string>
   <string name="api_health_problem">Unable to contact the server.  Please see the bar along the bottom of the screen for more information about the problem.</string>
   <string name="sync_failed_back">Back</string>
+  <string name="no_user">No user is logged in.</string>
+  <string name="no_location">No location information has been loaded yet.</string>
   <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
-  <string name="encounter_add_failed_unknown_server_error">Unknown error occurred on server.</string>
+  <string name="encounter_add_failed_unknown_server_error">An unknown error occurred on the server.</string>
   <string name="encounter_add_failed_interrupted">Network request was interrupted.</string>
   <string name="encounter_add_failed_to_authenticate">Username or password is invalid.</string>
   <string name="encounter_add_failed_invalid_encounter">The server rejected the new observations: %s</string>
@@ -232,8 +235,8 @@
   <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
   <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the form from the server.</string>
   <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
-  <string name="retrieving_encounter_form_title">Retrieving form</string>
-  <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
+  <string name="retrieving_form_title">Retrieving form</string>
+  <string name="retrieving_form_message">Please wait while the form is retrieved.</string>
   <string name="syncing_patients">Syncing patients…</string>
   <string name="syncing_concepts">Syncing concepts…</string>
   <string name="syncing_charts">Syncing charts…</string>
@@ -243,12 +246,12 @@
   <string name="syncing_locations">Syncing locations…</string>
   <string name="syncing_users">Syncing users…</string>
   <string name="completing_sync">Completing sync…</string>
-  <string name="sync_in_progress">Starting sync…</string>
+  <string name="sync_in_progress">Sync in progress…</string>
   <string name="submit_xform_failed_unknown_reason">Could not submit form data.</string>
   <string name="submit_xform_failed_server_auth">Could not submit form data: authentication problem.</string>
   <string name="submit_xform_failed_server_timeout">Could not submit form data: server timed out.</string>
-  <string name="submitting_encounter_form_title">Submitting form</string>
-  <string name="submitting_encounter_form_message">Please wait while form data is submitted.</string>
+  <string name="submitting_form_title">Submitting form</string>
+  <string name="submitting_form_message">Please wait while form data is submitted.</string>
   <string name="consciousness">Consciousness</string>
   <string name="condition">Condition</string>
   <string name="cancel_sync">Cancel Sync</string>
@@ -323,7 +326,7 @@
   <string name="patient_validation_missing_given_name">Enter the given name</string>
   <string name="patient_validation_missing_id">Enter the patient ID</string>
   <string name="patient_validation_missing_admission_date">Enter the admission date</string>
-  <string name="patient_missing_gender">Please select Male or Female.</string>
+  <string name="patient_missing_sex">Please select Male or Female.</string>
   <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
   <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future.</string>
   <string name="patient_creation_clear_symptom_onset_date">Clear</string>
@@ -347,18 +350,27 @@
   <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
   <string name="pref_title_package_server_url">Package server URL</string>
 
-  <string name="pref_title_apk_update_interval_secs">APK update check interval (seconds)</string>
-  <string name="pref_title_keep_form_instances">Store form instances locally</string>
-  <string name="pref_desc_keep_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
-  <string name="pref_title_require_wifi">Require Wi-Fi connection</string>
-  <string name="pref_desc_require_wifi">Turn this off to allow the app to work with non-Wi-Fi (emulated or Bluetooth tethered) networking.</string>
-  <string name="pref_title_starting_patient_id">Start with patient ID</string>
-  <string name="pref_desc_starting_patient_id">Set an ID here to go directly to a patient chart on startup.</string>
-  <string name="pref_title_use_sync_adapter">Use the old SyncAdapter framework</string>
-  <string name="pref_desc_use_sync_adapter">Turn this on to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
+  <string name="pref_title_apk_update_interval">App update check interval (seconds)</string>
+  <string name="pref_title_small_sync_interval">Small sync interval (seconds)</string>
+  <string name="pref_title_medium_sync_interval">Medium sync interval (seconds)</string>
+  <string name="pref_title_large_sync_interval">Large sync interval (seconds)</string>
+
+  <string name="waiting_for_sync">Waiting for current sync to finish...</string>
+  <string name="periodic_sync_currently_disabled">Periodic sync is currently disabled.</string>
+  <string name="pref_title_periodic_sync_disabled">Periodic sync disabled</string>
+  <string name="pref_desc_periodic_sync_disabled">Disable periodic retrieval of data from the server.</string>
+  <string name="pref_title_form_instances_retained">Form instances retained locally</string>
+  <string name="pref_desc_form_instances_retained">Keep forms on the device instead of deleting them after they are sent to the server.</string>
+  <string name="pref_title_non_wifi_allowed">Non-Wi-Fi connections allowed</string>
+  <string name="pref_desc_non_wifi_allowed">Allow the app to work with non-Wi-Fi (emulated or Bluetooth tethered) networking.</string>
+  <string name="pref_title_starting_patient_id">Starting patient ID</string>
+  <string name="pref_desc_starting_patient_id">If set, cause the app to go directly to a patient chart on startup.</string>
+  <string name="pref_title_sync_adapter_preferred">Old SyncAdapter framework preferred</string>
+  <string name="pref_desc_sync_adapter_preferred">Cause the app to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>
+  <string name="all_patients">ALL PATIENTS</string>
   <string name="all_present_patients">ALL PRESENT PATIENTS</string>
   <string name="discharged">Discharged</string>
   <string name="admission">Since admission</string>

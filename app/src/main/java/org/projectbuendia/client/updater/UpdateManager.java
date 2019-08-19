@@ -346,11 +346,9 @@ public class UpdateManager {
                 mDownloadId = -1;
                 mApplication.unregisterReceiver(this);
 
-                Cursor cursor = null;
                 final String uriString;
-                try {
-                    cursor = mDownloadManager.query(
-                        new DownloadManager.Query().setFilterById(receivedDownloadId));
+                try (Cursor cursor = mDownloadManager.query(
+                    new DownloadManager.Query().setFilterById(receivedDownloadId))) {
                     if (!cursor.moveToFirst()) {
                         LOG.w(
                             "Received download ID " + receivedDownloadId + " does not exist.");
@@ -372,10 +370,6 @@ public class UpdateManager {
                         LOG.w("No path for a downloaded file exists.");
                         // TODO: Consider firing an event.
                         return;
-                    }
-                } finally {
-                    if (cursor != null) {
-                        cursor.close();
                     }
                 }
 

@@ -2,7 +2,6 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -60,7 +59,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         String Title;
 
         listDataHeader = new ArrayList<>();
-        listDataChild = new HashMap<String, ArrayList<ObsRow>>();
+        listDataChild = new HashMap<>();
 
         for (ObsRow row: rows) {
 
@@ -74,7 +73,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
         for (String header: listDataHeader){
 
-            child = new ArrayList<ObsRow>();
+            child = new ArrayList<>();
 
             for (ObsRow row: rows){
 
@@ -99,29 +98,19 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         prepareData(obsrows);
 
         final ExpandableVoidObsRowAdapter listAdapter = new ExpandableVoidObsRowAdapter(App.getInstance().getApplicationContext(), listDataHeader, listDataChild);
-        ExpandableListView listView = (ExpandableListView) fragment.findViewById(R.id.obs_list);
+        ExpandableListView listView = fragment.findViewById(R.id.obs_list);
         listView.setAdapter(listAdapter);
 
         for(int i=0; i < listAdapter.getGroupCount(); i++)
             listView.expandGroup(i);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
+                .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss())
+                .setPositiveButton(R.string.voiding, (dialogInterface, i) -> {
+                    if ((listAdapter.mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
+                        EventBus.getDefault().post(new VoidObservationsRequestEvent(listAdapter.mCheckedItems));
                     }
-                })
-                .setPositiveButton(R.string.voiding, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        if ((listAdapter.mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
-                            EventBus.getDefault().post(new VoidObservationsRequestEvent(listAdapter.mCheckedItems));
-                        }
-
-                        dialogInterface.dismiss();
-                    }
+                    dialogInterface.dismiss();
                 }).setTitle(getResources().getString(R.string.void_observations))
                 .setView(fragment);
         return builder.create();

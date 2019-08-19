@@ -50,7 +50,7 @@ public final class ObsPoint implements Comparable<ObsPoint> {
     }
 
     @Override public int hashCode() {
-        return Objects.hashCode(time) + Objects.hashCode(value);
+        return 31 * Objects.hashCode(time) + Objects.hashCode(value);
     }
 
     @Override public int compareTo(@Nonnull ObsPoint other) {

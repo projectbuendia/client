@@ -11,15 +11,18 @@
 
 package org.projectbuendia.client.events.sync;
 
-/** An event bus event giving details on the last-reported progress of an in-progress sync. */
-public class SyncProgressEvent {
-    /** The progress completed so far, as a percentage. */
-    public int progress;
-    /** The resource ID of a string label describing the current sync status. */
-    public int messageId;
+/** Indicates that a sync is running and describes its progress. */
+public class SyncProgressEvent extends SyncEvent {
+    /** The progress completed so far, as a fraction. */
+    public final int numerator;
+    public final int denominator;
 
-    public SyncProgressEvent(int progress, int messageId) {
-        this.progress = progress;
+    /** The resource ID of a string message to show the user. */
+    public final int messageId;
+
+    public SyncProgressEvent(int numerator, int denominator, int messageId) {
+        this.numerator = numerator;
+        this.denominator = denominator;
         this.messageId = messageId;
     }
 }

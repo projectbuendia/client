@@ -11,29 +11,27 @@
 
 package org.projectbuendia.client.ui.lists;
 
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
-import org.projectbuendia.client.events.sync.SyncCanceledEvent;
+import org.projectbuendia.client.events.sync.SyncCancelledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
-import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.models.Zones;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.LoadingState;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
-import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** Controller for {@link LocationListActivity}. */
@@ -41,30 +39,26 @@ final class LocationListController {
 
     private static final Logger LOG = Logger.create();
 
-    // TODO/feature: Allow LOCATIONS_DEPTH to be specified.
-    /**
-     * The depth of locations to display. Only locations at this depth in the location tree will be
-     * displayed.
-     */
-    private static final int LOCATIONS_DEPTH = LocationTree.ABSOLUTE_DEPTH_TENT;
     private final AppModel mAppModel;
+    private final AppSettings mSettings;
     private final CrudEventBus mCrudEventBus;
     private final Ui mUi;
-    private final Set<LocationFragmentUi> mFragmentUis = new HashSet<>();
+    private final Set<LocationListFragmentUi> mFragmentUis = new HashSet<>();
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final SyncManager mSyncManager;
     private final PatientSearchController mPatientSearchController;
-    @Nullable private LocationTree mLocationTree;
-    @Nullable private Location mTriageZone;
-    @Nullable private Location mDischargedZone;
-    // True when the data model is unavailable and either a sync is already in progress or has been
-    // requested by this controller.
-    private boolean mWaitingOnSync = false;
-    // True when the user has explicitly requested that a sync be canceled (e.g. via the sync cancel
-    // button). Sync operations may be cancelled and rescheduled by Android without the user
-    // requesting a sync cancellation. In these cases, this flag will remain false.
-    private boolean mWaitingOnSyncCancel = false;
+
+    @Nullable private LocationForest mForest;
+
+    /**
+     * The ready state is SYNCING only when there is no data model yet and the
+     * initial sync is running.  LOADING is the default non-ready state.
+     */
+    private ReadyState mReadyState = ReadyState.LOADING;
+
+    /** True when the user has requested to cancel a sync and the sync hasn't stopped yet. */
+    private boolean mUserCancelRequestPending = false;
     private final Object mSyncCancelLock = new Object();
 
     public interface Ui {
@@ -77,38 +71,32 @@ final class LocationListController {
 
         void showSyncFailedDialog(boolean show);
 
-        void setLoadingState(LoadingState loadingState);
+        void setReadyState(ReadyState state);
 
         void finish();
     }
 
-    public interface LocationFragmentUi {
+    public interface LocationListFragmentUi {
 
-        void setLocations(LocationTree locationTree, List<Location> locations);
+        void setLocations(LocationForest forest, Collection<Location> locations);
 
-        void setPresentPatientCount(long patientCount);
+        void setReadyState(ReadyState state);
 
-        void setTriagePatientCount(long patientCount);
-
-        void setDischargedPatientCount(long dischargedPatientCount);
-
-        void setBusyLoading(boolean busy);
-
-        void showIncrementalSyncProgress(int progress, int messageId);
-
-        void resetSyncProgress();
+        void setSyncProgress(int numerator, int denominator, Integer messageId);
 
         void showSyncCancelRequested();
     }
 
     public LocationListController(
         AppModel appModel,
+        AppSettings settings,
         CrudEventBus crudEventBus,
         Ui ui,
         EventBusRegistrationInterface eventBus,
         SyncManager syncManager,
         PatientSearchController patientSearchController) {
         mAppModel = appModel;
+        mSettings = settings;
         mCrudEventBus = crudEventBus;
         mUi = ui;
         mEventBus = eventBus;
@@ -117,101 +105,63 @@ final class LocationListController {
     }
 
     public void init() {
-        mWaitingOnSyncCancel = false;
+        mUserCancelRequestPending = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        LOG.d("init: isLocationTreeValid() = " + isLocationTreeValid());
-
-        // Get or update mLocationTree.
-        if (mAppModel.isFullModelAvailable()) {
-            LOG.i("Data model is available in init(); loading location tree from local DB");
-            mWaitingOnSync = false;
-            mAppModel.fetchLocationTree(
-                mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
+        if (mAppModel.isReady()) {
+            loadForest();
         } else {
-            LOG.i("Data model unavailable; waiting on sync.");
-            mWaitingOnSync = true;
-            if (!mSyncManager.isSyncRunningOrPending()) {
-                LOG.i("No sync detected, forcing new sync.");
-                onSyncRetry();
-            }
-        }
-
-        updateUi();
-    }
-
-    /** Returns true if a non-empty LocationTree has been loaded from the local database. */
-    private boolean isLocationTreeValid() {
-        return mLocationTree != null && mLocationTree.getRoot() != null;
-    }
-
-    public void onSyncRetry() {
-        mWaitingOnSync = true;
-        mUi.setLoadingState(LoadingState.SYNCING);
-        for (LocationFragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.resetSyncProgress();
-        }
-        mSyncManager.syncAll();
-    }
-
-    private void updateUi() {
-        boolean hasValidTree = isLocationTreeValid();
-        updateLoadingState();
-        for (LocationFragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.setBusyLoading(!hasValidTree);
-
-            if (hasValidTree) {
-                long dischargedPatientCount = (mDischargedZone == null)
-                    ? 0 : mLocationTree.getTotalPatientCount(mDischargedZone);
-                long totalPatientCount =
-                    mLocationTree.getTotalPatientCount(mLocationTree.getRoot());
-                fragmentUi.setLocations(
-                    mLocationTree,
-                    mLocationTree.getDescendantsAtDepth(LOCATIONS_DEPTH).asList());
-                fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
-                fragmentUi.setDischargedPatientCount(
-                    (mDischargedZone == null)
-                        ? 0 : mLocationTree.getTotalPatientCount(mDischargedZone));
-                fragmentUi.setTriagePatientCount(
-                    (mTriageZone == null)
-                        ? 0 : mLocationTree.getTotalPatientCount(mTriageZone));
-            }
+            LOG.w("Model has not been synced successfully yet; initiating full sync.");
+            startInitialSync();
         }
     }
 
-    private void updateLoadingState() {
-        boolean hasLocationTree = isLocationTreeValid();
-        if (hasLocationTree) {
-            mUi.setLoadingState(LoadingState.LOADED);
-            return;
-        }
-
-        if (mWaitingOnSync) {
-            mUi.setLoadingState(LoadingState.SYNCING);
-            return;
-        }
-
-        mUi.setLoadingState(LoadingState.LOADING);
+    public void loadForest() {
+        setReadyState(ReadyState.LOADING);
+        setForest(mAppModel.getForest());
+        setReadyState(ReadyState.READY);
     }
 
-    public void attachFragmentUi(LocationFragmentUi fragmentUi) {
-        LOG.d("Attached new fragment UI: " + fragmentUi);
+    public void startInitialSync() {
+        setReadyState(ReadyState.SYNCING);
+        if (!mSyncManager.isSyncRunningOrPending()) {
+            mSyncManager.syncAll();
+        }
+    }
+
+    private void setForest(@Nonnull LocationForest forest) {
+        mForest = forest;
+        for (LocationListFragmentUi fragmentUi : mFragmentUis) {
+            updateFragmentUi(fragmentUi);
+        }
+    }
+
+    private void updateFragmentUi(LocationListFragmentUi fragmentUi) {
+        if (mForest != null) {
+            fragmentUi.setLocations(mForest, mForest.allNodes());
+        }
+        fragmentUi.setReadyState(mReadyState);
+    }
+
+    private void setReadyState(ReadyState state) {
+        mReadyState = state;
+        mUi.setReadyState(state);
+        for (LocationListFragmentUi fragmentUi : mFragmentUis) {
+            fragmentUi.setReadyState(state);
+        }
+    }
+
+    public void attachFragmentUi(LocationListFragmentUi fragmentUi) {
         mFragmentUis.add(fragmentUi);
-        updateUi();
+        updateFragmentUi(fragmentUi);
     }
 
-    public void detachFragmentUi(LocationFragmentUi fragmentUi) {
-        LOG.d("Detached fragment UI: " + fragmentUi);
+    public void detachFragmentUi(LocationListFragmentUi fragmentUi) {
         mFragmentUis.remove(fragmentUi);
     }
 
     /** Frees any resources used by the controller. */
     public void suspend() {
-        LOG.d("Controller suspended.");
-
-        if (mLocationTree != null) {
-            mLocationTree.close();
-        }
         mCrudEventBus.unregister(mEventBusSubscriber);
         mEventBus.unregister(mEventBusSubscriber);
     }
@@ -228,18 +178,6 @@ final class LocationListController {
         mUi.switchToLocationList();
     }
 
-    /** Call when the user presses the discharged zone. */
-    public void onDischargedPressed() {
-        Utils.logUserAction("location_pressed", "location", mDischargedZone.name);
-        mUi.openSingleLocation(mDischargedZone);
-    }
-
-    /** Call when the user presses the triage zone. */
-    public void onTriagePressed() {
-        Utils.logUserAction("location_pressed", "location", mTriageZone.name);
-        mUi.openSingleLocation(mTriageZone);
-    }
-
     /** Call when the user presses a location. */
     public void onLocationSelected(Location location) {
         Utils.logUserAction("location_pressed", "location", location.name);
@@ -250,104 +188,50 @@ final class LocationListController {
     private final class EventBusSubscriber {
 
         public void onEventMainThread(SyncCancelRequestedEvent event) {
-            if (mWaitingOnSync) {
+            if (mReadyState == ReadyState.SYNCING) {
                 synchronized (mSyncCancelLock) {
-                    mWaitingOnSyncCancel = true;
-                    for (LocationFragmentUi fragmentUi : mFragmentUis) {
+                    mUserCancelRequestPending = true;
+                    for (LocationListFragmentUi fragmentUi : mFragmentUis) {
                         fragmentUi.showSyncCancelRequested();
                     }
                 }
             }
         }
 
-        public void onEventMainThread(SyncCanceledEvent event) {
+        public void onEventMainThread(SyncCancelledEvent event) {
             // If user-initiated cancellation occurred, close the activity even if we're no longer
             // waiting on a sync (continuing to load the activity might be jarring).
             synchronized (mSyncCancelLock) {
-                if (!mWaitingOnSyncCancel) {
-                    LOG.d("Detected non-user-initiated sync cancellation, ignoring.");
-                    return;
+                if (mUserCancelRequestPending) {
+                    LOG.d("User-initiated sync cancellation completed; finishing activity.");
+                    mUi.finish();
+                } else {
+                    LOG.d("Sync cancelled, but not by the user.");
                 }
-
-                mWaitingOnSyncCancel = false;
-                LOG.d("Detected sync cancellation while waiting on sync, finishing activity.");
-                mUi.finish();
             }
         }
 
         public void onEventMainThread(SyncProgressEvent event) {
-            if (mWaitingOnSync) {
-                for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.showIncrementalSyncProgress(event.progress, event.messageId);
-                }
-            }
-        }
-
-        public void onEventMainThread(SyncStartedEvent event) {
-            if (mWaitingOnSync) {
-                for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.resetSyncProgress();
-                }
+            for (LocationListFragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.setSyncProgress(event.numerator, event.denominator, event.messageId);
             }
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
             mUi.showSyncFailedDialog(false);
-
-            // Reload locations from the local datastore when a full sync completes successfully.
-            if (mAppModel.isFullModelAvailable()) {
-                LOG.i("Data model is available after sync; loading location tree.");
-                mAppModel.fetchLocationTree(
-                    mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
-                mWaitingOnSync = false;
-            } else if (!isLocationTreeValid()) {
-                LOG.i("Sync succeeded but was incomplete; forcing a new sync.");
-                onSyncRetry();
-            }
+            loadForest();
         }
 
         public void onEventMainThread(SyncFailedEvent event) {
-            if (mWaitingOnSync) {
-                for (LocationFragmentUi fragmentUi : mFragmentUis) {
-                    fragmentUi.resetSyncProgress();
-                }
+            if (mReadyState == ReadyState.SYNCING) {
+                // Show the dialog only if the UI is waiting for this sync.
                 mUi.showSyncFailedDialog(true);
                 Utils.logEvent("sync_failed_dialog_shown");
-            }
-        }
-
-        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            if (mLocationTree != null) {
-                mLocationTree.close();
-            }
-            mLocationTree = event.tree;
-            if (!isLocationTreeValid()) {
-                LOG.i("Found no locations in the local datastore; continuing to wait on sync.");
-                return;
-            }
-            mWaitingOnSync = false;
-
-            LOG.i("Received a valid location tree.");
-            for (Location zone :
-                mLocationTree.getChildren(mLocationTree.getRoot())) {
-                switch (zone.uuid) {
-                    case Zones.TRIAGE_ZONE_UUID:
-                        mTriageZone = zone;
-                        break;
-                    case Zones.DISCHARGED_ZONE_UUID:
-                        mDischargedZone = zone;
-                        break;
-                    default:
-                        break;
+                for (LocationListFragmentUi fragmentUi : mFragmentUis) {
+                    fragmentUi.setSyncProgress(0, 0, null);
                 }
+                setReadyState(ReadyState.ERROR);
             }
-
-            updateUi();
-
-            // Update the search controller immediately -- it does not listen for location updates
-            // on this controller's bus and would otherwise be unaware of changes.
-            // TODO/cleanup: Remove -- likely unnecessary.
-            mPatientSearchController.setLocations(mLocationTree);
         }
     }
 }

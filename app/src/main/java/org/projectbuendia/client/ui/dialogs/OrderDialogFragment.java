@@ -25,7 +25,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -110,11 +109,9 @@ public class OrderDialogFragment extends DialogFragment {
 
         // After the dialog has been laid out and positioned, we can figure out
         // how to position and size the autocompletion dropdown.
-        mMedication.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override public boolean onPreDraw() {
-                adjustDropDownSize(mMedication, ITEM_HORIZONTAL_PADDING);
-                return true;
-            }
+        mMedication.getViewTreeObserver().addOnPreDrawListener(() -> {
+            adjustDropDownSize(mMedication, ITEM_HORIZONTAL_PADDING);
+            return true;
         });
     }
 
@@ -140,35 +137,24 @@ public class OrderDialogFragment extends DialogFragment {
 
     private void addListeners() {
         // TODO(ping): Replace the mRoute EditText with a properly styled Spinner.
-        mRoute.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) v.callOnClick();
-            }
+        mRoute.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) v.callOnClick();
         });
-        mRoute.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                int index = Arrays.asList(ROUTE_LABELS).indexOf(mRoute.getText().toString());
-                new AlertDialog.Builder(getActivity())
-                    .setTitle(R.string.route_of_administration)
-                    .setSingleChoiceItems(ROUTE_LABELS, index, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mRoute.setText(ROUTE_LABELS[which]);
-                            dialog.dismiss();
-                        }
-                    })
-                    .setNegativeButton(R.string.cancel, null)
-                    .show();
-            }
+        mRoute.setOnClickListener(v -> {
+            int index = Arrays.asList(ROUTE_LABELS).indexOf(mRoute.getText().toString());
+            new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.route_of_administration)
+                .setSingleChoiceItems(ROUTE_LABELS, index, (dialog, which) -> {
+                    mRoute.setText(ROUTE_LABELS[which]);
+                    dialog.dismiss();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
         });
 
         mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
 
-        mDelete.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                onDelete(getDialog(), mOrderUuid);
-            }
-        });
+        mDelete.setOnClickListener(view -> onDelete(getDialog(), mOrderUuid));
     }
 
     /** Adjusts the size of the autocomplete dropdown according to other UI elements. */
@@ -263,11 +249,8 @@ public class OrderDialogFragment extends DialogFragment {
         new AlertDialog.Builder(getActivity())
             .setMessage(R.string.confirm_order_delete)
             .setTitle(R.string.title_confirmation)
-            .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialog, int i) {
-                    EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid));
-                }
-            })
+            .setPositiveButton(R.string.delete,
+                (dialog1, i) -> EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid)))
             .setNegativeButton(R.string.cancel, null)
             .create().show();
     }
@@ -298,19 +281,17 @@ public class OrderDialogFragment extends DialogFragment {
         });
 
         view.setMinimumHeight(view.getPaddingTop() + ih + view.getPaddingBottom());
-        view.setOnTouchListener(new View.OnTouchListener() {
-            @Override public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    int x = (int) event.getX();
-                    int y = (int) event.getY();
-                    if (x >= view.getWidth() - view.getPaddingRight() - iw && x < view.getWidth() &&
-                        y >= 0 && y < view.getHeight()) {
-                        view.setText("");
-                        return true;
-                    }
+        view.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                int x = (int) event.getX();
+                int y = (int) event.getY();
+                if (x >= view.getWidth() - view.getPaddingRight() - iw && x < view.getWidth() &&
+                    y >= 0 && y < view.getHeight()) {
+                    view.setText("");
+                    return true;
                 }
-                return false;
             }
+            return false;
         });
     }
 
@@ -333,11 +314,7 @@ public class OrderDialogFragment extends DialogFragment {
         final AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false)
             .setTitle(title)
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialog, int which) {
-                    onSubmit(dialog);
-                }
-            })
+            .setPositiveButton(R.string.ok, (dialog1, which) -> onSubmit(dialog1))
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();

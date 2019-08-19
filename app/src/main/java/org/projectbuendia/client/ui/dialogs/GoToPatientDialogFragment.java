@@ -32,8 +32,8 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
@@ -75,18 +75,10 @@ public class GoToPatientDialogFragment extends DialogFragment {
         final View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mPatientId.addTextChangedListener(new IdWatcher());
-        mPatientSearchResult.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                onSubmit();
-            }
-        });
+        mPatientSearchResult.setOnClickListener(view -> onSubmit());
         return new AlertDialog.Builder(getActivity())
             .setTitle(R.string.go_to_patient_title)
-            .setPositiveButton(R.string.go_to_patient_go, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    onSubmit();
-                }
-            })
+            .setPositiveButton(R.string.go_to_patient_go, (dialogInterface, i) -> onSubmit())
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();
@@ -103,26 +95,23 @@ public class GoToPatientDialogFragment extends DialogFragment {
             // Handler is necessary to get the numeric keypad to close.  If we
             // post the event to the EventBus immediately, the numeric keypad
             // stays up even as the new activity launches underneath it!
-            new Handler().postDelayed(new Runnable() {
-                @Override public void run() {
-                    EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
-                }
-            }, 100);
+            new Handler().postDelayed(() -> EventBus.getDefault().post(
+                new PatientChartRequestedEvent(mPatientUuid)), 100);
         }
     }
 
-    public void onEventMainThread(ItemFetchedEvent<Patient> event) {
+    public void onEventMainThread(ItemLoadedEvent<Patient> event) {
         String id = mPatientId.getText().toString().trim();
         Patient patient = event.item;
         if (id.equals(patient.id)) {  // server returned the patient we were looking for
             mPatientUuid = patient.uuid;
             mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                " (" + patient.gender + ", " + Utils.birthdateToAge(
+                " (" + patient.sex + ", " + Utils.birthdateToAge(
                 patient.birthdate, App.getInstance().getResources()) + ")");
         }
     }
 
-    public void onEventMainThread(ItemFetchFailedEvent event) {
+    public void onEventMainThread(ItemLoadFailedEvent event) {
         String id = mPatientId.getText().toString().trim();
         if (id.equals(event.id)) {  // server returned empty results for the ID we sought
             mPatientUuid = null;
@@ -152,10 +141,10 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
                         String age = birthdate != null ?
                             Utils.birthdateToAge(birthdate, getResources()) : "age unknown";
-                        String gender = Utils.getString(cursor, Patients.GENDER, "");
+                        String sex = Utils.getString(cursor, Patients.SEX, "");
                         mPatientUuid = uuid;
                         mPatientSearchResult.setText(givenName + " " + familyName +
-                            " (" + gender + ", " + age + ")");
+                            " (" + sex + ", " + age + ")");
                     } else {
                         String message = getResources().getString(R.string.go_to_patient_no_data);
                         DateTime lastSyncTime = mAppModel.getLastFullSyncTime();
@@ -168,7 +157,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         mPatientSearchResult.setText(message);
 
                         // Immediately check for this patient on the server.
-                        mAppModel.downloadSinglePatient(mBus, id);
+                        mAppModel.fetchSinglePatient(mBus, id);
                     }
                 }
             }

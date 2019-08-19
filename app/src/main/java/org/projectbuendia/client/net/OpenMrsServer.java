@@ -71,6 +71,8 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void logToServer(List<String> pairs) {
+        LOG.i("Not logging: %s", pairs);
+        if (1 + 8 > 3) return;
         // To avoid filling the server logs with big messy stack traces, let's make a dummy
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but
@@ -80,10 +82,10 @@ public class OpenMrsServer implements Server {
         List<String> params = new ArrayList<>();
         JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
-            params.add("user_id=" + user.id);
-            if (user.isGuestUser()) {
-                params.add("guest_user=1");
-            }
+            pairs.add("user_name");
+            pairs.add(user.fullName);
+            pairs.add("user_uuid");
+            pairs.add(user.uuid);
         }
         for (int i = 0; i + 1 < pairs.size(); i += 2) {
             params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
@@ -94,10 +96,7 @@ public class OpenMrsServer implements Server {
         LOG.i("Logging to server: %s", params);
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails, urlPath + ";" + Joiner.on(";").join(params), null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                }
-            }, null);
+            response -> { }, null);
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 0, 1));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
@@ -117,15 +116,13 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/patients",
             json,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        successListener.onResponse(patientFromJson(response));
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
-                        errorListener.onErrorResponse(
-                            new VolleyError("Failed to parse response", e));
-                    }
+            response -> {
+                try {
+                    successListener.onResponse(patientFromJson(response));
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
+                    errorListener.onErrorResponse(
+                        new VolleyError("Failed to parse response", e));
                 }
             },
             wrapErrorListener(errorListener));
@@ -154,9 +151,11 @@ public class OpenMrsServer implements Server {
         final Response.ErrorListener errorListener) {
         return new OpenMrsErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
-                String message = parseResponse(error);
-                displayErrorMessage(message);
-                errorListener.onErrorResponse(new VolleyError(message, error));
+                super.onErrorResponse(error);
+                if (error.getMessage() == null) {
+                    error = new VolleyError("Error", error);
+                }
+                errorListener.onErrorResponse(error);
             }
         };
     }
@@ -175,15 +174,13 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/patients/" + patientUuid,
             json,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        successListener.onResponse(patientFromJson(response));
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
-                        errorListener.onErrorResponse(
-                            new VolleyError("Failed to parse response", e));
-                    }
+            response -> {
+                try {
+                    successListener.onResponse(patientFromJson(response));
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
+                    errorListener.onErrorResponse(
+                        new VolleyError("Failed to parse response", e));
                 }
             },
             wrapErrorListener(errorListener)
@@ -213,15 +210,13 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/users",
             requestBody,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        successListener.onResponse(userFromJson(response));
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
-                        errorListener.onErrorResponse(
-                            new VolleyError("Failed to parse response", e));
-                    }
+            response -> {
+                try {
+                    successListener.onResponse(userFromJson(response));
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
+                    errorListener.onErrorResponse(
+                        new VolleyError("Failed to parse response", e));
                 }
             },
             wrapErrorListener(errorListener)
@@ -249,15 +244,13 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/encounters",
             json,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        successListener.onResponse(encounterFromJson(response));
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
-                        errorListener.onErrorResponse(
-                            new VolleyError("Failed to parse response", e));
-                    }
+            response -> {
+                try {
+                    successListener.onResponse(encounterFromJson(response));
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
+                    errorListener.onErrorResponse(
+                        new VolleyError("Failed to parse response", e));
                 }
             },
             wrapErrorListener(errorListener));
@@ -272,11 +265,7 @@ public class OpenMrsServer implements Server {
             Request.Method.DELETE,
             mConnectionDetails.getRestApiUrl() + "/obs/" + Uuid,
             null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    LOG.i("Voided observation");
-                }
-            },
+            response -> LOG.i("Voided observation"),
             wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
@@ -294,7 +283,7 @@ public class OpenMrsServer implements Server {
             json = order.toJson();
             JsonUser user = App.getUserManager().getActiveUser();
             if (user != null) {
-                json.put("orderer_uuid", user.id);
+                json.put("orderer_uuid", user.uuid);
             }
         } catch (Exception e) {
             errorListener.onErrorResponse(new VolleyError("failed to serialize request", e));
@@ -306,16 +295,14 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/orders" + (order.uuid != null ? "/" + order.uuid : ""),
             json,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        successListener.onResponse(
-                            mGson.fromJson(response.toString(), JsonOrder.class));
-                    } catch (JsonSyntaxException e) {
-                        LOG.e(e, "Failed to parse response");
-                        errorListener.onErrorResponse(
-                            new VolleyError("Failed to parse response", e));
-                    }
+            response -> {
+                try {
+                    successListener.onResponse(
+                        mGson.fromJson(response.toString(), JsonOrder.class));
+                } catch (JsonSyntaxException e) {
+                    LOG.e(e, "Failed to parse response");
+                    errorListener.onErrorResponse(
+                        new VolleyError("Failed to parse response", e));
                 }
             },
             wrapErrorListener(errorListener));
@@ -332,14 +319,12 @@ public class OpenMrsServer implements Server {
             Request.Method.DELETE,
             "/orders/" + orderUuid,
             null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        successListener.onResponse(null);
-                    } catch (JsonSyntaxException e) {
-                        LOG.e(e, "Failed to parse response");
-                        errorListener.onErrorResponse(new VolleyError("Failed to parse response", e));
-                    }
+            response -> {
+                try {
+                    successListener.onResponse(null);
+                } catch (JsonSyntaxException e) {
+                    LOG.e(e, "Failed to parse response");
+                    errorListener.onErrorResponse(new VolleyError("Failed to parse response", e));
                 }
             },
             wrapErrorListener(errorListener));
@@ -354,20 +339,18 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/patients?id=" + patientId,
             null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        if (results != null && results.length() > 0) {
-                            successListener.onResponse(patientFromJson(results.getJSONObject(0)));
-                        } else {
-                            successListener.onResponse(null);
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
-                        errorListener.onErrorResponse(
-                            new VolleyError("Failed to parse response", e));
+            response -> {
+                try {
+                    JSONArray results = response.getJSONArray("results");
+                    if (results != null && results.length() > 0) {
+                        successListener.onResponse(patientFromJson(results.getJSONObject(0)));
+                    } else {
+                        successListener.onResponse(null);
                     }
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
+                    errorListener.onErrorResponse(
+                        new VolleyError("Failed to parse response", e));
                 }
             },
             wrapErrorListener(errorListener)
@@ -387,19 +370,17 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/users" + query,
             null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    ArrayList<JsonUser> users = new ArrayList<>();
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            users.add(userFromJson(results.getJSONObject(i)));
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
+            response -> {
+                ArrayList<JsonUser> users = new ArrayList<>();
+                try {
+                    JSONArray results = response.getJSONArray("results");
+                    for (int i = 0; i < results.length(); i++) {
+                        users.add(userFromJson(results.getJSONObject(i)));
                     }
-                    successListener.onResponse(users);
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
                 }
+                successListener.onResponse(users);
             },
             wrapErrorListener(errorListener)
         );
@@ -433,11 +414,7 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/locations",
             requestBody,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    successListener.onResponse(parseLocationJson(response));
-                }
-            },
+            response -> successListener.onResponse(parseLocationJson(response)),
             errorListener);
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
@@ -471,11 +448,7 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/locations/" + location.uuid,
             requestBody,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    successListener.onResponse(parseLocationJson(response));
-                }
-            },
+            response -> successListener.onResponse(parseLocationJson(response)),
             wrapErrorListener(errorListener)
         );
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
@@ -502,21 +475,19 @@ public class OpenMrsServer implements Server {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails, "/locations",
             null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    ArrayList<JsonLocation> result = new ArrayList<>();
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            JsonLocation location =
-                                parseLocationJson(results.getJSONObject(i));
-                            result.add(location);
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
+            response -> {
+                ArrayList<JsonLocation> result = new ArrayList<>();
+                try {
+                    JSONArray results = response.getJSONArray("results");
+                    for (int i = 0; i < results.length(); i++) {
+                        JsonLocation location =
+                            parseLocationJson(results.getJSONObject(i));
+                        result.add(location);
                     }
-                    successListener.onResponse(result);
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
                 }
+                successListener.onResponse(result);
             },
             wrapErrorListener(errorListener)
         );
@@ -530,20 +501,18 @@ public class OpenMrsServer implements Server {
             mConnectionDetails,
             "/xforms",
             null,
-            new Response.Listener<JSONObject>() {
-                @Override public void onResponse(JSONObject response) {
-                    ArrayList<JsonForm> forms = new ArrayList<>();
-                    try {
-                        JSONArray results = response.getJSONArray("results");
-                        for (int i = 0; i < results.length(); i++) {
-                            JSONObject result = results.getJSONObject(i);
-                            forms.add(mGson.fromJson(result.toString(), JsonForm.class));
-                        }
-                    } catch (JSONException e) {
-                        LOG.e(e, "Failed to parse response");
+            response -> {
+                ArrayList<JsonForm> forms = new ArrayList<>();
+                try {
+                    JSONArray results = response.getJSONArray("results");
+                    for (int i = 0; i < results.length(); i++) {
+                        JSONObject result = results.getJSONObject(i);
+                        forms.add(mGson.fromJson(result.toString(), JsonForm.class));
                     }
-                    successListener.onResponse(forms);
+                } catch (JSONException e) {
+                    LOG.e(e, "Failed to parse response");
                 }
+                successListener.onResponse(forms);
             },
             wrapErrorListener(errorListener)
         );

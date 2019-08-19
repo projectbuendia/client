@@ -245,7 +245,13 @@ public class FormsProvider extends ContentProvider {
         }
 
         if (mDbHelper != null) {
-        	return mDbHelper;
+            if (new File(mDbHelper.getWritableDatabase().getPath()).exists()) {
+                return mDbHelper;
+            }
+            // If the file has been moved or deleted, we have to close this
+            // database and open a new one.  Otherwise, the invalid database
+            // will be reused indefinitely and all operations will fail.
+            mDbHelper.close();
         }
         mDbHelper = new DatabaseHelper(DATABASE_NAME);
         return mDbHelper;
@@ -384,12 +390,12 @@ public class FormsProvider extends ContentProvider {
             // If we want this insert to always replace, then do a transactional delete followed
             // by an insert. The primary key is _ID, which we can't know in advance.
             try {
-                db.beginTransaction();
-                db.delete(
-                        FORMS_TABLE_NAME, FormsColumns.FORM_FILE_PATH + "=?",
-                        new String[]{filePath});
-                rowId = db.insert(FORMS_TABLE_NAME, null, values);
-                db.setTransactionSuccessful();
+				db.beginTransaction();
+				db.delete(
+					FORMS_TABLE_NAME, FormsColumns.FORM_FILE_PATH + "=?",
+					new String[] {filePath});
+				rowId = db.insert(FORMS_TABLE_NAME, null, values);
+				db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
             }
@@ -553,7 +559,7 @@ public class FormsProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		if (count > 0) getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
 
@@ -712,7 +718,7 @@ public class FormsProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		if (count > 0) getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
 

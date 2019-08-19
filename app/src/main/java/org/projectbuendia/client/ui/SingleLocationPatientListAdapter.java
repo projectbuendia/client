@@ -17,16 +17,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.LocationTree;
 
 /**
  * A {@link PatientListTypedCursorAdapter} that hides its group headings, as the group heading is
  * expected to be reflected in the title bar or by other information on the screen.
  */
 public class SingleLocationPatientListAdapter extends PatientListTypedCursorAdapter {
-    public SingleLocationPatientListAdapter(
-        Context context, LocationTree locationTree) {
-        super(context, locationTree);
+    public SingleLocationPatientListAdapter(Context context) {
+        super(context);
     }
 
     @Override public View getGroupView(

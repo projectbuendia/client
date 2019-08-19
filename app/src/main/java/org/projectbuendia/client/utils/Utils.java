@@ -14,6 +14,7 @@ package org.projectbuendia.client.utils;
 import android.app.Dialog;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -73,8 +74,10 @@ public class Utils {
     public static final int SECOND = 1000;  // in ms
     public static final int MINUTE = 60 * SECOND;  // in ms
     public static final int HOUR = 60 * MINUTE;  // in ms
+    public static final int DAY = 24 * HOUR;  // in ms
 
     private static Map<Integer, String> sHttpMethods = initHttpMethods();
+
     private static Map<Integer, String> initHttpMethods() {
         Map<Integer, String> map = new HashMap<>();
         map.put(Request.Method.DEPRECATED_GET_OR_POST, "DEPRECATED_GET_OR_POST");
@@ -95,6 +98,15 @@ public class Utils {
 
     // ==== Basic types ====
 
+    /**
+     * Java's default .equals() and == are both broken whereas Objects.equals is
+     * usually correct, so let's make its logic available under a short, easy name.
+     */
+    public static boolean eq(Object a, Object b) {
+        // noinspection EqualsReplaceableByObjectsCall (this is deliberately inlined)
+        return (a == b) || (a != null && a.equals(b));
+    }
+
     /** Returns a value if that value is not null, or a specified default value otherwise. */
     public static @Nonnull <T> T orDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value != null ? value : defaultValue;
@@ -106,7 +118,7 @@ public class Utils {
     }
 
     /** The same operation as map.getOrDefault(key), which is only available in API 24+. */
-    public static <K, V> V getOrDefault(Map<K, V> map, Object key, V defaultValue) {
+    public static <K, V> V getOrDefault(Map<K, V> map, K key, V defaultValue) {
         return map.containsKey(key) ? map.get(key) : defaultValue;
     }
 
@@ -157,8 +169,18 @@ public class Utils {
     }
 
     /** Calls toString() on a nullable object, returning an empty string if null. */
-    public static @Nonnull String toStringNonnull(@Nullable Object obj) {
+    public static @Nonnull String toNonnullString(@Nullable Object obj) {
         return obj != null ? obj.toString() : "";
+    }
+
+    /** Calls toString() on a nullable object, returning null if the object is null. */
+    public static @Nullable String toNullableString(@Nullable Object obj) {
+        return obj != null ? obj.toString() : null;
+    }
+
+    /** Calls toString() on a nullable object, returning a default value if the object is null. */
+    public static @Nonnull String toStringOrDefault(@Nullable Object obj, @Nonnull String defaultValue) {
+        return obj != null ? obj.toString() : defaultValue;
     }
 
     /** Formats a string using ASCII encoding. */
@@ -257,9 +279,6 @@ public class Utils {
         DateTimeFormat.mediumDateTime();
     private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
         DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
-    // Note: Use of \L here assumes a string that is already NFC-normalized.
-    private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
-    private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
@@ -406,19 +425,36 @@ public class Utils {
         return millis == null ? null : new DateTime(millis);
     }
 
-    /** Gets a nullable long value from a cursor. */
-    public static Long getLong(Cursor c, String columnName) {
-        return getLong(c, columnName, null);
+    /** Gets a nullable integer value from a cursor. */
+    public static Integer getInt(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : (int) c.getLong(index);
     }
 
-    /** Gets a long integer value from a cursor, returning a default value instead of null. */
-    public static Long getLong(Cursor c, String columnName, @Nullable Long defaultValue) {
+    /** Gets an integer value from a cursor, returning a default value instead of null. */
+    public static int getInt(Cursor c, String columnName, @Nonnull int defaultValue) {
         int index = c.getColumnIndex(columnName);
         // The cast (Long) c.getLong(index) is necessary to work around the fact that
         // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
         // causing an NPE when defaultValue is null.  The correct superset of (Long) and
         // (long) is obviously (Long); the Java specification (15.25) is incorrect.
-        return c.isNull(index) ? defaultValue : (Long) c.getLong(index);
+        return c.isNull(index) ? defaultValue : (int) c.getLong(index);
+    }
+
+    /** Gets a nullable long value from a cursor. */
+    public static Long getLong(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : c.getLong(index);
+    }
+
+    /** Gets a long integer value from a cursor, returning a default value instead of null. */
+    public static long getLong(Cursor c, String columnName, @Nonnull long defaultValue) {
+        int index = c.getColumnIndex(columnName);
+        // The cast (Long) c.getLong(index) is necessary to work around the fact that
+        // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
+        // causing an NPE when defaultValue is null.  The correct superset of (Long) and
+        // (long) is obviously (Long); the Java specification (15.25) is incorrect.
+        return c.isNull(index) ? defaultValue : c.getLong(index);
     }
 
 
@@ -476,6 +512,13 @@ public class Utils {
     }
 
 
+    // ==== Colour ====
+
+    public static int colorWithOpacity(int color, double opacity) {
+        byte alpha = (byte) (255 * opacity);
+        return (color & 0x00_ff_ff_ff) | (alpha * 0x01_00_00_00);
+    }
+
 
     // ==== User interface ====
 
@@ -508,6 +551,8 @@ public class Utils {
 
     // ==== OpenMRS ====
 
+    private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
+
     /** Compresses a UUID optionally to a small integer. */
     public static Object compressUuid(String uuid) {
         Matcher matcher = COMPRESSIBLE_UUID.matcher(uuid);
@@ -526,6 +571,11 @@ public class Utils {
         return (String) id;
     }
 
+    /** Expands a UUID from a small integer. */
+    public static String toUuid(int id) {
+        return expandUuid(id);
+    }
+
 
     // ==== Ordering ====
 
@@ -534,7 +584,7 @@ public class Utils {
      * null sorts before everything; all integers sort before all strings; integers
      * sort according to numeric value; strings sort according to string value.
      */
-    public static Comparator<Object> nullIntStrComparator = new Comparator<Object>() {
+    public static final Comparator<Object> NULL_INT_STR_COMPARATOR = new Comparator<Object>() {
         @Override public int compare(Object a, Object b) {
             BigInteger intA = toBigInteger(a);
             BigInteger intB = toBigInteger(b);
@@ -553,10 +603,10 @@ public class Utils {
      * Compares two lists, each of whose elements is a null, Integer, Long,
      * BigInteger, or String, lexicographically by element, just like Python.
      */
-    public static Comparator<List<Object>> nullIntStrListComparator = new Comparator<List<Object>>() {
+    public static final Comparator<List<Object>> NULL_INT_STR_LIST_COMPARATOR = new Comparator<List<Object>>() {
         @Override public int compare(List<Object> a, List<Object> b) {
             for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-                int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+                int result = NULL_INT_STR_COMPARATOR.compare(a.get(i), b.get(i));
                 if (result != 0) {
                     return result;
                 }
@@ -565,6 +615,9 @@ public class Utils {
         }
     };
 
+    // Note: Use of \L here assumes a string that is already NFC-normalized.
+    private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
+
     /**
      * Compares two strings in a manner that sorts alphabetic parts in alphabetic
      * order and numeric parts in numeric order, while guaranteeing that:
@@ -572,15 +625,15 @@ public class Utils {
      * - compare(s, s + t) < 0 for any strings s and t.
      * - compare(s + x, s + y) == Integer.compare(x, y) for all integers x, y
      * and strings s that do not end in a digit.
-     * - compare(s + t, s + u) == compare(s, t) for all strings s and strings
+     * - compare(s + t, s + u) == compare(t, u) for all strings s and strings
      * t, u that consist entirely of Unicode letters.
      * For example, the strings ["b1", "a11a", "a11", "a2", "a2b", "a2a", "a1"]
      * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
      */
-    public static Comparator<String> alphanumericComparator = new Comparator<String>() {
+    public static final Comparator<String> ALPHANUMERIC_COMPARATOR = new Comparator<String>() {
         @Override public int compare(String a, String b) {
-            String aNormalized = Normalizer.normalize(Utils.toNonnull(a), Normalizer.Form.NFC);
-            String bNormalized = Normalizer.normalize(Utils.toNonnull(b), Normalizer.Form.NFC);
+            String aNormalized = Normalizer.normalize(a == null ? "" : a, Normalizer.Form.NFC);
+            String bNormalized = Normalizer.normalize(b == null ? "" : b, Normalizer.Form.NFC);
             List<Object> aParts = getParts(aNormalized);
             List<Object> bParts = getParts(bNormalized);
             // Add a separator to ensure that the tiebreakers added below are never
@@ -595,7 +648,7 @@ public class Utils {
             // using the non-normalized string as a further tiebreaker.
             aParts.add(a);
             bParts.add(b);
-            return nullIntStrListComparator.compare(aParts, bParts);
+            return NULL_INT_STR_LIST_COMPARATOR.compare(aParts, bParts);
         }
 
         /**
@@ -617,6 +670,30 @@ public class Utils {
             return parts;
         }
     };
+
+
+    // ==== Concurrency ====
+
+    public static void runInBackground(Runnable runnable) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override protected Void doInBackground(Void... voids) {
+                runnable.run();
+                return null;
+            }
+        }.execute();
+    }
+
+    public static <T> void runInBackground(Provider<T> provider, Receiver<T> receiver) {
+        new AsyncTask<Void, Void, T>() {
+            @Override protected T doInBackground(Void... voids) {
+                return provider.provide();
+            }
+
+            @Override protected void onPostExecute(T result) {
+                if (receiver != null) receiver.receive(result);
+            }
+        }.execute();
+    }
 
 
     // ==== Logging ====
@@ -665,9 +742,21 @@ public class Utils {
         return sw.toString();
     }
 
-    /** Converts a string to a C identifier by turning all non-identifier characters into underscores. */
-    public static String removeUnsafeChars(String input) {
-        return input.replaceAll("[\\W]", "_");
+    /** Converts a string to a CSS-safe identifier by replacing characters into underscores. */
+    // We use this to give predictable class names to HTML rows so that tests
+    // can verify the values in the patient chart.  See PatientChartActivityTest.
+    public static String toCssIdentifier(String input) {
+        return input.trim().replaceAll("[\\W]", "_");
+    }
+
+    /** Returns an unambiguous string representation of a string, prefixed with its length. */
+    public static String reprWithLen(String str) {
+        return format("(length %d) ", str.length()) + repr(str);
+    }
+
+    /** Returns an unambiguous string representation of a string, suitable for logging. */
+    public static String repr(String str) {
+        return repr(str, 100);
     }
 
     /** Returns an unambiguous string representation of a string, suitable for logging. */
@@ -696,7 +785,7 @@ public class Utils {
 
     /** Uses backslash sequences to form a printable representation of a string. */
     private static String escape(String str, int maxLength) {
-        StringBuffer buffer = new StringBuffer(format("(length %d) \"", str.length()));
+        StringBuilder buffer = new StringBuilder("\"");
         for (int i = 0; i < str.length() && i < maxLength; i++) {
             char c = str.charAt(i);
             switch (str.charAt(i)) {

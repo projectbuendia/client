@@ -19,13 +19,12 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
+import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.events.data.OrderSaveFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonOrder;
-import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
@@ -45,7 +44,6 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
     private static final Logger LOG = Logger.create();
 
     private final TaskFactory mTaskFactory;
-    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final Order mOrder;
@@ -56,13 +54,11 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
     /** Creates a new {@link SaveOrderTask}. */
     public SaveOrderTask(
         TaskFactory taskFactory,
-        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         Order order,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mOrder = order;
@@ -70,14 +66,14 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
     }
 
     @SuppressWarnings("unused") // called by reflection from EventBus
-    public void onEventMainThread(ItemFetchedEvent<Order> event) {
+    public void onEventMainThread(ItemLoadedEvent<Order> event) {
         mBus.post(mOrder.uuid != null ? new ItemUpdatedEvent<>(mOrder.uuid, event.item)
             : new ItemCreatedEvent<>(event.item));
         mBus.unregister(this);
     }
 
     @SuppressWarnings("unused") // called by reflection from EventBus
-    public void onEventMainThread(ItemFetchFailedEvent event) {
+    public void onEventMainThread(ItemLoadFailedEvent event) {
         mBus.post(new OrderSaveFailedEvent(
             OrderSaveFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
         mBus.unregister(this);
@@ -114,8 +110,8 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
         // We use the fetch event to trigger UI updates, both for initial load and for this update.
         mBus.register(this);
-        mTaskFactory.newFetchItemTask(
-            Contracts.Orders.URI, null, new UuidFilter(), mUuid,
-            mLoaderSet.orderLoader, mBus).execute();
+        mTaskFactory.newLoadItemTask(
+            Contracts.Orders.URI, null, new UuidFilter(), mUuid, Order.LOADER, mBus
+        ).execute();
     }
 }

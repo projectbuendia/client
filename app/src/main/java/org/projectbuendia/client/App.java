@@ -22,9 +22,12 @@ import com.joanzapata.iconify.fonts.FontAwesomeModule;
 
 import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
+import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.user.UserManager;
 
 import javax.inject.Inject;
@@ -34,36 +37,66 @@ import dagger.ObjectGraph;
 /** An {@link Application} the represents the Android Client. */
 public class App extends Application {
 
-    /** The current instance of the application. */
+    // Global instances of all our singletons.
     private static App sInstance;
+    private static AppModel sModel;
+    private static AppSettings sSettings;
     private static ContentProviderClient sContentProviderClient;
+    private static CrudEventBus sCrudEventBus;
+    private static HealthMonitor sHealthMonitor;
+    private static SyncManager sSyncManager;
     private static UserManager sUserManager;
-    private static Server sServer;
     private static OpenMrsConnectionDetails sConnectionDetails;
+    private static Server sServer;
+
     private ObjectGraph mObjectGraph;
+    @Inject AppModel mModel;
+    @Inject AppSettings mSettings;
+    @Inject CrudEventBus mCrudEventBus;
+    @Inject HealthMonitor mHealthMonitor;
+    @Inject SyncManager mSyncManager;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject Server mServer;
-    @Inject HealthMonitor mHealthMonitor;
 
-    public static synchronized App getInstance() {
+    public static App getInstance() {
         return sInstance;
+    }
+
+    public static synchronized AppModel getModel() {
+        return sModel;
+    }
+
+    public static synchronized AppSettings getSettings() {
+        return sSettings;
     }
 
     public static synchronized ContentProviderClient getContentProviderClient() {
         return sContentProviderClient;
     }
 
+    public static synchronized CrudEventBus getCrudEventBus() {
+        return sCrudEventBus;
+    }
+
+    public static synchronized HealthMonitor getHealthMonitor() {
+        return sHealthMonitor;
+    }
+
+    public static synchronized SyncManager getSyncManager() {
+        return sSyncManager;
+    }
+
     public static synchronized UserManager getUserManager() {
         return sUserManager;
     }
 
-    public static synchronized Server getServer() {
-        return sServer;
-    }
-
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
         return sConnectionDetails;
+    }
+
+    public static synchronized Server getServer() {
+        return sServer;
     }
 
     @Override public void onCreate() {
@@ -80,6 +113,7 @@ public class App extends Application {
         // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
         Stetho.initializeWithDefaults(this);
 
+        sInstance = this;
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);
         mObjectGraph.injectStatics();
@@ -88,14 +122,17 @@ public class App extends Application {
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         synchronized (App.class) {
-            sInstance = this;
+            sModel = mModel;
+            sSettings = mSettings;
             sContentProviderClient = getContentResolver().acquireContentProviderClient(Contracts.Users.URI);
+            sCrudEventBus = mCrudEventBus;
+            sHealthMonitor = mHealthMonitor;
+            sSyncManager = mSyncManager;
             sUserManager = mUserManager; // TODO: Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO: Remove when Daggered.
             sServer = mServer; // TODO: Remove when Daggered.
+            mHealthMonitor.start();
         }
-
-        mHealthMonitor.start();
     }
 
     public <T> T get(Class<T> type) {
@@ -104,9 +141,5 @@ public class App extends Application {
 
     public void inject(Object obj) {
         mObjectGraph.inject(obj);
-    }
-
-    public HealthMonitor getHealthMonitor() {
-        return mHealthMonitor;
     }
 }

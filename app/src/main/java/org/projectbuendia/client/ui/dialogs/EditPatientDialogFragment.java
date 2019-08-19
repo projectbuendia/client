@@ -13,7 +13,6 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -31,11 +30,13 @@ import com.google.common.base.Optional;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.regex.Matcher;
@@ -49,6 +50,7 @@ import butterknife.InjectView;
 /** A {@link DialogFragment} for adding or editing a patient. */
 public class EditPatientDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
+    @Inject AppSettings mSettings;
     @Inject CrudEventBus mCrudEventBus;
 
     @InjectView(R.id.patient_id_prefix) EditText mIdPrefix;
@@ -76,7 +78,7 @@ public class EditPatientDialogFragment extends DialogFragment {
             args.putString("givenName", patient.givenName);
             args.putString("familyName", patient.familyName);
             args.putString("birthdate", Utils.formatDate(patient.birthdate));
-            args.putInt("gender", patient.gender);
+            args.putString("sex", patient.sex.code);
         }
         fragment.setArguments(args);
         return fragment;
@@ -110,11 +112,11 @@ public class EditPatientDialogFragment extends DialogFragment {
             mAgeYears.setText(String.valueOf(age.getYears()));
             mAgeMonths.setText(String.valueOf(age.getMonths()));
         }
-        switch (args.getInt("gender", Patient.GENDER_UNKNOWN)) {
-            case Patient.GENDER_FEMALE:
+        switch (Sex.forCode(args.getString("sex", Sex.UNKNOWN.code))) {
+            case FEMALE:
                 mSexFemale.setChecked(true);
                 break;
-            case Patient.GENDER_MALE:
+            case MALE:
                 mSexMale.setChecked(true);
                 break;
         }
@@ -122,7 +124,7 @@ public class EditPatientDialogFragment extends DialogFragment {
 
     public void onSubmit() {
         String idPrefix = mIdPrefix.getText().toString().trim();
-        String id = mId.getText().toString().trim();
+        String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
         String familyName = Utils.toNonemptyOrNull(mFamilyName.getText().toString().trim());
         String ageYears = mAgeYears.getText().toString().trim();
@@ -134,20 +136,26 @@ public class EditPatientDialogFragment extends DialogFragment {
             birthdate = LocalDate.now().minusYears(Integer.parseInt("0" + ageYears))
                 .minusMonths(Integer.parseInt("0" + ageMonths));
         }
+
+        Sex sex = null;
         // TODO: This should start out as "Sex sex = null" and then get set to female, male,
         // other, or unknown if any button is selected (there should be four buttons) -- so
         // that we can distinguish "no change to sex" (null) from "change sex to unknown" ("U").
-        int sex = Patient.GENDER_UNKNOWN;
         switch (mSex.getCheckedRadioButtonId()) {
             case R.id.patient_sex_female:
-                sex = Patient.GENDER_FEMALE;
+                sex = Sex.FEMALE;
                 break;
             case R.id.patient_sex_male:
-                sex = Patient.GENDER_MALE;
+                sex = Sex.MALE;
                 break;
         }
 
-        id = idPrefix.isEmpty() ? id : idPrefix + "/" + id;
+        if (!idPrefix.isEmpty()) {
+            id = idPrefix + "/" + id;
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            pref.edit().putString("last_id_prefix", idPrefix).commit();
+        }
+
         Utils.logUserAction("patient_submitted",
             "id", id,
             "given_name", givenName,
@@ -157,22 +165,18 @@ public class EditPatientDialogFragment extends DialogFragment {
             "sex", "" + sex);
 
         PatientDelta delta = new PatientDelta();
-        delta.id = Optional.of(id);
+        delta.id = Optional.fromNullable(id);
         delta.givenName = Optional.fromNullable(givenName);
         delta.familyName = Optional.fromNullable(familyName);
         delta.birthdate = Optional.fromNullable(birthdate);
-        delta.gender = Optional.of(sex);
+        delta.sex = Optional.fromNullable(sex);
         delta.admissionDate = Optional.of(admissionDate);
-
-        if (!idPrefix.isEmpty()) {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            pref.edit().putString("last_id_prefix", idPrefix).commit();
-        }
 
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
-            if (id != null || givenName != null || familyName != null || birthdate != null
-                || sex != Patient.GENDER_UNKNOWN) {
+            if (id != null || givenName != null || familyName != null ||
+                birthdate != null || sex != null) {
+                delta.assignedLocationUuid = Optional.of(mModel.getDefaultLocation().uuid);
                 mModel.addPatient(mCrudEventBus, delta);
             }
         } else {
@@ -190,14 +194,15 @@ public class EditPatientDialogFragment extends DialogFragment {
         // Set focus.
         EditText[] fields = {mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths};
         for (EditText field : fields) {
-            if (field.getText().toString().isEmpty()) {
+            if (field.isShown() && field.getText().toString().isEmpty()) {
                 field.requestFocus();
-                break;
+                return;
             }
         }
 
-        // Default to focusing on the given name field.
+        // If all fields are populated, default to the end of the given name field.
         mGivenName.requestFocus();
+        mGivenName.setSelection(mGivenName.getText().length());
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -211,11 +216,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(title)
-            .setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    onSubmit();
-                }
-            })
+            .setPositiveButton(getResources().getString(R.string.ok), (dialogInterface, i) -> onSubmit())
             .setNegativeButton(getResources().getString(R.string.cancel), null)
             .setView(fragment)
             .create();
