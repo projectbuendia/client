@@ -139,7 +139,7 @@ public final class PatientChartControllerTest {
         // WHEN that patient's details are loaded
         mFakeCrudEventBus.post(new ItemLoadedEvent<>(PATIENT));
         // THEN the controller updates the UI
-        verify(mMockUi).updatePatientDetailsUi(PATIENT);
+        verify(mMockUi).updatePatientDetailsUi(PATIENT, false);
     }
 
     /** Tests that selecting a new general condition results in adding a new encounter. */

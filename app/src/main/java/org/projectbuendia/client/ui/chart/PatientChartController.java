@@ -90,6 +90,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
+    private boolean mPregnant;
 
     private final EventBusRegistrationInterface mDefaultEventBus;
     private final CrudEventBus mCrudEventBus;
@@ -151,7 +152,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             LocalDate firstSymptomsDate);
 
         /** Updates the UI with the patient's personal details (name, sex, etc.) */
-        void updatePatientDetailsUi(Patient patient);
+        void updatePatientDetailsUi(Patient patient, boolean pregnant);
 
         /** Shows a progress dialog with an indeterminate spinner in it. */
         void showWaitDialog(int titleId);
@@ -488,9 +489,13 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
         LocalDate firstSymptomsDate = getObservedDate(
             latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
+        mPregnant = ConceptUuids.isYes(
+            latestObservations.get(ConceptUuids.PREGNANCY_UUID));
+
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
         mUi.updateEbolaPcrTestResultUi(latestObservations);
         mUi.updatePregnancyAndIvStatusUi(latestObservations);
+        mUi.updatePatientDetailsUi(mPatient, mPregnant);
         if (!mCharts.isEmpty()) {
             mUi.updateTilesAndGrid(
                 mCharts.get(mChartIndex),
@@ -574,7 +579,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
                 Patient patient = (Patient) event.item;
                 if (patient.uuid.equals(mPatientUuid)) {
                     mPatient = patient;
-                    mUi.updatePatientDetailsUi(mPatient);
+                    mUi.updatePatientDetailsUi(mPatient, mPregnant);
                     updatePatientLocationUi();
                 }
             } else if (event.item instanceof Encounter) {
