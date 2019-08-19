@@ -497,7 +497,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
         }
 
-        @Override public void updatePatientDetailsUi(Patient patient) {
+        @Override public void updatePatientDetailsUi(Patient patient, boolean pregnant) {
             // TODO: Localize everything below.
             String id = Utils.orDefault(patient.id, EN_DASH);
             String fullName = Utils.orDefault(patient.givenName, EN_DASH) + " " +
@@ -506,6 +506,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             List<String> labels = new ArrayList<>();
             if (patient.sex != Sex.UNKNOWN) {
                 labels.add(patient.sex.code);
+            }
+            if (pregnant) {
+                labels.add(getString(R.string.pregnant).toLowerCase());
             }
             labels.add(patient.birthdate == null ? "age unknown"
                 : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n

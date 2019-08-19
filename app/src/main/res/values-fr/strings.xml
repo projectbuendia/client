@@ -171,7 +171,7 @@
   <string name="latest_pcr_label_with_date">Essai d\'Ebola test (%s)</string>
   <string name="action_add_test_result">Ajouter le résultat du test</string>
   <string name="pregnant">Enceinte</string>
-  <string name="iv_fitted">cathéter intraveineux en place</string>
+  <string name="iv_fitted">Cathéter intraveineux en place</string>
   <string name="cannot_eat">Ne peut pas manger</string>
   <string name="oxygen">Oxygène</string>
   <string name="status_short_desc_unknown">-</string>
