@@ -256,7 +256,7 @@ public class OrderDialogFragment extends DialogFragment {
     }
 
     private void setError(EditText field, int resourceId, Object... args) {
-        field.setError(getResources().getString(resourceId, args));
+        field.setError(getString(resourceId, args));
         field.invalidate();
         field.requestFocus();
     }
@@ -346,7 +346,7 @@ public class OrderDialogFragment extends DialogFragment {
             days == 0 ? R.string.order_give_for_days :
                 days == 1 ? R.string.order_give_for_day :
                     R.string.order_give_for_days);
-        mDurationLabel.setText(getResources().getString(
+        mDurationLabel.setText(getString(
             days == 0 ? (
                 frequency == 0 ?
                 R.string.order_duration_administer_once :

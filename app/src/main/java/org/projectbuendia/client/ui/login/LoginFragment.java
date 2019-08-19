@@ -45,7 +45,7 @@ public class LoginFragment extends ProgressFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
 
         setContentLayout(R.layout.login_fragment);
 

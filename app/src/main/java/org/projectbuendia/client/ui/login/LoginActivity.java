@@ -47,7 +47,7 @@ public class LoginActivity extends BaseActivity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
 
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
@@ -129,7 +129,7 @@ public class LoginActivity extends BaseActivity {
         }
 
         @Override public void showErrorToast(int stringResourceId) {
-            BigToast.show(LoginActivity.this, getString(stringResourceId));
+            BigToast.show(stringResourceId);
         }
 
         @Override public void showSyncFailedDialog(boolean show) {

@@ -37,8 +37,8 @@ public class EditAndClearDataPreference extends EditTextPreference {
         super.onDialogClosed(positive);
         if (positive) {
             dialog = ProgressDialog.show(getContext(), "Clearing data", "Clearing all local data...");
-            App.getInstance().getSyncManager().setNewSyncsSuppressed(true);
-            App.getInstance().getSyncManager().stopSyncing(this::clearAllData);
+            App.getSyncManager().setNewSyncsSuppressed(true);
+            App.getSyncManager().stopSyncing(this::clearAllData);
         }
     }
 
@@ -46,7 +46,7 @@ public class EditAndClearDataPreference extends EditTextPreference {
         clearDatabase();
         clearMemoryState();
         clearOdkState();
-        App.getInstance().getSyncManager().setNewSyncsSuppressed(false);
+        App.getSyncManager().setNewSyncsSuppressed(false);
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
@@ -55,7 +55,7 @@ public class EditAndClearDataPreference extends EditTextPreference {
 
     private void clearDatabase() {
         try {
-            Database db = new Database(App.getInstance().getApplicationContext());
+            Database db = new Database(App.getContext());
             db.clear();
             db.close();
         } catch (Throwable t) {
@@ -75,7 +75,7 @@ public class EditAndClearDataPreference extends EditTextPreference {
 
     private void clearOdkState() {
         try {
-            File filesDir = App.getInstance().getApplicationContext().getFilesDir();
+            File filesDir = App.getContext().getFilesDir();
             File odkDir = new File(filesDir, "odk");
             File odkTempDir = new File(filesDir, "odk-deleted." + System.currentTimeMillis());
             odkDir.renameTo(odkTempDir);

@@ -27,12 +27,10 @@ import java.util.List;
  */
 public final class SimpleSelectionFilterGroup<T extends Base>
     extends SimpleSelectionFilter<T> {
-    private static final String DEFAULT_FILTER_NAME =
-        App.getInstance().getString(R.string.filter_group_default_name);
 
     private final FilterType mFilterType;
     private final ImmutableList<SimpleSelectionFilter> mFilters;
-    private String mName = DEFAULT_FILTER_NAME;
+    private String mName = App.str(R.string.filter_group_default_name);
 
     /**
      * Specifies whether filters in this group will be AND'd or OR'd in the

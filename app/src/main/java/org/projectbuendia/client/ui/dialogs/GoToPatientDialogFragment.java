@@ -65,7 +65,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
         mInflater = LayoutInflater.from(getActivity());
         mBus = mCrudEventBusProvider.get();
         mBus.register(this);
@@ -107,8 +107,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
             if (id.equals(patient.id)) {  // server returned the patient we were looking for
                 mPatientUuid = patient.uuid;
                 mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                    " (" + patient.sex + ", " + Utils.birthdateToAge(
-                    patient.birthdate, App.getInstance().getResources()) + ")");
+                    " (" + patient.sex + ", " + Utils.birthdateToAge(patient.birthdate) + ")");
             }
         }
     }
@@ -117,7 +116,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
         String id = mPatientId.getText().toString().trim();
         if (id.equals(event.id)) {  // server returned empty results for the ID we sought
             mPatientUuid = null;
-            mPatientSearchResult.setText(getResources().getString(R.string.go_to_patient_not_found));
+            mPatientSearchResult.setText(getString(R.string.go_to_patient_not_found));
         }
     }
 
@@ -142,16 +141,16 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
                         LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
                         String age = birthdate != null ?
-                            Utils.birthdateToAge(birthdate, getResources()) : "age unknown";
+                            Utils.birthdateToAge(birthdate) : "age unknown";
                         String sex = Utils.getString(cursor, Patients.SEX, "");
                         mPatientUuid = uuid;
                         mPatientSearchResult.setText(givenName + " " + familyName +
                             " (" + sex + ", " + age + ")");
                     } else {
-                        String message = getResources().getString(R.string.go_to_patient_no_data);
+                        String message = getString(R.string.go_to_patient_no_data);
                         DateTime lastSyncTime = mAppModel.getLastFullSyncTime();
                         if (lastSyncTime != null) {
-                            message = getResources().getString(
+                            message = getString(
                                 R.string.go_to_patient_not_found_as_of_time,
                                 new RelativeDateTimeFormatter().format(lastSyncTime));
                         }

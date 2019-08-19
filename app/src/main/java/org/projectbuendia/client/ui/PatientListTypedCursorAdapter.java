@@ -69,7 +69,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         mContext = context;
         mPatientsByLocation = new HashMap<>();
         mChartDataHelper = new ChartDataHelper(
-            App.getInstance().getSettings(), context.getContentResolver());
+            App.getSettings(), context.getContentResolver());
     }
 
     @Override public int getGroupCount() {
@@ -153,9 +153,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         holder.mId.setTextColor(status.getForegroundColor());
         holder.mId.setBackgroundColor(status.getBackgroundColor());
 
-        holder.mAge.setText(
-            patient.birthdate == null ? "" : Utils.birthdateToAge(
-                patient.birthdate, mContext.getResources()));
+        holder.mAge.setText(patient.birthdate == null ? ""
+            : Utils.birthdateToAge(patient.birthdate));
 
         boolean isChild = Utils.isChild(patient.birthdate);
 
@@ -252,7 +251,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
-            String localeTag = App.getInstance().getSettings().getLocaleTag();
+            String localeTag = App.getSettings().getLocaleTag();
             mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.PREGNANCY_UUID, localeTag);
             mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID, localeTag);
             return null;

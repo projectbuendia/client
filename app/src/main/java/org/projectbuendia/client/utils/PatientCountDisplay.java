@@ -30,7 +30,7 @@ public class PatientCountDisplay {
             return prefix;
         }
 
-        return context.getResources().getString(
+        return context.getString(
             R.string.heading_with_patient_count, prefix, getPatientCountSubtitle(context, patientCount));
     }
 
@@ -40,12 +40,12 @@ public class PatientCountDisplay {
 
     public static String getPatientCountSubtitle(
         Context context, long patientCount, boolean usePresent) {
-        int resource = resourceForPatientCount(patientCount, usePresent);
-        return context.getResources().getString(resource, patientCount);
+        int id = getPatientCountMessageId(patientCount, usePresent);
+        return context.getString(id, patientCount);
     }
 
     // TODO/i18n: Switch to built in support for plurals in Android.
-    private static int resourceForPatientCount(long patientCount, boolean usePresentResource) {
+    private static int getPatientCountMessageId(long patientCount, boolean usePresentResource) {
         int resource;
         if (patientCount < 1) {
             if (usePresentResource) {

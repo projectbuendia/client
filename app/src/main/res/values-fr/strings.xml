@@ -64,6 +64,7 @@
   <string name="n_present_patients">%d patients présents</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
 
+  <string name="age_unknown">Âge inconnu</string>
   <string name="abbrev_n_months">%d mo</string>
   <string name="abbrev_n_years">%d a</string>
   <string name="abbrev_n_years_n_months">%1$d a %2$d mo</string>

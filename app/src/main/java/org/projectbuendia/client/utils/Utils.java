@@ -12,7 +12,6 @@
 package org.projectbuendia.client.utils;
 
 import android.app.Dialog;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -374,11 +373,11 @@ public class Utils {
     }
 
     /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate, Resources resources) {
+    public static String birthdateToAge(LocalDate birthdate) {
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
-        return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
-            resources.getString(R.string.abbrev_n_months, months + years * 12);
+        return years >= 5 ? App.str(R.string.abbrev_n_years, years) :
+            App.str(R.string.abbrev_n_months, months + years * 12);
     }
 
 
@@ -707,7 +706,7 @@ public class Utils {
      *               arbitrary data to record with the event.
      */
     public static void logUserAction(String action, String... pairs) {
-        Server server = App.getInstance().getServer();
+        Server server = App.getServer();
         if (server != null) {
             List<String> allPairs = Lists.newArrayList("action", action);
             allPairs.addAll(Arrays.asList(pairs));
@@ -724,7 +723,7 @@ public class Utils {
      *              arbitrary data to record with the event.
      */
     public static void logEvent(String event, String... pairs) {
-        Server server = App.getInstance().getServer();
+        Server server = App.getServer();
         if (server != null) {
             List<String> allPairs = Lists.newArrayList("event", event);
             allPairs.addAll(Arrays.asList(pairs));

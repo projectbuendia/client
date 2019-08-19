@@ -178,7 +178,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         ButterKnife.inject(this);
-        App.getInstance().inject(this);
+        App.inject(this);
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
@@ -340,7 +340,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private String getFormattedPcrString(double pcrValue) {
         return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
-            getResources().getString(R.string.pcr_negative) :
+            getString(R.string.pcr_negative) :
             Utils.format("%1$.1f", pcrValue);
     }
 
@@ -375,10 +375,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // TODO: Localize strings in this function.
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
             mAdmissionDaysView.setValue(
-                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                day >= 1 ? getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mSymptomOnsetDaysView.setValue(
-                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                day >= 1 ? getString(R.string.day_n, day) : "–");
             if (admissionDate != null) {
                 mAdmissionDateDialog.updateDate(
                     admissionDate.getYear(),
@@ -444,8 +444,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = pcrObsTime.toLocalDate();
                     String dateText = new RelativeDateTimeFormatter().format(obsDay, today);
-                    mPcr.setName(getResources().getString(
-                        R.string.latest_pcr_label_with_date, dateText));
+                    mPcr.setName(getString(R.string.latest_pcr_label_with_date, dateText));
                 }
             }
         }
@@ -510,8 +509,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (pregnant) {
                 labels.add(getString(R.string.pregnant).toLowerCase());
             }
-            labels.add(patient.birthdate == null ? "age unknown"
-                : Utils.birthdateToAge(patient.birthdate, getResources())); // TODO/i18n
+            labels.add(patient.birthdate == null ? App.str(R.string.age_unknown)
+                : Utils.birthdateToAge(patient.birthdate));
             String sexAge = Joiner.on(", ").join(labels);
 
             ActionBar actionBar = getActionBar();
@@ -536,11 +535,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override public void showError(int errorMessageResource, Object... args) {
-            BigToast.show(PatientChartActivity.this, getString(errorMessageResource, args));
+            BigToast.show(getString(errorMessageResource, args));
         }
 
         @Override public void showError(int errorMessageResource) {
-            BigToast.show(PatientChartActivity.this, errorMessageResource);
+            BigToast.show(errorMessageResource);
         }
 
         @Override public synchronized void fetchAndShowXform(
@@ -603,7 +602,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     messageId = R.string.patient_location_error_unknown;
                     break;
             }
-            BigToast.show(PatientChartActivity.this, messageId);
+            BigToast.show(messageId);
         }
     }
 }

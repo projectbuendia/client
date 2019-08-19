@@ -122,7 +122,7 @@ public final class AssignGeneralConditionDialog
             default:
                 messageId = R.string.encounter_add_failed_unknown_reason;
         }
-        BigToast.show(mContext, messageId, exceptionMessage);
+        BigToast.show(messageId, exceptionMessage);
     }
 
     @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

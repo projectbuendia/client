@@ -88,7 +88,7 @@ public class EditPatientDialogFragment extends DialogFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
         mInflater = LayoutInflater.from(getActivity());
     }
 
@@ -189,11 +189,11 @@ public class EditPatientDialogFragment extends DialogFragment {
         dialog.dismiss();
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
-            BigToast.show(getActivity(), R.string.adding_new_patient_please_wait);
+            BigToast.show(R.string.adding_new_patient_please_wait);
             delta.assignedLocationUuid = Optional.of(mModel.getDefaultLocation().uuid);
             mModel.addPatient(mCrudEventBus, delta);
         } else {
-            BigToast.show(getActivity(), R.string.updating_patient_please_wait);
+            BigToast.show(R.string.updating_patient_please_wait);
             mModel.updatePatient(mCrudEventBus, args.getString("uuid"), delta);
         }
         // TODO: While the network request is in progress, show a spinner and/or keep the
@@ -202,7 +202,7 @@ public class EditPatientDialogFragment extends DialogFragment {
     }
 
     private void setError(EditText field, int resourceId, Object... args) {
-        String message = getResources().getString(resourceId, args);
+        String message = getString(resourceId, args);
         field.setError(message);
         field.invalidate();
         field.requestFocus();
@@ -237,8 +237,8 @@ public class EditPatientDialogFragment extends DialogFragment {
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(title)
-            .setPositiveButton(getResources().getString(R.string.ok), null)
-            .setNegativeButton(getResources().getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.ok), null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .setView(fragment)
             .create();
 

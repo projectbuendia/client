@@ -119,7 +119,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         OpenMrsXformsConnection openMrsXformsConnection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
         openMrsXformsConnection.getXform(uuid, response -> {
-            if (App.getInstance().getSyncManager().getNewSyncsSuppressed()) {
+            if (App.getSyncManager().getNewSyncsSuppressed()) {
                 LOG.w("Skipping form save: New syncs are currently suppressed.");
                 return;
             }

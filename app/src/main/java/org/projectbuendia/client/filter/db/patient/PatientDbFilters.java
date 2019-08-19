@@ -52,7 +52,7 @@ public final class PatientDbFilters {
     public static List<SimpleSelectionFilter<?>> getOtherFilters() {
         return ImmutableList.of(
             new ConceptFilter(
-                App.getInstance().getString(R.string.pregnant),
+                App.str(R.string.pregnant),
                 ConceptUuids.PREGNANCY_UUID, ConceptUuids.YES_UUID),
             new AgeFilter(5),
             new AgeFilter(2)

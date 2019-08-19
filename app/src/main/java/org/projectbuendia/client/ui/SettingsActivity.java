@@ -110,7 +110,7 @@ public class SettingsActivity extends PreferenceActivity {
                     }
                     break;
                 case "periodic_sync_disabled":
-                    SyncManager syncManager = App.getInstance().getSyncManager();
+                    SyncManager syncManager = App.getSyncManager();
                     syncManager.applyPeriodicSyncSettings();
                     if (syncManager.isSyncRunningOrPending()) {
                         sSyncPendingDialog = ProgressDialog.show(
@@ -237,7 +237,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
         setupActionBar();
     }
 

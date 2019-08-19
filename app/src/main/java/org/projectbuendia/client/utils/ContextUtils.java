@@ -68,7 +68,7 @@ public class ContextUtils extends ContextWrapper {
 
     /** Strings are always available in the app-wide resources. */
     public String str(int id) {
-        return App.getInstance().getApplicationContext().getResources().getString(id);
+        return App.str(id);
     }
 
     /** getColor() doesn't exist for API < 23, but it's final, so this can't be named getColor(). */

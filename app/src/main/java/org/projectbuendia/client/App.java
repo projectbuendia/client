@@ -12,7 +12,8 @@
 package org.projectbuendia.client;
 
 import android.app.Application;
-import android.content.ContentProviderClient;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.preference.PreferenceManager;
 
 import com.android.volley.VolleyLog;
@@ -26,7 +27,6 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.user.UserManager;
 
@@ -41,7 +41,6 @@ public class App extends Application {
     private static App sInstance;
     private static AppModel sModel;
     private static AppSettings sSettings;
-    private static ContentProviderClient sContentProviderClient;
     private static CrudEventBus sCrudEventBus;
     private static HealthMonitor sHealthMonitor;
     private static SyncManager sSyncManager;
@@ -63,16 +62,28 @@ public class App extends Application {
         return sInstance;
     }
 
+    public static Context getContext() {
+        return sInstance.getApplicationContext();
+    }
+
+    public static String str(int id, Object... args) {
+        return sInstance.getString(id, args);
+    }
+
+    public static void inject(Object obj) {
+        sInstance.mObjectGraph.inject(obj);
+    }
+
+    public static synchronized ContentResolver getResolver() {
+        return sInstance.getContentResolver();
+    }
+
     public static synchronized AppModel getModel() {
         return sModel;
     }
 
     public static synchronized AppSettings getSettings() {
         return sSettings;
-    }
-
-    public static synchronized ContentProviderClient getContentProviderClient() {
-        return sContentProviderClient;
     }
 
     public static synchronized CrudEventBus getCrudEventBus() {
@@ -100,6 +111,7 @@ public class App extends Application {
     }
 
     @Override public void onCreate() {
+        sInstance = this;
         Collect.onCreate(this);
         super.onCreate();
 
@@ -113,7 +125,6 @@ public class App extends Application {
         // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
         Stetho.initializeWithDefaults(this);
 
-        sInstance = this;
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);
         mObjectGraph.injectStatics();
@@ -124,7 +135,6 @@ public class App extends Application {
         synchronized (App.class) {
             sModel = mModel;
             sSettings = mSettings;
-            sContentProviderClient = getContentResolver().acquireContentProviderClient(Contracts.Users.URI);
             sCrudEventBus = mCrudEventBus;
             sHealthMonitor = mHealthMonitor;
             sSyncManager = mSyncManager;
@@ -133,13 +143,5 @@ public class App extends Application {
             sServer = mServer; // TODO: Remove when Daggered.
             mHealthMonitor.start();
         }
-    }
-
-    public <T> T get(Class<T> type) {
-        return mObjectGraph.get(type);
-    }
-
-    public void inject(Object obj) {
-        mObjectGraph.inject(obj);
     }
 }

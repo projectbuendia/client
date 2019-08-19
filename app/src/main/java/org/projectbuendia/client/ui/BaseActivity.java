@@ -411,7 +411,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
     }
 
     @Override protected void onResume() {
@@ -422,14 +422,14 @@ public abstract class BaseActivity extends FragmentActivity {
             restartWithFontScale(sScaleStep);
         }
         EventBus.getDefault().registerSticky(this);
-        App.getInstance().getHealthMonitor().start();
-        App.getInstance().getSyncManager().applyPeriodicSyncSettings();
+        App.getHealthMonitor().start();
+        App.getSyncManager().applyPeriodicSyncSettings();
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
     }
 
     @Override protected void onPause() {
         EventBus.getDefault().unregister(this);
-        App.getInstance().getHealthMonitor().stop();
+        App.getHealthMonitor().stop();
         pausedScaleStep = sScaleStep;
         super.onPause();
     }

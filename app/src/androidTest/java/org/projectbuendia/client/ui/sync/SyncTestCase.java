@@ -62,7 +62,7 @@ public class SyncTestCase extends FunctionalTestCase {
 
     /** Clears all contents of the database (note: this does not include ODK forms or instances). */
     public void clearDatabase() throws SQLException {
-        Database db = new Database(App.getInstance().getApplicationContext());
+        Database db = new Database(App.getContext());
         db.onUpgrade(db.getWritableDatabase(), 0, 1);
         db.close();
     }

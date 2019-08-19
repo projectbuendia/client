@@ -81,7 +81,7 @@ public class UserStore {
 
     private void addUserLocally(JsonUser user) {
         LOG.i("Updating user db with newly added user");
-        ContentProviderClient client = App.getInstance().getContentResolver()
+        ContentProviderClient client = App.getResolver()
             .acquireContentProviderClient(Users.URI);
         try {
             ContentValues values = new ContentValues();
@@ -133,7 +133,7 @@ public class UserStore {
 
     private void  updateDatabase(Set<JsonUser> users) throws RemoteException, OperationApplicationException {
         LOG.i("Updating local database with %d users", users.size());
-        ContentProviderClient client = App.getInstance().getContentResolver()
+        ContentProviderClient client = App.getResolver()
             .acquireContentProviderClient(Users.URI);
         BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
         try (DatabaseTransaction tx = provider.startTransaction(USER_SYNC_SAVEPOINT_NAME)) {
@@ -164,7 +164,7 @@ public class UserStore {
         Cursor cursor = null;
         ContentProviderClient client = null;
         try {
-            client = App.getInstance().getContentResolver()
+            client = App.getResolver()
                 .acquireContentProviderClient(Users.URI);
 
             // Request users from database.

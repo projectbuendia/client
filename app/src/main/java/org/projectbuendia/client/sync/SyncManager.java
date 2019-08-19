@@ -67,7 +67,7 @@ public class SyncManager {
 
     public SyncManager(SyncScheduler scheduler) {
         mScheduler = scheduler;
-        App.getInstance().getApplicationContext()
+        App.getContext()
             .registerReceiver(new StatusReceiver(), new IntentFilter(STATUS_ACTION));
     }
 
@@ -104,7 +104,7 @@ public class SyncManager {
 
     /** Starts or cancels regularly repeating syncs, according to the settings. */
     public void applyPeriodicSyncSettings() {
-        AppSettings settings = App.getInstance().getSettings();
+        AppSettings settings = App.getSettings();
         if (settings.getPeriodicSyncDisabled()) {
             mScheduler.clearAllPeriodicSyncs();
         } else {

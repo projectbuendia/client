@@ -48,7 +48,7 @@ public class LocationsSyncWorker implements SyncWorker {
      */
     private static ArrayList<ContentProviderOperation> getLocationUpdateOps(SyncResult syncResult)
             throws ExecutionException, InterruptedException {
-        final ContentResolver contentResolver = App.getInstance().getContentResolver();
+        final ContentResolver contentResolver = App.getResolver();
 
         final String[] projection = new String[] {
                 Locations.UUID,
