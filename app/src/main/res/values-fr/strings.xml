@@ -147,6 +147,7 @@
   <string name="since_admission">Depuis admission</string>
   <string name="since_symptom_onset">Depuis début des symptômes</string>
   <string name="location">Emplacement</string>
+  <string name="bed_number_n">Lit %s</string>
   <string name="id">ID</string>
   <string name="id_prefix">Préfix de l\'ID</string>
   <string name="patient_creation_given_name_label">Prénom</string>

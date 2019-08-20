@@ -34,11 +34,14 @@
     </ScrollView>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
-        android:visibility="gone">
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="0sp"
+        android:layout_marginBottom="24sp"
+        android:layout_marginLeft="16sp"
+        android:layout_marginRight="16sp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -50,6 +53,7 @@
             android:ems="5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="@style/text.huge"
         />
     </LinearLayout>
 
