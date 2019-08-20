@@ -34,7 +34,6 @@ import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.Sex;
@@ -154,7 +153,7 @@ public final class PatientChartControllerTest {
         mController.setCondition(ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID);
         // THEN a new encounter is added
         verify(mMockAppModel).addObservationEncounter(
-            any(CrudEventBus.class), PATIENT_UUID_1, any(Encounter.Observation.class));
+            any(CrudEventBus.class), PATIENT_UUID_1, any(Obs.class));
     }
 
     /** Tests that selecting a form from the menu shows loading dialog. */

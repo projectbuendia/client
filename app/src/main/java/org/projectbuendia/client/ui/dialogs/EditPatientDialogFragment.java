@@ -45,6 +45,7 @@ import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -188,20 +189,21 @@ public class EditPatientDialogFragment extends DialogFragment {
         delta.familyName = Optional.fromNullable(familyName);
         delta.birthdate = Optional.fromNullable(birthdate);
         delta.sex = Optional.fromNullable(sex);
-
         dialog.dismiss();
+
+        List<Obs> observations = null;
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
             BigToast.show(R.string.adding_new_patient_please_wait);
 
             long now = System.currentTimeMillis(); // not actually used by PatientDelta
-            delta.observations = ImmutableList.of(
+            observations = ImmutableList.of(
                 new Obs(now, ConceptUuids.ADMISSION_DATE_UUID,
                     ConceptType.DATE, LocalDate.now().toString(), ""),
                 new Obs(now, ConceptUuids.PLACEMENT_UUID,
                     ConceptType.TEXT, mModel.getDefaultLocation().uuid, "")
             );
-            mModel.addPatient(mCrudEventBus, delta);
+            mModel.addPatient(mCrudEventBus, delta, observations);
         } else {
             BigToast.show(R.string.updating_patient_please_wait);
             mModel.updatePatient(mCrudEventBus, args.getString("uuid"), delta);

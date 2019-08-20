@@ -27,7 +27,6 @@ import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 import org.projectbuendia.client.events.data.TypedCursorLoadedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
-import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.UpdatePatientTask;
@@ -37,6 +36,8 @@ import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
+
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -152,8 +153,8 @@ public class AppModel {
      * {@link ItemCreatedEvent} with the newly-added patient on
      * the specified event bus when complete.
      */
-    public void addPatient(CrudEventBus bus, PatientDelta patientDelta) {
-        AddPatientTask task = mTaskFactory.newAddPatientTask(patientDelta, bus);
+    public void addPatient(CrudEventBus bus, PatientDelta patientDelta, List<Obs> observations) {
+        AddPatientTask task = mTaskFactory.newAddPatientTask(patientDelta, observations, bus);
         task.execute();
     }
 
@@ -193,9 +194,9 @@ public class AppModel {
     }
 
     /** Adds a single observation in an encounter, posting ItemCreatedEvent when complete. */
-    public void addObservationEncounter(CrudEventBus bus, String patientUuid, Observation obs) {
+    public void addObservationEncounter(CrudEventBus bus, String patientUuid, Obs obs) {
         mTaskFactory.newAddEncounterTask(new Encounter(
-            null, patientUuid, DateTime.now(), new Observation[] {obs}, null
+            null, patientUuid, DateTime.now(), new Obs[] {obs}, null
         ), bus).execute();
     }
 

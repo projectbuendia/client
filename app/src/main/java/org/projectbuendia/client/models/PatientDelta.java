@@ -16,15 +16,12 @@ import android.content.ContentValues;
 import com.google.common.base.Optional;
 
 import org.joda.time.LocalDate;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
-
-import java.util.List;
 
 /** Represents the data to write to a new patient or the data to update on a patient. */
 public class PatientDelta {
@@ -33,7 +30,6 @@ public class PatientDelta {
     public Optional<String> familyName = Optional.absent();
     public Optional<Sex> sex = Optional.absent();
     public Optional<LocalDate> birthdate = Optional.absent();
-    public List<Obs> observations = null;
     private static final Logger LOG = Logger.create();
 
     /** Returns the {@link ContentValues} corresponding to the delta. */
@@ -89,14 +85,6 @@ public class PatientDelta {
                 json.put(
                     Server.PATIENT_BIRTHDATE_KEY,
                     Utils.formatDate(birthdate.get()));
-            }
-
-            JSONArray jsonObsArray = new JSONArray();
-            if (observations != null && !observations.isEmpty()) {
-                for (Obs obs : observations) {
-                    jsonObsArray.put(obs.toJson());
-                }
-                json.put(Server.PATIENT_OBSERVATIONS_KEY, jsonObsArray);
             }
             return true;
         } catch (JSONException e) {

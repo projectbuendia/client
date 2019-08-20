@@ -26,7 +26,8 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Handles syncing patients. Uses an incremental sync mechanism - see
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
     private static final Logger LOG = Logger.create();
-    private List<String> updatedPatientUuids = new ArrayList<>();
+    private Set<String> patientUuidsToUpdate = new HashSet<>();
 
     public PatientsSyncWorker() {
         super("patients", Contracts.Table.PATIENTS, JsonPatient.class);
@@ -42,9 +43,8 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
 
     @Override public void initialize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client) {
-        updatedPatientUuids.clear();
+        patientUuidsToUpdate.clear();
     }
-
 
     @Override protected ArrayList<ContentProviderOperation> getUpdateOps(
         JsonPatient[] patients, SyncResult syncResult) {
@@ -59,7 +59,7 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
                 numInserts++;
                 ops.add(makeInsertOpForPatient(patient));
             }
-            updatedPatientUuids.add(patient.uuid);
+            patientUuidsToUpdate.add(patient.uuid);
         }
         LOG.d("Patients: %d inserts, %d deletes", numInserts, numDeletes);
         syncResult.stats.numInserts += numInserts;
@@ -79,7 +79,7 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
 
     @Override public void finalize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client) {
-        for (String uuid : updatedPatientUuids) {
+        for (String uuid : patientUuidsToUpdate) {
             App.getModel().denormalizeObservations(App.getCrudEventBus(), uuid);
         }
         if (result.stats.numInserts + result.stats.numDeletes > 0) {

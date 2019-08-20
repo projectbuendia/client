@@ -75,7 +75,7 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
         String pregnancyValue = getLatestValue(mPatientUuid, ConceptUuids.PREGNANCY_UUID);
         String placementValue = getLatestValue(mPatientUuid, ConceptUuids.PLACEMENT_UUID);
 
-        LOG.i("Denormalizing observations for patient %s", mPatientUuid);
+        LOG.i("Denormalizing observations for patient %s (%s, %s)", mPatientUuid, pregnancyValue, placementValue);
         ContentValues cv = new ContentValues();
         if (pregnancyValue != null) {
             cv.put(Patients.PREGNANCY, ConceptUuids.isYes(pregnancyValue));
@@ -85,6 +85,7 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
             cv.put(Patients.LOCATION_UUID, parts[0]);
             cv.put(Patients.BED_NUMBER, parts[1]);
         }
+        if (cv.size() == 0) return null;  // no update needed
 
         int count = mContentResolver.update(
             Patients.URI, cv, Patients.UUID + " = ?", new String[] {mPatientUuid}
@@ -135,6 +136,10 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
                 PatientUpdateFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);
         }
+    }
+
+    public static boolean needsDenormalization(String conceptUuid) {
+        return DENORMALIZED_CONCEPTS.contains(conceptUuid);
     }
 
     public static boolean needsDenormalization(ContentValues[] values) {

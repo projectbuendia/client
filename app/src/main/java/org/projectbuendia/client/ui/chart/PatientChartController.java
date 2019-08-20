@@ -40,6 +40,7 @@ import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
@@ -47,7 +48,6 @@ import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
@@ -413,8 +413,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void setDate(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
-        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Observation(
-            conceptUuid, date.toString(), Observation.Type.DATE
+        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
+            DateTime.now().getMillis(), conceptUuid, ConceptType.DATE, date.toString(), null
         ));
     }
 
@@ -433,8 +433,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
-        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Observation(
-            ConceptUuids.GENERAL_CONDITION_UUID, newConditionUuid, Observation.Type.NON_DATE
+        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
+            DateTime.now().getMillis(), ConceptUuids.GENERAL_CONDITION_UUID,
+            ConceptType.CODED, newConditionUuid, null
         ));
     }
 

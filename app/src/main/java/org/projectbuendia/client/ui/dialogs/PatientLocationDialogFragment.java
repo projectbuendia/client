@@ -20,15 +20,17 @@ import android.view.WindowManager;
 
 import com.google.android.flexbox.FlexboxLayout;
 
+import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
@@ -89,9 +91,10 @@ public class PatientLocationDialogFragment extends DialogFragment {
         ((PatientChartActivity) getActivity()).getUi().showWaitDialog(R.string.title_updating_patient);
 
         Location location = mList.getSelectedLocation();
-        String locationUuid = location != null ? location.uuid : null;
-        mModel.addObservationEncounter(mCrudEventBus, patientUuid, new Observation(
-            ConceptUuids.PLACEMENT_UUID, locationUuid, Observation.Type.NON_DATE
+        String placement = location != null ? location.uuid : null;
+        mModel.addObservationEncounter(mCrudEventBus, patientUuid, new Obs(
+            DateTime.now().getMillis(), ConceptUuids.PLACEMENT_UUID,
+            ConceptType.TEXT, placement, null
         ));
         dismiss();
     }

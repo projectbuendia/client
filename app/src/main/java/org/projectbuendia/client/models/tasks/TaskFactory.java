@@ -18,13 +18,16 @@ import android.os.AsyncTask;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Model;
+import org.projectbuendia.client.models.CursorLoader;
 import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Model;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.CursorLoader;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
+
+import java.util.List;
 
 /**
  * An assisted injection factory that creates {@link AsyncTask}s for performing {@link AppModel}
@@ -42,8 +45,8 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link AddPatientTask}. */
-    public AddPatientTask newAddPatientTask(PatientDelta patientDelta, CrudEventBus bus) {
-        return new AddPatientTask(this, mServer, mContentResolver, patientDelta, bus);
+    public AddPatientTask newAddPatientTask(PatientDelta patientDelta, List<Obs> observations, CrudEventBus bus) {
+        return new AddPatientTask(this, mServer, mContentResolver, patientDelta, observations, bus);
     }
 
     public FetchSinglePatientTask newFetchSinglePatientTask(
