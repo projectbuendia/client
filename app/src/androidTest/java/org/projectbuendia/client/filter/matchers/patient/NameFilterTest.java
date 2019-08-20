@@ -42,10 +42,11 @@ public class NameFilterTest {
     }
 
     private Patient getPatientWithName(String givenName, String familyName) {
-        return Patient.builder()
-            .setGivenName(Utils.orDefault(givenName, "\u2013"))
-            .setFamilyName(Utils.orDefault(familyName, "\u2013"))
-            .build();
+        return new Patient(
+            null, "1",
+            Utils.orDefault(givenName, "\u2013"),
+            Utils.orDefault(familyName, "\u2013"),
+            null, null, "");
     }
 
     /** Tests that name matching works on just the given name. */

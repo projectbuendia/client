@@ -20,15 +20,13 @@ import javax.annotation.concurrent.Immutable;
  * A row returned by the location query, which includes the localized name and
  * the number of patients assigned directly to this location.
  */
-public final @Immutable class LocationQueryResult extends Base<String> {
-    public final String uuid;
+public final @Immutable class LocationQueryResult extends Model {
     public final String parentUuid;
     public final String name;
     public final int numPatients;
 
     public LocationQueryResult(String uuid, String parentUuid, String name, int numPatients) {
-        super(null);  // Location objects never have an id
-        this.uuid = uuid;
+        super(uuid);
         this.parentUuid = parentUuid;
         this.name = name;
         this.numPatients = numPatients;

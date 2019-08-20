@@ -187,7 +187,7 @@ public class AppModel {
      */
     public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
         addEncounter(bus, patient, new Encounter(
-                patient.uuid, null, DateTime.now(), null, new String[]{orderUuid}
+            null, patient.uuid, DateTime.now(), null, new String[]{orderUuid}
         ));
     }
 
@@ -203,7 +203,7 @@ public class AppModel {
         mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
     }
 
-    private static class LoadTypedCursorAsyncTask<T extends Base>
+    private static class LoadTypedCursorAsyncTask<T extends Model>
         extends AsyncTask<Void, Void, TypedCursor<T>> {
 
         private final Uri mContentUri;

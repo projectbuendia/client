@@ -22,6 +22,6 @@ public class JsonEncounter {
     public DateTime timestamp;
     public String enterer_id;
     /** A {conceptUuid: value} map, where value can be a number, string, or answer UUID. */
-    public Map<Object, Object> observations;
+    public Map<String, Object> observations;
     public String[] order_uuids;  // orders executed during this encounter
 }

@@ -86,7 +86,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
      */
     private static final int PATIENT_UPDATE_PERIOD_MILLIS = 10000;
 
-    private Patient mPatient = Patient.builder().build();
+    private Patient mPatient = null;
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
@@ -415,8 +415,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     public void setDate(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
         Encounter encounter = new Encounter(
-            mPatientUuid,
-            null, // encounter UUID, which the server will generate
+            null, mPatientUuid,
+            // encounter UUID, which the server will generate
             DateTime.now(),
             new Observation[] {
                 new Observation(conceptUuid, date.toString(), Observation.Type.DATE)
@@ -440,8 +440,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
         Encounter encounter = new Encounter(
-            mPatientUuid,
-            null, // encounter UUID, which the server will generate
+            null, mPatientUuid,
+            // encounter UUID, which the server will generate
             DateTime.now(),
             new Observation[] {
                 new Observation(

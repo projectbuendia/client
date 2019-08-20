@@ -11,13 +11,13 @@
 
 package org.projectbuendia.client.filter.db;
 
-import org.projectbuendia.client.models.Base;
+import org.projectbuendia.client.models.Model;
 
 /**
  * A container for a filter string (part of an SQL WHERE clause) and the arguments to insert into
  * that filter string.
  */
-public abstract class SimpleSelectionFilter<T extends Base> {
+public abstract class SimpleSelectionFilter<T extends Model> {
     /**
      * A selection filter, with the syntax of a structured SQL WHERE clause.
      * For example, a selection filter could be "given_name=? AND family_name LIKE ?".

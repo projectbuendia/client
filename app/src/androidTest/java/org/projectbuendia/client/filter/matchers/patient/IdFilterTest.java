@@ -41,7 +41,7 @@ public class IdFilterTest {
     }
 
     private Patient getPatientWithId(String id) {
-        return Patient.builder().setId(id).build();
+        return new Patient(null, id, "", "", null, null, "");
     }
 
     /** Tests that id matching allows for a prefix match. */

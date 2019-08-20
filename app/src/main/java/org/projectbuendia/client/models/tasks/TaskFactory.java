@@ -18,7 +18,7 @@ import android.os.AsyncTask;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Base;
+import org.projectbuendia.client.models.Model;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
@@ -87,7 +87,7 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link LoadItemTask}. */
-    public <T extends Base<?>> LoadItemTask<T> newLoadItemTask(
+    public <T extends Model> LoadItemTask<T> newLoadItemTask(
         Uri contentUri,
         String[] projectionColumns,
         SimpleSelectionFilter filter,

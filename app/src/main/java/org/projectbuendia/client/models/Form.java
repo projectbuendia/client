@@ -22,14 +22,12 @@ import javax.annotation.concurrent.Immutable;
 
 /** An order in the app model. */
 @Immutable
-public final class Form extends Base<String> implements Comparable<Form> {
-    public final String uuid;
+public final class Form extends Model implements Comparable<Form> {
     public final String name;
     public final String version;
 
     public Form(String uuid, String name, String version) {
-        super(null);  // Form objects never have an id
-        this.uuid = uuid;
+        super(uuid);
         this.name = name;
         this.version = version;
     }

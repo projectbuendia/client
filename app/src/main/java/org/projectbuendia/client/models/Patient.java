@@ -20,18 +20,18 @@ import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
-public final @Immutable class Patient extends Base<String> implements Comparable<Patient> {
-    public static final CursorLoader<Patient> LOADER = cursor -> builder()
-        .setUuid(Utils.getString(cursor, Contracts.Patients.UUID))
-        .setId(Utils.getString(cursor, Contracts.Patients.ID))
-        .setGivenName(Utils.getString(cursor, Contracts.Patients.GIVEN_NAME))
-        .setFamilyName(Utils.getString(cursor, Contracts.Patients.FAMILY_NAME))
-        .setBirthdate(Utils.getLocalDate(cursor, Contracts.Patients.BIRTHDATE))
-        .setSex(Sex.forCode(Utils.getString(cursor, Contracts.Patients.SEX)))
-        .setLocationUuid(Utils.getString(cursor, Contracts.Patients.LOCATION_UUID))
-        .build();
+public final @Immutable class Patient extends Model implements Comparable<Patient> {
+    public static final CursorLoader<Patient> LOADER = cursor -> new Patient(
+        Utils.getString(cursor, Contracts.Patients.UUID),
+        Utils.getString(cursor, Contracts.Patients.ID),
+        Utils.getString(cursor, Contracts.Patients.GIVEN_NAME),
+        Utils.getString(cursor, Contracts.Patients.FAMILY_NAME),
+        Sex.forCode(Utils.getString(cursor, Contracts.Patients.SEX)),
+        Utils.getLocalDate(cursor, Contracts.Patients.BIRTHDATE),
+        Utils.getString(cursor, Contracts.Patients.LOCATION_UUID)
+    );
 
-    public final String uuid;
+    public final String id;
     public final String givenName;
     public final String familyName;
     public final Sex sex;
@@ -39,22 +39,13 @@ public final @Immutable class Patient extends Base<String> implements Comparable
     public final LocalDate birthdate;
     public final String locationUuid;
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     /** Creates an instance of {@link Patient} from a network {@link JsonPatient} object. */
     public static Patient fromJson(JsonPatient patient) {
-        return builder()
-            .setId(patient.id)
-            .setUuid(patient.uuid)
-            .setGivenName(patient.given_name)
-            .setFamilyName(patient.family_name)
-            .setSex(Sex.forCode(patient.sex))
-            .setBirthdate(patient.birthdate)
-            .setLocationUuid(
-                patient.assigned_location != null ? patient.assigned_location.uuid : null)
-            .build();
+        return new Patient(
+            patient.uuid, patient.id, patient.given_name, patient.family_name,
+            Sex.forCode(patient.sex), patient.birthdate,
+            patient.assigned_location != null ? patient.assigned_location.uuid : null
+        );
     }
 
     @Override public int compareTo(Patient other) {
@@ -79,65 +70,14 @@ public final @Immutable class Patient extends Base<String> implements Comparable
             uuid, id, givenName, familyName);
     }
 
-    public static final class Builder {
-        private String mId;
-        private String mUuid;
-        private String mGivenName;
-        private String mFamilyName;
-        private Sex mSex;
-        private LocalDate mBirthdate;
-        private String mLocationUuid;
-
-        public Builder setId(String id) {
-            this.mId = id;
-            return this;
-        }
-
-        public Builder setUuid(String uuid) {
-            this.mUuid = uuid;
-            return this;
-        }
-
-        public Builder setGivenName(String givenName) {
-            this.mGivenName = givenName;
-            return this;
-        }
-
-        public Builder setFamilyName(String familyName) {
-            this.mFamilyName = familyName;
-            return this;
-        }
-
-        public Builder setSex(Sex sex) {
-            this.mSex = sex;
-            return this;
-        }
-
-        public Builder setBirthdate(LocalDate birthdate) {
-            this.mBirthdate = birthdate;
-            return this;
-        }
-
-        public Builder setLocationUuid(String locationUuid) {
-            this.mLocationUuid = locationUuid;
-            return this;
-        }
-
-        public Patient build() {
-            return new Patient(this);
-        }
-
-        private Builder() {
-        }
-    }
-
-    private Patient(Builder builder) {
-        super(builder.mId);
-        this.uuid = builder.mUuid;
-        this.givenName = builder.mGivenName;
-        this.familyName = builder.mFamilyName;
-        this.sex = builder.mSex;
-        this.birthdate = builder.mBirthdate;
-        this.locationUuid = builder.mLocationUuid;
+    public Patient(String uuid, String id, String givenName, String familyName,
+                   Sex sex, LocalDate birthdate, String locationUuid) {
+        super(uuid);
+        this.id = id;
+        this.givenName = givenName;
+        this.familyName = familyName;
+        this.sex = sex;
+        this.birthdate = birthdate;
+        this.locationUuid = locationUuid;
     }
 }

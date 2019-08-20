@@ -12,13 +12,13 @@
 package org.projectbuendia.client.models;
 
 /** A user in the app model. */
-public final class User extends Base<String> {
-    public final String uuid;
+public final class User extends Model {
+    public final String id;
     public final String fullName;
 
     private User(String uuid, String id, String fullName) {
-        super(id);
-        this.uuid = uuid;
+        super(uuid);
+        this.id = id;
         this.fullName = fullName;
     }
 }
