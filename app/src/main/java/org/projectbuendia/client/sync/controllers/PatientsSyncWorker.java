@@ -19,12 +19,14 @@ import android.content.ContentResolver;
 import android.content.SyncResult;
 import android.net.Uri;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles syncing patients. Uses an incremental sync mechanism - see
@@ -32,10 +34,17 @@ import java.util.ArrayList;
  */
 public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
     private static final Logger LOG = Logger.create();
+    private List<String> updatedPatientUuids = new ArrayList<>();
 
     public PatientsSyncWorker() {
         super("patients", Contracts.Table.PATIENTS, JsonPatient.class);
     }
+
+    @Override public void initialize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client) {
+        updatedPatientUuids.clear();
+    }
+
 
     @Override protected ArrayList<ContentProviderOperation> getUpdateOps(
         JsonPatient[] patients, SyncResult syncResult) {
@@ -50,6 +59,7 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
                 numInserts++;
                 ops.add(makeInsertOpForPatient(patient));
             }
+            updatedPatientUuids.add(patient.uuid);
         }
         LOG.d("Patients: %d inserts, %d deletes", numInserts, numDeletes);
         syncResult.stats.numInserts += numInserts;
@@ -69,6 +79,9 @@ public class PatientsSyncWorker extends IncrementalSyncWorker<JsonPatient> {
 
     @Override public void finalize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client) {
+        for (String uuid : updatedPatientUuids) {
+            App.getModel().denormalizeObservations(App.getCrudEventBus(), uuid);
+        }
         if (result.stats.numInserts + result.stats.numDeletes > 0) {
             resolver.notifyChange(Contracts.Patients.URI, null, false);
         }

@@ -392,7 +392,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         Interval interval = new Interval(start, start.plusDays(1));
         List<DateTime> executionTimes = new ArrayList<>();
         for (Obs obs : mObservations) {
-            if (ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
+            if (ConceptUuids.ORDER_EXECUTED_UUID.equals(obs.conceptUuid) &&
                 order.uuid.equals(obs.value)) {
                 executionTimes.add(obs.time);
             }
@@ -692,8 +692,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         }
 
         public void onEventMainThread(VoidObservationsRequestEvent event) {
-            for (String uuid : event.Uuids) {
-                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
+            for (String uuid : event.uuids) {
+                mAppModel.voidObservation(mCrudEventBus, new VoidObs(uuid, mPatientUuid));
             }
             updatePatientObsUi();
         }

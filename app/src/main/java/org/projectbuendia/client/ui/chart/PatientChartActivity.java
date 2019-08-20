@@ -534,12 +534,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         }
 
-        @Override public void showError(int errorMessageResource, Object... args) {
-            BigToast.show(getString(errorMessageResource, args));
+        @Override public void showError(int messageId, Object... args) {
+            BigToast.show(getString(messageId, args));
         }
 
-        @Override public void showError(int errorMessageResource) {
-            BigToast.show(errorMessageResource);
+        @Override public void showError(int messageId) {
+            BigToast.show(messageId);
         }
 
         @Override public synchronized void fetchAndShowXform(

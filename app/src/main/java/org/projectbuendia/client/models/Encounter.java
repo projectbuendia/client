@@ -119,7 +119,7 @@ public class Encounter extends Model {
         }
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues cv = new ContentValues();
-            cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID);
+            cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_UUID);
             cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, uuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);

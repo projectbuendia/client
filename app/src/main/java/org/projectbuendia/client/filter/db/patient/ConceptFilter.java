@@ -38,6 +38,7 @@ public final class ConceptFilter extends SimpleSelectionFilter<Patient> {
         + "             SELECT concept_uuid, patient_uuid,"
         + "                    max(encounter_millis) AS max_millis"
         + "             FROM observations"
+        + "             WHERE observations.voided IS NOT 1"
         + "             GROUP BY patient_uuid, concept_uuid"
         + "         ) max_times"
         + "         ON obs.encounter_millis = max_times.max_millis AND"

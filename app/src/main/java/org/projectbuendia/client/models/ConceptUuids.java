@@ -76,7 +76,8 @@ public class ConceptUuids {
     // has been carried out (e.g. a prescribed medication has been administered).
     // The timestamp of an observation for this concept should be the time the order
     // was executed, and the value of the observation should be the UUID of the order.
-    public static final String ORDER_EXECUTED_CONCEPT_UUID = "buendia_concept_order_executed";
+    public static final String ORDER_EXECUTED_UUID = "buendia_concept_order_executed";
+    public static final String LOCATION_UUID = "buendia_concept_location";
 
 
     // ==== Pulse; used only for health checks and logging messages to the server.

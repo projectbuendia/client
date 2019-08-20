@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -118,7 +119,9 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         ContentValues[] values = encounter.toContentValuesArray();
         if (values.length > 0) {
             int inserted = mContentResolver.bulkInsert(Observations.URI, values);
-
+            if (DenormalizeObservationsTask.needsDenormalization(values)) {
+                App.getModel().denormalizeObservations(mBus, mPatient.uuid);
+            }
             if (inserted != values.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
                     inserted, encounter.observations.length);

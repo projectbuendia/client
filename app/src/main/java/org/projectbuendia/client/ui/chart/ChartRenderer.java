@@ -227,7 +227,7 @@ public class ChartRenderer {
             for (Obs obs : observations) {
                 if (obs == null) continue;
 
-                if (obs.conceptUuid.equals(ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID)) {
+                if (obs.conceptUuid.equals(ConceptUuids.ORDER_EXECUTED_UUID)) {
                     Order order = orders.get(obs.value);
                     if (order != null) {
                         if (!mExecutionHistories.containsKey(order.uuid)) {

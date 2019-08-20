@@ -53,7 +53,7 @@ public class TaskFactory {
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public VoidObsTask voidObsTask(CrudEventBus bus, VoidObs voidObs) {
+    public VoidObsTask newVoidObsTask(CrudEventBus bus, VoidObs voidObs) {
         return new VoidObsTask(this, mServer, mContentResolver, voidObs, bus);
     }
 
@@ -76,11 +76,6 @@ public class TaskFactory {
         return new SaveOrderTask(this, mServer, mContentResolver, order, bus);
     }
 
-    // DO NOT SUBMIT: work out why there's two of these.
-    public VoidObsTask newVoidObsAsyncTask(VoidObs obs, CrudEventBus bus) {
-        return new VoidObsTask(this, mServer, mContentResolver, obs, bus);
-    }
-
     /** Creates a new {@link DeleteOrderTask}. */
     public DeleteOrderTask newDeleteOrderTask(String orderUuid, CrudEventBus bus) {
         return new DeleteOrderTask(mServer, mContentResolver, orderUuid, bus);
@@ -96,5 +91,9 @@ public class TaskFactory {
         CrudEventBus bus) {
         return new LoadItemTask<>(
             mContentResolver, contentUri, projectionColumns, filter, constraint, loader, bus);
+    }
+
+    public DenormalizeObservationsTask newDenormalizeObservationsTask(String patientUuid, CrudEventBus bus) {
+        return new DenormalizeObservationsTask(this, mServer, mContentResolver, patientUuid, bus);
     }
 }

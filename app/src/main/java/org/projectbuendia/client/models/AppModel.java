@@ -33,6 +33,7 @@ import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
+import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -102,12 +103,11 @@ public class AppModel {
         return fullSyncEnd;
     }
 
-    public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
-        String conditions = Contracts.Observations.UUID + " = ?";
+    public void voidObservation(CrudEventBus bus, VoidObs voidObs) {
+        String conditions = Observations.UUID + " = ?";
         ContentValues values = new ContentValues();
-        values.put(Contracts.Observations.VOIDED,1);
-        mContentResolver.update(Contracts.Observations.URI, values, conditions, new String[]{voidObs.Uuid});
-        mTaskFactory.voidObsTask(bus, voidObs).execute();
+        values.put(Observations.VOIDED, 1);
+        mTaskFactory.newVoidObsTask(bus, voidObs).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
@@ -199,8 +199,12 @@ public class AppModel {
         mTaskFactory.newAddEncounterTask(patient, encounter, bus).execute();
     }
 
-    public void voidObservation(CrudEventBus bus, VoidObs obs) {
-        mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
+    /**
+     * Updates the denormalized observation fields in a row in the patient table
+     * with the latest unvoided values in the observations table.
+     */
+    public void denormalizeObservations(CrudEventBus bus, String patientUuid) {
+        mTaskFactory.newDenormalizeObservationsTask(patientUuid, bus).execute();
     }
 
     private static class LoadTypedCursorAsyncTask<T extends Model>
