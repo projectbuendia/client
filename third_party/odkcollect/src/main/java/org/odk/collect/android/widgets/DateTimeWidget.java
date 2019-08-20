@@ -52,6 +52,7 @@ public class DateTimeWidget extends QuestionWidget {
     private boolean hideMonth = false;
     private boolean showCalendar = false;
 	private HorizontalScrollView scrollView = null;
+	private boolean changed = false;
 
     public DateTimeWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
@@ -79,6 +80,7 @@ public class DateTimeWidget extends QuestionWidget {
         mDateListener = new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int month, int day) {
+                changed = true;
                 if (mPrompt.isReadOnly()) {
                     setAnswer();
                 } else {
@@ -111,6 +113,7 @@ public class DateTimeWidget extends QuestionWidget {
         mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
 			@Override
 			public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                changed = true;
             	Collect.getInstance().getActivityLogger().logInstanceAction(DateTimeWidget.this, "onTimeChanged",
             			String.format("%1$02d:%2$02d",hourOfDay, minute), mPrompt.getIndex());
 			}
@@ -279,6 +282,15 @@ public class DateTimeWidget extends QuestionWidget {
             new DateTime(mDatePicker.getYear(), mDatePicker.getMonth() + 1,
                     mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(),
                     mTimePicker.getCurrentMinute(), 0);
+
+        // If the user hasn't touched anything, use the current time.
+        // The widget has no seconds, so without this we would be unable
+        // to tell which submission occurred later or earlier for two
+        // submissions up to a minute apart.
+        if (!changed) {
+            ldt = DateTime.now();
+        }
+
         //DateTime utc = ldt.withZone(DateTimeZone.forID("UTC"));
         return new DateTimeData(ldt.toDate());
     }
