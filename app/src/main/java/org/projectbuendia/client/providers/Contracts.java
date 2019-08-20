@@ -200,11 +200,11 @@ public interface Contracts {
         String ID = "id";
         String GIVEN_NAME = "given_name";
         String FAMILY_NAME = "family_name";
-        String LOCATION_UUID = "location_uuid";
         String BIRTHDATE = "birthdate";  // a local date in yyyy-mm-dd format
         String SEX = "sex";
         String PREGNANCY = "pregnancy";  // denormalized observation
-        String LOCATION = "location";  // denormalized observation
+        String LOCATION_UUID = "location_uuid";  // denormalized observation
+        String BED_NUMBER = "bed_number";  // denormalized observation
     }
 
     interface Users {

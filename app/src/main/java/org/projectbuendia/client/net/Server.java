@@ -24,7 +24,6 @@ import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 
 import java.util.List;
@@ -38,14 +37,18 @@ public interface Server {
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_SEX_KEY = "sex";
-    public static final String PATIENT_ASSIGNED_LOCATION_KEY = "assigned_location";
     public static final String PATIENT_OBSERVATIONS_KEY = "observations";
     public static final String ENCOUNTER_OBSERVATIONS_KEY = "observations";
     public static final String ENCOUNTER_TIMESTAMP = "timestamp";
     public static final String ENCOUNTER_ORDER_UUIDS = "order_uuids";
-    public static final String OBSERVATION_QUESTION_UUID = "question_uuid";
-    public static final String OBSERVATION_ANSWER_DATE = "answer_date";
-    public static final String OBSERVATION_ANSWER_UUID = "answer_uuid";
+    public static final String OBS_QUESTION_UUID = "question_uuid";
+    // TODO(ping): For consistency with ConceptType, it would be nice one day to
+    // rename answer_uuid to answer_coded and answer_number to answer_numeric.
+    public static final String OBS_ANSWER_DATE = "answer_date";
+    public static final String OBS_ANSWER_DATETIME = "answer_datetime";
+    public static final String OBS_ANSWER_UUID = "answer_uuid";
+    public static final String OBS_ANSWER_NUMBER = "answer_number";
+    public static final String OBS_ANSWER_TEXT = "answer_text";
 
     /**
      * Logs an event by sending a dummy request to the server.  (The server logs
@@ -77,27 +80,19 @@ public interface Server {
         Response.Listener<JsonUser> successListener,
         Response.ErrorListener errorListener);
 
-    /**
-     * Creates a new encounter for a given patient.
-     * @param patient   the patient being observed
-     * @param encounter the encounter to add
-     */
+    /** Creates a new encounter. */
     void addEncounter(
-        Patient patient,
         Encounter encounter,
         Response.Listener<JsonEncounter> successListener,
         Response.ErrorListener errorListener);
 
-    /**
-     * Remove an observation by it's UUID.
-     * @param Uuid The observation UUID.
-     */
+    /** Deletes (voids) an observation by its UUID. */
     void deleteObservation(
-            String Uuid,
-            Response.ErrorListener errorListener);
+        String uuid,
+        Response.ErrorListener errorListener);
 
     /**
-     * Get the patient record for an existing patient. Currently we are just using a String-String
+     * Gets the patient record for an existing patient. Currently we are just using a String-String
      * map for parameters, but this is a bit close in implementation details to the old Buendia UI
      * so it will probably need to be generalized in future.
      * @param patientId the unique patient id representing the patients

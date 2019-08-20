@@ -276,6 +276,8 @@ public class Utils {
         DateTimeFormat.forPattern("d MMM 'at' HH:mm"); // TODO/i18n
     private static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER =
         DateTimeFormat.mediumDateTime();
+    private static final DateTimeFormatter ISO8601_UTC_DATETIME_FORMATTER =
+        DateTimeFormat.forPattern("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
     private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
         DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
 
@@ -334,6 +336,11 @@ public class Utils {
      */
     public static @Nullable String formatMediumDateTime(@Nullable DateTime dateTime) {
         return dateTime != null ? MEDIUM_DATETIME_FORMATTER.print(dateTime) : null;
+    }
+
+    /** Converts a nullable DateTime to a yyyy-mm-ddThh:mm:ssZ String or null. */
+    public static @Nullable String formatUtc8601(@Nullable DateTime dt) {
+        return dt != null ? ISO8601_UTC_DATETIME_FORMATTER.print(dt.withZone(DateTimeZone.UTC)) : null;
     }
 
     /** Gets the DateTime at the start of a day. */

@@ -15,7 +15,6 @@ import android.content.ContentValues;
 
 import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,17 +24,16 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
+import java.util.List;
+
 /** Represents the data to write to a new patient or the data to update on a patient. */
 public class PatientDelta {
-
     public Optional<String> id = Optional.absent();
     public Optional<String> givenName = Optional.absent();
     public Optional<String> familyName = Optional.absent();
     public Optional<Sex> sex = Optional.absent();
     public Optional<LocalDate> birthdate = Optional.absent();
-    public Optional<LocalDate> admissionDate = Optional.absent();
-    public Optional<LocalDate> firstSymptomDate = Optional.absent();
-    public Optional<String> assignedLocationUuid = Optional.absent();
+    public List<Obs> observations = null;
     private static final Logger LOG = Logger.create();
 
     /** Returns the {@link ContentValues} corresponding to the delta. */
@@ -56,9 +54,6 @@ public class PatientDelta {
         }
         if (birthdate.isPresent()) {
             cv.put(Contracts.Patients.BIRTHDATE, birthdate.get().toString());
-        }
-        if (assignedLocationUuid.isPresent()) {
-            cv.put(Contracts.Patients.LOCATION_UUID, assignedLocationUuid.get());
         }
         return cv;
     }
@@ -96,48 +91,17 @@ public class PatientDelta {
                     Utils.formatDate(birthdate.get()));
             }
 
-            JSONArray observations = new JSONArray();
-            if (admissionDate.isPresent()) {
-                JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.ADMISSION_DATE_UUID);
-                observation.put(
-                    Server.OBSERVATION_ANSWER_DATE,
-                    Utils.formatDate(admissionDate.get()));
-                observations.put(observation);
+            JSONArray jsonObsArray = new JSONArray();
+            if (observations != null && !observations.isEmpty()) {
+                for (Obs obs : observations) {
+                    jsonObsArray.put(obs.toJson());
+                }
+                json.put(Server.PATIENT_OBSERVATIONS_KEY, jsonObsArray);
             }
-            if (firstSymptomDate.isPresent()) {
-                JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
-                observation.put(
-                    Server.OBSERVATION_ANSWER_DATE,
-                    Utils.formatDate(firstSymptomDate.get()));
-                observations.put(observation);
-            }
-            if (observations != null) {
-                json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
-            }
-
-            if (assignedLocationUuid.isPresent()) {
-                json.put(
-                    Server.PATIENT_ASSIGNED_LOCATION_KEY,
-                    getLocationObject(assignedLocationUuid.get()));
-            }
-
             return true;
         } catch (JSONException e) {
             LOG.w(e, "Unable to serialize a patient delta to JSON.");
-
             return false;
         }
-    }
-
-    private static JSONObject getLocationObject(String assignedLocationUuid) throws JSONException {
-        JSONObject location = new JSONObject();
-        location.put("uuid", assignedLocationUuid);
-        return location;
-    }
-
-    private static long getTimestamp(DateTime dateTime) {
-        return dateTime.toInstant().getMillis()/1000;
     }
 }

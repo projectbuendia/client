@@ -27,6 +27,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -34,7 +35,10 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.Sex;
@@ -184,13 +188,19 @@ public class EditPatientDialogFragment extends DialogFragment {
         delta.familyName = Optional.fromNullable(familyName);
         delta.birthdate = Optional.fromNullable(birthdate);
         delta.sex = Optional.fromNullable(sex);
-        delta.admissionDate = Optional.of(admissionDate);
 
         dialog.dismiss();
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
             BigToast.show(R.string.adding_new_patient_please_wait);
-            delta.assignedLocationUuid = Optional.of(mModel.getDefaultLocation().uuid);
+
+            long now = System.currentTimeMillis(); // not actually used by PatientDelta
+            delta.observations = ImmutableList.of(
+                new Obs(now, ConceptUuids.ADMISSION_DATE_UUID,
+                    ConceptType.DATE, LocalDate.now().toString(), ""),
+                new Obs(now, ConceptUuids.PLACEMENT_UUID,
+                    ConceptType.TEXT, mModel.getDefaultLocation().uuid, "")
+            );
             mModel.addPatient(mCrudEventBus, delta);
         } else {
             BigToast.show(R.string.updating_patient_please_wait);

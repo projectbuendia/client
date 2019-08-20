@@ -31,7 +31,7 @@ public class Database extends SQLiteOpenHelper {
     private static final Logger LOG = Logger.create();
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 32;
+    public static final int DATABASE_VERSION = 34;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
@@ -51,11 +51,11 @@ public class Database extends SQLiteOpenHelper {
             + "id TEXT,"
             + "given_name TEXT,"
             + "family_name TEXT,"
-            + "location_uuid TEXT,"
             + "birthdate TEXT,"
             + "sex TEXT,"
             + "pregnancy INTEGER,"
-            + "location TEXT"
+            + "location_uuid TEXT,"
+            + "bed_number TEXT"
         );
 
         SCHEMAS.put(Table.CONCEPTS, ""

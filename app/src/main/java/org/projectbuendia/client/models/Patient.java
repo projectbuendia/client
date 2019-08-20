@@ -29,7 +29,8 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
         Sex.forCode(Utils.getString(cursor, Patients.SEX)),
         Utils.getLocalDate(cursor, Patients.BIRTHDATE),
         Utils.getBoolean(cursor, Patients.PREGNANCY, false),
-        Utils.getString(cursor, Patients.LOCATION_UUID)
+        Utils.getString(cursor, Patients.LOCATION_UUID),
+        Utils.getString(cursor, Patients.BED_NUMBER)
     );
 
     public final String id;
@@ -38,16 +39,14 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
     public final Sex sex;
     public final LocalDate birthdate;
     public final boolean pregnancy;
-    // TODO: Make PatientDelta.birthdate and Patient.birthdate same type (LocalDate or DateTime).
     public final String locationUuid;
+    public final String bedNumber;
 
     /** Creates an instance of {@link Patient} from a network {@link JsonPatient} object. */
     public static Patient fromJson(JsonPatient patient) {
         return new Patient(
             patient.uuid, patient.id, patient.given_name, patient.family_name,
-            Sex.forCode(patient.sex), patient.birthdate, false,
-            patient.assigned_location != null ? patient.assigned_location.uuid : null
-        );
+            Sex.forCode(patient.sex), patient.birthdate, false, "", "");
     }
 
     @Override public int compareTo(Patient other) {
@@ -64,7 +63,8 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
         cv.put(Patients.SEX, sex.code);
         cv.put(Patients.BIRTHDATE, Utils.formatDate(birthdate));
         // PREGNANCY is a denormalized column and is never written directly.
-        cv.put(Patients.LOCATION_UUID, locationUuid);
+        // LOCATION_UUID is a denormalized column and is never written directly.
+        // BED_NUMBER is a denormalized column and is never written directly.
         return cv;
     }
 
@@ -74,14 +74,16 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
     }
 
     public Patient(String uuid, String id, String givenName, String familyName,
-                   Sex sex, LocalDate birthdate, boolean pregnancy, String locationUuid) {
+                   Sex sex, LocalDate birthdate, boolean pregnancy,
+                   String locationUuid, String bedNumber) {
         super(uuid);
-        this.id = id;
-        this.givenName = givenName;
-        this.familyName = familyName;
+        this.id = Utils.toNonnull(id);
+        this.givenName = Utils.toNonnull(givenName);
+        this.familyName = Utils.toNonnull(familyName);
         this.sex = sex;
         this.birthdate = birthdate;
         this.pregnancy = pregnancy;
-        this.locationUuid = locationUuid;
+        this.locationUuid = Utils.toNonnull(locationUuid);
+        this.bedNumber = Utils.toNonnull(bedNumber);
     }
 }

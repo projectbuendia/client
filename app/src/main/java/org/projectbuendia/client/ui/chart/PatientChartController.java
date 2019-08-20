@@ -414,13 +414,11 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     public void setDate(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
         Encounter encounter = new Encounter(
-            null, mPatientUuid,
-            // encounter UUID, which the server will generate
-            DateTime.now(),
+            null, mPatientUuid, DateTime.now(),
             new Observation[] {
                 new Observation(conceptUuid, date.toString(), Observation.Type.DATE)
             }, null);
-        mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
+        mAppModel.addEncounter(mCrudEventBus, encounter);
     }
 
     public void showAssignGeneralConditionDialog(
@@ -439,16 +437,14 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
         Encounter encounter = new Encounter(
-            null, mPatientUuid,
-            // encounter UUID, which the server will generate
-            DateTime.now(),
+            null, mPatientUuid, DateTime.now(),
             new Observation[] {
                 new Observation(
                     ConceptUuids.GENERAL_CONDITION_UUID,
                     newConditionUuid,
                     Observation.Type.NON_DATE)
             }, null);
-        mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
+        mAppModel.addEncounter(mCrudEventBus, encounter);
     }
 
     public void showAssignLocationDialog(Context context) {

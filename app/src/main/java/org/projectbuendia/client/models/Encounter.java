@@ -61,7 +61,7 @@ public class Encounter extends Model {
         this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
     }
 
-    public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
+    public static Encounter fromJson(JsonEncounter encounter) {
         List<Observation> observations = new ArrayList<>();
         if (encounter.observations != null) {
             for (String key : encounter.observations.keySet()) {
@@ -69,7 +69,7 @@ public class Encounter extends Model {
                 observations.add(new Observation(key, value, Observation.estimatedTypeFor(value)));
             }
         }
-        return new Encounter(encounter.uuid, patientUuid, encounter.timestamp,
+        return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.timestamp,
             observations.toArray(new Observation[0]), encounter.order_uuids);
     }
 
@@ -79,16 +79,16 @@ public class Encounter extends Model {
         json.put(Server.PATIENT_UUID_KEY, patientUuid);
         json.put(Server.ENCOUNTER_TIMESTAMP, timestamp.getMillis()/1000);
         if (observations.length > 0) {
-            JSONArray observationsJson = new JSONArray();
+            JSONArray jsonObsArray = new JSONArray();
             for (Observation obs : observations) {
-                JSONObject observationJson = new JSONObject();
-                observationJson.put(Server.OBSERVATION_QUESTION_UUID, obs.conceptUuid);
+                JSONObject jsonObs = new JSONObject();
+                jsonObs.put(Server.OBS_QUESTION_UUID, obs.conceptUuid);
                 String valueKey = obs.type == Observation.Type.DATE ?
-                    Server.OBSERVATION_ANSWER_DATE : Server.OBSERVATION_ANSWER_UUID;
-                observationJson.put(valueKey, obs.value);
-                observationsJson.put(observationJson);
+                    Server.OBS_ANSWER_DATE : Server.OBS_ANSWER_UUID;
+                jsonObs.put(valueKey, obs.value);
+                jsonObsArray.put(jsonObs);
             }
-            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observationsJson);
+            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, jsonObsArray);
         }
         if (orderUuids.length > 0) {
             JSONArray orderUuidsJson = new JSONArray();
@@ -162,37 +162,30 @@ public class Encounter extends Model {
     }
 
     /**
-     * An {@link CursorLoader} that loads {@link Encounter}s. Expects the {@link Cursor} to
-     * contain only a single encounter, represented by multiple observations, with one observation per
-     * row.
-     * <p/>
-     * <p>Unlike other {@link CursorLoader}s, {@link Encounter.Loader} must be instantiated
-     * once per patient, since {@link Encounter} contains the patient's UUID as one of its fields,
-     * which is not present in the database representation of an encounter.
+     * A CursorLoader that loads Encounters.  Expects the Cursor to contain only
+     * a single encounter, represented by multiple observations, with one observation per row.
      */
     public static class Loader implements CursorLoader<Encounter> {
-        private String mPatientUuid;
-
-        public Loader(String patientUuid) {
-            mPatientUuid = patientUuid;
-        }
-
         @Override public Encounter fromCursor(Cursor cursor) {
-            final String encounterUuid = cursor.getString(
-                cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
-            final long millis = cursor.getLong(
-                cursor.getColumnIndex(Observations.ENCOUNTER_MILLIS));
+            final String encounterUuid = Utils.getString(cursor, Observations.ENCOUNTER_UUID);
+            final long millis = Utils.getLong(cursor, Observations.ENCOUNTER_MILLIS);
+            String patientUuid = null;
             List<Observation> observations = new ArrayList<>();
-            cursor.move(-1);
+            cursor.move(-1); // TODO(ping): Why?
             while (cursor.moveToNext()) {
-                String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
+                patientUuid = Utils.getString(cursor, Observations.PATIENT_UUID);
+                String conceptUuid = Utils.getString(cursor, Observations.CONCEPT_UUID);
+                String value = Utils.getString(cursor, Observations.VALUE);
                 observations.add(new Observation(
-                    cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
+                    Utils.getString(cursor, Observations.CONCEPT_UUID),
                     value, Observation.estimatedTypeFor(value)
                 ));
             }
-            return new Encounter(encounterUuid, mPatientUuid, new DateTime(millis),
-                observations.toArray(new Observation[observations.size()]), null);
+            if (patientUuid != null) {
+                return new Encounter(encounterUuid, patientUuid, new DateTime(millis),
+                    observations.toArray(new Observation[observations.size()]), null);
+            }
+            return null; // PATIENT_UUID should never be null, so this should never happen
         }
     }
 }

@@ -77,7 +77,10 @@ public class ConceptUuids {
     // The timestamp of an observation for this concept should be the time the order
     // was executed, and the value of the observation should be the UUID of the order.
     public static final String ORDER_EXECUTED_UUID = "buendia_concept_order_executed";
-    public static final String LOCATION_UUID = "buendia_concept_location";
+
+    // This is a custom Buendia-specific concept to indicate where a patient is
+    // placed, as a string consisting of a Location UUID, a slash, and a bed number.
+    public static final String PLACEMENT_UUID = "buendia_concept_placement";
 
 
     // ==== Pulse; used only for health checks and logging messages to the server.

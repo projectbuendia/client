@@ -21,7 +21,6 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Model;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.CursorLoader;
 import org.projectbuendia.client.models.VoidObs;
@@ -65,10 +64,8 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link AddEncounterTask}. */
-    public AddEncounterTask newAddEncounterTask(
-        Patient patient, Encounter encounter, CrudEventBus bus) {
-        return new AddEncounterTask(
-            this, mServer, mContentResolver, patient, encounter, bus);
+    public AddEncounterTask newAddEncounterTask(Encounter encounter, CrudEventBus bus) {
+        return new AddEncounterTask(this, mServer, mContentResolver, encounter, bus);
     }
 
     /** Creates a new {@link SaveOrderTask}. */

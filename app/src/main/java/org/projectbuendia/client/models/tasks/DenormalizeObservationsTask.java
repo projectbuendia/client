@@ -30,6 +30,7 @@ import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.Set;
 
@@ -54,7 +55,7 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
 
     private static final Set<String> DENORMALIZED_CONCEPTS = ImmutableSet.of(
         ConceptUuids.PREGNANCY_UUID,
-        ConceptUuids.LOCATION_UUID
+        ConceptUuids.PLACEMENT_UUID
     );
 
     DenormalizeObservationsTask(
@@ -72,16 +73,22 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
 
     @Override protected PatientUpdateFailedEvent doInBackground(Void... params) {
         String pregnancyValue = getLatestValue(mPatientUuid, ConceptUuids.PREGNANCY_UUID);
-        String locationValue = getLatestValue(mPatientUuid, ConceptUuids.LOCATION_UUID);
+        String placementValue = getLatestValue(mPatientUuid, ConceptUuids.PLACEMENT_UUID);
 
         LOG.i("Denormalizing observations for patient %s", mPatientUuid);
         ContentValues cv = new ContentValues();
-        cv.put(Patients.PREGNANCY, ConceptUuids.isYes(pregnancyValue));
-        cv.put(Patients.LOCATION, locationValue);
+        if (pregnancyValue != null) {
+            cv.put(Patients.PREGNANCY, ConceptUuids.isYes(pregnancyValue));
+        }
+        if (placementValue != null) {
+            String[] parts = Utils.splitFields(placementValue, "/", 2);
+            cv.put(Patients.LOCATION_UUID, parts[0]);
+            cv.put(Patients.BED_NUMBER, parts[1]);
+        }
+
         int count = mContentResolver.update(
             Patients.URI, cv, Patients.UUID + " = ?", new String[] {mPatientUuid}
         );
-
         if (count == 1) return null;
 
         return new PatientUpdateFailedEvent(

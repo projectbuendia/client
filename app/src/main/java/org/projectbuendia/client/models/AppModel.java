@@ -186,8 +186,8 @@ public class AppModel {
      * {@link ItemCreatedEvent} when complete.
      */
     public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
-        addEncounter(bus, patient, new Encounter(
-            null, patient.uuid, DateTime.now(), null, new String[]{orderUuid}
+        addEncounter(bus, new Encounter(
+            null, patient.uuid, DateTime.now(), null, new String[] {orderUuid}
         ));
     }
 
@@ -195,8 +195,8 @@ public class AppModel {
      * Asynchronously adds an encounter to a patient, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addEncounter(CrudEventBus bus, Patient patient, Encounter encounter) {
-        mTaskFactory.newAddEncounterTask(patient, encounter, bus).execute();
+    public void addEncounter(CrudEventBus bus, Encounter encounter) {
+        mTaskFactory.newAddEncounterTask(encounter, bus).execute();
     }
 
     /**

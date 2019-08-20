@@ -19,17 +19,19 @@ import android.support.v4.app.DialogFragment;
 import android.view.WindowManager;
 
 import com.google.android.flexbox.FlexboxLayout;
-import com.google.common.base.Optional;
 
+import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
 import org.projectbuendia.client.utils.ContextUtils;
@@ -54,6 +56,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
         Bundle args = new Bundle();
         args.putString("patientUuid", patient.uuid);
         args.putString("locationUuid", patient.locationUuid);
+        args.putString("bedNumber", patient.bedNumber);
         fragment.setArguments(args);
         return fragment;
     }
@@ -86,11 +89,17 @@ public class PatientLocationDialogFragment extends DialogFragment {
     public void onSubmit() {
         Utils.logUserAction("location_assigned");
         ((PatientChartActivity) getActivity()).getUi().showWaitDialog(R.string.title_updating_patient);
-        PatientDelta delta = new PatientDelta();
+
         Location location = mList.getSelectedLocation();
         String locationUuid = location != null ? location.uuid : null;
-        delta.assignedLocationUuid = Optional.of(locationUuid);
-        mModel.updatePatient(mCrudEventBus, patientUuid, delta);
+
+        mModel.addEncounter(mCrudEventBus, new Encounter(
+            null, patientUuid, DateTime.now(), new Observation[] {
+                new Observation(
+                    ConceptUuids.PLACEMENT_UUID, locationUuid, Observation.Type.NON_DATE
+                )
+            }, null)
+        );
         dismiss();
     }
 }

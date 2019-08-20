@@ -63,7 +63,7 @@ public final class PatientChartControllerTest {
     private static final String PATIENT_NAME_1 = "Bob";
     private static final String PATIENT_ID_1 = "patient-id-1";
     private static final Patient PATIENT =
-        new Patient(PATIENT_UUID_1, PATIENT_ID_1, "Given", "Family", Sex.OTHER, null, false, "");
+        new Patient(PATIENT_UUID_1, PATIENT_ID_1, "Given", "Family", Sex.OTHER, null, false, "", "");
 
     private static final Obs OBS_1 = new Obs(
         0, ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", "");
@@ -153,10 +153,7 @@ public final class PatientChartControllerTest {
         // WHEN a new general condition is set from the dialog
         mController.setCondition(ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID);
         // THEN a new encounter is added
-        verify(mMockAppModel).addEncounter(
-            any(CrudEventBus.class),
-            any(Patient.class),
-            any(Encounter.class));
+        verify(mMockAppModel).addEncounter(any(CrudEventBus.class), any(Encounter.class));
     }
 
     /** Tests that selecting a form from the menu shows loading dialog. */

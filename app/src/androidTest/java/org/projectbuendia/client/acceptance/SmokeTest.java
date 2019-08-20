@@ -18,11 +18,11 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.RequestFuture;
-import com.google.common.base.Optional;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
@@ -30,11 +30,13 @@ import org.odk.collect.android.widgets2.group.TableWidgetGroup;
 import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartController;
@@ -184,12 +186,17 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     /** Moves the patient on the server without updating the local data store. */
     private void internalMovePatient(String patientUuid, String locationUuid) {
-        PatientDelta delta = new PatientDelta();
-        delta.assignedLocationUuid = Optional.of(locationUuid);
-        RequestFuture<JsonPatient> future = RequestFuture.newFuture();
-        App.getServer().updatePatient(patientUuid, delta, future, future);
+        Encounter encounter = new Encounter(
+            null, patientUuid, DateTime.now(), new Observation[] {
+                new Observation(
+                    ConceptUuids.PLACEMENT_UUID, locationUuid, Observation.Type.NON_DATE
+                )
+            }, null
+        );
+        RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
+        App.getServer().addEncounter(encounter, future, future);
         try {
-            JsonPatient patient = future.get();
+            JsonEncounter result = future.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Could not move patient", e);
         }

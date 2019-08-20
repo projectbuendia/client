@@ -14,7 +14,11 @@ package org.projectbuendia.client.models;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.Arrays;
@@ -29,6 +33,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
 // { final @Nonnull String uuid; String name; final @Nonnull ObsPoint point; } then delete
 // getObsPoint(), getObsValue(), compareTo(), getTypeOrdering(), getCodedValueOrdering().
 public final class Obs implements Comparable<Obs> {
+    private static Logger LOG = Logger.create();
+
     /** The time at which this observation was taken. */
     public final DateTime time;
 
@@ -154,5 +160,34 @@ public final class Obs implements Comparable<Obs> {
                 return 4;
         }
         return 0;
+    }
+
+    public JSONObject toJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put(Server.OBS_QUESTION_UUID, conceptUuid);
+        switch (conceptType) {
+            case DATE:
+                json.put(Server.OBS_ANSWER_DATE, value);
+                break;
+            case DATETIME:
+                // Obs stores DATETIME in millis, but we want ISO8601 for JSON.
+                json.put(Server.OBS_ANSWER_DATETIME,
+                    Utils.formatUtc8601(new DateTime(Long.valueOf(value))));
+                break;
+            case NUMERIC:
+                json.put(Server.OBS_ANSWER_NUMBER, getObsValue().number);
+                break;
+            case BOOLEAN:
+            case CODED:
+                json.put(Server.OBS_ANSWER_UUID, value);
+                break;
+            case TEXT:
+                json.put(Server.OBS_ANSWER_TEXT, value);
+                break;
+            default:
+                LOG.w("Ignoring %s with a type that EncounterResource cannot handle", this);
+                break;
+        }
+        return json;
     }
 }
