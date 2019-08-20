@@ -52,7 +52,7 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
                 hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
                 hasText("–")));
 
-        waitUntilVisible(399999, viewThat(
+        waitUntilVisible(viewThat(
                 hasAncestorThat(withId(R.id.attribute_admission_days)),
                 hasText("Day 1")));
 

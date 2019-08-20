@@ -124,10 +124,16 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     private void enterSetting(String title, Object value, String buttonText) {
         click(title);
-        clearAndType(value, viewThat(
+        EditText editText = (EditText) getViewThat(
             isA(EditText.class),
             hasSiblingThat(hasText(""))
-        ));
+        );
+        if (!eq(editText.getText().toString(), value)) {
+            clearAndType(value, viewThat(
+                isA(EditText.class),
+                hasSiblingThat(hasText(""))
+            ));
+        }
         click(buttonText);
     }
 
