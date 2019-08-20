@@ -39,8 +39,8 @@ public class ConceptUuids {
     public static final String PCR_L_UUID = toUuid(162827);
     public static final String PCR_GP_UUID = toUuid(777000025);
 
-    // Essential status flags shown at top right: pregnant, IV access, on O2, cannot eat.
-    public static final String IV_UUID = "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07";
+    // Essential status flags shown at top right: pregnancy, IV access, on O2, cannot eat.
+    public static final String IV_UUID = toUuid(777000011);
     public static final String DYSPHAGIA_UUID = toUuid(888118789);
     public static final String OXYGEN_UUID = toUuid(888162738);
     public static final String PREGNANCY_UUID = toUuid(5272);

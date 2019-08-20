@@ -114,7 +114,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.attribute_admission_days) PatientAttributeView mAdmissionDaysView;
     @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
-    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
+    @InjectView(R.id.special_labels) TextView mSpecialLabelsView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
 
     private static final String EN_DASH = "\u2013";
@@ -368,7 +368,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // TODO/cleanup: As soon as we implement an ObsFormat formatter that displays
         // a date as a count of days (Utils.dayNumberSince), we can replace this logic
         // with a format defined in the profile, decide how to arrange the tiles for
-        // admission date, first symptoms date, pregnancy status, IV status, and Ebola
+        // admission date, first symptoms date, IV status, oxygen status, and Ebola
         // PCR test results, and delete this method.
         @Override public void updateAdmissionDateAndFirstSymptomsDateUi(
             LocalDate admissionDate, LocalDate firstSymptomsDate) {
@@ -449,18 +449,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         }
 
-        // TODO/cleanup: We don't need this special logic for the pregnancy and IV fields
-        // anymore, because it can be implemented using a format configured in the profile
-        // (e.g. the format "{1,yes_no,Pregnant} / {2,yes_no,IV fitted}" with the concepts
-        // concepts "5272,f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").  The only reason we haven't
-        // deleted this code is that we need to do the other tiles like Admission Date to
-        // complete the layout.
-        @Override public void updatePregnancyAndIvStatusUi(Map<String, Obs> observations) {
-            // Pregnancy & IV status
+        // TODO/cleanup: We don't need this special logic for these IV fields anymore,
+        // because it can be implemented using a format configured in the profile
+        // (e.g. the format "{1,yes_no,Oxygen} / {2,yes_no,IV fitted}" with the concepts
+        // concepts "888162738,f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").  The only reason
+        // we haven't deleted this code is that we need to do the other tiles like
+        // Admission Date to complete the layout.
+        @Override public void updateSpecialLabels(Map<String, Obs> observations) {
             List<String> specialLabels = new ArrayList<>();
-            if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
-                specialLabels.add(getString(R.string.pregnant));
-            }
             if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
@@ -470,7 +466,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (ConceptUuids.isYes(observations.get(ConceptUuids.DYSPHAGIA_UUID))) {
                 specialLabels.add(getString(R.string.cannot_eat));
             }
-            mPatientPregnantOrIvView.setText(Joiner.on("\n").join(specialLabels));
+            mSpecialLabelsView.setText(Joiner.on("\n").join(specialLabels));
         }
 
         @Override public void updatePatientConditionUi(String generalConditionUuid) {
@@ -496,7 +492,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
         }
 
-        @Override public void updatePatientDetailsUi(Patient patient, boolean pregnant) {
+        @Override public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
             String id = Utils.orDefault(patient.id, EN_DASH);
             String fullName = Utils.orDefault(patient.givenName, EN_DASH) + " " +
@@ -506,7 +502,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (patient.sex != Sex.UNKNOWN) {
                 labels.add(patient.sex.code);
             }
-            if (pregnant) {
+            if (patient.pregnancy) {
                 labels.add(getString(R.string.pregnant).toLowerCase());
             }
             labels.add(patient.birthdate == null ? App.str(R.string.age_unknown)

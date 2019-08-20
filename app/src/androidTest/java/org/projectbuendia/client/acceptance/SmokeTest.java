@@ -96,7 +96,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
         answerMultipleCodedQuestion("Attributes", "Oxygen mask");
         submitForm(); // step 9
         screenshot("Submitted form");
-        waitFor(viewThat(hasId(R.id.patient_chart_pregnant), hasText("Oxygen")));
+        waitFor(viewThat(hasId(R.id.special_labels), hasText("Oxygen")));
         addOrder("Sunshine", "25 rays", "Get outside!");  // step 10
         screenshot("Added new order");
         editOrder("Sunshine", "Exercise!");  // step 11

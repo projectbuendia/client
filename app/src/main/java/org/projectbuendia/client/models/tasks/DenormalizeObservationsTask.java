@@ -76,7 +76,7 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
 
         LOG.i("Denormalizing observations for patient %s", mPatientUuid);
         ContentValues cv = new ContentValues();
-        cv.put(Patients.PREGNANT, ConceptUuids.isYes(pregnancyValue));
+        cv.put(Patients.PREGNANCY, ConceptUuids.isYes(pregnancyValue));
         cv.put(Patients.LOCATION, locationValue);
         int count = mContentResolver.update(
             Patients.URI, cv, Patients.UUID + " = ?", new String[] {mPatientUuid}

@@ -203,7 +203,7 @@ public interface Contracts {
         String LOCATION_UUID = "location_uuid";
         String BIRTHDATE = "birthdate";  // a local date in yyyy-mm-dd format
         String SEX = "sex";
-        String PREGNANT = "pregnant";  // denormalized observation
+        String PREGNANCY = "pregnancy";  // denormalized observation
         String LOCATION = "location";  // denormalized observation
     }
 

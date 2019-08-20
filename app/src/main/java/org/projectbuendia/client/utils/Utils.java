@@ -424,6 +424,18 @@ public class Utils {
         return millis == null ? null : new DateTime(millis);
     }
 
+    /** Gets a nullable boolean value from a cursor. */
+    public static Boolean getBoolean(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : (c.getLong(index) != 0);
+    }
+
+    /** Gets a boolean value from a cursor, returning a default value instead of null. */
+    public static boolean getBoolean(Cursor c, String columnName, boolean defaultValue) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? defaultValue : (c.getLong(index) != 0);
+    }
+
     /** Gets a nullable integer value from a cursor. */
     public static Integer getInt(Cursor c, String columnName) {
         int index = c.getColumnIndex(columnName);
@@ -431,7 +443,7 @@ public class Utils {
     }
 
     /** Gets an integer value from a cursor, returning a default value instead of null. */
-    public static int getInt(Cursor c, String columnName, @Nonnull int defaultValue) {
+    public static int getInt(Cursor c, String columnName, int defaultValue) {
         int index = c.getColumnIndex(columnName);
         // The cast (Long) c.getLong(index) is necessary to work around the fact that
         // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
