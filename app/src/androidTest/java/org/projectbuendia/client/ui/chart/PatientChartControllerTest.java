@@ -153,7 +153,8 @@ public final class PatientChartControllerTest {
         // WHEN a new general condition is set from the dialog
         mController.setCondition(ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID);
         // THEN a new encounter is added
-        verify(mMockAppModel).addEncounter(any(CrudEventBus.class), any(Encounter.class));
+        verify(mMockAppModel).addObservationEncounter(
+            any(CrudEventBus.class), PATIENT_UUID_1, any(Encounter.Observation.class));
     }
 
     /** Tests that selecting a form from the menu shows loading dialog. */

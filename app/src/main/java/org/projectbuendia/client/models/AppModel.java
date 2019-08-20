@@ -27,6 +27,7 @@ import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 import org.projectbuendia.client.events.data.TypedCursorLoadedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.UpdatePatientTask;
@@ -185,10 +186,17 @@ public class AppModel {
      * Asynchronously adds an encounter that records an order as executed, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
-        addEncounter(bus, new Encounter(
-            null, patient.uuid, DateTime.now(), null, new String[] {orderUuid}
-        ));
+    public void addOrderExecutedEncounter(CrudEventBus bus, String patientUuid, String orderUuid) {
+        mTaskFactory.newAddEncounterTask(new Encounter(
+            null, patientUuid, DateTime.now(), null, new String[] {orderUuid}
+        ), bus).execute();
+    }
+
+    /** Adds a single observation in an encounter, posting ItemCreatedEvent when complete. */
+    public void addObservationEncounter(CrudEventBus bus, String patientUuid, Observation obs) {
+        mTaskFactory.newAddEncounterTask(new Encounter(
+            null, patientUuid, DateTime.now(), new Observation[] {obs}, null
+        ), bus).execute();
     }
 
     /**

@@ -413,12 +413,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void setDate(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
-        Encounter encounter = new Encounter(
-            null, mPatientUuid, DateTime.now(),
-            new Observation[] {
-                new Observation(conceptUuid, date.toString(), Observation.Type.DATE)
-            }, null);
-        mAppModel.addEncounter(mCrudEventBus, encounter);
+        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Observation(
+            conceptUuid, date.toString(), Observation.Type.DATE
+        ));
     }
 
     public void showAssignGeneralConditionDialog(
@@ -436,15 +433,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
-        Encounter encounter = new Encounter(
-            null, mPatientUuid, DateTime.now(),
-            new Observation[] {
-                new Observation(
-                    ConceptUuids.GENERAL_CONDITION_UUID,
-                    newConditionUuid,
-                    Observation.Type.NON_DATE)
-            }, null);
-        mAppModel.addEncounter(mCrudEventBus, encounter);
+        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Observation(
+            ConceptUuids.GENERAL_CONDITION_UUID, newConditionUuid, Observation.Type.NON_DATE
+        ));
     }
 
     public void showAssignLocationDialog(Context context) {
@@ -693,7 +684,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
             Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
-                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
+                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient.uuid, order.uuid);
             }
         }
     }

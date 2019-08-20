@@ -20,14 +20,12 @@ import android.view.WindowManager;
 
 import com.google.android.flexbox.FlexboxLayout;
 
-import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
@@ -92,14 +90,9 @@ public class PatientLocationDialogFragment extends DialogFragment {
 
         Location location = mList.getSelectedLocation();
         String locationUuid = location != null ? location.uuid : null;
-
-        mModel.addEncounter(mCrudEventBus, new Encounter(
-            null, patientUuid, DateTime.now(), new Observation[] {
-                new Observation(
-                    ConceptUuids.PLACEMENT_UUID, locationUuid, Observation.Type.NON_DATE
-                )
-            }, null)
-        );
+        mModel.addObservationEncounter(mCrudEventBus, patientUuid, new Observation(
+            ConceptUuids.PLACEMENT_UUID, locationUuid, Observation.Type.NON_DATE
+        ));
         dismiss();
     }
 }
