@@ -22,7 +22,6 @@ import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.events.user.UserAddFailedEvent;
 import org.projectbuendia.client.events.user.UserAddedEvent;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -99,9 +98,6 @@ public final class LoginController {
      * after this function returns.
      */
     public void init() {
-        if (mSettings.getPeriodicSyncDisabled()) {
-            BigToast.show(R.string.periodic_sync_currently_disabled);
-        }
         mEventBus.register(mSubscriber);
         mFragmentUi.showSpinner(true);
         mUserManager.loadKnownUsers();
