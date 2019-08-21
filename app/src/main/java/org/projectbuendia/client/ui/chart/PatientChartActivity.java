@@ -502,8 +502,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 Utils.orDefault(patient.familyName, EN_DASH);
 
             List<String> labels = new ArrayList<>();
-            if (patient.sex != Sex.UNKNOWN) {
-                labels.add(patient.sex.code);
+            if (patient.sex != null) {
+                labels.add(Sex.getAbbreviation(patient.sex));
             }
             if (patient.pregnancy) {
                 labels.add(getString(R.string.pregnant).toLowerCase());

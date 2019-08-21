@@ -26,7 +26,7 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
         Utils.getString(cursor, Patients.ID),
         Utils.getString(cursor, Patients.GIVEN_NAME),
         Utils.getString(cursor, Patients.FAMILY_NAME),
-        Sex.forCode(Utils.getString(cursor, Patients.SEX)),
+        Sex.nullableValueOf(Utils.getString(cursor, Patients.SEX)),
         Utils.getLocalDate(cursor, Patients.BIRTHDATE),
         Utils.getBoolean(cursor, Patients.PREGNANCY, false),
         Utils.getString(cursor, Patients.LOCATION_UUID),
@@ -46,7 +46,8 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
     public static Patient fromJson(JsonPatient patient) {
         return new Patient(
             patient.uuid, patient.id, patient.given_name, patient.family_name,
-            Sex.forCode(patient.sex), patient.birthdate, false, "", "");
+            patient.sex, patient.birthdate, false /* pregnancy */,
+            "" /* locationUuid */, "" /* bedNumber */);
     }
 
     @Override public int compareTo(Patient other) {
@@ -60,7 +61,7 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
         cv.put(Patients.ID, id);
         cv.put(Patients.GIVEN_NAME, givenName);
         cv.put(Patients.FAMILY_NAME, familyName);
-        cv.put(Patients.SEX, sex.code);
+        cv.put(Patients.SEX, Sex.nullableNameOf(sex));
         cv.put(Patients.BIRTHDATE, Utils.formatDate(birthdate));
         // PREGNANCY is a denormalized column and is never written directly.
         // LOCATION_UUID is a denormalized column and is never written directly.

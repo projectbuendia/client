@@ -122,8 +122,12 @@
   <string name="chart_last_updated">"Graphique dernière mise à jour: "</string>
   <string name="last_observation_none">Aucune observation</string>
   <string name="male">Masculin</string>
-  <string name="female">Feminin</string>
+  <string name="female">Féminin</string>
+  <string name="other">Autre</string>
   <string name="unknown">Inconnu</string>
+  <string name="sex_male_abbreviation">M</string>
+  <string name="sex_female_abbreviation">F</string>
+  <string name="sex_other_abbreviation">A</string>
   <string name="title_updating_patient">Mise à jour du patient</string>
   <string name="title_adding_new_patient">Ajout d\'un nouveau patient</string>
   <string name="please_wait">Attendez SVP</string>

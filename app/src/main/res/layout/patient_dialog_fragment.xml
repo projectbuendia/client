@@ -144,19 +144,13 @@
             android:id="@+id/patient_sex_male"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8sp"
             android:text="@string/male" />
-        <!--
         <RadioButton
-            android:id="@+id/sex_other"
+            android:id="@+id/patient_sex_other"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/other" />
-        <RadioButton
-            android:id="@+id/sex_unknown"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unknown" />
-        -->
       </RadioGroup>
     </TableRow>
 

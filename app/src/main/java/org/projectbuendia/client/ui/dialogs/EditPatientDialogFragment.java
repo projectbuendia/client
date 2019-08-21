@@ -17,7 +17,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -51,6 +50,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
@@ -68,13 +68,15 @@ public class EditPatientDialogFragment extends DialogFragment {
     @InjectView(R.id.patient_family_name) EditText mFamilyName;
     @InjectView(R.id.patient_age_years) EditText mAgeYears;
     @InjectView(R.id.patient_age_months) EditText mAgeMonths;
-    @InjectView(R.id.patient_sex) RadioGroup mSex;
+    @InjectView(R.id.patient_sex) RadioGroup mSexRadioGroup;
     @InjectView(R.id.patient_sex_female) RadioButton mSexFemale;
     @InjectView(R.id.patient_sex_male) RadioButton mSexMale;
+    @InjectView(R.id.patient_sex_other) RadioButton mSexOther;
 
     private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
     private LayoutInflater mInflater;
+    private ToggleRadioGroup<Sex> mSex;
     private boolean mAgeChanged;
 
     /** Creates a new instance and registers the given UI, if specified. */
@@ -88,7 +90,7 @@ public class EditPatientDialogFragment extends DialogFragment {
             args.putString("givenName", patient.givenName);
             args.putString("familyName", patient.familyName);
             args.putString("birthdate", Utils.formatDate(patient.birthdate));
-            args.putString("sex", patient.sex.code);
+            args.putString("sex", Sex.nullableNameOf(patient.sex));
         }
         fragment.setArguments(args);
         return fragment;
@@ -98,6 +100,35 @@ public class EditPatientDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         App.inject(this);
         mInflater = LayoutInflater.from(getActivity());
+    }
+
+    @Override public @Nonnull Dialog onCreateDialog(Bundle savedInstanceState) {
+        View fragment = mInflater.inflate(R.layout.patient_dialog_fragment, null);
+        ButterKnife.inject(this, fragment);
+
+        Bundle args = getArguments();
+        String title = args.getBoolean("new") ?
+            getString(R.string.title_activity_patient_add) :
+            getString(R.string.action_edit_patient);
+        populateFields(args);
+
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+            .setCancelable(false) // Disable auto-cancel.
+            .setTitle(title)
+            .setPositiveButton(getString(R.string.ok), null)
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setView(fragment)
+            .create();
+
+        // To prevent the dialog from being automatically dismissed, we have to
+        // override the listener instead of passing it in to setPositiveButton.
+        dialog.setOnShowListener(di ->
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(view -> onSubmit(dialog))
+        );
+
+        focusFirstEmptyField(dialog);
+        return dialog;
     }
 
     private void populateFields(Bundle args) {
@@ -122,17 +153,15 @@ public class EditPatientDialogFragment extends DialogFragment {
             mAgeYears.setText(String.valueOf(age.getYears()));
             mAgeMonths.setText(String.valueOf(age.getMonths()));
         }
-        switch (Sex.forCode(args.getString("sex", Sex.UNKNOWN.code))) {
-            case FEMALE:
-                mSexFemale.setChecked(true);
-                break;
-            case MALE:
-                mSexMale.setChecked(true);
-                break;
-        }
+
+        Sex sex = Sex.nullableValueOf(args.getString("sex"));
+        mSexFemale.setTag(Sex.FEMALE);
+        mSexMale.setTag(Sex.MALE);
+        mSexOther.setTag(Sex.OTHER);
+        mSex = new ToggleRadioGroup<>(mSexRadioGroup);
+        mSex.setSelection(sex);
 
         mAgeChanged = false;
-
         TextWatcher ageEditedWatcher = new AgeEditedWatcher();
         mAgeYears.addTextChangedListener(ageEditedWatcher);
         mAgeMonths.addTextChangedListener(ageEditedWatcher);
@@ -143,6 +172,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
         String familyName = Utils.toNonemptyOrNull(mFamilyName.getText().toString().trim());
+        Sex sex = mSex.getSelection();
         String ageYears = mAgeYears.getText().toString().trim();
         String ageMonths = mAgeMonths.getText().toString().trim();
         LocalDate birthdate = null;
@@ -178,19 +208,6 @@ public class EditPatientDialogFragment extends DialogFragment {
             valid = false;
         }
         if (!valid) return;
-
-        Sex sex = null;
-        // TODO: This should start out as "Sex sex = null" and then get set to female, male,
-        // other, or unknown if any button is selected (there should be four buttons) -- so
-        // that we can distinguish "no change to sex" (null) from "change sex to unknown" ("U").
-        switch (mSex.getCheckedRadioButtonId()) {
-            case R.id.patient_sex_female:
-                sex = Sex.FEMALE;
-                break;
-            case R.id.patient_sex_male:
-                sex = Sex.MALE;
-                break;
-        }
 
         if (!idPrefix.isEmpty()) {
             id = idPrefix + "/" + id;
@@ -259,33 +276,6 @@ public class EditPatientDialogFragment extends DialogFragment {
         // If all fields are populated, default to the end of the given name field.
         mGivenName.requestFocus();
         mGivenName.setSelection(mGivenName.getText().length());
-    }
-
-    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.patient_dialog_fragment, null);
-        ButterKnife.inject(this, fragment);
-
-        Bundle args = getArguments();
-        String title = args.getBoolean("new") ? getString(R.string.title_activity_patient_add) : getString(R.string.action_edit_patient);
-        populateFields(args);
-
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
-            .setCancelable(false) // Disable auto-cancel.
-            .setTitle(title)
-            .setPositiveButton(getString(R.string.ok), null)
-            .setNegativeButton(getString(R.string.cancel), null)
-            .setView(fragment)
-            .create();
-
-        // To prevent the dialog from being automatically dismissed, we have to
-        // override the listener instead of passing it in to setPositiveButton.
-        dialog.setOnShowListener(di ->
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                .setOnClickListener(view -> onSubmit(dialog))
-        );
-
-        focusFirstEmptyField(dialog);
-        return dialog;
     }
 
     private class AgeEditedWatcher implements TextWatcher {
