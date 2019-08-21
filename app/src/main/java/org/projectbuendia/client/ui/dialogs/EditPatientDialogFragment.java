@@ -19,6 +19,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -73,6 +75,7 @@ public class EditPatientDialogFragment extends DialogFragment {
     private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
     private LayoutInflater mInflater;
+    private boolean mAgeChanged;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static EditPatientDialogFragment newInstance(Patient patient) {
@@ -127,6 +130,12 @@ public class EditPatientDialogFragment extends DialogFragment {
                 mSexMale.setChecked(true);
                 break;
         }
+
+        mAgeChanged = false;
+
+        TextWatcher ageEditedWatcher = new AgeEditedWatcher();
+        mAgeYears.addTextChangedListener(ageEditedWatcher);
+        mAgeMonths.addTextChangedListener(ageEditedWatcher);
     }
 
     public void onSubmit(DialogInterface dialog) {
@@ -144,10 +153,24 @@ public class EditPatientDialogFragment extends DialogFragment {
             setError(mId, R.string.patient_validation_missing_id);
             valid = false;
         }
-        if (!ageYears.isEmpty() || !ageMonths.isEmpty()) {
+        if (mAgeChanged) {
+            // We should only save/update the age when the fields have been edited;
+            // otherwise, simply opening and submitting the dialog would shift the
+            // birthdate every time to make the age a whole number of months.
             int years = Integer.parseInt("0" + ageYears);
             int months = Integer.parseInt("0" + ageMonths);
+
             birthdate = LocalDate.now().minusYears(years).minusMonths(months);
+
+            // Pick a birthdate just one day earlier than necessary to put the age
+            // at the desired number of years and months, so that the same age
+            // appears on all tablets regardless of timezone.  Showing different
+            // ages in different timezones isn't truly avoidable because ages are
+            // stored as local dates (not timestamps), but the extra day will at
+            // least prevent some initial confusion.  After all, the entered age
+            // is only precise to the month; the confusion comes from emphasizing
+            // precision that isn't there.
+            birthdate = birthdate.minusDays(1);
         }
         if (birthdate != null && new Period(
             birthdate, LocalDate.now().plusDays(1)).getYears() >= 120) {
@@ -263,5 +286,13 @@ public class EditPatientDialogFragment extends DialogFragment {
 
         focusFirstEmptyField(dialog);
         return dialog;
+    }
+
+    private class AgeEditedWatcher implements TextWatcher {
+        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+        @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+        @Override public void afterTextChanged(Editable s) {
+            mAgeChanged = true;
+        }
     }
 }
