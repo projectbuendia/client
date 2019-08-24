@@ -10,6 +10,7 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -18,7 +19,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
 public class LocationForestProvider {
     private LocationForest currentForest = null;
-    private String currentLocale = null;
+    private Locale currentLocale = null;
     private Runnable onForestReplacedListener = null;
 
     private final ContentResolver resolver;
@@ -51,7 +52,7 @@ public class LocationForestProvider {
         resolver.unregisterContentObserver(patientChangeObserver);
     }
 
-    public @Nonnull LocationForest getForest(String locale) {
+    public @Nonnull LocationForest getForest(Locale locale) {
         if (currentForest != null && eq(currentLocale, locale)) {
             return currentForest;
         }
@@ -64,7 +65,7 @@ public class LocationForestProvider {
         onForestReplacedListener = listener;
     }
 
-    private LocationForest loadForest(String locale) {
+    private LocationForest loadForest(Locale locale) {
         Uri uri = Contracts.getLocalizedLocationsUri(locale);
         try (Cursor cursor = resolver.query(uri, null, null, null, null)) {
             return new LocationForest(new TypedCursorWithLoader<>(cursor, LocationQueryResult.LOADER));

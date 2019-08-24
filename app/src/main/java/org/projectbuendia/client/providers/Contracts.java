@@ -15,6 +15,9 @@ import android.content.ContentResolver;
 import android.net.Uri;
 
 import org.projectbuendia.client.BuildConfig;
+import org.projectbuendia.client.utils.Utils;
+
+import java.util.Locale;
 
 /** The external contracts for {@link BuendiaProvider}. */
 @SuppressWarnings("unused")
@@ -254,9 +257,9 @@ public interface Contracts {
     }
 
     /** Returns the content URI for the localized locations for a given locale. */
-    static Uri getLocalizedLocationsUri(String locale) {
+    static Uri getLocalizedLocationsUri(Locale locale) {
         return LocalizedLocations.URI.buildUpon()
-            .appendPath(locale)
+            .appendPath(Utils.toLanguageTag(locale))
             .build();
     }
 }

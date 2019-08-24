@@ -14,6 +14,8 @@ package org.projectbuendia.client;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.preference.PreferenceManager;
 
 import com.android.volley.VolleyLog;
@@ -27,8 +29,10 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.sync.ConceptService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.user.UserManager;
+import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
 
@@ -47,6 +51,7 @@ public class App extends Application {
     private static UserManager sUserManager;
     private static OpenMrsConnectionDetails sConnectionDetails;
     private static Server sServer;
+    private static ConceptService sConceptService;
 
     private ObjectGraph mObjectGraph;
     @Inject AppModel mModel;
@@ -76,6 +81,10 @@ public class App extends Application {
 
     public static synchronized ContentResolver getResolver() {
         return sInstance.getContentResolver();
+    }
+
+    public static synchronized SharedPreferences getPrefs() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext());
     }
 
     public static synchronized AppModel getModel() {
@@ -110,6 +119,10 @@ public class App extends Application {
         return sServer;
     }
 
+    public static synchronized ConceptService getConceptService() {
+        return sConceptService;
+    }
+
     @Override public void onCreate() {
         sInstance = this;
         Collect.onCreate(this);
@@ -138,10 +151,17 @@ public class App extends Application {
             sCrudEventBus = mCrudEventBus;
             sHealthMonitor = mHealthMonitor;
             sSyncManager = mSyncManager;
-            sUserManager = mUserManager; // TODO: Remove when Daggered.
-            sConnectionDetails = mOpenMrsConnectionDetails; // TODO: Remove when Daggered.
-            sServer = mServer; // TODO: Remove when Daggered.
+            sUserManager = mUserManager;
+            sConnectionDetails = mOpenMrsConnectionDetails;
+            sServer = mServer;
+            sConceptService = new ConceptService(getContentResolver());
+            Utils.applyLocaleSetting(this);
             mHealthMonitor.start();
         }
+    }
+
+    @Override public void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        Utils.applyLocaleSetting(this);
     }
 }

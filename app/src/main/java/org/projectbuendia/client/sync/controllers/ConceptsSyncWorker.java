@@ -12,7 +12,6 @@ import org.projectbuendia.client.json.JsonConcept;
 import org.projectbuendia.client.json.JsonConceptsResponse;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
@@ -62,11 +61,15 @@ public class ConceptsSyncWorker implements SyncWorker {
             }
         }
         client.bulkInsert(Contracts.Concepts.URI,
-                conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
+            conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
         client.bulkInsert(Contracts.ConceptNames.URI,
-                conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
-
-        ChartDataHelper.invalidateLoadedConceptData();
+            conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
         return true;
+    }
+
+    @Override public void finalize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client
+    ) throws Throwable {
+        App.getConceptService().invalidate();
     }
 }

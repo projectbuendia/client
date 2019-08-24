@@ -11,9 +11,15 @@
 
 package org.projectbuendia.client.utils;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -70,13 +76,13 @@ public class Utils {
     public static final DateTime MAX_DATETIME = new DateTime(MAX_TIME, DateTimeZone.UTC);
     public static final LocalDate MIN_DATE = new LocalDate(0, 1, 1).year().withMinimumValue();
     public static final LocalDate MAX_DATE = new LocalDate(0, 12, 31).year().withMaximumValue();
+
     public static final int SECOND = 1000;  // in ms
     public static final int MINUTE = 60 * SECOND;  // in ms
     public static final int HOUR = 60 * MINUTE;  // in ms
     public static final int DAY = 24 * HOUR;  // in ms
 
     private static Map<Integer, String> sHttpMethods = initHttpMethods();
-
     private static Map<Integer, String> initHttpMethods() {
         Map<Integer, String> map = new HashMap<>();
         map.put(Request.Method.DEPRECATED_GET_OR_POST, "DEPRECATED_GET_OR_POST");
@@ -90,6 +96,8 @@ public class Utils {
         map.put(Request.Method.PATCH, "PATCH");
         return map;
     }
+    private static final Bundle NO_TRANSITION =
+        ActivityOptions.makeCustomAnimation(App.getContext(), 0, 0).toBundle();
 
     /** Prevent instantiation. */
     private Utils() { }
@@ -385,6 +393,49 @@ public class Utils {
         int years = age.getYears(), months = age.getMonths();
         return years >= 5 ? App.str(R.string.abbrev_n_years, years) :
             App.str(R.string.abbrev_n_months, months + years * 12);
+    }
+
+
+    // ==== Localization ====
+
+    public static Locale toLocale(String languageTag) {
+        if (Build.VERSION.SDK_INT >= 21) return Locale.forLanguageTag(languageTag);
+        String[] parts = splitFields(languageTag, "_", 2);
+        return new Locale(parts[0], parts[1]);
+    }
+
+    public static String toLanguageTag(Locale locale) {
+        if (Build.VERSION.SDK_INT >= 21) return locale.toLanguageTag();
+        return locale.getLanguage() +
+            (Utils.isEmpty(locale.getCountry()) ? "" : "_" + locale.getCountry());
+    }
+
+    public static Context applyLocaleSetting(Context context) {
+        return applyLocale(context, App.getSettings().getLocale());
+    }
+
+    /** Sets the default locale and returns a context configured for the given locale. */
+    public static Context applyLocale(Context context, Locale locale) {
+        Locale.setDefault(locale);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Configuration config = context.getResources().getConfiguration();
+            config.setLocale(locale);
+            config.setLayoutDirection(locale);
+            return context.createConfigurationContext(config);
+        } else {
+            Resources resources = context.getResources();
+            Configuration config = resources.getConfiguration();
+            config.locale = locale;
+            config.setLayoutDirection(locale);
+            resources.updateConfiguration(config, resources.getDisplayMetrics());
+            return context;
+        }
+    }
+
+    /** Restarts the current activity (for use after a configuration change). */
+    public static void restartActivity(Activity activity) {
+        activity.finish();
+        activity.startActivity(activity.getIntent(), NO_TRANSITION);
     }
 
 

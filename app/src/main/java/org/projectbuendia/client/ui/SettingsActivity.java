@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -21,26 +22,31 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -54,6 +60,8 @@ import javax.inject.Inject;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends PreferenceActivity {
+    private static final Logger LOG = Logger.create();
+
     /**
      Controls whether to always show the simplified UI, where settings are
      arranged in a single list without a left navigation panel.
@@ -63,6 +71,7 @@ public class SettingsActivity extends PreferenceActivity {
         "openmrs_user",
         "openmrs_password",
         "openmrs_root_url",
+        "locale",
         "package_server_root_url",
         "apk_update_interval",
         "small_sync_interval",
@@ -87,7 +96,7 @@ public class SettingsActivity extends PreferenceActivity {
             return true; // prevent endless recursion
 
         Context context = pref.getContext();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = App.getPrefs();
         String server = prefs.getString("server", "");
         String str = "" + value;
         try {
@@ -204,19 +213,28 @@ public class SettingsActivity extends PreferenceActivity {
     private static void initPrefs(PreferenceFragment fragment) {
         textPrefs.clear();
         for (String key : PREF_KEYS) {
-            initPref(fragment.findPreference(key));
+            initPref(fragment.findPreference(key), fragment.getActivity());
         }
     }
 
     /** Sets up the listener and summary for a preference. */
-    private static void initPref(@Nullable Preference pref) {
-        if (pref != null) {
-            pref.setOnPreferenceChangeListener(sPrefListener);
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
-            updatePrefSummary(pref, prefs.getAll().get(pref.getKey()));
-            if (pref instanceof EditTextPreference) {
-                textPrefs.put(pref.getKey(), (EditTextPreference) pref);
-            }
+    private static void initPref(@Nullable Preference pref, Activity activity) {
+        if (pref == null) return;
+
+        updatePrefSummary(pref, App.getPrefs().getAll().get(pref.getKey()));
+        pref.setOnPreferenceChangeListener(sPrefListener);
+
+        if (pref instanceof EditTextPreference) {
+            textPrefs.put(pref.getKey(), (EditTextPreference) pref);
+        }
+        if (eq(pref.getKey(), "locale")) {
+            ListPreference localePref = (ListPreference) pref;
+            localePref.setEntryValues(AppSettings.getLocaleOptionValues());
+            localePref.setEntries(AppSettings.getLocaleOptionLabels());
+            localePref.setOnPreferenceChangeListener((changedPref, value) -> {
+                Utils.restartActivity(activity); // to apply the new locale setting
+                return true;
+            });
         }
     }
 
@@ -232,7 +250,19 @@ public class SettingsActivity extends PreferenceActivity {
             case "medium_sync_interval":
             case "large_sync_interval":
                 pref.setSummary(str);
+                break;
+            case "openmrs_password":
+                pref.setSummary(Utils.isEmpty(str) ? "" :  "••••••••");
+                break;
+            case "locale":
+                Locale locale = Utils.toLocale(str);
+                pref.setSummary(locale.getDisplayName(locale));
+                break;
         }
+    }
+
+    @Override protected void attachBaseContext(Context base) {
+        super.attachBaseContext(Utils.applyLocaleSetting(base));
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -281,7 +311,7 @@ public class SettingsActivity extends PreferenceActivity {
     private static void initPrefs(PreferenceActivity activity) {
         textPrefs.clear();
         for (String key : PREF_KEYS) {
-            initPref(activity.findPreference(key));
+            initPref(activity.findPreference(key), activity);
         }
     }
 
@@ -295,6 +325,7 @@ public class SettingsActivity extends PreferenceActivity {
         super.onPause();
         if (!mAppModel.isReady()) {
             // The database was cleared; go back to the login activity.
+            LOG.w("Database is empty; restarting at login activity");
             startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
         }
     }
