@@ -112,6 +112,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     private void initSettings() {
         click(R.id.settings);
+        waitFor("Periodic sync disabled");
         clickIfUnchecked(viewThat(
             isA(CheckBox.class),
             whoseParent(hasSiblingThat(hasChildThat(hasText("Periodic sync disabled"))))

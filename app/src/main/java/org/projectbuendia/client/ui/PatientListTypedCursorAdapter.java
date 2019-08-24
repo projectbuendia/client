@@ -44,6 +44,8 @@ import java.util.Map;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+import static org.projectbuendia.client.utils.Utils.eq;
+
 /**
  * A {@link BaseExpandableListAdapter} that wraps a {@link TypedCursor} of {@link Patient}'s,
  * displaying these patients grouped by location and filtered by a specified
@@ -146,6 +148,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         String givenName = Utils.orDefault(patient.givenName, EN_DASH);
         String familyName = Utils.orDefault(patient.familyName, EN_DASH);
         holder.mName.setText(givenName + " " + familyName);
+        holder.mBedNumber.setText(Utils.toNonnull(patient.bedNumber));
         holder.mId.setText(patient.id);
         holder.mId.setTextColor(status.getForegroundColor());
         holder.mId.setBackgroundColor(status.getBackgroundColor());
@@ -226,9 +229,13 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         mPatientsByLocation.keySet().toArray(mLocations);
         forest.sort(mLocations);
 
-        // Sort the patient lists within each location using the default comparator.
+        // Sort the patient lists within each location by bed number, then ID.
         for (List<Patient> patients : mPatientsByLocation.values()) {
-            Collections.sort(patients);
+            Collections.sort(patients, (a, b) ->
+                !eq(a.bedNumber, b.bedNumber) ?
+                    Utils.ALPHANUMERIC_COMPARATOR.compare(a.bedNumber, b.bedNumber) :
+                    Utils.ALPHANUMERIC_COMPARATOR.compare(a.id, b.id)
+            );
         }
 
         new FetchObservationsTask().execute();
@@ -260,6 +267,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     static class ViewHolder {
         @InjectView(R.id.listview_cell_search_results_name) TextView mName;
+        @InjectView(R.id.listview_cell_search_results_bed_number) TextView mBedNumber;
         @InjectView(R.id.listview_cell_search_results_id) TextView mId;
         @InjectView(R.id.listview_cell_search_results_sex) ImageView mSex;
         @InjectView(R.id.listview_cell_search_results_age) TextView mAge;
