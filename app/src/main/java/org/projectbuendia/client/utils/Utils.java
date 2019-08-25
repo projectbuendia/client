@@ -46,6 +46,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.net.Server;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -454,6 +455,15 @@ public class Utils {
         } catch (Exception e) {  // should never happen
             return null;
         }
+    }
+
+    public static void recursivelyDelete(File path) {
+        if (path.isDirectory()) {
+            for (File child : path.listFiles()) {
+                recursivelyDelete(child);
+            }
+        }
+        path.delete();
     }
 
 
