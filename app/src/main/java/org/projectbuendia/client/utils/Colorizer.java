@@ -18,29 +18,21 @@ import java.util.Random;
 
 /** A class that generates aesthetically pleasing colors based on a color wheel. */
 public class Colorizer {
+    public static final int[] DEFAULT_PALETTE = {
+        0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00,
+        0xFFFF7000, 0xFF7FFF00, 0xFF00FF7F, 0xFF007FFF, 0xFF7F00FF, 0xFFFF007F
+    };
+
     /** A {@link Colorizer} that has 12 colors. */
-    public static final Colorizer C_12;
+    public static final Colorizer C_12 = new Colorizer(DEFAULT_PALETTE, 0, 0);
     /** A {@link Colorizer} that has 24 colors. */
-    public static final Colorizer C_24;
+    public static final Colorizer C_24 = new Colorizer(DEFAULT_PALETTE, 1, 0);
     /** A {@link Colorizer} that has 48 colors. */
-    public static final Colorizer C_48;
+    public static final Colorizer C_48 = new Colorizer(DEFAULT_PALETTE, 2, 0);
     /** A {@link Colorizer} that has 96 colors. */
-    public static final Colorizer C_96;
+    public static final Colorizer C_96 = new Colorizer(DEFAULT_PALETTE, 3, 0);
     private static int[] sDefaultPalette;
     private static int[][] sDefaultPaletteBytes;
-
-    static {
-        // The above fields are initialized here because initialization must occur in a
-        // specific order; the palettes must be set before any constructors are safe to call.
-        sDefaultPalette = new int[] {
-            0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00,
-            0xFFFF7000, 0xFF7FFF00, 0xFF00FF7F, 0xFF007FFF, 0xFF7F00FF, 0xFFFF007F};
-        sDefaultPaletteBytes = getPaletteBytes(sDefaultPalette);
-        C_12 = new Colorizer(0);
-        C_24 = new Colorizer(1);
-        C_48 = new Colorizer(2);
-        C_96 = new Colorizer(3);
-    }
 
     private final LruCache<Integer, Integer> mCache = new LruCache<>(128);
     private final int[][] mPaletteBytes;
@@ -49,10 +41,6 @@ public class Colorizer {
     private final int mColorCount;
     private final double mShift;
     private final Random mRandom;
-
-    public static Colorizer withPalette(int... palette) {
-        return new Colorizer(Arrays.copyOf(palette, palette.length));
-    }
 
     public Colorizer interpolate(int interpolation) {
         return new Colorizer(this, interpolation);
@@ -133,8 +121,12 @@ public class Colorizer {
         return mRandom.nextInt();
     }
 
-    private Colorizer(int[] palette) {
+    public Colorizer(int... palette) {
         this(getPaletteBytes(palette), 0, 0.);
+    }
+
+    private Colorizer(int[] palette, int interpolations, double shift) {
+        this(getPaletteBytes(palette), interpolations, shift);
     }
 
     private Colorizer(int[][] paletteBytes, int interpolations, double shift) {
@@ -157,10 +149,6 @@ public class Colorizer {
         }
 
         return paletteBytes;
-    }
-
-    private Colorizer(int interpolations) {
-        this(sDefaultPaletteBytes, interpolations, 0.);
     }
 
     private Colorizer(Colorizer colorizer, int interpolations) {

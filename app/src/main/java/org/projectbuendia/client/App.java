@@ -16,6 +16,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
 import com.android.volley.VolleyLog;
@@ -48,6 +49,7 @@ public class App extends Application {
 
     // Global instances of all our singletons.
     private static App sInstance;
+    private static Resources sResources;
     private static AppModel sModel;
     private static AppSettings sSettings;
     private static CrudEventBus sCrudEventBus;
@@ -76,8 +78,12 @@ public class App extends Application {
         return sInstance.getApplicationContext();
     }
 
+    public static void setResources(Resources resources) {
+        sResources = resources;
+    }
+
     public static String str(int id, Object... args) {
-        return sInstance.getString(id, args);
+        return sResources.getString(id, args);
     }
 
     public static void inject(Object obj) {
@@ -130,6 +136,7 @@ public class App extends Application {
 
     @Override public void onCreate() {
         sInstance = this;
+        sResources = this.getResources();
         Collect.onCreate(this);
         super.onCreate();
 

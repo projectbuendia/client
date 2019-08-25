@@ -418,19 +418,21 @@ public class Utils {
     /** Sets the default locale and returns a context configured for the given locale. */
     public static Context applyLocale(Context context, Locale locale) {
         Locale.setDefault(locale);
+        Resources resources = context.getResources();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Configuration config = context.getResources().getConfiguration();
+            Configuration config = resources.getConfiguration();
             config.setLocale(locale);
             config.setLayoutDirection(locale);
-            return context.createConfigurationContext(config);
+            context = context.createConfigurationContext(config);
+            resources = context.getResources();
         } else {
-            Resources resources = context.getResources();
             Configuration config = resources.getConfiguration();
             config.locale = locale;
             config.setLayoutDirection(locale);
             resources.updateConfiguration(config, resources.getDisplayMetrics());
-            return context;
         }
+        App.setResources(resources);
+        return context;
     }
 
     /** Restarts the current activity (for use after a configuration change). */

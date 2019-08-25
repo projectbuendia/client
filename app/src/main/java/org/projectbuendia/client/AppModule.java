@@ -46,6 +46,7 @@ import org.projectbuendia.client.ui.lists.SingleLocationFragment;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.login.LoginFragment;
 import org.projectbuendia.client.updater.UpdateModule;
+import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.user.UserModule;
 import org.projectbuendia.client.utils.UtilsModule;
 
@@ -68,6 +69,7 @@ import dagger.Provides;
     injects = {
         App.class,
         AppSettings.class,
+        UserManager.class,
         SyncManager.class,
 
         // TODO: Move these into activity-specific modules.

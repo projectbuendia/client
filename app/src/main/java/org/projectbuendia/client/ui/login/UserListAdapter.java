@@ -18,9 +18,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.utils.Colorizer;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -28,11 +28,8 @@ import butterknife.InjectView;
 /** {@link ArrayAdapter} for a grid of users. */
 final class UserListAdapter extends ArrayAdapter<JsonUser> {
 
-    private final Colorizer mColorizer;
-
-    public UserListAdapter(Context context, Colorizer colorizer) {
+    public UserListAdapter(Context context) {
         super(context, R.layout.login_grid_user_item);
-        mColorizer = colorizer;
     }
 
     @Override public View getView(int position, View view, ViewGroup parent) {
@@ -47,10 +44,9 @@ final class UserListAdapter extends ArrayAdapter<JsonUser> {
         }
 
         JsonUser user = getItem(position);
-        holder.initials.setBackgroundColor(mColorizer.getColorArgb(user.fullName.trim()));
-        holder.initials.setText(user.getInitials());
-        holder.fullName.setText(user.fullName);
-
+        holder.initials.setBackgroundColor(App.getUserManager().getColor(user));
+        holder.initials.setText(user.getLocalizedInitials());
+        holder.fullName.setText(user.getLocalizedName());
         return view;
     }
 

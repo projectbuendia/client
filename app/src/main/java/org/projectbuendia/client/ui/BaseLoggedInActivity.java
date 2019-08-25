@@ -34,11 +34,8 @@ import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.login.LoginActivity;
-import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
-
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -50,8 +47,6 @@ import static org.projectbuendia.client.utils.Utils.eq;
 public abstract class BaseLoggedInActivity extends BaseActivity {
 
     private static final Logger LOG = Logger.create();
-
-    @Inject Colorizer mUserColorizer;
 
     private JsonUser mLastActiveUser;
     private Menu mMenu;
@@ -140,7 +135,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     private void updateActiveUser() {
         JsonUser user = App.getUserManager().getActiveUser();
-
         if (!eq(mLastActiveUser, user)) {
             LOG.w("User has switched from %s to %s", mLastActiveUser, user);
         }
@@ -150,9 +144,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             .getItem(mMenu.size() - 1)
             .getActionView()
             .findViewById(R.id.user_initials);
-
-        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.fullName));
-        initials.setText(user.getInitials());
+        initials.setBackgroundColor(App.getUserManager().getColor(user));
+        initials.setText(user.getLocalizedInitials());
     }
 
     public void onEvent(ActiveUserUnsetEvent event) {
@@ -269,14 +262,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         @Override public void showAsDropDown(View anchor) {
             super.showAsDropDown(anchor);
-
             JsonUser user = App.getUserManager().getActiveUser();
-            if (user == null) {
-                // TODO: Handle no user.
-                return;
-            }
-
-            mUserName.setText(App.getUserManager().getActiveUser().fullName);
+            mUserName.setText(user != null ? user.getLocalizedName() : "?");
         }
 
         @OnClick(R.id.button_settings)
