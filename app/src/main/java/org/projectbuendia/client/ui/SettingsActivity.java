@@ -26,6 +26,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
@@ -96,7 +97,7 @@ public class SettingsActivity extends PreferenceActivity {
             return true; // prevent endless recursion
 
         Context context = pref.getContext();
-        SharedPreferences prefs = App.getPrefs();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String server = prefs.getString("server", "");
         String str = "" + value;
         try {

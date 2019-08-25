@@ -18,7 +18,7 @@ import javax.annotation.concurrent.Immutable;
 
 /** The app model for a location, including its localized name. */
 public final @Immutable class Location extends Model {
-    public final @Nonnull String name;
+    public @Nonnull String name;
 
     /** Creates an instance of {@link Location}. */
     public Location(@Nonnull String uuid, String name) {

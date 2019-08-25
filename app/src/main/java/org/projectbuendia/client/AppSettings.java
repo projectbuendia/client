@@ -141,6 +141,11 @@ public class AppSettings {
         return !localeTag.isEmpty() ? new Locale(localeTag) : ORIGINAL_DEFAULT_LOCALE;
     }
 
+    /** Gets the app's hardcoded default locale. */
+    public static Locale getDefaultLocale() {
+        return new Locale("en");
+    }
+
     /** Gets the values for a menu of available locales. */
     public static String[] getLocaleOptionValues() {
         List<String> values = new ArrayList<>();
