@@ -344,9 +344,9 @@ public class ObsFormat extends Format {
      */
     class ObsSelectFormat extends ObsOutputFormat {
         class Option {
-            public String operator = "";
-            public String operand = "";
-            public ObsFormat format;
+            public @Nonnull String operator = "";
+            public @Nonnull String operand = "";
+            public @Nonnull ObsFormat format;
         }
         private final List<Option> mOptions;
 
@@ -411,7 +411,7 @@ public class ObsFormat extends Format {
         }
 
         /** Returns true if an observed value matches the given condition. */
-        private boolean matches(@Nullable Object obj, String operator, String operandStr) {
+        private boolean matches(@Nullable Object obj, @Nonnull String operator, @Nonnull String operandStr) {
             ObsValue value;
             if (obj == null) {
                 // To test for null, use = to compare to an empty string.

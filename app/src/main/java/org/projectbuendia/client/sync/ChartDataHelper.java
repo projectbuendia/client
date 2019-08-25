@@ -79,10 +79,10 @@ public class ChartDataHelper {
     }
 
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
-        long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
-        String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
+        long millis = Utils.getLong(c, Observations.ENCOUNTER_MILLIS, 0);
+        String conceptUuid = Utils.getString(c, Observations.CONCEPT_UUID, "");
         ConceptType conceptType = concepts.getType(conceptUuid);
-        String value = c.getString(c.getColumnIndex(Observations.VALUE));
+        String value = Utils.getString(c, Observations.VALUE, "");
         String valueName = value;
         if (eq(conceptType, ConceptType.CODED)) {
             valueName = concepts.getName(value, locale);
@@ -93,7 +93,7 @@ public class ChartDataHelper {
     private static @Nullable ObsRow loadObsRow(
         Cursor c, Locale locale, ConceptService concepts) {
         Obs obs = loadObs(c, locale, concepts);
-        String uuid = c.getString(c.getColumnIndex(Observations.UUID));
+        String uuid = Utils.getString(c, Observations.UUID);
         String conceptName = concepts.getName(obs.conceptUuid, locale);
         if (conceptName == null) return null;
         return new ObsRow(uuid, obs.time.getMillis(),
@@ -243,28 +243,21 @@ public class ChartDataHelper {
                 if (parentRowid == null) {
                     // Add a section.
                     String sectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
-                    if (sectionType != null) {
-                        switch (sectionType) {
-                            // TODO(ping): Get rid of CHART_DIVIDER sections and
-                            // CHART_DIVIDER items, and instead store multiple
-                            // charts each in their own form.
-                            case "CHART_DIVIDER":
-                                if (chart != null &&
-                                    chart.tileGroups.size() + chart.rowGroups.size() > 0) {
-                                    charts.add(chart);
-                                }
-                                break;
-                            case "TILE_ROW":
-                                ChartSection tileGroup = new ChartSection(label);
-                                chart.tileGroups.add(tileGroup);
-                                tileGroupsById.put(rowid, tileGroup);
-                                break;
-                            case "GRID_SECTION":
-                                ChartSection rowGroup = new ChartSection(label);
-                                chart.rowGroups.add(rowGroup);
-                                rowGroupsById.put(rowid, rowGroup);
-                                break;
+                    if (eq(sectionType, "CHART_DIVIDER") && chart != null) {
+                        // TODO(ping): Get rid of CHART_DIVIDER sections and
+                        // CHART_DIVIDER items, and instead store multiple
+                        // charts each in their own form.
+                        if (chart.tileGroups.size() + chart.rowGroups.size() > 0) {
+                            charts.add(chart);
                         }
+                    } else if (eq(sectionType, "TILE_ROW") && chart != null) {
+                        ChartSection tileGroup = new ChartSection(label);
+                        chart.tileGroups.add(tileGroup);
+                        tileGroupsById.put(rowid, tileGroup);
+                    } else if (eq(sectionType, "GRID_SECTION") && chart != null) {
+                        ChartSection rowGroup = new ChartSection(label);
+                        chart.rowGroups.add(rowGroup);
+                        rowGroupsById.put(rowid, rowGroup);
                     }
                 } else {
                     // Add a tile to its tile group or a grid row to its row group.

@@ -33,15 +33,10 @@ public enum Sex {
 
     /** Gets the localized abbreviation for a Sex value. */
     public static @Nonnull String getAbbreviation(@Nullable Sex sex) {
-        switch (sex) {
-            case FEMALE:
-                return App.str(R.string.sex_female_abbreviation);
-            case MALE:
-                return App.str(R.string.sex_male_abbreviation);
-            case OTHER:
-                return App.str(R.string.sex_other_abbreviation);
-            default:
-                return "";
-        }
+        // Java switch is not safe to use because it stupidly crashes on null.
+        if (sex == FEMALE) return App.str(R.string.sex_female_abbreviation);
+        if (sex == MALE) return App.str(R.string.sex_male_abbreviation);
+        if (sex == OTHER) return App.str(R.string.sex_other_abbreviation);
+        return "";
     }
 }

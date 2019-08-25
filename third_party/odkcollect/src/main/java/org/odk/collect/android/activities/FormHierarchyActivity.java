@@ -267,14 +267,12 @@ public class FormHierarchyActivity extends ListActivity {
         		if (repeatGroupRef != null) {
                     // We're in a repeat group within the one we want to list
                 	// skip this question/group/repeat and move to the next index.
-                    event =
-                            formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
+                    event = formController.stepToNextEvent(FormController.STEP_INTO_GROUP);
                     continue;
                 }
 
         		switch (event) {
                     case FormEntryController.EVENT_QUESTION:
-
                         FormEntryPrompt fp = formController.getQuestionPrompt();
                         String label = fp.getLongText();
                         if ( !fp.isReadOnly() || (label != null && label.length() > 0) ) {

@@ -102,7 +102,7 @@ public class SettingsActivity extends PreferenceActivity {
         String str = "" + value;
         try {
             updatingPrefValues = true;
-            switch (pref.getKey()) {
+            if (pref.getKey() != null) switch (pref.getKey()) {
                 case "server":
                     if (!str.equals("")) {
                         setTextAndSummary(prefs, "openmrs_root_url", "http://" + str + ":9000/openmrs");
@@ -241,7 +241,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     static void updatePrefSummary(Preference pref, Object value) {
         String str = Utils.toNonnullString(value);
-        switch (pref.getKey()) {
+        if (pref.getKey() != null) switch (pref.getKey()) {
             case "server":
             case "openmrs_user":
             case "openmrs_root_url":
