@@ -54,7 +54,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.BaseLoggedInActivity;
+import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
@@ -83,7 +83,7 @@ import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
 /** Activity displaying a patient's vitals and chart history. */
-public final class PatientChartActivity extends BaseLoggedInActivity {
+public final class PatientChartActivity extends LoggedInActivity {
     private static final Logger LOG = Logger.create();
 
     // TODO/cleanup: We don't need this anymore.  See updateEbolaPcrTestResultUi below.

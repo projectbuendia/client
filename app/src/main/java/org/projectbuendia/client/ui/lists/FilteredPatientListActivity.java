@@ -25,7 +25,7 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.List;
 
 /** A list of patients with a choice of several filters in a dropdown menu. */
-public class FilteredPatientListActivity extends BaseSearchablePatientListActivity {
+public class FilteredPatientListActivity extends PatientListActivity {
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 
     private PatientFilterController mFilterController;

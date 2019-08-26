@@ -41,7 +41,7 @@ import de.greenrobot.event.EventBus;
 
 import static org.projectbuendia.client.filter.matchers.MatchingFilterGroup.FilterType.OR;
 
-/** Controller for {@link BaseSearchablePatientListActivity}. */
+/** Controller for {@link PatientListActivity}. */
 public class PatientSearchController {
 
     private static final String TAG = PatientSearchController.class.getSimpleName();

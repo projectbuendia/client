@@ -94,7 +94,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        mController = ((BaseSearchablePatientListActivity) getActivity()).getSearchController();
+        mController = ((PatientListActivity) getActivity()).getSearchController();
         mController.attachFragmentUi(mFragmentUi);
     }
 

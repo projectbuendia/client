@@ -52,9 +52,9 @@ import de.greenrobot.event.EventBus;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
- * An abstract {@link FragmentActivity} that is the base for all activities, providing a "content
- * view" that can be populated by implementing classes and a "status view" that can be used for
- * troubleshooting and status messages.
+ * An abstract {@link FragmentActivity} that is the base for all activities
+ * except SettingsActivity, providing a "content view" that is populated by
+ * subclasses and a SnackBar for troubleshooting and status messages.
  */
 public abstract class BaseActivity extends FragmentActivity {
     private static final Logger LOG = Logger.create();
