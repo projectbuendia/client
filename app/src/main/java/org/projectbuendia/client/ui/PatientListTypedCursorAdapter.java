@@ -33,7 +33,6 @@ import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -103,8 +102,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         ExpandableListView expandableListView = (ExpandableListView) parent;
         expandableListView.expandGroup(groupPosition);
         TextView item = view.findViewById(R.id.patient_list_tent_tv);
-        item.setText(PatientCountDisplay.getPatientCountTitle(
-            mContext, getChildrenCount(groupPosition), location.name));
+        item.setText(Utils.formatLocationHeading(
+            mContext, location.uuid, getChildrenCount(groupPosition)));
         return view;
     }
 

@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.widget.TextView;
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
@@ -50,7 +52,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     private JsonUser mLastActiveUser;
     private Menu mMenu;
-    private MenuPopupWindow mPopupWindow;
+    private UserMenuPopup mUserMenu;
 
     private boolean mIsCreated = false;
 
@@ -109,10 +111,10 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return true;
         });
 
-        mPopupWindow = new MenuPopupWindow();
+        mUserMenu = new UserMenuPopup();
 
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
-        userView.setOnClickListener(view -> mPopupWindow.showAsDropDown(userView));
+        userView.setOnClickListener(view -> mUserMenu.showAsDropDown(userView));
 
         updateActiveUser();
 
@@ -201,8 +203,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     }
 
     protected void onPauseImpl() {
-        if (mPopupWindow != null) {
-            mPopupWindow.dismiss();
+        if (mUserMenu != null) {
+            mUserMenu.dismiss();
         }
 
         super.onPause();
@@ -234,20 +236,21 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         }
     }
 
-    class MenuPopupWindow extends PopupWindow {
+    class UserMenuPopup extends PopupWindow {
 
         private final LinearLayout mLayout;
 
         @InjectView(R.id.user_name) TextView mUserName;
+        @InjectView(R.id.language) TextView mLanguage;
         @InjectView(R.id.button_settings) ImageButton mSettings;
         @InjectView(R.id.button_log_out) ImageButton mLogOut;
 
         @SuppressLint("InflateParams")
-        public MenuPopupWindow() {
+        public UserMenuPopup() {
             super();
 
             mLayout = (LinearLayout) getLayoutInflater()
-                .inflate(R.layout.popup_window_user, null);
+                .inflate(R.layout.user_menu_popup, null);
             setContentView(mLayout);
 
             ButterKnife.inject(this, mLayout);
@@ -266,15 +269,31 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             mUserName.setText(user != null ? user.getLocalizedName() : "?");
         }
 
+        @OnClick(R.id.language)
+        public void onLanguageClick() {
+            Utils.logUserAction("user_menu_language_pressed");
+            String[] languageTags = AppSettings.getLocaleOptionValues();
+            new AlertDialog.Builder(BaseLoggedInActivity.this)
+                .setTitle(R.string.pref_title_language)
+                .setSingleChoiceItems(
+                    AppSettings.getLocaleOptionLabels(),
+                    App.getSettings().getLocaleIndex(),
+                    (view, index) -> {
+                        App.getSettings().setLocale(languageTags[index]);
+                        Utils.restartActivity(BaseLoggedInActivity.this);
+                    }
+                ).show();
+        }
+
         @OnClick(R.id.button_settings)
         public void onSettingsClick() {
-            Utils.logUserAction("popup_settings_button_pressed");
+            Utils.logUserAction("user_menu_settings_pressed");
             SettingsActivity.start(BaseLoggedInActivity.this);
         }
 
         @OnClick(R.id.button_log_out)
         public void onLogOutClick() {
-            Utils.logUserAction("popup_logout_button_pressed");
+            Utils.logUserAction("user_menu_logout_pressed");
             App.getUserManager().setActiveUser(null);
 
             Intent intent = new Intent(BaseLoggedInActivity.this, LoginActivity.class);

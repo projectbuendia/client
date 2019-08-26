@@ -38,6 +38,7 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.File;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -78,7 +79,13 @@ public class App extends Application {
         return sInstance.getApplicationContext();
     }
 
-    public static void setResources(Resources resources) {
+    public static void setLocale(Locale locale) {
+        Locale.setDefault(locale);
+        Resources resources = getContext().getResources();
+        Configuration config = resources.getConfiguration();
+        config.locale = locale;
+        config.setLayoutDirection(locale);
+        resources.updateConfiguration(config, resources.getDisplayMetrics());
         sResources = resources;
     }
 

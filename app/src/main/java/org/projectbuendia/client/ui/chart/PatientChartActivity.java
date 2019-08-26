@@ -496,7 +496,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {
-            // TODO: Localize everything below.
             String id = Utils.orDefault(patient.id, EN_DASH);
             String fullName = Utils.orDefault(patient.givenName, EN_DASH) + " " +
                 Utils.orDefault(patient.familyName, EN_DASH);

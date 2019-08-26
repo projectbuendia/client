@@ -72,6 +72,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         App.inject(this);
+        setTitle(R.string.title_location_list);
 
         if (Common.OFFLINE_SUPPORT) {
             // Create account, if needed

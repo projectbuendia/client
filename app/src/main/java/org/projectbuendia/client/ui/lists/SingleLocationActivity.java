@@ -19,32 +19,30 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.utils.PatientCountDisplay;
+import org.projectbuendia.client.utils.Utils;
 
 /** A patient list for a single location. */
 public class SingleLocationActivity extends BaseSearchablePatientListActivity {
-    private String mLocationName;
     private String mLocationUuid;
     private long mPatientCount;
 
     public static void start(Context caller, Location location) {
-        Intent intent = new Intent(caller, SingleLocationActivity.class);
-        intent.putExtra("uuid", location.uuid);
-        intent.putExtra("name", location.name);
-        caller.startActivity(intent);
+        caller.startActivity(
+            new Intent(caller, SingleLocationActivity.class)
+                .putExtra("uuid", location.uuid));
     }
 
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
+        setTitle(R.string.title_single_location);
 
         mLocationUuid = getIntent().getStringExtra("uuid");
-        mLocationName = getIntent().getStringExtra("name");
         setContentView(R.layout.activity_round);
         getSearchController().setLocationFilter(mLocationUuid);
     }
 
     @Override protected void setPatients(TypedCursor<Patient> patients) {
         mPatientCount = patients.getCount();
-        setTitle(PatientCountDisplay.getPatientCountTitle(this, mPatientCount, mLocationName));
+        setTitle(Utils.formatLocationHeading(this, mLocationUuid, mPatientCount));
     }
 }

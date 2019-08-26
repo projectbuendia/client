@@ -269,6 +269,7 @@ public class SettingsActivity extends PreferenceActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.inject(this);
+        setTitle(R.string.title_activity_settings);
         setupActionBar();
     }
 

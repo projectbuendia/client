@@ -18,6 +18,7 @@ import android.support.annotation.NonNull;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -139,6 +140,18 @@ public class AppSettings {
     public Locale getLocale() {
         String localeTag = Utils.toNonnull(prefs.getString("locale", ""));
         return !localeTag.isEmpty() ? new Locale(localeTag) : ORIGINAL_DEFAULT_LOCALE;
+    }
+
+
+    /** Sets the locale. */
+    public void setLocale(String languageTag) {
+        prefs.edit().putString("locale", languageTag).commit();
+    }
+
+    /** Gets the index of the currently selected locale in the getLocaleOptionValues() array. */
+    public int getLocaleIndex() {
+        String languageTag = Utils.toNonnull(prefs.getString("locale", ""));
+        return Arrays.asList(getLocaleOptionValues()).indexOf(languageTag);
     }
 
     /** Gets the app's hardcoded default locale. */
