@@ -6,9 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.providers.Contracts;
-import org.projectbuendia.client.providers.Contracts.LocationNames;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -48,8 +46,6 @@ public class LocationForestProvider {
         resolver.registerContentObserver(
             Contracts.Locations.URI, true, locationChangeObserver);
         resolver.registerContentObserver(
-            Contracts.LocationNames.URI, true, locationChangeObserver);
-        resolver.registerContentObserver(
             Contracts.Patients.URI, true, patientChangeObserver);
     }
 
@@ -71,23 +67,21 @@ public class LocationForestProvider {
         onForestReplacedListener = listener;
     }
 
-    private LocationForest loadForest(Locale desiredLocale) {
+    private LocationForest loadForest(Locale locale) {
         List<LocationForest.Record> records = new ArrayList<>();
         Uri uri = Contracts.Locations.URI;
-        Map<String, String> namesByUuid = getNamesByLocationUuid(desiredLocale);
         Map<String, Integer> countsByUuid = getPatientCountsByLocationUuid();
         try (Cursor cursor = resolver.query(uri, null, null, null, null)) {
             while (cursor.moveToNext()) {
-                String uuid = Utils.getString(cursor, Contracts.Locations.UUID);
+                String uuid = Utils.getString(cursor, Contracts.Locations.UUID, "");
+                String name = Utils.getString(cursor, Contracts.Locations.NAME, "?");
                 String parentUuid = Utils.getString(cursor, Contracts.Locations.PARENT_UUID);
                 records.add(new LocationForest.Record(
-                    uuid, parentUuid,
-                    Utils.getOrDefault(namesByUuid, uuid, "?"),
-                    Utils.getOrDefault(countsByUuid, uuid, 0)
+                    uuid, parentUuid, name, Utils.getOrDefault(countsByUuid, uuid, 0)
                 ));
             }
         }
-        return new LocationForest(records);
+        return new LocationForest(records, locale);
     }
 
     private Map<String, Integer> getPatientCountsByLocationUuid() {
@@ -101,25 +95,5 @@ public class LocationForestProvider {
             }
         }
         return countsByLocationUuid;
-    }
-
-    private Map<String, String> getNamesByLocationUuid(Locale desiredLocale) {
-        Locale defaultLocale = AppSettings.getDefaultLocale();
-        Uri uri = LocationNames.URI;
-        Map<String, String> namesByLocationUuid = new HashMap<>();
-        Map<String, Integer> scoresByLocationUuid = new HashMap<>();
-        try (Cursor cursor = resolver.query(uri, null, null, null, null)) {
-            while (cursor.moveToNext()) {
-                String locationUuid = Utils.getString(cursor, LocationNames.LOCATION_UUID);
-                String name = Utils.getString(cursor, LocationNames.NAME);
-                Locale locale = Utils.toLocale(Utils.getString(cursor, LocationNames.LOCALE));
-                int score = eq(locale, desiredLocale) ? 2 : eq(locale, defaultLocale) ? 1 : 0;
-                if (score > Utils.getOrDefault(scoresByLocationUuid, locationUuid, 0)) {
-                    namesByLocationUuid.put(locationUuid, name);
-                    scoresByLocationUuid.put(locationUuid, score);
-                }
-            }
-        }
-        return namesByLocationUuid;
     }
 }

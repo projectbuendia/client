@@ -462,8 +462,6 @@ public class OpenMrsServer implements Server {
 
     @Override public void listLocations(final Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener) {
-
-
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails, "/locations",
             null,
@@ -474,6 +472,9 @@ public class OpenMrsServer implements Server {
                     for (int i = 0; i < results.length(); i++) {
                         JsonLocation location =
                             parseLocationJson(results.getJSONObject(i));
+                        if (location.names != null && !location.names.isEmpty()) {
+                            location.name = location.names.values().iterator().next();
+                        }
                         result.add(location);
                     }
                 } catch (JSONException e) {

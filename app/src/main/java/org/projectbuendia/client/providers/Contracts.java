@@ -29,7 +29,6 @@ public interface Contracts {
         CONCEPT_NAMES("concept_names"),
         CONCEPTS("concepts"),
         FORMS("forms"),
-        LOCATION_NAMES("location_names"),
         LOCATIONS("locations"),
         MISC("misc"),
         OBSERVATIONS("observations"),
@@ -108,22 +107,13 @@ public interface Contracts {
         String VERSION = "version";
     }
 
-    interface LocationNames {
-        Uri URI = buildContentUri("location-names");
-        String GROUP_TYPE = buildGroupType("location-name");
-        String ITEM_TYPE = buildItemType("location-name");
-
-        String LOCATION_UUID = "location_uuid";
-        String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
-        String NAME = "name";
-    }
-
     interface Locations {
         Uri URI = buildContentUri("locations");
         String GROUP_TYPE = buildGroupType("location");
         String ITEM_TYPE = buildItemType("location");
 
         String UUID = "uuid";
+        String NAME = "name";
         String PARENT_UUID = "parent_uuid"; // parent location or null
     }
 

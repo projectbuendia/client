@@ -13,17 +13,14 @@ package org.projectbuendia.client.json;
 
 import java.util.Map;
 
-/** JSON representation of an OpenMRS Location */
+/** JSON representation of an OpenMRS Location (constructed by Gson using reflection). */
 public class JsonLocation {
-
-    // Note: this class is constructed by reflection by Gson.
-
     public String uuid;
     public String parent_uuid;
+    public String name;
 
-    /** A map of locales to localized names. */
+    /** A map of locales to localized names (deprecated; replaced by the name field). */
     public Map<String, String> names;
 
-    public JsonLocation() {
-    }
+    public JsonLocation() { }
 }

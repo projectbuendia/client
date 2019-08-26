@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -49,7 +50,7 @@ public class LocationForest {
     private final Object patientCountLock = new Object();
     private Runnable onPatientCountsUpdatedListener = null;
 
-    public LocationForest(List<Record> records) {
+    public LocationForest(List<Record> records, Locale locale) {
         List<String> uuids = new ArrayList<>();
         Map<String, String> namesByUuid = new HashMap<>();
         Map<String, String> shortIdsByUuid = new HashMap<>();
@@ -78,28 +79,37 @@ public class LocationForest {
             shortIdsByUuid.put(uuids.get(i), Utils.format(format, i));
         }
 
+        String languageTag = Utils.toLanguageTag(locale);
         Pattern EXTRAS_PATTERN = Pattern.compile("\\[(.*?)\\]");
         locations = new Location[uuids.size()];
         String defaultUuid = null;
         for (int i = 0; i < uuids.size(); i++) {
             String uuid = uuids.get(i);
 
-            // Parts of the name that are enclosed in square brackets are
-            // not shown; this makes it possible to attach extra information
-            // to locations in a way that can be done entirely from the
-            // OpenMRS web interface.  In particular, putting a number in
-            // a bracketed prefix will control the sorting order of locations,
-            // because locations are sorted alphanumerically by name (e.g.
-            // "2" will come before "11").
+            // Parts of the name that are enclosed in square brackets are not
+            // shown; this makes it possible to attach extra information to
+            // locations using only the normal OpenMRS web interface:
+            //   - Putting a number in a bracketed prefix will control the
+            //     sorting order of locations, because locations are sorted
+            //     alphanumerically by name (e.g. "2" will come before "11").
+            //   - Putting an asterisk in a bracketed prefix will set a
+            //     location as the default location for new patients.
+            //   - Bracketed parts starting with a language tag and a colon
+            //     can specify localized names, e.g. "cat [fr:chat] [es:gato]"
             String name = namesByUuid.get(uuid);
             Matcher matcher = EXTRAS_PATTERN.matcher(name);
-            if (matcher.find()) {
+            int pos = 0;
+            while (matcher.find(pos)) {
                 String extras = matcher.group(1);
-                name = EXTRAS_PATTERN.matcher(name).replaceAll("").trim();
                 if (extras.contains("*")) {
                     defaultUuid = uuid;
                 }
+                if (extras.startsWith(languageTag + ":")) {
+                    name = extras.split(":", 2)[1];
+                }
+                pos = matcher.end(1);
             }
+            name = EXTRAS_PATTERN.matcher(name).replaceAll("").trim();
 
             // Use the short IDs to construct a sortable path string for each node.
             // Each path component ends with a terminating character so that
