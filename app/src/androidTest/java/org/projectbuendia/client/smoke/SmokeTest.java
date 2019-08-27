@@ -1,4 +1,4 @@
-package org.projectbuendia.client.acceptance;
+package org.projectbuendia.client.smoke;
 
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.espresso.Espresso;
