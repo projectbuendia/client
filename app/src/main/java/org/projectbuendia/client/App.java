@@ -79,7 +79,8 @@ public class App extends Application {
         return sInstance.getApplicationContext();
     }
 
-    public static void setLocale(Locale locale) {
+    public static void applyLocaleSetting() {
+        Locale locale = getSettings().getLocale();
         Locale.setDefault(locale);
         Resources resources = getContext().getResources();
         Configuration config = resources.getConfiguration();
@@ -174,14 +175,14 @@ public class App extends Application {
             sConnectionDetails = mOpenMrsConnectionDetails;
             sServer = mServer;
             sConceptService = new ConceptService(getContentResolver());
-            Utils.applyLocaleSetting(this);
+            applyLocaleSetting();
             mHealthMonitor.start();
         }
     }
 
     @Override public void onConfigurationChanged(Configuration config) {
         super.onConfigurationChanged(config);
-        Utils.applyLocaleSetting(this);
+        applyLocaleSetting();
     }
 
     public static void reset(Runnable callback) {

@@ -157,12 +157,8 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     @Override public boolean onChildClick(
-        ExpandableListView parent,
-        View v,
-        int groupPosition,
-        int childPosition,
-        long id) {
-        Patient patient = (Patient) mPatientAdapter.getChild(groupPosition, childPosition);
+        ExpandableListView parent, View v, int groupIndex, int childIndex, long id) {
+        Patient patient = (Patient) mPatientAdapter.getChild(groupIndex, childIndex);
         Utils.logUserAction("patient_pressed", "patient_uuid", patient.uuid);
         mController.onPatientSelected(patient);
         return true;

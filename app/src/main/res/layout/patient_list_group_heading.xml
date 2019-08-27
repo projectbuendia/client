@@ -19,7 +19,7 @@
     android:padding="20dp">
 
     <TextView
-        android:id="@+id/patient_list_tent_tv"
+        android:id="@+id/heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/unknown_tent"

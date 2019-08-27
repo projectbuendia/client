@@ -119,7 +119,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         mIndeterminateProgressBar.setLayoutParams(centeredLayout);
 
         mProgressBarLayout =
-            inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
+            inflater.inflate(R.layout.labelled_progress_bar, null);
         mProgressBarLayout.setLayoutParams(centeredLayout);
         mProgressBar =
             mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);

@@ -128,7 +128,7 @@ public final class PatientChartControllerTest {
         verify(mMockUi).updateTilesAndGrid(
                 mFakeChart, recentObservations, allObservations, ImmutableList.of(), null, null);
         verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
-        verify(mMockUi).updateEbolaPcrTestResultUi(recentObservations);
+        verify(mMockUi).updateEbolaTestResultUi(recentObservations);
         verify(mMockUi).updateSpecialLabels(recentObservations);
     }
 

@@ -309,24 +309,24 @@ public class SnackBar {
             return (mMessagesList.size() == 0) ? 0 : 1;
         }
 
-        @Override public int getChildrenCount(int groupPosition) {
+        @Override public int getChildrenCount(int groupIndex) {
             return mMessagesList.size() - 1;
         }
 
-        @Override public Object getGroup(int groupPosition) {
-            return mMessagesList.values().toArray()[groupPosition];
+        @Override public Object getGroup(int groupIndex) {
+            return mMessagesList.values().toArray()[groupIndex];
         }
 
-        @Override public Object getChild(int groupPosition, int childPosition) {
-            return mMessagesList.values().toArray()[childPosition + 1];
+        @Override public Object getChild(int groupIndex, int childIndex) {
+            return mMessagesList.values().toArray()[childIndex + 1];
         }
 
-        @Override public long getGroupId(int groupPosition) {
-            return groupPosition;
+        @Override public long getGroupId(int groupIndex) {
+            return groupIndex;
         }
 
-        @Override public long getChildId(int groupPosition, int childPosition) {
-            return childPosition;
+        @Override public long getChildId(int groupIndex, int childIndex) {
+            return childIndex;
         }
 
         @Override public boolean hasStableIds() {
@@ -334,9 +334,9 @@ public class SnackBar {
         }
 
         @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
+        public View getGroupView(int groupIndex, boolean isExpanded, View convertView,
                                  ViewGroup parent) {
-            View header = getView(convertView, parent, groupPosition);
+            View header = getView(convertView, parent, groupIndex);
             TextView count = header.findViewById(R.id.snackbar_count);
             View indicator = header.findViewById(R.id.snackbar_indicator);
             if (mMessagesList.size() > 1) {
@@ -351,12 +351,12 @@ public class SnackBar {
         }
 
         @Override
-        public View getChildView(int groupPosition, int childPosition, boolean isLastChild,
+        public View getChildView(int groupIndex, int childIndex, boolean isLastChild,
                                  View convertView, ViewGroup parent) {
-            return getView(convertView, parent, (childPosition + 1));
+            return getView(convertView, parent, (childIndex + 1));
         }
 
-        @Override public boolean isChildSelectable(int groupPosition, int childPosition) {
+        @Override public boolean isChildSelectable(int groupIndex, int childIndex) {
             return true;
         }
 

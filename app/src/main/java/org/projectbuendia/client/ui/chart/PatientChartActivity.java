@@ -110,10 +110,10 @@ public final class PatientChartActivity extends LoggedInActivity {
     @Inject ChartDataHelper mChartDataHelper;
     @Inject AppSettings mSettings;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
-    @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
-    @InjectView(R.id.attribute_admission_days) PatientAttributeView mAdmissionDaysView;
-    @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
-    @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
+    @InjectView(R.id.patient_placement) PatientAttributeView mPatientPlacement;
+    @InjectView(R.id.admission_day_number) PatientAttributeView mAdmissionDayNumber;
+    @InjectView(R.id.symptom_day_number) PatientAttributeView mSymptomDayNumber;
+    @InjectView(R.id.ebola_test_results) PatientAttributeView mEbolaTestResults;
     @InjectView(R.id.special_labels) TextView mSpecialLabelsView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
 
@@ -165,7 +165,7 @@ public final class PatientChartActivity extends LoggedInActivity {
                 ebolaLabTestFormEnabled = true;
             }
         }
-        Utils.showIf(mPcr, ebolaLabTestFormEnabled);
+        Utils.showIf(mEbolaTestResults, ebolaLabTestFormEnabled);
     }
 
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
@@ -236,19 +236,19 @@ public final class PatientChartActivity extends LoggedInActivity {
             mSyncManager,
             minimalHandler);
 
-        mAdmissionDaysView.setOnClickListener(view -> {
-            Utils.logUserAction("admission_days_pressed");
+        mAdmissionDayNumber.setOnClickListener(view -> {
+            Utils.logUserAction("admission_day_pressed");
             mAdmissionDateDialog.show();
         });
-        mSymptomOnsetDaysView.setOnClickListener(view -> {
-            Utils.logUserAction("symptom_onset_days_pressed");
+        mSymptomDayNumber.setOnClickListener(view -> {
+            Utils.logUserAction("symptom_day_pressed");
             mSymptomOnsetDateDialog.show();
         });
-        mPatientLocationView.setOnClickListener(view -> {
-            Utils.logUserAction("location_view_pressed");
+        mPatientPlacement.setOnClickListener(view -> {
+            Utils.logUserAction("placement_pressed");
             mController.showAssignLocationDialog(PatientChartActivity.this);
         });
-        mPcr.setOnClickListener(view -> mController.onPcrResultsPressed());
+        mEbolaTestResults.setOnClickListener(view -> mController.onEbolaTestResultsPressed());
 
         initChartTabs();
     }
@@ -374,10 +374,10 @@ public final class PatientChartActivity extends LoggedInActivity {
             LocalDate admissionDate, LocalDate firstSymptomsDate) {
             // TODO: Localize strings in this function.
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
-            mAdmissionDaysView.setValue(
+            mAdmissionDayNumber.setValue(
                 day >= 1 ? getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
-            mSymptomOnsetDaysView.setValue(
+            mSymptomDayNumber.setValue(
                 day >= 1 ? getString(R.string.day_n, day) : "–");
             if (admissionDate != null) {
                 mAdmissionDateDialog.updateDate(
@@ -401,15 +401,15 @@ public final class PatientChartActivity extends LoggedInActivity {
         // (e.g. the format "{1,select,>39.95:NEG;#} / {2,select,>39.95:NEG;#}" with the
         // concepts "162826,162827").  The only reason we haven't deleted this code is
         // that we need to do the other tiles like Admission Date to complete the layout.
-        @Override public void updateEbolaPcrTestResultUi(Map<String, Obs> observations) {
+        @Override public void updateEbolaTestResultUi(Map<String, Obs> observations) {
             // PCR
             Obs pcrGpObservation = observations.get(ConceptUuids.PCR_GP_UUID);
             Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
 
-            mPcr.setIcon(createIcon(FontAwesomeIcons.fa_flask, R.color.chart_tile_icon));
+            mEbolaTestResults.setIcon(createIcon(FontAwesomeIcons.fa_flask, R.color.chart_tile_icon));
             if ((pcrGpObservation == null || pcrGpObservation.valueName == null)
                     && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
-                mPcr.setValue("–");
+                mEbolaTestResults.setValue("–");
             } else {
                 String pcrGpString = "–";
                 DateTime pcrObsTime = null;
@@ -439,12 +439,12 @@ public final class PatientChartActivity extends LoggedInActivity {
                     }
                 }
 
-                mPcr.setValue(String.format("%1$s / %2$s", pcrGpString, pcrNpString));
+                mEbolaTestResults.setValue(String.format("%1$s / %2$s", pcrGpString, pcrNpString));
                 if (pcrObsTime != null) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = pcrObsTime.toLocalDate();
                     String dateText = new RelativeDateTimeFormatter().format(obsDay, today);
-                    mPcr.setName(getString(R.string.latest_pcr_label_with_date, dateText));
+                    mEbolaTestResults.setName(getString(R.string.latest_pcr_label_with_date, dateText));
                 }
             }
         }
@@ -489,10 +489,10 @@ public final class PatientChartActivity extends LoggedInActivity {
             String locationText = location != null ? location.name : getString(R.string.unknown);
             String bedNumberText = Utils.toNonnull(patient.bedNumber).trim();
 
-            mPatientLocationView.setName(bedNumberText.isEmpty()
+            mPatientPlacement.setName(bedNumberText.isEmpty()
                 ? getString(R.string.location) : getString(R.string.bed_number_n, bedNumberText));
-            mPatientLocationView.setValue(locationText);
-            mPatientLocationView.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
+            mPatientPlacement.setValue(locationText);
+            mPatientPlacement.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {

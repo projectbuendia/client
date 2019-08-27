@@ -19,7 +19,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.utils.Utils;
 
 /** A patient list for a single location. */
 public class SingleLocationActivity extends PatientListActivity {
@@ -43,6 +42,6 @@ public class SingleLocationActivity extends PatientListActivity {
 
     @Override protected void setPatients(TypedCursor<Patient> patients) {
         mPatientCount = patients.getCount();
-        setTitle(Utils.formatLocationHeading(this, mLocationUuid, mPatientCount));
+        setTitle(u.formatLocationHeading(mLocationUuid, mPatientCount));
     }
 }

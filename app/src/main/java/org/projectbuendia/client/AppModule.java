@@ -129,8 +129,7 @@ public final class AppModule {
         return new BuendiaSyncEngine(app.getApplicationContext());
     }
 
-    @Provides @Singleton ChartDataHelper provideLocalizedChartHelper(
-        AppSettings settings, ContentResolver contentResolver) {
-        return new ChartDataHelper(settings, contentResolver);
+    @Provides @Singleton ChartDataHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
+        return new ChartDataHelper(contentResolver);
     }
 }
