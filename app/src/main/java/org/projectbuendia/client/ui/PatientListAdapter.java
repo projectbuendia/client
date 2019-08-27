@@ -52,7 +52,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
  * displaying these patients grouped by location and filtered by a specified
  * {@link org.projectbuendia.client.filter.db.SimpleSelectionFilter}.
  */
-public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
+public class PatientListAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
     private final HashMap<Location, List<Patient>> mPatientsByLocation;
@@ -63,11 +63,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private Location[] mLocations;
     private Map<String, Obs> mConditionObs = new HashMap<>();
 
-    /**
-     * Creates a {@link PatientListTypedCursorAdapter}.
-     * @param context an activity context
-     */
-    public PatientListTypedCursorAdapter(Context context) {
+    public PatientListAdapter(Context context) {
         mContext = context;
         mPatientsByLocation = new HashMap<>();
         mChartDataHelper = new ChartDataHelper(

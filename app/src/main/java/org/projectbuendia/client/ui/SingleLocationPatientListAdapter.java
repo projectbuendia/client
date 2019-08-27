@@ -19,10 +19,10 @@ import android.view.ViewGroup;
 import org.projectbuendia.client.R;
 
 /**
- * A {@link PatientListTypedCursorAdapter} that hides its group headings, as the group heading is
+ * A {@link PatientListAdapter} that hides its group headings, as the group heading is
  * expected to be reflected in the title bar or by other information on the screen.
  */
-public class SingleLocationPatientListAdapter extends PatientListTypedCursorAdapter {
+public class SingleLocationPatientListAdapter extends PatientListAdapter {
     public SingleLocationPatientListAdapter(Context context) {
         super(context);
     }

@@ -21,7 +21,7 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilterGroup;
 import org.projectbuendia.client.filter.db.patient.LocationUuidFilter;
 import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
-import org.projectbuendia.client.filter.matchers.FilteredCursorWrapper;
+import org.projectbuendia.client.filter.matchers.FilteredCursor;
 import org.projectbuendia.client.filter.matchers.MatchingFilter;
 import org.projectbuendia.client.filter.matchers.MatchingFilterGroup;
 import org.projectbuendia.client.filter.matchers.patient.IdFilter;
@@ -160,7 +160,7 @@ public class PatientSearchController {
 
     /** Gets a cursor that returns the filtered list of patients. */
     private TypedCursor<Patient> getFilteredCursor() {
-        return new FilteredCursorWrapper<>(mPatientsCursor, mSearchFilter, mFilterQueryTerm);
+        return new FilteredCursor<>(mPatientsCursor, mSearchFilter, mFilterQueryTerm);
     }
 
     public void onPatientSelected(Patient patient) {
