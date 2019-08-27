@@ -50,6 +50,10 @@ public class LocationForest {
     private final Object patientCountLock = new Object();
     private Runnable onPatientCountsUpdatedListener = null;
 
+    public LocationForest(List<Record> records) {
+        this(records, null);
+    }
+
     public LocationForest(List<Record> records, Locale locale) {
         List<String> uuids = new ArrayList<>();
         Map<String, String> namesByUuid = new HashMap<>();
@@ -104,7 +108,7 @@ public class LocationForest {
                 if (extras.contains("*")) {
                     defaultUuid = uuid;
                 }
-                if (extras.startsWith(languageTag + ":")) {
+                if (languageTag != null && extras.startsWith(languageTag + ":")) {
                     name = extras.split(":", 2)[1];
                 }
                 pos = matcher.end(1);

@@ -205,7 +205,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void internalIncrementalSync() {
-        sleep(1000);
+        sleep(500);
         App.getSyncManager().sync(SyncManager.SMALL_PHASES);
     }
 
@@ -231,7 +231,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
         for (int i = 0; i < numDays; i++) {
             act(firstViewThat(
                 isA(NumberPicker.class),
-                hasAncestorThat(isA(DatePicker.class))
+                hasAncestorThat(isA(DatePicker.class)),
+                hasChildThat(hasTextMatchingRegex("[0-9]{1,2}"))
             ), tapUp);
             sleep(50);
         }

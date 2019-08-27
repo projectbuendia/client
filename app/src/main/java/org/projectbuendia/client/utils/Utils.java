@@ -407,7 +407,8 @@ public class Utils {
         return new Locale(parts[0], parts[1]);
     }
 
-    public static String toLanguageTag(Locale locale) {
+    public static @Nullable String toLanguageTag(@Nullable Locale locale) {
+        if (locale == null) return null;
         if (Build.VERSION.SDK_INT >= 21) return locale.toLanguageTag();
         return locale.getLanguage() +
             (Utils.isEmpty(locale.getCountry()) ? "" : "_" + locale.getCountry());
