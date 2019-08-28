@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
+import org.projectbuendia.client.widgets.ShrinkFitTextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,8 +128,12 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
         u.setContainer(view);
         u.setText(R.id.name, u.formatPatientName(patient));
         u.setText(R.id.bed_number, patient.bedNumber);
-        u.setText(R.id.id, patient.id);
-        u.setTextViewColors(R.id.id, status);
+        u.show(R.id.bed_bar, !Utils.isEmpty(patient.bedNumber));
+        ShrinkFitTextView idView = u.findView(R.id.id);
+        idView.setTextAndResize(patient.id);
+        idView.setTextColor(status.getForegroundColor());
+        idView.getBackground().setColorFilter(status.getBackgroundColor(), PorterDuff.Mode.SRC_ATOP);
+
         u.setText(R.id.sex, u.formatPatientDetails(patient, true, true, false));
         u.setText(R.id.age, u.formatPatientDetails(patient, false, false, true));
 

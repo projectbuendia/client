@@ -46,10 +46,10 @@ public class ConceptUuids {
     public static final String PREGNANCY_UUID = toUuid(5272);
 
     // Condition question and values.  Used to colour-code patient ID chips in patient lists.
-    public static final String GENERAL_CONDITION_UUID = "a3657203-cfed-44b8-8e3f-960f8d4cf3b3";
-    public static final String GENERAL_CONDITION_WELL_UUID = toUuid(1855);
-    public static final String GENERAL_CONDITION_UNWELL_UUID = toUuid(137793);
-    public static final String GENERAL_CONDITION_CRITICAL_UUID = "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
+    public static final String GENERAL_CONDITION_UUID = toUuid(777000010);
+    public static final String GENERAL_CONDITION_WELL_UUID = toUuid(888001855);
+    public static final String GENERAL_CONDITION_UNWELL_UUID = toUuid(888137793);
+    public static final String GENERAL_CONDITION_CRITICAL_UUID = toUuid(777000009);
     public static final String GENERAL_CONDITION_PALLIATIVE_UUID = "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
     public static final String GENERAL_CONDITION_CONVALESCENT_UUID = toUuid(119844);
     public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID = "e4a20c4a-6f13-11e4-b315-040ccecfdba4";

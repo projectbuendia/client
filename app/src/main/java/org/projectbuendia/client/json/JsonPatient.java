@@ -21,12 +21,12 @@ import java.io.Serializable;
 /** JSON representation of an OpenMRS Patient. */
 public class JsonPatient implements Serializable {
     public String uuid;  // OpenMRS record UUID
-    public boolean voided; // true if the patient has been voided.
     public String id;  // user-specified patient ID
     public String given_name;
     public String family_name;
     public Sex sex;
     public LocalDate birthdate;
+    public boolean voided;
 
     public JsonPatient() {
     }

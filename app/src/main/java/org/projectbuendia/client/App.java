@@ -180,11 +180,6 @@ public class App extends Application {
         }
     }
 
-    @Override public void onConfigurationChanged(Configuration config) {
-        super.onConfigurationChanged(config);
-        applyLocaleSetting();
-    }
-
     public static void reset(Runnable callback) {
         sSyncManager.setNewSyncsSuppressed(true);
         LOG.i("reset(): Waiting for syncs to stop...");

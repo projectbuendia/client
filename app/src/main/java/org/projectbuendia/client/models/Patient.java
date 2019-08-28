@@ -27,6 +27,9 @@ public final @Immutable class Patient extends Model {
     public final String familyName;
     public final Sex sex;
     public final LocalDate birthdate;
+
+    // The fields below are denormalized from observations, not received
+    // as part of the patient model.
     public final boolean pregnancy;
     public final String locationUuid;
     public final String bedNumber;
