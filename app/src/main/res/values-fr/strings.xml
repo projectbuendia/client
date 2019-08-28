@@ -31,6 +31,7 @@
   <string name="action_view_xform">+ Voir la première xform sauvegardé</string>
   <string name="action_new_round">Nouveau tour</string>
   <string name="action_assign_location">Attribuer emplacement</string>
+  <string name="bed_number">Numéro de lit</string>
   <string name="action_edit_patient">Modifier patient</string>
   <string name="action_view_round_archive">Archive de tours</string>
   <string name="snackbar_update_available">Mise à jour des applications disponibles</string>
@@ -162,7 +163,6 @@
   <string name="months">mois</string>
   <string name="sex">Sexe</string>
   <string name="patient_creation_location_label">Emplacement</string>
-  <string name="patient_creation_location_assign">Attribuer emplacement</string>
   <string name="add_patient">Créer</string>
   <string name="patient_creation_create_busy">De travail&#8230;</string>
   <string name="patient_creation_cancel">Annuler</string>
