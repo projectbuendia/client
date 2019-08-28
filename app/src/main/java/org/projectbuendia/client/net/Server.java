@@ -24,7 +24,6 @@ import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.PatientDelta;
 
 import java.util.List;
 
@@ -60,14 +59,13 @@ public interface Server {
 
     /** Adds a patient. */
     void addPatient(
-        PatientDelta patientDelta,
+        JsonPatient patient,
         Response.Listener<JsonPatient> successListener,
         Response.ErrorListener errorListener);
 
     /** Updates a patient. */
     public void updatePatient(
-        String patientId,
-        PatientDelta patientDelta,
+        JsonPatient patient,
         Response.Listener<JsonPatient> successListener,
         Response.ErrorListener errorListener);
 

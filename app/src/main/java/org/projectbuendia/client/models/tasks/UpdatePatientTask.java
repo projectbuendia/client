@@ -26,7 +26,6 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Patients;
 
@@ -45,29 +44,28 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
+    private final JsonPatient mPatient;
     private final String mUuid;
-    private final PatientDelta mPatientDelta;
     private final CrudEventBus mBus;
 
     UpdatePatientTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
-        String patientUuid,
-        PatientDelta patientDelta,
+        JsonPatient patient,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
-        mUuid = patientUuid;
-        mPatientDelta = patientDelta;
+        mPatient = patient;
+        mUuid = patient.uuid;
         mBus = bus;
     }
 
     @Override protected PatientUpdateFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonPatient> patientFuture = RequestFuture.newFuture();
 
-        mServer.updatePatient(mUuid, mPatientDelta, patientFuture, patientFuture);
+        mServer.updatePatient(mPatient, patientFuture, patientFuture);
         try {
             patientFuture.get();
         } catch (InterruptedException e) {
@@ -80,7 +78,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
 
         int count = mContentResolver.update(
             Patients.URI,
-            mPatientDelta.toContentValues(),
+            mPatient.toContentValues(),
             FILTER.getSelectionString(),
             FILTER.getSelectionArgs(mUuid));
 

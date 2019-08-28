@@ -46,6 +46,8 @@ import java.util.Map;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.NONE;
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.SHORT;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
@@ -133,9 +135,8 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
         idView.setTextAndResize(patient.id);
         idView.setTextColor(status.getForegroundColor());
         idView.getBackground().setColorFilter(status.getBackgroundColor(), PorterDuff.Mode.SRC_ATOP);
-
-        u.setText(R.id.sex, u.formatPatientDetails(patient, true, true, false));
-        u.setText(R.id.age, u.formatPatientDetails(patient, false, false, true));
+        u.setText(R.id.sex, u.formatPatientDetails(patient, SHORT, SHORT, NONE));
+        u.setText(R.id.age, u.formatPatientDetails(patient, NONE, NONE, SHORT));
 
         ((ExpandableListView) parent).expandGroup(groupIndex);
         return view;

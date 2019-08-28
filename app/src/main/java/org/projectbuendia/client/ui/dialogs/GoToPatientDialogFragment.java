@@ -45,6 +45,9 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.SHORT;
+
 /** A dialog for jumping to a patient by ID. */
 public class GoToPatientDialogFragment extends DialogFragment {
     @Inject AppModel mAppModel;
@@ -117,7 +120,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
     }
 
     private String formatSearchResult(Patient patient) {
-        String details = u.formatPatientDetails(patient, true, true, true);
+        String details = u.formatPatientDetails(patient, SHORT, LONG, LONG);
         return Utils.format("%s (%s)", u.formatPatientName(patient),
             Utils.nonemptyOrDefault(details, u.str(R.string.unknown)));
     }

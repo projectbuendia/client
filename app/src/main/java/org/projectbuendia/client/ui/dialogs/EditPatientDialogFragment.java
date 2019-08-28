@@ -27,7 +27,6 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 import org.joda.time.LocalDate;
@@ -37,11 +36,11 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.utils.Utils;
@@ -78,6 +77,7 @@ public class EditPatientDialogFragment extends DialogFragment {
     private LayoutInflater mInflater;
     private ToggleRadioGroup<Sex> mSex;
     private boolean mAgeChanged;
+    private LocalDate mBirthdate;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static EditPatientDialogFragment newInstance(Patient patient) {
@@ -161,7 +161,7 @@ public class EditPatientDialogFragment extends DialogFragment {
         mSex = new ToggleRadioGroup<>(mSexRadioGroup);
         mSex.setSelection(sex);
 
-        mAgeChanged = false;
+        mBirthdate = birthdate;
         TextWatcher ageEditedWatcher = new AgeEditedWatcher();
         mAgeYears.addTextChangedListener(ageEditedWatcher);
         mAgeMonths.addTextChangedListener(ageEditedWatcher);
@@ -175,32 +175,35 @@ public class EditPatientDialogFragment extends DialogFragment {
         Sex sex = mSex.getSelection();
         String ageYears = mAgeYears.getText().toString().trim();
         String ageMonths = mAgeMonths.getText().toString().trim();
-        LocalDate birthdate = null;
-        LocalDate admissionDate = LocalDate.now();
+        LocalDate birthdate = mBirthdate;
         boolean valid = true;
 
         if (id == null) {
             setError(mId, R.string.patient_validation_missing_id);
             valid = false;
         }
+        // We should only save/update the age when the fields have been edited;
+        // otherwise, simply opening and submitting the dialog would shift the
+        // birthdate every time to make the age a whole number of months.
         if (mAgeChanged) {
-            // We should only save/update the age when the fields have been edited;
-            // otherwise, simply opening and submitting the dialog would shift the
-            // birthdate every time to make the age a whole number of months.
-            int years = Integer.parseInt("0" + ageYears);
-            int months = Integer.parseInt("0" + ageMonths);
+            if (ageYears.isEmpty() && ageMonths.isEmpty()) {
+                // The user can clear the birthdate information by clearing the fields.
+                birthdate = null;
+            } else {
+                int years = Integer.parseInt("0" + ageYears);
+                int months = Integer.parseInt("0" + ageMonths);
+                birthdate = LocalDate.now().minusYears(years).minusMonths(months);
 
-            birthdate = LocalDate.now().minusYears(years).minusMonths(months);
-
-            // Pick a birthdate just one day earlier than necessary to put the age
-            // at the desired number of years and months, so that the same age
-            // appears on all tablets regardless of timezone.  Showing different
-            // ages in different timezones isn't truly avoidable because ages are
-            // stored as local dates (not timestamps), but the extra day will at
-            // least prevent some initial confusion.  After all, the entered age
-            // is only precise to the month; the confusion comes from emphasizing
-            // precision that isn't there.
-            birthdate = birthdate.minusDays(1);
+                // Pick a birthdate just one day earlier than necessary to put the age
+                // at the desired number of years and months, so that the same age
+                // appears on all tablets regardless of timezone.  Showing different
+                // ages in different timezones isn't truly avoidable because ages are
+                // stored as local dates (not timestamps), but the extra day will at
+                // least prevent some initial confusion.  After all, the entered age
+                // is only precise to the month; the confusion comes from emphasizing
+                // precision that isn't there.
+                birthdate = birthdate.minusDays(1);
+            }
         }
         if (birthdate != null && new Period(
             birthdate, LocalDate.now().plusDays(1)).getYears() >= 120) {
@@ -222,14 +225,14 @@ public class EditPatientDialogFragment extends DialogFragment {
             "age_years", ageYears,
             "age_months", ageMonths,
             "sex", "" + sex);
-
-        PatientDelta delta = new PatientDelta();
-        delta.id = Optional.fromNullable(id);
-        delta.givenName = Optional.fromNullable(givenName);
-        delta.familyName = Optional.fromNullable(familyName);
-        delta.birthdate = Optional.fromNullable(birthdate);
-        delta.sex = Optional.fromNullable(sex);
         dialog.dismiss();
+
+        JsonPatient patient = new JsonPatient();
+        patient.id = id;
+        patient.given_name = givenName;
+        patient.family_name = familyName;
+        patient.birthdate = birthdate;
+        patient.sex = sex;
 
         List<Obs> observations = null;
         Bundle args = getArguments();
@@ -243,10 +246,11 @@ public class EditPatientDialogFragment extends DialogFragment {
                 new Obs(now, ConceptUuids.PLACEMENT_UUID,
                     ConceptType.TEXT, mModel.getDefaultLocation().uuid, "")
             );
-            mModel.addPatient(mCrudEventBus, delta, observations);
+            mModel.addPatient(mCrudEventBus, patient, observations);
         } else {
             BigToast.show(R.string.updating_patient_please_wait);
-            mModel.updatePatient(mCrudEventBus, args.getString("uuid"), delta);
+            patient.uuid = args.getString("uuid");
+            mModel.updatePatient(mCrudEventBus, patient);
         }
         // TODO: While the network request is in progress, show a spinner and/or keep the
         // dialog open but greyed out -- keep the UI blocked to make it clear that there is a

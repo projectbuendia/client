@@ -397,8 +397,8 @@ public abstract class BaseActivity extends FragmentActivity {
             ));
 
         TroubleshootingMessage messages = troubleshootingMessages.get(solvedIssue);
-
         if (messages != null) {
+            initializeSnackBar();
             SnackBar.Message snackBarMessage = snackBar.getMessage(messages.messageId);
             if (snackBarMessage != null) {
                 snackBar.dismiss(snackBarMessage.key);

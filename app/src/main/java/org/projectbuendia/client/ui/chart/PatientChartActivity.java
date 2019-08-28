@@ -81,6 +81,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
+
 /** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends LoggedInActivity {
     private static final Logger LOG = Logger.create();
@@ -499,7 +501,7 @@ public final class PatientChartActivity extends LoggedInActivity {
             if (actionBar != null) {
                 String id = Utils.orDefault(patient.id, EN_DASH);
                 actionBar.setTitle(id + ". " + u.formatPatientName(patient));
-                actionBar.setSubtitle(u.formatPatientDetails(patient, true, true, true));
+                actionBar.setSubtitle(u.formatPatientDetails(patient, LONG, LONG, LONG));
             }
         }
 

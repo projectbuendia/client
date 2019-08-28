@@ -65,7 +65,8 @@
   <string name="all_patients">TOUS LES PATIENTS</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
 
-  <string name="age_unknown">Âge inconnu</string>
+  <string name="sex_unknown">Sexe inconnu</string>
+  <string name="age_unknown">âge inconnu</string>
   <string name="abbrev_n_months">%d mo</string>
   <string name="abbrev_n_years">%d a</string>
   <string name="abbrev_n_years_n_months">%1$d a %2$d mo</string>
@@ -156,7 +157,7 @@
   <string name="id_prefix">Préfix de l\'ID</string>
   <string name="patient_creation_given_name_label">Prénom</string>
   <string name="patient_creation_family_name_label">Nom de famille</string>
-  <string name="age">Age</string>
+  <string name="age">Âge</string>
   <string name="years">ans</string>
   <string name="months">mois</string>
   <string name="sex">Sexe</string>

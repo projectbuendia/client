@@ -146,18 +146,28 @@ public class ContextUtils extends ContextWrapper {
         return given + " " + family;
     }
 
+    public enum FormatStyle { NONE, SHORT, LONG };
+
     /** Formats the sex, pregnancy status, and/or age of a patient. */
-    public String formatPatientDetails(Patient patient, boolean sex, boolean pregnancy, boolean age) {
+    public String formatPatientDetails(
+        Patient patient, FormatStyle sex, FormatStyle pregnancy, FormatStyle age) {
         List<String> labels = new ArrayList<>();
-        if (sex && patient.sex != null) {
+        if (patient.sex != null && (sex == FormatStyle.SHORT || sex == FormatStyle.LONG)) {
             String abbrev = Sex.getAbbreviation(patient.sex);
             labels.add(Utils.isChild(patient.birthdate) ? abbrev.toLowerCase() : abbrev);
         }
-        if (pregnancy && patient.pregnancy) {
-            labels.add(str(R.string.pregnant_abbreviation));
+        if (patient.sex == null && sex == FormatStyle.LONG) {
+            labels.add(str(R.string.sex_unknown));
         }
-        if (age && patient.birthdate != null) {
+        if (patient.pregnancy) {
+            if (pregnancy == FormatStyle.SHORT) labels.add(str(R.string.pregnant_abbreviation));
+            if (pregnancy == FormatStyle.LONG) labels.add(str(R.string.pregnant).toLowerCase());
+        }
+        if (patient.birthdate != null && (age == FormatStyle.SHORT || age == FormatStyle.LONG)) {
             labels.add(Utils.birthdateToAge(patient.birthdate));
+        }
+        if (patient.birthdate == null && (age == FormatStyle.LONG)) {
+            labels.add(str(R.string.age_unknown));
         }
         return Joiner.on(", ").join(labels);
     }

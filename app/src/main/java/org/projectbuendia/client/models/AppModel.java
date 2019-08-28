@@ -27,9 +27,8 @@ import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 import org.projectbuendia.client.events.data.TypedCursorLoadedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
-import org.projectbuendia.client.models.tasks.AddPatientTask;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.tasks.TaskFactory;
-import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
@@ -148,9 +147,8 @@ public class AppModel {
      * {@link ItemCreatedEvent} with the newly-added patient on
      * the specified event bus when complete.
      */
-    public void addPatient(CrudEventBus bus, PatientDelta patientDelta, List<Obs> observations) {
-        AddPatientTask task = mTaskFactory.newAddPatientTask(patientDelta, observations, bus);
-        task.execute();
+    public void addPatient(CrudEventBus bus, JsonPatient patient, List<Obs> observations) {
+        mTaskFactory.newAddPatientTask(patient, observations, bus).execute();
     }
 
     /**
@@ -158,11 +156,8 @@ public class AppModel {
      * {@link ItemUpdatedEvent} with the updated
      * {@link Patient} on the specified event bus when complete.
      */
-    public void updatePatient(
-        CrudEventBus bus, String patientUuid, PatientDelta patientDelta) {
-        UpdatePatientTask task =
-            mTaskFactory.newUpdatePatientTask(patientUuid, patientDelta, bus);
-        task.execute();
+    public void updatePatient(CrudEventBus bus, JsonPatient patient) {
+        mTaskFactory.newUpdatePatientTask(patient, bus).execute();
     }
 
     /**

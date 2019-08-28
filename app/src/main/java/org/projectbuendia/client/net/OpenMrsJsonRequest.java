@@ -35,7 +35,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
     private static Logger LOG = Logger.create();
 
     /**
-     * Constructs a GET request to OpenMRS.
+     * Constructs a GET or POST request to OpenMRS.
      * @param connectionDetails an {@link OpenMrsConnectionDetails} for communicating with OpenMRS
      * @param urlSuffix         the API URL being requested, relative to the API root
      * @param jsonRequest       a {@link JSONObject} containing the request body

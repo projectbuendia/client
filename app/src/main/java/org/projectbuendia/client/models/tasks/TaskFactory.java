@@ -17,13 +17,13 @@ import android.os.AsyncTask;
 
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.CursorLoader;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Model;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 
@@ -45,8 +45,8 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link AddPatientTask}. */
-    public AddPatientTask newAddPatientTask(PatientDelta patientDelta, List<Obs> observations, CrudEventBus bus) {
-        return new AddPatientTask(this, mServer, mContentResolver, patientDelta, observations, bus);
+    public AddPatientTask newAddPatientTask(JsonPatient patient, List<Obs> observations, CrudEventBus bus) {
+        return new AddPatientTask(this, mServer, mContentResolver, patient, observations, bus);
     }
 
     public FetchSinglePatientTask newFetchSinglePatientTask(
@@ -60,10 +60,8 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link UpdatePatientTask}. */
-    public UpdatePatientTask newUpdatePatientTask(
-        String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
-        return new UpdatePatientTask(
-            this, mServer, mContentResolver, patientUuid, patientDelta, bus);
+    public UpdatePatientTask newUpdatePatientTask(JsonPatient patient, CrudEventBus bus) {
+        return new UpdatePatientTask(this, mServer, mContentResolver, patient, bus);
     }
 
     /** Creates a new {@link AddEncounterTask}. */
