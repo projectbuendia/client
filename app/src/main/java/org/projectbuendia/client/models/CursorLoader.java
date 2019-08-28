@@ -16,5 +16,5 @@ import android.database.Cursor;
 /** An object that loads a model from a database cursor. */
 public interface CursorLoader<T> {
     /** Constructs a model from the given {@link Cursor}'s current row of values. */
-    T fromCursor(Cursor cursor);
+    T load(Cursor cursor);
 }

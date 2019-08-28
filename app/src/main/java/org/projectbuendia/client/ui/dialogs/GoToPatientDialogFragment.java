@@ -21,13 +21,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
@@ -38,7 +35,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
@@ -54,8 +51,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject SyncManager mSyncManager;
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
-    @InjectView(R.id.go_to_patient_result) TextView mPatientSearchResult;
-    private LayoutInflater mInflater;
+    @InjectView(R.id.go_to_patient_result) TextView mSearchResult;
+    private static ContextUtils u;
     String mPatientUuid;
     CrudEventBus mBus;
 
@@ -66,19 +63,19 @@ public class GoToPatientDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.inject(this);
-        mInflater = LayoutInflater.from(getActivity());
+        u = ContextUtils.from(getActivity());
         mBus = mCrudEventBusProvider.get();
         mBus.register(this);
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        final View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
+        final View fragment = u.inflateForDialog(R.layout.go_to_patient_dialog_fragment);
         ButterKnife.inject(this, fragment);
         mPatientId.addTextChangedListener(new IdWatcher());
-        mPatientSearchResult.setOnClickListener(view -> onSubmit());
+        mSearchResult.setOnClickListener(view -> onSubmit());
         return new AlertDialog.Builder(getActivity())
             .setTitle(R.string.go_to_patient_title)
-            .setPositiveButton(R.string.go_to_patient_go, (dialogInterface, i) -> onSubmit())
+            .setPositiveButton(R.string.go_to_chart, (dialogInterface, i) -> onSubmit())
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment)
             .create();
@@ -106,8 +103,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
             Patient patient = (Patient) event.item;
             if (id.equals(patient.id)) {  // server returned the patient we were looking for
                 mPatientUuid = patient.uuid;
-                mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                    " (" + patient.sex + ", " + Utils.birthdateToAge(patient.birthdate) + ")");
+                mSearchResult.setText(formatSearchResult(patient));
             }
         }
     }
@@ -116,48 +112,36 @@ public class GoToPatientDialogFragment extends DialogFragment {
         String id = mPatientId.getText().toString().trim();
         if (id.equals(event.id)) {  // server returned empty results for the ID we sought
             mPatientUuid = null;
-            mPatientSearchResult.setText(getString(R.string.go_to_patient_not_found));
+            mSearchResult.setText(u.str(R.string.patient_not_found, event.id));
         }
     }
 
-    class IdWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {
-        }
+    private String formatSearchResult(Patient patient) {
+        String details = u.formatPatientDetails(patient, true, true, true);
+        return Utils.format("%s (%s)", u.formatPatientName(patient),
+            Utils.nonemptyOrDefault(details, u.str(R.string.unknown)));
+    }
 
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {
-        }
+    class IdWatcher implements TextWatcher {
+        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) { }
+
+        @Override public void onTextChanged(CharSequence c, int x, int y, int z) { }
 
         @Override public void afterTextChanged(Editable editable) {
             String id = mPatientId.getText().toString().trim();
             if (id.isEmpty()) {
                 mPatientUuid = null;
-                mPatientSearchResult.setText("");
+                mSearchResult.setText("");
             } else {
                 try (Cursor cursor = getActivity().getContentResolver().query(
                     Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
-                    if (cursor.moveToNext()) {
-                        String uuid = Utils.getString(cursor, Patients.UUID, null);
-                        String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
-                        String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
-                        LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
-                        String age = birthdate != null ?
-                            Utils.birthdateToAge(birthdate) : "age unknown";
-                        String sex = Utils.getString(cursor, Patients.SEX, "");
-                        mPatientUuid = uuid;
-                        mPatientSearchResult.setText(givenName + " " + familyName +
-                            " (" + sex + ", " + age + ")");
-                    } else {
-                        String message = getString(R.string.go_to_patient_no_data);
-                        DateTime lastSyncTime = mAppModel.getLastFullSyncTime();
-                        if (lastSyncTime != null) {
-                            message = getString(
-                                R.string.go_to_patient_not_found_as_of_time,
-                                new RelativeDateTimeFormatter().format(lastSyncTime));
-                        }
+                    if (cursor.moveToNext()) {  // found locally
+                        Patient patient = Patient.load(cursor);
+                        mPatientUuid = patient.uuid;
+                        mSearchResult.setText(formatSearchResult(patient));
+                    } else {  // not found locally; check server
                         mPatientUuid = null;
-                        mPatientSearchResult.setText(message);
-
-                        // Immediately check for this patient on the server.
+                        mSearchResult.setText(R.string.searching_ellipsis);
                         mAppModel.fetchSinglePatient(mBus, id);
                     }
                 }

@@ -10,16 +10,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.common.base.Joiner;
+
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.resolvables.ResStatus;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
 public class ContextUtils extends ContextWrapper {
-    public final Context context;
+    private static final String EN_DASH = "\u2013";
+
+    private final Context context;
     private LayoutInflater inflater = null;
     private View lastView = null;
 
@@ -128,6 +137,29 @@ public class ContextUtils extends ContextWrapper {
         return count == 0 ? str(R.string.no_patients)
             : count == 1 ? str(R.string.one_patient)
             : str(R.string.n_patients, count);
+    }
+
+    /** Formats a patient name, using an en-dash if either part is missing. */
+    public String formatPatientName(Patient patient) {
+        String given = Utils.orDefault(patient.givenName, EN_DASH);
+        String family = Utils.orDefault(patient.familyName, EN_DASH);
+        return given + " " + family;
+    }
+
+    /** Formats the sex, pregnancy status, and/or age of a patient. */
+    public String formatPatientDetails(Patient patient, boolean sex, boolean pregnancy, boolean age) {
+        List<String> labels = new ArrayList<>();
+        if (sex && patient.sex != null) {
+            String abbrev = Sex.getAbbreviation(patient.sex);
+            labels.add(Utils.isChild(patient.birthdate) ? abbrev.toLowerCase() : abbrev);
+        }
+        if (pregnancy && patient.pregnancy) {
+            labels.add(str(R.string.pregnant_abbreviation));
+        }
+        if (age && patient.birthdate != null) {
+            labels.add(Utils.birthdateToAge(patient.birthdate));
+        }
+        return Joiner.on(", ").join(labels);
     }
 
     public interface ContextProvider {

@@ -64,7 +64,7 @@ public class LoadItemTask<T extends Model> extends AsyncTask<Void, Void, Object>
             if (cursor == null || !cursor.moveToFirst()) {
                 return new ItemLoadFailedEvent("no results");
             }
-            return new ItemLoadedEvent<>(mLoader.fromCursor(cursor));
+            return new ItemLoadedEvent<>(mLoader.load(cursor));
         }
     }
 

@@ -31,9 +31,9 @@ import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -124,13 +124,12 @@ public class AppModel {
         // See http://stackoverflow.com/questions/24136126/fatal-exception-asynctask and
         // https://github.com/projectbuendia/client/issues/7
         LoadTypedCursorAsyncTask<Patient> task = new LoadTypedCursorAsyncTask<>(
-            Contracts.Patients.URI,
+            Patients.URI,
             // The projection must contain an "_id" column for the ListAdapter as well as all
             // the columns used in Patient.Loader.fromCursor().
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
                 //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.SEX, Patients.LOCATION_UUID},
-            Patient.class, mContentResolver,
-            filter, constraint, Patient.LOADER, bus);
+            Patient.class, mContentResolver, filter, constraint, Patient::load, bus);
         task.execute();
     }
 
@@ -140,7 +139,7 @@ public class AppModel {
      */
     public void loadSinglePatient(CrudEventBus bus, String uuid) {
         mTaskFactory.newLoadItemTask(
-            Contracts.Patients.URI, null, new UuidFilter(), uuid, Patient.LOADER, bus
+            Patients.URI, null, new UuidFilter(), uuid, Patient::load, bus
         ).execute();
     }
 

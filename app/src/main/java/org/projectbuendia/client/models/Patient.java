@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.json.JsonPatient;
@@ -21,18 +22,6 @@ import org.projectbuendia.client.utils.Utils;
 import javax.annotation.concurrent.Immutable;
 
 public final @Immutable class Patient extends Model {
-    public static final CursorLoader<Patient> LOADER = cursor -> new Patient(
-        Utils.getString(cursor, Patients.UUID),
-        Utils.getString(cursor, Patients.ID),
-        Utils.getString(cursor, Patients.GIVEN_NAME),
-        Utils.getString(cursor, Patients.FAMILY_NAME),
-        Sex.nullableValueOf(Utils.getString(cursor, Patients.SEX)),
-        Utils.getLocalDate(cursor, Patients.BIRTHDATE),
-        Utils.getBoolean(cursor, Patients.PREGNANCY, false),
-        Utils.getString(cursor, Patients.LOCATION_UUID),
-        Utils.getString(cursor, Patients.BED_NUMBER)
-    );
-
     public final String id;
     public final String givenName;
     public final String familyName;
@@ -82,5 +71,19 @@ public final @Immutable class Patient extends Model {
         this.pregnancy = pregnancy;
         this.locationUuid = Utils.toNonnull(locationUuid);
         this.bedNumber = Utils.toNonnull(bedNumber);
+    }
+
+    public static Patient load(Cursor cursor) {
+        return new Patient(
+            Utils.getString(cursor, Patients.UUID),
+            Utils.getString(cursor, Patients.ID),
+            Utils.getString(cursor, Patients.GIVEN_NAME),
+            Utils.getString(cursor, Patients.FAMILY_NAME),
+            Sex.nullableValueOf(Utils.getString(cursor, Patients.SEX)),
+            Utils.getLocalDate(cursor, Patients.BIRTHDATE),
+            Utils.getBoolean(cursor, Patients.PREGNANCY, false),
+            Utils.getString(cursor, Patients.LOCATION_UUID),
+            Utils.getString(cursor, Patients.BED_NUMBER)
+        );
     }
 }

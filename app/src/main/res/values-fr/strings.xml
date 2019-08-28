@@ -131,7 +131,7 @@
   <string name="sex_other_abbreviation">A</string>
   <string name="title_updating_patient">Mise à jour du patient</string>
   <string name="title_adding_new_patient">Ajout d\'un nouveau patient</string>
-  <string name="please_wait">Attendez SVP</string>
+  <string name="please_wait_ellipsis">Attendez SVP&#8230;</string>
   <string name="updating_patient_please_wait">Mise à jour du patient, veuillez patienter...</string>
   <string name="adding_new_patient_please_wait">Ajout d\'un nouveau patient, veuillez patienter...</string>
 
@@ -142,12 +142,11 @@
   <string name="zoom_quarter">4 colonnes par jour</string>
   <string name="zoom_sixth">6 colonnes par jour</string>
 
-  <string name="go_to_patient_title">Accédez au dossier du patient</string>
-  <string name="go_to_patient_id_label">Patient ID</string>
-  <string name="go_to_patient_no_data">Pas encore de données chargées à partir du serveur</string>
-  <string name="go_to_patient_not_found_as_of_time">Aucun patient trouvé des %s</string>
-  <string name="go_to_patient_not_found">Aucun patient trouvé</string>
-  <string name="go_to_patient_go">Aller à tracer</string>
+  <string name="go_to_patient_title">Aller au dossier du patient</string>
+  <string name="patient_id">ID du patient</string>
+  <string name="searching_ellipsis">Recherche en cours&#8230;</string>
+  <string name="patient_not_found">Aucun patient trouvé avec l\'ID %s</string>
+  <string name="go_to_chart">Aller au dossier</string>
 
   <string name="since_admission">Depuis admission</string>
   <string name="since_symptom_onset">Depuis début des symptômes</string>
@@ -177,6 +176,7 @@
   <string name="ebola_test_label">Essai d\'Ebola</string>
   <string name="latest_pcr_label_with_date">Essai d\'Ebola test (%s)</string>
   <string name="action_add_test_result">Ajouter le résultat du test</string>
+  <string name="pregnant_abbreviation">enc</string>
   <string name="pregnant">Enceinte</string>
   <string name="iv_fitted">Cathéter intraveineux en place</string>
   <string name="cannot_eat">Ne peut pas manger</string>

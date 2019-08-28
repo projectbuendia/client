@@ -154,12 +154,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
         LoadItemTask<Encounter> task = mTaskFactory.newLoadItemTask(
-            Observations.URI,
-            ENCOUNTER_PROJECTION,
-            new EncounterUuidFilter(),
-            mUuid,
-            new Encounter.Loader(),
-            mBus);
+            Observations.URI, ENCOUNTER_PROJECTION, new EncounterUuidFilter(), mUuid, Encounter::load, mBus);
         task.execute();
     }
 

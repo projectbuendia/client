@@ -51,11 +51,10 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
+import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
@@ -496,25 +495,11 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {
-            String id = Utils.orDefault(patient.id, EN_DASH);
-            String fullName = Utils.orDefault(patient.givenName, EN_DASH) + " " +
-                Utils.orDefault(patient.familyName, EN_DASH);
-
-            List<String> labels = new ArrayList<>();
-            if (patient.sex != null) {
-                labels.add(Sex.getAbbreviation(patient.sex));
-            }
-            if (patient.pregnancy) {
-                labels.add(getString(R.string.pregnant).toLowerCase());
-            }
-            labels.add(patient.birthdate == null ? App.str(R.string.age_unknown)
-                : Utils.birthdateToAge(patient.birthdate));
-            String sexAge = Joiner.on(", ").join(labels);
-
             ActionBar actionBar = getActionBar();
             if (actionBar != null) {
-                actionBar.setTitle(id + ". " + fullName);
-                actionBar.setSubtitle(sexAge);
+                String id = Utils.orDefault(patient.id, EN_DASH);
+                actionBar.setTitle(id + ". " + u.formatPatientName(patient));
+                actionBar.setSubtitle(u.formatPatientDetails(patient, true, true, true));
             }
         }
 
@@ -522,7 +507,7 @@ public final class PatientChartActivity extends LoggedInActivity {
             hideWaitDialog();
             mProgressDialog = ProgressDialog.show(
                 PatientChartActivity.this, getString(titleId),
-                getString(R.string.please_wait), true);
+                getString(R.string.please_wait_ellipsis), true);
         }
 
         @Override public void hideWaitDialog() {

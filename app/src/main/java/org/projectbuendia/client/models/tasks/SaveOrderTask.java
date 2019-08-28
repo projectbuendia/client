@@ -27,7 +27,7 @@ import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
@@ -98,7 +98,7 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
         // insert() is implemented as insert or replace, so we use it for both adding and updating.
         Uri uri = mContentResolver.insert(
-            Contracts.Orders.URI, Order.fromJson(json).toContentValues());
+            Orders.URI, Order.fromJson(json).toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.CLIENT_ERROR, null);
         }
@@ -116,7 +116,7 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
         // We use the fetch event to trigger UI updates, both for initial load and for this update.
         mBus.register(this);
         mTaskFactory.newLoadItemTask(
-            Contracts.Orders.URI, null, new UuidFilter(), mUuid, Order.LOADER, mBus
+            Orders.URI, null, new UuidFilter(), mUuid, Order::load, mBus
         ).execute();
     }
 }

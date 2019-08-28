@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -64,14 +65,6 @@ import javax.annotation.concurrent.Immutable;
 public final @Immutable class Order extends Model {
     public static final char NON_BREAKING_SPACE = '\u00a0';
 
-    public static final CursorLoader<Order> LOADER = cursor -> new Order(
-        cursor.getString(cursor.getColumnIndex(Orders.UUID)),
-        cursor.getString(cursor.getColumnIndex(Orders.PATIENT_UUID)),
-        cursor.getString(cursor.getColumnIndex(Orders.INSTRUCTIONS)),
-        cursor.getLong(cursor.getColumnIndex(Orders.START_MILLIS)),
-        cursor.getLong(cursor.getColumnIndex(Orders.STOP_MILLIS))
-    );
-
     public final String patientUuid;
     public final Instructions instructions;
     public final DateTime start;
@@ -82,6 +75,16 @@ public final @Immutable class Order extends Model {
             order.uuid, order.patient_uuid,
             order.instructions,
             order.start_millis, order.stop_millis
+        );
+    }
+
+    public static Order load(Cursor cursor) {
+        return new Order(
+            cursor.getString(cursor.getColumnIndex(Orders.UUID)),
+            cursor.getString(cursor.getColumnIndex(Orders.PATIENT_UUID)),
+            cursor.getString(cursor.getColumnIndex(Orders.INSTRUCTIONS)),
+            cursor.getLong(cursor.getColumnIndex(Orders.START_MILLIS)),
+            cursor.getLong(cursor.getColumnIndex(Orders.STOP_MILLIS))
         );
     }
 

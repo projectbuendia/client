@@ -119,6 +119,11 @@ public class Utils {
         return value != null ? value : defaultValue;
     }
 
+    /** Returns a value if that value is not null, or a specified default value otherwise. */
+    public static @Nonnull String nonemptyOrDefault(@Nullable String value, @Nonnull String defaultValue) {
+        return isEmpty(value) ? defaultValue : value;
+    }
+
     /** Converts nulls to a default integer value. */
     public static int toNonnull(@Nullable Integer n, int defaultValue) {
         return n == null ? defaultValue : n;

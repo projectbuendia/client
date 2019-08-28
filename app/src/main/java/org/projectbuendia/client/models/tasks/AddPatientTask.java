@@ -32,7 +32,7 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.Logger;
 
@@ -111,7 +111,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         }
 
         Patient patient = Patient.fromJson(json);
-        Uri uri = mContentResolver.insert(Contracts.Patients.URI, patient.toContentValues());
+        Uri uri = mContentResolver.insert(Patients.URI, patient.toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_CLIENT, null);
         }
@@ -151,12 +151,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
-            Contracts.Patients.URI,
-            null,
-            new UuidFilter(),
-            mUuid,
-            Patient.LOADER,
-            mBus);
+            Patients.URI, null, new UuidFilter(), mUuid, Patient::load, mBus);
         task.execute();
     }
 

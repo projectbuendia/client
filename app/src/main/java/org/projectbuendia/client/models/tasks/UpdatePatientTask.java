@@ -28,7 +28,7 @@ import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Patients;
 
 import java.util.concurrent.ExecutionException;
 
@@ -79,7 +79,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
         }
 
         int count = mContentResolver.update(
-            Contracts.Patients.URI,
+            Patients.URI,
             mPatientDelta.toContentValues(),
             FILTER.getSelectionString(),
             FILTER.getSelectionArgs(mUuid));
@@ -106,12 +106,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
         LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
-            Contracts.Patients.URI,
-            null,
-            new UuidFilter(),
-            mUuid,
-            Patient.LOADER,
-            mBus);
+            Patients.URI, null, new UuidFilter(), mUuid, Patient::load, mBus);
         task.execute();
     }
 
