@@ -320,7 +320,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 if (names.length == 2) {
                     list = list.replace(", ", " or ");
                 } else if (names.length > 2) {
-                    list = list.replaceAll(", ([^,*])$", ", or $1");
+                    list = list.replaceAll(", ([^,]*)$", ", or $1");
                 }
                 description.appendText(
                     (names[0].matches("^[AEIOU]") ? "is an " : "is a ") + list);
@@ -674,5 +674,9 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 description.appendText("is a WebView that does not contain any element with ID \"" + id + "\"");
             }
         };
+    }
+
+    protected String getString(int id, Object... args) {
+        return getActivity().getString(id, args);
     }
 }
