@@ -133,7 +133,7 @@
   <tbody class="orders">
     <tr>
       <th scope="rowgroup">
-        Treatments
+        {{get_string("treatments")}}
       </th>
       {% set prevStop = columns[0].start %}
       {% for column in columns %}
@@ -240,7 +240,7 @@
 
     <tr>
       <th scope="row" class="command" id="new_treatment" onclick="controller.onNewOrderPressed()">
-        Add a New Treatment
+        {{get_string("add_new_treatment")}}
       </th>
     </tr>
   </tbody>

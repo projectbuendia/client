@@ -11,6 +11,8 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.models.Order;
@@ -56,6 +58,7 @@ public class PebbleExtension extends AbstractExtension {
     static Map<String, Function> functions = new HashMap<>();
 
     static {
+        functions.put("get_string", new GetStringFunction());
         functions.put("get_latest_point", new GetLatestPointFunction());
         functions.put("get_all_points", new GetAllPointsFunction());
         functions.put("interval_contains", new IntervalContainsFunction());
@@ -276,6 +279,26 @@ public class PebbleExtension extends AbstractExtension {
     static class LineBreakHtmlFilter extends ZeroArgFilter {
         @Override public Object apply(Object input, Map<String, Object> args) {
             return ("" + input).replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
+        }
+    }
+
+    /** get_string(name) -> localized string */
+    static class GetStringFunction implements Function {
+        static final Map<String, Integer> STRING_IDS = getStringIdMap();
+
+        public static Map<String, Integer> getStringIdMap() {
+            Map<String, Integer> map = new HashMap<>();
+            map.put("treatments", R.string.treatments);
+            map.put("add_new_treatment", R.string.add_new_treatment);
+            return map;
+        }
+
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("name");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            return App.str(STRING_IDS.get(args.get("name")));
         }
     }
 
