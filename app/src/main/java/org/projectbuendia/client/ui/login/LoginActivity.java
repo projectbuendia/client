@@ -25,6 +25,7 @@ import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.SettingsActivity;
+import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -77,6 +78,8 @@ public class LoginActivity extends BaseActivity {
                 (dialog, which) -> SettingsActivity.start(LoginActivity.this))
             .setPositiveButton(R.string.sync_failed_retry, (dialog, which) -> mController.onSyncRetry())
             .create();
+
+        ChartRenderer.backgroundCompileTemplate();
     }
 
     /**

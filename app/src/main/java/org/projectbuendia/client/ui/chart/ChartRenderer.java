@@ -1,6 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.util.DisplayMetrics;
@@ -60,8 +61,11 @@ public class ChartRenderer {
     };
 
     private static PebbleEngine sEngine;
+    private static PebbleTemplate sTemplate;
+    private static final Object sTemplateLock = new Object();
     private static final Logger LOG = Logger.create();
     private static final ExecutionHistory EMPTY_HISTORY = new ExecutionHistory();
+    private static final String TEMPLATE_PATH = "assets/chart.html";
 
     private WebView mView;  // view into which the HTML table will be rendered
     private Resources mResources;  // resources used for localizing the rendering
@@ -357,7 +361,7 @@ public class ChartRenderer {
             context.put("orders", getSortedOrders());
             context.put("executionHistories", getSortedExecutionHistories());
             LOG.elapsed("GridHtmlGenerator", "Template context populated");
-            String result = renderTemplate("assets/chart.html", context);
+            String result = renderTemplate(context);
             LOG.finish("GridHtmlGenerator", "Finished rendering HTML");
             return result;
         }
@@ -400,26 +404,48 @@ public class ChartRenderer {
             }
         }
 
-        /** Renders a Pebble template. */
-        String renderTemplate(String filename, Map<String, Object> context) {
+        /** Renders the Pebble template for the chart. */
+        String renderTemplate(Map<String, Object> context) {
             LOG.start("renderTemplate");
-
-            if (sEngine == null) {
-                // PebbleEngine caches compiled templates by filename, so as long as we keep using the
-                // same engine instance, it's okay to call getTemplate(filename) on each render.
-                sEngine = new PebbleEngine.Builder().extension(new PebbleExtension()).build();
-            }
+            foregroundCompileTemplate();
             try {
                 StringWriter writer = new StringWriter();
-                PebbleTemplate template = sEngine.getTemplate(filename);
                 LOG.elapsed("renderTemplate", "Template loaded");
-                template.evaluate(writer, context);
+                sTemplate.evaluate(writer, context);
                 LOG.finish("renderTemplate");
                 return writer.toString();
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();
                 e.printStackTrace(new PrintWriter(writer));
                 return "<div style=\"font-size: 150%\">" + writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
+            }
+        }
+    }
+
+    public static void backgroundCompileTemplate() {
+        if (sEngine == null || sTemplate == null) {
+            new AsyncTask<Void, Void, Void>() {
+                public Void doInBackground(Void... param) {
+                    compileTemplate();
+                    return null;
+                }
+            }.execute();
+        }
+    }
+
+    public static void foregroundCompileTemplate() {
+        if (sEngine == null || sTemplate == null) {
+            compileTemplate();
+        }
+    }
+
+    private static void compileTemplate() {
+        synchronized (sTemplateLock) {
+            if (sEngine == null || sTemplate == null) {
+                LOG.start("compileTemplate");
+                sEngine = new PebbleEngine.Builder().extension(new PebbleExtension()).build();
+                sTemplate = sEngine.getTemplate(TEMPLATE_PATH);
+                LOG.finish("compileTemplate");
             }
         }
     }
