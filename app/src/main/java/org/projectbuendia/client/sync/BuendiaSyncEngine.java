@@ -33,7 +33,7 @@ import org.joda.time.Instant;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts.Misc;
-import org.projectbuendia.client.providers.Contracts.SyncTokens;
+import org.projectbuendia.client.providers.Contracts.Bookmarks;
 import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.providers.DatabaseTransaction;
 import org.projectbuendia.client.sync.SyncManager.SyncStatus;
@@ -245,8 +245,8 @@ public class BuendiaSyncEngine implements SyncEngine {
     public static String getBookmark(ContentProviderClient provider, Table table)
             throws RemoteException {
         try (Cursor c = provider.query(
-                SyncTokens.URI.buildUpon().appendPath(table.name).build(),
-                new String[] {SyncTokens.SYNC_TOKEN}, null, null, null)
+                Bookmarks.URI.buildUpon().appendPath(table.name).build(),
+                new String[] {Bookmarks.BOOKMARK}, null, null, null)
         ) {
             // Make the linter happy, there's no way that the cursor can be null without throwing
             // an exception.
@@ -264,11 +264,11 @@ public class BuendiaSyncEngine implements SyncEngine {
         }
     }
 
-    public static void setBookmark(ContentProviderClient provider, Table table, String syncToken)
+    public static void setBookmark(ContentProviderClient provider, Table table, String bookmark)
             throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(SyncTokens.TABLE_NAME, table.name);
-        cv.put(SyncTokens.SYNC_TOKEN, syncToken);
-        provider.insert(SyncTokens.URI, cv);
+        cv.put(Bookmarks.TABLE_NAME, table.name);
+        cv.put(Bookmarks.BOOKMARK, bookmark);
+        provider.insert(Bookmarks.URI, cv);
     }
 }
