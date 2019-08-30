@@ -263,8 +263,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     @Override protected void attachBaseContext(Context base) {
-        App.applyLocaleSetting();
-        super.attachBaseContext(App.getContext());
+        super.attachBaseContext(App.applyLocaleSetting(base));
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {

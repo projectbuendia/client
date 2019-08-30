@@ -436,8 +436,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     @Override protected void attachBaseContext(Context base) {
-        App.applyLocaleSetting();
-        super.attachBaseContext(App.getContext());
+        super.attachBaseContext(App.applyLocaleSetting(base));
         u = ContextUtils.from(this);
     }
 
