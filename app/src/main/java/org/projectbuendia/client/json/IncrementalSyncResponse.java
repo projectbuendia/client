@@ -14,23 +14,17 @@
 package org.projectbuendia.client.json;
 
 /**
- * Represents an incremental sync response of type {@code T}. This object is deserialized from JSON,
- * so {@code T} should be a type that can be populated from the JSON response.
+ * An incremental sync response containing items of type T.  This object is
+ * deserialized from JSON, so T should be a type that can be deserialized
+ * from the JSON response.
  */
 public class IncrementalSyncResponse<T> {
     /** A list of objects returned by the incremental sync operation. */
     public T[] results;
 
-    /**
-     * Can be sent to the server with the next request to ensure that only new data will be
-     * returned.
-     */
-    public String syncToken;
+    /** Can be sent with the next request to cause only new data to be returned. */
+    public String bookmark;
 
-    /**
-     * {@code true} if there is more data that remains unfetched. In this case, a subsequent request
-     * to the same endpoint that supplies {@link #syncToken} from this response will return more
-     * data that the client hasn't previously fetched.
-     */
+    /** True if there is more data available to be fetched. */
     public boolean more;
 }

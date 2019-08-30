@@ -32,9 +32,9 @@ import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.providers.BuendiaProvider;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
+import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.providers.DatabaseTransaction;
 import org.projectbuendia.client.sync.SyncManager.SyncStatus;
 import org.projectbuendia.client.sync.controllers.ChartsSyncWorker;
@@ -242,11 +242,12 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     /** Returns the server timestamp corresponding to the last observation sync. */
     @Nullable
-    public static String getLastSyncToken(ContentProviderClient provider, Contracts.Table table)
+    public static String getBookmark(ContentProviderClient provider, Table table)
             throws RemoteException {
-        try(Cursor c = provider.query(
+        try (Cursor c = provider.query(
                 SyncTokens.URI.buildUpon().appendPath(table.name).build(),
-                new String[] {SyncTokens.SYNC_TOKEN}, null, null, null)) {
+                new String[] {SyncTokens.SYNC_TOKEN}, null, null, null)
+        ) {
             // Make the linter happy, there's no way that the cursor can be null without throwing
             // an exception.
             assert c != null;
@@ -263,8 +264,7 @@ public class BuendiaSyncEngine implements SyncEngine {
         }
     }
 
-    public static void storeSyncToken(
-            ContentProviderClient provider, Contracts.Table table, String syncToken)
+    public static void setBookmark(ContentProviderClient provider, Table table, String syncToken)
             throws RemoteException {
         ContentValues cv = new ContentValues();
         cv.put(SyncTokens.TABLE_NAME, table.name);
