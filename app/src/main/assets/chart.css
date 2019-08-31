@@ -42,7 +42,7 @@ button#up { bottom: 12rem; }
 button#down { bottom: 6rem; }
 
 /* Apply borders to all cells so their sizes are uniform. */
-.top th { border-top: 1px solid transparent; }
+.top th { border-top: 1px solid transparent; border-bottom: none; }
 th, td { border: 1px solid transparent; border-width: 0 1px 1px 0; }
 
 /* Grid lines */
@@ -170,7 +170,7 @@ th.command { /* should match @style/ActionButton */
 #grid-left .frozen { background: #fff; z-index: 1; }
 
 /* Tiles */
-#fixed { background: #ddd; }
+#fixed { background: #eee; }
 #tiles { width: 100%; }
 .row { display: flex; flex-direction: row; }
 .tile { flex-basis: 0; flex-grow: 1; padding: 1rem 0 1rem 16px; }
