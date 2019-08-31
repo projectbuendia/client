@@ -172,6 +172,7 @@ public class ChartRenderer {
             }
         };
         List<List<Tile>> mTileRows = new ArrayList<>();
+        List<List<Tile>> mFixedRows = new ArrayList<>();
         List<RowGroup> mRowGroups = new ArrayList<>();
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
@@ -186,33 +187,14 @@ public class ChartRenderer {
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
             LOG.start("GridHtmlGenerator");
-            for (ChartSection tileGroup : chart.tileGroups) {
-                List<Tile> tileRow = new ArrayList<>();
-                for (ChartItem item : tileGroup.items) {
-                    ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
-                    for (int i = 0; i < points.length; i++) {
-                        Obs obs = latestObservations.get(item.conceptUuids[i]);
-                        if (obs != null) {
-                            points[i] = obs.getObsPoint();
-                        }
-                    }
-                    tileRow.add(new Tile(item, points));
-                    if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
-                    }
-                }
-                mTileRows.add(tileRow);
+            for (ChartSection section : chart.fixedGroups) {
+                mFixedRows.add(createTiles(section, latestObservations));
             }
-
+            for (ChartSection section : chart.tileGroups) {
+                mTileRows.add(createTiles(section, latestObservations));
+            }
             for (ChartSection section : chart.rowGroups) {
-                RowGroup rowGroup = new RowGroup(section.label);
-                mRowGroups.add(rowGroup);
-                for (ChartItem item : section.items) {
-                    rowGroup.rows.add(new Row(item));
-                    if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
-                    }
-                }
+                mRowGroups.add(createRowGroup(section));
             }
 
             Map<String, Order> ordersByUuid = new HashMap<>();
@@ -224,6 +206,35 @@ public class ChartRenderer {
             insertEmptyColumns();
 
             LOG.elapsed("GridHtmlGenerator", "Data prepared");
+        }
+
+        private List<Tile> createTiles(ChartSection section, Map<String, Obs> observations) {
+            List<Tile> tiles = new ArrayList<>();
+            for (ChartItem item : section.items) {
+                ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
+                for (int i = 0; i < points.length; i++) {
+                    Obs obs = observations.get(item.conceptUuids[i]);
+                    if (obs != null) {
+                        points[i] = obs.getObsPoint();
+                    }
+                }
+                tiles.add(new Tile(item, points));
+                if (!item.script.trim().isEmpty()) {
+                    mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                }
+            }
+            return tiles;
+        }
+
+        private RowGroup createRowGroup(ChartSection section) {
+            RowGroup rowGroup = new RowGroup(section.label);
+            for (ChartItem item : section.items) {
+                rowGroup.rows.add(new Row(item));
+                if (!item.script.trim().isEmpty()) {
+                    mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                }
+            }
+            return rowGroup;
         }
 
         /** Collects observations into Column objects that make up the grid. */
@@ -352,6 +363,7 @@ public class ChartRenderer {
             Map<String, Object> context = new HashMap<>();
             context.put("now", mNow);
             context.put("today", mNow.toLocalDate());
+            context.put("fixedRows", mFixedRows);
             context.put("tileRows", mTileRows);
             context.put("rowGroups", mRowGroups);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));

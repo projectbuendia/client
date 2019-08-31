@@ -247,6 +247,10 @@ public class ChartDataHelper {
                         if (chart.tileGroups.size() + chart.rowGroups.size() > 0) {
                             charts.add(chart);
                         }
+                    } else if (eq(sectionType, "FIXED_ROW") && chart != null) {
+                        ChartSection fixedGroup = new ChartSection(label);
+                        chart.fixedGroups.add(fixedGroup);
+                        tileGroupsById.put(rowid, fixedGroup);
                     } else if (eq(sectionType, "TILE_ROW") && chart != null) {
                         ChartSection tileGroup = new ChartSection(label);
                         chart.tileGroups.add(tileGroup);

@@ -11,25 +11,8 @@
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 <body>
-<div id="tiles" cellspacing="0" cellpadding="0">
-  {% for tileRow in tileRows %}
-    <div class="row">
-      {% for tile in tileRow %}
-        {% set id = tile.item.conceptIds | first %}
-        {% set values = tile.points | values %}
-        {% set class = values | format_values(tile.item.cssClass) %}
-        {% set style = values | format_values(tile.item.cssStyle) %}
-        <div class="tile {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}">
-          <div class="heading">{{tile.item.label}}</div>
-          <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
-          <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% endfor %}
-</div>
 
-<table id="grid" cellspacing=0 cellpadding=0>
+<table id="grid-table" cellspacing=0 cellpadding=0>
   <thead>
     <tr class="top">
       <th class="corner">&nbsp;</th>
@@ -246,22 +229,68 @@
   </tbody>
 </table>
 
-<div id="scroller" ontouchstart="seeking = false">
-  <div id="grid-left"></div>
-  <div id="grid-body"></div>
-  <div id="buttons">
-    <button id="up" ontouchstart="moveTarget(event, 0, -jumpY)"></button>
-    <button id="down" ontouchstart="moveTarget(event, 0, jumpY)"></button>
-    <button id="left" ontouchstart="moveTarget(event, -jumpX, 0)"></button>
-    <button id="home" ontouchstart="moveTarget(event, 0, 0, true)"></button>
-    <button id="right" ontouchstart="moveTarget(event, jumpX, 0)"></button>
+<div id="fixed" cellspacing="0" cellpadding="0">
+  {% for fixedRow in fixedRows %}
+    <div class="row">
+      {% for tile in fixedRow %}
+        {% set id = tile.item.conceptIds | first %}
+        {% set values = tile.points | values %}
+        {% set class = values | format_values(tile.item.cssClass) %}
+        {% set style = values | format_values(tile.item.cssStyle) %}
+        <div class="tile {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}">
+          <div class="heading">{{tile.item.label}}</div>
+          <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
+          <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+
+<div id="scrolling" ontouchstart="seeking = false">
+  <div id="tiles" cellspacing="0" cellpadding="0">
+    {% for tileRow in tileRows %}
+      <div class="row">
+        {% for tile in tileRow %}
+          {% set id = tile.item.conceptIds | first %}
+          {% set values = tile.points | values %}
+          {% set class = values | format_values(tile.item.cssClass) %}
+          {% set style = values | format_values(tile.item.cssStyle) %}
+          <div class="tile {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}">
+            <div class="heading">{{tile.item.label}}</div>
+            <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
+            <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
   </div>
+  <div id="grid">
+    <div id="grid-left"></div>
+    <div id="grid-body"></div>
+  </div>
+</div>
+
+<div id="buttons">
+  <button id="up" ontouchstart="moveTarget(event, 0, -jumpY)"></button>
+  <button id="down" ontouchstart="moveTarget(event, 0, jumpY)"></button>
+  <button id="left" ontouchstart="moveTarget(event, -jumpX, 0)"></button>
+  <button id="home" ontouchstart="moveTarget(event, 0, 0, true)"></button>
+  <button id="right" ontouchstart="moveTarget(event, jumpX, 0)"></button>
 </div>
 
 <script>
   controller.log('Start running script');
 
   var data = {{dataCellsByConceptId | raw}};
+
+  {% for fixedRow in fixedRows %}
+    {% for tile in fixedRow %}
+      {% if tile.item.script is not empty %}
+        runTileScript(data, {{tile.item.conceptIds | join(',') | js | raw}}, {{tile.item.script | js | raw}});
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
 
   {% for tileRow in tileRows %}
     {% for tile in tileRow %}
@@ -279,16 +308,17 @@
 
   controller.log('Start constructing grid-left and grid-body');
 
-  var win = $(window);
-  var grid = $('#grid');
+  var scrolling = $('#scrolling');
+  var tiles = $('#tiles');
+  var gridTable = $('#grid-table');
   var gridLeft = $('#grid-left');
   var gridBody = $('#grid-body');
 
-  var left = grid.clone();
-  var body = grid.clone();
+  var left = gridTable.clone();
+  var body = gridTable.clone();
   left.find('th').add(left.find('td')).not(':first-child').remove();
   body.find('th:first-child').add(body.find('td:first-child')).remove();
-  grid.remove();
+  gridTable.remove();
   gridLeft.append(left.attr('id', null));
   gridBody.append(body.attr('id', null));
 
@@ -296,17 +326,23 @@
   var frozenCorner = corner.clone().addClass('frozen').hide();
   gridLeft.append(frozenCorner);
 
+  // We use two copies of the column headings.  The "frozen headings" are for
+  // vertical scrolling and are fixed at the top of the window.  The "floating
+  // headings" scroll horizontally with #grid-body.
   var headings = $('#grid-body thead');
   var frozenHeadings = headings.clone().addClass('frozen').hide();
   gridBody.append(frozenHeadings);
-
   var floatingHeadings = headings.clone().addClass('floating').hide();
   gridBody.append(floatingHeadings);
+
+  // The frozen parts are fixed at the top of the vertical scrolling region.
+  frozenCorner.css({top: scrolling.offset().top + 'px'});
+  frozenHeadings.css({top: scrolling.offset().top + 'px'});
 
   var yOffset = 0;
 
   function updateY() {
-    yOffset = win.scrollTop() - headings.offset().top;
+    yOffset = scrolling.scrollTop() - tiles.height();
     frozenCorner.toggle(yOffset > 0);
     frozenHeadings.toggle(yOffset > 0);
     floatingHeadings.hide();
@@ -325,7 +361,7 @@
     }
   }
 
-  win.scroll(updateY);
+  scrolling.scroll(updateY);
   gridBody.scroll(updateX);
 
   $(window).unload(function() {
@@ -340,14 +376,14 @@
   var nowCenter = nowColumn.offset().left + nowColumn.width()/2;
   var bodyCenter = gridBody.offset().left + gridBody.width()/2;
   var jumpX = gridBody.width()/2;
-  var jumpY = (window.innerHeight - $('#scroller').offset().top)/2;
+  var jumpY = (window.innerHeight - $('#grid').offset().top)/2;
   var homeX = nowCenter - bodyCenter;
   var targetX = 0;
   var targetY = 0;
 
   function scrollJump(dx, dy, home) {
     var x = gridBody.scrollLeft();
-    var y = win.scrollTop();
+    var y = scrolling.scrollTop();
     if (home) {
       gridBody.scrollLeft(homeX);
       updateX();
@@ -357,7 +393,7 @@
       updateX();
     }
     if (dy != 0) {
-      win.scrollTop(y + dy);
+      scrolling.scrollTop(y + dy);
       updateY();
     }
   }
@@ -369,7 +405,7 @@
     event.stopPropagation();
     if (!seeking) {
       targetX = gridBody.scrollLeft();
-      targetY = win.scrollTop();
+      targetY = scrolling.scrollTop();
     }
     if (home) targetX = homeX;
     targetX += dx;
@@ -381,15 +417,15 @@
   function scrollStep() {
     if (!seeking) return;
     var x = gridBody.scrollLeft();
-    var y = win.scrollTop();
+    var y = scrolling.scrollTop();
     gridBody.scrollLeft(x * 0.6 + targetX * 0.4);
-    win.scrollTop(y * 0.6 + targetY * 0.4);
+    scrolling.scrollTop(y * 0.6 + targetY * 0.4);
     if (abs(gridBody.scrollLeft() - x) > 0.5) {
       updateX();
     } else {
       targetX = x;
     }
-    if (abs(win.scrollTop() - y) > 0.5) {
+    if (abs(scrolling.scrollTop() - y) > 0.5) {
       updateY();
     } else {
       targetY = y;
