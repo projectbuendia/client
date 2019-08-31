@@ -17,6 +17,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
+
 public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
     private final ContextUtils u;
     private final List<Section> mSections;
@@ -57,13 +60,13 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
     @Override public Object getGroup(int groupIndex) {
         Section section = mSections.get(groupIndex);
         return Utils.format("%s " + BULLET + " %s",
-            section.conceptName, Utils.formatShortDate(section.date));
+            section.conceptName, Utils.format(section.date, MONTH_DAY));
     }
 
     @Override public Object getChild(int groupIndex, int childIndex) {
         ObsRow row = mSectionRows.get(groupIndex).get(childIndex);
         return Utils.format("%s " + EM_DASH + " %s",
-            Utils.formatTimeOfDay(row.time), row.valueName);
+            Utils.format(row.time, HOUR_MINUTE), row.valueName);
     }
 
     @Override public int getGroupCount() {

@@ -50,7 +50,7 @@ public final @Immutable class Patient extends Model {
         cv.put(Patients.GIVEN_NAME, givenName);
         cv.put(Patients.FAMILY_NAME, familyName);
         cv.put(Patients.SEX, Sex.nullableNameOf(sex));
-        cv.put(Patients.BIRTHDATE, Utils.formatDate(birthdate));
+        cv.put(Patients.BIRTHDATE, Utils.format(birthdate));
         // PREGNANCY is a denormalized column and is never written directly.
         // LOCATION_UUID is a denormalized column and is never written directly.
         // BED_NUMBER is a denormalized column and is never written directly.

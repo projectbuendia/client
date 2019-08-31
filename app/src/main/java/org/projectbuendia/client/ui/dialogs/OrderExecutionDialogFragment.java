@@ -40,6 +40,9 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
+
 /** A {@link DialogFragment} for recording that an order was executed. */
 public class OrderExecutionDialogFragment extends DialogFragment {
     @InjectView(R.id.order_medication) TextView mOrderMedication;
@@ -134,8 +137,8 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
         DateTime start = Utils.getDateTime(args, "orderStartMillis");
         mOrderStartTime.setText(getString(
-            R.string.order_started_on_date_at_time,
-            Utils.formatShortDate(start.toLocalDate()), Utils.formatTimeOfDay(start)));
+            R.string.order_started_datetime,
+            Utils.format(start, Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE)));
 
         // Describe how many times the order was executed during the selected interval.
         int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
@@ -146,19 +149,19 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                     : R.string.order_execution_today_singular_html) :
                 (plural ? R.string.order_execution_historical_plural_html
                     : R.string.order_execution_historical_singular_html),
-            count, Utils.formatShortDate(date))));
+            count, Utils.format(date, MONTH_DAY))));
 
         // Show the list of times that the order was executed during the selected interval.
         boolean editable = args.getBoolean("editable");
         Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
         List<String> htmlItems = new ArrayList<>();
         for (DateTime executionTime : executionTimes) {
-            htmlItems.add(Utils.formatTimeOfDay(executionTime));
+            htmlItems.add(Utils.format(executionTime, HOUR_MINUTE));
         }
         if (editable) {
             DateTime encounterTime = Utils.getDateTime(args, "encounterTimeMillis");
             htmlItems.add(orderExecutedNow ?
-                "<b>" + Utils.formatTimeOfDay(encounterTime) + "</b>" :
+                "<b>" + Utils.format(encounterTime, HOUR_MINUTE) + "</b>" :
                 "<b>&nbsp;</b>");  // keep total height stable
         }
         mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));

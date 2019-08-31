@@ -38,6 +38,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
+import org.joda.time.ReadablePartial;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
@@ -316,18 +317,8 @@ public class Utils {
 
     // ==== Dates and times ====
 
-    private static final DateTimeFormatter SHORT_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM"); // TODO/i18n
-    private static final DateTimeFormatter MEDIUM_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM yyyy"); // TODO/i18n
-    private static final DateTimeFormatter SHORT_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("d MMM 'at' HH:mm"); // TODO/i18n
-    private static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER =
-        DateTimeFormat.mediumDateTime();
     private static final DateTimeFormatter ISO8601_UTC_DATETIME_FORMATTER =
         DateTimeFormat.forPattern("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-    private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
-        DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
@@ -340,7 +331,7 @@ public class Utils {
     }
 
     /** Converts a nullable LocalDate to a yyyy-mm-dd String or null. */
-    public static @Nullable String formatDate(@Nullable LocalDate date) {
+    public static @Nullable String format(@Nullable LocalDate date) {
         return date != null ? date.toString() : null;
     }
 
@@ -353,42 +344,46 @@ public class Utils {
         }
     }
 
-    /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
-    public static @Nullable String formatShortDate(@Nullable LocalDate localDate) {
-        return localDate != null ? SHORT_DATE_FORMATTER.print(localDate) : null;
-    }
-
-    /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
-    public static @Nullable String formatMediumDate(@Nullable LocalDate localDate) {
-        return localDate != null ? MEDIUM_DATE_FORMATTER.print(localDate) : null;
-    }
-
-    /** Converts a nullable {@link DateTime} to a nullable String with day and month only. */
-    public static @Nullable String formatShortDate(@Nullable DateTime dateTime) {
-        return dateTime != null ? SHORT_DATE_FORMATTER.print(dateTime) : null;
-    }
-
-    /** Converts a nullable {@link DateTime} to a nullable String with time, day, and month only. */
-    public static @Nullable String formatShortDateTime(@Nullable DateTime dateTime) {
-        return dateTime != null ? SHORT_DATETIME_FORMATTER.print(dateTime) : null;
-    }
-
-    /** Converts a nullable {@link DateTime} to a nullable String in HH:MM format. */
-    public static @Nullable String formatTimeOfDay(@Nullable DateTime dateTime) {
-        return dateTime != null ? TIME_OF_DAY_FORMATTER.print(dateTime) : null;
-    }
-
-    /**
-     * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
-     * time zone.
-     */
-    public static @Nullable String formatMediumDateTime(@Nullable DateTime dateTime) {
-        return dateTime != null ? MEDIUM_DATETIME_FORMATTER.print(dateTime) : null;
-    }
-
     /** Converts a nullable DateTime to a yyyy-mm-ddThh:mm:ssZ String or null. */
     public static @Nullable String formatUtc8601(@Nullable DateTime dt) {
         return dt != null ? ISO8601_UTC_DATETIME_FORMATTER.print(dt.withZone(DateTimeZone.UTC)) : null;
+    }
+
+    public static enum DateStyle {
+        MONTH_DAY(R.string.month_day_format),
+        SENTENCE_MONTH_DAY(R.string.sentence_month_day_format),
+        YEAR_MONTH_DAY(R.string.year_month_day_format),
+        SENTENCE_YEAR_MONTH_DAY(R.string.sentence_year_month_day_format),
+        HOUR_MINUTE(R.string.hour_minute_format),
+        SENTENCE_HOUR_MINUTE(R.string.sentence_hour_minute_format),
+        MONTH_DAY_HOUR_MINUTE(R.string.month_day_hour_minute_format),
+        SENTENCE_MONTH_DAY_HOUR_MINUTE(R.string.sentence_month_day_hour_minute_format);
+
+        private final int formatId;
+        private Map<Locale, DateTimeFormatter> formatters = new HashMap<>();
+        private DateTimeFormatter formatter = null;
+
+        private DateStyle(int formatId) {
+            this.formatId = formatId;
+        }
+
+        public DateTimeFormatter getFormatter() {
+            Locale locale = App.getSettings().getLocale();
+            if (formatters.get(locale) == null) {
+                formatters.put(locale, DateTimeFormat.forPattern(App.str(formatId)));
+            }
+            return formatters.get(locale);
+        }
+    }
+
+    public static @Nullable String format(@Nullable ReadablePartial partial, DateStyle style) {
+        if (partial == null) return null;
+        return style.getFormatter().print(partial);
+    }
+
+    public static @Nullable String format(@Nullable DateTime datetime, DateStyle style) {
+        if (datetime == null) return null;
+        return style.getFormatter().print(datetime.toLocalDateTime());
     }
 
     /** Gets the DateTime at the start of a day. */

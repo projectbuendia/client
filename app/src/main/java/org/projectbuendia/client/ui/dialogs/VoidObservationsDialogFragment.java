@@ -24,6 +24,8 @@ import java.util.List;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
+
 public class VoidObservationsDialogFragment extends DialogFragment {
 
     private LayoutInflater mInflater;
@@ -63,7 +65,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
         for (ObsRow row: rows) {
 
-            Title = row.conceptName + " " + Utils.formatShortDate(row.time);
+            Title = row.conceptName + " " + Utils.format(row.time, MONTH_DAY);
 
             if(!isExistingHeader(Title)){
                 listDataHeader.add(Title);
@@ -77,7 +79,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
             for (ObsRow row: rows){
 
-                verifyTitle = row.conceptName + " " + Utils.formatShortDate(row.time);
+                verifyTitle = row.conceptName + " " + Utils.format(row.time, MONTH_DAY);
 
                 if (verifyTitle.equals(header)){
                     child.add(row);

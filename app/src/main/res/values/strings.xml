@@ -14,6 +14,14 @@
   <string name="quoted_text">"%s"</string>
   <string name="two_items">%s and %s</string>
   <string name="more_than_two_items">%s, and %s</string>
+  <string name="month_day_format">MMM d</string>
+  <string name="sentence_month_day_format">MMM d</string>
+  <string name="year_month_day_format">MMM d, yyyy</string>
+  <string name="sentence_year_month_day_format">MMM d, yyyy</string>
+  <string name="hour_minute_format">HH:mm</string>
+  <string name="sentence_hour_minute_format">HH:mm</string>
+  <string name="month_day_hour_minute_format">MMM d, HH:mm</string>
+  <string name="sentence_month_day_hour_minute_format">\'on\' MMM d \'at\' HH:mm</string>
 
   <!-- Statuses -->
   <string name="status_unknown">Unknown</string>
@@ -122,7 +130,7 @@
   <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today, %2$s</string>
   <string name="order_execution_mark_as_given">Mark as given now</string>
   <string name="order_execution_marked_as_given">&#x2714; Marked as given now</string>
-  <string name="order_started_on_date_at_time">Started on %1$s at %2$s</string>
+  <string name="order_started_datetime">Started %s</string>
 
   <string name="unknown_tent">Unknown tent</string>
   <string name="unknown_zone">Unknown zone</string>

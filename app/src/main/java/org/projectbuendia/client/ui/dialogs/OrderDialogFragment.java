@@ -47,6 +47,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
+
 /** A {@link DialogFragment} for adding a new user. */
 public class OrderDialogFragment extends DialogFragment {
     public static final int MAX_FREQUENCY = 24;  // maximum 24 times per day
@@ -355,7 +357,7 @@ public class OrderDialogFragment extends DialogFragment {
                 days == 1 ? R.string.order_duration_stop_after_today :
                     days == 2 ? R.string.order_duration_stop_after_tomorrow :
                         R.string.order_duration_stop_after_date
-        ).replace("%s", Utils.formatShortDate(lastDay)));
+        ).replace("%s", Utils.format(lastDay, MONTH_DAY)));
     }
 
     class DurationDaysWatcher implements TextWatcher {

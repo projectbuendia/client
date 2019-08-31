@@ -36,6 +36,8 @@ import javax.annotation.Nullable;
 
 import butterknife.ButterKnife;
 
+import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE;
+
 public class ObsDetailDialogFragment extends DialogFragment {
     private ContextUtils u;
     private SortedMap<Section, List<ObsRow>> rowsBySection;
@@ -97,8 +99,8 @@ public class ObsDetailDialogFragment extends DialogFragment {
             conceptNames = u.formatItems(names);
         }
         if (interval != null) {
-            String start = Utils.formatShortDateTime(interval.getStart());
-            String stop = Utils.formatShortDateTime(interval.getEnd());
+            String start = Utils.format(interval.getStart(), SENTENCE_MONTH_DAY_HOUR_MINUTE);
+            String stop = Utils.format(interval.getEnd(), SENTENCE_MONTH_DAY_HOUR_MINUTE);
             if (conceptNames != null) {
                 message.setText(getString(
                     Utils.hasItems(obsRows)
