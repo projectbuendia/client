@@ -11,6 +11,10 @@
     specific language governing permissions and limitations under the License.
 -->
 <resources>
+  <string name="quoted_text">«%s»</string>
+  <string name="two_items">%s et %s</string>
+  <string name="more_than_two_items">%s, et %s</string>
+
   <!-- Statuses -->
   <string name="status_unknown">Inconnu</string>
   <string name="status_well">Bien</string>
@@ -179,7 +183,7 @@
   <string name="family_name_cannot_be_null">Nom de famille ne doit pas être null</string>
   <string name="invalid_username">Nom d\'utilisateur doit être compris entre 2 et 50 caractères. Seuls les lettres, chiffres, ".", "-", et "_" sont autorisés.</string>
   <string name="ebola_test_label">Essai d\'Ebola</string>
-  <string name="latest_pcr_label_with_date">Essai d\'Ebola test (%s)</string>
+  <string name="latest_pcr_label_with_date">Essai d\'Ebola (%s)</string>
   <string name="action_add_test_result">Ajouter le résultat du test</string>
   <string name="pregnant_abbreviation">enc</string>
   <string name="pregnant">Enceinte</string>
@@ -393,4 +397,13 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
   <string name="voiding">vide</string>
   <string name="void_observations">Observations Vides</string>
+
+  <!-- Observation details dialog -->
+  <string name="obs_details_title">Observations</string>
+  <string name="obs_details_interval">Les observations enregistrée entre %1$s et %2$s:</string>
+  <string name="obs_details_interval_empty">Aucune observation n\'a été enregistrée entre %1$s et %2$s.</string>
+  <string name="obs_details_concept">Toutes les observations de %s:</string>
+  <string name="obs_details_concept_interval">Observations de %1$s enregistrée entre %2$s et %3$s:</string>
+  <string name="obs_details_concept_empty">Aucune observation de %1$s n\'a été enregistrée.</string>
+  <string name="obs_details_concept_interval_empty">Aucune observation de %1$s n\'a été enregistrée entre %2$s et %3$s.</string>
 </resources>

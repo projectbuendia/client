@@ -49,8 +49,8 @@ public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupIndex, boolean isExpanded,
                              View view, ViewGroup parent) {
-        view = u.reuseOrInflate(view, R.layout.obs_section, parent);
-        u.setText(R.id.section_heading, (String) getGroup(groupIndex));
+        view = u.reuseOrInflate(view, R.layout.obs_heading, parent);
+        u.setText(R.id.heading_text, (String) getGroup(groupIndex));
         return view;
     }
 

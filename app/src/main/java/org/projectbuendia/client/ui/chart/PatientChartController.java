@@ -175,7 +175,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         void showOrderDialog(String patientUuid, Order order);
         void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
-        void showObsDetailDialog(List<ObsRow> obsRows, List<String> orderedConceptUuids);
+        void showObsDetailDialog(Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> orderedConceptUuids);
         void showPatientLocationDialog(Patient patient);
         void showPatientUpdateFailed(int reason);
     }
@@ -301,9 +301,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void onEbolaTestResultsPressed() {
         String[] conceptUuids = new String[] {ConceptUuids.PCR_GP_UUID, ConceptUuids.PCR_NP_UUID};
-        List<ObsRow> obsRows = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuids);
+        List<ObsRow> obsRows = mChartHelper.getPatientObservations(mPatientUuid, conceptUuids, null, null);
         if (!obsRows.isEmpty()) {
-            mUi.showObsDetailDialog(obsRows, Arrays.asList(conceptUuids));
+            mUi.showObsDetailDialog(null, conceptUuids, obsRows, Arrays.asList(conceptUuids));
         }
     }
 
@@ -361,21 +361,33 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         );
     }
 
-    @JavascriptInterface public void onObsDialog(String conceptUuid, String startMillis, String stopMillis) {
-        ArrayList<ObsRow> obsRows = null;
-        if (!conceptUuid.isEmpty()){
-            if (!startMillis.isEmpty()){
-                obsRows = mChartHelper.getPatientObservationsByConceptMillis(mPatientUuid, conceptUuid, startMillis, stopMillis);
-            } else {
-                obsRows = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuid);
-            }
-        }
-        else if (!startMillis.isEmpty()){
-            obsRows = mChartHelper.getPatientObservationsByMillis(mPatientUuid, startMillis, stopMillis);
-        }
-        if (obsRows != null && !obsRows.isEmpty()) {
-            mUi.showObsDetailDialog(obsRows, getCurrentChartRowItemConceptUuids());
-        }
+    @JavascriptInterface public void showObsDetails(String conceptUuids) {
+        mUi.showObsDetailDialog(
+            null,
+            conceptUuids.split(","),
+            mChartHelper.getPatientObservations(mPatientUuid, conceptUuids.split(","), null, null),
+            getConceptUuidsInChartOrder(getCurrentChart())
+        );
+    }
+
+    @JavascriptInterface public void showObsDetails(long startMillis, long stopMillis) {
+        Interval interval = new Interval(startMillis, stopMillis);
+        mUi.showObsDetailDialog(
+            interval,
+            null,
+            mChartHelper.getPatientObservations(mPatientUuid, null, startMillis, stopMillis),
+            getConceptUuidsInChartOrder(getCurrentChart())
+        );
+    }
+
+    @JavascriptInterface public void showObsDetails(String conceptUuids, long startMillis, long stopMillis) {
+        Interval interval = new Interval(startMillis, stopMillis);
+        mUi.showObsDetailDialog(
+            interval,
+            conceptUuids.split(","),
+            mChartHelper.getPatientObservations(mPatientUuid, conceptUuids.split(","), startMillis, stopMillis),
+            getConceptUuidsInChartOrder(getCurrentChart())
+        );
     }
 
     @JavascriptInterface public void onNewOrderPressed() {
@@ -499,9 +511,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         return mCharts.get(mChartIndex);
     }
 
-    private ArrayList<String> getCurrentChartRowItemConceptUuids() {
+    private ArrayList<String> getConceptUuidsInChartOrder(Chart chart) {
         ArrayList<String> conceptUuids = new ArrayList<>();
-        Chart chart = getCurrentChart();
         for (ChartSection chartSection : chart.rowGroups) {
             for (ChartItem chartItem : chartSection.items) {
                 conceptUuids.addAll(Arrays.asList(chartItem.conceptUuids));

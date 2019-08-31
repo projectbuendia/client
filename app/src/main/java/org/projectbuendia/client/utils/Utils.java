@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
@@ -161,12 +162,7 @@ public class Utils {
     }
 
 
-    // ==== String handling ====
-
-    /** Performs a null-safe check for a null or empty String. */
-    public static boolean isEmpty(@Nullable String str) {
-        return str == null || str.length() == 0;
-    }
+    // ==== Collections ====
 
     /** Performs a null-safe check for a null or empty array. */
     public static <T> boolean isEmpty(@Nullable T[] array) {
@@ -178,9 +174,9 @@ public class Utils {
         return collection == null || collection.size() == 0;
     }
 
-    /** Performs a null-safe check for a String with at least one character. */
-    public static boolean hasChars(@Nullable String str) {
-        return str != null && str.length() > 0;
+    /** Converts nulls to empty Lists. */
+    public static <T> List<T> toNonnull(@Nullable List<T> list) {
+        return list != null ? list : ImmutableList.of();
     }
 
     /** Performs a null-safe check for an array with at least one item. */
@@ -191,6 +187,19 @@ public class Utils {
     /** Performs a null-safe check for a Collection with at least one item. */
     public static boolean hasItems(@Nullable Collection collection) {
         return collection != null && collection.size() > 0;
+    }
+
+
+    // ==== Strings ====
+
+    /** Performs a null-safe check for a null or empty String. */
+    public static boolean isEmpty(@Nullable String str) {
+        return str == null || str.length() == 0;
+    }
+
+    /** Performs a null-safe check for a String with at least one character. */
+    public static boolean hasChars(@Nullable String str) {
+        return str != null && str.length() > 0;
     }
 
     /** Converts empty strings to null. */

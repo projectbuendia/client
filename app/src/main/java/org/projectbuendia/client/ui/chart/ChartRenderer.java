@@ -76,15 +76,23 @@ public class ChartRenderer {
     private int mLastRenderedZoomIndex;  // last zoom level index rendered
     private String mLastChartName = "";
 
+    // WARNING(kpy): The WebView only knows how to pass boolean, numeric, or
+    // String arguments to these methods from JavaScript, and does not always
+    // perform the obvious conversions.  Every parameter must be declared here
+    // as boolean, int, long, float, double, or String.  Methods must be called
+    // with exactly the declared number of arguments, or the call will cause
+    // a JavaScript "Method not found" exception.  Boolean parameters convert
+    // all non-boolean values to false.  Numeric parameters convert incoming
+    // numbers to the declared type and all non-numeric values to 0.  String
+    // parameters pass through nulls, convert all booleans and numbers to
+    // strings, and convert anything else to the string "undefined".
     public interface JsInterface {
         @JavascriptInterface void onNewOrderPressed();
-
         @JavascriptInterface void onOrderHeadingPressed(String orderUuid);
-
         @JavascriptInterface void onOrderCellPressed(String orderUuid, long startMillis);
-
-        @JavascriptInterface void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
-
+        @JavascriptInterface void showObsDetails(String conceptUuids);
+        @JavascriptInterface void showObsDetails(long startMillis, long stopMillis);
+        @JavascriptInterface void showObsDetails(String conceptUuids, long startMillis, long stopMillis);
         @JavascriptInterface void onPageUnload(int scrollX, int scrollY);
     }
 
@@ -125,7 +133,7 @@ public class ChartRenderer {
         mView.getSettings().setDefaultFontSize((int) defaultFontSize);
 
         mView.getSettings().setJavaScriptEnabled(true);
-        mView.addJavascriptInterface(controllerInterface, "controller");
+        mView.addJavascriptInterface(controllerInterface, "c");
         mView.setWebChromeClient(new WebChromeClient());
         String html = new GridHtmlGenerator(
             chart, latestObservations, observations, orders,

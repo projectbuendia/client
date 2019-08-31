@@ -11,6 +11,10 @@
   specific language governing permissions and limitations under the License.
 -->
 <resources>
+  <string name="quoted_text">"%s"</string>
+  <string name="two_items">%s and %s</string>
+  <string name="more_than_two_items">%s, and %s</string>
+
   <!-- Statuses -->
   <string name="status_unknown">Unknown</string>
   <string name="status_well">Well</string>
@@ -395,4 +399,13 @@
   <string name="string_with_paren">%1$s (%2$s)</string>
   <string name="voiding">Void</string>
   <string name="void_observations">Void Observations</string>
+
+  <!-- Observation details dialog -->
+  <string name="obs_details_title">Observations</string>
+  <string name="obs_details_interval">Observations recorded between %1$s and %2$s:</string>
+  <string name="obs_details_interval_empty">No observations were recorded between %1$s and %2$s.</string>
+  <string name="obs_details_concept">All observations of %s:</string>
+  <string name="obs_details_concept_interval">Observations of %1$s recorded between %2$s and %3$s:</string>
+  <string name="obs_details_concept_empty">No observations of %1$s have been recorded.</string>
+  <string name="obs_details_concept_interval_empty">No observations of %1$s were recorded between %2$s and %3$s.</string>
 </resources>

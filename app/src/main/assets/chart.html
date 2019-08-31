@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="chart.css">
-<script>controller.log('Start loading scripts');</script>
+<script>c.log('Start loading scripts');</script>
 <script src="jquery-1.5.1.min.js"></script>
 <script src="chart.js"></script>
-<script>controller.log('Start HTML');</script>
+<script>c.log('Start HTML');</script>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 <body>
@@ -22,7 +22,7 @@
           <th class="gap" scope="col" rowspan=2>&nbsp;</th>
         {% endif %}
         {% if column.start == column.dayStart %}
-          <th class="day {{column.date == today ? 'now' : ''}} {{column.date.dayOfWeek > 5 ? 'weekend' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+          <th class="day {{column.date == today ? 'now' : ''}} {{column.date.dayOfWeek > 5 ? 'weekend' : ''}}" colspan={{numColumnsPerDay}} onclick="c.showObsDetails({{column.dayStart.millis}}, {{column.dayStop.millis}});">
             {% if numColumnsPerDay == 1 %}
               {% if column.dayLabel is empty %}&nbsp;{% else %}{{column.dayLabel}}{% endif %}
             {% elseif column.dayLabel is not empty %}
@@ -38,7 +38,7 @@
     <tr>
       <th class="corner">&nbsp;</th>
       {% for column in columns %}
-        <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
+        <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="c.showObsDetails({{column.start.millis}}, {{column.stop.millis}});">
           {% if numColumnsPerDay == 1 %}
             {{column.shortDate}}
           {% else %}
@@ -70,7 +70,7 @@
       {% for row in group.rows %}
         {% set id = row.item.conceptIds | first %}
         <tr class="obs {{row.item.label | to_css_identifier}}">
-          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
+          <th scope="row" onclick="c.showObsDetails('{{row.item.conceptUuidsList}}');">
             {{row.item.label}}
           </th>
           {% set prevStop = columns[0].start %}
@@ -91,7 +91,7 @@
             <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
               style="{{style}}"
               onclick="{% if points is not empty and row.item.type.string != 'text_icon' %}
-                         od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
+                         c.showObsDetails('{{row.item.conceptUuidsList}}', {{column.start.millis}}, {{column.stop.millis}});
                        {% endif %}">
               {% if points is empty %}
                 &nbsp;
@@ -134,7 +134,7 @@
       {% set ins = order.instructions %}
       {% set id = ins.medication | to_css_identifier %}
       <tr class="order route-{{ins.route}}">
-        <th scope="row" id="{{id}}_row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
+        <th scope="row" id="{{id}}_row" onclick="c.onOrderHeadingPressed('{{order.uuid}}')">
           {% if ins.notes is not empty %}
             <div class="notes" id="{{id}}_notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
           {% endif %}
@@ -165,7 +165,7 @@
               {% set started = true %}
             {% endif %}
             <td class="day" colspan={{numColumnsPerDay}}
-                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                onclick="c.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
               &nbsp; {# ensure uniform height #}
               {% set totalScheduled = 0 %}
               {% set totalGiven = 0 %}
@@ -222,7 +222,7 @@
     {% endfor %}
 
     <tr>
-      <th scope="row" class="command" id="new_treatment" onclick="controller.onNewOrderPressed()">
+      <th scope="row" class="command" id="new_treatment" onclick="c.onNewOrderPressed()">
         {{get_string("add_new_treatment")}}
       </th>
     </tr>
@@ -237,7 +237,7 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-        <div class="tile {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}">
+        <div class="tile {{class}}" onclick="c.showObsDetails('{{tile.item.conceptUuidsList}}');" style="{{style}}">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -256,7 +256,7 @@
           {% set values = tile.points | values %}
           {% set class = values | format_values(tile.item.cssClass) %}
           {% set style = values | format_values(tile.item.cssStyle) %}
-          <div class="tile {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}">
+          <div class="tile {{class}}" onclick="c.showObsDetails('{{tile.item.conceptUuidsList}}');" style="{{style}}">
             <div class="heading">{{tile.item.label}}</div>
             <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
             <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -280,7 +280,7 @@
 </div>
 
 <script>
-  controller.log('Start running script');
+  c.log('Start running script');
 
   var data = {{dataCellsByConceptId | raw}};
 
@@ -306,7 +306,7 @@
     {% endif %}
   {% endfor %}
 
-  controller.log('Start constructing grid-left and grid-body');
+  c.log('Start constructing grid-left and grid-body');
 
   var scrolling = $('#scrolling');
   var tiles = $('#tiles');
@@ -365,12 +365,8 @@
   gridBody.scroll(updateX);
 
   $(window).unload(function() {
-    controller.onPageUnload($('#grid-body').scrollLeft(), $(window).scrollTop());
+    c.onPageUnload($('#grid-body').scrollLeft(), $(window).scrollTop());
   });
-
-  function od(conceptUuid, startMillis, stopMillis) {
-    controller.onObsDialog(conceptUuid, startMillis, stopMillis);
-  }
 
   var nowColumn = $('.now[scope="col"]');
   var nowCenter = nowColumn.offset().left + nowColumn.width()/2;
@@ -436,7 +432,7 @@
 
   gridBody.scrollLeft(homeX);
 
-  controller.finish();
+  c.finish();
 </script>
 </body>
 </html>
