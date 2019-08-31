@@ -170,7 +170,7 @@ th.command { /* should match @style/ActionButton */
 #grid-left .frozen { background: #fff; z-index: 1; }
 
 /* Tiles */
-#fixed { background: #eee; }
+#fixed { background: #eee; min-height: 1px; }
 #tiles { width: 100%; }
 .row { display: flex; flex-direction: row; }
 .tile { flex-basis: 0; flex-grow: 1; padding: 1rem 0 1rem 16px; }

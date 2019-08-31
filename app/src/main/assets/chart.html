@@ -237,7 +237,7 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-        <div class="tile {{class}}" onclick="c.showObsDetails('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+      <div class="tile {{class}}" onclick="c.showObsDetails('{{tile.item.conceptUuidsList}}');" style="{{style}}">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>

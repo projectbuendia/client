@@ -29,6 +29,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
+import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -49,6 +50,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import static org.projectbuendia.client.utils.Utils.HOUR;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
@@ -219,14 +221,26 @@ public class ChartRenderer {
         private List<Tile> createTiles(ChartSection section, Map<String, Obs> observations) {
             List<Tile> tiles = new ArrayList<>();
             for (ChartItem item : section.items) {
-                ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
-                for (int i = 0; i < points.length; i++) {
-                    Obs obs = observations.get(item.conceptUuids[i]);
-                    if (obs != null) {
-                        points[i] = obs.getObsPoint();
+                List<ObsPoint> points = new ArrayList<>();
+                for (String uuid : item.conceptUuids) {
+                    Obs obs = observations.get(uuid);
+                    if (eq(uuid, ConceptUuids.PLACEMENT_UUID)) {
+                        // Special case: a placement value is split into
+                        // two values, a location and a bed number.
+                        if (obs == null) {
+                            points.add(null);
+                            points.add(null);
+                            continue;
+                        }
+                        String value = obs.getObsValue().text;
+                        String[] parts = Utils.splitFields(value, "/", 2);
+                        points.add(new ObsPoint(obs.time, ObsValue.newText(parts[0])));
+                        points.add(new ObsPoint(obs.time, ObsValue.newText(parts[1])));
+                    } else {
+                        points.add(obs != null ? obs.getObsPoint() : null);
                     }
                 }
-                tiles.add(new Tile(item, points));
+                tiles.add(new Tile(item, points.toArray(new ObsPoint[0])));
                 if (!item.script.trim().isEmpty()) {
                     mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
                 }

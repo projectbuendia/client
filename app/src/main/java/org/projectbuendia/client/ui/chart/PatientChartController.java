@@ -69,6 +69,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import static org.projectbuendia.client.utils.Utils.eq;
+
 /** Controller for {@link PatientChartActivity}. */
 public final class PatientChartController implements ChartRenderer.JsInterface {
 
@@ -362,6 +364,10 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     @JavascriptInterface public void showObsDetails(String conceptUuids) {
+        if (eq(conceptUuids, ConceptUuids.PLACEMENT_UUID)) {
+            mUi.showPatientLocationDialog(mPatient);
+            return;
+        }
         mUi.showObsDetailDialog(
             null,
             conceptUuids.split(","),
