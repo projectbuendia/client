@@ -54,6 +54,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -162,9 +163,34 @@ public class Utils {
 
     // ==== String handling ====
 
-    /** Performs a null-safe check for a null or empty string. */
+    /** Performs a null-safe check for a null or empty String. */
     public static boolean isEmpty(@Nullable String str) {
-        return str == null || str.isEmpty();
+        return str == null || str.length() == 0;
+    }
+
+    /** Performs a null-safe check for a null or empty array. */
+    public static <T> boolean isEmpty(@Nullable T[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /** Performs a null-safe check for a null or empty Collection. */
+    public static boolean isEmpty(@Nullable Collection collection) {
+        return collection == null || collection.size() == 0;
+    }
+
+    /** Performs a null-safe check for a String with at least one character. */
+    public static boolean hasChars(@Nullable String str) {
+        return str != null && str.length() > 0;
+    }
+
+    /** Performs a null-safe check for an array with at least one item. */
+    public static <T> boolean hasItems(@Nullable T[] array) {
+        return array != null && array.length > 0;
+    }
+
+    /** Performs a null-safe check for a Collection with at least one item. */
+    public static boolean hasItems(@Nullable Collection collection) {
+        return collection != null && collection.size() > 0;
     }
 
     /** Converts empty strings to null. */
@@ -261,17 +287,20 @@ public class Utils {
         }
     }
 
+    /** Converts objects of integer types to longs. */
+    public static Long toLongOrNull(Object obj) {
+        if (obj instanceof Integer) return (long) (Integer) obj;
+        if (obj instanceof Long) return (long) obj;
+        if (obj instanceof BigInteger) return ((BigInteger) obj).longValue();
+        if (obj instanceof String) return toLongOrNull((String) obj);
+        return null;
+    }
+
     /** Converts objects of integer types to BigIntegers. */
     public static BigInteger toBigInteger(Object obj) {
-        if (obj instanceof Integer) {
-            return BigInteger.valueOf(((Integer) obj).longValue());
-        }
-        if (obj instanceof Long) {
-            return BigInteger.valueOf((Long) obj);
-        }
-        if (obj instanceof BigInteger) {
-            return (BigInteger) obj;
-        }
+        if (obj instanceof Integer) return BigInteger.valueOf(((Integer) obj).longValue());
+        if (obj instanceof Long) return BigInteger.valueOf((Long) obj);
+        if (obj instanceof BigInteger) return (BigInteger) obj;
         return null;
     }
 
