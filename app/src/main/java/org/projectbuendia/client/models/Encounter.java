@@ -18,15 +18,14 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonEncounter;
+import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -44,54 +43,34 @@ import javax.annotation.concurrent.Immutable;
  * currently only <code>DATE</code> and <code>UUID</code> (coded) types are supported.
  */
 @Immutable
-public class Encounter extends Base<String> {
+public class Encounter extends Model {
+    private static final Logger LOG = Logger.create();
+
     public final String patientUuid;
-    public final
-    @Nullable String encounterUuid;
     public final DateTime timestamp;
     public final Observation[] observations;
     public final String[] orderUuids;
-    private static final Logger LOG = Logger.create();
 
-    /**
-     * Creates a new Encounter for the given patient.
-     * @param patientUuid   The UUID of the patient.
-     * @param encounterUuid The UUID of this encounter, or null for encounters created on the client.
-     * @param timestamp     The encounter time.
-     * @param observations  An array of observations to include in the encounter.
-     * @param orderUuids    A list of UUIDs of the orders executed during this encounter.
-     */
     public Encounter(
-        String patientUuid,
-        @Nullable String encounterUuid,
-        DateTime timestamp,
-        Observation[] observations,
-        String[] orderUuids) {
-        super(encounterUuid);
+        @Nullable String uuid, String patientUuid,
+        DateTime timestamp, Observation[] observations, String[] orderUuids) {
+        super(uuid);
         this.patientUuid = patientUuid;
-        this.encounterUuid = encounterUuid;
         this.timestamp = timestamp;
         this.observations = Utils.orDefault(observations, new Observation[0]);
         this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
     }
 
-    /**
-     * Creates an instance of {@link Encounter} from a network
-     * {@link JsonEncounter} object and corresponding patient UUID.
-     */
     public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
         List<Observation> observations = new ArrayList<>();
         if (encounter.observations != null) {
-            for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
-                observations.add(new Observation(
-                    (String) observation.getKey(),
-                    (String) observation.getValue(),
-                    Observation.estimatedTypeFor((String) observation.getValue())
-                ));
+            for (String key : encounter.observations.keySet()) {
+                String value = Utils.toNullableString(encounter.observations.get(key));
+                observations.add(new Observation(key, value, Observation.estimatedTypeFor(value)));
             }
         }
-        return new Encounter(patientUuid, encounter.uuid, encounter.timestamp,
-            observations.toArray(new Observation[observations.size()]), encounter.order_uuids);
+        return new Encounter(encounter.uuid, patientUuid, encounter.timestamp,
+            observations.toArray(new Observation[0]), encounter.order_uuids);
     }
 
     /** Serializes this into a {@link JSONObject}. */
@@ -133,7 +112,7 @@ public class Encounter extends Base<String> {
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, obs.conceptUuid);
             cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
-            cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
+            cv.put(Observations.ENCOUNTER_UUID, uuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, obs.value);
             cvs[i] = cv;
@@ -142,7 +121,7 @@ public class Encounter extends Base<String> {
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID);
             cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
-            cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
+            cv.put(Observations.ENCOUNTER_UUID, uuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, orderUuids[i]);
             cvs[observations.length + i] = cv;
@@ -212,7 +191,7 @@ public class Encounter extends Base<String> {
                     value, Observation.estimatedTypeFor(value)
                 ));
             }
-            return new Encounter(mPatientUuid, encounterUuid, new DateTime(millis),
+            return new Encounter(encounterUuid, mPatientUuid, new DateTime(millis),
                 observations.toArray(new Observation[observations.size()]), null);
         }
     }

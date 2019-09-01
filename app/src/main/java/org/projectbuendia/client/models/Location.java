@@ -13,32 +13,20 @@ package org.projectbuendia.client.models;
 
 import org.projectbuendia.client.utils.Utils;
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 /** The app model for a location, including its localized name. */
-public final @Immutable class Location extends Base<String> {
-    public final @Nonnull String uuid;  // permanent unique identifier
+public final @Immutable class Location extends Model {
     public final @Nonnull String name;
 
     /** Creates an instance of {@link Location}. */
     public Location(@Nonnull String uuid, String name) {
-        super(null);
-        this.uuid = uuid;
+        super(uuid);
         this.name = Utils.toNonnull(name);
     }
 
     @Override public String toString() {
         return Utils.format("<Location %s [%s]>", Utils.repr(name), uuid);
-    }
-
-    @Override public boolean equals(Object other) {
-        return other instanceof Location && uuid.equals(((Location) other).uuid);
-    }
-
-    @Override public int hashCode() {
-        return Objects.hashCode(uuid);
     }
 }

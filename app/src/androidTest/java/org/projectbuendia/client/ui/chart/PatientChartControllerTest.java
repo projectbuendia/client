@@ -37,6 +37,7 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -61,7 +62,8 @@ public final class PatientChartControllerTest {
     private static final String PATIENT_UUID_1 = "patient-uuid-1";
     private static final String PATIENT_NAME_1 = "Bob";
     private static final String PATIENT_ID_1 = "patient-id-1";
-    private static final Patient PATIENT = Patient.builder().setId(PATIENT_ID_1).setUuid(PATIENT_UUID_1).build();
+    private static final Patient PATIENT =
+        new Patient(PATIENT_UUID_1, PATIENT_ID_1, "Given", "Family", Sex.OTHER, null, "");
 
     private static final Obs OBS_1 = new Obs(
         0, ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", "");

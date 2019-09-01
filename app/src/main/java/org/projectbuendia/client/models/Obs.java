@@ -18,11 +18,11 @@ import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A simple bean class representing an observation with localized names and values. */
 // TODO: Make ObsPoint a member of Obs; change the structure of Obs to be simply:
@@ -92,13 +92,15 @@ public final class Obs implements Comparable<Obs> {
     }
 
     @Override public boolean equals(Object other) {
+        // This compares all fields because ChartRenderer relies on this
+        // equals() method to decide whether to re-render the chart grid.
         if (other instanceof Obs) {
             Obs o = (Obs) other;
-            return Objects.equals(time, o.time)
-                && Objects.equals(conceptUuid, o.conceptUuid)
-                && Objects.equals(conceptType, o.conceptType)
-                && Objects.equals(value, o.value)
-                && Objects.equals(valueName, o.valueName);
+            return eq(time, o.time)
+                && eq(conceptUuid, o.conceptUuid)
+                && eq(conceptType, o.conceptType)
+                && eq(value, o.value)
+                && eq(valueName, o.valueName);
         } else {
             return false;
         }

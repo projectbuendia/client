@@ -11,14 +11,25 @@
 
 package org.projectbuendia.client.models;
 
-/**
- * An abstract base class for all application model types.
- * @param <T> the type of the ID of the model
- */
-public abstract class Base<T> {
-    public final T id;
+import static org.projectbuendia.client.utils.Utils.eq;
 
-    protected Base(T id) {
-        this.id = id;
+/** An abstract base class for application models, which all have UUIDs. */
+public abstract class Model {
+    public final String uuid;
+
+    protected Model(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public boolean equals(Object other) {
+        return other instanceof Model && eq(uuid, ((Model) other).uuid);
+    }
+
+    public int hashCode() {
+        return uuid != null ? uuid.hashCode() : 0;
+    }
+
+    public String toString() {
+        return "<" + getClass().getSimpleName() + " " + uuid + ">";
     }
 }

@@ -61,7 +61,7 @@ import javax.annotation.concurrent.Immutable;
  * multi-word medication name, there are non-breaking spaces betwen the words
  * instead of regular spaces).
  */
-public final @Immutable class Order extends Base<String> {
+public final @Immutable class Order extends Model {
     public static final char NON_BREAKING_SPACE = '\u00a0';
 
     public static final CursorLoader<Order> LOADER = cursor -> new Order(
@@ -72,7 +72,6 @@ public final @Immutable class Order extends Base<String> {
         cursor.getLong(cursor.getColumnIndex(Orders.STOP_MILLIS))
     );
 
-    public final @Nullable String uuid;
     public final String patientUuid;
     public final Instructions instructions;
     public final DateTime start;
@@ -88,21 +87,22 @@ public final @Immutable class Order extends Base<String> {
 
     public Order(@Nullable String uuid, String patientUuid,
                  Instructions instructions, DateTime start, @Nullable DateTime stop) {
-        super(null);  // Order objects never have an id
-        this.uuid = uuid;
+        super(uuid);
         this.patientUuid = patientUuid;
         this.instructions = instructions;
         this.start = start;
         this.stop = stop;
     }
 
-    public Order(@Nullable String uuid, String patientUuid,
-                 String instructionsText, DateTime start, @Nullable DateTime stop) {
+    public Order(
+        @Nullable String uuid, String patientUuid,
+        String instructionsText, DateTime start, @Nullable DateTime stop) {
         this(uuid, patientUuid, new Instructions(instructionsText), start, stop);
     }
 
-    public Order(@Nullable String uuid, String patientUuid,
-                 String instructionsText, Long startMillis, @Nullable Long stopMillis) {
+    public Order(
+        @Nullable String uuid, String patientUuid,
+        String instructionsText, Long startMillis, @Nullable Long stopMillis) {
         this(
             uuid, patientUuid, instructionsText,
             new DateTime(startMillis),
@@ -223,10 +223,11 @@ public final @Immutable class Order extends Base<String> {
     }
 
     @Override public boolean equals(Object other) {
+        // This compares all fields because ChartRenderer relies on this
+        // equals() method to decide whether to re-render the chart grid.
         if (other instanceof Order) {
             Order o = (Order) other;
-            return Objects.equals(id, o.id)
-                && Objects.equals(uuid, o.uuid)
+            return Objects.equals(uuid, o.uuid)
                 && Objects.equals(patientUuid, o.patientUuid)
                 && Objects.equals(instructions, o.instructions)
                 && Objects.equals(start, o.start)
