@@ -29,7 +29,6 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.Immutable;
@@ -305,38 +304,26 @@ public final @Immutable class Order extends Base<String> {
             //   - Record 1: dosage, unit, concentration, unit
             //   - Record 2: frequency, unit
             //   - Record 3: notes
-            if (instructionsText.contains(RS)) {
-                String[] records = Utils.splitFields(instructionsText, RS, 4);
+            String[] records = Utils.splitFields(instructionsText, RS, 4);
 
-                // Medication
-                String[] fields = Utils.splitFields(records[0], US, 2);
-                medication = fields[0].trim();
-                route = fields[1].trim();
+            // Medication
+            String[] fields = Utils.splitFields(records[0], US, 2);
+            medication = fields[0].trim();
+            route = fields[1].trim();
 
-                // Dosage
-                fields = Utils.splitFields(records[1], US, 2);
-                dosage = fields[0].trim();
-                // TODO(ping): Support dosage units and concentration.
+            // Dosage
+            fields = Utils.splitFields(records[1], US, 2);
+            dosage = fields[0].trim();
+            // TODO(ping): Support dosage units and concentration.
 
-                // Frequency
-                fields = Utils.splitFields(records[2], US, 2);
-                frequency = Utils.toIntOrDefault(fields[0].trim(), 0);
-                // TODO(ping): Support frequency units (currently "per day" is assumed).
+            // Frequency
+            fields = Utils.splitFields(records[2], US, 2);
+            frequency = Utils.toIntOrDefault(fields[0].trim(), 0);
+            // TODO(ping): Support frequency units (currently "per day" is assumed).
 
-                // Notes
-                fields = Utils.splitFields(records[3], US, 2);
-                notes = fields[0].trim();
-            } else {
-                Matcher matcher = OLD_PATTERN.matcher(Utils.toNonnull(instructionsText));
-                if (!matcher.matches()) {
-                    throw new IllegalArgumentException("Invalid order instructions: " + Utils.repr(instructionsText));
-                }
-                medication = Utils.orDefault(matcher.group(1), matcher.group(4)).replace(NON_BREAKING_SPACE, ' ');
-                route = "";
-                dosage = Utils.orDefault(matcher.group(2), matcher.group(5));
-                frequency = matcher.group(3) != null ? Integer.valueOf(matcher.group(3)) : 0;
-                notes = "";
-            }
+            // Notes
+            fields = Utils.splitFields(records[3], US, 2);
+            notes = fields[0].trim();
         }
 
         /** Packs medication, dosage, and frequency into a single instruction string. */
@@ -344,7 +331,8 @@ public final @Immutable class Order extends Base<String> {
             return (medication + US + route)
                 + RS + (dosage)
                 + RS + (frequency > 0 ? (frequency + US + "x daily") : "")
-                + RS + (notes);
+                + RS + (notes)
+                + RS + US + US + ".";
         }
 
         public boolean equals(Object other) {
