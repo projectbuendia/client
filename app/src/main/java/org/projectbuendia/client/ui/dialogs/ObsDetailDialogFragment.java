@@ -6,22 +6,26 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.sync.ConceptService;
 import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -32,11 +36,10 @@ import javax.annotation.Nullable;
 
 import butterknife.ButterKnife;
 
-public class ObsDetailDialogFragment extends DialogFragment {
-    private static final String KEY_OBS_ROWS = "obsRows";
-    private static final String KEY_CONCEPT_UUIDS = "conceptUuids";
+import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE;
 
-    private LayoutInflater mInflater;
+public class ObsDetailDialogFragment extends DialogFragment {
+    private ContextUtils u;
     private SortedMap<Section, List<ObsRow>> rowsBySection;
 
     private static String EN_DASH = "\u2013";
@@ -44,10 +47,13 @@ public class ObsDetailDialogFragment extends DialogFragment {
     private static String BULLET = "\u2022";
 
     public static ObsDetailDialogFragment newInstance(
-        List<ObsRow> obsRows, List<String> orderedConceptUuids) {
+        Interval interval, String[] conceptUuids,
+        List<ObsRow> obsRows, List<String> conceptOrdering) {
         Bundle args = new Bundle();
-        args.putParcelableArrayList(KEY_OBS_ROWS, new ArrayList<>(obsRows));
-        args.putStringArrayList(KEY_CONCEPT_UUIDS, new ArrayList<>(orderedConceptUuids));
+        args.putString("interval", Utils.toNullableString(interval));
+        args.putStringArray("conceptUuids", conceptUuids);
+        args.putParcelableArrayList("obsRows", new ArrayList<>(obsRows));
+        args.putStringArrayList("conceptOrdering", new ArrayList<>(conceptOrdering));
         ObsDetailDialogFragment fragment = new ObsDetailDialogFragment();
         fragment.setArguments(args);
         return fragment;
@@ -55,17 +61,20 @@ public class ObsDetailDialogFragment extends DialogFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mInflater = LayoutInflater.from(getActivity());
+        u = ContextUtils.from(getActivity());
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.obs_detail_dialog_fragment, null);
+        View fragment = u.inflateForDialog(R.layout.obs_detail_dialog_fragment);
         ButterKnife.inject(this, fragment);
 
-        List<String> conceptUuids = getArguments().getStringArrayList(KEY_CONCEPT_UUIDS);
-        List<ObsRow> obsRows = getArguments().getParcelableArrayList(KEY_OBS_ROWS);
+        String arg = getArguments().getString("interval");
+        Interval interval = arg != null ? Interval.parse(arg) : null;
+        String[] conceptUuids = getArguments().getStringArray("conceptUuids");
+        List<ObsRow> obsRows = getArguments().getParcelableArrayList("obsRows");
+        List<String> conceptOrdering = getArguments().getStringArrayList("conceptOrdering");
 
-        rowsBySection = new TreeMap<>(new SectionComparator(conceptUuids));
+        rowsBySection = new TreeMap<>(new SectionComparator(conceptOrdering));
         if (obsRows != null) {
             for (ObsRow row : obsRows) {
                 if (row.valueName != null) {
@@ -78,8 +87,47 @@ public class ObsDetailDialogFragment extends DialogFragment {
             }
         }
 
-        ExpandableListAdapter adapter = new ExpandableObsRowAdapter(
-            App.getContext(), rowsBySection);
+        TextView message = fragment.findViewById(R.id.message);
+        String conceptNames = null;
+        if (Utils.hasItems(conceptUuids)) {
+            ConceptService concepts = App.getConceptService();
+            Locale locale = App.getSettings().getLocale();
+            String[] names = new String[conceptUuids.length];
+            for (int i = 0; i < conceptUuids.length; i++) {
+                names[i] = getString(R.string.quoted_text, concepts.getName(conceptUuids[i], locale));
+            }
+            conceptNames = u.formatItems(names);
+        }
+        if (interval != null) {
+            String start = Utils.format(interval.getStart(), SENTENCE_MONTH_DAY_HOUR_MINUTE);
+            String stop = Utils.format(interval.getEnd(), SENTENCE_MONTH_DAY_HOUR_MINUTE);
+            if (conceptNames != null) {
+                message.setText(getString(
+                    Utils.hasItems(obsRows)
+                        ? R.string.obs_details_concept_interval
+                        : R.string.obs_details_concept_interval_empty,
+                    conceptNames, start, stop
+                ));
+            } else {
+                message.setText(getString(
+                    Utils.hasItems(obsRows)
+                        ? R.string.obs_details_interval
+                        : R.string.obs_details_interval_empty,
+                    start, stop
+                ));
+            }
+        } else if (conceptNames != null) {
+            message.setText(getString(
+                Utils.hasItems(obsRows)
+                    ? R.string.obs_details_concept
+                    : R.string.obs_details_concept_empty,
+                conceptNames
+            ));
+        } else {
+            // Should never get here (no concepts and no interval).
+            message.setText("");
+        }
+        ExpandableListAdapter adapter = new ExpandableObsRowAdapter(u, rowsBySection);
         ExpandableListView listView = fragment.findViewById(R.id.obs_list);
         listView.setAdapter(adapter);
         for (int i = 0; i < adapter.getGroupCount(); i++) {
@@ -92,6 +140,7 @@ public class ObsDetailDialogFragment extends DialogFragment {
         // listView.addFooterView(listFooterView);
 
         return new AlertDialog.Builder(getActivity())
+            .setTitle(R.string.obs_details_title)
             .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
             .setView(fragment)
             .create();
@@ -156,12 +205,12 @@ public class ObsDetailDialogFragment extends DialogFragment {
         private final Map<String, Integer> orderingByUuid = new HashMap<>();
         private final int orderingMax;
 
-        public SectionComparator(@Nullable List<String> conceptUuids) {
-            if (conceptUuids != null) {
-                for (int i = 0; i < conceptUuids.size(); i++) {
-                    orderingByUuid.put(conceptUuids.get(i), i);
+        public SectionComparator(@Nullable List<String> conceptOrdering) {
+            if (conceptOrdering != null) {
+                for (int i = 0; i < conceptOrdering.size(); i++) {
+                    orderingByUuid.put(conceptOrdering.get(i), i);
                 }
-                orderingMax = conceptUuids.size();
+                orderingMax = conceptOrdering.size();
             } else {
                 orderingMax = 0;
             }

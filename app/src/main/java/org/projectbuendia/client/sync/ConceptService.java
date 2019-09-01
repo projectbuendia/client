@@ -3,6 +3,7 @@ package org.projectbuendia.client.sync;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
@@ -35,11 +36,16 @@ public class ConceptService {
     }
 
     public String getName(String uuid, Locale locale) {
+        // TODO(ping): Internationalize concept names in a way that doesn't require
+        // reloading all concepts just to get the default locale for one concept.
+        locale = AppSettings.APP_DEFAULT_LOCALE;
         if (names == null || !eq(locale, loadedLocale)) {
             names = loadNames(resolver, locale);
             loadedLocale = locale;
         }
-        return names.get(uuid);
+        String name = names.get(uuid);
+        if (name == null) name = Utils.compressUuid(uuid) + "?";
+        return name;
     }
 
     public void invalidate() {

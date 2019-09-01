@@ -24,12 +24,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
-import com.google.common.base.Joiner;
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.joda.time.DateTime;
@@ -45,8 +42,6 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
@@ -65,11 +60,8 @@ import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
-import org.projectbuendia.client.widgets.PatientAttributeView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -110,13 +102,7 @@ public final class PatientChartActivity extends LoggedInActivity {
     @Inject SyncManager mSyncManager;
     @Inject ChartDataHelper mChartDataHelper;
     @Inject AppSettings mSettings;
-    @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
-    @InjectView(R.id.patient_placement) PatientAttributeView mPatientPlacement;
-    @InjectView(R.id.admission_day_number) PatientAttributeView mAdmissionDayNumber;
-    @InjectView(R.id.symptom_day_number) PatientAttributeView mSymptomDayNumber;
-    @InjectView(R.id.ebola_test_results) PatientAttributeView mEbolaTestResults;
-    @InjectView(R.id.special_labels) TextView mSpecialLabelsView;
-    @InjectView(R.id.chart_webview) WebView mGridWebView;
+    @InjectView(R.id.chart_webview) WebView mWebView;
 
     private static final String EN_DASH = "\u2013";
 
@@ -152,7 +138,6 @@ public final class PatientChartActivity extends LoggedInActivity {
                 return true;
             });
 
-        boolean ebolaLabTestFormEnabled = false;
         for (final Form form : mChartDataHelper.getForms()) {
             MenuItem item = editSubmenu.add(form.name);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
@@ -162,11 +147,7 @@ public final class PatientChartActivity extends LoggedInActivity {
                     return true;
                 }
             );
-            if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
-                ebolaLabTestFormEnabled = true;
-            }
         }
-        Utils.showIf(mEbolaTestResults, ebolaLabTestFormEnabled);
     }
 
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
@@ -201,7 +182,7 @@ public final class PatientChartActivity extends LoggedInActivity {
             R.string.symptoms_onset_date_picker_title, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
 
         // Remembering scroll position and applying it after the chart finished loading.
-        mGridWebView.setWebViewClient(new WebViewClient() {
+        mWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 Point scrollPosition = mController.getLastScrollPosition();
                 if (scrollPosition != null) {
@@ -210,7 +191,7 @@ public final class PatientChartActivity extends LoggedInActivity {
                 }
             }
         });
-        mChartRenderer = new ChartRenderer(mGridWebView, getResources(), mSettings);
+        mChartRenderer = new ChartRenderer(mWebView, getResources(), mSettings);
 
         final OdkResultSender odkResultSender = (patientUuid, resultCode, data) ->
             OdkActivityLauncher.sendOdkResultToServer(
@@ -237,20 +218,6 @@ public final class PatientChartActivity extends LoggedInActivity {
             mSyncManager,
             minimalHandler);
 
-        mAdmissionDayNumber.setOnClickListener(view -> {
-            Utils.logUserAction("admission_day_pressed");
-            mAdmissionDateDialog.show();
-        });
-        mSymptomDayNumber.setOnClickListener(view -> {
-            Utils.logUserAction("symptom_day_pressed");
-            mSymptomOnsetDateDialog.show();
-        });
-        mPatientPlacement.setOnClickListener(view -> {
-            Utils.logUserAction("placement_pressed");
-            mController.showAssignLocationDialog(PatientChartActivity.this);
-        });
-        mEbolaTestResults.setOnClickListener(view -> mController.onEbolaTestResultsPressed());
-
         initChartTabs();
     }
 
@@ -263,7 +230,7 @@ public final class PatientChartActivity extends LoggedInActivity {
         if (uuid != null) {
             // Immediately hide the current patient chart, to avoid giving the
             // misleading impression that it applies to the new patient.
-            mGridWebView.setVisibility(View.INVISIBLE);
+            mWebView.setVisibility(View.INVISIBLE);
             mController.setPatient(uuid);
         }
     }
@@ -271,12 +238,12 @@ public final class PatientChartActivity extends LoggedInActivity {
     class DateObsDialog extends DatePickerDialog {
         private String mTitle;
 
-        public DateObsDialog(String title, final String conceptUuid, final LocalDate date) {
+        public DateObsDialog(String title, final String conceptUuid, LocalDate date) {
             super(
                 PatientChartActivity.this,
                 (picker, year, zeroBasedMonth, day) -> {
                     int month = zeroBasedMonth + 1;
-                    mController.setDate(conceptUuid, new LocalDate(year, month, day));
+                    mController.submitDateObservation(conceptUuid, new LocalDate(year, month, day));
                 },
                 date.getYear(),
                 date.getMonthOfYear() - 1,
@@ -366,134 +333,17 @@ public final class PatientChartActivity extends LoggedInActivity {
             PatientChartActivity.this.setTitle(title);
         }
 
-        // TODO/cleanup: As soon as we implement an ObsFormat formatter that displays
-        // a date as a count of days (Utils.dayNumberSince), we can replace this logic
-        // with a format defined in the profile, decide how to arrange the tiles for
-        // admission date, first symptoms date, IV status, oxygen status, and Ebola
-        // PCR test results, and delete this method.
-        @Override public void updateAdmissionDateAndFirstSymptomsDateUi(
-            LocalDate admissionDate, LocalDate firstSymptomsDate) {
-            // TODO: Localize strings in this function.
-            int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
-            mAdmissionDayNumber.setValue(
-                day >= 1 ? getString(R.string.day_n, day) : "–");
-            day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
-            mSymptomDayNumber.setValue(
-                day >= 1 ? getString(R.string.day_n, day) : "–");
-            if (admissionDate != null) {
-                mAdmissionDateDialog.updateDate(
-                    admissionDate.getYear(),
-                    admissionDate.getMonthOfYear() - 1,
-                    admissionDate.getDayOfMonth()
-                );
-            }
-            if (firstSymptomsDate != null) {
-                mSymptomOnsetDateDialog.updateDate(
-                    firstSymptomsDate.getYear(),
-                    firstSymptomsDate.getMonthOfYear() - 1,
-                    firstSymptomsDate.getDayOfMonth()
-                );
-            }
+        @Override public void showDateObsDialog(String title, String uuid, LocalDate date) {
+            if (date == null) date = LocalDate.now();
+            DatePickerDialog dialog = new DateObsDialog(title, uuid, date);
+            dialog.updateDate(date.getYear(), date.getMonthOfYear() - 1, date.getDayOfMonth());
+            dialog.show();
         }
 
-        // TODO/cleanup: We don't need this special logic for the Ebola PCR test results
-        // any more, because the two-number format with a "NEG" displayed for numbers
-        // greater than 39.95 can be implemented using a format configured in the profile
-        // (e.g. the format "{1,select,>39.95:NEG;#} / {2,select,>39.95:NEG;#}" with the
-        // concepts "162826,162827").  The only reason we haven't deleted this code is
-        // that we need to do the other tiles like Admission Date to complete the layout.
-        @Override public void updateEbolaTestResultUi(Map<String, Obs> observations) {
-            // PCR
-            Obs pcrGpObservation = observations.get(ConceptUuids.PCR_GP_UUID);
-            Obs pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
-
-            mEbolaTestResults.setIcon(createIcon(FontAwesomeIcons.fa_flask, R.color.chart_tile_icon));
-            if ((pcrGpObservation == null || pcrGpObservation.valueName == null)
-                    && (pcrNpObservation == null || pcrNpObservation.valueName == null)) {
-                mEbolaTestResults.setValue("–");
-            } else {
-                String pcrGpString = "–";
-                DateTime pcrObsTime = null;
-                if (pcrGpObservation != null && pcrGpObservation.valueName != null) {
-                    pcrObsTime = pcrGpObservation.time;
-                    try {
-                        double pcrGp = Double.parseDouble(pcrGpObservation.valueName);
-                        pcrGpString = getFormattedPcrString(pcrGp);
-                    } catch (NumberFormatException e) {
-                        LOG.w(
-                            "Retrieved a malformed GP-gene PCR value: '%1$s'.",
-                            pcrGpObservation.valueName);
-                        pcrGpString = pcrGpObservation.valueName;
-                    }
-                }
-                String pcrNpString = "–";
-                if (pcrNpObservation != null && pcrNpObservation.valueName != null) {
-                    pcrObsTime = pcrNpObservation.time;
-                    try {
-                        double pcrNp = Double.parseDouble(pcrNpObservation.valueName);
-                        pcrNpString = getFormattedPcrString(pcrNp);
-                    } catch (NumberFormatException e) {
-                        LOG.w(
-                            "Retrieved a malformed Np-gene PCR value: '%1$s'.",
-                            pcrNpObservation.valueName);
-                        pcrNpString = pcrNpObservation.valueName;
-                    }
-                }
-
-                mEbolaTestResults.setValue(String.format("%1$s / %2$s", pcrGpString, pcrNpString));
-                if (pcrObsTime != null) {
-                    LocalDate today = LocalDate.now();
-                    LocalDate obsDay = pcrObsTime.toLocalDate();
-                    String dateText = new RelativeDateTimeFormatter().format(obsDay, today);
-                    mEbolaTestResults.setName(getString(R.string.latest_pcr_label_with_date, dateText));
-                }
-            }
-        }
-
-        // TODO/cleanup: We don't need this special logic for these IV fields anymore,
-        // because it can be implemented using a format configured in the profile
-        // (e.g. the format "{1,yes_no,Oxygen} / {2,yes_no,IV fitted}" with the concepts
-        // concepts "888162738,f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").  The only reason
-        // we haven't deleted this code is that we need to do the other tiles like
-        // Admission Date to complete the layout.
-        @Override public void updateSpecialLabels(Map<String, Obs> observations) {
-            List<String> specialLabels = new ArrayList<>();
-            if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
-                specialLabels.add(getString(R.string.iv_fitted));
-            }
-            if (ConceptUuids.isYes(observations.get(ConceptUuids.OXYGEN_UUID))) {
-                specialLabels.add(getString(R.string.oxygen));
-            }
-            if (ConceptUuids.isYes(observations.get(ConceptUuids.DYSPHAGIA_UUID))) {
-                specialLabels.add(getString(R.string.cannot_eat));
-            }
-            mSpecialLabelsView.setText(Joiner.on("\n").join(specialLabels));
-        }
-
-        @Override public void updatePatientConditionUi(String generalConditionUuid) {
-        }
-
-        @Override public void updateTilesAndGrid(
-            Chart chart,
-            Map<String, Obs> latestObservations,
-            List<Obs> observations,
-            List<Order> orders,
-            LocalDate admissionDate,
-            LocalDate firstSymptomsDate) {
-            mChartRenderer.render(chart, latestObservations, observations, orders,
-                                  admissionDate, firstSymptomsDate, mController);
-            mRootView.invalidate();
-        }
-
-        public void updatePatientLocationUi(LocationForest forest, Patient patient) {
-            Location location = forest.get(patient.locationUuid);
-            String locationText = location != null ? location.name : u.str(R.string.unknown);
-            String bedNumberText = Utils.toNonnull(patient.bedNumber).trim();
-
-            mPatientPlacement.setName(bedNumberText.isEmpty()
-                ? u.str(R.string.location) : u.str(R.string.bed_number_n, bedNumberText));
-            mPatientPlacement.setValue(locationText);
-            mPatientPlacement.setIcon(createIcon(FontAwesomeIcons.fa_map_marker, R.color.chart_tile_icon));
+        @Override public void updateTilesAndGrid(Chart chart, Map<String, Obs> latestObservations,
+            List<Obs> observations, List<Order> orders) {
+            mChartRenderer.render(chart, latestObservations, observations, orders, mController);
+            mWebView.invalidate();
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {
@@ -548,8 +398,8 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showObsDetailDialog(
-            List<ObsRow> obsRows, List<String> orderedConceptUuids) {
-            ObsDetailDialogFragment.newInstance(obsRows, orderedConceptUuids)
+            Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> conceptOrdering) {
+            ObsDetailDialogFragment.newInstance(interval, conceptUuids, obsRows, conceptOrdering)
                 .show(getSupportFragmentManager(), null);
         }
 

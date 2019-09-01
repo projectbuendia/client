@@ -89,7 +89,7 @@ public class EditPatientDialogFragment extends DialogFragment {
             args.putString("id", patient.id);
             args.putString("givenName", patient.givenName);
             args.putString("familyName", patient.familyName);
-            args.putString("birthdate", Utils.formatDate(patient.birthdate));
+            args.putString("birthdate", Utils.format(patient.birthdate));
             args.putString("sex", Sex.nullableNameOf(patient.sex));
         }
         fragment.setArguments(args);

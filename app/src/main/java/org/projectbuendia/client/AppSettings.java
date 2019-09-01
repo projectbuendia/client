@@ -24,7 +24,13 @@ import java.util.Locale;
 
 /** Type-safe access to application settings. */
 public class AppSettings {
+    // The locale in which this app guarantees a definition for every string.
+    public static final Locale APP_DEFAULT_LOCALE = new Locale("en");
+
+    // The system default locale at app startup time.
     public static final Locale ORIGINAL_DEFAULT_LOCALE = Locale.getDefault();
+
+    // Locales to offer as options to the user.
     public static final Locale[] AVAILABLE_LOCALES = new Locale[] {
         new Locale("en"), new Locale("fr")
     };
@@ -152,11 +158,6 @@ public class AppSettings {
     public int getLocaleIndex() {
         String languageTag = Utils.toNonnull(prefs.getString("locale", ""));
         return Arrays.asList(getLocaleOptionValues()).indexOf(languageTag);
-    }
-
-    /** Gets the app's hardcoded default locale. */
-    public static Locale getDefaultLocale() {
-        return new Locale("en");
     }
 
     /** Gets the values for a menu of available locales. */

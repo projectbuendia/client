@@ -29,6 +29,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
+import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -49,6 +50,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import static org.projectbuendia.client.utils.Utils.HOUR;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
@@ -76,15 +78,23 @@ public class ChartRenderer {
     private int mLastRenderedZoomIndex;  // last zoom level index rendered
     private String mLastChartName = "";
 
+    // WARNING(kpy): The WebView only knows how to pass boolean, numeric, or
+    // String arguments to these methods from JavaScript, and does not always
+    // perform the obvious conversions.  Every parameter must be declared here
+    // as boolean, int, long, float, double, or String.  Methods must be called
+    // with exactly the declared number of arguments, or the call will cause
+    // a JavaScript "Method not found" exception.  Boolean parameters convert
+    // all non-boolean values to false.  Numeric parameters convert incoming
+    // numbers to the declared type and all non-numeric values to 0.  String
+    // parameters pass through nulls, convert all booleans and numbers to
+    // strings, and convert anything else to the string "undefined".
     public interface JsInterface {
         @JavascriptInterface void onNewOrderPressed();
-
         @JavascriptInterface void onOrderHeadingPressed(String orderUuid);
-
         @JavascriptInterface void onOrderCellPressed(String orderUuid, long startMillis);
-
-        @JavascriptInterface void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
-
+        @JavascriptInterface void showObsDialog(String conceptUuids);
+        @JavascriptInterface void showObsDialog(long startMillis, long stopMillis);
+        @JavascriptInterface void showObsDialog(String conceptUuids, long startMillis, long stopMillis);
         @JavascriptInterface void onPageUnload(int scrollX, int scrollY);
     }
 
@@ -101,7 +111,6 @@ public class ChartRenderer {
     // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
     public void render(Chart chart, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
-                       LocalDate admissionDate, LocalDate firstSymptomsDate,
                        JsInterface controllerInterface) {
         if (chart == null) {
             mView.loadUrl("file:///android_asset/no_chart.html");
@@ -125,11 +134,10 @@ public class ChartRenderer {
         mView.getSettings().setDefaultFontSize((int) defaultFontSize);
 
         mView.getSettings().setJavaScriptEnabled(true);
-        mView.addJavascriptInterface(controllerInterface, "controller");
+        mView.addJavascriptInterface(controllerInterface, "c");
         mView.setWebChromeClient(new WebChromeClient());
         String html = new GridHtmlGenerator(
-            chart, latestObservations, observations, orders,
-            admissionDate, firstSymptomsDate).getHtml();
+            chart, latestObservations, observations, orders).getHtml();
 
         LOG.elapsed("render", "HTML generated");
 
@@ -163,7 +171,6 @@ public class ChartRenderer {
         DateTime mNow;
         Column mNowColumn;
         LocalDate mAdmissionDate;
-        LocalDate mFirstSymptomsDate;
 
         Map<String, ExecutionHistory> mExecutionHistories = new HashMap<String, ExecutionHistory>() {
             @Override public @NonNull ExecutionHistory get(Object key) {
@@ -172,47 +179,29 @@ public class ChartRenderer {
             }
         };
         List<List<Tile>> mTileRows = new ArrayList<>();
+        List<List<Tile>> mFixedRows = new ArrayList<>();
         List<RowGroup> mRowGroups = new ArrayList<>();
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
         GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
-                          List<Obs> observations, List<Order> orders,
-                          LocalDate admissionDate, LocalDate firstSymptomsDate) {
-            mAdmissionDate = admissionDate;
-            mFirstSymptomsDate = firstSymptomsDate;
+                          List<Obs> observations, List<Order> orders) {
+            LOG.start("GridHtmlGenerator");
+
             mOrders = orders;
             mNow = DateTime.now();
+            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATE_UUID);
+            mAdmissionDate = obs != null ? Utils.toLocalDate(obs.value) : null;
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
-            LOG.start("GridHtmlGenerator");
-            for (ChartSection tileGroup : chart.tileGroups) {
-                List<Tile> tileRow = new ArrayList<>();
-                for (ChartItem item : tileGroup.items) {
-                    ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
-                    for (int i = 0; i < points.length; i++) {
-                        Obs obs = latestObservations.get(item.conceptUuids[i]);
-                        if (obs != null) {
-                            points[i] = obs.getObsPoint();
-                        }
-                    }
-                    tileRow.add(new Tile(item, points));
-                    if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
-                    }
-                }
-                mTileRows.add(tileRow);
+            for (ChartSection section : chart.fixedGroups) {
+                mFixedRows.add(createTiles(section, latestObservations));
             }
-
+            for (ChartSection section : chart.tileGroups) {
+                mTileRows.add(createTiles(section, latestObservations));
+            }
             for (ChartSection section : chart.rowGroups) {
-                RowGroup rowGroup = new RowGroup(section.label);
-                mRowGroups.add(rowGroup);
-                for (ChartItem item : section.items) {
-                    rowGroup.rows.add(new Row(item));
-                    if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
-                    }
-                }
+                mRowGroups.add(createRowGroup(section));
             }
 
             Map<String, Order> ordersByUuid = new HashMap<>();
@@ -224,6 +213,47 @@ public class ChartRenderer {
             insertEmptyColumns();
 
             LOG.elapsed("GridHtmlGenerator", "Data prepared");
+        }
+
+        private List<Tile> createTiles(ChartSection section, Map<String, Obs> observations) {
+            List<Tile> tiles = new ArrayList<>();
+            for (ChartItem item : section.items) {
+                List<ObsPoint> points = new ArrayList<>();
+                for (String uuid : item.conceptUuids) {
+                    Obs obs = observations.get(uuid);
+                    if (eq(uuid, ConceptUuids.PLACEMENT_UUID)) {
+                        // Special case: a placement value is split into
+                        // two values, a location and a bed number.
+                        if (obs == null) {
+                            points.add(null);
+                            points.add(null);
+                            continue;
+                        }
+                        String value = obs.getObsValue().text;
+                        String[] parts = Utils.splitFields(value, "/", 2);
+                        points.add(new ObsPoint(obs.time, ObsValue.newText(parts[0])));
+                        points.add(new ObsPoint(obs.time, ObsValue.newText(parts[1])));
+                    } else {
+                        points.add(obs != null ? obs.getObsPoint() : null);
+                    }
+                }
+                tiles.add(new Tile(item, points.toArray(new ObsPoint[0])));
+                if (!item.script.trim().isEmpty()) {
+                    mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                }
+            }
+            return tiles;
+        }
+
+        private RowGroup createRowGroup(ChartSection section) {
+            RowGroup rowGroup = new RowGroup(section.label);
+            for (ChartItem item : section.items) {
+                rowGroup.rows.add(new Row(item));
+                if (!item.script.trim().isEmpty()) {
+                    mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                }
+            }
+            return rowGroup;
         }
 
         /** Collects observations into Column objects that make up the grid. */
@@ -352,6 +382,7 @@ public class ChartRenderer {
             Map<String, Object> context = new HashMap<>();
             context.put("now", mNow);
             context.put("today", mNow.toLocalDate());
+            context.put("fixedRows", mFixedRows);
             context.put("tileRows", mTileRows);
             context.put("rowGroups", mRowGroups);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));

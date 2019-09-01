@@ -84,7 +84,7 @@ public class PatientDelta {
             if (birthdate.isPresent()) {
                 json.put(
                     Server.PATIENT_BIRTHDATE_KEY,
-                    Utils.formatDate(birthdate.get()));
+                    Utils.format(birthdate.get()));
             }
             return true;
         } catch (JSONException e) {

@@ -21,6 +21,7 @@ import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.resolvables.ResStatus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -120,6 +121,19 @@ public class ContextUtils extends ContextWrapper {
     /** Strings are always available in the app-wide resources. */
     public String str(int id, Object... args) {
         return App.str(id, args);
+    }
+
+    /** Formats a list of items in a localized fashion. */
+    public String formatItems(String... items) {
+        int n = items.length;
+        return n == 0 ? ""
+            : n == 1 ? items[0]
+            : n == 2 ? str(R.string.two_items, items[0], items[1])
+            : str(
+                R.string.more_than_two_items,
+                Joiner.on(", ").join(Arrays.copyOfRange(items, 0, n - 1)),
+                items[n - 1]
+            );
     }
 
     /** Formats a location heading with an optional patient count. */

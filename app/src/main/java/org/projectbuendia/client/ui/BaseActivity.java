@@ -146,6 +146,7 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation." {@link SnackBar#message(int)}
      */
     public void snackBar(@StringRes int message) {
+        initializeSnackBar();
         snackBar.message(message);
     }
 
@@ -154,6 +155,7 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation." {@link SnackBar#message(int, int)}
      */
     public void snackBar(@StringRes int message, int priority) {
+        initializeSnackBar();
         snackBar.message(message, priority);
     }
 
@@ -161,8 +163,8 @@ public abstract class BaseActivity extends FragmentActivity {
      * Adds a message to the SnackBar. Priority defaults to 999.
      * @see "SnackBar Documentation." {@link SnackBar#message(int, int, View.OnClickListener, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener listener) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View.OnClickListener listener) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, listener, 999);
     }
 
@@ -170,8 +172,9 @@ public abstract class BaseActivity extends FragmentActivity {
      * Adds a message to the SnackBar with informed priority.
      * @see "SnackBar Documentation." {@link SnackBar#message(int, int, View.OnClickListener, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener listener, int priority) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage,
+                         View.OnClickListener listener, int priority) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, listener, priority);
     }
 
@@ -180,8 +183,9 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation."
      * {@link SnackBar#message(int, int, View.OnClickListener, int, boolean, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener actionOnClick, int priority, boolean isDismissible) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage,
+                         View.OnClickListener actionOnClick, int priority, boolean isDismissible) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
     }
 
@@ -190,8 +194,10 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation."
      * {@link SnackBar#message(int, int, View.OnClickListener, int, boolean, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener actionOnClick, int priority, boolean isDismissible, int secondsToTimeOut) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage,
+                         View.OnClickListener actionOnClick, int priority,
+                         boolean isDismissible, int secondsToTimeOut) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible,
             secondsToTimeOut);
     }
@@ -201,15 +207,15 @@ public abstract class BaseActivity extends FragmentActivity {
      * @param id The @StringRes for the message.
      */
     public void snackBarDismiss(@StringRes int id) {
-        snackBar.dismiss(id);
+        if (snackBar != null) snackBar.dismiss(id);
     }
 
     /**
      * Programmatically dismiss multiple messages at once
      * @param id a @StringRes message Array
      */
-    public void snackBarDismiss(@StringRes int[] id) {
-        snackBar.dismiss(id);
+    public void snackBarDismiss(@StringRes int[] ids) {
+        if (snackBar != null) snackBar.dismiss(ids);
     }
 
     @Override public void setContentView(View view) {

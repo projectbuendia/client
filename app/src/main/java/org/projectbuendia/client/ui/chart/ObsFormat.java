@@ -1,11 +1,12 @@
 package org.projectbuendia.client.ui.chart;
 
-import com.google.common.base.Objects;
-
 import org.apache.commons.text.ExtendedMessageFormat;
 import org.apache.commons.text.FormatFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.ObsPoint;
 import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.utils.Utils;
@@ -54,11 +55,13 @@ public class ObsFormat extends Format {
         FORMAT_CLASSES.put("yes_no", ObsYesNoFormat.class);
         FORMAT_CLASSES.put("abbr", ObsAbbrFormat.class);
         FORMAT_CLASSES.put("name", ObsNameFormat.class);
-        FORMAT_CLASSES.put("number", ObsDecimalFormat.class);
+        FORMAT_CLASSES.put("number", ObsNumberFormat.class);
         FORMAT_CLASSES.put("text", ObsTextFormat.class);
         FORMAT_CLASSES.put("date", ObsDateFormat.class);
         FORMAT_CLASSES.put("time", ObsTimeFormat.class);
         FORMAT_CLASSES.put("select", ObsSelectFormat.class);
+        FORMAT_CLASSES.put("day_number", ObsDayNumberFormat.class);
+        FORMAT_CLASSES.put("location", ObsLocationFormat.class);
     }
 
     public static final String ELLIPSIS = "\u2026";  // used when truncating excessively long text
@@ -73,9 +76,10 @@ public class ObsFormat extends Format {
      * pattern, ObsNumberFormat will get instantiated and invoked with the first argument.
      * In some cases, most notably ObsSelectFormat, the sub-format invokes other formats.
      * We'd like those sub-formats to have access to all the arguments, not just the single
-     * argument that they're being asked to format.  So, we keep a reference to the root
-     * ObsFormat from which all others descended, which holds onto the original array of all
-     * the arguments.  The sub-format classes are all inner classes, so they can see mRootObsFormat.
+     * argument passed to ObsSelectFormat.  So, we keep a reference to the root ObsFormat
+     * from which all others descended, which holds the original array of all the arguments.
+     * The sub-format classes are all inner classes, so they can see mRootObsFormat.
+     * For convenience, we also make the parent format's first argument available as {0}.
      */
     private ObsFormat mRootObsFormat;  // root ObsFormat from which this ObsFormat descended
     private Object[] mCurrentArgs;  // args currently being formatted by this ObsFormat
@@ -85,12 +89,15 @@ public class ObsFormat extends Format {
             pattern = "";
         }
         mPattern = pattern;
-        // Allow plain numeric formats like "#0.00" as a shorthand for "{1,number,#0.00}".
+        // Allow plain numeric formats like "#0.00" as a shorthand for "{0,number,#0.00}".
         if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
             try {
                 new DecimalFormat(pattern);  // check if it's a valid numeric format
-                pattern = "{1,number," + pattern + "}";
+                pattern = "{0,number," + pattern + "}";
             } catch (IllegalArgumentException e) { }
+        } else if (!pattern.contains("{") && pattern.contains("$")) {
+            // Allow "$" as a shorthand for "{0,text}".
+            pattern = pattern.replaceFirst("$", "{0,text}");
         }
         mRootObsFormat = Utils.orDefault(rootObsFormat, this);
         try {
@@ -136,6 +143,7 @@ public class ObsFormat extends Format {
                                          @Nonnull FieldPosition pos) {
         if (obj instanceof ObsValue[]) {
             mCurrentArgs = (ObsValue[]) obj;
+            if (mCurrentArgs.length > 1) mCurrentArgs[0] = mCurrentArgs[1];
             return mFormat.format(obj, buf, pos);
         } else {
             buf.append(TYPE_ERROR);
@@ -185,6 +193,7 @@ public class ObsFormat extends Format {
         @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                              @Nonnull FieldPosition pos) {
             // UNOBSERVED is compared by identity (not using equals()) because it is a sentinel.
+            if (mCurrentArgs.length > 0) mCurrentArgs[0] = obj;
             if (obj == UNOBSERVED) {
                 buf.append(formatObsValue(null));
             } else if (obj instanceof ObsValue) {
@@ -271,17 +280,21 @@ public class ObsFormat extends Format {
     }
 
     /** "number" format for numeric values.  Typical use: {1,number,##.# kg} */
-    class ObsDecimalFormat extends ObsOutputFormat {
+    class ObsNumberFormat extends ObsOutputFormat {
         DecimalFormat mFormat;
 
-        public ObsDecimalFormat(String pattern) {
-            mFormat = new DecimalFormat(pattern);
+        public ObsNumberFormat(String pattern) {
+            mFormat = new DecimalFormat(Utils.toNonnull(pattern));
+        }
+
+        protected String formatNumber(Double number) {
+            return mFormat.format(number).replace('-', '\u2212');  // use a real minus sign
         }
 
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
             if (value.number == null) return TYPE_ERROR;
-            return mFormat.format(value.number).replace('-', '\u2212');  // use a real minus sign
+            return formatNumber(value.number);
         }
     }
 
@@ -300,7 +313,10 @@ public class ObsFormat extends Format {
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
             if (value.text == null) return TYPE_ERROR;
-            String text = value.text;
+            return formatText(value.text);
+        }
+
+        protected String formatText(String text) {
             return maxLength < text.length() ? text.substring(0, maxLength) + ELLIPSIS : text;
         }
     }
@@ -335,6 +351,33 @@ public class ObsFormat extends Format {
         }
     }
 
+    /** "day_number" format that describes today, counting the observed date as day 1.  Typical use: {1,day_number,Day #} */
+    class ObsDayNumberFormat extends ObsNumberFormat {
+        public ObsDayNumberFormat(String pattern) {
+            super(pattern);
+        }
+
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.date == null) return TYPE_ERROR;
+            return formatNumber((double) Utils.dayNumberSince(value.date, LocalDate.now()));
+        }
+    }
+
+    /** "day_number" format that describes today, counting the observed date as day 1.  Typical use: {1,day_number,Day #} */
+    class ObsLocationFormat extends ObsTextFormat {
+        public ObsLocationFormat(String pattern) {
+            super(pattern);
+        }
+
+        @Override public String formatObsValue(@Nullable ObsValue value) {
+            if (value == null) return EN_DASH;
+            if (value.text == null) return TYPE_ERROR;
+            Location location = App.getModel().getForest().get(value.text);
+            return formatText(location != null ? location.name : App.str(R.string.unknown));
+        }
+    }
+
     private static final Pattern CONDITION_PATTERN = Pattern.compile("([<>=]*)(.*)");
 
     /**
@@ -344,7 +387,7 @@ public class ObsFormat extends Format {
      */
     class ObsSelectFormat extends ObsOutputFormat {
         class Option {
-            public @Nonnull String operator = "";
+            public @Nullable String operator = null;
             public @Nonnull String operand = "";
             public @Nonnull ObsFormat format;
         }
@@ -442,8 +485,13 @@ public class ObsFormat extends Format {
             } else if (value.text != null) {
                 operand = ObsValue.newText(operandStr);
             } else if (value.date != null) {
+                Integer days = Utils.toIntOrNull(operandStr);
                 try {
-                    operand = ObsValue.newDate(LocalDate.parse(operandStr));
+                    if (days != null) {
+                        operand = ObsValue.newDate(LocalDate.now().plusDays(days));
+                    } else {
+                        operand = ObsValue.newDate(LocalDate.parse(operandStr));
+                    }
                 } catch (IllegalArgumentException e) {
                     operand = ObsValue.MIN_DATE;
                 }
@@ -459,7 +507,7 @@ public class ObsFormat extends Format {
                 case "":
                 case "=":
                 case "==":
-                    return Objects.equal(value.uuid, operand.uuid);
+                    return value.compareTo(operand) == 0;
                 case "<":
                     return value.compareTo(operand) < 0;
                 case "<=":
@@ -474,7 +522,7 @@ public class ObsFormat extends Format {
 
         @Override public String formatObsValue(@Nullable ObsValue value) {
             for (Option option : mOptions) {
-                if (matches(value, option.operator, option.operand)) {
+                if (option.operator == null || matches(value, option.operator, option.operand)) {
                     return option.format.format(getRootArgs());
                 }
             }

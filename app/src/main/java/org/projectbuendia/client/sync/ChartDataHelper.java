@@ -21,6 +21,7 @@ import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
@@ -49,6 +50,10 @@ import static org.projectbuendia.client.utils.Utils.eq;
 /** A helper class for retrieving and localizing data to show in patient charts. */
 public class ChartDataHelper {
     private static final Logger LOG = Logger.create();
+    private static final String[] UUIDS_TO_OMIT = {
+        ConceptUuids.ORDER_EXECUTED_UUID,
+        ConceptUuids.PLACEMENT_UUID
+    };
 
     private final ContentResolver mContentResolver;
 
@@ -92,7 +97,6 @@ public class ChartDataHelper {
         Obs obs = loadObs(c, locale, concepts);
         String uuid = Utils.getString(c, Observations.UUID);
         String conceptName = concepts.getName(obs.conceptUuid, locale);
-        if (conceptName == null) return null;
         return new ObsRow(uuid, obs.time.getMillis(),
             conceptName, obs.conceptUuid, obs.value, obs.valueName);
     }
@@ -119,73 +123,50 @@ public class ChartDataHelper {
         return results;
     }
 
-    public ArrayList<ObsRow> getPatientObservationsByConcept(String patientUuid, String... conceptUuids) {
+    /** Gets observations filtered by optional concept and optional time bounds. */
+    public ArrayList<ObsRow> getPatientObservations(String patientUuid, String[] conceptUuids, Long startMillis, Long stopMillis) {
         ConceptService concepts = App.getConceptService();
         Locale locale = App.getSettings().getLocale();
-        String[] placeholders = new String[conceptUuids.length];
+        List<String> args = new ArrayList<>();
+
+        String query = Observations.VOIDED + " IS NOT 1";
+
+        query += " AND " + Observations.PATIENT_UUID + " = ?";
+        args.add(patientUuid);
+
+        if (Utils.hasItems(conceptUuids)) {
+            query += " AND " + Observations.CONCEPT_UUID + " IN " + makeSqlPlaceholderSet(conceptUuids);
+            args.addAll(Arrays.asList(conceptUuids));
+        } else {
+            query += " AND " + Observations.CONCEPT_UUID + " NOT IN " + makeSqlPlaceholderSet(UUIDS_TO_OMIT);
+            args.addAll(Arrays.asList(UUIDS_TO_OMIT));
+        }
+        if (startMillis != null) {
+            query += " AND " + Observations.ENCOUNTER_MILLIS + " >= ?";
+            args.add("" + startMillis);
+        }
+        if (stopMillis != null) {
+            query += " AND " + Observations.ENCOUNTER_MILLIS + " < ?";
+            args.add("" + stopMillis);
+        }
+        String[] argArray = args.toArray(new String[0]);
+
+        String order = Observations.ENCOUNTER_MILLIS + " ASC";
+
+        ArrayList<ObsRow> results = new ArrayList<>();
+        try (Cursor c = mContentResolver.query(Observations.URI, null, query, argArray, order)) {
+            while (c.moveToNext()) {
+                ObsRow row = loadObsRow(c, locale, concepts);
+                if (row != null) results.add(row);
+            }
+        }
+        return results;
+    }
+
+    private String makeSqlPlaceholderSet(String[] items) {
+        String[] placeholders = new String[items.length];
         Arrays.fill(placeholders, "?");
-
-        ArrayList<ObsRow> results = new ArrayList<>();
-        try (Cursor c = mContentResolver.query(
-            Observations.URI,
-            null,
-            Observations.CONCEPT_UUID + " in (" + Joiner.on(", ").join(placeholders) + ")"
-                + " AND " + Observations.PATIENT_UUID + " = ?"
-                + " AND " + Observations.VOIDED + " IS NOT 1",
-            conceptUuids,
-            Observations.ENCOUNTER_MILLIS + " ASC"
-        )) {
-            while (c.moveToNext()) {
-                ObsRow row = loadObsRow(c, locale, concepts);
-                if (row != null) results.add(row);
-            }
-        }
-        return results;
-    }
-
-    public ArrayList<ObsRow> getPatientObservationsByMillis(String patientUuid, String startMillis,String stopMillis) {
-        ConceptService concepts = App.getConceptService();
-        Locale locale = App.getSettings().getLocale();
-        ArrayList<ObsRow> results = new ArrayList<>();
-
-        try (Cursor c = mContentResolver.query(
-            Observations.URI, null,
-            Observations.VOIDED + " IS NOT 1 AND "
-                + Observations.PATIENT_UUID + " = ? AND "
-                + Observations.ENCOUNTER_MILLIS + " >= ? AND "
-                + Observations.ENCOUNTER_MILLIS + " <= ?",
-            new String[] {patientUuid, startMillis, stopMillis},
-            Observations.ENCOUNTER_MILLIS + " ASC"
-        )) {
-            while (c.moveToNext()) {
-                ObsRow row = loadObsRow(c, locale, concepts);
-                if (row != null) results.add(row);
-            }
-        }
-        return results;
-    }
-
-    public ArrayList<ObsRow> getPatientObservationsByConceptMillis(String patientUuid, String conceptUuid, String startMillis, String stopMillis) {
-        ConceptService concepts = App.getConceptService();
-        Locale locale = App.getSettings().getLocale();
-        ArrayList<ObsRow> results = new ArrayList<>();
-
-        try (Cursor c = mContentResolver.query(
-            Observations.URI, null,
-            Observations.VOIDED + " IS NOT 1 AND "
-                + Observations.PATIENT_UUID + " = ? AND "
-                + Observations.CONCEPT_UUID + " = ? AND "
-                + Observations.ENCOUNTER_MILLIS + " >= ? AND "
-                + Observations.ENCOUNTER_MILLIS + " <= ?",
-            new String[] {patientUuid, conceptUuid, startMillis, stopMillis},
-            Observations.ENCOUNTER_MILLIS + " ASC"
-        )) {
-            while (c.moveToNext()) {
-                ObsRow row = loadObsRow(c, locale, concepts);
-                if (row != null) results.add(row);
-            }
-        }
-        return results;
+        return "(" + Joiner.on(", ").join(placeholders) + ")";
     }
 
     /** Gets the latest observation of each concept for a given patient from the app db. */
@@ -247,6 +228,10 @@ public class ChartDataHelper {
                         if (chart.tileGroups.size() + chart.rowGroups.size() > 0) {
                             charts.add(chart);
                         }
+                    } else if (eq(sectionType, "FIXED_ROW") && chart != null) {
+                        ChartSection fixedGroup = new ChartSection(label);
+                        chart.fixedGroups.add(fixedGroup);
+                        tileGroupsById.put(rowid, fixedGroup);
                     } else if (eq(sectionType, "TILE_ROW") && chart != null) {
                         ChartSection tileGroup = new ChartSection(label);
                         chart.tileGroups.add(tileGroup);
