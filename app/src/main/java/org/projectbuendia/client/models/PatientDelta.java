@@ -46,7 +46,7 @@ public class PatientDelta {
             cv.put(Contracts.Patients.FAMILY_NAME, familyName.get());
         }
         if (sex.isPresent()) {
-            cv.put(Contracts.Patients.SEX, sex.get().code);
+            cv.put(Contracts.Patients.SEX, Sex.nullableNameOf(sex.get()));
         }
         if (birthdate.isPresent()) {
             cv.put(Contracts.Patients.BIRTHDATE, birthdate.get().toString());
@@ -79,7 +79,7 @@ public class PatientDelta {
                 json.put(Server.PATIENT_FAMILY_NAME_KEY, familyName.get());
             }
             if (sex.isPresent()) {
-                json.put(Server.PATIENT_SEX_KEY, sex.get().code);
+                json.put(Server.PATIENT_SEX_KEY, Sex.serialize(sex.get()));
             }
             if (birthdate.isPresent()) {
                 json.put(

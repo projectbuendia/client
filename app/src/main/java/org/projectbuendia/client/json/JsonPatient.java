@@ -14,6 +14,7 @@ package org.projectbuendia.client.json;
 import com.google.common.base.MoreObjects;
 
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.models.Sex;
 
 import java.io.Serializable;
 
@@ -24,7 +25,7 @@ public class JsonPatient implements Serializable {
     public String id;  // user-specified patient ID
     public String given_name;
     public String family_name;
-    public String sex; // "U", "M", "F", or "O"
+    public Sex sex;
     public LocalDate birthdate;
 
     public JsonPatient() {

@@ -130,13 +130,7 @@ public class OpenMrsServer implements Server {
     }
 
     private JsonPatient patientFromJson(JSONObject object) throws JSONException {
-        JsonPatient patient = mGson.fromJson(object.toString(), JsonPatient.class);
-
-        if (!patient.sex.matches("^[MFOU]$")) {
-            LOG.e("Invalid sex from server: " + patient.sex);
-            patient.sex = "U";
-        }
-        return patient;
+        return mGson.fromJson(object.toString(), JsonPatient.class);
     }
 
     /**

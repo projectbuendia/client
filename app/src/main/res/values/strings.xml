@@ -125,7 +125,11 @@
   <string name="last_observation_none">No observations</string>
   <string name="male">Male</string>
   <string name="female">Female</string>
+  <string name="other">Other</string>
   <string name="unknown">Unknown</string>
+  <string name="sex_male_abbreviation">M</string>
+  <string name="sex_female_abbreviation">F</string>
+  <string name="sex_other_abbreviation">O</string>
   <string name="title_updating_patient">Updating patient</string>
   <string name="title_adding_new_patient">Adding new patient</string>
   <string name="please_wait">Please wait&#8230;</string>
