@@ -111,7 +111,6 @@ public class ChartRenderer {
     // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
     public void render(Chart chart, Map<String, Obs> latestObservations,
                        List<Obs> observations, List<Order> orders,
-                       LocalDate admissionDate, LocalDate firstSymptomsDate,
                        JsInterface controllerInterface) {
         if (chart == null) {
             mView.loadUrl("file:///android_asset/no_chart.html");
@@ -138,8 +137,7 @@ public class ChartRenderer {
         mView.addJavascriptInterface(controllerInterface, "c");
         mView.setWebChromeClient(new WebChromeClient());
         String html = new GridHtmlGenerator(
-            chart, latestObservations, observations, orders,
-            admissionDate, firstSymptomsDate).getHtml();
+            chart, latestObservations, observations, orders).getHtml();
 
         LOG.elapsed("render", "HTML generated");
 
@@ -173,7 +171,6 @@ public class ChartRenderer {
         DateTime mNow;
         Column mNowColumn;
         LocalDate mAdmissionDate;
-        LocalDate mFirstSymptomsDate;
 
         Map<String, ExecutionHistory> mExecutionHistories = new HashMap<String, ExecutionHistory>() {
             @Override public @NonNull ExecutionHistory get(Object key) {
@@ -188,10 +185,7 @@ public class ChartRenderer {
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
         GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
-                          List<Obs> observations, List<Order> orders,
-                          LocalDate admissionDate, LocalDate firstSymptomsDate) {
-            mAdmissionDate = admissionDate;
-            mFirstSymptomsDate = firstSymptomsDate;
+                          List<Obs> observations, List<Order> orders) {
             mOrders = orders;
             mNow = DateTime.now();
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
@@ -214,6 +208,9 @@ public class ChartRenderer {
             addObservations(observations, ordersByUuid);
             addOrders(orders);
             insertEmptyColumns();
+
+            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATE_UUID);
+            mAdmissionDate = obs != null ? Utils.toLocalDate(obs.value) : null;
 
             LOG.elapsed("GridHtmlGenerator", "Data prepared");
         }

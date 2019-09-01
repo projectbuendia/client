@@ -9,70 +9,9 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<RelativeLayout
-    android:id="@+id/patient_chart_root"
+<WebView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="org.projectbuendia.client.ui.chart.PatientChartActivity">
+    android:id="@+id/chart_webview"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" />
 
-  <LinearLayout
-      android:id="@+id/patient_chart_status_section"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      android:orientation="horizontal">
-
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/admission_day_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/since_admission"
-        app:attributeValue="–"/>
-
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/symptom_day_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/since_symptom_onset"
-        app:attributeValue="–"/>
-
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/patient_placement"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/location"
-        app:attributeValue="–"/>
-
-    <org.projectbuendia.client.widgets.PatientAttributeView
-        android:id="@+id/ebola_test_results"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        app:attributeName="@string/ebola_test_label"
-        app:attributeValue="–"/>
-
-    <TextView
-        android:id="@+id/special_labels"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        android:textSize="12sp"
-        android:gravity="end"
-        android:textColor="@color/red"
-        tools:text="Pregnant&#10;IV Fitted"/>
-  </LinearLayout>
-
-  <WebView
-      android:id="@+id/chart_webview"
-      android:layout_width="match_parent"
-      android:layout_height="fill_parent"
-      android:layout_below="@+id/patient_chart_status_section" />
-
-</RelativeLayout>

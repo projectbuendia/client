@@ -143,7 +143,7 @@ public class ObsFormat extends Format {
                                          @Nonnull FieldPosition pos) {
         if (obj instanceof ObsValue[]) {
             mCurrentArgs = (ObsValue[]) obj;
-            mCurrentArgs[0] = mCurrentArgs[1];
+            if (mCurrentArgs.length > 1) mCurrentArgs[0] = mCurrentArgs[1];
             return mFormat.format(obj, buf, pos);
         } else {
             buf.append(TYPE_ERROR);
@@ -193,7 +193,7 @@ public class ObsFormat extends Format {
         @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                              @Nonnull FieldPosition pos) {
             // UNOBSERVED is compared by identity (not using equals()) because it is a sentinel.
-            mCurrentArgs[0] = obj;
+            if (mCurrentArgs.length > 0) mCurrentArgs[0] = obj;
             if (obj == UNOBSERVED) {
                 buf.append(formatObsValue(null));
             } else if (obj instanceof ObsValue) {

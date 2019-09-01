@@ -49,7 +49,6 @@ import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
@@ -128,31 +127,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         /** Sets the activity title. */
         void setTitle(String title);
 
-        /** Updates the UI showing the admission date and first symptoms date for this patient. */
-        void updateAdmissionDateAndFirstSymptomsDateUi(
-            @Nullable LocalDate admissionDate,
-            @Nullable LocalDate firstSymptomsDate);
-
-        /** Updates the UI showing Ebola PCR lab test results for this patient. */
-        void updateEbolaTestResultUi(Map<String, Obs> observations);
-
-        /** Updates the UI showing the IV and oxygen status for this patient. */
-        void updateSpecialLabels(Map<String, Obs> observations);
-
-        /** Updates the general condition UI with the patient's current condition. */
-        void updatePatientConditionUi(String generalConditionUuid);
-
-        /** Updates the UI with the patient's location. */
-        void updatePatientLocationUi(LocationForest forest, Patient patient);
-
         /** Updates the UI showing the history of observations and orders for this patient. */
-        void updateTilesAndGrid(
-            Chart chart,
-            Map<String, Obs> latestObservations,
-            List<Obs> observations,
-            List<Order> orders,
-            LocalDate admissionDate,
-            LocalDate firstSymptomsDate);
+        void updateTilesAndGrid(Chart chart, Map<String, Obs> latestObservations,
+            List<Obs> observations, List<Order> orders);
 
         /** Updates the UI with the patient's personal details (name, sex, etc.) */
         void updatePatientDetailsUi(Patient patient);
@@ -242,7 +219,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
-        updatePatientLocationUi();
     }
 
     /** Releases any resources used by the controller. */
@@ -376,7 +352,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             ConceptService concepts = App.getConceptService();
             if (concepts.getType(uuid) == ConceptType.DATE) {
                 String title = concepts.getName(uuid, App.getSettings().getLocale());
-                mUi.showDateObsDialog(title, uuid, getObservedDate(latest, uuid));
+                Obs obs = latest.get(uuid);
+                mUi.showDateObsDialog(title, uuid, obs != null ? Utils.toLocalDate(obs.value) : null);
                 return;
             }
         }
@@ -503,19 +480,10 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         }
         LOG.elapsed("updatePatientObsUi", "%d obs, %d orders", mObservations.size(), orders.size());
 
-        LocalDate admissionDate = getObservedDate(
-            latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
-        LocalDate firstSymptomsDate = getObservedDate(
-            latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
-
-        mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
-        mUi.updateEbolaTestResultUi(latestObservations);
-        mUi.updateSpecialLabels(latestObservations);
         if (!mCharts.isEmpty()) {
             mUi.updateTilesAndGrid(
                 mCharts.get(mChartIndex),
-                latestObservations, mObservations, orders,
-                admissionDate, firstSymptomsDate);
+                latestObservations, mObservations, orders);
         }
 
         LOG.finish("updatePatientObsUi");
@@ -544,12 +512,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         Map<String, Obs> observations, String conceptUuid) {
         Obs obs = observations.get(conceptUuid);
         return obs != null ? Utils.toLocalDate(obs.valueName) : null;
-    }
-
-    private synchronized void updatePatientLocationUi() {
-        if (mPatient != null && mPatient.locationUuid != null) {
-            mUi.updatePatientLocationUi(mAppModel.getForest(), mPatient);
-        }
     }
 
     /** Represents an instance of a form being opened by the user. */
@@ -594,7 +556,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
                 if (patient.uuid.equals(mPatientUuid)) {
                     mPatient = patient;
                     mUi.updatePatientDetailsUi(mPatient);
-                    updatePatientLocationUi();
                 }
             } else if (event.item instanceof Encounter) {
                 mUi.hideWaitDialog();
