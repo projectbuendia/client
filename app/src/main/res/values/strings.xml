@@ -75,10 +75,14 @@
   <string name="abbrev_n_years">%d y</string>
   <string name="abbrev_n_years_n_months">%1$d y %2$d mo</string>
 
+  <string name="treatments">Treatments</string>
+  <string name="add_new_treatment">Add a new treatment</string>
+
   <string name="title_new_order">New treatment</string>
   <string name="title_edit_order">Edit treatment</string>
   <string name="order_medication">Medication</string>
   <string name="order_dosage">Dosage</string>
+  <string name="order_route">Route</string>
   <string name="order_frequency">Frequency</string>
   <string name="order_time_per_day">time per day</string>
   <string name="order_times_per_day">times per day</string>

@@ -72,10 +72,14 @@
   <string name="abbrev_n_years">%d a</string>
   <string name="abbrev_n_years_n_months">%1$d a %2$d mo</string>
 
+  <string name="treatments">Traitements</string>
+  <string name="add_new_treatment">Ajouter un nouveau traitement</string>
+
   <string name="title_new_order">Nouveau traitement</string>
   <string name="title_edit_order">Modifier traitement</string>
   <string name="order_medication">Médicament</string>
   <string name="order_dosage">Dosage</string>
+  <string name="order_route">Voie</string>
   <string name="order_frequency">Fréquence</string>
   <string name="order_time_per_day">fois par jour</string>
   <string name="order_times_per_day">fois par jour</string>
@@ -267,10 +271,10 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="cancel_sync">Annuler synchronisation</string>
   <string name="cancelling_sync">Annulation de la synchronisation…</string>
   <string name="sync_starting">Synchronisation partir…</string>
-  <string name="troubleshoot_wifi_disabled">Wifi est désactivé</string>
+  <string name="troubleshoot_wifi_disabled">Wi-Fi est désactivé</string>
   <string name="troubleshoot_wifi_disabled_solved">Reseau activé</string>
   <string name="troubleshoot_wifi_disabled_action_enable">Activer</string>
-  <string name="troubleshoot_wifi_disconnected">Wifi est déconnecté</string>
+  <string name="troubleshoot_wifi_disconnected">Wi-Fi est déconnecté</string>
   <string name="troubleshoot_wifi_disconnected_solved">Reseau retabli</string>
   <string name="troubleshoot_wifi_disconnected_action_connect">Connectez</string>
   <string name="troubleshoot_periodic_sync_disabled">Synchronisation périodique est actuellement désactivée.</string>
@@ -287,7 +291,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_server_unreachable_details">
       Le serveur n\'a pas pu être atteint. Cela peut être parce que:
       \n
-      \n • Le réseau wifi est incorrect.
+      \n • Le réseau Wi-Fi est incorrect.
       \n • L\'URL du serveur est incorrecte.
       \n • Le serveur est en panne.
       \n
@@ -365,8 +369,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_large_sync_interval">Intervalle des grandes synchronisations (seconds)</string>
   <string name="pref_title_form_instances_retained">Instances de formulaire de stocker localement</string>
   <string name="pref_desc_form_instances_retained">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
-  <string name="pref_title_non_wifi_allowed">Permettrer les connexions sans wifi</string>
-  <string name="pref_desc_non_wifi_allowed">Activez cette option pour permettre l\'application de travailler avec des connexions non-wifi (émulé ou Bluetooth) en réseau.</string>
+  <string name="pref_title_non_wifi_allowed">Permettrer les connexions sans Wi-Fi</string>
+  <string name="pref_desc_non_wifi_allowed">Activez cette option pour permettre l\'application de travailler avec des connexions non-Wi-Fi (émulé ou Bluetooth) en réseau.</string>
   <string name="pref_title_starting_patient_id">Commencer avec le dossier du patient avec l\'ID</string>
   <string name="pref_desc_starting_patient_id">Entrez un ID du patient pour ouvrir l\'application avec le dossier du patient</string>
   <string name="pref_title_sync_adapter_preferred">Utiliser l\'ancien framework SyncAdapter</string>

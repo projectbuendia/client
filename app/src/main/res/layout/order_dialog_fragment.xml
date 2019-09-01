@@ -80,7 +80,7 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_column="2"
-          android:hint="Route" />
+          android:hint="@string/order_route" />
     </TableRow>
 
     <TableRow
