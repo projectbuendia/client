@@ -35,6 +35,7 @@ import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
@@ -153,7 +154,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showDateObsDialog(String title, String conceptUuid, LocalDate date);
-        void showOrderDialog(String patientUuid, Order order);
+        void showOrderDialog(String patientUuid, Order order, List<DateTime> executionTimes);
         void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
         void showObsDetailDialog(Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> orderedConceptUuids);
@@ -386,25 +387,29 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     @JavascriptInterface public void onNewOrderPressed() {
-        mUi.showOrderDialog(mPatientUuid, null);
+        mUi.showOrderDialog(mPatientUuid, null, null);
     }
 
     @JavascriptInterface public void onOrderHeadingPressed(String orderUuid) {
-        mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid));
+        mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid), getExecutionTimes(orderUuid));
     }
 
     @JavascriptInterface public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
+        mUi.showOrderExecutionDialog(order, interval, getExecutionTimes(orderUuid));
+    }
+
+    private List<DateTime> getExecutionTimes(String orderUuid) {
         List<DateTime> executionTimes = new ArrayList<>();
         for (Obs obs : mObservations) {
-            if (ConceptUuids.ORDER_EXECUTED_UUID.equals(obs.conceptUuid) &&
-                order.uuid.equals(obs.value)) {
+            if (eq(obs.conceptUuid, ConceptUuids.ORDER_EXECUTED_UUID) &&
+                eq(orderUuid, obs.value)) {
                 executionTimes.add(obs.time);
             }
         }
-        mUi.showOrderExecutionDialog(order, interval, executionTimes);
+        return executionTimes;
     }
 
     @JavascriptInterface public void onPageUnload(int scrollX, int scrollY) {
@@ -641,6 +646,17 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             LOG.i("Saving order: %s", event.instructions);
             mAppModel.saveOrder(mCrudEventBus, new Order(
                 event.orderUuid, event.patientUuid, event.instructions, start, stop));
+        }
+
+        public void onEventMainThread(OrderStopRequestedEvent event) {
+            Order order = mOrdersByUuid.get(event.orderUuid);
+            DateTime newStop = DateTime.now();
+            if (order.isSeries() && (order.stop == null || newStop.isBefore(order.stop))) {
+                LOG.i("Stopping order: %s", order.instructions);
+                mAppModel.saveOrder(mCrudEventBus, new Order(
+                    event.orderUuid, order.patientUuid, order.instructions, order.start, newStop
+                ));
+            }
         }
 
         public void onEventMainThread(OrderDeleteRequestedEvent event) {

@@ -392,8 +392,8 @@ public final class PatientChartActivity extends LoggedInActivity {
             Utils.showDialogIf(mFormSubmissionDialog, show);
         }
 
-        @Override public void showOrderDialog(String patientUuid, Order order) {
-            OrderDialogFragment.newInstance(patientUuid, order)
+        @Override public void showOrderDialog(String patientUuid, Order order, List<DateTime> executionTimes) {
+            OrderDialogFragment.newInstance(patientUuid, order, executionTimes)
                 .show(getSupportFragmentManager(), null);
         }
 

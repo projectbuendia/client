@@ -115,7 +115,8 @@
   <string name="order_stop_now">Stop now</string>
   <string name="order_delete">Delete this treatment</string>
   <string name="title_confirmation">Confirmation</string>
-  <string name="confirm_order_delete">Really delete?</string>
+  <string name="confirm_order_stop">Stop this treatment now?</string>
+  <string name="confirm_order_delete">Delete this treatment?</string>
   <string name="delete">Delete</string>
 
   <string name="route_of_administration">Route of administration</string>

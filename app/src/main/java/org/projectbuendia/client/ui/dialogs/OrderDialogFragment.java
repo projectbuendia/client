@@ -36,12 +36,15 @@ import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.MedCompleter;
+import org.projectbuendia.client.ui.TextChangedWatcher;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.Arrays;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -67,21 +70,25 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_notes) EditText mNotes;
+    @InjectView(R.id.order_stop_now) Button mStopNow;
     @InjectView(R.id.order_delete) Button mDelete;
 
     private LayoutInflater mInflater;
     private String mOrderUuid;
 
     /** Creates a new instance and registers the given UI, if specified. */
-    public static OrderDialogFragment newInstance(String patientUuid, Order order) {
-        Bundle args = new Bundle();
-        args.putString("patientUuid", patientUuid);
-        args.putBoolean("new", order == null);
-
+    public static OrderDialogFragment newInstance(
+        String patientUuid, Order order, List<DateTime> executionTimes) {
         // This time is used as the current time for any calculations in this dialog.
         // Use this value throughout instead of calling now().  This is necessary to maintain UI
         // consistency (e.g. if the dialog is opened before midnight and submitted after midnight).
-        args.putLong("now_millis", DateTime.now().getMillis());
+        DateTime now = DateTime.now();
+
+        Bundle args = new Bundle();
+        args.putString("patientUuid", patientUuid);
+        args.putBoolean("new", order == null);
+        args.putBoolean("executed", Utils.hasItems(executionTimes));
+        args.putLong("now_millis", now.getMillis());
 
         if (order != null) {
             args.putString("uuid", order.uuid);
@@ -92,6 +99,8 @@ public class OrderDialogFragment extends DialogFragment {
             args.putString("notes", order.instructions.notes);
             Utils.putDateTime(args, "start_millis", order.start);
             Utils.putDateTime(args, "stop_millis", order.stop);
+            args.putBoolean("stopped", !order.isSeries() ||
+                (order.stop != null && now.isAfter(order.stop)));
         }
         OrderDialogFragment fragment = new OrderDialogFragment();
         fragment.setArguments(args);
@@ -154,8 +163,10 @@ public class OrderDialogFragment extends DialogFragment {
                 .show();
         });
 
-        mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
+        mFrequency.addTextChangedListener(new TextChangedWatcher(this::updateLabels));
+        mGiveForDays.addTextChangedListener(new TextChangedWatcher(this::updateLabels));
 
+        mStopNow.setOnClickListener(view -> onStopNow(getDialog(), mOrderUuid));
         mDelete.setOnClickListener(view -> onDelete(getDialog(), mOrderUuid));
     }
 
@@ -245,14 +256,26 @@ public class OrderDialogFragment extends DialogFragment {
             uuid, patientUuid, instructions, start, durationDays));
     }
 
+    public void onStopNow(DialogInterface dialog, final String orderUuid) {
+        dialog.dismiss();
+
+        new AlertDialog.Builder(getActivity())
+            .setTitle(R.string.title_confirmation)
+            .setMessage(R.string.confirm_order_stop)
+            .setPositiveButton(R.string.order_stop_now,
+                (d, i) -> EventBus.getDefault().post(new OrderStopRequestedEvent(orderUuid)))
+            .setNegativeButton(R.string.cancel, null)
+            .create().show();
+    }
+
     public void onDelete(DialogInterface dialog, final String orderUuid) {
         dialog.dismiss();
 
         new AlertDialog.Builder(getActivity())
-            .setMessage(R.string.confirm_order_delete)
             .setTitle(R.string.title_confirmation)
+            .setMessage(R.string.confirm_order_delete)
             .setPositiveButton(R.string.delete,
-                (dialog1, i) -> EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid)))
+                (d, i) -> EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid)))
             .setNegativeButton(R.string.cancel, null)
             .create().show();
     }
@@ -303,9 +326,18 @@ public class OrderDialogFragment extends DialogFragment {
 
         Bundle args = getArguments();
         boolean newOrder = args.getBoolean("new");
-        String title = getString(newOrder ? R.string.title_new_order : R.string.title_edit_order);
+        boolean stopped = args.getBoolean("stopped");
+        boolean executed = args.getBoolean("executed");
         mOrderUuid = args.getString("uuid");
         populateFields(args);
+
+        String title = getString(newOrder ? R.string.title_new_order : R.string.title_edit_order);
+
+        // Hide or show the "Stop" and "Delete" buttons appropriately.
+        Long stopMillis = Utils.getLong(args, "stop_millis");
+        Long nowMillis = Utils.getLong(args, "now_millis");
+        Utils.showIf(mStopNow, !newOrder && !stopped);
+        Utils.showIf(mDelete, !newOrder && !executed);
 
         addListeners();
         addClearButton(mMedication, R.drawable.abc_ic_clear_mtrl_alpha);
@@ -327,11 +359,6 @@ public class OrderDialogFragment extends DialogFragment {
             dialog.getButton(DialogInterface.BUTTON_POSITIVE)
                 .setOnClickListener(view -> onSubmit(dialog))
         );
-
-        // Hide or show the "Stop" and "Delete" buttons appropriately.
-        Long stopMillis = Utils.getLong(args, "stop_millis");
-        Long nowMillis = Utils.getLong(args, "now_millis");
-        Utils.showIf(mDelete, !newOrder);
 
         return dialog;
     }
@@ -359,15 +386,4 @@ public class OrderDialogFragment extends DialogFragment {
                         R.string.order_duration_stop_after_date
         ).replace("%s", Utils.format(lastDay, MONTH_DAY)));
     }
-
-    class DurationDaysWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) { }
-
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) { }
-
-        @Override public void afterTextChanged(Editable editable) {
-            updateLabels();
-        }
-    }
-
 }

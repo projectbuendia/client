@@ -18,8 +18,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -43,6 +41,7 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.ui.BigToast;
+import org.projectbuendia.client.ui.TextChangedWatcher;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.List;
@@ -162,9 +161,8 @@ public class EditPatientDialogFragment extends DialogFragment {
         mSex.setSelection(sex);
 
         mBirthdate = birthdate;
-        TextWatcher ageEditedWatcher = new AgeEditedWatcher();
-        mAgeYears.addTextChangedListener(ageEditedWatcher);
-        mAgeMonths.addTextChangedListener(ageEditedWatcher);
+        mAgeYears.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
+        mAgeMonths.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
     }
 
     public void onSubmit(DialogInterface dialog) {
@@ -280,13 +278,5 @@ public class EditPatientDialogFragment extends DialogFragment {
         // If all fields are populated, default to the end of the given name field.
         mGivenName.requestFocus();
         mGivenName.setSelection(mGivenName.getText().length());
-    }
-
-    private class AgeEditedWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-        @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
-        @Override public void afterTextChanged(Editable s) {
-            mAgeChanged = true;
-        }
     }
 }

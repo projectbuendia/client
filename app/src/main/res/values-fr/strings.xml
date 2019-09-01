@@ -112,7 +112,8 @@
   <string name="order_stop_now">Arrêter maintenant</string>
   <string name="order_delete">Supprimer cette traitement</string>
   <string name="title_confirmation">Confirmation</string>
-  <string name="confirm_order_delete">Vraiment supprimer?</string>
+  <string name="confirm_order_stop">Arrêter ce traitement maintenant?</string>
+  <string name="confirm_order_delete">Supprimer ce traitement?</string>
   <string name="delete">Supprimer</string>
 
   <string name="route_of_administration">Voie d\'administration</string>

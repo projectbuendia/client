@@ -198,14 +198,23 @@
       android:layout_height="wrap_content"
       android:orientation="horizontal">
 
-  <Button
-      android:id="@+id/order_delete"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16sp"
-      android:layout_marginBottom="16sp"
-      android:padding="16sp"
-      android:text="@string/order_delete"/>
+    <Button
+        android:id="@+id/order_stop_now"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16sp"
+        android:layout_marginBottom="16sp"
+        android:padding="16sp"
+        android:text="@string/order_stop_now"/>
+
+    <Button
+        android:id="@+id/order_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16sp"
+        android:layout_marginBottom="16sp"
+        android:padding="16sp"
+        android:text="@string/order_delete"/>
   </LinearLayout>
 
 </LinearLayout>
