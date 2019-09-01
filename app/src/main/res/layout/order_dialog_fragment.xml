@@ -109,7 +109,7 @@
 
       <TextView
           android:id="@+id/order_times_per_day_label"
-          android:layout_width="300sp"
+          android:layout_weight="1"
           android:layout_column="2"
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
@@ -142,7 +142,7 @@
 
       <TextView
           android:id="@+id/order_give_for_days_label"
-          android:layout_width="600sp"
+          android:layout_weight="1"
           android:layout_column="2"
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
@@ -157,6 +157,8 @@
           android:id="@+id/order_duration_label"
           style="@style/field_label"
           android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
           android:layout_column="1"
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
