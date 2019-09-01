@@ -35,7 +35,6 @@ import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -101,14 +100,10 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void addPatient(
-        PatientDelta patientDelta,
+        JsonPatient patient,
         final Response.Listener<JsonPatient> successListener,
         final Response.ErrorListener errorListener) {
-        JSONObject json = new JSONObject();
-        if (!patientDelta.toJson(json)) {
-            throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
-        }
-
+        JSONObject json = patientToJson(patient);
         LOG.v("Adding patient from JSON: %s", json.toString());
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
@@ -127,6 +122,14 @@ public class OpenMrsServer implements Server {
             wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+    private JSONObject patientToJson(JsonPatient patient) throws IllegalArgumentException {
+        try {
+            return new JSONObject(mGson.toJson(patient));
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Unable to serialize the patient to JSON.");
+        }
     }
 
     private JsonPatient patientFromJson(JSONObject object) throws JSONException {
@@ -154,18 +157,13 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void updatePatient(
-        String patientUuid,
-        PatientDelta patientDelta,
+        JsonPatient patient,
         final Response.Listener<JsonPatient> successListener,
         final Response.ErrorListener errorListener) {
-        JSONObject json = new JSONObject();
-        if (!patientDelta.toJson(json)) {
-            throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
-        }
-
+        JSONObject json = patientToJson(patient);
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patients/" + patientUuid,
+            "/patients/" + patient.uuid,
             json,
             response -> {
                 try {

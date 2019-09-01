@@ -80,9 +80,6 @@ public class Utils {
     public static final int HOUR = 60 * MINUTE;  // in ms
     public static final int DAY = 24 * HOUR;  // in ms
 
-    private static final Bundle NO_TRANSITION =
-        ActivityOptions.makeCustomAnimation(App.getContext(), 0, 0).toBundle();
-
     private static Map<Integer, String> sHttpMethods = initHttpMethods();
     private static Map<Integer, String> initHttpMethods() {
         Map<Integer, String> map = new HashMap<>();
@@ -117,6 +114,11 @@ public class Utils {
     /** Returns a value if that value is not null, or a specified default value otherwise. */
     public static @Nonnull <T> T orDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value != null ? value : defaultValue;
+    }
+
+    /** Returns a value if that value is not null, or a specified default value otherwise. */
+    public static @Nonnull String nonemptyOrDefault(@Nullable String value, @Nonnull String defaultValue) {
+        return isEmpty(value) ? defaultValue : value;
     }
 
     /** Converts nulls to a default integer value. */
@@ -414,7 +416,9 @@ public class Utils {
     /** Restarts the current activity (for use after a configuration change). */
     public static void restartActivity(Activity activity) {
         activity.finish();
-        activity.startActivity(activity.getIntent(), NO_TRANSITION);
+        activity.startActivity(
+            activity.getIntent(),
+            ActivityOptions.makeCustomAnimation(activity, 0, 0).toBundle());
     }
 
 

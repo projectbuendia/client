@@ -116,9 +116,8 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
         else {
             mBus.register(new EventSubscriber());
             mTaskFactory.newLoadItemTask(
-                Patients.URI, null,
-                new UuidFilter(), mPatientUuid,
-                Patient.LOADER, mBus).execute();
+                Patients.URI, null, new UuidFilter(), mPatientUuid, Patient::load, mBus
+            ).execute();
         }
     }
 

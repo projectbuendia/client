@@ -68,7 +68,7 @@ public class TypedCursorWithLoader<T> implements TypedCursor<T> {
                 return null;
             }
 
-            convertedItem = mLoader.fromCursor(mCursor);
+            convertedItem = mLoader.load(mCursor);
             mCursor.moveToPosition(originalPosition);
 
             mLoadedItems.put(position, convertedItem);
@@ -100,7 +100,7 @@ public class TypedCursorWithLoader<T> implements TypedCursor<T> {
 
             T loadedItem = mLoadedItems.get(position);
             if (loadedItem == null) {
-                loadedItem = mLoader.fromCursor(mCursor);
+                loadedItem = mLoader.load(mCursor);
                 mLoadedItems.put(position, loadedItem);
             }
 

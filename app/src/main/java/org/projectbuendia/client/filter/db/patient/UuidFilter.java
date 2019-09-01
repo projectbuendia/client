@@ -17,9 +17,8 @@ import org.projectbuendia.client.providers.Contracts;
 
 /** Matches only the patient with the given patient UUID. */
 public final class UuidFilter extends SimpleSelectionFilter<Patient> {
-
     @Override public String getSelectionString() {
-        return Contracts.Patients.UUID + "=?";
+        return Contracts.Patients.UUID + " = ?";
     }
 
     @Override public String[] getSelectionArgs(CharSequence constraint) {

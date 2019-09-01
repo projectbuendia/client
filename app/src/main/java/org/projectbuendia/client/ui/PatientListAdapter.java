@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,13 +28,13 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
+import org.projectbuendia.client.widgets.ShrinkFitTextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +46,8 @@ import java.util.Map;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.NONE;
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.SHORT;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
@@ -57,7 +60,6 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
     private final ChartDataHelper mChartDataHelper;
 
     private static final Logger LOG = Logger.create();
-    private static final String EN_DASH = "\u2013";
 
     private Location[] mLocations;
     private Map<String, Obs> mConditionObs = new HashMap<>();
@@ -117,58 +119,24 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
     @Override public View getChildView(int groupIndex, int childIndex,
         boolean isLastChild, View view, ViewGroup parent) {
         Patient patient = (Patient) getChild(groupIndex, childIndex);
+        view = u.reuseOrInflate(view, R.layout.patient_list_item, parent);
 
         // Show condition, if the data for this has been loaded.
         Obs obs = mConditionObs.get(patient.uuid);
         String condition = obs != null ? obs.value : null;
-
-        if (view == null) view = u.inflate(R.layout.patient_list_item, parent);
-
         ResStatus.Resolved status =
             ConceptUuids.getResStatus(condition).resolve(u.getResources());
 
-        String givenName = Utils.orDefault(patient.givenName, EN_DASH);
-        String familyName = Utils.orDefault(patient.familyName, EN_DASH);
         u.setContainer(view);
-        u.setText(R.id.name, givenName + " " + familyName);
+        u.setText(R.id.name, u.formatPatientName(patient));
         u.setText(R.id.bed_number, patient.bedNumber);
-        u.setText(R.id.id, patient.id);
-        u.setTextViewColors(R.id.id, status);
-        u.setText(R.id.age, patient.birthdate != null ?
-            Utils.birthdateToAge(patient.birthdate) : "");
-
-        boolean isChild = Utils.isChild(patient.birthdate);
-
-        int drawableId = 0;
-
-        // Java switch is not safe to use because it stupidly crashes on null.
-        if (patient.sex == Sex.MALE) {
-            drawableId = isChild ? R.drawable.ic_male_child : R.drawable.ic_male;
-        }
-        if (patient.sex == Sex.FEMALE) {
-            drawableId = patient.pregnancy ? R.drawable.ic_female_pregnant :
-                isChild ? R.drawable.ic_female_child : R.drawable.ic_female;
-        }
-
-        if (drawableId > 0) {
-            u.show(R.id.sex);
-            ((ImageView) u.findView(R.id.sex)).setImageDrawable(u.getResources().getDrawable(drawableId));
-        } else {
-            u.hide(R.id.sex);
-        }
-
-        // Add a bottom border and extra padding to the last item in each group.
-        if (isLastChild) {
-            view.setBackgroundResource(R.drawable.bottom_border_1dp);
-            view.setPadding(
-                view.getPaddingLeft(), view.getPaddingTop(),
-                view.getPaddingRight(), 40);
-        } else {
-            view.setBackgroundResource(0);
-            view.setPadding(
-                view.getPaddingLeft(), view.getPaddingTop(),
-                view.getPaddingRight(), 20);
-        }
+        u.show(R.id.bed_bar, !Utils.isEmpty(patient.bedNumber));
+        ShrinkFitTextView idView = u.findView(R.id.id);
+        idView.setTextAndResize(patient.id);
+        idView.setTextColor(status.getForegroundColor());
+        idView.getBackground().setColorFilter(status.getBackgroundColor(), PorterDuff.Mode.SRC_ATOP);
+        u.setText(R.id.sex, u.formatPatientDetails(patient, SHORT, SHORT, NONE));
+        u.setText(R.id.age, u.formatPatientDetails(patient, NONE, NONE, SHORT));
 
         ((ExpandableListView) parent).expandGroup(groupIndex);
         return view;

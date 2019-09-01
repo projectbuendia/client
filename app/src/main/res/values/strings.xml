@@ -32,6 +32,7 @@
   <string name="action_view_xform">View first saved xform</string>
   <string name="action_new_round">New round</string>
   <string name="action_assign_location">Assign location</string>
+  <string name="bed_number">Bed number</string>
   <string name="action_edit_patient">Edit patient</string>
   <string name="action_view_round_archive">Round archive</string>
   <string name="snackbar_update_available">Application update available</string>
@@ -68,6 +69,7 @@
   <string name="one_present_patient">1 present patient</string>
   <string name="n_present_patients">%d present patients</string>
 
+  <string name="sex_unknown">Sex unknown</string>
   <string name="age_unknown">age unknown</string>
   <string name="abbrev_n_months">%d mo</string>
   <string name="abbrev_n_years">%d y</string>
@@ -133,7 +135,7 @@
   <string name="sex_other_abbreviation">O</string>
   <string name="title_updating_patient">Updating patient</string>
   <string name="title_adding_new_patient">Adding new patient</string>
-  <string name="please_wait">Please wait&#8230;</string>
+  <string name="please_wait_ellipsis">Please wait&#8230;</string>
   <string name="updating_patient_please_wait">Updating patient; please wait...</string>
   <string name="adding_new_patient_please_wait">Adding new patient; please wait...</string>
 
@@ -145,11 +147,10 @@
   <string name="zoom_sixth">6 columns per day</string>
 
   <string name="go_to_patient_title">Go to patient chart</string>
-  <string name="go_to_patient_id_label">Patient ID</string>
-  <string name="go_to_patient_no_data">No data loaded from server yet</string>
-  <string name="go_to_patient_not_found_as_of_time">No such patient as of %s</string>
-  <string name="go_to_patient_not_found">No such patient on server</string>
-  <string name="go_to_patient_go">Go to chart</string>
+  <string name="patient_id">Patient ID</string>
+  <string name="searching_ellipsis">Searching&#8230;</string>
+  <string name="patient_not_found">No patient found with ID %s</string>
+  <string name="go_to_chart">Go to chart</string>
 
   <string name="since_admission">Since admission</string>
   <string name="since_symptom_onset">Since symptom onset</string>
@@ -164,7 +165,6 @@
   <string name="months">months</string>
   <string name="sex">Sex</string>
   <string name="patient_creation_location_label">Location</string>
-  <string name="patient_creation_location_assign">Assign location</string>
   <string name="add_patient">Create</string>
   <string name="patient_creation_create_busy">Working&#8230;</string>
   <string name="patient_creation_cancel">Cancel</string>
@@ -179,6 +179,7 @@
   <string name="ebola_test_label">Ebola test</string>
   <string name="latest_pcr_label_with_date">Ebola test (%s)</string>
   <string name="action_add_test_result">Add test result</string>
+  <string name="pregnant_abbreviation">prg</string>
   <string name="pregnant">Pregnant</string>
   <string name="iv_fitted">IV fitted</string>
   <string name="cannot_eat">Cannot eat</string>

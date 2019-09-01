@@ -11,35 +11,34 @@
 
 package org.projectbuendia.client.json;
 
-import com.google.common.base.MoreObjects;
+import android.content.ContentValues;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.models.Sex;
+import org.projectbuendia.client.providers.Contracts.Patients;
 
 import java.io.Serializable;
 
 /** JSON representation of an OpenMRS Patient. */
 public class JsonPatient implements Serializable {
     public String uuid;  // OpenMRS record UUID
-    public boolean voided; // true if the patient has been voided.
     public String id;  // user-specified patient ID
     public String given_name;
     public String family_name;
     public Sex sex;
     public LocalDate birthdate;
+    public boolean voided;
 
-    public JsonPatient() {
-    }
+    public JsonPatient() { }
 
-    @Override public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("uuid", uuid)
-            .add("voided", voided)
-            .add("id", id)
-            .add("given_name", given_name)
-            .add("family_name", family_name)
-            .add("sex", sex)
-            .add("birthdate", birthdate.toString())
-            .toString();
+    /** Populates a ContentValues record with the fields of this patient. */
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues();
+        cv.put(Patients.ID, id);
+        cv.put(Patients.GIVEN_NAME, given_name);
+        cv.put(Patients.FAMILY_NAME, family_name);
+        cv.put(Patients.SEX, Sex.nullableNameOf(sex));
+        cv.put(Patients.BIRTHDATE, birthdate != null ? birthdate.toString() : null);
+        return cv;
     }
 }

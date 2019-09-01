@@ -121,7 +121,7 @@ public class FetchSinglePatientTask extends AsyncTask<Void, Void, ItemLoadFailed
         // result of the fetch determines if adding a patient was truly successful
         // and propagates a new event to report success/failure.
         mTaskFactory.newLoadItemTask(
-            Patients.URI, null, new UuidFilter(), mUuid, Patient.LOADER, mBus
+            Patients.URI, null, new UuidFilter(), mUuid, Patient::load, mBus
         ).execute();
     }
 }

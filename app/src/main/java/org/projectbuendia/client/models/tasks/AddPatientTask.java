@@ -30,9 +30,8 @@ import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.Logger;
 
@@ -55,7 +54,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
-    private final PatientDelta mPatientDelta;
+    private final JsonPatient mPatient;
     private final List<Obs> mObservations;
     private final CrudEventBus mBus;
     @Inject SyncManager mSyncManager;
@@ -67,13 +66,13 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
-        PatientDelta patientDelta,
+        JsonPatient patient,
         List<Obs> observations,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
-        mPatientDelta = patientDelta;
+        mPatient = patient;
         mObservations = observations;
         mBus = bus;
         App.inject(this);
@@ -82,7 +81,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     @Override protected PatientAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonPatient> future = RequestFuture.newFuture();
 
-        mServer.addPatient(mPatientDelta, future, future);
+        mServer.addPatient(mPatient, future, future);
         JsonPatient json;
         try {
             json = future.get();
@@ -111,7 +110,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         }
 
         Patient patient = Patient.fromJson(json);
-        Uri uri = mContentResolver.insert(Contracts.Patients.URI, patient.toContentValues());
+        Uri uri = mContentResolver.insert(Patients.URI, patient.toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_CLIENT, null);
         }
@@ -151,12 +150,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
-            Contracts.Patients.URI,
-            null,
-            new UuidFilter(),
-            mUuid,
-            Patient.LOADER,
-            mBus);
+            Patients.URI, null, new UuidFilter(), mUuid, Patient::load, mBus);
         task.execute();
     }
 
