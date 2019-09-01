@@ -34,6 +34,8 @@
           android:layout_height="wrap_content"
           android:inputType="textCapCharacters"
           android:singleLine="true"
+          android:nextFocusDown="@id/patient_id"
+          android:nextFocusRight="@id/patient_id"
           android:ems="5" />
     </TableRow>
 
@@ -49,6 +51,9 @@
           android:inputType="numberDecimal"
           android:digits="0123456789"
           android:singleLine="true"
+          android:nextFocusLeft="@id/patient_id_prefix"
+          android:nextFocusDown="@id/patient_given_name"
+          android:nextFocusRight="@id/patient_given_name"
           android:ems="10" />
     </TableRow>
 
@@ -63,6 +68,9 @@
           android:layout_height="wrap_content"
           android:inputType="textCapWords|textPersonName"
           android:singleLine="true"
+          android:nextFocusLeft="@id/patient_id"
+          android:nextFocusDown="@id/patient_family_name"
+          android:nextFocusRight="@id/patient_family_name"
           android:ems="10" />
     </TableRow>
 
@@ -77,6 +85,9 @@
           android:layout_height="wrap_content"
           android:inputType="textCapWords|textPersonName"
           android:singleLine="true"
+          android:nextFocusLeft="@id/patient_given_name"
+          android:nextFocusDown="@id/patient_age_years"
+          android:nextFocusRight="@id/patient_age_years"
           android:ems="10" />
     </TableRow>
 
@@ -97,6 +108,9 @@
             android:digits="0123456789"
             android:singleLine="true"
             android:ems="3"
+            android:nextFocusLeft="@id/patient_family_name"
+            android:nextFocusDown="@id/patient_age_months"
+            android:nextFocusRight="@id/patient_age_months"
             android:maxLength="3"/>
         <TextView
             android:layout_height="wrap_content"
@@ -112,6 +126,9 @@
             android:digits="0123456789"
             android:singleLine="true"
             android:ems="2"
+            android:nextFocusLeft="@id/patient_age_years"
+            android:nextFocusDown="@id/patient_sex"
+            android:nextFocusRight="@id/patient_sex"
             android:maxLength="2"/>
         <TextView
             android:layout_height="wrap_content"
