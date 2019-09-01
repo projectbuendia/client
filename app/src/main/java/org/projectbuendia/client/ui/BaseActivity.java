@@ -36,6 +36,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
+import org.projectbuendia.client.inject.Qualifiers;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
 import org.projectbuendia.client.updater.DownloadedUpdateInfo;
 import org.projectbuendia.client.utils.Logger;
@@ -43,6 +44,8 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -64,6 +67,8 @@ public abstract class BaseActivity extends FragmentActivity {
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
     private SnackBar snackBar;
+
+    @Inject @Qualifiers.HealthEventBus EventBus mHealthEventBus;
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
@@ -235,61 +240,67 @@ public abstract class BaseActivity extends FragmentActivity {
                         R.string.troubleshoot_wifi_disabled_action_enable,
                         view -> ((WifiManager) getApplicationContext()
                             .getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true),
-                        995, false);
+                        10, false);
                     break;
                 case CONNECT_WIFI:
                     snackBar(R.string.troubleshoot_wifi_disconnected,
                         R.string.troubleshoot_wifi_disconnected_action_connect,
-                        view -> startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)), 996, false);
-                    break;
-                case CHECK_SERVER_AUTH:
-                    snackBar(R.string.troubleshoot_server_auth,
-                        R.string.troubleshoot_server_auth_action_check,
-                        view -> SettingsActivity.start(BaseActivity.this), 999, false);
+                        view -> startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)),
+                        20, false);
                     break;
                 case CHECK_SERVER_CONFIGURATION:
                     snackBar(R.string.troubleshoot_server_address,
                         R.string.troubleshoot_server_address_action_check,
-                        view -> SettingsActivity.start(BaseActivity.this), 999, false);
+                        view -> SettingsActivity.start(BaseActivity.this),
+                        30, false);
                     break;
                 case CHECK_SERVER_REACHABILITY:
                     snackBar(R.string.troubleshoot_server_unreachable,
                         R.string.troubleshoot_action_more_info,
-                        view -> {
+                        view -> showMoreInfoDialog(
                             // TODO: Display the actual server URL that couldn't be reached in
                             // this message. This will require that injection be hooked up
                             // through to this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_unreachable),
-                                getString(R.string.troubleshoot_server_unreachable_details),
-                                true);
-                        }, 997, false);
+                            getString(R.string.troubleshoot_server_unreachable),
+                            getString(R.string.troubleshoot_server_unreachable_details),
+                            true
+                        ), 40, false);
                     break;
-                case CHECK_SERVER_SETUP:
+                case CHECK_SERVER_AUTH:
+                    snackBar(R.string.troubleshoot_server_auth,
+                        R.string.troubleshoot_server_auth_action_check,
+                        view -> SettingsActivity.start(BaseActivity.this),
+                        50, false);
+                    break;
+                case CHECK_SERVER_SETUP:  // server is returning 500
                     snackBar(R.string.troubleshoot_server_unstable,
                         R.string.troubleshoot_action_more_info,
-                        view -> {
+                        view -> showMoreInfoDialog(
                             // TODO: Display the actual server URL that couldn't be reached in
                             // this message. This will require that injection be hooked up
                             // through to this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_unstable),
-                                getString(R.string.troubleshoot_server_unstable_details),
-                                false);
-                        }, 999, false);
+                            getString(R.string.troubleshoot_server_unstable),
+                            getString(R.string.troubleshoot_server_unstable_details),
+                            false
+                        ), 60, false);
                     break;
-                case CHECK_SERVER_STATUS:
+                case CHECK_SERVER_STATUS:  // server is not responding
                     snackBar(R.string.troubleshoot_server_not_responding,
                         R.string.troubleshoot_action_more_info,
-                        view -> {
+                        view -> showMoreInfoDialog(
                             // TODO: Display the actual server URL that couldn't be reached in
                             // this message. This will require that injection be hooked up
                             // through to this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_not_responding),
-                                getString(R.string.troubleshoot_server_not_responding_details),
-                                false);
-                        }, 999, false);
+                            getString(R.string.troubleshoot_server_not_responding),
+                            getString(R.string.troubleshoot_server_not_responding_details),
+                            false
+                        ), 60, false);
+                    break;
+                case CHECK_PERIODIC_SYNC_SETTINGS:
+                    snackBar(R.string.troubleshoot_periodic_sync_disabled,
+                        R.string.troubleshoot_action_check_settings,
+                        view -> SettingsActivity.start(BaseActivity.this),
+                        70, false);
                     break;
                 case CHECK_PACKAGE_SERVER_REACHABILITY:
                     snackBar(R.string.troubleshoot_package_server_unreachable,
@@ -298,7 +309,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             getString(R.string.troubleshoot_package_server_unreachable),
                             getString(R.string.troubleshoot_update_server_unreachable_details),
                             true
-                        ), 998, false);
+                        ), 80, false);
                     break;
                 case CHECK_PACKAGE_SERVER_CONFIGURATION:
                     snackBar(R.string.troubleshoot_package_server_misconfigured,
@@ -307,7 +318,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             getString(R.string.troubleshoot_package_server_misconfigured),
                             getString(R.string.troubleshoot_update_server_misconfigured_details),
                             true
-                        ), 999, false);
+                        ), 90, false);
                     break;
                 default:
                     LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
@@ -375,6 +386,12 @@ public abstract class BaseActivity extends FragmentActivity {
                 R.string.troubleshoot_package_server_misconfigured_solved,
                 10
         ));
+        troubleshootingMessages.put(HealthIssue.PERIODIC_SYNC_DISABLED,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_periodic_sync_disabled,
+                R.string.troubleshoot_periodic_sync_disabled_solved,
+                10
+            ));
 
         TroubleshootingMessage messages = troubleshootingMessages.get(solvedIssue);
 
@@ -424,6 +441,11 @@ public abstract class BaseActivity extends FragmentActivity {
         EventBus.getDefault().registerSticky(this);
         App.getHealthMonitor().start();
         App.getSyncManager().applyPeriodicSyncSettings();
+        mHealthEventBus.post(
+            App.getSettings().getPeriodicSyncDisabled() ?
+                HealthIssue.PERIODIC_SYNC_DISABLED.discovered :
+                HealthIssue.PERIODIC_SYNC_DISABLED.resolved
+        );
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
     }
 

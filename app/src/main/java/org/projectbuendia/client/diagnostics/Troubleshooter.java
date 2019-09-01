@@ -94,6 +94,8 @@ public class Troubleshooter {
             actions.add(TroubleshootingAction.CHECK_SERVER_CONFIGURATION);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_AUTHENTICATION_ISSUE)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_AUTH);
+        } else if (mActiveIssues.contains(HealthIssue.PERIODIC_SYNC_DISABLED)) {
+            actions.add(TroubleshootingAction.CHECK_PERIODIC_SYNC_SETTINGS);
         }
 
         return actions;
