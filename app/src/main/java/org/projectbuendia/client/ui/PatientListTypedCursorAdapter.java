@@ -28,6 +28,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -160,14 +161,14 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         boolean isChild = Utils.isChild(patient.birthdate);
 
         int drawableId = 0;
-        switch (patient.sex) {
-            case MALE:
-                drawableId = isChild ? R.drawable.ic_male_child : R.drawable.ic_male;
-                break;
-            case FEMALE:
-                drawableId = patient.pregnancy ? R.drawable.ic_female_pregnant :
-                    isChild ? R.drawable.ic_female_child : R.drawable.ic_female;
-                break;
+
+        // Java switch is not safe to use because it stupidly crashes on null.
+        if (patient.sex == Sex.MALE) {
+            drawableId = isChild ? R.drawable.ic_male_child : R.drawable.ic_male;
+        }
+        if (patient.sex == Sex.FEMALE) {
+            drawableId = patient.pregnancy ? R.drawable.ic_female_pregnant :
+                isChild ? R.drawable.ic_female_child : R.drawable.ic_female;
         }
 
         if (drawableId > 0) {

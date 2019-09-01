@@ -20,6 +20,7 @@ import android.widget.GridView;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
+import org.projectbuendia.client.events.data.EncounterAddFailedEvent.Reason;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.utils.Utils;
@@ -93,36 +94,30 @@ public final class AssignGeneralConditionDialog
     public void onEncounterAddFailed(EncounterAddFailedEvent event) {
         mAdapter.setSelectedConditionUuid(mCurrentConditionUuid);
 
-        int messageId;
-        String exceptionMessage = event.exception.getMessage();
-        switch (event.reason) {
-            case FAILED_TO_AUTHENTICATE:
-                messageId = R.string.encounter_add_failed_to_authenticate;
-                break;
-            case FAILED_TO_FETCH_SAVED_OBSERVATION:
-                messageId = R.string.encounter_add_failed_to_fetch_saved;
-                break;
-            case FAILED_TO_SAVE_ON_SERVER:
-                messageId = R.string.encounter_add_failed_to_saved_on_server;
-                break;
-            case FAILED_TO_VALIDATE:
-                messageId = R.string.encounter_add_failed_invalid_encounter;
-                // Validation reason typically starts after the message below.
-                exceptionMessage = exceptionMessage.replaceFirst(
-                    ".*failed to validate with reason: .*: ", "");
-                break;
-            case INTERRUPTED:
-                messageId = R.string.encounter_add_failed_interrupted;
-                break;
-            case INVALID_NUMBER_OF_OBSERVATIONS_SAVED: // Hard to communicate to the user.
-            case UNKNOWN_SERVER_ERROR:
-                messageId = R.string.encounter_add_failed_unknown_server_error;
-                break;
-            case UNKNOWN:
-            default:
-                messageId = R.string.encounter_add_failed_unknown_reason;
+        int messageId =
+            event.reason == Reason.FAILED_TO_AUTHENTICATE ?
+                R.string.encounter_add_failed_to_authenticate :
+            event.reason == Reason.FAILED_TO_FETCH_SAVED_OBSERVATION ?
+                R.string.encounter_add_failed_to_fetch_saved :
+            event.reason == Reason.FAILED_TO_SAVE_ON_SERVER ?
+                R.string.encounter_add_failed_to_saved_on_server :
+            event.reason == Reason.FAILED_TO_VALIDATE ?
+                R.string.encounter_add_failed_invalid_encounter :
+            event.reason == Reason.INTERRUPTED ?
+                R.string.encounter_add_failed_interrupted :
+            event.reason == Reason.INVALID_NUMBER_OF_OBSERVATIONS_SAVED ?
+                // Hard to communicate to the user.
+                R.string.encounter_add_failed_unknown_server_error :
+            event.reason == Reason.UNKNOWN_SERVER_ERROR ?
+                R.string.encounter_add_failed_unknown_server_error :
+                R.string.encounter_add_failed_unknown_reason;
+
+        String message = event.exception.getMessage();
+        if (event.reason == Reason.FAILED_TO_VALIDATE) {
+            // Validation reason typically starts after the message below.
+            message = message.replaceFirst(".*failed to validate with reason: .*: ", "");
         }
-        BigToast.show(messageId, exceptionMessage);
+        BigToast.show(messageId, message);
     }
 
     @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

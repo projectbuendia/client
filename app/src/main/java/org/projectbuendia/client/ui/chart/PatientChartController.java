@@ -28,6 +28,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
+import org.projectbuendia.client.events.FetchXformFailedEvent.Reason;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
@@ -601,18 +602,12 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
         public void onEventMainThread(SubmitXformFailedEvent event) {
             mUi.showFormSubmissionDialog(false);
-            int errorMessageResource;
-            switch (event.reason) {
-                case SERVER_AUTH:
-                    errorMessageResource = R.string.submit_xform_failed_server_auth;
-                    break;
-                case SERVER_TIMEOUT:
-                    errorMessageResource = R.string.submit_xform_failed_server_timeout;
-                    break;
-                default:
-                    errorMessageResource = R.string.submit_xform_failed_unknown_reason;
-            }
-            mUi.showError(errorMessageResource);
+            // Java switch is not safe to use because it stupidly crashes on null.
+            int messageId =
+                event.reason == SubmitXformFailedEvent.Reason.SERVER_AUTH ? R.string.submit_xform_failed_server_auth
+                : event.reason == SubmitXformFailedEvent.Reason.SERVER_TIMEOUT ? R.string.submit_xform_failed_server_timeout
+                : R.string.submit_xform_failed_unknown_reason;
+            mUi.showError(messageId);
         }
 
         public void onEventMainThread(FetchXformSucceededEvent event) {
@@ -620,30 +615,17 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         }
 
         public void onEventMainThread(FetchXformFailedEvent event) {
-            int errorMessageResource = R.string.fetch_xform_failed_unknown_reason;
-            switch (event.reason) {
-                case NO_FORMS_FOUND:
-                    errorMessageResource = R.string.fetch_xform_failed_no_forms_found;
-                    break;
-                case SERVER_AUTH:
-                    errorMessageResource = R.string.fetch_xform_failed_server_auth;
-                    break;
-                case SERVER_BAD_ENDPOINT:
-                    errorMessageResource = R.string.fetch_xform_failed_server_bad_endpoint;
-                    break;
-                case SERVER_FAILED_TO_FETCH:
-                    errorMessageResource = R.string.fetch_xform_failed_server_failed_to_fetch;
-                    break;
-                case SERVER_UNKNOWN:
-                    errorMessageResource = R.string.fetch_xform_failed_server_unknown;
-                    break;
-                case UNKNOWN:
-                default:
-                    // Intentionally blank.
-            }
+            // Java switch is not safe to use because it stupidly crashes on null.
+            int messageId =
+                event.reason == Reason.NO_FORMS_FOUND ? R.string.fetch_xform_failed_no_forms_found
+                : event.reason == Reason.SERVER_AUTH ? R.string.fetch_xform_failed_server_auth
+                : event.reason == Reason.SERVER_BAD_ENDPOINT ? R.string.fetch_xform_failed_server_bad_endpoint
+                : event.reason == Reason.SERVER_FAILED_TO_FETCH ? R.string.fetch_xform_failed_server_failed_to_fetch
+                : event.reason == Reason.SERVER_UNKNOWN ? R.string.fetch_xform_failed_server_unknown
+                : R.string.fetch_xform_failed_unknown_reason;
             mFormPending = false;
             mUi.showFormLoadingDialog(false);
-            mUi.showError(errorMessageResource);
+            mUi.showError(messageId);
         }
 
         public void onEventMainThread(OrderSaveRequestedEvent event) {

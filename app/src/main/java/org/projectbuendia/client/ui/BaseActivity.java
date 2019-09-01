@@ -235,8 +235,8 @@ public abstract class BaseActivity extends FragmentActivity {
             return;
         }
 
-        for (TroubleshootingAction troubleshootingAction: event.actions) {
-            switch (troubleshootingAction) {
+        for (TroubleshootingAction action : event.actions) {
+            if (action != null) switch (action) {
                 case ENABLE_WIFI:
                     snackBar(R.string.troubleshoot_wifi_disabled,
                         R.string.troubleshoot_wifi_disabled_action_enable,
@@ -323,7 +323,7 @@ public abstract class BaseActivity extends FragmentActivity {
                         ), 90, false);
                     break;
                 default:
-                    LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
+                    LOG.w("Troubleshooting action '%1$s' is unknown.", action);
                     return;
             }
         }

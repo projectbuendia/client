@@ -23,6 +23,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,13 +37,13 @@ public final class Obs implements Comparable<Obs> {
     private static Logger LOG = Logger.create();
 
     /** The time at which this observation was taken. */
-    public final DateTime time;
+    public final @Nonnull DateTime time;
 
     /** The UUID of the concept that was observed. */
-    public final String conceptUuid;
+    public final @Nonnull String conceptUuid;
 
     /** The data type of the concept that was observed. */
-    public final ConceptType conceptType;
+    public final @Nonnull ConceptType conceptType;
 
     /** The observed value (a string, number as a string, or answer concept UUID). */
     public final @Nullable String value;
@@ -52,8 +53,8 @@ public final class Obs implements Comparable<Obs> {
 
     public Obs(
         long millis,
-        String conceptUuid,
-        ConceptType conceptType,
+        @Nonnull String conceptUuid,
+        @Nonnull ConceptType conceptType,
         @Nullable String value,
         @Nullable String valueName) {
         this.time = new DateTime(millis);
