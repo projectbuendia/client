@@ -69,7 +69,7 @@ public class AppModel {
     }
 
     public @Nonnull LocationForest getForest() {
-        return getForest(App.getInstance().getSettings().getLocaleTag());
+        return getForest(App.getSettings().getLocaleTag());
     }
 
     public @Nullable Location getDefaultLocation() {

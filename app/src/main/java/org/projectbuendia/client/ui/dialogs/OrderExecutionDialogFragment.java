@@ -94,7 +94,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         mMarkToggle.setOnCheckedChangeListener((compoundButton, checked) -> updateUi(checked));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-            .setTitle(getResources().getString(R.string.order_execution_title))
+            .setTitle(getString(R.string.order_execution_title))
             .setPositiveButton(R.string.ok, (dialogInterface, i) -> onSubmit())
             .setNegativeButton(R.string.cancel, null)
             .setView(fragment);

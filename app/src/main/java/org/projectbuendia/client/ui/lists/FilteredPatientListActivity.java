@@ -45,7 +45,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
         mFilterController = new PatientFilterController(new FilterUi(), mAppModel);
 
-        App.getInstance().inject(this);
+        App.inject(this);
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {

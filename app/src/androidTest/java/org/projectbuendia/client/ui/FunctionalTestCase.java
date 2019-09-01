@@ -366,6 +366,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     }
 
     protected void toast(String message) {
-        getActivity().runOnUiThread(() -> BigToast.show(getActivity(), message));
+        getActivity().runOnUiThread(() -> BigToast.show(message));
     }
 }

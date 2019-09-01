@@ -66,6 +66,7 @@
   <string name="one_present_patient">1 present patient</string>
   <string name="n_present_patients">%d present patients</string>
 
+  <string name="age_unknown">age unknown</string>
   <string name="abbrev_n_months">%d mo</string>
   <string name="abbrev_n_years">%d y</string>
   <string name="abbrev_n_years_n_months">%1$d y %2$d mo</string>

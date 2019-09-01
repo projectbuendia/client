@@ -75,7 +75,7 @@ public class FormsSyncWorker implements SyncWorker {
         }
 
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        final ContentResolver resolver = App.getInstance().getContentResolver();
+        final ContentResolver resolver = App.getResolver();
         Cursor c = resolver.query(Contracts.Forms.URI, new String[] {Contracts.Forms.UUID},
                 null, null, null);
         LOG.i("Examining forms: " + c.getCount() + " local, " + cvs.size() + " from server");

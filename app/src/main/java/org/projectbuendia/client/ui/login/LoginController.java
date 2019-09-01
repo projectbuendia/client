@@ -13,7 +13,6 @@ package org.projectbuendia.client.ui.login;
 
 import com.google.common.collect.Ordering;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
@@ -101,7 +100,7 @@ public final class LoginController {
      */
     public void init() {
         if (mSettings.getPeriodicSyncDisabled()) {
-            BigToast.show(App.getInstance().getApplicationContext(), R.string.periodic_sync_currently_disabled);
+            BigToast.show(R.string.periodic_sync_currently_disabled);
         }
         mEventBus.register(mSubscriber);
         mFragmentUi.showSpinner(true);

@@ -55,7 +55,7 @@ public class PatientListController {
         mUi = ui;
         mSyncManager = syncManager;
         mEventBus = eventBus;
-        App.getInstance().inject(this);
+        App.inject(this);
     }
 
     public void init() {

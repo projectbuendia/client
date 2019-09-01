@@ -89,7 +89,7 @@ public class OdkActivityLauncher {
         LOG.i("Listing all forms from server (in order to cache them)");
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
             response -> {
-                if (App.getInstance().getSyncManager().getNewSyncsSuppressed()) {
+                if (App.getSyncManager().getNewSyncsSuppressed()) {
                     LOG.w("Skipping form sync: New syncs are currently suppressed.");
                     return;
                 }
@@ -212,7 +212,7 @@ public class OdkActivityLauncher {
     private static List<OpenMrsXformIndexEntry> getLocalFormEntries() {
         List<OpenMrsXformIndexEntry> entries = new ArrayList<>();
 
-        final ContentResolver resolver = App.getInstance().getContentResolver();
+        final ContentResolver resolver = App.getResolver();
         try (Cursor c = resolver.query(Contracts.Forms.URI, new String[] {
             Contracts.Forms.UUID, Contracts.Forms.NAME
         }, null, null, null)) {

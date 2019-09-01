@@ -69,7 +69,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         mContentResolver = contentResolver;
         mPatientDelta = patientDelta;
         mBus = bus;
-        App.getInstance().inject(this);
+        App.inject(this);
     }
 
     @Override protected PatientAddFailedEvent doInBackground(Void... params) {

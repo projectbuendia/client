@@ -191,7 +191,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     private void internalIncrementalSync() {
         sleep(1000);
-        App.getInstance().getSyncManager().sync(SyncManager.SMALL_PHASES);
+        App.getSyncManager().sync(SyncManager.SMALL_PHASES);
     }
 
     private void goToPatientById(String id, String given, String family) {

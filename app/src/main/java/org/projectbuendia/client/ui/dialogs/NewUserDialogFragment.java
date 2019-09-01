@@ -65,9 +65,9 @@ public class NewUserDialogFragment extends DialogFragment {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity())
             .setCancelable(false) // Disable auto-cancel.
-            .setTitle(getResources().getString(R.string.title_new_user))
-            .setPositiveButton(getResources().getString(R.string.ok), null)
-            .setNegativeButton(getResources().getString(R.string.cancel), null)
+            .setTitle(getString(R.string.title_new_user))
+            .setPositiveButton(getString(R.string.ok), null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .setView(fragment);
 
         final AlertDialog dialog = dialogBuilder.create();
@@ -110,7 +110,7 @@ public class NewUserDialogFragment extends DialogFragment {
     }
 
     private void setError(EditText field, int resourceId) {
-        field.setError(getResources().getString(resourceId));
+        field.setError(getString(resourceId));
         field.invalidate();
         field.requestFocus();
     }

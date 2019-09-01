@@ -76,7 +76,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
         mListController = new PatientListController(
             mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
         setContentLayout(R.layout.fragment_patient_list);
@@ -193,11 +193,11 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         @Override public void showRefreshError() {
-            BigToast.show(getActivity(), R.string.patient_list_fragment_sync_error);
+            BigToast.show(R.string.patient_list_fragment_sync_error);
         }
 
         @Override public void showApiHealthProblem() {
-            BigToast.show(getActivity(), R.string.api_health_problem);
+            BigToast.show(R.string.api_health_problem);
         }
     }
 }

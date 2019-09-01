@@ -36,6 +36,6 @@ final class AgeFilter extends SimpleSelectionFilter<Patient> {
     }
 
     @Override public String getDescription() {
-        return App.getInstance().getString(R.string.age_filter_description, mYears);
+        return App.str(R.string.age_filter_description, mYears);
     }
 }

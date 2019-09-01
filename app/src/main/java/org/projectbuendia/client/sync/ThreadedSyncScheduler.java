@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -182,7 +183,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
         }
 
         private void runSync(Bundle options) {
-            if (App.getInstance().getSyncManager().getNewSyncsSuppressed()) {
+            if (App.getSyncManager().getNewSyncsSuppressed()) {
                 LOG.w("Skipping sync: New syncs are currently suppressed.");
                 return;
             }
@@ -192,12 +193,12 @@ public class ThreadedSyncScheduler implements SyncScheduler {
             // unavailable.  As a side effect of this change, however, any
             // user-requested sync will instantly fail until the HealthMonitor has
             // made a determination that the server is definitely accessible.
-            if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
+            if (App.getHealthMonitor().isApiUnavailable()) {
                 LOG.w("Skipping sync: Buendia API is unavailable.");
                 return;
             }
 
-            ContentProviderClient client = App.getContentProviderClient();
+            ContentProviderClient client = App.getResolver().acquireContentProviderClient(Contracts.Users.URI);
             SyncResult result = new SyncResult();
             running = true;
             try {

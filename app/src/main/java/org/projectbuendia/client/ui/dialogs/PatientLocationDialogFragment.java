@@ -60,7 +60,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
         c = ContextUtils.from(getActivity());
     }
 
@@ -70,8 +70,8 @@ public class PatientLocationDialogFragment extends DialogFragment {
         AlertDialog dialog = c.buildDialog(R.layout.patient_location_dialog_fragment)
             .setCancelable(false) // Disable auto-cancel.
             .setTitle(R.string.action_assign_location)
-            .setPositiveButton(getResources().getString(R.string.ok), (dialogInterface, i) -> onSubmit())
-            .setNegativeButton(getResources().getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.ok), (dialogInterface, i) -> onSubmit())
+            .setNegativeButton(getString(R.string.cancel), null)
             .create();
         dialog.getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);

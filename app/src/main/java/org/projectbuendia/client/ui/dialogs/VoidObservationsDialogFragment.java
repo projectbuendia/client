@@ -97,7 +97,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList("obsrows");
         prepareData(obsrows);
 
-        final ExpandableVoidObsRowAdapter listAdapter = new ExpandableVoidObsRowAdapter(App.getInstance().getApplicationContext(), listDataHeader, listDataChild);
+        final ExpandableVoidObsRowAdapter listAdapter = new ExpandableVoidObsRowAdapter(App.getContext(), listDataHeader, listDataChild);
         ExpandableListView listView = fragment.findViewById(R.id.obs_list);
         listView.setAdapter(listAdapter);
 
@@ -111,7 +111,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                         EventBus.getDefault().post(new VoidObservationsRequestEvent(listAdapter.mCheckedItems));
                     }
                     dialogInterface.dismiss();
-                }).setTitle(getResources().getString(R.string.void_observations))
+                }).setTitle(getString(R.string.void_observations))
                 .setView(fragment);
         return builder.create();
     }

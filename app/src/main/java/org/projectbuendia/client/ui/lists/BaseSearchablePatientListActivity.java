@@ -113,7 +113,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
 
-        App.getInstance().inject(this);
+        App.inject(this);
         mSearchController = new PatientSearchController(
             new SearchUi(),
             mCrudEventBus,
@@ -172,7 +172,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         }
 
         @Override public void goToPatientChart(String patientUuid) {
-            BigToast.show(BaseSearchablePatientListActivity.this, R.string.patient_creation_success);
+            BigToast.show(R.string.patient_creation_success);
             PatientChartActivity.start(BaseSearchablePatientListActivity.this, patientUuid);
         }
     }
