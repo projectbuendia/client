@@ -92,9 +92,9 @@ public class ChartRenderer {
         @JavascriptInterface void onNewOrderPressed();
         @JavascriptInterface void onOrderHeadingPressed(String orderUuid);
         @JavascriptInterface void onOrderCellPressed(String orderUuid, long startMillis);
-        @JavascriptInterface void showObsDetails(String conceptUuids);
-        @JavascriptInterface void showObsDetails(long startMillis, long stopMillis);
-        @JavascriptInterface void showObsDetails(String conceptUuids, long startMillis, long stopMillis);
+        @JavascriptInterface void showObsDialog(String conceptUuids);
+        @JavascriptInterface void showObsDialog(long startMillis, long stopMillis);
+        @JavascriptInterface void showObsDialog(String conceptUuids, long startMillis, long stopMillis);
         @JavascriptInterface void onPageUnload(int scrollX, int scrollY);
     }
 

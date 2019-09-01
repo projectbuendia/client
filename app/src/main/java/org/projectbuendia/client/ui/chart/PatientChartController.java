@@ -365,7 +365,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         );
     }
 
-    @JavascriptInterface public void showObsDetails(String conceptUuids) {
+    @JavascriptInterface public void showObsDialog(String conceptUuids) {
         if (!conceptUuids.contains(",")) {
             String uuid = conceptUuids;
             if (eq(uuid, ConceptUuids.PLACEMENT_UUID)) {
@@ -388,7 +388,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         );
     }
 
-    @JavascriptInterface public void showObsDetails(long startMillis, long stopMillis) {
+    @JavascriptInterface public void showObsDialog(long startMillis, long stopMillis) {
         Interval interval = new Interval(startMillis, stopMillis);
         mUi.showObsDetailDialog(
             interval,
@@ -398,7 +398,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         );
     }
 
-    @JavascriptInterface public void showObsDetails(String conceptUuids, long startMillis, long stopMillis) {
+    @JavascriptInterface public void showObsDialog(String conceptUuids, long startMillis, long stopMillis) {
         Interval interval = new Interval(startMillis, stopMillis);
         mUi.showObsDetailDialog(
             interval,

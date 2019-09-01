@@ -22,7 +22,7 @@
           <th class="gap" scope="col" rowspan=2>&nbsp;</th>
         {% endif %}
         {% if column.start == column.dayStart %}
-          <th class="day {{column.date == today ? 'now' : ''}} {{column.date.dayOfWeek > 5 ? 'weekend' : ''}}" colspan={{numColumnsPerDay}} onclick="c.showObsDetails({{column.dayStart.millis}}, {{column.dayStop.millis}});">
+          <th class="day {{column.date == today ? 'now' : ''}} {{column.date.dayOfWeek > 5 ? 'weekend' : ''}}" colspan={{numColumnsPerDay}} onclick="c.showObsDialog({{column.dayStart.millis}}, {{column.dayStop.millis}});">
             {% if numColumnsPerDay == 1 %}
               {% if column.dayLabel is empty %}&nbsp;{% else %}{{column.dayLabel}}{% endif %}
             {% elseif column.dayLabel is not empty %}
@@ -38,7 +38,7 @@
     <tr>
       <th class="corner">&nbsp;</th>
       {% for column in columns %}
-        <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="c.showObsDetails({{column.start.millis}}, {{column.stop.millis}});">
+        <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="c.showObsDialog({{column.start.millis}}, {{column.stop.millis}});">
           {% if numColumnsPerDay == 1 %}
             {{column.shortDate}}
           {% else %}
@@ -70,7 +70,7 @@
       {% for row in group.rows %}
         {% set id = row.item.conceptIds | first %}
         <tr class="obs {{row.item.label | to_css_identifier}}">
-          <th scope="row" onclick="c.showObsDetails('{{row.item.conceptUuidsList}}');">
+          <th scope="row" onclick="c.showObsDialog('{{row.item.conceptUuidsList}}');">
             {{row.item.label}}
           </th>
           {% set prevStop = columns[0].start %}
@@ -91,7 +91,7 @@
             <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
               style="{{style}}"
               onclick="{% if points is not empty and row.item.type.string != 'text_icon' %}
-                         c.showObsDetails('{{row.item.conceptUuidsList}}', {{column.start.millis}}, {{column.stop.millis}});
+                         c.showObsDialog('{{row.item.conceptUuidsList}}', {{column.start.millis}}, {{column.stop.millis}});
                        {% endif %}">
               {% if points is empty %}
                 &nbsp;
@@ -237,7 +237,7 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-      <div class="tile {{class}}" onclick="c.showObsDetails('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+      <div class="tile {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -256,7 +256,7 @@
           {% set values = tile.points | values %}
           {% set class = values | format_values(tile.item.cssClass) %}
           {% set style = values | format_values(tile.item.cssStyle) %}
-          <div class="tile {{class}}" onclick="c.showObsDetails('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+          <div class="tile {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
             <div class="heading">{{tile.item.label}}</div>
             <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
             <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
