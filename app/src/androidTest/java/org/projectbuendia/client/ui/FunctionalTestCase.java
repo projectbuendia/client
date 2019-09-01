@@ -251,7 +251,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void inUserLoginGoToLocationSelection() {
         click(viewWithText("Guest User"));
-        waitUntilVisible(20000, viewWithText("ALL PATIENTS"));
+        waitUntilVisible(20000, viewWithText("Discharged"));
         waitForProgressFragment(); // wait for locations to load
     }
 
@@ -320,7 +320,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     /** Checks that the expected zones and tents are shown. */
     protected void inLocationSelectionCheckZonesAndTentsDisplayed() {
         // Should be at location selection screen
-        waitUntilVisible(viewWithText("ALL PATIENTS"));
+        waitUntilVisible(viewWithText("Discharged"));
         expectVisible(viewWithText(LOCATION_NAME));
     }
 
