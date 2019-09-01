@@ -388,7 +388,7 @@ public class OrderDialogFragment extends DialogFragment {
         if (frequency == 0) mGiveForDays.setText("");
 
         mTimesPerDayLabel.setText(
-            days == 1 ? R.string.order_time_per_day : R.string.order_times_per_day);
+            frequency == 1 ? R.string.order_time_per_day : R.string.order_times_per_day);
 
         mGiveForDaysLabel.setText(
             days == 1 ? R.string.order_give_for_day : R.string.order_give_for_days);
