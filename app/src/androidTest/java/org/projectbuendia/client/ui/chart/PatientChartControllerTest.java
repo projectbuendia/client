@@ -45,6 +45,7 @@ import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender
 
 import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import androidx.test.filters.SmallTest;
@@ -277,7 +278,7 @@ public final class PatientChartControllerTest {
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
         mFakeHandler = new FakeHandler();
-        when(mMockSettings.getLocaleTag()).thenReturn("en");
+        when(mMockSettings.getLocale()).thenReturn(new Locale("en"));
         mController = new PatientChartController(
             mMockAppModel,
             mMockSettings,

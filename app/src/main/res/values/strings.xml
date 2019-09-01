@@ -357,6 +357,7 @@
   <string name="pref_title_openmrs_password">OpenMRS password</string>
   <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
   <string name="pref_title_package_server_url">Package server URL</string>
+  <string name="pref_title_language">Language</string>
 
   <string name="pref_title_apk_update_interval">App update check interval (seconds)</string>
   <string name="pref_title_small_sync_interval">Small sync interval (seconds)</string>

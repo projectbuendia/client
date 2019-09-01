@@ -11,7 +11,6 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonLocation;
-import org.projectbuendia.client.providers.Contracts.LocalizedLocations;
 import org.projectbuendia.client.providers.Contracts.LocationNames;
 import org.projectbuendia.client.providers.Contracts.Locations;
 import org.projectbuendia.client.utils.Logger;
@@ -37,7 +36,6 @@ public class LocationsSyncWorker implements SyncWorker {
         if (ops.size() > 0) {
             resolver.notifyChange(Locations.URI, null, false);
             resolver.notifyChange(LocationNames.URI, null, false);
-            resolver.notifyChange(LocalizedLocations.URI, null, false);
         }
         return true;
     }

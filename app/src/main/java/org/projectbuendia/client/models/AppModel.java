@@ -72,15 +72,11 @@ public class AppModel {
     }
 
     public @Nonnull LocationForest getForest() {
-        return getForest(App.getSettings().getLocaleTag());
+        return forestProvider.getForest(App.getSettings().getLocale());
     }
 
     public @Nullable Location getDefaultLocation() {
         return getForest().getDefaultLocation();
-    }
-
-    private @Nonnull LocationForest getForest(String locale) {
-        return forestProvider.getForest(locale);
     }
 
     public void setOnForestReplacedListener(Runnable listener) {

@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui;
 
-import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -43,11 +42,14 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * An abstract {@link FragmentActivity} that is the base for all activities, providing a "content
@@ -67,6 +69,7 @@ public abstract class BaseActivity extends FragmentActivity {
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
     private SnackBar snackBar;
+    private Locale initialLocale; // for restarting when locale has changed
 
     @Inject @Qualifiers.HealthEventBus EventBus mHealthEventBus;
 
@@ -99,10 +102,9 @@ public abstract class BaseActivity extends FragmentActivity {
     public void restartWithFontScale(long newScaleStep) {
         Configuration config = getResources().getConfiguration();
         config.fontScale = (float) Math.pow(STEP_FACTOR, newScaleStep);
-        sScaleStep = newScaleStep;
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        finish();
-        startActivity(getIntent(), ActivityOptions.makeCustomAnimation(getApplicationContext(), 0, 0).toBundle());
+        sScaleStep = newScaleStep;
+        Utils.restartActivity(this);
     }
 
     public void setMenuBarIcon(MenuItem item, Icon icon) {
@@ -428,11 +430,17 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initialLocale = Locale.getDefault();
         App.inject(this);
+    }
+
+    @Override protected void attachBaseContext(Context base) {
+        super.attachBaseContext(Utils.applyLocaleSetting(base));
     }
 
     @Override protected void onResume() {
         super.onResume();
+        if (!eq(Locale.getDefault(), initialLocale)) Utils.restartActivity(this);
         initializeSnackBar();
         if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
             // If the font scale was changed while this activity was paused, force a refresh.

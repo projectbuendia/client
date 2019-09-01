@@ -29,6 +29,18 @@
       android:orientation="horizontal">
 
     <TextView
+        android:id="@+id/listview_cell_search_results_bed_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:width="40sp"
+        android:gravity="center"
+        android:paddingBottom="12sp"
+        android:paddingTop="12sp"
+        android:textAppearance="@style/text.large"
+        android:textColor="@color/black"
+        tools:text="2A"/>
+
+    <TextView
         android:id="@+id/listview_cell_search_results_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

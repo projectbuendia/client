@@ -49,25 +49,20 @@ public class LocationForest {
     private final Object patientCountLock = new Object();
     private Runnable onPatientCountsUpdatedListener = null;
 
-    public LocationForest() {
-        locations = new Location[0];
-        defaultLocation = null;
-    }
-
-    public LocationForest(Iterable<LocationQueryResult> cursor) {
+    public LocationForest(List<Record> records) {
         List<String> uuids = new ArrayList<>();
         Map<String, String> namesByUuid = new HashMap<>();
         Map<String, String> shortIdsByUuid = new HashMap<>();
         int totalNumPatients = 0;
 
-        for (LocationQueryResult result : cursor) {
-            uuids.add(result.uuid);
-            parentUuidsByUuid.put(result.uuid, result.parentUuid);
-            nonleafUuids.add(result.parentUuid);
-            namesByUuid.put(result.uuid, result.name);
-            numPatientsAtNode.put(result.uuid, result.numPatients);
-            numPatientsInSubtree.put(result.uuid, 0);  // counts will be added below
-            totalNumPatients += result.numPatients;
+        for (Record record : records) {
+            uuids.add(record.uuid);
+            parentUuidsByUuid.put(record.uuid, record.parentUuid);
+            nonleafUuids.add(record.parentUuid);
+            namesByUuid.put(record.uuid, record.name);
+            numPatientsAtNode.put(record.uuid, record.numPatients);
+            numPatientsInSubtree.put(record.uuid, 0);  // counts will be added below
+            totalNumPatients += record.numPatients;
         }
 
         // Sort into a global ordering that is consistent with the ordering
@@ -269,5 +264,20 @@ public class LocationForest {
     /** Returns the default location where new patients will be placed. */
     public @Nullable Location getDefaultLocation() {  // null only when size() == 0
         return defaultLocation;
+    }
+
+    /** The information about each location from which a LocationForest is built. */
+    public static class Record {
+        public final String uuid;
+        public final String parentUuid;
+        public final String name;
+        public final int numPatients;
+
+        public Record(String uuid, String parentUuid, String name, int numPatients) {
+            this.uuid = uuid;
+            this.parentUuid = parentUuid;
+            this.name = name;
+            this.numPatients = numPatients;
+        }
     }
 }

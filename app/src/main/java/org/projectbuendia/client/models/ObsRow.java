@@ -16,6 +16,7 @@ public class ObsRow implements Parcelable {
     public final @Nullable String value;
     public final @Nullable String valueName;
 
+    // TODO(ping): Rearrange/rename to uuid, millis, questionUuid, questionName, answer, answerName.
     public ObsRow(
         String uuid, long millis, String conceptName, String conceptUuid,
         @Nullable String value, @Nullable String valueName

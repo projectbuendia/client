@@ -81,11 +81,9 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
         registry.registerDelegate(Users.URI.getPath() + "/*",
             new ItemProviderDelegate(Users.ITEM_TYPE, Table.USERS, Users.UUID));
 
-        // Custom providers, usually with special logic.
+        // Custom providers with special logic.
         registry.registerDelegate(Contracts.PatientCounts.URI.getPath(),
             new PatientCountsDelegate());
-        registry.registerDelegate(Contracts.LocalizedLocations.URI.getPath() + "/*",
-            new LocalizedLocationsDelegate());
 
         // Content provider for our single-row table for storing miscellaneous values.
         registry.registerDelegate(Misc.URI.getPath(),

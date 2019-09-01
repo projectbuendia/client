@@ -15,14 +15,25 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 
+import org.projectbuendia.client.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 /** Type-safe access to application settings. */
 public class AppSettings {
-    SharedPreferences mSharedPreferences;
-    Resources mResources;
+    public static final Locale ORIGINAL_DEFAULT_LOCALE = Locale.getDefault();
+    public static final Locale[] AVAILABLE_LOCALES = new Locale[] {
+        new Locale("en"), new Locale("fr")
+    };
 
-    public AppSettings(SharedPreferences sharedPreferences, Resources resources) {
-        mSharedPreferences = sharedPreferences;
-        mResources = resources;
+    private SharedPreferences prefs;
+    private Resources resources;
+
+    public AppSettings(SharedPreferences prefs, Resources resources) {
+        this.prefs = prefs;
+        this.resources = resources;
     }
 
     /** Constructs the URL for a given URL path under the OpenMRS root URL. */
@@ -32,20 +43,20 @@ public class AppSettings {
 
     /** Gets the root URL of the OpenMRS server providing the Buendia API. */
     public String getOpenmrsUrl() {
-        return mSharedPreferences.getString("openmrs_root_url",
-            mResources.getString(R.string.openmrs_root_url_default));
+        return prefs.getString("openmrs_root_url",
+            resources.getString(R.string.openmrs_root_url_default));
     }
 
     /** Gets the OpenMRS username. */
     public String getOpenmrsUser() {
-        return mSharedPreferences.getString("openmrs_user",
-            mResources.getString(R.string.openmrs_user_default));
+        return prefs.getString("openmrs_user",
+            resources.getString(R.string.openmrs_user_default));
     }
 
     /** Gets the OpenMRS password. */
     public String getOpenmrsPassword() {
-        return mSharedPreferences.getString("openmrs_password",
-            mResources.getString(R.string.openmrs_password_default));
+        return prefs.getString("openmrs_password",
+            resources.getString(R.string.openmrs_password_default));
     }
 
     /** Constructs the URL for a given URL path on the package server. */
@@ -55,18 +66,18 @@ public class AppSettings {
 
     /** Gets the root URL of the package server providing APK updates. */
     public String getPackageServerUrl() {
-        return mSharedPreferences.getString("package_server_root_url",
-            mResources.getString(R.string.package_server_root_url_default));
+        return prefs.getString("package_server_root_url",
+            resources.getString(R.string.package_server_root_url_default));
     }
 
     /** Gets the index of the preferred chart zoom level. */
     public int getChartZoomIndex() {
-        return mSharedPreferences.getInt("chart_zoom_index", 0);
+        return prefs.getInt("chart_zoom_index", 0);
     }
 
     /** Sets the preferred chart zoom level. */
     public void setChartZoomIndex(int zoom) {
-        mSharedPreferences.edit().putInt("chart_zoom_index", zoom).commit();
+        prefs.edit().putInt("chart_zoom_index", zoom).commit();
     }
 
     /**
@@ -75,8 +86,8 @@ public class AppSettings {
      will not check the package server for new updates.
      */
     public int getApkUpdateInterval() {
-        return mSharedPreferences.getInt("apk_update_interval",
-            mResources.getInteger(R.integer.apk_check_interval_default));
+        return prefs.getInt("apk_update_interval",
+            resources.getInteger(R.integer.apk_check_interval_default));
     }
 
     /** Returns true if the app should skip directly to a patient chart on startup. */
@@ -86,70 +97,94 @@ public class AppSettings {
 
     /** Gets the patient ID of the chart to skip directly to on startup, or "". */
     public @NonNull String getStartingPatientId() {
-        return mSharedPreferences.getString("starting_patient_id",
-            mResources.getString(R.string.starting_patient_id_default)).trim();
+        return prefs.getString("starting_patient_id",
+            resources.getString(R.string.starting_patient_id_default)).trim();
     }
 
     /** Returns true if periodic sync has been disabled in the settings. */
     public boolean getPeriodicSyncDisabled() {
-        return mSharedPreferences.getBoolean("periodic_sync_disabled",
-            mResources.getBoolean(R.bool.periodic_sync_disabled_default));
+        return prefs.getBoolean("periodic_sync_disabled",
+            resources.getBoolean(R.bool.periodic_sync_disabled_default));
     }
 
     /** Gets the setting for whether to retain filled-in forms after submission. */
     public boolean getformInstancesRetainedLocally() {
-        return mSharedPreferences.getBoolean("form_instances_retained",
-            mResources.getBoolean(R.bool.form_instances_retained_default));
+        return prefs.getBoolean("form_instances_retained",
+            resources.getBoolean(R.bool.form_instances_retained_default));
     }
 
     /** Gets the setting for whether to use the unreliable SyncAdapter framework. */
     public boolean getSyncAdapterPreferred() {
-        return mSharedPreferences.getBoolean("sync_adapter_preferred",
-            mResources.getBoolean(R.bool.sync_adapter_preferred_default));
+        return prefs.getBoolean("sync_adapter_preferred",
+            resources.getBoolean(R.bool.sync_adapter_preferred_default));
     }
 
     /** Gets the flag indicating whether the sync account has been initialized. */
     public boolean getSyncAccountInitialized() {
-        return mSharedPreferences.getBoolean("sync_account_initialized", false);
+        return prefs.getBoolean("sync_account_initialized", false);
     }
 
     /** Sets the flag indicating whether the sync account has been initialized. */
     public void setSyncAccountInitialized(boolean value) {
-        mSharedPreferences.edit().putBoolean("sync_account_initialized", value).commit();
+        prefs.edit().putBoolean("sync_account_initialized", value).commit();
     }
 
     /** Gets the flag controlling whether to assume no wifi means no network. */
     public boolean getNonWifiAllowed() {
-        return mSharedPreferences.getBoolean("non_wifi_allowed",
-            mResources.getBoolean(R.bool.non_wifi_allowed_default));
+        return prefs.getBoolean("non_wifi_allowed",
+            resources.getBoolean(R.bool.non_wifi_allowed_default));
     }
 
-    /** Gets the currently selected locale as a BCP 47 tag. */
-    public String getLocaleTag() {
-        return "en";
+    /** Gets the currently selected locale. */
+    public Locale getLocale() {
+        String localeTag = Utils.toNonnull(prefs.getString("locale", ""));
+        return !localeTag.isEmpty() ? new Locale(localeTag) : ORIGINAL_DEFAULT_LOCALE;
+    }
+
+    /** Gets the app's hardcoded default locale. */
+    public static Locale getDefaultLocale() {
+        return new Locale("en");
+    }
+
+    /** Gets the values for a menu of available locales. */
+    public static String[] getLocaleOptionValues() {
+        List<String> values = new ArrayList<>();
+        for (Locale locale : AVAILABLE_LOCALES) {
+            values.add(Utils.toLanguageTag(locale));
+        }
+        return values.toArray(new String[0]);
+    }
+
+    /** Gets the labels for a menu of available locales. */
+    public static String[] getLocaleOptionLabels() {
+        List<String> labels = new ArrayList<>();
+        for (Locale locale : AVAILABLE_LOCALES) {
+            labels.add(locale.getDisplayName(locale));
+        }
+        return labels.toArray(new String[0]);
     }
 
     /** Gets the interval for fast incremental syncs (patients, orders, observations). */
     // Syncs in this category should typically take less than 100 ms.
     public int getSmallSyncInterval() {
-        return mSharedPreferences.getInt("small_sync_interval",
-            mResources.getInteger(R.integer.small_sync_interval_default));
+        return prefs.getInt("small_sync_interval",
+            resources.getInteger(R.integer.small_sync_interval_default));
     }
 
     /** Gets the interval for syncs that are non-incremental but small (locations, users). */
     // This category is for syncs expected to take up to 500 ms, for data
     // that changes (on average) less than once an hour.
     public int getMediumSyncInterval() {
-       return mSharedPreferences.getInt("medium_sync_interval",
-           mResources.getInteger(R.integer.medium_sync_interval_default));
+       return prefs.getInt("medium_sync_interval",
+           resources.getInteger(R.integer.medium_sync_interval_default));
     }
 
     /** Gets the interval for syncs that are non-incremental and large (concepts, forms). */
     // This category is for syncs expected to take up to 2000 ms, for data
     // that changes (on average) less than once a day.
     public int getLargeSyncInterval() {
-        return mSharedPreferences.getInt("large_sync_interval",
-            mResources.getInteger(R.integer.large_sync_interval_default));
+        return prefs.getInt("large_sync_interval",
+            resources.getInteger(R.integer.large_sync_interval_default));
     }
 }
 

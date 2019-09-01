@@ -220,18 +220,6 @@ public interface Contracts {
     // ProviderDelegate.  The column name constants should match the columns
     // returned by the query() method of the corresponding ProviderDelegate.
 
-    interface LocalizedLocations {
-        Uri URI = buildContentUri("localized-locations");
-        String GROUP_TYPE = buildGroupType("localized-location");
-        String ITEM_TYPE = buildItemType("localized-location");
-
-        String UUID = "uuid";
-        String PARENT_UUID = "parent_uuid";
-        String NAME = "name";
-        /** Patient count for a location, not including child locations. */
-        String PATIENT_COUNT = "patient_count";
-    }
-
     interface PatientCounts {
         Uri URI = buildContentUri("patient-counts");
         String GROUP_TYPE = buildGroupType("patient-count");
@@ -251,12 +239,5 @@ public interface Contracts {
 
     static String buildItemType(String name) {
         return ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
-    }
-
-    /** Returns the content URI for the localized locations for a given locale. */
-    static Uri getLocalizedLocationsUri(String locale) {
-        return LocalizedLocations.URI.buildUpon()
-            .appendPath(locale)
-            .build();
     }
 }
