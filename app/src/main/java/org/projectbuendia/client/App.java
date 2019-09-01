@@ -79,15 +79,17 @@ public class App extends Application {
         return sInstance.getApplicationContext();
     }
 
-    public static void applyLocaleSetting() {
+    /** This should be called in every Activity's attachBaseContext method. */
+    public static Context applyLocaleSetting(Context base) {
         Locale locale = getSettings().getLocale();
         Locale.setDefault(locale);
-        Resources resources = getContext().getResources();
+        Resources resources = base.getResources();
         Configuration config = resources.getConfiguration();
-        config.locale = locale;
+        config.setLocale(locale);
         config.setLayoutDirection(locale);
-        resources.updateConfiguration(config, resources.getDisplayMetrics());
-        sResources = resources;
+        Context context = base.createConfigurationContext(config);
+        sResources = context.getResources();
+        return context;
     }
 
     public static String str(int id, Object... args) {
@@ -175,7 +177,6 @@ public class App extends Application {
             sConnectionDetails = mOpenMrsConnectionDetails;
             sServer = mServer;
             sConceptService = new ConceptService(getContentResolver());
-            applyLocaleSetting();
             mHealthMonitor.start();
         }
     }
