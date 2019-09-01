@@ -19,8 +19,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -35,6 +33,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.ui.TextChangedWatcher;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
@@ -74,7 +73,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         final View fragment = u.inflateForDialog(R.layout.go_to_patient_dialog_fragment);
         ButterKnife.inject(this, fragment);
-        mPatientId.addTextChangedListener(new IdWatcher());
+        mPatientId.addTextChangedListener(new TextChangedWatcher(this::search));
+
         mSearchResult.setOnClickListener(view -> onSubmit());
         return new AlertDialog.Builder(getActivity())
             .setTitle(R.string.go_to_patient_title)
@@ -125,32 +125,26 @@ public class GoToPatientDialogFragment extends DialogFragment {
             Utils.nonemptyOrDefault(details, u.str(R.string.unknown)));
     }
 
-    class IdWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) { }
-
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) { }
-
-        @Override public void afterTextChanged(Editable editable) {
-            String id = mPatientId.getText().toString().trim();
-            if (id.isEmpty()) {
-                mPatientUuid = null;
-                mSearchResult.setText("");
-            } else {
-                try (Cursor cursor = getActivity().getContentResolver().query(
-                    Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
-                    if (cursor.moveToNext()) {  // found locally
-                        Patient patient = Patient.load(cursor);
-                        mPatientUuid = patient.uuid;
-                        mSearchResult.setText(formatSearchResult(patient));
-                    } else {  // not found locally; check server
-                        mPatientUuid = null;
-                        mSearchResult.setText(R.string.searching_ellipsis);
-                        mAppModel.fetchSinglePatient(mBus, id);
-                    }
+    private void search() {
+        String id = mPatientId.getText().toString().trim();
+        if (id.isEmpty()) {
+            mPatientUuid = null;
+            mSearchResult.setText("");
+        } else {
+            try (Cursor cursor = getActivity().getContentResolver().query(
+                Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
+                if (cursor.moveToNext()) {  // found locally
+                    Patient patient = Patient.load(cursor);
+                    mPatientUuid = patient.uuid;
+                    mSearchResult.setText(formatSearchResult(patient));
+                } else {  // not found locally; check server
+                    mPatientUuid = null;
+                    mSearchResult.setText(R.string.searching_ellipsis);
+                    mAppModel.fetchSinglePatient(mBus, id);
                 }
             }
-            ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
-                .setEnabled(mPatientUuid != null);
         }
+        ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
+            .setEnabled(mPatientUuid != null);
     }
 }

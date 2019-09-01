@@ -12,16 +12,19 @@
 -->
 <resources>
   <string name="quoted_text">«%s»</string>
-  <string name="two_items">%s et %s</string>
-  <string name="more_than_two_items">%s, et %s</string>
+  <string name="two_items">%$1s et %$2s</string>
+  <string name="more_than_two_items">%$1s, et %$2s</string>
   <string name="month_day_format">d MMM</string>
   <string name="sentence_month_day_format">\'le\' d MMM</string>
   <string name="year_month_day_format">d MMM yyyy</string>
   <string name="sentence_year_month_day_format">\'le\' d MMM yyyy</string>
   <string name="hour_minute_format">HH\'h\'mm</string>
-  <string name="sentence_hour_minute_format">HH\'h\'mm</string>
+  <string name="sentence_hour_minute_format">\'à\' HH\'h\'mm</string>
   <string name="month_day_hour_minute_format">MMM d, HH\'h\'mm</string>
   <string name="sentence_month_day_hour_minute_format">\'le\' d MMM \'à\' HH\'h\'mm</string>
+  <string name="sentence_yesterday">hier</string>
+  <string name="sentence_today">aujourd\'hui</string>
+  <string name="sentence_tomorrow">demain</string>
 
   <!-- Statuses -->
   <string name="status_unknown">Inconnu</string>
@@ -98,21 +101,29 @@
   <string name="order_give_for">Donne pour</string>
   <string name="order_give_for_days">jours</string>
   <string name="order_give_for_day">jour</string>
-  <string name="order_duration_stop_after_today">(arrêter après aujourd\'hui)</string>
-  <string name="order_duration_stop_after_tomorrow">(arrêter après demain)</string>
-  <string name="order_duration_stop_after_date">(arrêter après %s)</string>
-  <string name="order_duration_unspecified">(pas de durée spécifique)</string>
-  <string name="order_duration_indefinitely">(indéfiniment)</string>
-  <string name="order_duration_administer_once">(seul dose)</string>
+
+  <string name="order_one_dose_only">(seul dose)</string>
+  <string name="order_start_now_indefinitely">(commencer maintenant; continuer indéfiniment)</string>
+  <string name="order_start_now_stop_after_doses">(commencer maintenant; arrêter après %d doses)</string>
+  <string name="order_start_now_after_doses_stop_date">(commencer maintenant; après %1$d doses, arrêter %2$s)</string>
+
+  <string name="order_one_dose_only_ordered_date">(seul dose, commandé %s)</string>
+  <string name="order_started_date_stopped_date">(commencé %1$s; arrêté %2$s)</string>
+  <string name="order_started_date_indefinitely">(commencé %s; continuer indéfiniment)</string>
+  <string name="order_started_date_stop_after_doses">(commencé %1$s; arrêter après %2$d doses)</string>
+  <string name="order_started_date_after_doses_stop_date">(commencé %1$s; après %2$d doses, arrêter %3$s)</string>
+
   <string name="order_notes">Remarques</string>
   <string name="enter_medication">Entrez le médicament</string>
   <string name="order_give_for_days_cannot_be_zero">Doit être vide ou supérieure à 0</string>
   <string name="order_cannot_exceed_n_times_per_day">Ne peut pas dépasser %d fois par jour</string>
   <string name="order_cannot_exceed_n_days">Ne peut pas dépasser %d jours</string>
+  <string name="order_cannot_stop_in_past">Ne peut pas etre arrêté dans le passé</string>
   <string name="order_stop_now">Arrêter maintenant</string>
   <string name="order_delete">Supprimer cette traitement</string>
   <string name="title_confirmation">Confirmation</string>
-  <string name="confirm_order_delete">Vraiment supprimer?</string>
+  <string name="confirm_order_stop">Arrêter ce traitement maintenant?</string>
+  <string name="confirm_order_delete">Supprimer ce traitement?</string>
   <string name="delete">Supprimer</string>
 
   <string name="route_of_administration">Voie d\'administration</string>
