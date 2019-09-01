@@ -17,19 +17,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Provides a wrapper over a {@link TypedCursor}, providing a filtered view of the cursor using
- * a specified {@link MatchingFilter}.
- */
-public class FilteredCursorWrapper<T> implements TypedCursor<T> {
+/** A view of a cursor that is filtered with a specified {@link MatchingFilter}. */
+public class FilteredCursor<T> implements TypedCursor<T> {
     private final TypedCursor<T> mCursor;
     private final List<Integer> mIndices;
 
-    /**
-     * Applies the given {@link MatchingFilter} to the given {@link TypedCursor}, given a particular
-     * search term.
-     */
-    public FilteredCursorWrapper(
+    /** Applies a filter to a cursor, given a particular search term. */
+    public FilteredCursor(
         TypedCursor<T> cursor, MatchingFilter<T> filter, CharSequence constraint) {
         mCursor = cursor;
         mIndices = new ArrayList<>();

@@ -49,15 +49,15 @@ public class EditPatientDialogFragmentTest extends FunctionalTestCase {
 
         // The symptom onset date should not be assigned a default value.
         expectVisible(viewThat(
-                hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
+                hasAncestorThat(withId(R.id.symptom_day_number)),
                 hasText("–")));
 
         waitUntilVisible(viewThat(
-                hasAncestorThat(withId(R.id.attribute_admission_days)),
+                hasAncestorThat(withId(R.id.admission_day_number)),
                 hasText("Day 1")));
 
         // Assign a location to the patient
-        click(viewWithId(R.id.attribute_location));
+        click(viewWithId(R.id.patient_placement));
         screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");

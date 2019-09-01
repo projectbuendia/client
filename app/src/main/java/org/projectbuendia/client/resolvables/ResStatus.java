@@ -100,12 +100,12 @@ public enum ResStatus implements Resolvable<ResStatus.Resolved> {
             return mResources.getString(mStatus.messageId);
         }
 
-        public int getBackgroundColor() {
-            return mResources.getColor(mStatus.backgroundColorId);
-        }
-
         public int getForegroundColor() {
             return mResources.getColor(mStatus.foregroundColorId);
+        }
+
+        public int getBackgroundColor() {
+            return mResources.getColor(mStatus.backgroundColorId);
         }
     }
 

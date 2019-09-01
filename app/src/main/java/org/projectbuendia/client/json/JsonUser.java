@@ -38,7 +38,7 @@ public class JsonUser implements Serializable {
         if (aSection != bSection) {
             return aSection - bSection;
         }
-        return a.name.compareTo(b.name);
+        return Utils.ALPHANUMERIC_COMPARATOR.compare(a.name, b.name);
     };
 
     /** Default constructor for serialization. */

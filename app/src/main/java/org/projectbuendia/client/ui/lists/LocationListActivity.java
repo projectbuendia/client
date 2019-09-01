@@ -38,7 +38,7 @@ import javax.inject.Provider;
 import de.greenrobot.event.EventBus;
 
 /** Displays a list of locations and allows users to search through a list of patients. */
-public final class LocationListActivity extends BaseSearchablePatientListActivity {
+public final class LocationListActivity extends PatientListActivity {
 
     private LocationListController mController;
     private AlertDialog mSyncFailedDialog;

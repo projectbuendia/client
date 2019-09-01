@@ -17,7 +17,6 @@ import android.database.Cursor;
 import com.google.common.base.Joiner;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
@@ -51,11 +50,9 @@ import static org.projectbuendia.client.utils.Utils.eq;
 public class ChartDataHelper {
     private static final Logger LOG = Logger.create();
 
-    private final AppSettings mSettings;
     private final ContentResolver mContentResolver;
 
-    public ChartDataHelper(AppSettings settings, ContentResolver contentResolver) {
-        mSettings = settings;
+    public ChartDataHelper(ContentResolver contentResolver) {
         mContentResolver = checkNotNull(contentResolver);
     }
 

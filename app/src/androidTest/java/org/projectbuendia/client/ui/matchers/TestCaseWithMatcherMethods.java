@@ -44,6 +44,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
+import org.projectbuendia.client.utils.Utils;
 
 import java.text.MessageFormat;
 
@@ -91,7 +92,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     public static Matcher<View> hasText(Object obj) {
         String text = "" + obj;
         return new MatcherWithDescription<>(ViewMatchers.withText(text),
-            "has the exact text \"" + text + "\"");
+            "has the exact text \"" + quote(text) + "\"");
     }
 
     public static ViewInteraction viewWithTextString(int resourceId) {
@@ -291,7 +292,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         String name = cls.getSimpleName();
         return new MatcherWithDescription<>(
             ViewMatchers.isAssignableFrom(cls),
-            (name.matches("^[AEIOU]") ? "is an " : "is a ") + name);
+            (name.matches("^[AEIOU]") ? "is an " : "is a ") + quote(name));
     }
 
     // Names of Espresso matchers form expressions that don't make any grammatical sense,
@@ -319,7 +320,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 if (names.length == 2) {
                     list = list.replace(", ", " or ");
                 } else if (names.length > 2) {
-                    list = list.replaceAll(", ([^,*])$", ", or $1");
+                    list = list.replaceAll(", ([^,]*)$", ", or $1");
                 }
                 description.appendText(
                     (names[0].matches("^[AEIOU]") ? "is an " : "is a ") + list);
@@ -379,13 +380,13 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
 
     public static Matcher<View> hasTextContaining(String text) {
         return new MatcherWithDescription<>(ViewMatchers.withText(Matchers.containsString(text)),
-            "has text containing \"" + text + "\"");
+            "has text containing \"" + quote(text) + "\"");
     }
 
     public static Matcher<View> hasTextMatchingRegex(String regex) {
         return new MatcherWithDescription<>(
             ViewMatchers.withText(StringMatchers.matchesRegex(regex)),
-            "has text matching regex /" + regex + "/");
+            "has text matching regex /" + quote(regex) + "/");
     }
 
     public static Matcher<View> isAtLeastNPercentVisible(int percentage) {
@@ -540,6 +541,12 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         }
     }
 
+    /** Quotes a string for use in a MessageFormat. */
+    private static String quote(String text) {
+        if (Utils.isEmpty(text)) return "";
+        return "'" + text.replaceAll("'", "''") + "'";
+    }
+
     static ViewAction clickIfUncheckedAction() {
         return new ViewAction() {
             @Override public BaseMatcher<View> getConstraints() {
@@ -667,5 +674,9 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 description.appendText("is a WebView that does not contain any element with ID \"" + id + "\"");
             }
         };
+    }
+
+    protected String getString(int id, Object... args) {
+        return getActivity().getString(id, args);
     }
 }

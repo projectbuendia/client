@@ -174,7 +174,7 @@
   <string name="given_name_cannot_be_null">Prénom ne doit pas être null</string>
   <string name="family_name_cannot_be_null">Nom de famille ne doit pas être null</string>
   <string name="invalid_username">Nom d\'utilisateur doit être compris entre 2 et 50 caractères. Seuls les lettres, chiffres, ".", "-", et "_" sont autorisés.</string>
-  <string name="latest_pcr_label">Essai d\'Ebola</string>
+  <string name="ebola_test_label">Essai d\'Ebola</string>
   <string name="latest_pcr_label_with_date">Essai d\'Ebola test (%s)</string>
   <string name="action_add_test_result">Ajouter le résultat du test</string>
   <string name="pregnant">Enceinte</string>

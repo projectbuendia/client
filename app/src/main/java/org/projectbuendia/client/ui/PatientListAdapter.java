@@ -13,7 +13,6 @@ package org.projectbuendia.client.ui;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -32,6 +31,7 @@ import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -48,46 +48,36 @@ import butterknife.InjectView;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
- * A {@link BaseExpandableListAdapter} that wraps a {@link TypedCursor} of {@link Patient}'s,
- * displaying these patients grouped by location and filtered by a specified
- * {@link org.projectbuendia.client.filter.db.SimpleSelectionFilter}.
+ * A ListAdapter that displays Patients from a TypedCursor, grouped by location
+ * and filtered by an optional SimpleSelectionFilter.
  */
-public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
-    protected final Context mContext;
-
+public class PatientListAdapter extends BaseExpandableListAdapter {
+    protected final ContextUtils u;
     private final HashMap<Location, List<Patient>> mPatientsByLocation;
     private final ChartDataHelper mChartDataHelper;
+
     private static final Logger LOG = Logger.create();
     private static final String EN_DASH = "\u2013";
 
     private Location[] mLocations;
     private Map<String, Obs> mConditionObs = new HashMap<>();
 
-    /**
-     * Creates a {@link PatientListTypedCursorAdapter}.
-     * @param context an activity context
-     */
-    public PatientListTypedCursorAdapter(Context context) {
-        mContext = context;
+    public PatientListAdapter(Context context) {
+        u = ContextUtils.from(context);
         mPatientsByLocation = new HashMap<>();
-        mChartDataHelper = new ChartDataHelper(
-            App.getSettings(), context.getContentResolver());
+        mChartDataHelper = new ChartDataHelper(App.getResolver());
     }
 
     @Override public int getGroupCount() {
-        if (mPatientsByLocation == null) {
-            return 0;
-        }
-
-        return mPatientsByLocation.size();
+        return mPatientsByLocation != null ? mPatientsByLocation.size() : 0;
     }
 
-    @Override public long getGroupId(int groupPosition) {
-        return groupPosition;
+    @Override public long getGroupId(int groupIndex) {
+        return groupIndex;
     }
 
-    @Override public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
+    @Override public long getChildId(int groupIndex, int childIndex) {
+        return childIndex;
     }
 
     @Override public boolean hasStableIds() {
@@ -95,29 +85,28 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public View getGroupView(
-        int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        Location location = getGroup(groupPosition);
-        View view = convertView != null ? convertView : newGroupView();
+        int groupIndex, boolean isExpanded, View view, ViewGroup parent) {
+        Location location = getGroup(groupIndex);
+        view = u.reuseOrInflate(view, R.layout.patient_list_group_heading, parent);
 
-        ExpandableListView expandableListView = (ExpandableListView) parent;
-        expandableListView.expandGroup(groupPosition);
-        TextView item = view.findViewById(R.id.patient_list_tent_tv);
-        item.setText(Utils.formatLocationHeading(
-            mContext, location.uuid, getChildrenCount(groupPosition)));
+        ((ExpandableListView) parent).expandGroup(groupIndex);
+        TextView item = view.findViewById(R.id.heading);
+        item.setText(u.formatLocationHeading(
+            location.uuid, getChildrenCount(groupIndex)));
         return view;
     }
 
-    @Override public Location getGroup(int groupPosition) {
+    @Override public Location getGroup(int groupIndex) {
         if (mLocations == null) {
             LOG.e("getGroup: mLocations is null! (see issue #352)");
             return null;
         }
-        return mLocations[groupPosition];
+        return mLocations[groupIndex];
     }
 
-    @Override public int getChildrenCount(int groupPosition) {
-        LOG.d("getChildrenCount: mLocations = %s (%d), groupPosition = %d", mLocations, mLocations != null ? mLocations.length : -1, groupPosition);
-        Location location = getGroup(groupPosition);
+    @Override public int getChildrenCount(int groupIndex) {
+        LOG.d("getChildrenCount: mLocations = %s (%d), groupIndex = %d", mLocations, mLocations != null ? mLocations.length : -1, groupIndex);
+        Location location = getGroup(groupIndex);
         if (mPatientsByLocation == null || location == null) {
             return 0;
         }
@@ -125,37 +114,28 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return mPatientsByLocation.get(location).size();
     }
 
-    protected View newGroupView() {
-        return LayoutInflater.from(mContext).inflate(R.layout.listview_tent_header, null);
-    }
-
-    @Override public View getChildView(
-        int groupPosition, int childPosition, boolean isLastChild, View convertView,
-        ViewGroup parent) {
-        Patient patient = (Patient) getChild(groupPosition, childPosition);
+    @Override public View getChildView(int groupIndex, int childIndex,
+        boolean isLastChild, View view, ViewGroup parent) {
+        Patient patient = (Patient) getChild(groupIndex, childIndex);
 
         // Show condition, if the data for this has been loaded.
         Obs obs = mConditionObs.get(patient.uuid);
         String condition = obs != null ? obs.value : null;
 
-        if (convertView == null) {
-            convertView = newChildView();
-        }
+        if (view == null) view = u.inflate(R.layout.patient_list_item, parent);
 
         ResStatus.Resolved status =
-            ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
+            ConceptUuids.getResStatus(condition).resolve(u.getResources());
 
-        ViewHolder holder = (ViewHolder) convertView.getTag();
         String givenName = Utils.orDefault(patient.givenName, EN_DASH);
         String familyName = Utils.orDefault(patient.familyName, EN_DASH);
-        holder.mName.setText(givenName + " " + familyName);
-        holder.mBedNumber.setText(Utils.toNonnull(patient.bedNumber));
-        holder.mId.setText(patient.id);
-        holder.mId.setTextColor(status.getForegroundColor());
-        holder.mId.setBackgroundColor(status.getBackgroundColor());
-
-        holder.mAge.setText(patient.birthdate == null ? ""
-            : Utils.birthdateToAge(patient.birthdate));
+        u.setContainer(view);
+        u.setText(R.id.name, givenName + " " + familyName);
+        u.setText(R.id.bed_number, patient.bedNumber);
+        u.setText(R.id.id, patient.id);
+        u.setTextViewColors(R.id.id, status);
+        u.setText(R.id.age, patient.birthdate != null ?
+            Utils.birthdateToAge(patient.birthdate) : "");
 
         boolean isChild = Utils.isChild(patient.birthdate);
 
@@ -171,44 +151,34 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         if (drawableId > 0) {
-            holder.mSex.setVisibility(View.VISIBLE);
-            holder.mSex.setImageDrawable(mContext.getResources().getDrawable(drawableId));
+            u.show(R.id.sex);
+            ((ImageView) u.findView(R.id.sex)).setImageDrawable(u.getResources().getDrawable(drawableId));
         } else {
-            holder.mSex.setVisibility(View.GONE);
+            u.hide(R.id.sex);
         }
 
         // Add a bottom border and extra padding to the last item in each group.
         if (isLastChild) {
-            convertView.setBackgroundResource(R.drawable.bottom_border_1dp);
-            convertView.setPadding(
-                convertView.getPaddingLeft(), convertView.getPaddingTop(),
-                convertView.getPaddingRight(), 40);
+            view.setBackgroundResource(R.drawable.bottom_border_1dp);
+            view.setPadding(
+                view.getPaddingLeft(), view.getPaddingTop(),
+                view.getPaddingRight(), 40);
         } else {
-            convertView.setBackgroundResource(0);
-            convertView.setPadding(
-                convertView.getPaddingLeft(), convertView.getPaddingTop(),
-                convertView.getPaddingRight(), 20);
+            view.setBackgroundResource(0);
+            view.setPadding(
+                view.getPaddingLeft(), view.getPaddingTop(),
+                view.getPaddingRight(), 20);
         }
 
-        ExpandableListView expandableListView = (ExpandableListView) parent;
-        expandableListView.expandGroup(groupPosition);
-
-        return convertView;
-    }
-
-    @Override public Object getChild(int groupPosition, int childPosition) {
-        return mPatientsByLocation.get(getGroup(groupPosition)).get(childPosition);
-    }
-
-    private View newChildView() {
-        View view = LayoutInflater.from(mContext).inflate(
-            R.layout.listview_cell_search_results, null, false);
-        ViewHolder holder = new ViewHolder(view);
-        view.setTag(holder);
+        ((ExpandableListView) parent).expandGroup(groupIndex);
         return view;
     }
 
-    @Override public boolean isChildSelectable(int groupPosition, int childPosition) {
+    @Override public Object getChild(int groupIndex, int childIndex) {
+        return mPatientsByLocation.get(getGroup(groupIndex)).get(childIndex);
+    }
+
+    @Override public boolean isChildSelectable(int groupIndex, int childIndex) {
         return true;
     }
 
@@ -267,11 +237,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     static class ViewHolder {
-        @InjectView(R.id.listview_cell_search_results_name) TextView mName;
-        @InjectView(R.id.listview_cell_search_results_bed_number) TextView mBedNumber;
-        @InjectView(R.id.listview_cell_search_results_id) TextView mId;
-        @InjectView(R.id.listview_cell_search_results_sex) ImageView mSex;
-        @InjectView(R.id.listview_cell_search_results_age) TextView mAge;
+        @InjectView(R.id.name) TextView mName;
+        @InjectView(R.id.bed_number) TextView mBedNumber;
+        @InjectView(R.id.id) TextView mId;
+        @InjectView(R.id.sex) ImageView mSex;
+        @InjectView(R.id.age) TextView mAge;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

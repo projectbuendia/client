@@ -31,7 +31,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.BaseLoggedInActivity;
+import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
@@ -46,10 +46,10 @@ import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 /**
- * A {@link BaseLoggedInActivity} with a {@link SearchView} that filters a patient list.
+ * A {@link LoggedInActivity} with a {@link SearchView} that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
  */
-public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActivity {
+public abstract class PatientListActivity extends LoggedInActivity {
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject CrudEventBus mCrudEventBus;
@@ -166,12 +166,12 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     private final class SearchUi implements PatientSearchController.Ui {
         @Override public void setPatients(TypedCursor<Patient> patients) {
             // Delegate to implementers.
-            BaseSearchablePatientListActivity.this.setPatients(patients);
+            PatientListActivity.this.setPatients(patients);
         }
 
         @Override public void goToPatientChart(String patientUuid) {
             BigToast.show(R.string.patient_creation_success);
-            PatientChartActivity.start(BaseSearchablePatientListActivity.this, patientUuid);
+            PatientChartActivity.start(PatientListActivity.this, patientUuid);
         }
     }
 

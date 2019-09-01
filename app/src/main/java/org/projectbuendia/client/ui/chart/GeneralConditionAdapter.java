@@ -29,7 +29,7 @@ import butterknife.InjectView;
 
 /** Shows a list of general conditions, with corresponding number, color, and name. */
 public class GeneralConditionAdapter extends ArrayAdapter<String> {
-    private static final int VIEW_RESOURCE = R.layout.listview_cell_condition_selection;
+    private static final int VIEW_RESOURCE = R.layout.condition_item;
     private String[] mConditions;
     @Nullable private String mSelectedConditionUuid;
 

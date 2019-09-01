@@ -1,4 +1,4 @@
-package org.projectbuendia.client.acceptance;
+package org.projectbuendia.client.smoke;
 
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.espresso.Espresso;
@@ -170,10 +170,10 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void movePatient(String location) {
-        click(R.id.attribute_location);
+        click(R.id.patient_placement);
         click(location);
         click("OK");
-        waitFor(viewThat(hasId(R.id.attribute_location),
+        waitFor(viewThat(hasId(R.id.patient_placement),
             hasDescendantThat(hasId(R.id.view_attribute_name), hasText("Location")),
             hasDescendantThat(hasId(R.id.view_attribute_value), hasText(location))
         ));
@@ -205,7 +205,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void internalIncrementalSync() {
-        sleep(1000);
+        sleep(500);
         App.getSyncManager().sync(SyncManager.SMALL_PHASES);
     }
 
@@ -225,13 +225,14 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void rewindAdmissionDate(int numDays, String expected) {
-        click(R.id.attribute_admission_days);
+        click(R.id.admission_day_number);
         ViewAction tapUp = new GeneralClickAction(
             Tap.SINGLE, GeneralLocation.TOP_CENTER, Press.FINGER);
         for (int i = 0; i < numDays; i++) {
             act(firstViewThat(
                 isA(NumberPicker.class),
-                hasAncestorThat(isA(DatePicker.class))
+                hasAncestorThat(isA(DatePicker.class)),
+                hasChildThat(hasTextMatchingRegex("[0-9]{1,2}"))
             ), tapUp);
             sleep(50);
         }

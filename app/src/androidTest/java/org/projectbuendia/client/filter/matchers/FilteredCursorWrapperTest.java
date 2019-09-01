@@ -26,7 +26,7 @@ import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertEquals;
 
-/** Tests for {@link FilteredCursorWrapper}. */
+/** Tests for {@link FilteredCursor}. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class FilteredCursorWrapperTest {
@@ -41,27 +41,27 @@ public class FilteredCursorWrapperTest {
     /** Tests that getCount() returns the expected number of matches. */
     @Test
     public void testGetCount_returnsNumberOfMatches() {
-        assertEquals(2, getWrapperForConstraint("pe").getCount());
-        assertEquals(1, getWrapperForConstraint("pea").getCount());
-        assertEquals(0, getWrapperForConstraint("peak").getCount());
+        assertEquals(2, filterWithConstraint("pe").getCount());
+        assertEquals(1, filterWithConstraint("pea").getCount());
+        assertEquals(0, filterWithConstraint("peak").getCount());
     }
 
-    private FilteredCursorWrapper<String> getWrapperForConstraint(String constraint) {
-        return new FilteredCursorWrapper<>(SAMPLE_CURSOR, SUBSTRING_FILTER, constraint);
+    private FilteredCursor<String> filterWithConstraint(String constraint) {
+        return new FilteredCursor<>(SAMPLE_CURSOR, SUBSTRING_FILTER, constraint);
     }
 
     /** Tests that get() returns any and all matched entries. */
     @Test
     public void testGet_returnsMatchedEntries() {
-        FilteredCursorWrapper<String> wrapper = getWrapperForConstraint("pe");
-        assertEquals("pear", wrapper.get(0));
-        assertEquals("grapefruit", wrapper.get(1));
+        FilteredCursor<String> cursor = filterWithConstraint("pe");
+        assertEquals("pear", cursor.get(0));
+        assertEquals("grapefruit", cursor.get(1));
     }
 
     /** Tests that the iterator returned by iterator() only iterates on matched entries. */
     @Test
     public void testIterator_returnsIteratorForMatchedEntries() {
-        Iterator<String> iterator = getWrapperForConstraint("pe").iterator();
+        Iterator<String> iterator = filterWithConstraint("pe").iterator();
         String[] iteratorValues = Iterators.toArray(iterator, String.class);
         assertEquals(2, iteratorValues.length);
         assertEquals("pear", iteratorValues[0]);

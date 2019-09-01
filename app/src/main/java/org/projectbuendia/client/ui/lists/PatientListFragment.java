@@ -28,7 +28,7 @@ import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
-import org.projectbuendia.client.ui.PatientListTypedCursorAdapter;
+import org.projectbuendia.client.ui.PatientListAdapter;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -51,7 +51,7 @@ public class PatientListFragment extends ProgressFragment implements
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
     private PatientSearchController mController;
     private PatientListController mListController;
-    private PatientListTypedCursorAdapter mPatientAdapter;
+    private PatientListAdapter mPatientAdapter;
     private FragmentUi mFragmentUi;
     private ListUi mListUi;
 
@@ -94,7 +94,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        mController = ((BaseSearchablePatientListActivity) getActivity()).getSearchController();
+        mController = ((PatientListActivity) getActivity()).getSearchController();
         mController.attachFragmentUi(mFragmentUi);
     }
 
@@ -121,8 +121,8 @@ public class PatientListFragment extends ProgressFragment implements
         }
     }
 
-    protected PatientListTypedCursorAdapter getAdapterInstance() {
-        return new PatientListTypedCursorAdapter(getActivity());
+    protected PatientListAdapter getAdapterInstance() {
+        return new PatientListAdapter(getActivity());
     }
 
     private void setActivatedPosition(int position) {
@@ -157,12 +157,8 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     @Override public boolean onChildClick(
-        ExpandableListView parent,
-        View v,
-        int groupPosition,
-        int childPosition,
-        long id) {
-        Patient patient = (Patient) mPatientAdapter.getChild(groupPosition, childPosition);
+        ExpandableListView parent, View v, int groupIndex, int childIndex, long id) {
+        Patient patient = (Patient) mPatientAdapter.getChild(groupIndex, childIndex);
         Utils.logUserAction("patient_pressed", "patient_uuid", patient.uuid);
         mController.onPatientSelected(patient);
         return true;

@@ -35,7 +35,7 @@ import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
-import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
+import org.projectbuendia.client.ui.lists.PatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.ui.lists.LocationListFragment;
@@ -82,7 +82,7 @@ import dagger.Provides;
         EditPatientDialogFragment.class,
         PatientLocationDialogFragment.class,
         LocationListFragment.class,
-        BaseSearchablePatientListActivity.class,
+        PatientListActivity.class,
         SingleLocationActivity.class,
         LocationListActivity.class,
         PatientListFragment.class,
@@ -129,8 +129,7 @@ public final class AppModule {
         return new BuendiaSyncEngine(app.getApplicationContext());
     }
 
-    @Provides @Singleton ChartDataHelper provideLocalizedChartHelper(
-        AppSettings settings, ContentResolver contentResolver) {
-        return new ChartDataHelper(settings, contentResolver);
+    @Provides @Singleton ChartDataHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
+        return new ChartDataHelper(contentResolver);
     }
 }

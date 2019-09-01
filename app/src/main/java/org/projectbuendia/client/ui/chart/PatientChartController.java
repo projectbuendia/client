@@ -131,7 +131,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             @Nullable LocalDate firstSymptomsDate);
 
         /** Updates the UI showing Ebola PCR lab test results for this patient. */
-        void updateEbolaPcrTestResultUi(Map<String, Obs> observations);
+        void updateEbolaTestResultUi(Map<String, Obs> observations);
 
         /** Updates the UI showing the IV and oxygen status for this patient. */
         void updateSpecialLabels(Map<String, Obs> observations);
@@ -299,7 +299,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         return request;
     }
 
-    public void onPcrResultsPressed() {
+    public void onEbolaTestResultsPressed() {
         String[] conceptUuids = new String[] {ConceptUuids.PCR_GP_UUID, ConceptUuids.PCR_NP_UUID};
         List<ObsRow> obsRows = mChartHelper.getPatientObservationsByConcept(mPatientUuid, conceptUuids);
         if (!obsRows.isEmpty()) {
@@ -479,7 +479,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
 
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
-        mUi.updateEbolaPcrTestResultUi(latestObservations);
+        mUi.updateEbolaTestResultUi(latestObservations);
         mUi.updateSpecialLabels(latestObservations);
         if (!mCharts.isEmpty()) {
             mUi.updateTilesAndGrid(

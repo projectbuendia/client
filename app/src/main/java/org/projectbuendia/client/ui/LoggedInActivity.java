@@ -46,7 +46,7 @@ import butterknife.OnClick;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A {@link BaseActivity} that requires that there currently be a logged-in user. */
-public abstract class BaseLoggedInActivity extends BaseActivity {
+public abstract class LoggedInActivity extends BaseActivity {
 
     private static final Logger LOG = Logger.create();
 
@@ -273,14 +273,14 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         public void onLanguageClick() {
             Utils.logUserAction("user_menu_language_pressed");
             String[] languageTags = AppSettings.getLocaleOptionValues();
-            new AlertDialog.Builder(BaseLoggedInActivity.this)
+            new AlertDialog.Builder(LoggedInActivity.this)
                 .setTitle(R.string.pref_title_language)
                 .setSingleChoiceItems(
                     AppSettings.getLocaleOptionLabels(),
                     App.getSettings().getLocaleIndex(),
                     (view, index) -> {
                         App.getSettings().setLocale(languageTags[index]);
-                        Utils.restartActivity(BaseLoggedInActivity.this);
+                        Utils.restartActivity(LoggedInActivity.this);
                     }
                 ).show();
         }
@@ -288,7 +288,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         @OnClick(R.id.button_settings)
         public void onSettingsClick() {
             Utils.logUserAction("user_menu_settings_pressed");
-            SettingsActivity.start(BaseLoggedInActivity.this);
+            SettingsActivity.start(LoggedInActivity.this);
         }
 
         @OnClick(R.id.button_log_out)
@@ -296,7 +296,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             Utils.logUserAction("user_menu_logout_pressed");
             App.getUserManager().setActiveUser(null);
 
-            Intent intent = new Intent(BaseLoggedInActivity.this, LoginActivity.class);
+            Intent intent = new Intent(LoggedInActivity.this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }

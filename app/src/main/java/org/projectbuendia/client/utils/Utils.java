@@ -14,7 +14,6 @@ package org.projectbuendia.client.utils;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Dialog;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -42,8 +41,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.net.Server;
 
 import java.io.File;
@@ -407,38 +404,17 @@ public class Utils {
         return new Locale(parts[0], parts[1]);
     }
 
-    public static String toLanguageTag(Locale locale) {
+    public static @Nullable String toLanguageTag(@Nullable Locale locale) {
+        if (locale == null) return null;
         if (Build.VERSION.SDK_INT >= 21) return locale.toLanguageTag();
         return locale.getLanguage() +
             (Utils.isEmpty(locale.getCountry()) ? "" : "_" + locale.getCountry());
-    }
-
-    public static Context applyLocaleSetting(Context context) {
-        App.setLocale(App.getSettings().getLocale());
-        return App.getContext();
     }
 
     /** Restarts the current activity (for use after a configuration change). */
     public static void restartActivity(Activity activity) {
         activity.finish();
         activity.startActivity(activity.getIntent(), NO_TRANSITION);
-    }
-
-    /** Formats a location heading with an optional patient count. */
-    public static String formatLocationHeading(Context context, String locationUuid, long patientCount) {
-        LocationForest forest = App.getModel().getForest();
-        Location location = forest.get(locationUuid);
-        String locationName = location != null ? location.name : context.getString(R.string.unknown_location);
-        // If no patient count is available, only show the location name.
-        if (patientCount < 0) return locationName;
-        return locationName + "  \u00b7  " + formatPatientCount(context, patientCount);
-    }
-
-    /** Formats a localized patient count. */
-    public static String formatPatientCount(Context context, long count) {
-        return count == 0 ? context.getString(R.string.no_patients)
-            : count == 1 ? context.getString(R.string.one_patient)
-            : context.getString(R.string.n_patients, count);
     }
 
 

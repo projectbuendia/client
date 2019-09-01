@@ -210,13 +210,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Try to discard and give up.
         click(viewWithText("Discard"));
-        expectVisible(viewWithText(R.string.title_discard_observations));
-        click(viewWithText(R.string.no));
+        expectVisible(viewWithText(getString(R.string.title_discard_observations)));
+        click(viewWithText("No"));
 
         // Try to discard and actually go back.
         click(viewWithText("Discard"));
-        expectVisible(viewWithText(R.string.title_discard_observations));
-        click(viewWithText(R.string.yes));
+        expectVisible(viewWithText(getString(R.string.title_discard_observations)));
+        click(viewWithText("Yes"));
     }
 
     private void answerTextQuestion(String questionText, String answerText) {
@@ -250,13 +250,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             hasAncestorThat(
                 isAnyOf(classes),
                 hasDescendantThat(hasTextContaining(questionText))),
-            hasTextContaining(answerText)));
+            hasText(answerText)));
     }
 
     private void saveForm() {
         IdlingResource xformWaiter = getXformSubmissionIdlingResource();
         click(viewWithText("Save"));
-        click(viewWithText("Yes"));
         Espresso.registerIdlingResources(xformWaiter);
     }
 
@@ -353,7 +352,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerTextQuestion("saturation", "95");
         answerTextQuestion(BP_SYS, "80");
         answerTextQuestion(BP_DIA, "100");
-        answerMultipleCodedQuestion("Other symptoms", "Hiccups");
+        answerMultipleCodedQuestion("Other symptoms", "Nausea");
         saveForm();
 
         // Enter second set of observations for this encounter.
@@ -381,7 +380,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals(BP_DIA, "100");
         checkObservationValueEquals("AVPU", "V");
         checkObservationValueEquals("Cough", YES);
-        checkObservationValueEquals("Hiccups", YES);
+        checkObservationValueEquals("Nausea", YES);
         checkObservationValueEquals("Condition", "2");
         checkObservationValueEquals("Notes", "Call …");
     }
@@ -408,12 +407,15 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerTextQuestion(BP_DIA, "75");
         answerTextQuestion("Cap Refill Time", "2");
         answerTextQuestion("Temperature", "36.1");
-        answerSingleCodedQuestion("Consciousness", "Unresponsive");
+        answerSingleCodedQuestion("Consciousness", "U. Unresponsive");
         answerSingleCodedQuestion("Urinary function", "Oliguria");
         answerSingleCodedQuestion("Anorexia", "++");
 
         answerTextQuestion("Vomiting", "1");
         answerTextQuestion("Diarrhea", "2");
+
+        scrollToAndExpectVisible(firstViewWithText("Other symptoms"));
+        scrollToAndExpectVisible(firstViewWithText("Condition"));
         answerMultipleCodedQuestion("Other symptoms", "Headache");
         answerMultipleCodedQuestion("Other symptoms", "Asthenia");
         answerMultipleCodedQuestion("Other symptoms", "Cough");
@@ -427,36 +429,44 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerMultipleCodedQuestion("Other symptoms", "Abdominal pain");
         answerMultipleCodedQuestion("Other symptoms", "Myalgia");
 
-        answerSingleCodedQuestion("Condition", "Stable");
+        scrollToAndExpectVisible(firstViewWithText("Bleeding"));
+        answerSingleCodedQuestion("Condition", "1. Stable");
         answerMultipleCodedQuestion("Appearance", "Pallor");
         answerMultipleCodedQuestion("Appearance", "Jaundice");
         answerMultipleCodedQuestion("Appearance", "Cyanosis");
-        answerSingleCodedQuestion("Dehydration", "Mild");
+        answerSingleCodedQuestion("Dehydration", "A. Mild");
         answerSingleCodedQuestion("Neuro", "Confusion");
 
-        // This is not all of the bleeding answers.
+        scrollToAndExpectVisible(firstViewWithText("Respiratory"));
+        answerMultipleCodedQuestion("Bleeding", "Conjunctival injection");
+        answerMultipleCodedQuestion("Bleeding", "Gingival hemorrhage");
         answerMultipleCodedQuestion("Bleeding", "Epistaxis");
         answerMultipleCodedQuestion("Bleeding", "Hemoptysis");
+        answerMultipleCodedQuestion("Bleeding", "Hematemesis");
+        answerMultipleCodedQuestion("Bleeding", "Melaena");
         answerMultipleCodedQuestion("Bleeding", "Hematuria");
+        answerMultipleCodedQuestion("Bleeding", "Vaginal bleeding");
+        answerMultipleCodedQuestion("Bleeding", "Injection site bleeding");
         answerMultipleCodedQuestion("Bleeding", "Petechiae");
 
+        scrollToAndExpectVisible(firstViewWithText("Notes"));
         answerSingleCodedQuestion("Respiratory", "Mild dyspnea");
-        answerSingleCodedQuestion("Circulation", "Weak pulse");
-        answerSingleCodedQuestion("Abdomen", "Soft");
-        answerSingleCodedQuestion("Abdomen", "Distended");
-        answerSingleCodedQuestion("Abdomen", "Painful");
-        answerSingleCodedQuestion("Abdomen", "Hepatomegaly");
-        answerSingleCodedQuestion("Abdomen", "Splenomegaly");
+        answerMultipleCodedQuestion("Circulation", "Weak pulse");
+        answerMultipleCodedQuestion("Abdomen", "Soft");
+        answerMultipleCodedQuestion("Abdomen", "Distended");
+        answerMultipleCodedQuestion("Abdomen", "Painful");
+        answerMultipleCodedQuestion("Abdomen", "Hepatomegaly");
+        answerMultipleCodedQuestion("Abdomen", "Splenomegaly");
 
         answerTextQuestion("Notes", "Possible malaria.");
         saveForm();
 
-        // Check that all values are now visible.
         // Expect a WebView with JS enabled to be visible soon (the chart).
         waitUntilVisible(10000, viewThat(isJavascriptEnabled()));
         // Wait for WebView to render and scripts to run.
         try { Thread.sleep(10000); } catch (InterruptedException e) { }
 
+        // Check that all values are now visible.
         checkObservationValueEquals("Heart rate", "70");
         checkObservationValueEquals("Respiratory rate", "23");
         checkObservationValueEquals("O₂ saturation", "95");
@@ -492,9 +502,15 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals("Dehydration", "A");
         checkObservationValueEquals("Confusion", YES);
 
+        checkObservationValueEquals("Conjunctival injection", YES);
+        checkObservationValueEquals("Gingival hemorrhage", YES);
         checkObservationValueEquals("Epistaxis", YES);
         checkObservationValueEquals("Hemoptysis", YES);
+        checkObservationValueEquals("Hematemesis", YES);
+        checkObservationValueEquals("Melaena", YES);
         checkObservationValueEquals("Hematuria", YES);
+        checkObservationValueEquals("Vaginal bleeding", YES);
+        checkObservationValueEquals("Injection site bleeding", YES);
         checkObservationValueEquals("Petechiae", YES);
 
         checkObservationValueEquals("Mild dyspnea", YES);

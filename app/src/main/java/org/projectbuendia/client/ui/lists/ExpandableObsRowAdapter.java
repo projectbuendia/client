@@ -1,16 +1,14 @@
 package org.projectbuendia.client.ui.lists;
 
 import android.content.Context;
-import android.support.annotation.LayoutRes;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.TextView;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Section;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -20,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
-    private final Context mContext;
+    private final ContextUtils u;
     private final List<Section> mSections;
     private final List<List<ObsRow>> mSectionRows;
 
@@ -28,7 +26,7 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
     private static String BULLET = "\u2022";
 
     public ExpandableObsRowAdapter(Context context, Map<Section, List<ObsRow>> rowsBySection) {
-        mContext = context;
+        u = ContextUtils.from(context);
         mSections = new ArrayList<>(rowsBySection.keySet());
         mSectionRows = new ArrayList<>();
 
@@ -42,26 +40,17 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
         }
     }
 
-    private View inflate(@LayoutRes int layoutId) {
-        return ((LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-            .inflate(layoutId, null);
-    }
-
-    @Override public View getGroupView(int groupIndex, boolean isExpanded, View view, ViewGroup parent) {
-        if (view == null) {
-            view = inflate(R.layout.obs_section);
-        }
-        TextView heading = view.findViewById(R.id.section_heading);
-        heading.setText((String) getGroup(groupIndex));
+    @Override public View getGroupView(
+        int groupIndex, boolean isExpanded, View view, ViewGroup parent) {
+        view = u.reuseOrInflate(view, R.layout.obs_section, parent);
+        u.setText(R.id.section_heading, (String) getGroup(groupIndex));
         return view;
     }
 
-    @Override public View getChildView(int groupIndex, int childIndex, boolean isLastChild, View view, ViewGroup parent) {
-        if (view == null) {
-            view = inflate(R.layout.obs_item);
-        }
-        TextView item = view.findViewById(R.id.item_text);
-        item.setText((String) getChild(groupIndex, childIndex));
+    @Override public View getChildView(
+        int groupIndex, int childIndex, boolean isLastChild, View view, ViewGroup parent) {
+        view = u.reuseOrInflate(view, R.layout.obs_item, parent);
+        u.setText(R.id.item_text, (String) getChild(groupIndex, childIndex));
         return view;
     }
 
@@ -81,19 +70,19 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
         return mSections.size();
     }
 
-    @Override public int getChildrenCount(int groupPosition) {
-        return mSectionRows.get(groupPosition).size();
+    @Override public int getChildrenCount(int groupIndex) {
+        return mSectionRows.get(groupIndex).size();
     }
 
-    @Override public long getGroupId(int groupPosition) {
-        return groupPosition;
+    @Override public long getGroupId(int groupIndex) {
+        return groupIndex;
     }
 
-    @Override public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
+    @Override public long getChildId(int groupIndex, int childIndex) {
+        return childIndex;
     }
 
-    @Override public boolean isChildSelectable(int groupPosition, int childPosition) {
+    @Override public boolean isChildSelectable(int groupIndex, int childIndex) {
         return true;
     }
 

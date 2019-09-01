@@ -38,6 +38,7 @@ import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChange
 import org.projectbuendia.client.inject.Qualifiers;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
 import org.projectbuendia.client.updater.DownloadedUpdateInfo;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -52,9 +53,9 @@ import de.greenrobot.event.EventBus;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
- * An abstract {@link FragmentActivity} that is the base for all activities, providing a "content
- * view" that can be populated by implementing classes and a "status view" that can be used for
- * troubleshooting and status messages.
+ * An abstract {@link FragmentActivity} that is the base for all activities
+ * except SettingsActivity, providing a "content view" that is populated by
+ * subclasses and a SnackBar for troubleshooting and status messages.
  */
 public abstract class BaseActivity extends FragmentActivity {
     private static final Logger LOG = Logger.create();
@@ -63,7 +64,7 @@ public abstract class BaseActivity extends FragmentActivity {
     private static final long MIN_STEP = -2;
     private static final long MAX_STEP = 2;
 
-    // TODO: Store sScaleStep in an app preference.
+    protected ContextUtils u;
     private static long sScaleStep = 0; // app-wide scale step, selected by user
     private Long pausedScaleStep = null; // this activity's scale step when last paused
     private LinearLayout mWrapperView;
@@ -435,7 +436,9 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     @Override protected void attachBaseContext(Context base) {
-        super.attachBaseContext(Utils.applyLocaleSetting(base));
+        App.applyLocaleSetting();
+        super.attachBaseContext(App.getContext());
+        u = ContextUtils.from(this);
     }
 
     @Override protected void onResume() {
