@@ -12,6 +12,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -108,7 +109,7 @@
 
       <TextView
           android:id="@+id/order_times_per_day_label"
-          android:layout_width="300dip"
+          android:layout_width="300sp"
           android:layout_column="2"
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
@@ -160,7 +161,7 @@
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
           android:layout_span="2"
-          android:text="@string/order_duration_unspecified"/>
+          tools:text="(commencé le 29 août; après 10 doses, arrêter le 31 août)"/>
     </TableRow>
 
     <TableRow

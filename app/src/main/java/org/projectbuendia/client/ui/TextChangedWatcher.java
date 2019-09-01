@@ -5,6 +5,7 @@ import android.text.TextWatcher;
 
 public class TextChangedWatcher implements TextWatcher {
     private final Runnable callback;
+    private boolean inCallback = false;
 
     public TextChangedWatcher(Runnable callback) {
         this.callback = callback;
@@ -15,6 +16,13 @@ public class TextChangedWatcher implements TextWatcher {
     @Override public void onTextChanged(CharSequence c, int x, int y, int z) { }
 
     @Override public void afterTextChanged(Editable editable) {
-        callback.run();
+        if (callback != null && !inCallback) {
+            inCallback = true;
+            try {
+                callback.run();
+            } finally {
+                inCallback = false;
+            }
+        }
     }
 }
