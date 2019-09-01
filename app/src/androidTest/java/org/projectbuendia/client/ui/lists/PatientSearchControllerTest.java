@@ -98,7 +98,7 @@ public class PatientSearchControllerTest {
     }
 
     private TypedCursor<Patient> getFakeAppPatientCursor() {
-        Patient patient = new Patient("", "", "Given", "Family", Sex.OTHER, null, "");
+        Patient patient = new Patient("", "", "Given", "Family", Sex.OTHER, null, false, "", "");
         return new FakeTypedCursor<>(new Patient[] {patient});
     }
 

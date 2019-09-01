@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.filter.db.patient;
 
-import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
@@ -19,23 +18,16 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
 
 /** Matches only patients below a specified age in years. */
-final class AgeFilter extends SimpleSelectionFilter<Patient> {
-    private final int mYears;
-
-    public AgeFilter(int years) {
-        mYears = years;
-    }
-
+final class PregnancyFilter extends SimpleSelectionFilter<Patient> {
     @Override public String getSelectionString() {
-        return Contracts.Patients.BIRTHDATE + " > ?";
+        return Contracts.Patients.PREGNANCY;
     }
 
     @Override public String[] getSelectionArgs(CharSequence constraint) {
-        LocalDate minBirthdate = LocalDate.now().minusYears(mYears);
-        return new String[] {minBirthdate.toString()};
+        return new String[] {};
     }
 
     @Override public String getDescription() {
-        return App.str(R.string.age_filter_description, mYears);
+        return App.str(R.string.pregnant);
     }
 }

@@ -13,13 +13,14 @@ package org.projectbuendia.client.json;
 
 import com.google.gson.annotations.SerializedName;
 
-/** OpenMRS concept types (used for JSON representation and elsewhere) */
+/** OpenMRS concept types (used for JSON representation and elsewhere). */
 public enum ConceptType {
-    @SerializedName("numeric")NUMERIC,
-    @SerializedName("boolean")BOOLEAN,
-    @SerializedName("coded")CODED,
-    @SerializedName("text")TEXT,
-    @SerializedName("date")DATE,
-    @SerializedName("datetime")DATETIME,
-    @SerializedName("none")NONE
+    // These serialized names must match the HL7_TYPE_NAMES on the server side.
+    @SerializedName("numeric") NUMERIC,
+    @SerializedName("boolean") BOOLEAN,
+    @SerializedName("coded") CODED,
+    @SerializedName("text") TEXT,
+    @SerializedName("date") DATE,
+    @SerializedName("datetime") DATETIME,
+    @SerializedName("none") NONE
 }

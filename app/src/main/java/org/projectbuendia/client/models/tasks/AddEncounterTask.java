@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -26,7 +27,6 @@ import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
@@ -55,7 +55,6 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
-    private final Patient mPatient;
     private final Encounter mEncounter;
     private final CrudEventBus mBus;
 
@@ -66,14 +65,12 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
-        Patient patient,
         Encounter encounter,
         CrudEventBus bus
     ) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
-        mPatient = patient;
         mEncounter = encounter;
         mBus = bus;
     }
@@ -81,7 +78,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     @Override protected EncounterAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
 
-        mServer.addEncounter(mPatient, mEncounter, future, future);
+        mServer.addEncounter(mEncounter, future, future);
         JsonEncounter jsonEncounter;
         try {
             jsonEncounter = future.get();
@@ -114,11 +111,13 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
                 EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
         }
 
-        Encounter encounter = Encounter.fromJson(mPatient.uuid, jsonEncounter);
+        Encounter encounter = Encounter.fromJson(jsonEncounter);
         ContentValues[] values = encounter.toContentValuesArray();
         if (values.length > 0) {
             int inserted = mContentResolver.bulkInsert(Observations.URI, values);
-
+            if (DenormalizeObservationsTask.needsDenormalization(values)) {
+                App.getModel().denormalizeObservations(mBus, encounter.patientUuid);
+            }
             if (inserted != values.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
                     inserted, encounter.observations.length);
@@ -159,7 +158,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             ENCOUNTER_PROJECTION,
             new EncounterUuidFilter(),
             mUuid,
-            new Encounter.Loader(mPatient.uuid),
+            new Encounter.Loader(),
             mBus);
         task.execute();
     }

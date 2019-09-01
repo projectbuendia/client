@@ -39,8 +39,8 @@ public class ConceptUuids {
     public static final String PCR_L_UUID = toUuid(162827);
     public static final String PCR_GP_UUID = toUuid(777000025);
 
-    // Essential status flags shown at top right: pregnant, IV access, on O2, cannot eat.
-    public static final String IV_UUID = "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07";
+    // Essential status flags shown at top right: pregnancy, IV access, on O2, cannot eat.
+    public static final String IV_UUID = toUuid(777000011);
     public static final String DYSPHAGIA_UUID = toUuid(888118789);
     public static final String OXYGEN_UUID = toUuid(888162738);
     public static final String PREGNANCY_UUID = toUuid(5272);
@@ -76,7 +76,11 @@ public class ConceptUuids {
     // has been carried out (e.g. a prescribed medication has been administered).
     // The timestamp of an observation for this concept should be the time the order
     // was executed, and the value of the observation should be the UUID of the order.
-    public static final String ORDER_EXECUTED_CONCEPT_UUID = "buendia_concept_order_executed";
+    public static final String ORDER_EXECUTED_UUID = "buendia_concept_order_executed";
+
+    // This is a custom Buendia-specific concept to indicate where a patient is
+    // placed, as a string consisting of a Location UUID, a slash, and a bed number.
+    public static final String PLACEMENT_UUID = "buendia_concept_placement";
 
 
     // ==== Pulse; used only for health checks and logging messages to the server.

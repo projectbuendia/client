@@ -15,37 +15,38 @@ import android.content.ContentValues;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
 public final @Immutable class Patient extends Model implements Comparable<Patient> {
     public static final CursorLoader<Patient> LOADER = cursor -> new Patient(
-        Utils.getString(cursor, Contracts.Patients.UUID),
-        Utils.getString(cursor, Contracts.Patients.ID),
-        Utils.getString(cursor, Contracts.Patients.GIVEN_NAME),
-        Utils.getString(cursor, Contracts.Patients.FAMILY_NAME),
-        Sex.forCode(Utils.getString(cursor, Contracts.Patients.SEX)),
-        Utils.getLocalDate(cursor, Contracts.Patients.BIRTHDATE),
-        Utils.getString(cursor, Contracts.Patients.LOCATION_UUID)
+        Utils.getString(cursor, Patients.UUID),
+        Utils.getString(cursor, Patients.ID),
+        Utils.getString(cursor, Patients.GIVEN_NAME),
+        Utils.getString(cursor, Patients.FAMILY_NAME),
+        Sex.forCode(Utils.getString(cursor, Patients.SEX)),
+        Utils.getLocalDate(cursor, Patients.BIRTHDATE),
+        Utils.getBoolean(cursor, Patients.PREGNANCY, false),
+        Utils.getString(cursor, Patients.LOCATION_UUID),
+        Utils.getString(cursor, Patients.BED_NUMBER)
     );
 
     public final String id;
     public final String givenName;
     public final String familyName;
     public final Sex sex;
-    // TODO: Make PatientDelta.birthdate and Patient.birthdate same type (LocalDate or DateTime).
     public final LocalDate birthdate;
+    public final boolean pregnancy;
     public final String locationUuid;
+    public final String bedNumber;
 
     /** Creates an instance of {@link Patient} from a network {@link JsonPatient} object. */
     public static Patient fromJson(JsonPatient patient) {
         return new Patient(
             patient.uuid, patient.id, patient.given_name, patient.family_name,
-            Sex.forCode(patient.sex), patient.birthdate,
-            patient.assigned_location != null ? patient.assigned_location.uuid : null
-        );
+            Sex.forCode(patient.sex), patient.birthdate, false, "", "");
     }
 
     @Override public int compareTo(Patient other) {
@@ -55,13 +56,15 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
     /** Puts this object's fields in a {@link ContentValues} object for insertion into a database. */
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(Contracts.Patients.UUID, uuid);
-        cv.put(Contracts.Patients.ID, id);
-        cv.put(Contracts.Patients.GIVEN_NAME, givenName);
-        cv.put(Contracts.Patients.FAMILY_NAME, familyName);
-        cv.put(Contracts.Patients.SEX, sex.code);
-        cv.put(Contracts.Patients.BIRTHDATE, Utils.formatDate(birthdate));
-        cv.put(Contracts.Patients.LOCATION_UUID, locationUuid);
+        cv.put(Patients.UUID, uuid);
+        cv.put(Patients.ID, id);
+        cv.put(Patients.GIVEN_NAME, givenName);
+        cv.put(Patients.FAMILY_NAME, familyName);
+        cv.put(Patients.SEX, sex.code);
+        cv.put(Patients.BIRTHDATE, Utils.formatDate(birthdate));
+        // PREGNANCY is a denormalized column and is never written directly.
+        // LOCATION_UUID is a denormalized column and is never written directly.
+        // BED_NUMBER is a denormalized column and is never written directly.
         return cv;
     }
 
@@ -71,13 +74,16 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
     }
 
     public Patient(String uuid, String id, String givenName, String familyName,
-                   Sex sex, LocalDate birthdate, String locationUuid) {
+                   Sex sex, LocalDate birthdate, boolean pregnancy,
+                   String locationUuid, String bedNumber) {
         super(uuid);
-        this.id = id;
-        this.givenName = givenName;
-        this.familyName = familyName;
+        this.id = Utils.toNonnull(id);
+        this.givenName = Utils.toNonnull(givenName);
+        this.familyName = Utils.toNonnull(familyName);
         this.sex = sex;
         this.birthdate = birthdate;
-        this.locationUuid = locationUuid;
+        this.pregnancy = pregnancy;
+        this.locationUuid = Utils.toNonnull(locationUuid);
+        this.bedNumber = Utils.toNonnull(bedNumber);
     }
 }

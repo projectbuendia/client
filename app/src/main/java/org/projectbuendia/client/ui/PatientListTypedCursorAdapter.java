@@ -58,7 +58,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private static final String EN_DASH = "\u2013";
 
     private Location[] mLocations;
-    private Map<String, Obs> mPregnancyObs = new HashMap<>();
     private Map<String, Obs> mConditionObs = new HashMap<>();
 
     /**
@@ -132,9 +131,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         ViewGroup parent) {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
 
-        // Show pregnancy status and condition, if the data for these has been loaded.
-        boolean pregnant = ConceptUuids.isYes(mPregnancyObs.get(patient.uuid));
-
+        // Show condition, if the data for this has been loaded.
         Obs obs = mConditionObs.get(patient.uuid);
         String condition = obs != null ? obs.value : null;
 
@@ -164,7 +161,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
                 drawableId = isChild ? R.drawable.ic_male_child : R.drawable.ic_male;
                 break;
             case FEMALE:
-                drawableId = pregnant ? R.drawable.ic_female_pregnant :
+                drawableId = patient.pregnancy ? R.drawable.ic_female_pregnant :
                     isChild ? R.drawable.ic_female_child : R.drawable.ic_female;
                 break;
         }
@@ -252,7 +249,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
             String localeTag = App.getSettings().getLocaleTag();
-            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.PREGNANCY_UUID, localeTag);
             mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID, localeTag);
             return null;
         }

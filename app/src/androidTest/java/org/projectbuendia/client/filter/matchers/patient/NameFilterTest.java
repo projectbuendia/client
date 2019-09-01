@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.utils.Utils;
 
 import androidx.test.filters.SmallTest;
@@ -46,7 +47,8 @@ public class NameFilterTest {
             null, "1",
             Utils.orDefault(givenName, "\u2013"),
             Utils.orDefault(familyName, "\u2013"),
-            null, null, "");
+            Sex.OTHER, null /* birthdate */, false /* pregnancy */,
+            "" /* location_uuid */, "" /* bed_number */);
     }
 
     /** Tests that name matching works on just the given name. */

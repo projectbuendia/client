@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.models;
 
+import org.projectbuendia.client.utils.Utils;
+
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /** An abstract base class for application models, which all have UUIDs. */
@@ -18,7 +20,7 @@ public abstract class Model {
     public final String uuid;
 
     protected Model(String uuid) {
-        this.uuid = uuid;
+        this.uuid = Utils.toNonnull(uuid);
     }
 
     public boolean equals(Object other) {

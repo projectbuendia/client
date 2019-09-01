@@ -18,14 +18,16 @@ import android.os.AsyncTask;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Model;
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.CursorLoader;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Model;
+import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
+
+import java.util.List;
 
 /**
  * An assisted injection factory that creates {@link AsyncTask}s for performing {@link AppModel}
@@ -43,8 +45,8 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link AddPatientTask}. */
-    public AddPatientTask newAddPatientTask(PatientDelta patientDelta, CrudEventBus bus) {
-        return new AddPatientTask(this, mServer, mContentResolver, patientDelta, bus);
+    public AddPatientTask newAddPatientTask(PatientDelta patientDelta, List<Obs> observations, CrudEventBus bus) {
+        return new AddPatientTask(this, mServer, mContentResolver, patientDelta, observations, bus);
     }
 
     public FetchSinglePatientTask newFetchSinglePatientTask(
@@ -53,7 +55,7 @@ public class TaskFactory {
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public VoidObsTask voidObsTask(CrudEventBus bus, VoidObs voidObs) {
+    public VoidObsTask newVoidObsTask(CrudEventBus bus, VoidObs voidObs) {
         return new VoidObsTask(this, mServer, mContentResolver, voidObs, bus);
     }
 
@@ -65,20 +67,13 @@ public class TaskFactory {
     }
 
     /** Creates a new {@link AddEncounterTask}. */
-    public AddEncounterTask newAddEncounterTask(
-        Patient patient, Encounter encounter, CrudEventBus bus) {
-        return new AddEncounterTask(
-            this, mServer, mContentResolver, patient, encounter, bus);
+    public AddEncounterTask newAddEncounterTask(Encounter encounter, CrudEventBus bus) {
+        return new AddEncounterTask(this, mServer, mContentResolver, encounter, bus);
     }
 
     /** Creates a new {@link SaveOrderTask}. */
     public SaveOrderTask newSaveOrderTask(Order order, CrudEventBus bus) {
         return new SaveOrderTask(this, mServer, mContentResolver, order, bus);
-    }
-
-    // DO NOT SUBMIT: work out why there's two of these.
-    public VoidObsTask newVoidObsAsyncTask(VoidObs obs, CrudEventBus bus) {
-        return new VoidObsTask(this, mServer, mContentResolver, obs, bus);
     }
 
     /** Creates a new {@link DeleteOrderTask}. */
@@ -96,5 +91,9 @@ public class TaskFactory {
         CrudEventBus bus) {
         return new LoadItemTask<>(
             mContentResolver, contentUri, projectionColumns, filter, constraint, loader, bus);
+    }
+
+    public DenormalizeObservationsTask newDenormalizeObservationsTask(String patientUuid, CrudEventBus bus) {
+        return new DenormalizeObservationsTask(this, mServer, mContentResolver, patientUuid, bus);
     }
 }

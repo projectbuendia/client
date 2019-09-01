@@ -40,6 +40,7 @@ import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
@@ -47,7 +48,6 @@ import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
@@ -90,7 +90,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
     private List<Obs> mObservations;
-    private boolean mPregnant;
 
     private final EventBusRegistrationInterface mDefaultEventBus;
     private final CrudEventBus mCrudEventBus;
@@ -133,8 +132,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         /** Updates the UI showing Ebola PCR lab test results for this patient. */
         void updateEbolaPcrTestResultUi(Map<String, Obs> observations);
 
-        /** Updates the UI showing the pregnancy status and IV status for this patient. */
-        void updatePregnancyAndIvStatusUi(Map<String, Obs> observations);
+        /** Updates the UI showing the IV and oxygen status for this patient. */
+        void updateSpecialLabels(Map<String, Obs> observations);
 
         /** Updates the general condition UI with the patient's current condition. */
         void updatePatientConditionUi(String generalConditionUuid);
@@ -152,7 +151,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             LocalDate firstSymptomsDate);
 
         /** Updates the UI with the patient's personal details (name, sex, etc.) */
-        void updatePatientDetailsUi(Patient patient, boolean pregnant);
+        void updatePatientDetailsUi(Patient patient);
 
         /** Shows a progress dialog with an indeterminate spinner in it. */
         void showWaitDialog(int titleId);
@@ -338,11 +337,11 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             }
         }
         Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
-        if (ConceptUuids.isYes(observations.get(ConceptUuids.PREGNANCY_UUID))) {
-            preset.pregnant = Preset.YES;
+        if (mPatient.pregnancy) {
+            preset.pregnancy = Preset.YES;
         }
         if (ConceptUuids.isYes(observations.get(ConceptUuids.IV_UUID))) {
-            preset.ivFitted = Preset.YES;
+            preset.ivAccess = Preset.YES;
         }
         preset.targetGroup = targetGroup;
 
@@ -392,7 +391,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         Interval interval = new Interval(start, start.plusDays(1));
         List<DateTime> executionTimes = new ArrayList<>();
         for (Obs obs : mObservations) {
-            if (ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
+            if (ConceptUuids.ORDER_EXECUTED_UUID.equals(obs.conceptUuid) &&
                 order.uuid.equals(obs.value)) {
                 executionTimes.add(obs.time);
             }
@@ -414,14 +413,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void setDate(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
-        Encounter encounter = new Encounter(
-            null, mPatientUuid,
-            // encounter UUID, which the server will generate
-            DateTime.now(),
-            new Observation[] {
-                new Observation(conceptUuid, date.toString(), Observation.Type.DATE)
-            }, null);
-        mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
+        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
+            DateTime.now().getMillis(), conceptUuid, ConceptType.DATE, date.toString(), null
+        ));
     }
 
     public void showAssignGeneralConditionDialog(
@@ -439,17 +433,10 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
-        Encounter encounter = new Encounter(
-            null, mPatientUuid,
-            // encounter UUID, which the server will generate
-            DateTime.now(),
-            new Observation[] {
-                new Observation(
-                    ConceptUuids.GENERAL_CONDITION_UUID,
-                    newConditionUuid,
-                    Observation.Type.NON_DATE)
-            }, null);
-        mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
+        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
+            DateTime.now().getMillis(), ConceptUuids.GENERAL_CONDITION_UUID,
+            ConceptType.CODED, newConditionUuid, null
+        ));
     }
 
     public void showAssignLocationDialog(Context context) {
@@ -489,13 +476,10 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
         LocalDate firstSymptomsDate = getObservedDate(
             latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
-        mPregnant = ConceptUuids.isYes(
-            latestObservations.get(ConceptUuids.PREGNANCY_UUID));
 
         mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
         mUi.updateEbolaPcrTestResultUi(latestObservations);
-        mUi.updatePregnancyAndIvStatusUi(latestObservations);
-        mUi.updatePatientDetailsUi(mPatient, mPregnant);
+        mUi.updateSpecialLabels(latestObservations);
         if (!mCharts.isEmpty()) {
             mUi.updateTilesAndGrid(
                 mCharts.get(mChartIndex),
@@ -579,7 +563,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
                 Patient patient = (Patient) event.item;
                 if (patient.uuid.equals(mPatientUuid)) {
                     mPatient = patient;
-                    mUi.updatePatientDetailsUi(mPatient, mPregnant);
+                    mUi.updatePatientDetailsUi(mPatient);
                     updatePatientLocationUi();
                 }
             } else if (event.item instanceof Encounter) {
@@ -692,8 +676,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         }
 
         public void onEventMainThread(VoidObservationsRequestEvent event) {
-            for (String uuid : event.Uuids) {
-                mAppModel.VoidObservation(mCrudEventBus, new VoidObs(uuid));
+            for (String uuid : event.uuids) {
+                mAppModel.voidObservation(mCrudEventBus, new VoidObs(uuid, mPatientUuid));
             }
             updatePatientObsUi();
         }
@@ -701,7 +685,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
             Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
-                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
+                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient.uuid, order.uuid);
             }
         }
     }

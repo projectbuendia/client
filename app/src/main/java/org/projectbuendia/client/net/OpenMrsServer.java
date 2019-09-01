@@ -35,7 +35,6 @@ import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -229,10 +228,9 @@ public class OpenMrsServer implements Server {
         return new JsonUser(object.getString("user_id"), object.getString("full_name"));
     }
 
-    @Override public void addEncounter(Patient patient,
-                             Encounter encounter,
-                             final Response.Listener<JsonEncounter> successListener,
-                             final Response.ErrorListener errorListener) {
+    @Override public void addEncounter(Encounter encounter,
+                                       final Response.Listener<JsonEncounter> successListener,
+                                       final Response.ErrorListener errorListener) {
         JSONObject json;
         try {
             json = encounter.toJson();

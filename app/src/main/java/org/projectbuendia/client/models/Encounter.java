@@ -18,6 +18,7 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
@@ -29,6 +30,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * An encounter in the app model. Encounters contain one or more observations taken at a particular
@@ -48,29 +51,30 @@ public class Encounter extends Model {
 
     public final String patientUuid;
     public final DateTime timestamp;
-    public final Observation[] observations;
+    public final Obs[] observations;
     public final String[] orderUuids;
 
     public Encounter(
         @Nullable String uuid, String patientUuid,
-        DateTime timestamp, Observation[] observations, String[] orderUuids) {
+        DateTime timestamp, Obs[] observations, String[] orderUuids) {
         super(uuid);
         this.patientUuid = patientUuid;
         this.timestamp = timestamp;
-        this.observations = Utils.orDefault(observations, new Observation[0]);
+        this.observations = Utils.orDefault(observations, new Obs[0]);
         this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
     }
 
-    public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
-        List<Observation> observations = new ArrayList<>();
+    public static Encounter fromJson(JsonEncounter encounter) {
+        List<Obs> observations = new ArrayList<>();
         if (encounter.observations != null) {
+            long millis = encounter.timestamp.getMillis();
             for (String key : encounter.observations.keySet()) {
                 String value = Utils.toNullableString(encounter.observations.get(key));
-                observations.add(new Observation(key, value, Observation.estimatedTypeFor(value)));
+                observations.add(new Obs(millis, key, estimatedTypeFor(key, value), value, null));
             }
         }
-        return new Encounter(encounter.uuid, patientUuid, encounter.timestamp,
-            observations.toArray(new Observation[0]), encounter.order_uuids);
+        return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.timestamp,
+            observations.toArray(new Obs[0]), encounter.order_uuids);
     }
 
     /** Serializes this into a {@link JSONObject}. */
@@ -79,16 +83,11 @@ public class Encounter extends Model {
         json.put(Server.PATIENT_UUID_KEY, patientUuid);
         json.put(Server.ENCOUNTER_TIMESTAMP, timestamp.getMillis()/1000);
         if (observations.length > 0) {
-            JSONArray observationsJson = new JSONArray();
-            for (Observation obs : observations) {
-                JSONObject observationJson = new JSONObject();
-                observationJson.put(Server.OBSERVATION_QUESTION_UUID, obs.conceptUuid);
-                String valueKey = obs.type == Observation.Type.DATE ?
-                    Server.OBSERVATION_ANSWER_DATE : Server.OBSERVATION_ANSWER_UUID;
-                observationJson.put(valueKey, obs.value);
-                observationsJson.put(observationJson);
+            JSONArray jsonObsArray = new JSONArray();
+            for (Obs obs : observations) {
+                jsonObsArray.put(obs.toJson());
             }
-            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observationsJson);
+            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, jsonObsArray);
         }
         if (orderUuids.length > 0) {
             JSONArray orderUuidsJson = new JSONArray();
@@ -108,7 +107,7 @@ public class Encounter extends Model {
     public ContentValues[] toContentValuesArray() {
         ContentValues[] cvs = new ContentValues[observations.length + orderUuids.length];
         for (int i = 0; i < observations.length; i++) {
-            Observation obs = observations[i];
+            Obs obs = observations[i];
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, obs.conceptUuid);
             cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
@@ -119,7 +118,7 @@ public class Encounter extends Model {
         }
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues cv = new ContentValues();
-            cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID);
+            cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_UUID);
             cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, uuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
@@ -129,70 +128,41 @@ public class Encounter extends Model {
         return cvs;
     }
 
-    /** Represents a single observation within this encounter. */
-    public static final class Observation {
-        public final String conceptUuid;
-        public final String value;
-        public final Type type;
-
-        /** Data type of the observation. */
-        public enum Type {
-            DATE,
-            NON_DATE
-        }
-
-        public Observation(String conceptUuid, String value, Type type) {
-            this.conceptUuid = conceptUuid;
-            this.value = value;
-            this.type = type;
-        }
-
-        /**
-         * Produces a best guess for the type of a given value, since the server doesn't give us
-         * typing information.
-         */
-        public static Type estimatedTypeFor(String value) {
-            try {
-                new DateTime(Long.parseLong(value));
-                return Type.DATE;
-            } catch (Exception e) {
-                return Type.NON_DATE;
-            }
+    /** A hacky attempt to guess the type of an observation value. :( */
+    public static ConceptType estimatedTypeFor(String conceptUuid, String value) {
+        if (eq(conceptUuid, ConceptUuids.PLACEMENT_UUID)) return ConceptType.TEXT;
+        try {
+            new DateTime(Long.parseLong(value));
+            return ConceptType.DATE;
+        } catch (Exception e) {
+            return ConceptType.CODED;
         }
     }
 
     /**
-     * An {@link CursorLoader} that loads {@link Encounter}s. Expects the {@link Cursor} to
-     * contain only a single encounter, represented by multiple observations, with one observation per
-     * row.
-     * <p/>
-     * <p>Unlike other {@link CursorLoader}s, {@link Encounter.Loader} must be instantiated
-     * once per patient, since {@link Encounter} contains the patient's UUID as one of its fields,
-     * which is not present in the database representation of an encounter.
+     * A CursorLoader that loads Encounters.  Expects the Cursor to contain only
+     * a single encounter, represented by multiple observations, with one observation per row.
      */
     public static class Loader implements CursorLoader<Encounter> {
-        private String mPatientUuid;
-
-        public Loader(String patientUuid) {
-            mPatientUuid = patientUuid;
-        }
-
         @Override public Encounter fromCursor(Cursor cursor) {
-            final String encounterUuid = cursor.getString(
-                cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
-            final long millis = cursor.getLong(
-                cursor.getColumnIndex(Observations.ENCOUNTER_MILLIS));
-            List<Observation> observations = new ArrayList<>();
-            cursor.move(-1);
+            final String encounterUuid = Utils.getString(cursor, Observations.ENCOUNTER_UUID);
+            final long millis = Utils.getLong(cursor, Observations.ENCOUNTER_MILLIS);
+            String patientUuid = null;
+            List<Obs> observations = new ArrayList<>();
+            cursor.move(-1); // TODO(ping): Why?
             while (cursor.moveToNext()) {
-                String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
-                observations.add(new Observation(
-                    cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
-                    value, Observation.estimatedTypeFor(value)
+                patientUuid = Utils.getString(cursor, Observations.PATIENT_UUID);
+                String conceptUuid = Utils.getString(cursor, Observations.CONCEPT_UUID);
+                String value = Utils.getString(cursor, Observations.VALUE);
+                observations.add(new Obs(
+                    millis, conceptUuid, estimatedTypeFor(conceptUuid, value), value, null
                 ));
             }
-            return new Encounter(encounterUuid, mPatientUuid, new DateTime(millis),
-                observations.toArray(new Observation[observations.size()]), null);
+            if (patientUuid != null) {
+                return new Encounter(encounterUuid, patientUuid, new DateTime(millis),
+                    observations.toArray(new Obs[observations.size()]), null);
+            }
+            return null; // PATIENT_UUID should never be null, so this should never happen
         }
     }
 }

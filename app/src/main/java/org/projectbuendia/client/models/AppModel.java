@@ -33,8 +33,11 @@ import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
+import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
+
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -102,12 +105,11 @@ public class AppModel {
         return fullSyncEnd;
     }
 
-    public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
-        String conditions = Contracts.Observations.UUID + " = ?";
+    public void voidObservation(CrudEventBus bus, VoidObs voidObs) {
+        String conditions = Observations.UUID + " = ?";
         ContentValues values = new ContentValues();
-        values.put(Contracts.Observations.VOIDED,1);
-        mContentResolver.update(Contracts.Observations.URI, values, conditions, new String[]{voidObs.Uuid});
-        mTaskFactory.voidObsTask(bus, voidObs).execute();
+        values.put(Observations.VOIDED, 1);
+        mTaskFactory.newVoidObsTask(bus, voidObs).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
@@ -151,8 +153,8 @@ public class AppModel {
      * {@link ItemCreatedEvent} with the newly-added patient on
      * the specified event bus when complete.
      */
-    public void addPatient(CrudEventBus bus, PatientDelta patientDelta) {
-        AddPatientTask task = mTaskFactory.newAddPatientTask(patientDelta, bus);
+    public void addPatient(CrudEventBus bus, PatientDelta patientDelta, List<Obs> observations) {
+        AddPatientTask task = mTaskFactory.newAddPatientTask(patientDelta, observations, bus);
         task.execute();
     }
 
@@ -185,22 +187,33 @@ public class AppModel {
      * Asynchronously adds an encounter that records an order as executed, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
-        addEncounter(bus, patient, new Encounter(
-            null, patient.uuid, DateTime.now(), null, new String[]{orderUuid}
-        ));
+    public void addOrderExecutedEncounter(CrudEventBus bus, String patientUuid, String orderUuid) {
+        mTaskFactory.newAddEncounterTask(new Encounter(
+            null, patientUuid, DateTime.now(), null, new String[] {orderUuid}
+        ), bus).execute();
+    }
+
+    /** Adds a single observation in an encounter, posting ItemCreatedEvent when complete. */
+    public void addObservationEncounter(CrudEventBus bus, String patientUuid, Obs obs) {
+        mTaskFactory.newAddEncounterTask(new Encounter(
+            null, patientUuid, DateTime.now(), new Obs[] {obs}, null
+        ), bus).execute();
     }
 
     /**
      * Asynchronously adds an encounter to a patient, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addEncounter(CrudEventBus bus, Patient patient, Encounter encounter) {
-        mTaskFactory.newAddEncounterTask(patient, encounter, bus).execute();
+    public void addEncounter(CrudEventBus bus, Encounter encounter) {
+        mTaskFactory.newAddEncounterTask(encounter, bus).execute();
     }
 
-    public void voidObservation(CrudEventBus bus, VoidObs obs) {
-        mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
+    /**
+     * Updates the denormalized observation fields in a row in the patient table
+     * with the latest unvoided values in the observations table.
+     */
+    public void denormalizeObservations(CrudEventBus bus, String patientUuid) {
+        mTaskFactory.newDenormalizeObservationsTask(patientUuid, bus).execute();
     }
 
     private static class LoadTypedCursorAsyncTask<T extends Model>

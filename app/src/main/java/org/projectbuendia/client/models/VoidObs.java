@@ -1,20 +1,11 @@
 package org.projectbuendia.client.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class VoidObs {
+    public final String obsUuid;
+    public final String patientUuid;
 
-    public String Uuid;
-
-    public VoidObs(String uuid) {
-        this.Uuid = uuid;
-    }
-
-    public JSONObject toJson() throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put("uuid", Uuid);
-
-        return json;
+    public VoidObs(String obsUuid, String patientUuid) {
+        this.obsUuid = obsUuid;
+        this.patientUuid = patientUuid;
     }
 }

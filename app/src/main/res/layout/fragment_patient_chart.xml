@@ -59,7 +59,7 @@
         app:attributeValue="–"/>
 
     <TextView
-        android:id="@+id/patient_chart_pregnant"
+        android:id="@+id/special_labels"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"

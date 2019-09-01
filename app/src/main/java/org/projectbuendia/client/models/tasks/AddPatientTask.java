@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
+import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -26,6 +27,8 @@ import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
@@ -33,6 +36,7 @@ import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -52,6 +56,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final PatientDelta mPatientDelta;
+    private final List<Obs> mObservations;
     private final CrudEventBus mBus;
     @Inject SyncManager mSyncManager;
 
@@ -63,11 +68,13 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         Server server,
         ContentResolver contentResolver,
         PatientDelta patientDelta,
+        List<Obs> observations,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
         mPatientDelta = patientDelta;
+        mObservations = observations;
         mBus = bus;
         App.inject(this);
     }
@@ -108,8 +115,13 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_CLIENT, null);
         }
-
         mUuid = json.uuid;
+
+        Encounter encounter = new Encounter(
+            null, mUuid, DateTime.now(), mObservations.toArray(new Obs[0]), null
+        );
+        App.getModel().addEncounter(App.getCrudEventBus(), encounter);
+
         return null;
     }
 

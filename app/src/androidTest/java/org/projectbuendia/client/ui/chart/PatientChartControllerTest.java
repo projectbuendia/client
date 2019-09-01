@@ -34,7 +34,6 @@ import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.Sex;
@@ -63,7 +62,7 @@ public final class PatientChartControllerTest {
     private static final String PATIENT_NAME_1 = "Bob";
     private static final String PATIENT_ID_1 = "patient-id-1";
     private static final Patient PATIENT =
-        new Patient(PATIENT_UUID_1, PATIENT_ID_1, "Given", "Family", Sex.OTHER, null, "");
+        new Patient(PATIENT_UUID_1, PATIENT_ID_1, "Given", "Family", Sex.OTHER, null, false, "", "");
 
     private static final Obs OBS_1 = new Obs(
         0, ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", "");
@@ -129,7 +128,7 @@ public final class PatientChartControllerTest {
                 mFakeChart, recentObservations, allObservations, ImmutableList.of(), null, null);
         verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
         verify(mMockUi).updateEbolaPcrTestResultUi(recentObservations);
-        verify(mMockUi).updatePregnancyAndIvStatusUi(recentObservations);
+        verify(mMockUi).updateSpecialLabels(recentObservations);
     }
 
     /** Tests that the UI is given updated patient data when patient data is fetched. */
@@ -141,7 +140,7 @@ public final class PatientChartControllerTest {
         // WHEN that patient's details are loaded
         mFakeCrudEventBus.post(new ItemLoadedEvent<>(PATIENT));
         // THEN the controller updates the UI
-        verify(mMockUi).updatePatientDetailsUi(PATIENT, false);
+        verify(mMockUi).updatePatientDetailsUi(PATIENT);
     }
 
     /** Tests that selecting a new general condition results in adding a new encounter. */
@@ -153,10 +152,8 @@ public final class PatientChartControllerTest {
         // WHEN a new general condition is set from the dialog
         mController.setCondition(ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID);
         // THEN a new encounter is added
-        verify(mMockAppModel).addEncounter(
-            any(CrudEventBus.class),
-            any(Patient.class),
-            any(Encounter.class));
+        verify(mMockAppModel).addObservationEncounter(
+            any(CrudEventBus.class), PATIENT_UUID_1, any(Obs.class));
     }
 
     /** Tests that selecting a form from the menu shows loading dialog. */

@@ -50,6 +50,9 @@ import android.widget.Toast;
 
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.data.IAnswerData;
+import org.javarosa.core.model.instance.FormInstance;
+import org.javarosa.core.model.instance.TreeElement;
+import org.javarosa.core.model.instance.TreeReference;
 import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
@@ -1234,6 +1237,7 @@ public class FormEntryActivity
 	private View createView(int event, boolean advancingPage, Preset preset) {
 		FormController formController = Collect.getInstance()
 				.getFormController();
+		FormInstance formInstance = formController.getFormDef().getMainInstance();
 //		setTitle(getString(R.string.app_name) + " > "
 //				+ formController.getFormTitle());
 
@@ -1454,6 +1458,9 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
+				TreeReference ref = formController.getFormIndex().getReference();
+				TreeElement element = formInstance.resolveReference(ref);
+
 				odkv = new ODKView(this, prompts, groups, advancingPage, preset);
                 if (preset != null
                         && preset.targetGroup != null
