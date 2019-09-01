@@ -56,6 +56,7 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
+import org.projectbuendia.client.sync.ConceptService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Logger;
@@ -174,6 +175,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
+        void showDateObsDialog(String title, String conceptUuid, LocalDate date);
         void showOrderDialog(String patientUuid, Order order);
         void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
         void showEditPatientDialog(Patient patient);
@@ -364,9 +366,19 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     @JavascriptInterface public void showObsDetails(String conceptUuids) {
-        if (eq(conceptUuids, ConceptUuids.PLACEMENT_UUID)) {
-            mUi.showPatientLocationDialog(mPatient);
-            return;
+        if (!conceptUuids.contains(",")) {
+            String uuid = conceptUuids;
+            if (eq(uuid, ConceptUuids.PLACEMENT_UUID)) {
+                mUi.showPatientLocationDialog(mPatient);
+                return;
+            }
+            Map<String, Obs> latest = mChartHelper.getLatestObservations(mPatientUuid);
+            ConceptService concepts = App.getConceptService();
+            if (concepts.getType(uuid) == ConceptType.DATE) {
+                String title = concepts.getName(uuid, App.getSettings().getLocale());
+                mUi.showDateObsDialog(title, uuid, getObservedDate(latest, uuid));
+                return;
+            }
         }
         mUi.showObsDetailDialog(
             null,
@@ -430,7 +442,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         LOG.finish("ChartJS");
     }
 
-    public void setDate(String conceptUuid, LocalDate date) {
+    public void submitDateObservation(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
         mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
             DateTime.now().getMillis(), conceptUuid, ConceptType.DATE, date.toString(), null

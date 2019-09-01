@@ -271,12 +271,12 @@ public final class PatientChartActivity extends LoggedInActivity {
     class DateObsDialog extends DatePickerDialog {
         private String mTitle;
 
-        public DateObsDialog(String title, final String conceptUuid, final LocalDate date) {
+        public DateObsDialog(String title, final String conceptUuid, LocalDate date) {
             super(
                 PatientChartActivity.this,
                 (picker, year, zeroBasedMonth, day) -> {
                     int month = zeroBasedMonth + 1;
-                    mController.setDate(conceptUuid, new LocalDate(year, month, day));
+                    mController.submitDateObservation(conceptUuid, new LocalDate(year, month, day));
                 },
                 date.getYear(),
                 date.getMonthOfYear() - 1,
@@ -364,6 +364,13 @@ public final class PatientChartActivity extends LoggedInActivity {
     public final class Ui implements PatientChartController.Ui {
         @Override public void setTitle(String title) {
             PatientChartActivity.this.setTitle(title);
+        }
+
+        @Override public void showDateObsDialog(String title, String uuid, LocalDate date) {
+            if (date == null) date = LocalDate.now();
+            DatePickerDialog dialog = new DateObsDialog(title, uuid, date);
+            dialog.updateDate(date.getYear(), date.getMonthOfYear() - 1, date.getDayOfMonth());
+            dialog.show();
         }
 
         // TODO/cleanup: As soon as we implement an ObsFormat formatter that displays
