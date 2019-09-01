@@ -150,8 +150,8 @@ public class Database extends SQLiteOpenHelper {
         clear(db);
     }
 
-    public void clear(SQLiteDatabase db) {
-        LOG.i("Clearing database.");
+    private void clear(SQLiteDatabase db) {
+        LOG.i("Dropping all tables");
         for (Table table : Table.values()) {
             db.execSQL("DROP TABLE IF EXISTS " + table);
         }
@@ -159,7 +159,7 @@ public class Database extends SQLiteOpenHelper {
     }
 
     @Override public void onCreate(SQLiteDatabase db) {
-        LOG.i("Initializing database");
+        LOG.i("Creating tables");
         for (Table table : Table.values()) {
             db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
         }
