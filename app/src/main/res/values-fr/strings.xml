@@ -62,6 +62,7 @@
   <string name="no_present_patients">Aucun patient présent</string>
   <string name="one_present_patient">1 patient présents</string>
   <string name="n_present_patients">%d patients présents</string>
+  <string name="all_patients">TOUS LES PATIENTS</string>
   <string name="all_present_patients">TOUS LES PATIENTS ACTUELLES</string>
 
   <string name="age_unknown">Âge inconnu</string>
@@ -228,6 +229,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="patient_list_fragment_sync_error">Erreur de synchronisation des données des patients. S\'il vous plaît vérifier les paramètres ou réessayez.</string>
   <string name="api_health_problem">Impossible de contacter le serveur. SVP voir la barre du bas de l\'écran pour plus d\'informations.</string>
   <string name="sync_failed_back">Arrière</string>
+  <string name="no_user">Aucun utilisateur n\'est connecté.</string>
+  <string name="no_location">Aucune information des lieux n\'a encore été chargée.</string>
   <string name="encounter_add_failed_unknown_reason">Erreur inconnue</string>
   <string name="encounter_add_failed_unknown_server_error">Erreur inconnue sur le serveur.</string>
   <string name="encounter_add_failed_interrupted">Demande de réseau a été interrompue.</string>
@@ -269,6 +272,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_wifi_disconnected">Wifi est déconnecté</string>
   <string name="troubleshoot_wifi_disconnected_solved">Reseau retabli</string>
   <string name="troubleshoot_wifi_disconnected_action_connect">Connectez</string>
+  <string name="troubleshoot_periodic_sync_disabled">Synchronisation périodique est actuellement désactivée.</string>
+  <string name="troubleshoot_periodic_sync_disabled_solved">Synchronisation périodique est maintenant activée.</string>
   <string name="troubleshoot_server_auth">Serveur nom d\'utilisateur / mot de passe peut être incorrect</string>
   <string name="troubleshoot_server_auth_solved">Nom d\'utilisateur/mot de passe corrigé</string>
   <string name="troubleshoot_server_auth_action_check">Vérifier</string>
@@ -326,6 +331,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="filter_group_default_name">Plusieurs filtres</string>
 
   <string name="patient_missing_age">Entrez l\'âge (en utilisant années, mois, ou les deux)</string>
+  <string name="patient_validation_age_limit">L\'âge ne peut pas être supérieur à 120 ans</string>
   <string name="patient_validation_missing_family_name">Entrez le nom de famille</string>
   <string name="patient_validation_missing_given_name">Entrez le nom donné</string>
   <string name="patient_validation_missing_id">Entrez l\'ID du patient</string>
@@ -350,8 +356,12 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_openmrs_root_url">URL de base d\'OpenMRS</string>
   <string name="pref_title_package_server_url">URL du serveur des packages</string>
   <string name="pref_title_language">Langue</string>
+  <string name="select_language">Sélectionnez la langue</string>
 
-  <string name="pref_title_apk_update_interval">APK mise à jour intervalle de vérification (secondes)</string>
+  <string name="pref_title_apk_update_interval">Intervalle de vérification des mises à jour APK (secondes)</string>
+  <string name="pref_title_small_sync_interval">Intervalle des petites synchronisations (seconds)</string>
+  <string name="pref_title_medium_sync_interval">Intervalle des moyennes synchronisations (seconds)</string>
+  <string name="pref_title_large_sync_interval">Intervalle des grandes synchronisations (seconds)</string>
   <string name="pref_title_form_instances_retained">Instances de formulaire de stocker localement</string>
   <string name="pref_desc_form_instances_retained">Normalement formes seront supprimés après avoir été envoyé au serveur. Sélectionnez cette option pour les garder pour le débogage.</string>
   <string name="pref_title_non_wifi_allowed">Permettrer les connexions sans wifi</string>
@@ -360,6 +370,9 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_desc_starting_patient_id">Entrez un ID du patient pour ouvrir l\'application avec le dossier du patient</string>
   <string name="pref_title_sync_adapter_preferred">Utiliser l\'ancien framework SyncAdapter</string>
   <string name="pref_desc_sync_adapter_preferred">Activez cette option pour utiliser SyncAdapter (qui necessité une connexion Internet) au lieu du ThreadedSyncScheduler intégré.  L\'app doit être redémarrée pour que cette modification soit prise en compte.</string>
+  <string name="waiting_for_sync">En attente de la fin de la synchronisation en cours...</string>
+  <string name="pref_title_periodic_sync_disabled">Synchronisation périodique désactivée</string>
+  <string name="pref_desc_periodic_sync_disabled">Désactivez le récupération périodique des données du serveur.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Appliquer et effacer les données locales</string>
@@ -370,6 +383,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="no_such_patient_as_of_48_min_ago">Aucun patient d\'il y a 48 min</string>
   <string name="observation">Observation</string>
   <string name="title_new_user">Nouvel utilisateur</string>
+  <string name="guest_user_initials">UI</string>
+  <string name="guest_user_name">Utilisateur invité</string>
   <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
   <string name="voiding">vide</string>
   <string name="void_observations">Observations Vides</string>

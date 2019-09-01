@@ -19,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.user.ActiveUserSetEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
@@ -30,6 +31,7 @@ import org.projectbuendia.client.events.user.UserAddedEvent;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.utils.AsyncTaskRunner;
+import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.EventBusInterface;
 import org.projectbuendia.client.utils.Logger;
 
@@ -38,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -81,6 +84,7 @@ public class UserManager {
     private boolean mSynced = false;
     private boolean mAutoCancelEnabled = false;
     private boolean mIsDirty = false;
+    @Inject Colorizer mColorizer;
     @Nullable private AsyncTask mLastTask;
     @Nullable private JsonUser mActiveUser;
 
@@ -226,6 +230,11 @@ public class UserManager {
         mAsyncTaskRunner = checkNotNull(asyncTaskRunner);
         mEventBus = checkNotNull(eventBus);
         mUserStore = checkNotNull(userStore);
+        App.inject(this);
+    }
+
+    public int getColor(JsonUser user) {
+        return user.isGuestUser() ? 0xff666666 : mColorizer.getColorArgb(user.getName());
     }
 
     /**

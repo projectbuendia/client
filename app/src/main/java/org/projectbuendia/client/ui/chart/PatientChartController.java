@@ -330,7 +330,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
         // Preset the provider and location so they don't appear as questions in the form.
         Preset preset = new Preset();
-        preset.providerUuid = user.uuid;
+        preset.providerUuid = user.getUuid();
         preset.locationUuid = mPatient.locationUuid;
         if (preset.locationUuid == null) {
             if (mAppModel.getDefaultLocation() != null) {

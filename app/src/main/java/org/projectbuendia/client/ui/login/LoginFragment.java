@@ -17,17 +17,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.ProgressFragment;
-import org.projectbuendia.client.utils.Colorizer;
+import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -39,17 +35,12 @@ public class LoginFragment extends ProgressFragment {
 
     private FragmentUi mFragmentUi = new FragmentUi();
     private UserListAdapter mUserListAdapter;
-
-    @Inject Colorizer mUserColorizer;
     @InjectView(R.id.users) GridView mUserGrid;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.inject(this);
-
         setContentLayout(R.layout.login_fragment);
-
-        mUserListAdapter = new UserListAdapter(getActivity(), mUserColorizer);
+        mUserListAdapter = new UserListAdapter(getActivity());
     }
 
     @Override public View onCreateView(

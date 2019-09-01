@@ -451,7 +451,7 @@ public class OdkActivityLauncher {
         JsonUser activeUser = App.getUserManager().getActiveUser();
         LOG.i("Submitting form instance to server");
         connection.postXformInstance(
-                patientUuid, activeUser.uuid, xml, successListener, errorListener);
+                patientUuid, activeUser.getUuid(), xml, successListener, errorListener);
     }
 
     private static void handleSubmitError(VolleyError error) {

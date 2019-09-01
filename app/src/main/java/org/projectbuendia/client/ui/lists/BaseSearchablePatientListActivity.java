@@ -15,7 +15,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
@@ -69,8 +68,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     @Override public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
 
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
 
         menu.findItem(R.id.action_new_patient).setOnMenuItemClickListener(
             menuItem -> {

@@ -48,6 +48,7 @@ public class LoginActivity extends BaseActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.inject(this);
+        setTitle(R.string.app_name);
 
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow

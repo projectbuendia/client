@@ -15,16 +15,15 @@ import org.projectbuendia.client.providers.Contracts.ChartItems;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
 import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.providers.Contracts.Forms;
-import org.projectbuendia.client.providers.Contracts.LocationNames;
 import org.projectbuendia.client.providers.Contracts.Locations;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.providers.Contracts.SyncTokens;
+import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.providers.Contracts.Users;
 import org.projectbuendia.client.sync.Database;
-import org.projectbuendia.client.providers.Contracts.Table;
 
 /** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
 public class BuendiaProvider extends DelegatingProvider<Database> {
@@ -52,8 +51,6 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             new GroupProviderDelegate(Forms.GROUP_TYPE, Table.FORMS));
         registry.registerDelegate(Locations.URI.getPath(),
             new GroupProviderDelegate(Locations.GROUP_TYPE, Table.LOCATIONS));
-        registry.registerDelegate(LocationNames.URI.getPath(),
-            new GroupProviderDelegate(LocationNames.GROUP_TYPE, Table.LOCATION_NAMES));
         registry.registerDelegate(Observations.URI.getPath(),
             new GroupProviderDelegate(Observations.GROUP_TYPE, Table.OBSERVATIONS));
         registry.registerDelegate(Orders.URI.getPath(),
@@ -70,8 +67,6 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             new ItemProviderDelegate(Forms.GROUP_TYPE, Table.FORMS, Forms.UUID));
         registry.registerDelegate(Locations.URI.getPath() + "/*",
             new ItemProviderDelegate(Locations.ITEM_TYPE, Table.LOCATIONS, Locations.UUID));
-        registry.registerDelegate(LocationNames.URI.getPath() + "/*",
-            new ItemProviderDelegate(LocationNames.ITEM_TYPE, Table.LOCATION_NAMES, null));
         registry.registerDelegate(Observations.URI.getPath() + "/*",
             new ItemProviderDelegate(Observations.ITEM_TYPE, Table.OBSERVATIONS, Observations.UUID));
         registry.registerDelegate(Orders.URI.getPath() + "/*",

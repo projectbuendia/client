@@ -368,7 +368,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
         List<String> names = new ArrayList<>();
         for (int i = 0; i < adapter.getCount(); i++) {
             JsonUser user = (JsonUser) adapter.getItem(i);
-            names.add(user.fullName);
+            names.add(user.getName());
         }
         int nextId = 1;
         while (names.contains("Test" + nextId + " User" + nextId)) {

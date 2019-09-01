@@ -82,9 +82,9 @@ public class OpenMrsServer implements Server {
         JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
             pairs.add("user_name");
-            pairs.add(user.fullName);
+            pairs.add(user.getName());
             pairs.add("user_uuid");
-            pairs.add(user.uuid);
+            pairs.add(user.getUuid());
         }
         for (int i = 0; i + 1 < pairs.size(); i += 2) {
             params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
@@ -275,7 +275,7 @@ public class OpenMrsServer implements Server {
             json = order.toJson();
             JsonUser user = App.getUserManager().getActiveUser();
             if (user != null) {
-                json.put("orderer_uuid", user.uuid);
+                json.put("orderer_uuid", user.getUuid());
             }
         } catch (Exception e) {
             errorListener.onErrorResponse(new VolleyError("failed to serialize request", e));
@@ -462,8 +462,6 @@ public class OpenMrsServer implements Server {
 
     @Override public void listLocations(final Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener) {
-
-
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails, "/locations",
             null,
@@ -474,6 +472,9 @@ public class OpenMrsServer implements Server {
                     for (int i = 0; i < results.length(); i++) {
                         JsonLocation location =
                             parseLocationJson(results.getJSONObject(i));
+                        if (location.names != null && !location.names.isEmpty()) {
+                            location.name = location.names.values().iterator().next();
+                        }
                         result.add(location);
                     }
                 } catch (JSONException e) {

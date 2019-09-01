@@ -15,8 +15,6 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -44,6 +42,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.net.Server;
 
 import java.io.File;
@@ -83,6 +83,9 @@ public class Utils {
     public static final int HOUR = 60 * MINUTE;  // in ms
     public static final int DAY = 24 * HOUR;  // in ms
 
+    private static final Bundle NO_TRANSITION =
+        ActivityOptions.makeCustomAnimation(App.getContext(), 0, 0).toBundle();
+
     private static Map<Integer, String> sHttpMethods = initHttpMethods();
     private static Map<Integer, String> initHttpMethods() {
         Map<Integer, String> map = new HashMap<>();
@@ -97,8 +100,7 @@ public class Utils {
         map.put(Request.Method.PATCH, "PATCH");
         return map;
     }
-    private static final Bundle NO_TRANSITION =
-        ActivityOptions.makeCustomAnimation(App.getContext(), 0, 0).toBundle();
+
 
     /** Prevent instantiation. */
     private Utils() { }
@@ -412,31 +414,31 @@ public class Utils {
     }
 
     public static Context applyLocaleSetting(Context context) {
-        return applyLocale(context, App.getSettings().getLocale());
-    }
-
-    /** Sets the default locale and returns a context configured for the given locale. */
-    public static Context applyLocale(Context context, Locale locale) {
-        Locale.setDefault(locale);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Configuration config = context.getResources().getConfiguration();
-            config.setLocale(locale);
-            config.setLayoutDirection(locale);
-            return context.createConfigurationContext(config);
-        } else {
-            Resources resources = context.getResources();
-            Configuration config = resources.getConfiguration();
-            config.locale = locale;
-            config.setLayoutDirection(locale);
-            resources.updateConfiguration(config, resources.getDisplayMetrics());
-            return context;
-        }
+        App.setLocale(App.getSettings().getLocale());
+        return App.getContext();
     }
 
     /** Restarts the current activity (for use after a configuration change). */
     public static void restartActivity(Activity activity) {
         activity.finish();
         activity.startActivity(activity.getIntent(), NO_TRANSITION);
+    }
+
+    /** Formats a location heading with an optional patient count. */
+    public static String formatLocationHeading(Context context, String locationUuid, long patientCount) {
+        LocationForest forest = App.getModel().getForest();
+        Location location = forest.get(locationUuid);
+        String locationName = location != null ? location.name : context.getString(R.string.unknown_location);
+        // If no patient count is available, only show the location name.
+        if (patientCount < 0) return locationName;
+        return locationName + "  \u00b7  " + formatPatientCount(context, patientCount);
+    }
+
+    /** Formats a localized patient count. */
+    public static String formatPatientCount(Context context, long count) {
+        return count == 0 ? context.getString(R.string.no_patients)
+            : count == 1 ? context.getString(R.string.one_patient)
+            : context.getString(R.string.n_patients, count);
     }
 
 

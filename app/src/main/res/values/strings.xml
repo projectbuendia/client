@@ -42,6 +42,8 @@
   <string name="given_name">Given name</string>
   <string name="family_name">Family name</string>
   <string name="title_new_user">New user</string>
+  <string name="guest_user_initials">GU</string>
+  <string name="guest_user_name">Guest User</string>
   <string name="action_search">Search</string>
   <string name="action_edit">Edit</string>
   <string name="action_go_to">Search by ID</string>
@@ -112,7 +114,6 @@
   <string name="order_execution_marked_as_given">&#x2714; Marked as given now</string>
   <string name="order_started_on_date_at_time">Started on %1$s at %2$s</string>
 
-  <string name="heading_with_patient_count">%1$s&#xa0;&#xa0;&#xb7;&#xa0;&#xa0;%2$s</string>
   <string name="unknown_tent">Unknown tent</string>
   <string name="unknown_zone">Unknown zone</string>
   <string name="mild_symptom">Mild</string>
@@ -358,6 +359,7 @@
   <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
   <string name="pref_title_package_server_url">Package server URL</string>
   <string name="pref_title_language">Language</string>
+  <string name="select_language">Select Language</string>
 
   <string name="pref_title_apk_update_interval">App update check interval (seconds)</string>
   <string name="pref_title_small_sync_interval">Small sync interval (seconds)</string>

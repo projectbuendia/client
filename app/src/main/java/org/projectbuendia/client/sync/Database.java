@@ -31,7 +31,7 @@ public class Database extends SQLiteOpenHelper {
     private static final Logger LOG = Logger.create();
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 34;
+    public static final int DATABASE_VERSION = 35;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
@@ -76,13 +76,8 @@ public class Database extends SQLiteOpenHelper {
 
         SCHEMAS.put(Table.LOCATIONS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
-            + "parent_uuid TEXT");
-
-        SCHEMAS.put(Table.LOCATION_NAMES, ""
-            + "location_uuid TEXT,"
-            + "locale TEXT,"
             + "name TEXT,"
-            + "UNIQUE (location_uuid, locale)");
+            + "parent_uuid TEXT");
 
         SCHEMAS.put(Table.OBSERVATIONS, ""
             // uuid intentionally allows null values, because temporary observations inserted
