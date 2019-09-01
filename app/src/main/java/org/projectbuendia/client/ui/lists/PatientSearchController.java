@@ -14,8 +14,8 @@ package org.projectbuendia.client.ui.lists;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
+import org.projectbuendia.client.events.data.AppPatientsLoadedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilterGroup;
@@ -238,9 +238,11 @@ public class PatientSearchController {
     }
 
     private class CreationSubscriber {
-        public void onEventMainThread(ItemCreatedEvent<Patient> event) {
-            Utils.logEvent("add_patient_succeeded");
-            mUi.goToPatientChart(event.item.uuid);
+        public void onEventMainThread(ItemCreatedEvent<?> event) {
+            if (event.item instanceof Patient) {
+                Utils.logEvent("add_patient_succeeded");
+                mUi.goToPatientChart(((Patient) event.item).uuid);
+            }
         }
     }
 
@@ -253,7 +255,7 @@ public class PatientSearchController {
     }
 
     private final class FilterSubscriber {
-        public void onEventMainThread(TypedCursorLoadedEvent<Patient> event) {
+        public void onEventMainThread(AppPatientsLoadedEvent event) {
             mCrudEventBus.unregister(this);
 
             // If a patient cursor was already open, close it.

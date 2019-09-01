@@ -66,10 +66,15 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
     }
 
     @SuppressWarnings("unused") // called by reflection from EventBus
-    public void onEventMainThread(ItemLoadedEvent<Order> event) {
-        mBus.post(mOrder.uuid != null ? new ItemUpdatedEvent<>(mOrder.uuid, event.item)
-            : new ItemCreatedEvent<>(event.item));
-        mBus.unregister(this);
+    public void onEventMainThread(ItemLoadedEvent<?> event) {
+        if (event.item instanceof Order) {
+            Order item = (Order) event.item;
+            mBus.post(mOrder.uuid != null
+                ? new ItemUpdatedEvent<>(mOrder.uuid, item)
+                : new ItemCreatedEvent<>(item)
+            );
+            mBus.unregister(this);
+        }
     }
 
     @SuppressWarnings("unused") // called by reflection from EventBus

@@ -153,9 +153,11 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(ItemLoadedEvent<Patient> event) {
-            mBus.post(new ItemCreatedEvent<>(event.item));
-            mBus.unregister(this);
+        public void onEventMainThread(ItemLoadedEvent<?> event) {
+            if (event.item instanceof Patient) {
+                mBus.post(new ItemCreatedEvent<>((Patient) event.item));
+                mBus.unregister(this);
+            }
         }
 
         public void onEventMainThread(ItemLoadFailedEvent event) {

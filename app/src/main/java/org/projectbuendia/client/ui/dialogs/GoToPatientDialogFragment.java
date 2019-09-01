@@ -100,14 +100,16 @@ public class GoToPatientDialogFragment extends DialogFragment {
         }
     }
 
-    public void onEventMainThread(ItemLoadedEvent<Patient> event) {
-        String id = mPatientId.getText().toString().trim();
-        Patient patient = event.item;
-        if (id.equals(patient.id)) {  // server returned the patient we were looking for
-            mPatientUuid = patient.uuid;
-            mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                " (" + patient.sex + ", " + Utils.birthdateToAge(
-                patient.birthdate, App.getInstance().getResources()) + ")");
+    public void onEventMainThread(ItemLoadedEvent<?> event) {
+        if (event.item instanceof Patient) {
+            String id = mPatientId.getText().toString().trim();
+            Patient patient = (Patient) event.item;
+            if (id.equals(patient.id)) {  // server returned the patient we were looking for
+                mPatientUuid = patient.uuid;
+                mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
+                    " (" + patient.sex + ", " + Utils.birthdateToAge(
+                    patient.birthdate, App.getInstance().getResources()) + ")");
+            }
         }
     }
 
