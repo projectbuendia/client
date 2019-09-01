@@ -31,7 +31,7 @@ public class Database extends SQLiteOpenHelper {
     private static final Logger LOG = Logger.create();
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 35;
+    public static final int DATABASE_VERSION = 36;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
@@ -129,9 +129,9 @@ public class Database extends SQLiteOpenHelper {
             + "full_sync_start_millis INTEGER,"
             + "full_sync_end_millis INTEGER");
 
-        SCHEMAS.put(Table.SYNC_TOKENS, ""
+        SCHEMAS.put(Table.BOOKMARKS, ""
             + "table_name TEXT PRIMARY KEY NOT NULL,"
-            + "sync_token TEXT NOT NULL");
+            + "bookmark TEXT NOT NULL");
     }
 
     public Database(Context context) {

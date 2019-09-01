@@ -25,6 +25,7 @@ public interface Contracts {
 
     /** Names of tables in the local datastore. */
     enum Table {
+        BOOKMARKS("bookmarks"),
         CHART_ITEMS("chart_items"),
         CONCEPT_NAMES("concept_names"),
         CONCEPTS("concepts"),
@@ -34,8 +35,7 @@ public interface Contracts {
         OBSERVATIONS("observations"),
         ORDERS("orders"),
         PATIENTS("patients"),
-        USERS("users"),
-        SYNC_TOKENS("sync_tokens");
+        USERS("users");
 
         public String name;
 
@@ -50,6 +50,13 @@ public interface Contracts {
 
     // Each interface below corresponds to one SQLite table in the local datastore.  The column
     // names defined in the constants should exactly match the schemas defined in Database.java.
+
+    interface Bookmarks {
+        Uri URI = buildContentUri("bookmarks");
+        String ITEM_TYPE = buildItemType("bookmark");
+        String TABLE_NAME = "table_name";
+        String BOOKMARK = "bookmark";
+    }
 
     interface ChartItems {
         Uri URI = buildContentUri("chart-items");
@@ -139,13 +146,6 @@ public interface Contracts {
          */
         String FULL_SYNC_END_MILLIS = "full_sync_end_millis";
 
-    }
-
-    interface SyncTokens {
-        Uri URI = buildContentUri("sync-tokens");
-        String ITEM_TYPE = buildItemType("sync-token");
-        String TABLE_NAME = "table_name";
-        String SYNC_TOKEN = "sync_token";
     }
 
     interface Observations {

@@ -20,7 +20,7 @@ import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.providers.Contracts.SyncTokens;
+import org.projectbuendia.client.providers.Contracts.Bookmarks;
 import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.providers.Contracts.Users;
 import org.projectbuendia.client.sync.Database;
@@ -84,11 +84,11 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
         registry.registerDelegate(Misc.URI.getPath(),
             new InsertableItemProviderDelegate(Misc.ITEM_TYPE, Table.MISC, "rowid"));
 
-        // Custom provider for our sync token table.
-        registry.registerDelegate(SyncTokens.URI.getPath(),
-            new GroupProviderDelegate(SyncTokens.ITEM_TYPE, Table.SYNC_TOKENS));
-        registry.registerDelegate(SyncTokens.URI.getPath() + "/*",
-                new ItemProviderDelegate(SyncTokens.ITEM_TYPE, Table.SYNC_TOKENS, SyncTokens.TABLE_NAME));
+        // Custom provider for our bookmark table.
+        registry.registerDelegate(Bookmarks.URI.getPath(),
+            new GroupProviderDelegate(Bookmarks.ITEM_TYPE, Table.BOOKMARKS));
+        registry.registerDelegate(Bookmarks.URI.getPath() + "/*",
+                new ItemProviderDelegate(Bookmarks.ITEM_TYPE, Table.BOOKMARKS, Bookmarks.TABLE_NAME));
 
         return registry;
     }
