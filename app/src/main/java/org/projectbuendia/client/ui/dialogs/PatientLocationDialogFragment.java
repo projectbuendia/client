@@ -16,7 +16,11 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.view.WindowManager;
+import android.widget.EditText;
 
 import com.google.android.flexbox.FlexboxLayout;
 
@@ -39,6 +43,8 @@ import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
 
+import static org.projectbuendia.client.utils.Utils.eq;
+
 /** A {@link DialogFragment} for updating a patient's location and bed number. */
 public class PatientLocationDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
@@ -49,6 +55,9 @@ public class PatientLocationDialogFragment extends DialogFragment {
     private FlexboxLayout mContainer;
     private LocationOptionList mList;
     private String patientUuid;
+    private EditText mBedNumber;
+    private String initialLocationUuid;
+    private String initialBedNumber;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static PatientLocationDialogFragment newInstance(Patient patient) {
@@ -79,10 +88,36 @@ public class PatientLocationDialogFragment extends DialogFragment {
         dialog.getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
+        initialLocationUuid = getArguments().getString("locationUuid");
+        initialBedNumber = getArguments().getString("bedNumber");
+
         LocationForest forest = mModel.getForest();
         mList = new LocationOptionList(c.findView(R.id.list_container), true);
         mList.setLocations(forest, forest.getLeaves());
-        mList.setSelectedLocation(forest.get(getArguments().getString("locationUuid")));
+        mList.setSelectedLocation(forest.get(initialLocationUuid));
+
+        mBedNumber = c.findView(R.id.bed_number);
+        mBedNumber.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
+        mBedNumber.setText(initialBedNumber);
+        mBedNumber.setSelection(mBedNumber.getText().length());
+        mBedNumber.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override public void afterTextChanged(Editable s) {
+                if (eq(mList.getSelectedLocation().uuid, initialLocationUuid)) {
+                    initialBedNumber = mBedNumber.getText().toString();
+                }
+            }
+        });
+        mList.setOnLocationSelectedListener(location -> {
+            if (eq(location.uuid, initialLocationUuid)) {
+                mBedNumber.setText(initialBedNumber);
+                mBedNumber.setSelection(mBedNumber.getText().length());
+            } else {
+                mBedNumber.setText("");
+            }
+        });
+
         return dialog;
     }
 
@@ -91,7 +126,8 @@ public class PatientLocationDialogFragment extends DialogFragment {
         ((PatientChartActivity) getActivity()).getUi().showWaitDialog(R.string.title_updating_patient);
 
         Location location = mList.getSelectedLocation();
-        String placement = location != null ? location.uuid : null;
+        String bedNumber = mBedNumber.getText().toString().toUpperCase();
+        String placement = location != null ? location.uuid + "/" + bedNumber : null;
         mModel.addObservationEncounter(mCrudEventBus, patientUuid, new Obs(
             DateTime.now().getMillis(), ConceptUuids.PLACEMENT_UUID,
             ConceptType.TEXT, placement, null
