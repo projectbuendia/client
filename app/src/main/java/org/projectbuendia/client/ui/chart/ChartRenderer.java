@@ -186,11 +186,14 @@ public class ChartRenderer {
 
         GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
                           List<Obs> observations, List<Order> orders) {
+            LOG.start("GridHtmlGenerator");
+
             mOrders = orders;
             mNow = DateTime.now();
+            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATE_UUID);
+            mAdmissionDate = obs != null ? Utils.toLocalDate(obs.value) : null;
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
-            LOG.start("GridHtmlGenerator");
             for (ChartSection section : chart.fixedGroups) {
                 mFixedRows.add(createTiles(section, latestObservations));
             }
@@ -208,9 +211,6 @@ public class ChartRenderer {
             addObservations(observations, ordersByUuid);
             addOrders(orders);
             insertEmptyColumns();
-
-            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATE_UUID);
-            mAdmissionDate = obs != null ? Utils.toLocalDate(obs.value) : null;
 
             LOG.elapsed("GridHtmlGenerator", "Data prepared");
         }
