@@ -20,7 +20,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
-public final @Immutable class Patient extends Model implements Comparable<Patient> {
+public final @Immutable class Patient extends Model {
     public static final CursorLoader<Patient> LOADER = cursor -> new Patient(
         Utils.getString(cursor, Patients.UUID),
         Utils.getString(cursor, Patients.ID),
@@ -48,10 +48,6 @@ public final @Immutable class Patient extends Model implements Comparable<Patien
             patient.uuid, patient.id, patient.given_name, patient.family_name,
             patient.sex, patient.birthdate, false /* pregnancy */,
             "" /* locationUuid */, "" /* bedNumber */);
-    }
-
-    @Override public int compareTo(Patient other) {
-        return Utils.ALPHANUMERIC_COMPARATOR.compare(id, other.id);
     }
 
     /** Puts this object's fields in a {@link ContentValues} object for insertion into a database. */
