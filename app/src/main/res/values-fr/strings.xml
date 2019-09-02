@@ -134,8 +134,8 @@
   <string name="order_dosage_series">%1$s, donné %2$d fois par jour</string>
   <string name="order_unspecified_dosage">Dosage non spécifié</string>
   <string name="order_frequency_value">%1$dx/jour</string>
-  <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois on %2$s</string>
-  <string name="order_execution_historical_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois on %2$s</string>
+  <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois %2$s</string>
+  <string name="order_execution_historical_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois %2$s</string>
   <string name="order_execution_today_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois aujourd\'hui, %2$s</string>
   <string name="order_execution_today_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois aujourd\'hui, %2$s</string>
   <string name="order_execution_mark_as_given">Marquer comme donné maintenant</string>
@@ -401,6 +401,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_sync_adapter_preferred">Utiliser l\'ancien framework SyncAdapter</string>
   <string name="pref_desc_sync_adapter_preferred">Activez cette option pour utiliser SyncAdapter (qui necessité une connexion Internet) au lieu du ThreadedSyncScheduler intégré.  L\'app doit être redémarrée pour que cette modification soit prise en compte.</string>
   <string name="waiting_for_sync">En attente de la fin de la synchronisation en cours...</string>
+  <string name="pref_title_server_responses_fabricated">Fabriquer les reponses du serveur</string>
+  <string name="pref_desc_server_responses_fabricated">Si le serveur n\'est pas disponible, fabriquez ses reponses and procéder tout même.</string>
   <string name="pref_title_periodic_sync_disabled">Synchronisation périodique désactivée</string>
   <string name="pref_desc_periodic_sync_disabled">Désactivez le récupération périodique des données du serveur.</string>
 

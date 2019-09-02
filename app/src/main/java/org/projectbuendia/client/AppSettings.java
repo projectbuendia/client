@@ -200,5 +200,10 @@ public class AppSettings {
         return prefs.getInt("large_sync_interval",
             resources.getInteger(R.integer.large_sync_interval_default));
     }
+
+    /** Gets the setting for whether to fabricate responses when the server fails. */
+    public boolean getServerResponsesFabricated() {
+        return prefs.getBoolean("server_responses_fabricated", false);
+    }
 }
 

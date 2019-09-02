@@ -31,6 +31,13 @@
             android:summary="@string/pref_desc_non_wifi_allowed"
             android:defaultValue="@bool/non_wifi_allowed_default" />
 
+        <!-- Whether to fabricate server responses when the server is unavailable. -->
+        <CheckBoxPreference
+            android:key="server_responses_fabricated"
+            android:title="@string/pref_title_server_responses_fabricated"
+            android:summary="@string/pref_desc_server_responses_fabricated"
+            android:defaultValue="false" />
+
         <!-- Whether to use the SyncAdapter framework; default is to use our own scheduler. -->
         <CheckBoxPreference
             android:key="sync_adapter_preferred"

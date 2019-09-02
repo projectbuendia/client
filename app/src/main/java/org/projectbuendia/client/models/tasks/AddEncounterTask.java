@@ -31,6 +31,7 @@ import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -79,9 +80,9 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
 
         mServer.addEncounter(mEncounter, future, future);
-        JsonEncounter jsonEncounter;
+        Encounter encounter;
         try {
-            jsonEncounter = future.get();
+            encounter = Encounter.fromJson(future.get());
         } catch (InterruptedException e) {
             return new EncounterAddFailedEvent(EncounterAddFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
@@ -99,19 +100,19 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             }
             LOG.e("Error response: %s", ((VolleyError) e.getCause()).networkResponse);
 
-            return new EncounterAddFailedEvent(reason, (VolleyError) e.getCause());
+            if (App.getSettings().getServerResponsesFabricated()) {
+                encounter = mEncounter.withUuid(UUID.randomUUID().toString());
+            } else {
+                return new EncounterAddFailedEvent(reason, (VolleyError) e.getCause());
+            }
         }
 
-        if (jsonEncounter.uuid == null) {
-            LOG.e(
-                "Although the server reported an encounter successfully added, it did not "
-                    + "return a UUID for that encounter. This indicates a server error.");
-
+        if (encounter.uuid == null) {
+            LOG.e("Server returned an encounter with no UUID.");
             return new EncounterAddFailedEvent(
                 EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
         }
 
-        Encounter encounter = Encounter.fromJson(jsonEncounter);
         ContentValues[] values = encounter.toContentValuesArray();
         if (values.length > 0) {
             int inserted = mContentResolver.bulkInsert(Observations.URI, values);
@@ -129,7 +130,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             LOG.w("Encounter was sent to the server but contained no observations.");
         }
 
-        mUuid = jsonEncounter.uuid;
+        mUuid = encounter.uuid;
         return null;
     }
 
@@ -137,17 +138,6 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         // If an error occurred, post the error event.
         if (event != null) {
             mBus.post(event);
-            return;
-        }
-
-        // If the UUID was not set, a programming error occurred. Log and post an error event.
-        if (mUuid == null) {
-            LOG.e(
-                "Although an encounter add ostensibly succeeded, no UUID was set for the newly-"
-                    + "added encounter. This indicates a programming error.");
-
-            mBus.post(new EncounterAddFailedEvent(
-                EncounterAddFailedEvent.Reason.UNKNOWN, null /*exception*/));
             return;
         }
 

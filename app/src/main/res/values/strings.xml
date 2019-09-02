@@ -11,7 +11,7 @@
   specific language governing permissions and limitations under the License.
 -->
 <resources>
-  <string name="quoted_text">"%s"</string>
+  <string name="quoted_text">\"%s\"</string>
   <string name="two_items">%1$s and %2$s</string>
   <string name="more_than_two_items">%1$s, and %2$s</string>
   <string name="month_day_format">MMM d</string>
@@ -137,12 +137,13 @@
   <string name="order_dosage_series">%1$s, given %2$dx daily</string>
   <string name="order_unspecified_dosage">Unspecified dosage</string>
   <string name="order_frequency_value">%1$dx/day</string>
-  <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; on %2$s</string>
-  <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times on %2$s</string>
+  <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; %2$s</string>
+  <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times %2$s</string>
   <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today, %2$s</string>
   <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today, %2$s</string>
   <string name="order_execution_mark_as_given">Mark as given now</string>
   <string name="order_execution_marked_as_given">&#x2714; Marked as given now</string>
+  <string name="order_execution_delete_selected">Delete selected</string>
   <string name="order_started_datetime">Started %s</string>
 
   <string name="unknown_tent">Unknown tent</string>
@@ -405,6 +406,8 @@
   <string name="pref_desc_non_wifi_allowed">Allow the app to work with non-Wi-Fi (emulated or Bluetooth tethered) networking.</string>
   <string name="pref_title_starting_patient_id">Starting patient ID</string>
   <string name="pref_desc_starting_patient_id">If set, cause the app to go directly to a patient chart on startup.</string>
+  <string name="pref_title_server_responses_fabricated">Fabricate server responses</string>
+  <string name="pref_desc_server_responses_fabricated">If the server is unavailable, fabricate its responses and proceed anyway.</string>
   <string name="pref_title_sync_adapter_preferred">Old SyncAdapter framework preferred</string>
   <string name="pref_desc_sync_adapter_preferred">Cause the app to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
 

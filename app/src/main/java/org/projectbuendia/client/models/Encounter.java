@@ -163,4 +163,10 @@ public class Encounter extends Model {
         }
         return null; // PATIENT_UUID should never be null, so this should never happen
     }
+
+    /** For developer use only, to help fabricate a response from a nonexistent server. */
+    public Encounter withUuid(String uuid) {
+        return new Encounter(uuid, patientUuid, timestamp, observations, orderUuids);
+    }
+
 }
