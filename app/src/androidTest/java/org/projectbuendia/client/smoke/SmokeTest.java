@@ -97,10 +97,10 @@ import static org.projectbuendia.client.utils.Utils.eq;
         screenshot("Edited admission date");
         openForm("Patient attributes");  // step 8
         screenshot("Opened form");
-        answerMultipleCodedQuestion("Attributes", "Oxygen mask");
+        answerMultipleCodedQuestion("Attributes", "Pregnant");
         submitForm(); // step 9
         screenshot("Submitted form");
-        waitFor(viewThat(hasId(R.id.special_labels), hasText("Oxygen")));
+        waitFor(viewContainingText("pregnant, 22 y"));
         addOrder("Sunshine", "25 rays", "Get outside!");  // step 10
         screenshot("Added new order");
         editOrder("Sunshine", "Exercise!");  // step 11
@@ -170,7 +170,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void movePatient(String location) {
-        click(R.id.patient_placement);
+        click(firstViewWithText("Location"));
         click(location);
         click("OK");
         waitFor(viewThat(hasId(R.id.patient_placement),
