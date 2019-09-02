@@ -23,6 +23,8 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Utils;
@@ -337,6 +339,10 @@ public final @Immutable class Order extends Model {
                 + RS + (frequency > 0 ? (frequency + US + "x daily") : "")
                 + RS + (notes)
                 + RS + US + US + ".";
+        }
+
+        public String getFormattedFrequency() {
+            return frequency != 0 ? App.str(R.string.order_frequency_value, frequency) : "";
         }
 
         public boolean equals(Object other) {

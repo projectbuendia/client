@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -30,6 +29,7 @@ import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
     @InjectView(R.id.order_execution_list) TextView mOrderExecutionList;
     @InjectView(R.id.order_execution_mark_toggle) ToggleButton mMarkToggle;
-    private LayoutInflater mInflater;
+    private ContextUtils u;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderExecutionDialogFragment newInstance(
@@ -86,11 +86,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mInflater = LayoutInflater.from(getActivity());
+        u = ContextUtils.from(getActivity());
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.order_execution_dialog_fragment, null);
+        View fragment = u.inflateForDialog(R.layout.order_execution_dialog_fragment);
         ButterKnife.inject(this, fragment);
 
         updateUi(false);
@@ -126,10 +126,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             args.getString("route")
         ));
         int frequency = args.getInt("frequency");
+        String dosage = args.getString("dosage");
+        if (Utils.isBlank(dosage)) dosage = u.str(R.string.order_unspecified_dosage);
         mOrderDosage.setText(getString(
             frequency > 0 ? R.string.order_dosage_series : R.string.order_dosage_unary,
-            args.getString("dosage"),
-            frequency
+            dosage, frequency
         ));
         String notes = args.getString("notes");
         mOrderNotes.setText(notes);

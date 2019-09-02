@@ -198,6 +198,11 @@ public class Utils {
         return str == null || str.length() == 0;
     }
 
+    /** Performs a null-safe check for a null, empty, or whitespace String. */
+    public static boolean isBlank(@Nullable String str) {
+        return str == null || str.length() == 0 || str.trim().length() == 0;
+    }
+
     /** Performs a null-safe check for a String with at least one character. */
     public static boolean hasChars(@Nullable String str) {
         return str != null && str.length() > 0;

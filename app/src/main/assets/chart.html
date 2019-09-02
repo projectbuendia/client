@@ -143,8 +143,9 @@
             <span class="dosage">{{ins.dosage}}</span
               >{% if ins.route is not empty %}
                 <span class="route">{{ins.route}}</span
-              >{% endif %}{% if ins.frequency > 0 %},
-                <span class="frequency">{{ins.frequency}}/day</span>
+                >{% endif %}{% if ins.dosage + ins.route is not empty and ins.frequency > 0 %}<span class="sep">, </span
+                >{% endif %}{% if ins.frequency > 0 %}
+                <span class="frequency">{{ins.formattedFrequency}}</span>
               {% endif %}
           </div>
         </th>
