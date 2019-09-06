@@ -185,7 +185,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
             // Post an event that triggers the PatientChartController to record the order execution.
             EventBus.getDefault().post(new OrderExecutionSaveRequestedEvent(
-                orderUuid, interval, encounterTime));
+                orderUuid, encounterTime));
         }
     }
 }

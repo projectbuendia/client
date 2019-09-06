@@ -1,12 +1,11 @@
 package org.projectbuendia.client.events.actions;
 
-
-import java.util.ArrayList;
+import java.util.Collection;
 
 public class ObsDeleteRequestedEvent {
-    public final ArrayList<String> uuids;
+    public final Collection<String> uuids;
 
-    public ObsDeleteRequestedEvent(ArrayList<String> uuids) {
+    public ObsDeleteRequestedEvent(Collection<String> uuids) {
         this.uuids = uuids;
     }
 }
