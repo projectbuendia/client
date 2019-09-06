@@ -24,7 +24,6 @@ import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Model;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 
 import java.util.List;
@@ -55,8 +54,8 @@ public class TaskFactory {
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public ObsDeleteTask newVoidObsTask(CrudEventBus bus, VoidObs voidObs) {
-        return new ObsDeleteTask(this, mServer, mContentResolver, voidObs, bus);
+    public ObsDeleteTask newVoidObsTask(CrudEventBus bus, String obsUuid) {
+        return new ObsDeleteTask(this, mServer, mContentResolver, obsUuid, bus);
     }
 
     /** Creates a new {@link UpdatePatientTask}. */

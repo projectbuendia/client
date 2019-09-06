@@ -11,7 +11,6 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ObsDeleteFailedEvent;
 import org.projectbuendia.client.events.data.ObsDeleteFailedEvent.Reason;
-import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
@@ -25,25 +24,25 @@ public class ObsDeleteTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
-    private final VoidObs mVoidObs;
+    private final String mObsUuid;
     private final CrudEventBus mBus;
 
     public ObsDeleteTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
-        VoidObs voidObs,
+        String obsUuid,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
-        mVoidObs = voidObs;
+        mObsUuid = obsUuid;
         mBus = bus;
     }
 
     @Override protected ObsDeleteFailedEvent doInBackground(Void... params) {
         RequestFuture future = RequestFuture.newFuture();
-        mServer.deleteObservation(mVoidObs.obsUuid, future);
+        mServer.deleteObservation(mObsUuid, future);
         try {
             future.get();
         } catch (InterruptedException e) {
@@ -54,8 +53,8 @@ public class ObsDeleteTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
         ContentValues cv = new ContentValues();
         cv.put(Observations.VOIDED, 1);
         mContentResolver.update(
-            Observations.URI, cv, Observations.UUID + " = ?", new String[] {mVoidObs.obsUuid});
-        App.getModel().denormalizeObservations(App.getCrudEventBus(), mVoidObs.obsUuid);
+            Observations.URI, cv, Observations.UUID + " = ?", new String[] {mObsUuid});
+        App.getModel().denormalizeObservations(App.getCrudEventBus(), mObsUuid);
         return null;
     }
 

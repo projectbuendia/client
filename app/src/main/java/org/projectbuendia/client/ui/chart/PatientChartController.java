@@ -32,11 +32,11 @@ import org.projectbuendia.client.events.FetchXformFailedEvent.Reason;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
-import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
@@ -54,7 +54,6 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.ConceptService;
 import org.projectbuendia.client.sync.SyncManager;
@@ -665,7 +664,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
         public void onEventMainThread(ObsDeleteRequestedEvent event) {
             for (String uuid : event.uuids) {
-                mAppModel.voidObservation(mCrudEventBus, new VoidObs(uuid, mPatientUuid));
+                mAppModel.voidObservation(mCrudEventBus, uuid);
             }
             updatePatientObsUi();
         }

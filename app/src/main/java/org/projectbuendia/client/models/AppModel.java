@@ -12,7 +12,6 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -31,7 +30,6 @@ import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Misc;
-import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -100,11 +98,8 @@ public class AppModel {
         return fullSyncEnd;
     }
 
-    public void voidObservation(CrudEventBus bus, VoidObs voidObs) {
-        String conditions = Observations.UUID + " = ?";
-        ContentValues values = new ContentValues();
-        values.put(Observations.VOIDED, 1);
-        mTaskFactory.newVoidObsTask(bus, voidObs).execute();
+    public void voidObservation(CrudEventBus bus, String obsUuid) {
+        mTaskFactory.newVoidObsTask(bus, obsUuid).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
