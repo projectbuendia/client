@@ -239,9 +239,9 @@ public class EditPatientDialogFragment extends DialogFragment {
 
             long now = System.currentTimeMillis(); // not actually used by PatientDelta
             observations = ImmutableList.of(
-                new Obs(now, ConceptUuids.ADMISSION_DATE_UUID,
+                new Obs(null, now, ConceptUuids.ADMISSION_DATE_UUID,
                     ConceptType.DATE, LocalDate.now().toString(), ""),
-                new Obs(now, ConceptUuids.PLACEMENT_UUID,
+                new Obs(null, now, ConceptUuids.PLACEMENT_UUID,
                     ConceptType.TEXT, mModel.getDefaultLocation().uuid, "")
             );
             mModel.addPatient(mCrudEventBus, patient, observations);

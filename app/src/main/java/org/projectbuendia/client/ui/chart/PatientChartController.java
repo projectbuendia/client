@@ -427,7 +427,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     public void submitDateObservation(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
         mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
-            DateTime.now().getMillis(), conceptUuid, ConceptType.DATE, date.toString(), null
+            null, DateTime.now().getMillis(), conceptUuid, ConceptType.DATE, date.toString(), null
         ));
     }
 
@@ -447,7 +447,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
         mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
-            DateTime.now().getMillis(), ConceptUuids.GENERAL_CONDITION_UUID,
+            null, DateTime.now().getMillis(), ConceptUuids.GENERAL_CONDITION_UUID,
             ConceptType.CODED, newConditionUuid, null
         ));
     }

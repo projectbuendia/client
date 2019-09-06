@@ -66,7 +66,7 @@ public final class PatientChartControllerTest {
         new Patient(PATIENT_UUID_1, PATIENT_ID_1, "Given", "Family", Sex.OTHER, null, false, "", "");
 
     private static final Obs OBS_1 = new Obs(
-        0, ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", "");
+        null, 0, ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", "");
 
     private PatientChartController mController;
 

@@ -129,7 +129,7 @@ public class PatientLocationDialogFragment extends DialogFragment {
         String bedNumber = mBedNumber.getText().toString().toUpperCase();
         String placement = location != null ? location.uuid + "/" + bedNumber : null;
         mModel.addObservationEncounter(mCrudEventBus, patientUuid, new Obs(
-            DateTime.now().getMillis(), ConceptUuids.PLACEMENT_UUID,
+            null, DateTime.now().getMillis(), ConceptUuids.PLACEMENT_UUID,
             ConceptType.TEXT, placement, null
         ));
         dismiss();

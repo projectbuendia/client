@@ -70,7 +70,11 @@ public class Encounter extends Model {
             long millis = encounter.timestamp.getMillis();
             for (String key : encounter.observations.keySet()) {
                 String value = Utils.toNullableString(encounter.observations.get(key));
-                observations.add(new Obs(millis, key, estimatedTypeFor(key, value), value, null));
+                // TODO(ping): These observations will be undeletable until the next
+                // sync replaces them with observations that have UUIDs.  For these
+                // observations to be deletable immediately, we would need the server
+                // to return them in the Encounter response with individual UUIDs.
+                observations.add(new Obs(null, millis, key, estimatedTypeFor(key, value), value, null));
             }
         }
         return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.timestamp,
@@ -146,15 +150,17 @@ public class Encounter extends Model {
     public static Encounter load(Cursor cursor) {
         final String encounterUuid = Utils.getString(cursor, Observations.ENCOUNTER_UUID);
         final long millis = Utils.getLong(cursor, Observations.ENCOUNTER_MILLIS);
+        String uuid = null;
         String patientUuid = null;
         List<Obs> observations = new ArrayList<>();
         cursor.move(-1); // TODO(ping): Why?
         while (cursor.moveToNext()) {
+            uuid = Utils.getString(cursor, Observations.UUID);
             patientUuid = Utils.getString(cursor, Observations.PATIENT_UUID);
             String conceptUuid = Utils.getString(cursor, Observations.CONCEPT_UUID);
             String value = Utils.getString(cursor, Observations.VALUE);
             observations.add(new Obs(
-                millis, conceptUuid, estimatedTypeFor(conceptUuid, value), value, null
+                uuid, millis, conceptUuid, estimatedTypeFor(conceptUuid, value), value, null
             ));
         }
         if (patientUuid != null) {

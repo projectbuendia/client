@@ -191,7 +191,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
     private void internalMovePatient(String patientUuid, String locationUuid) {
         Encounter encounter = new Encounter(
             null, patientUuid, DateTime.now(), new Obs[] {new Obs(
-                DateTime.now().getMillis(), ConceptUuids.PLACEMENT_UUID,
+                null, DateTime.now().getMillis(), ConceptUuids.PLACEMENT_UUID,
                 ConceptType.TEXT, locationUuid, null
             )}, null
         );

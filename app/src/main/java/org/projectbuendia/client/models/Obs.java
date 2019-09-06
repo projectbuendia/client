@@ -33,7 +33,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 // TODO: Make ObsPoint a member of Obs; change the structure of Obs to be simply:
 // { final @Nonnull String uuid; String name; final @Nonnull ObsPoint point; } then delete
 // getObsPoint(), getObsValue(), compareTo(), getTypeOrdering(), getCodedValueOrdering().
-public final class Obs implements Comparable<Obs> {
+public final class Obs extends Model implements Comparable<Obs> {
     private static Logger LOG = Logger.create();
 
     /** The time at which this observation was taken. */
@@ -52,11 +52,13 @@ public final class Obs implements Comparable<Obs> {
     public final @Nullable String valueName;
 
     public Obs(
+        String uuid,
         long millis,
         @Nonnull String conceptUuid,
         @Nonnull ConceptType conceptType,
         @Nullable String value,
         @Nullable String valueName) {
+        super(uuid);
         this.time = new DateTime(millis);
         this.conceptUuid = checkNotNull(conceptUuid);
         this.conceptType = conceptType;
