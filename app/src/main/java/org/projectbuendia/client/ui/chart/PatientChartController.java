@@ -36,7 +36,7 @@ import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
-import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
@@ -663,7 +663,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             mAppModel.deleteOrder(mCrudEventBus, event.orderUuid);
         }
 
-        public void onEventMainThread(VoidObservationsRequestEvent event) {
+        public void onEventMainThread(ObsDeleteRequestedEvent event) {
             for (String uuid : event.uuids) {
                 mAppModel.voidObservation(mCrudEventBus, new VoidObs(uuid, mPatientUuid));
             }

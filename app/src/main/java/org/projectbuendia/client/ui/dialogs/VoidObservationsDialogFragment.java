@@ -12,7 +12,7 @@ import android.widget.ExpandableListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.ui.lists.ExpandableVoidObsRowAdapter;
 import org.projectbuendia.client.utils.Utils;
@@ -110,7 +110,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss())
                 .setPositiveButton(R.string.voiding, (dialogInterface, i) -> {
                     if ((listAdapter.mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
-                        EventBus.getDefault().post(new VoidObservationsRequestEvent(listAdapter.mCheckedItems));
+                        EventBus.getDefault().post(new ObsDeleteRequestedEvent(listAdapter.mCheckedItems));
                     }
                     dialogInterface.dismiss();
                 }).setTitle(getString(R.string.void_observations))

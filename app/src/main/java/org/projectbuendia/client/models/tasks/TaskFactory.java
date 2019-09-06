@@ -55,8 +55,8 @@ public class TaskFactory {
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public VoidObsTask newVoidObsTask(CrudEventBus bus, VoidObs voidObs) {
-        return new VoidObsTask(this, mServer, mContentResolver, voidObs, bus);
+    public ObsDeleteTask newVoidObsTask(CrudEventBus bus, VoidObs voidObs) {
+        return new ObsDeleteTask(this, mServer, mContentResolver, voidObs, bus);
     }
 
     /** Creates a new {@link UpdatePatientTask}. */

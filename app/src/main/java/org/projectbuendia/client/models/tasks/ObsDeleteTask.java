@@ -9,8 +9,8 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.VoidObsFailedEvent;
-import org.projectbuendia.client.events.data.VoidObsFailedEvent.Reason;
+import org.projectbuendia.client.events.data.ObsDeleteFailedEvent;
+import org.projectbuendia.client.events.data.ObsDeleteFailedEvent.Reason;
 import org.projectbuendia.client.models.VoidObs;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
@@ -18,7 +18,7 @@ import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
 
-public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
+public class ObsDeleteTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
@@ -28,7 +28,7 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
     private final VoidObs mVoidObs;
     private final CrudEventBus mBus;
 
-    public VoidObsTask(
+    public ObsDeleteTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
@@ -41,15 +41,15 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
         mBus = bus;
     }
 
-    @Override protected VoidObsFailedEvent doInBackground(Void... params) {
+    @Override protected ObsDeleteFailedEvent doInBackground(Void... params) {
         RequestFuture future = RequestFuture.newFuture();
         mServer.deleteObservation(mVoidObs.obsUuid, future);
         try {
             future.get();
         } catch (InterruptedException e) {
-            return new VoidObsFailedEvent(Reason.INTERRUPTED, e);
+            return new ObsDeleteFailedEvent(Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
-            return new VoidObsFailedEvent(Reason.UNKNOWN_SERVER_ERROR, (VolleyError) e.getCause());
+            return new ObsDeleteFailedEvent(Reason.UNKNOWN_SERVER_ERROR, (VolleyError) e.getCause());
         }
         ContentValues cv = new ContentValues();
         cv.put(Observations.VOIDED, 1);
@@ -59,7 +59,7 @@ public class VoidObsTask extends AsyncTask<Void, Void, VoidObsFailedEvent> {
         return null;
     }
 
-    @Override protected void onPostExecute(VoidObsFailedEvent event) {
+    @Override protected void onPostExecute(ObsDeleteFailedEvent event) {
         if (event != null) {
             mBus.post(event);
         }
