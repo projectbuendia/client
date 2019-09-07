@@ -54,7 +54,7 @@ public class TaskFactory {
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public ObsDeleteTask newVoidObsTask(CrudEventBus bus, String obsUuid) {
+    public ObsDeleteTask newDeleteObsTask(CrudEventBus bus, String obsUuid) {
         return new ObsDeleteTask(this, mServer, mContentResolver, obsUuid, bus);
     }
 
