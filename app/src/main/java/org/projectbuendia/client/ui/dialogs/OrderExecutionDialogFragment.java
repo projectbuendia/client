@@ -238,6 +238,17 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         // Light up the Delete button only if it has an effect.
         mDeleteButton.setEnabled(anyItemsChecked);
         mDeleteButton.setBackgroundColor(anyItemsChecked ? 0xffff6666 : 0xffcccccc);
+
+        // If execution is requested, prevent marking anything for deletion;
+        // otherwise just disable the checkboxes of items already marked for deletion.
+        if (mExecuteToggle.isChecked()) {
+            for (View item : mItems) item.findViewById(R.id.checkbox).setEnabled(false);
+        } else {
+            for (View item : mItems) {
+                String uuid = (String) item.getTag();
+                item.findViewById(R.id.checkbox).setEnabled(!mObsUuidsToDelete.contains(uuid));
+            }
+        }
     }
 
     /** Marks the checked items for deletion. */
@@ -248,13 +259,12 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             if (checkbox.isChecked()) {
                 mObsUuidsToDelete.add(uuid);
                 checkbox.setChecked(false);
-                checkbox.setEnabled(false);
             }
         }
         updateUi();
     }
 
-    /** Applies the requested new execution and/or deletions. */
+    /** Applies the requested new execution or deletions. */
     public void onSubmit() {
         Bundle args = getArguments();
         String orderUuid = args.getString("orderUuid");
