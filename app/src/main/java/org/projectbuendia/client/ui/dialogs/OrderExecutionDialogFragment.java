@@ -50,9 +50,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @InjectView(R.id.order_dosage) TextView mOrderDosage;
     @InjectView(R.id.order_notes) TextView mOrderNotes;
     @InjectView(R.id.order_start_time) TextView mOrderStartTime;
-    @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
-    @InjectView(R.id.order_execution_list) TextView mOrderExecutionList;
-    @InjectView(R.id.order_execution_mark_toggle) ToggleButton mMarkToggle;
+    @InjectView(R.id.execution_count) TextView mExecutionCount;
+    @InjectView(R.id.execution_list) TextView mExecutionList;
+    @InjectView(R.id.execute_toggle) ToggleButton mExecuteToggle;
     private ContextUtils u;
 
     /** Creates a new instance and registers the given UI, if specified. */
@@ -95,7 +95,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         ButterKnife.inject(this, fragment);
 
         updateUi(false);
-        mMarkToggle.setOnCheckedChangeListener((compoundButton, checked) -> updateUi(checked));
+        mExecuteToggle.setOnCheckedChangeListener((compoundButton, checked) -> updateUi(checked));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
             .setTitle(getString(R.string.order_execution_title))
@@ -106,7 +106,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         if (!getArguments().getBoolean("editable")) {
             // Historical counts can be viewed but not changed.
             builder.setNegativeButton(null, null);
-            mMarkToggle.setVisibility(View.GONE);
+            mExecuteToggle.setVisibility(View.GONE);
         }
         return builder.create();
     }
@@ -145,7 +145,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         // Describe how many times the order was executed during the selected interval.
         int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
         boolean plural = count != 1;
-        mOrderExecutionCount.setText(Html.fromHtml(getString(
+        mExecutionCount.setText(Html.fromHtml(getString(
             date.equals(LocalDate.now()) ?
                 (plural ? R.string.order_execution_today_plural_html
                     : R.string.order_execution_today_singular_html) :
@@ -155,7 +155,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
         // Show the list of times that the order was executed during the selected interval.
         boolean editable = args.getBoolean("editable");
-        Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
+        Utils.showIf(mExecutionList, executionTimes.size() > 0 || editable);
         List<String> htmlItems = new ArrayList<>();
         for (DateTime executionTime : executionTimes) {
             htmlItems.add(Utils.format(executionTime, HOUR_MINUTE));
@@ -166,11 +166,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 "<b>" + Utils.format(executionTime, HOUR_MINUTE) + "</b>" :
                 "<b>&nbsp;</b>");  // keep total height stable
         }
-        mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
+        mExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
     }
 
     public void onSubmit() {
-        if (mMarkToggle.isChecked()) {
+        if (mExecuteToggle.isChecked()) {
             Bundle args = getArguments();
             String orderUuid = args.getString("orderUuid");
             String instructions = args.getString("instructions");
