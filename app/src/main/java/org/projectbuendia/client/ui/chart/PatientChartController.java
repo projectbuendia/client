@@ -672,7 +672,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         public void onEventMainThread(OrderExecutionAddRequestedEvent event) {
             Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
-                mAppModel.addOrderExecutionEncounter(mCrudEventBus, mPatient.uuid, order.uuid);
+                mAppModel.addOrderExecutionEncounter(
+                    mCrudEventBus, mPatient.uuid, order.uuid, event.executionTime);
             }
         }
     }

@@ -19,10 +19,10 @@ import org.joda.time.DateTime;
  */
 public class OrderExecutionAddRequestedEvent {
     public final String orderUuid;
-    public final DateTime encounterTime;
+    public final DateTime executionTime;
 
-    public OrderExecutionAddRequestedEvent(String orderUuid, DateTime encounterTime) {
+    public OrderExecutionAddRequestedEvent(String orderUuid, DateTime executionTime) {
         this.orderUuid = orderUuid;
-        this.encounterTime = encounterTime;
+        this.executionTime = executionTime;
     }
 }

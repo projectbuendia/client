@@ -172,9 +172,10 @@ public class AppModel {
      * Asynchronously adds an encounter that records an order as executed, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addOrderExecutionEncounter(CrudEventBus bus, String patientUuid, String orderUuid) {
+    public void addOrderExecutionEncounter(
+        CrudEventBus bus, String patientUuid, String orderUuid, DateTime executionTime) {
         mTaskFactory.newAddEncounterTask(new Encounter(
-            null, patientUuid, DateTime.now(), null, new String[] {orderUuid}
+            null, patientUuid, executionTime, null, new String[] {orderUuid}
         ), bus).execute();
     }
 

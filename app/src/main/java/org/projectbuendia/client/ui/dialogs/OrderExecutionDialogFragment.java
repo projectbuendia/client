@@ -76,9 +76,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         args.putLongArray("executionTimes", Utils.toArray(millis));
         // To avoid the possibility of confusion when the dialog is opened just
         // before midnight, save the current time for use as the encounter time later.
-        DateTime encounterTime = DateTime.now();
-        args.putLong("encounterTimeMillis", encounterTime.getMillis());
-        args.putBoolean("editable", interval.contains(encounterTime));
+        DateTime executionTime = DateTime.now();
+        args.putLong("executionTimeMillis", executionTime.getMillis());
+        args.putBoolean("editable", interval.contains(executionTime));
         OrderExecutionDialogFragment f = new OrderExecutionDialogFragment();
         f.setArguments(args);
         return f;
@@ -160,9 +160,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             htmlItems.add(Utils.format(executionTime, HOUR_MINUTE));
         }
         if (editable) {
-            DateTime encounterTime = Utils.getDateTime(args, "encounterTimeMillis");
+            DateTime executionTime = Utils.getDateTime(args, "executionTimeMillis");
             htmlItems.add(orderExecutedNow ?
-                "<b>" + Utils.format(encounterTime, HOUR_MINUTE) + "</b>" :
+                "<b>" + Utils.format(executionTime, HOUR_MINUTE) + "</b>" :
                 "<b>&nbsp;</b>");  // keep total height stable
         }
         mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
@@ -176,16 +176,16 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             Interval interval = new Interval(
                 Utils.getDateTime(args, "intervalStartMillis"),
                 Utils.getDateTime(args, "intervalStopMillis"));
-            DateTime encounterTime = Utils.getDateTime(args, "encounterTimeMillis");
+            DateTime executionTime = Utils.getDateTime(args, "executionTimeMillis");
             Utils.logUserAction("order_execution_submitted",
                 "orderUuid", orderUuid,
                 "instructions", instructions,
                 "interval", "" + interval,
-                "encounterTime", "" + encounterTime);
+                "executionTime", "" + executionTime);
 
             // Post an event that triggers the PatientChartController to record the order execution.
-            EventBus.getDefault().post(new OrderExecutionAddRequestedEvent(
-                orderUuid, encounterTime));
+            EventBus.getDefault().post(
+                new OrderExecutionAddRequestedEvent(orderUuid, executionTime));
         }
     }
 }
