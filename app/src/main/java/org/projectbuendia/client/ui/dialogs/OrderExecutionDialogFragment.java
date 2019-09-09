@@ -13,11 +13,15 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -27,6 +31,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
@@ -34,15 +39,16 @@ import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
 import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
-import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
+import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY;
 
 /** A {@link DialogFragment} for recording that an order was executed. */
 public class OrderExecutionDialogFragment extends DialogFragment {
@@ -51,11 +57,15 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @InjectView(R.id.order_notes) TextView mOrderNotes;
     @InjectView(R.id.order_start_time) TextView mOrderStartTime;
     @InjectView(R.id.execution_count) TextView mExecutionCount;
-    @InjectView(R.id.execution_list) TextView mExecutionList;
+    @InjectView(R.id.execution_list) ViewGroup mExecutionList;
     @InjectView(R.id.execute_toggle) ToggleButton mExecuteToggle;
+    @InjectView(R.id.delete_button) Button mDeleteButton;
     private ContextUtils u;
+    private List<View> mItems;
+    private View mNewItem;
+    private Set<String> mObsUuidsToDelete;
 
-    /** Creates a new instance and registers the given UI, if specified. */
+    /** Creates a new instance showing a list of executions in the order given. */
     public static OrderExecutionDialogFragment newInstance(
         Order order, Interval interval, List<Obs> executions) {
         Bundle args = new Bundle();
@@ -68,18 +78,21 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         args.putLong("orderStartMillis", order.start.getMillis());
         args.putLong("intervalStartMillis", interval.getStartMillis());
         args.putLong("intervalStopMillis", interval.getEndMillis());
-        List<Long> millis = new ArrayList<>();
+        List<String> uuids = new ArrayList<>();
+        List<Long> times = new ArrayList<>();
         for (Obs obs : executions) {
             if (interval.contains(obs.time)) {
-                millis.add(obs.time.getMillis());
+                uuids.add(obs.uuid);
+                times.add(obs.time.getMillis());
             }
         }
-        args.putLongArray("executionTimes", Utils.toArray(millis));
+        args.putLongArray("executionTimes", Utils.toLongArray(times));
+        args.putStringArray("executionUuids", Utils.toStringArray(uuids));
         // To avoid the possibility of confusion when the dialog is opened just
         // before midnight, save the current time for use as the encounter time later.
         DateTime executionTime = DateTime.now();
         args.putLong("executionTimeMillis", executionTime.getMillis());
-        args.putBoolean("editable", interval.contains(executionTime));
+        args.putBoolean("executable", interval.contains(executionTime));
         OrderExecutionDialogFragment f = new OrderExecutionDialogFragment();
         f.setArguments(args);
         return f;
@@ -88,37 +101,28 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         u = ContextUtils.from(getActivity());
+        mObsUuidsToDelete = new HashSet<>();
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = u.inflateForDialog(R.layout.order_execution_dialog_fragment);
         ButterKnife.inject(this, fragment);
 
-        updateUi(false);
-        mExecuteToggle.setOnCheckedChangeListener((compoundButton, checked) -> updateUi(checked));
+        populateUi();
+        updateUi();
+        mExecuteToggle.setOnCheckedChangeListener((button, checked) -> updateUi());
+        mDeleteButton.setOnClickListener(view -> deleteSelected());
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(getActivity())
             .setTitle(getString(R.string.order_execution_title))
-            .setPositiveButton(R.string.ok, (dialogInterface, i) -> onSubmit())
+            .setPositiveButton(R.string.ok, (di, which) -> onSubmit())
             .setNegativeButton(R.string.cancel, null)
-            .setView(fragment);
-
-        if (!getArguments().getBoolean("editable")) {
-            // Historical counts can be viewed but not changed.
-            builder.setNegativeButton(null, null);
-            mExecuteToggle.setVisibility(View.GONE);
-        }
-        return builder.create();
+            .setView(fragment)
+            .create();
     }
 
-    void updateUi(boolean orderExecutedNow) {
+    private void populateUi() {
         Bundle args = getArguments();
-        LocalDate date = new DateTime(Utils.getLong(args, "intervalStartMillis")).toLocalDate();
-        List<DateTime> executionTimes = new ArrayList<>();
-        for (long millis : args.getLongArray("executionTimes")) {
-            executionTimes.add(new DateTime(millis));
-        }
-        Collections.sort(executionTimes);
 
         // Show what was ordered and when the order started.
         mOrderMedication.setText(getString(
@@ -128,7 +132,8 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         ));
         int frequency = args.getInt("frequency");
         String dosage = args.getString("dosage");
-        if (Utils.isBlank(dosage)) dosage = u.str(R.string.order_unspecified_dosage);
+        if (Utils.isBlank(dosage))
+            dosage = u.str(R.string.order_unspecified_dosage);
         mOrderDosage.setText(getString(
             frequency > 0 ? R.string.order_dosage_series : R.string.order_dosage_unary,
             dosage, frequency
@@ -142,51 +147,135 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             R.string.order_started_datetime,
             Utils.format(start, Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE)));
 
+        // Populate the list of execution times with checkable items.
+        boolean executable = args.getBoolean("executable");
+        String[] uuids = args.getStringArray("executionUuids");
+        long[] times = args.getLongArray("executionTimes");
+        Utils.showIf(mExecutionList, uuids.length > 0 || executable);
+
+        mItems = new ArrayList<>();
+        for (int i = 0; i < uuids.length; i++) {
+            View item = u.inflate(R.layout.checkable_item, mExecutionList);
+            u.setText(R.id.text, Utils.format(new DateTime(times[i]), HOUR_MINUTE));
+            mExecutionList.addView(item);
+            final CheckBox checkbox = u.findView(R.id.checkbox);
+            checkbox.setOnCheckedChangeListener((view, checked) -> updateUi());
+            item.setOnClickListener(view -> {
+                if (checkbox.isEnabled()) checkbox.setChecked(!checkbox.isChecked());
+            });
+            item.setTag(uuids[i]);
+            mItems.add(item);
+        }
+        if (executable) {
+            mNewItem = u.inflate(R.layout.checkable_item, mExecutionList);
+            DateTime executionTime = Utils.getDateTime(args, "executionTimeMillis");
+            TextView text = u.findView(R.id.text);
+            text.setText(Utils.format(executionTime, HOUR_MINUTE));
+            text.setTypeface(text.getTypeface(), Typeface.BOLD);
+            u.findView(R.id.checkbox).setVisibility(View.INVISIBLE);
+            mExecutionList.addView(mNewItem);
+            mNewItem.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /** Updates the UI to reflect the changes proposed by the user. */
+    void updateUi() {
+        Bundle args = getArguments();
+        boolean executeNow = mExecuteToggle.isChecked();
+
         // Describe how many times the order was executed during the selected interval.
-        int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
+        int count = mItems.size() + (executeNow ? 1 : 0);
         boolean plural = count != 1;
+        LocalDate date = Utils.getDateTime(args, "intervalStartMillis").toLocalDate();
         mExecutionCount.setText(Html.fromHtml(getString(
             date.equals(LocalDate.now()) ?
                 (plural ? R.string.order_execution_today_plural_html
                     : R.string.order_execution_today_singular_html) :
                 (plural ? R.string.order_execution_historical_plural_html
                     : R.string.order_execution_historical_singular_html),
-            count, Utils.format(date, MONTH_DAY))));
+            count, Utils.format(date, SENTENCE_MONTH_DAY))));
 
-        // Show the list of times that the order was executed during the selected interval.
-        boolean editable = args.getBoolean("editable");
-        Utils.showIf(mExecutionList, executionTimes.size() > 0 || editable);
-        List<String> htmlItems = new ArrayList<>();
-        for (DateTime executionTime : executionTimes) {
-            htmlItems.add(Utils.format(executionTime, HOUR_MINUTE));
+        // Update the list of execution times.
+        for (View item : mItems) {
+            String uuid = (String) item.getTag();
+            if (mObsUuidsToDelete.contains(uuid)) {
+                item.setBackgroundColor(0xffffcccc);
+                ((TextView) item.findViewById(R.id.text)).setTextColor(0xff999999);
+                item.findViewById(R.id.strikethrough).setVisibility(View.VISIBLE);
+            }
         }
-        if (editable) {
-            DateTime executionTime = Utils.getDateTime(args, "executionTimeMillis");
-            htmlItems.add(orderExecutedNow ?
-                "<b>" + Utils.format(executionTime, HOUR_MINUTE) + "</b>" :
-                "<b>&nbsp;</b>");  // keep total height stable
+        if (mNewItem != null) {
+            mNewItem.setVisibility(executeNow ? View.VISIBLE : View.INVISIBLE);
         }
-        mExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
+
+        boolean executable = args.getBoolean("executable");
+        boolean anyItemsChecked = false;
+        for (View item : mItems) {
+            CheckBox checkbox = item.findViewById(R.id.checkbox);
+            if (checkbox.isChecked()) anyItemsChecked = true;
+        }
+
+        // To keep the dialog simple, we only show one button at a time (either
+        // the Mark button or the Delete button).  To keep the dialog from
+        // resizing, we always show one button.
+        boolean showDeleteButton;
+        if (anyItemsChecked || Utils.hasItems(mObsUuidsToDelete)) {
+            showDeleteButton = true;
+        } else if (executable) {
+            showDeleteButton = false;
+        } else {
+            showDeleteButton = true;
+        }
+        Utils.showIf(mExecuteToggle, !showDeleteButton);
+        Utils.showIf(mDeleteButton, showDeleteButton);
+
+        // Special case: if neither button can ever be used, hide both.
+        if (!executable && !Utils.hasItems(mItems)) {
+            Utils.showIf(mExecuteToggle, false);
+            Utils.showIf(mDeleteButton, false);
+        }
+
+        // Light up the Delete button only if it has an effect.
+        mDeleteButton.setEnabled(anyItemsChecked);
+        mDeleteButton.setBackgroundColor(anyItemsChecked ? 0xffff6666 : 0xffcccccc);
     }
 
+    /** Marks the checked items for deletion. */
+    private void deleteSelected() {
+        for (View item : mItems) {
+            String uuid = (String) item.getTag();
+            CheckBox checkbox = item.findViewById(R.id.checkbox);
+            if (checkbox.isChecked()) {
+                mObsUuidsToDelete.add(uuid);
+                checkbox.setChecked(false);
+                checkbox.setEnabled(false);
+            }
+        }
+        updateUi();
+    }
+
+    /** Applies the requested new execution and/or deletions. */
     public void onSubmit() {
+        Bundle args = getArguments();
+        String orderUuid = args.getString("orderUuid");
+        String instructions = args.getString("instructions");
+        DateTime executionTime = Utils.getDateTime(args, "executionTimeMillis");
+
         if (mExecuteToggle.isChecked()) {
-            Bundle args = getArguments();
-            String orderUuid = args.getString("orderUuid");
-            String instructions = args.getString("instructions");
-            Interval interval = new Interval(
-                Utils.getDateTime(args, "intervalStartMillis"),
-                Utils.getDateTime(args, "intervalStopMillis"));
-            DateTime executionTime = Utils.getDateTime(args, "executionTimeMillis");
             Utils.logUserAction("order_execution_submitted",
                 "orderUuid", orderUuid,
                 "instructions", instructions,
-                "interval", "" + interval,
                 "executionTime", "" + executionTime);
 
-            // Post an event that triggers the PatientChartController to record the order execution.
             EventBus.getDefault().post(
                 new OrderExecutionAddRequestedEvent(orderUuid, executionTime));
+        }
+        if (!mObsUuidsToDelete.isEmpty()) {
+            Utils.logUserAction("order_execution_deleted",
+                "orderUuid", orderUuid,
+                "obsUuids", Joiner.on(",").join(mObsUuidsToDelete));
+            EventBus.getDefault().post(
+                new ObsDeleteRequestedEvent(mObsUuidsToDelete));
         }
     }
 }

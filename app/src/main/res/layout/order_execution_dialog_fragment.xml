@@ -12,60 +12,105 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp"
-    android:orientation="vertical">
+    >
 
     <TextView
         android:id="@+id/order_medication"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/text.heading" />
+        android:textAppearance="@style/text.heading"
+        tools:text="Paracetamol"
+        />
 
     <TextView
         android:id="@+id/order_dosage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        tools:text="200 mg, given 2x daily"
+        />
 
     <TextView
         android:id="@+id/order_notes"
-        android:textStyle="italic"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textStyle="italic"
+        tools:text="Administer as needed for pain"
+        />
 
     <TextView
         android:id="@+id/order_start_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24sp" />
+        android:layout_marginTop="24sp"
+        tools:text="Started on Apr 21 at 12:34"
+        />
 
     <TextView
         android:id="@+id/execution_count"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        tools:text="Given 2 times today, Apr 22"
+        />
 
-    <TextView
-        android:id="@+id/execution_list"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16sp"
         android:layout_marginTop="12sp"
-        android:text="11:30&#x0a;12:45"
-        android:lineSpacingMultiplier="1.5"
-        android:background="#ddd" />
+        android:background="#ddd"
+        >
 
-    <ToggleButton
-        android:id="@+id/execute_toggle"
-        android:textOn="@string/order_execution_marked_as_given_now"
-        android:textOff="@string/order_execution_mark_as_given_now"
-        android:padding="24sp"
-        android:layout_marginTop="32sp"
+        <LinearLayout
+            android:id="@+id/execution_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="18sp"
+            android:paddingBottom="18sp"
+            />
+
+    </ScrollView>
+
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/text"
-        android:background="@drawable/toggle_button_selector"
-        android:textColor="#fff"
-        android:checked="false"/>
+        android:layout_marginTop="24sp"
+        android:orientation="horizontal"
+        >
+
+        <ToggleButton
+            android:id="@+id/execute_toggle"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/toggle_button_selector"
+            android:checked="false"
+            android:paddingBottom="18sp"
+            android:paddingTop="18sp"
+            android:textAppearance="@style/text"
+            android:textColor="#fff"
+            android:textOff="@string/order_execution_mark_as_given_now"
+            android:textOn="@string/order_execution_marked_as_given_now"
+            />
+
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#f66"
+            android:checked="false"
+            android:paddingBottom="18sp"
+            android:paddingTop="18sp"
+            android:text="@string/order_execution_delete_selected"
+            android:textAppearance="@style/text"
+            android:textColor="#fff"
+            />
+
+    </LinearLayout>
 
 </LinearLayout>

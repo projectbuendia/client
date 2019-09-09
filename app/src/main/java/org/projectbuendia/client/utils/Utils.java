@@ -142,8 +142,15 @@ public class Utils {
         return array[index];
     }
 
+    /** Converts a list of Strings to an array of Strings. */
+    public static String[] toStringArray(List<String> items) {
+        if (items == null) return new String[0];
+        return items.toArray(new String[0]);
+    }
+
     /** Converts a list of Longs to an array of primitive longs. */
-    public static long[] toArray(List<Long> items) {
+    public static long[] toLongArray(List<Long> items) {
+        if (items == null) return new long[0];
         long[] array = new long[items.size()];
         int i = 0;
         for (Long item : items) {

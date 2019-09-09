@@ -248,12 +248,12 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override public void deleteObservation(String Uuid,
-                                         final Response.ErrorListener errorListener) {
+    @Override public void deleteObservation(
+        String uuid, final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
             Request.Method.DELETE,
-            mConnectionDetails.getRestApiUrl() + "/obs/" + Uuid,
+            "/observations/" + uuid,
             null,
             response -> LOG.i("Voided observation"),
             wrapErrorListener(errorListener));
