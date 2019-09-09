@@ -102,12 +102,13 @@ public class ChartDataHelper {
             conceptName, obs.conceptUuid, obs.value, obs.valueName);
     }
 
-    /** Gets all observations for a given patient, localized for a given locale. */
+    /** Gets all observations for a given patient in chronological order. */
     // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
     public List<Obs> getObservations(String patientUuid) {
         return getObservations(patientUuid, App.getSettings().getLocale());
     }
 
+    /** Gets all observations for a given patient in chronological order. */
     private List<Obs> getObservations(String patientUuid, Locale locale) {
         ConceptService concepts = App.getConceptService();
         List<Obs> results = new ArrayList<>();
@@ -115,7 +116,8 @@ public class ChartDataHelper {
             Observations.URI, null,
             Observations.PATIENT_UUID + " = ? and "
                 + Observations.VOIDED + " IS NOT 1",
-            new String[] {patientUuid}, null
+            new String[] {patientUuid},
+            Observations.ENCOUNTER_MILLIS
         )) {
             while (c.moveToNext()) {
                 results.add(loadObs(c, locale, concepts));
