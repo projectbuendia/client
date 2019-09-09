@@ -52,7 +52,7 @@ public final class Obs extends Model implements Comparable<Obs> {
     public final @Nullable String valueName;
 
     public Obs(
-        String uuid,
+        @Nullable String uuid,
         long millis,
         @Nonnull String conceptUuid,
         @Nonnull ConceptType conceptType,
@@ -121,6 +121,8 @@ public final class Obs extends Model implements Comparable<Obs> {
         });
     }
 
+    // TODO(ping): This should be the comparison operator on ObsValue, not Obs.
+    // The natural comparison order for Obs should be chronological.
     /**
      * Compares value instances according to a total ordering such that:
      * - The empty value (present == false) is ordered before all others.
