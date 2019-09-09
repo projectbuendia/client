@@ -22,7 +22,7 @@ import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
-import org.projectbuendia.client.events.data.OrderSaveFailedEvent;
+import org.projectbuendia.client.events.data.OrderAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.models.Order;
@@ -32,14 +32,8 @@ import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
 
-/**
- * An {@link AsyncTask} that adds an order, both on the server and in the local store.
- * <p/>
- * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the
- * given {@link CrudEventBus} with the added order. If the operation fails, an
- * {@link OrderSaveFailedEvent} is posted instead.
- */
-public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
+/** A task that submits a new order to the server and then saves it locally. */
+public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
@@ -51,8 +45,7 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
     private String mUuid;
 
-    /** Creates a new {@link SaveOrderTask}. */
-    public SaveOrderTask(
+    public AddOrderTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
@@ -79,35 +72,35 @@ public class SaveOrderTask extends AsyncTask<Void, Void, OrderSaveFailedEvent> {
 
     @SuppressWarnings("unused") // called by reflection from EventBus
     public void onEventMainThread(ItemLoadFailedEvent event) {
-        mBus.post(new OrderSaveFailedEvent(
-            OrderSaveFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
+        mBus.post(new OrderAddFailedEvent(
+            OrderAddFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
         mBus.unregister(this);
     }
 
-    @Override protected OrderSaveFailedEvent doInBackground(Void... params) {
+    @Override protected OrderAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonOrder> future = RequestFuture.newFuture();
         mServer.saveOrder(mOrder, future, future);
         JsonOrder json;
         try {
             json = future.get();
         } catch (InterruptedException e) {
-            return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.INTERRUPTED, e);
+            return new OrderAddFailedEvent(OrderAddFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
-            return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.UNKNOWN_SERVER_ERROR, e);
+            return new OrderAddFailedEvent(OrderAddFailedEvent.Reason.UNKNOWN_SERVER_ERROR, e);
         }
 
         // insert() is implemented as insert or replace, so we use it for both adding and updating.
         Uri uri = mContentResolver.insert(
             Orders.URI, Order.fromJson(json).toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
-            return new OrderSaveFailedEvent(OrderSaveFailedEvent.Reason.CLIENT_ERROR, null);
+            return new OrderAddFailedEvent(OrderAddFailedEvent.Reason.CLIENT_ERROR, null);
         }
 
         mUuid = json.uuid;
         return null;  // no error means success
     }
 
-    @Override protected void onPostExecute(OrderSaveFailedEvent event) {
+    @Override protected void onPostExecute(OrderAddFailedEvent event) {
         if (event != null) {  // an error occurred
             mBus.post(event);
             return;

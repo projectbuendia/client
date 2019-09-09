@@ -11,14 +11,8 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.events.DefaultCrudEventBus;
-
-/**
- * An event bus event indicating that adding an order failed.
- * <p/>
- * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
- */
-public class OrderSaveFailedEvent {
+/** Indicates that an attempt to submit a new order to the server failed. */
+public class OrderAddFailedEvent {
     public final Reason reason;
     public final Exception exception;
 
@@ -29,7 +23,7 @@ public class OrderSaveFailedEvent {
         INTERRUPTED
     }
 
-    public OrderSaveFailedEvent(Reason reason, Exception exception) {
+    public OrderAddFailedEvent(Reason reason, Exception exception) {
         this.reason = reason;
         this.exception = exception;
     }

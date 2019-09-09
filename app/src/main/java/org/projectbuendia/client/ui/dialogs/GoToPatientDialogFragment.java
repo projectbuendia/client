@@ -140,7 +140,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 } else {  // not found locally; check server
                     mPatientUuid = null;
                     mSearchResult.setText(R.string.searching_ellipsis);
-                    mAppModel.fetchSinglePatient(mBus, id);
+                    mAppModel.fetchPatient(mBus, id);
                 }
             }
         }

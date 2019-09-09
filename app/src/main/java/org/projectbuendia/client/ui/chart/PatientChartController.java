@@ -34,8 +34,8 @@ import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
-import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
-import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
@@ -622,7 +622,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             mUi.showError(messageId);
         }
 
-        public void onEventMainThread(OrderSaveRequestedEvent event) {
+        public void onEventMainThread(OrderAddRequestedEvent event) {
             DateTime start = event.start;
             DateTime stop = null;
 
@@ -643,7 +643,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             }
 
             LOG.i("Saving order: %s", event.instructions);
-            mAppModel.saveOrder(mCrudEventBus, new Order(
+            mAppModel.addOrder(mCrudEventBus, new Order(
                 event.orderUuid, event.patientUuid, event.instructions, start, stop));
         }
 
@@ -652,7 +652,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             DateTime newStop = DateTime.now();
             if (order.isSeries() && (order.stop == null || newStop.isBefore(order.stop))) {
                 LOG.i("Stopping order: %s", order.instructions);
-                mAppModel.saveOrder(mCrudEventBus, new Order(
+                mAppModel.addOrder(mCrudEventBus, new Order(
                     event.orderUuid, order.patientUuid, order.instructions, order.start, newStop
                 ));
             }
@@ -669,10 +669,10 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             updatePatientObsUi();
         }
 
-        public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
+        public void onEventMainThread(OrderExecutionAddRequestedEvent event) {
             Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
-                mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient.uuid, order.uuid);
+                mAppModel.addOrderExecutionEncounter(mCrudEventBus, mPatient.uuid, order.uuid);
             }
         }
     }

@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutionException;
  * <p>Posts an {@link ItemLoadedEvent} or an {@link ItemLoadFailedEvent} on
  * the given {@link CrudEventBus} to indicate success or failure.
  */
-public class FetchSinglePatientTask extends AsyncTask<Void, Void, ItemLoadFailedEvent> {
+public class FetchPatientTask extends AsyncTask<Void, Void, ItemLoadFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
@@ -49,8 +49,8 @@ public class FetchSinglePatientTask extends AsyncTask<Void, Void, ItemLoadFailed
 
     private String mUuid;
 
-    /** Creates a new {@link FetchSinglePatientTask}. */
-    public FetchSinglePatientTask(
+    /** Creates a new {@link FetchPatientTask}. */
+    public FetchPatientTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,

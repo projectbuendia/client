@@ -27,7 +27,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
@@ -184,7 +184,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 "encounterTime", "" + encounterTime);
 
             // Post an event that triggers the PatientChartController to record the order execution.
-            EventBus.getDefault().post(new OrderExecutionSaveRequestedEvent(
+            EventBus.getDefault().post(new OrderExecutionAddRequestedEvent(
                 orderUuid, encounterTime));
         }
     }

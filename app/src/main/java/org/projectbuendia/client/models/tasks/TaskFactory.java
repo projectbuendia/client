@@ -36,49 +36,41 @@ public class TaskFactory {
     private final Server mServer;
     private final ContentResolver mContentResolver;
 
-    /** Creates a new {@link TaskFactory}. */
-    public TaskFactory(
-        Server server, ContentResolver contentResolver) {
+    public TaskFactory(Server server, ContentResolver contentResolver) {
         mServer = server;
         mContentResolver = contentResolver;
     }
 
-    /** Creates a new {@link AddPatientTask}. */
     public AddPatientTask newAddPatientTask(JsonPatient patient, List<Obs> observations, CrudEventBus bus) {
         return new AddPatientTask(this, mServer, mContentResolver, patient, observations, bus);
     }
 
-    public FetchSinglePatientTask newFetchSinglePatientTask(
+    public FetchPatientTask newFetchPatientTask(
         String patientId, CrudEventBus bus) {
-        return new FetchSinglePatientTask(
+        return new FetchPatientTask(
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public ObsDeleteTask newDeleteObsTask(CrudEventBus bus, String obsUuid) {
-        return new ObsDeleteTask(this, mServer, mContentResolver, obsUuid, bus);
+    public DeleteObsTask newDeleteObsTask(CrudEventBus bus, String obsUuid) {
+        return new DeleteObsTask(this, mServer, mContentResolver, obsUuid, bus);
     }
 
-    /** Creates a new {@link UpdatePatientTask}. */
     public UpdatePatientTask newUpdatePatientTask(JsonPatient patient, CrudEventBus bus) {
         return new UpdatePatientTask(this, mServer, mContentResolver, patient, bus);
     }
 
-    /** Creates a new {@link AddEncounterTask}. */
     public AddEncounterTask newAddEncounterTask(Encounter encounter, CrudEventBus bus) {
         return new AddEncounterTask(this, mServer, mContentResolver, encounter, bus);
     }
 
-    /** Creates a new {@link SaveOrderTask}. */
-    public SaveOrderTask newSaveOrderTask(Order order, CrudEventBus bus) {
-        return new SaveOrderTask(this, mServer, mContentResolver, order, bus);
+    public AddOrderTask newAddOrderTask(Order order, CrudEventBus bus) {
+        return new AddOrderTask(this, mServer, mContentResolver, order, bus);
     }
 
-    /** Creates a new {@link DeleteOrderTask}. */
     public DeleteOrderTask newDeleteOrderTask(String orderUuid, CrudEventBus bus) {
         return new DeleteOrderTask(mServer, mContentResolver, orderUuid, bus);
     }
 
-    /** Creates a new {@link LoadItemTask}. */
     public <T extends Model> LoadItemTask<T> newLoadItemTask(
         Uri contentUri,
         String[] projectionColumns,

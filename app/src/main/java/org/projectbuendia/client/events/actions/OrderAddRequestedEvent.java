@@ -17,10 +17,10 @@ import org.joda.time.DateTime;
 import org.projectbuendia.client.models.Order;
 
 /**
- * Event indicating that the user has entered an order that needs to be saved
- * (both stored locally on the client and posted to the server's order API).
+ * Event indicating that the user has entered a new order that needs to be
+ * submitted to the server and then saved locally on the client.
  */
-public class OrderSaveRequestedEvent {
+public class OrderAddRequestedEvent {
     // If orderUuid is set, the event indicates a revision of an existing
     // order; otherwise, the event indicates a creation of a new order.
     public final String orderUuid;
@@ -29,7 +29,7 @@ public class OrderSaveRequestedEvent {
     public final DateTime start;
     public final Integer durationDays;
 
-    public OrderSaveRequestedEvent(
+    public OrderAddRequestedEvent(
         @Nullable String orderUuid, String patientUuid, Order.Instructions instructions,
         DateTime start, @Nullable Integer durationDays) {
         this.orderUuid = orderUuid;

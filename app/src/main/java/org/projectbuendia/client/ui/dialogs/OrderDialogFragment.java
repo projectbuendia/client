@@ -34,7 +34,7 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
-import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
@@ -253,7 +253,7 @@ public class OrderDialogFragment extends DialogFragment {
         start = Utils.orDefault(start, now);
 
         // Post an event that triggers the PatientChartController to save the order.
-        EventBus.getDefault().post(new OrderSaveRequestedEvent(
+        EventBus.getDefault().post(new OrderAddRequestedEvent(
             uuid, patientUuid, instructions, start, durationDays));
     }
 

@@ -17,7 +17,7 @@ import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
 
-public class ObsDeleteTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
+public class DeleteObsTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
@@ -27,7 +27,7 @@ public class ObsDeleteTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
     private final String mObsUuid;
     private final CrudEventBus mBus;
 
-    public ObsDeleteTask(
+    public DeleteObsTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
