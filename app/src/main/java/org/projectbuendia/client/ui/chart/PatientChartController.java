@@ -153,8 +153,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showDateObsDialog(String title, String conceptUuid, LocalDate date);
-        void showOrderDialog(String patientUuid, Order order, List<DateTime> executionTimes);
-        void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
+        void showOrderDialog(String patientUuid, Order order, List<Obs> executions);
+        void showOrderExecutionDialog(Order order, Interval interval, List<Obs> executions);
         void showEditPatientDialog(Patient patient);
         void showObsDetailDialog(Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> orderedConceptUuids);
         void showPatientLocationDialog(Patient patient);
@@ -390,25 +390,25 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     @JavascriptInterface public void onOrderHeadingPressed(String orderUuid) {
-        mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid), getExecutionTimes(orderUuid));
+        mUi.showOrderDialog(mPatientUuid, mOrdersByUuid.get(orderUuid), getExecutions(orderUuid));
     }
 
     @JavascriptInterface public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
-        mUi.showOrderExecutionDialog(order, interval, getExecutionTimes(orderUuid));
+        mUi.showOrderExecutionDialog(order, interval, getExecutions(orderUuid));
     }
 
-    private List<DateTime> getExecutionTimes(String orderUuid) {
-        List<DateTime> executionTimes = new ArrayList<>();
+    private List<Obs> getExecutions(String orderUuid) {
+        List<Obs> executions = new ArrayList<>();
         for (Obs obs : mObservations) {
             if (eq(obs.conceptUuid, ConceptUuids.ORDER_EXECUTED_UUID) &&
                 eq(orderUuid, obs.value)) {
-                executionTimes.add(obs.time);
+                executions.add(obs);
             }
         }
-        return executionTimes;
+        return executions;
     }
 
     @JavascriptInterface public void onPageUnload(int scrollX, int scrollY) {

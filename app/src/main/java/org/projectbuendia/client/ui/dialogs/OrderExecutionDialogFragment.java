@@ -28,6 +28,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
@@ -56,7 +57,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderExecutionDialogFragment newInstance(
-        Order order, Interval interval, List<DateTime> executionTimes) {
+        Order order, Interval interval, List<Obs> executions) {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
         args.putString("medication", order.instructions.medication);
@@ -68,9 +69,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         args.putLong("intervalStartMillis", interval.getStartMillis());
         args.putLong("intervalStopMillis", interval.getEndMillis());
         List<Long> millis = new ArrayList<>();
-        for (DateTime dt : executionTimes) {
-            if (interval.contains(dt)) {
-                millis.add(dt.getMillis());
+        for (Obs obs : executions) {
+            if (interval.contains(obs.time)) {
+                millis.add(obs.time.getMillis());
             }
         }
         args.putLongArray("executionTimes", Utils.toArray(millis));
