@@ -73,10 +73,9 @@ public abstract class PatientListActivity extends LoggedInActivity {
         menu.findItem(R.id.action_new_patient).setOnMenuItemClickListener(
             menuItem -> {
                 Utils.logEvent("add_patient_pressed");
-                PatientDialogFragment.newInstance(null)
-                    .show(getSupportFragmentManager(), null);
-                return true;
-            });
+                return openDialog(PatientDialogFragment.create(null));
+            }
+        );
 
         MenuItem search = menu.findItem(R.id.action_search);
         setMenuBarIcon(search, FontAwesomeIcons.fa_filter);

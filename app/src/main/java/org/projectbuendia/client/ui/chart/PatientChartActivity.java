@@ -409,8 +409,7 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showEditPatientDialog(Patient patient) {
-            PatientDialogFragment.newInstance(patient)
-                .show(getSupportFragmentManager(), null);
+            openDialog(PatientDialogFragment.create(patient));
         }
 
         @Override public void showPatientLocationDialog(Patient patient) {

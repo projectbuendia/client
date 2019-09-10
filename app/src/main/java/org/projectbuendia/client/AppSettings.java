@@ -148,7 +148,6 @@ public class AppSettings {
         return !localeTag.isEmpty() ? new Locale(localeTag) : ORIGINAL_DEFAULT_LOCALE;
     }
 
-
     /** Sets the locale. */
     public void setLocale(String languageTag) {
         prefs.edit().putString("locale", languageTag).commit();
@@ -204,6 +203,14 @@ public class AppSettings {
     /** Gets the setting for whether to fabricate responses when the server fails. */
     public boolean getServerResponsesFabricated() {
         return prefs.getBoolean("server_responses_fabricated", false);
+    }
+
+    public String getLastIdPrefix() {
+        return prefs.getString("last_id_prefix", "");
+    }
+
+    public void setLastIdPrefix(String prefix) {
+        prefs.edit().putString("last_id_prefix", prefix).commit();
     }
 }
 

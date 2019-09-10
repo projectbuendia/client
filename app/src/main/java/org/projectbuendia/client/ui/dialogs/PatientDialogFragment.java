@@ -11,15 +11,9 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -45,18 +39,15 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.TextChangedWatcher;
 import org.projectbuendia.client.utils.Utils;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /** A {@link DialogFragment} for adding or editing a patient. */
-public class PatientDialogFragment extends DialogFragment {
+public class PatientDialogFragment extends BaseDialogFragment {
     @Inject AppModel mModel;
     @Inject AppSettings mSettings;
     @Inject CrudEventBus mCrudEventBus;
@@ -74,99 +65,77 @@ public class PatientDialogFragment extends DialogFragment {
 
     private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
-    private LayoutInflater mInflater;
+    private Patient mPatient;
     private ToggleRadioGroup<Sex> mSex;
     private boolean mAgeChanged;
-    private LocalDate mBirthdate;
 
-    /** Creates a new instance and registers the given UI, if specified. */
-    public static PatientDialogFragment newInstance(Patient patient) {
+    public static PatientDialogFragment create(Patient patient) {
         PatientDialogFragment fragment = new PatientDialogFragment();
-        Bundle args = new Bundle();
-        args.putBoolean("new", patient == null);
-        if (patient != null) {
-            args.putString("uuid", patient.uuid);
-            args.putString("id", patient.id);
-            args.putString("givenName", patient.givenName);
-            args.putString("familyName", patient.familyName);
-            args.putString("birthdate", Utils.format(patient.birthdate));
-            args.putString("sex", Sex.nullableNameOf(patient.sex));
-        }
-        fragment.setArguments(args);
+        fragment.setArguments(Utils.bundleOf("patient", patient));
         return fragment;
     }
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        App.inject(this);
-        mInflater = LayoutInflater.from(getActivity());
+    @Override protected int getLayoutId() {
+        return R.layout.patient_dialog_fragment;
     }
 
-    @Override public @Nonnull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.patient_dialog_fragment, null);
-        ButterKnife.inject(this, fragment);
+    @Override public void onOpen(Dialog dialog, Bundle args) {
+        mPatient = (Patient) args.getSerializable("patient");
+        dialog.setTitle(mPatient == null ?
+            R.string.title_activity_patient_add : R.string.action_edit_patient);
+        if (mPatient != null) {
+            String idPrefix = "";
+            String id = Utils.toNonnull(mPatient.id);
+            Matcher matcher = ID_PATTERN.matcher(id);
+            if (matcher.matches()) {
+                idPrefix = matcher.group(1);
+                id = matcher.group(2);
+            }
+            if (idPrefix.isEmpty() && id.isEmpty()) {
+                idPrefix = App.getSettings().getLastIdPrefix();
+            }
+            mIdPrefix.setText(idPrefix);
+            mId.setText(id);
+            mGivenName.setText(Utils.toNonnull(mPatient.givenName));
+            mFamilyName.setText(Utils.toNonnull(mPatient.familyName));
+            if (mPatient.birthdate != null) {
+                Period age = new Period(mPatient.birthdate, LocalDate.now());
+                mAgeYears.setText(String.valueOf(age.getYears()));
+                mAgeMonths.setText(String.valueOf(age.getMonths()));
+            }
 
-        Bundle args = getArguments();
-        String title = args.getBoolean("new") ?
-            getString(R.string.title_activity_patient_add) :
-            getString(R.string.action_edit_patient);
-        populateFields(args);
+            mSexFemale.setTag(Sex.FEMALE);
+            mSexMale.setTag(Sex.MALE);
+            mSexOther.setTag(Sex.OTHER);
+            mSex = new ToggleRadioGroup<>(mSexRadioGroup);
+            mSex.setSelection(mPatient.sex);
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
-            .setCancelable(false) // Disable auto-cancel.
-            .setTitle(title)
-            .setPositiveButton(getString(R.string.ok), null)
-            .setNegativeButton(getString(R.string.cancel), null)
-            .setView(fragment)
-            .create();
-
-        // To prevent the dialog from being automatically dismissed, we have to
-        // override the listener instead of passing it in to setPositiveButton.
-        dialog.setOnShowListener(di ->
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                .setOnClickListener(view -> onSubmit(dialog))
-        );
+            mAgeYears.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
+            mAgeMonths.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
+        }
 
         focusFirstEmptyField(dialog);
-        return dialog;
     }
 
-    private void populateFields(Bundle args) {
-        String idPrefix = "";
-        String id = Utils.toNonnull(args.getString("id"));
-        Matcher matcher = ID_PATTERN.matcher(id);
-        if (matcher.matches()) {
-            idPrefix = matcher.group(1);
-            id = matcher.group(2);
-        }
-        if (idPrefix.isEmpty() && id.isEmpty()) {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            idPrefix = pref.getString("last_id_prefix", "");
-        }
-        mIdPrefix.setText(idPrefix);
-        mId.setText(id);
-        mGivenName.setText(Utils.toNonnull(args.getString("givenName")));
-        mFamilyName.setText(Utils.toNonnull(args.getString("familyName")));
-        LocalDate birthdate = Utils.toLocalDate(args.getString("birthdate"));
-        if (birthdate != null) {
-            Period age = new Period(birthdate, LocalDate.now());
-            mAgeYears.setText(String.valueOf(age.getYears()));
-            mAgeMonths.setText(String.valueOf(age.getMonths()));
+    public void focusFirstEmptyField(Dialog dialog) {
+        // Open the keyboard.
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        // Set focus.
+        EditText[] fields = {mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths};
+        for (EditText field : fields) {
+            if (field.isEnabled() && field.getText().toString().isEmpty()) {
+                field.requestFocus();
+                return;
+            }
         }
 
-        Sex sex = Sex.nullableValueOf(args.getString("sex"));
-        mSexFemale.setTag(Sex.FEMALE);
-        mSexMale.setTag(Sex.MALE);
-        mSexOther.setTag(Sex.OTHER);
-        mSex = new ToggleRadioGroup<>(mSexRadioGroup);
-        mSex.setSelection(sex);
-
-        mBirthdate = birthdate;
-        mAgeYears.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
-        mAgeMonths.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
+        // If all fields are populated, default to the end of the given name field.
+        mGivenName.requestFocus();
+        mGivenName.setSelection(mGivenName.getText().length());
     }
 
-    public void onSubmit(DialogInterface dialog) {
+    @Override public void onSubmit(Dialog dialog) {
         String idPrefix = mIdPrefix.getText().toString().trim();
         String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
@@ -174,14 +143,14 @@ public class PatientDialogFragment extends DialogFragment {
         Sex sex = mSex.getSelection();
         String ageYears = mAgeYears.getText().toString().trim();
         String ageMonths = mAgeMonths.getText().toString().trim();
-        LocalDate birthdate = mBirthdate;
+        LocalDate birthdate = mPatient != null ? mPatient.birthdate : null;
         boolean valid = true;
 
         if (id == null) {
             setError(mId, R.string.patient_validation_missing_id);
             valid = false;
         }
-        // We should only save/update the age when the fields have been edited;
+        // Recalculate the birthdate only when the age fields have been edited;
         // otherwise, simply opening and submitting the dialog would shift the
         // birthdate every time to make the age a whole number of months.
         if (mAgeChanged) {
@@ -213,8 +182,7 @@ public class PatientDialogFragment extends DialogFragment {
 
         if (!idPrefix.isEmpty()) {
             id = idPrefix + "/" + id;
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            pref.edit().putString("last_id_prefix", idPrefix).commit();
+            App.getSettings().setLastIdPrefix(idPrefix);
         }
 
         Utils.logUserAction("patient_submitted",
@@ -233,51 +201,22 @@ public class PatientDialogFragment extends DialogFragment {
         patient.birthdate = birthdate;
         patient.sex = sex;
 
-        List<Obs> observations = null;
-        Bundle args = getArguments();
-        if (args.getBoolean("new")) {
+        if (mPatient == null) {
             BigToast.show(R.string.adding_new_patient_please_wait);
-
             DateTime now = DateTime.now(); // not actually used by PatientDelta
-            observations = ImmutableList.of(
+            mModel.addPatient(mCrudEventBus, patient, ImmutableList.of(
                 new Obs(null, null, now, ConceptUuids.ADMISSION_DATE_UUID,
                     ConceptType.DATE, LocalDate.now().toString(), ""),
                 new Obs(null, null, now, ConceptUuids.PLACEMENT_UUID,
                     ConceptType.TEXT, mModel.getDefaultLocation().uuid, "")
-            );
-            mModel.addPatient(mCrudEventBus, patient, observations);
+            ));
         } else {
             BigToast.show(R.string.updating_patient_please_wait);
-            patient.uuid = args.getString("uuid");
+            patient.uuid = mPatient.uuid;
             mModel.updatePatient(mCrudEventBus, patient);
         }
         // TODO: While the network request is in progress, show a spinner and/or keep the
         // dialog open but greyed out -- keep the UI blocked to make it clear that there is a
         // modal operation going on, while providing a way for the user to abort the operation.
-    }
-
-    private void setError(EditText field, int resourceId, Object... args) {
-        String message = getString(resourceId, args);
-        field.setError(message);
-        field.invalidate();
-        field.requestFocus();
-    }
-
-    public void focusFirstEmptyField(Dialog dialog) {
-        // Open the keyboard.
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        // Set focus.
-        EditText[] fields = {mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths};
-        for (EditText field : fields) {
-            if (field.isEnabled() && field.getText().toString().isEmpty()) {
-                field.requestFocus();
-                return;
-            }
-        }
-
-        // If all fields are populated, default to the end of the given name field.
-        mGivenName.requestFocus();
-        mGivenName.setSelection(mGivenName.getText().length());
     }
 }

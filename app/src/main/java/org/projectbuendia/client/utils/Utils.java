@@ -47,6 +47,7 @@ import org.projectbuendia.client.net.Server;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -600,6 +601,13 @@ public class Utils {
     /** Puts a Bundle into a Bundle in a chainable way. */
     public static Bundle putBundle(String key, Bundle value, Bundle bundle) {
         bundle.putBundle(key, value);
+        return bundle;
+    }
+
+    /** Makes a Bundle with one key and a Serializable value. */
+    public static Bundle bundleOf(String key, Serializable value) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(key, value);
         return bundle;
     }
 
