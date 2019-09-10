@@ -16,6 +16,7 @@ import android.database.Cursor;
 
 import com.google.common.base.Joiner;
 
+import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
@@ -81,8 +82,9 @@ public class ChartDataHelper {
     }
 
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
-        long millis = Utils.getLong(c, Observations.ENCOUNTER_MILLIS, 0);
         String uuid = Utils.getString(c, Observations.UUID);
+        String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
+        DateTime time = Utils.getDateTime(c, Observations.ENCOUNTER_MILLIS);
         String conceptUuid = Utils.getString(c, Observations.CONCEPT_UUID, "");
         ConceptType conceptType = concepts.getType(conceptUuid);
         String value = Utils.getString(c, Observations.VALUE, "");
@@ -90,7 +92,7 @@ public class ChartDataHelper {
         if (eq(conceptType, ConceptType.CODED)) {
             valueName = concepts.getName(value, locale);
         }
-        return new Obs(uuid, millis, conceptUuid, conceptType, value, valueName);
+        return new Obs(uuid, patientUuid, time, conceptUuid, conceptType, value, valueName);
     }
 
     private static @Nullable ObsRow loadObsRow(
