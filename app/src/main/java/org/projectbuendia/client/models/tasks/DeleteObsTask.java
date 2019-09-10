@@ -42,7 +42,7 @@ public class DeleteObsTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
 
     @Override protected ObsDeleteFailedEvent doInBackground(Void... params) {
         RequestFuture future = RequestFuture.newFuture();
-        mServer.deleteObservation(mObsUuid, future);
+        mServer.deleteObservation(mObsUuid, future, future);
         try {
             future.get();
         } catch (InterruptedException e) {

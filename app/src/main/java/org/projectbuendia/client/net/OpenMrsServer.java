@@ -249,13 +249,15 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void deleteObservation(
-        String uuid, final Response.ErrorListener errorListener) {
+        String uuid,
+        final Response.Listener<Void> successListener,
+        final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
             Request.Method.DELETE,
             "/observations/" + uuid,
             null,
-            response -> LOG.i("Voided observation"),
+            response -> successListener.onResponse(null),
             wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
