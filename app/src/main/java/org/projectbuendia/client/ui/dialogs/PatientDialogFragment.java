@@ -56,7 +56,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /** A {@link DialogFragment} for adding or editing a patient. */
-public class EditPatientDialogFragment extends DialogFragment {
+public class PatientDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
     @Inject AppSettings mSettings;
     @Inject CrudEventBus mCrudEventBus;
@@ -80,8 +80,8 @@ public class EditPatientDialogFragment extends DialogFragment {
     private LocalDate mBirthdate;
 
     /** Creates a new instance and registers the given UI, if specified. */
-    public static EditPatientDialogFragment newInstance(Patient patient) {
-        EditPatientDialogFragment fragment = new EditPatientDialogFragment();
+    public static PatientDialogFragment newInstance(Patient patient) {
+        PatientDialogFragment fragment = new PatientDialogFragment();
         Bundle args = new Bundle();
         args.putBoolean("new", patient == null);
         if (patient != null) {

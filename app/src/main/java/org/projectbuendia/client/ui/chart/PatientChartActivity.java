@@ -52,7 +52,7 @@ import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
-import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
@@ -409,7 +409,7 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showEditPatientDialog(Patient patient) {
-            EditPatientDialogFragment.newInstance(patient)
+            PatientDialogFragment.newInstance(patient)
                 .show(getSupportFragmentManager(), null);
         }
 
