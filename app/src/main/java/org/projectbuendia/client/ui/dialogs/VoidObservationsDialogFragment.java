@@ -110,7 +110,8 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss())
                 .setPositiveButton(R.string.voiding, (dialogInterface, i) -> {
                     if ((listAdapter.mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
-                        EventBus.getDefault().post(new ObsDeleteRequestedEvent(listAdapter.mCheckedItems));
+                        // TODO(ping): Provide a list of observations to delete.
+                        EventBus.getDefault().post(new ObsDeleteRequestedEvent(null));
                     }
                     dialogInterface.dismiss();
                 }).setTitle(getString(R.string.void_observations))

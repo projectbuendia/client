@@ -98,8 +98,8 @@ public class AppModel {
         return fullSyncEnd;
     }
 
-    public void deleteObs(CrudEventBus bus, String obsUuid) {
-        mTaskFactory.newDeleteObsTask(bus, obsUuid).execute();
+    public void deleteObs(CrudEventBus bus, Obs obs) {
+        mTaskFactory.newDeleteObsTask(bus, obs).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */

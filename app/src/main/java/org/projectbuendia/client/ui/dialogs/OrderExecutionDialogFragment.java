@@ -63,7 +63,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     private ContextUtils u;
     private List<View> mItems;
     private View mNewItem;
-    private Set<String> mObsUuidsToDelete;
+    private Set<String> mObsUuidsToDelete = new HashSet<>();
 
     /** Creates a new instance showing a list of executions in the order given. */
     public static OrderExecutionDialogFragment newInstance(
@@ -76,18 +76,12 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         args.putInt("frequency", order.instructions.frequency);
         args.putString("notes", order.instructions.notes);
         args.putLong("orderStartMillis", order.start.getMillis());
-        args.putLong("intervalStartMillis", interval.getStartMillis());
-        args.putLong("intervalStopMillis", interval.getEndMillis());
-        List<String> uuids = new ArrayList<>();
-        List<Long> times = new ArrayList<>();
+        args.putSerializable("date", interval.getStart().toLocalDate());
+        ArrayList<Obs> executionsInInterval = new ArrayList<>();
         for (Obs obs : executions) {
-            if (interval.contains(obs.time)) {
-                uuids.add(obs.uuid);
-                times.add(obs.time.getMillis());
-            }
+            if (interval.contains(obs.time)) executionsInInterval.add(obs);
         }
-        args.putLongArray("executionTimes", Utils.toLongArray(times));
-        args.putStringArray("executionUuids", Utils.toStringArray(uuids));
+        args.putParcelableArrayList("executions", executionsInInterval);
         // To avoid the possibility of confusion when the dialog is opened just
         // before midnight, save the current time for use as the encounter time later.
         DateTime executionTime = DateTime.now();
@@ -101,7 +95,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         u = ContextUtils.from(getActivity());
-        mObsUuidsToDelete = new HashSet<>();
+        mObsUuidsToDelete.clear();
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -149,21 +143,21 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
         // Populate the list of execution times with checkable items.
         boolean executable = args.getBoolean("executable");
-        String[] uuids = args.getStringArray("executionUuids");
-        long[] times = args.getLongArray("executionTimes");
-        Utils.showIf(mExecutionList, uuids.length > 0 || executable);
+
+        List<Obs> executions = args.getParcelableArrayList("executions");
+        Utils.showIf(mExecutionList, executions.size() > 0 || executable);
 
         mItems = new ArrayList<>();
-        for (int i = 0; i < uuids.length; i++) {
+        for (Obs obs : executions) {
             View item = u.inflate(R.layout.checkable_item, mExecutionList);
-            u.setText(R.id.text, Utils.format(new DateTime(times[i]), HOUR_MINUTE));
+            u.setText(R.id.text, Utils.format(obs.time, HOUR_MINUTE));
             mExecutionList.addView(item);
             final CheckBox checkbox = u.findView(R.id.checkbox);
             checkbox.setOnCheckedChangeListener((view, checked) -> updateUi());
             item.setOnClickListener(view -> {
                 if (checkbox.isEnabled()) checkbox.setChecked(!checkbox.isChecked());
             });
-            item.setTag(uuids[i]);
+            item.setTag(obs);
             mItems.add(item);
         }
         if (executable) {
@@ -186,7 +180,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         // Describe how many times the order was executed during the selected interval.
         int count = mItems.size() + (executeNow ? 1 : 0);
         boolean plural = count != 1;
-        LocalDate date = Utils.getDateTime(args, "intervalStartMillis").toLocalDate();
+        LocalDate date = (LocalDate) args.getSerializable("date");
         mExecutionCount.setText(Html.fromHtml(getString(
             date.equals(LocalDate.now()) ?
                 (plural ? R.string.order_execution_today_plural_html
@@ -197,8 +191,8 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
         // Update the list of execution times.
         for (View item : mItems) {
-            String uuid = (String) item.getTag();
-            if (mObsUuidsToDelete.contains(uuid)) {
+            Obs obs = (Obs) item.getTag();
+            if (mObsUuidsToDelete.contains(obs.uuid)) {
                 item.setBackgroundColor(0xffffcccc);
                 ((TextView) item.findViewById(R.id.text)).setTextColor(0xff999999);
                 item.findViewById(R.id.strikethrough).setVisibility(View.VISIBLE);
@@ -219,7 +213,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         // the Mark button or the Delete button).  To keep the dialog from
         // resizing, we always show one button.
         boolean showDeleteButton;
-        if (anyItemsChecked || Utils.hasItems(mObsUuidsToDelete)) {
+        if (anyItemsChecked || mObsUuidsToDelete.size() > 0) {
             showDeleteButton = true;
         } else if (executable) {
             showDeleteButton = false;
@@ -245,8 +239,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             for (View item : mItems) item.findViewById(R.id.checkbox).setEnabled(false);
         } else {
             for (View item : mItems) {
-                String uuid = (String) item.getTag();
-                item.findViewById(R.id.checkbox).setEnabled(!mObsUuidsToDelete.contains(uuid));
+                Obs obs = (Obs) item.getTag();
+                item.findViewById(R.id.checkbox).setEnabled(
+                    !mObsUuidsToDelete.contains(obs.uuid));
             }
         }
     }
@@ -254,10 +249,10 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     /** Marks the checked items for deletion. */
     private void deleteSelected() {
         for (View item : mItems) {
-            String uuid = (String) item.getTag();
+            Obs obs = (Obs) item.getTag();
             CheckBox checkbox = item.findViewById(R.id.checkbox);
             if (checkbox.isChecked()) {
-                mObsUuidsToDelete.add(uuid);
+                mObsUuidsToDelete.add(obs.uuid);
                 checkbox.setChecked(false);
             }
         }
@@ -280,12 +275,21 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             EventBus.getDefault().post(
                 new OrderExecutionAddRequestedEvent(orderUuid, executionTime));
         }
-        if (!mObsUuidsToDelete.isEmpty()) {
+
+        List<Obs> executions = args.getParcelableArrayList("executions");
+        List<Obs> executionsToDelete = new ArrayList<>();
+        for (Obs obs : executions) {
+            if (mObsUuidsToDelete.contains(obs.uuid)) {
+                executionsToDelete.add(obs);
+            }
+        }
+
+        if (mObsUuidsToDelete.size() > 0) {
             Utils.logUserAction("order_execution_deleted",
                 "orderUuid", orderUuid,
                 "obsUuids", Joiner.on(",").join(mObsUuidsToDelete));
             EventBus.getDefault().post(
-                new ObsDeleteRequestedEvent(mObsUuidsToDelete));
+                new ObsDeleteRequestedEvent(executionsToDelete));
         }
     }
 }

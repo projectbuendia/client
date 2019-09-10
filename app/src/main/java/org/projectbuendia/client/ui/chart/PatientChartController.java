@@ -664,8 +664,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         }
 
         public void onEventMainThread(ObsDeleteRequestedEvent event) {
-            for (String uuid : event.uuids) {
-                mAppModel.deleteObs(mCrudEventBus, uuid);
+            for (Obs obs : event.observations) {
+                mAppModel.deleteObs(mCrudEventBus, obs);
             }
             updatePatientObsUi();
         }

@@ -51,8 +51,8 @@ public class TaskFactory {
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public DeleteObsTask newDeleteObsTask(CrudEventBus bus, String obsUuid) {
-        return new DeleteObsTask(this, mServer, mContentResolver, obsUuid, bus);
+    public DeleteObsTask newDeleteObsTask(CrudEventBus bus, Obs obs) {
+        return new DeleteObsTask(this, mServer, mContentResolver, obs, bus);
     }
 
     public UpdatePatientTask newUpdatePatientTask(JsonPatient patient, CrudEventBus bus) {
