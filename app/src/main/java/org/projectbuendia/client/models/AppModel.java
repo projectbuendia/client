@@ -12,7 +12,6 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -31,7 +30,6 @@ import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Misc;
-import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -100,16 +98,13 @@ public class AppModel {
         return fullSyncEnd;
     }
 
-    public void voidObservation(CrudEventBus bus, VoidObs voidObs) {
-        String conditions = Observations.UUID + " = ?";
-        ContentValues values = new ContentValues();
-        values.put(Observations.VOIDED, 1);
-        mTaskFactory.newVoidObsTask(bus, voidObs).execute();
+    public void deleteObs(CrudEventBus bus, Obs obs) {
+        mTaskFactory.newDeleteObsTask(bus, obs).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
-    public void fetchSinglePatient(CrudEventBus bus, String patientId) {
-        mTaskFactory.newFetchSinglePatientTask(patientId, bus).execute();
+    public void fetchPatient(CrudEventBus bus, String patientId) {
+        mTaskFactory.newFetchPatientTask(patientId, bus).execute();
     }
 
     /**
@@ -164,8 +159,8 @@ public class AppModel {
      * Asynchronously adds or updates an order (depending whether order.uuid is null), posting an
      * {@link ItemCreatedEvent} or {@link ItemUpdatedEvent} when complete.
      */
-    public void saveOrder(CrudEventBus bus, Order order) {
-        mTaskFactory.newSaveOrderTask(order, bus).execute();
+    public void addOrder(CrudEventBus bus, Order order) {
+        mTaskFactory.newAddOrderTask(order, bus).execute();
     }
 
     /** Asynchronously deletes an order. */
@@ -177,9 +172,10 @@ public class AppModel {
      * Asynchronously adds an encounter that records an order as executed, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addOrderExecutedEncounter(CrudEventBus bus, String patientUuid, String orderUuid) {
+    public void addOrderExecutionEncounter(
+        CrudEventBus bus, String patientUuid, String orderUuid, DateTime executionTime) {
         mTaskFactory.newAddEncounterTask(new Encounter(
-            null, patientUuid, DateTime.now(), null, new String[] {orderUuid}
+            null, patientUuid, executionTime, null, new String[] {orderUuid}
         ), bus).execute();
     }
 

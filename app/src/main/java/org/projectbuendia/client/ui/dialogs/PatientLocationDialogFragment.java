@@ -22,8 +22,6 @@ import android.text.TextWatcher;
 import android.view.WindowManager;
 import android.widget.EditText;
 
-import com.google.android.flexbox.FlexboxLayout;
-
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
@@ -52,10 +50,9 @@ public class PatientLocationDialogFragment extends DialogFragment {
     @Inject CrudEventBus mCrudEventBus;
     private ContextUtils c;
 
-    private FlexboxLayout mContainer;
-    private LocationOptionList mList;
+    private LocationOptionList list;
     private String patientUuid;
-    private EditText mBedNumber;
+    private EditText bedNumber;
     private String initialLocationUuid;
     private String initialBedNumber;
 
@@ -92,29 +89,29 @@ public class PatientLocationDialogFragment extends DialogFragment {
         initialBedNumber = getArguments().getString("bedNumber");
 
         LocationForest forest = mModel.getForest();
-        mList = new LocationOptionList(c.findView(R.id.list_container), true);
-        mList.setLocations(forest, forest.getLeaves());
-        mList.setSelectedLocation(forest.get(initialLocationUuid));
+        list = new LocationOptionList(c.findView(R.id.list_container), true);
+        list.setLocations(forest, forest.getLeaves());
+        list.setSelectedLocation(forest.get(initialLocationUuid));
 
-        mBedNumber = c.findView(R.id.bed_number);
-        mBedNumber.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
-        mBedNumber.setText(initialBedNumber);
-        mBedNumber.setSelection(mBedNumber.getText().length());
-        mBedNumber.addTextChangedListener(new TextWatcher() {
+        bedNumber = c.findView(R.id.bed_number);
+        bedNumber.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
+        bedNumber.setText(initialBedNumber);
+        bedNumber.setSelection(bedNumber.getText().length());
+        bedNumber.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             public void onTextChanged(CharSequence s, int start, int before, int count) { }
             @Override public void afterTextChanged(Editable s) {
-                if (eq(mList.getSelectedLocation().uuid, initialLocationUuid)) {
-                    initialBedNumber = mBedNumber.getText().toString();
+                if (eq(list.getSelectedLocation().uuid, initialLocationUuid)) {
+                    initialBedNumber = bedNumber.getText().toString();
                 }
             }
         });
-        mList.setOnLocationSelectedListener(location -> {
+        list.setOnLocationSelectedListener(location -> {
             if (eq(location.uuid, initialLocationUuid)) {
-                mBedNumber.setText(initialBedNumber);
-                mBedNumber.setSelection(mBedNumber.getText().length());
+                bedNumber.setText(initialBedNumber);
+                bedNumber.setSelection(bedNumber.getText().length());
             } else {
-                mBedNumber.setText("");
+                bedNumber.setText("");
             }
         });
 
@@ -125,11 +122,11 @@ public class PatientLocationDialogFragment extends DialogFragment {
         Utils.logUserAction("location_assigned");
         ((PatientChartActivity) getActivity()).getUi().showWaitDialog(R.string.title_updating_patient);
 
-        Location location = mList.getSelectedLocation();
-        String bedNumber = mBedNumber.getText().toString().toUpperCase();
+        Location location = list.getSelectedLocation();
+        String bedNumber = this.bedNumber.getText().toString().toUpperCase();
         String placement = location != null ? location.uuid + "/" + bedNumber : null;
         mModel.addObservationEncounter(mCrudEventBus, patientUuid, new Obs(
-            DateTime.now().getMillis(), ConceptUuids.PLACEMENT_UUID,
+            null, patientUuid, DateTime.now(), ConceptUuids.PLACEMENT_UUID,
             ConceptType.TEXT, placement, null
         ));
         dismiss();

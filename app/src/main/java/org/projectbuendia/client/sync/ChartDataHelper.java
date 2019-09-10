@@ -16,6 +16,7 @@ import android.database.Cursor;
 
 import com.google.common.base.Joiner;
 
+import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
@@ -81,7 +82,9 @@ public class ChartDataHelper {
     }
 
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
-        long millis = Utils.getLong(c, Observations.ENCOUNTER_MILLIS, 0);
+        String uuid = Utils.getString(c, Observations.UUID);
+        String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
+        DateTime time = Utils.getDateTime(c, Observations.ENCOUNTER_MILLIS);
         String conceptUuid = Utils.getString(c, Observations.CONCEPT_UUID, "");
         ConceptType conceptType = concepts.getType(conceptUuid);
         String value = Utils.getString(c, Observations.VALUE, "");
@@ -89,7 +92,7 @@ public class ChartDataHelper {
         if (eq(conceptType, ConceptType.CODED)) {
             valueName = concepts.getName(value, locale);
         }
-        return new Obs(millis, conceptUuid, conceptType, value, valueName);
+        return new Obs(uuid, patientUuid, time, conceptUuid, conceptType, value, valueName);
     }
 
     private static @Nullable ObsRow loadObsRow(
@@ -101,12 +104,13 @@ public class ChartDataHelper {
             conceptName, obs.conceptUuid, obs.value, obs.valueName);
     }
 
-    /** Gets all observations for a given patient, localized for a given locale. */
+    /** Gets all observations for a given patient in chronological order. */
     // TODO/cleanup: Consider returning a SortedSet<Obs> or a Map<String, SortedSet<ObsPoint>>.
     public List<Obs> getObservations(String patientUuid) {
         return getObservations(patientUuid, App.getSettings().getLocale());
     }
 
+    /** Gets all observations for a given patient in chronological order. */
     private List<Obs> getObservations(String patientUuid, Locale locale) {
         ConceptService concepts = App.getConceptService();
         List<Obs> results = new ArrayList<>();
@@ -114,7 +118,8 @@ public class ChartDataHelper {
             Observations.URI, null,
             Observations.PATIENT_UUID + " = ? and "
                 + Observations.VOIDED + " IS NOT 1",
-            new String[] {patientUuid}, null
+            new String[] {patientUuid},
+            Observations.ENCOUNTER_MILLIS
         )) {
             while (c.moveToNext()) {
                 results.add(loadObs(c, locale, concepts));

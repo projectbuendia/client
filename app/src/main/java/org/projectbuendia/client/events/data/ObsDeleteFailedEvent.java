@@ -1,6 +1,6 @@
 package org.projectbuendia.client.events.data;
 
-public class VoidObsFailedEvent {
+public class ObsDeleteFailedEvent {
 
     public final Reason reason;
     public final Exception exception;
@@ -12,7 +12,7 @@ public class VoidObsFailedEvent {
         INTERRUPTED
     }
 
-    public VoidObsFailedEvent(Reason reason, Exception exception) {
+    public ObsDeleteFailedEvent(Reason reason, Exception exception) {
         this.reason = reason;
         this.exception = exception;
     }

@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
@@ -33,8 +35,11 @@ import static org.projectbuendia.client.utils.Utils.eq;
 // TODO: Make ObsPoint a member of Obs; change the structure of Obs to be simply:
 // { final @Nonnull String uuid; String name; final @Nonnull ObsPoint point; } then delete
 // getObsPoint(), getObsValue(), compareTo(), getTypeOrdering(), getCodedValueOrdering().
-public final class Obs implements Comparable<Obs> {
+public final class Obs extends Model implements Comparable<Obs>, Parcelable {
     private static Logger LOG = Logger.create();
+
+    /** The patient for which this observation was taken (null if yet to be created). */
+    public final @Nullable String patientUuid;
 
     /** The time at which this observation was taken. */
     public final @Nonnull DateTime time;
@@ -52,12 +57,16 @@ public final class Obs implements Comparable<Obs> {
     public final @Nullable String valueName;
 
     public Obs(
-        long millis,
+        @Nullable String uuid,
+        @Nullable String patientUuid,
+        @Nonnull DateTime time,
         @Nonnull String conceptUuid,
         @Nonnull ConceptType conceptType,
         @Nullable String value,
         @Nullable String valueName) {
-        this.time = new DateTime(millis);
+        super(uuid);
+        this.patientUuid = patientUuid;
+        this.time = time;
         this.conceptUuid = checkNotNull(conceptUuid);
         this.conceptType = conceptType;
         this.value = value;
@@ -91,7 +100,9 @@ public final class Obs implements Comparable<Obs> {
     }
 
     @Override public String toString() {
-        return "Obs(time=" + time
+        return "Obs(uuid=" + uuid
+            + ", patientUuid=" + patientUuid
+            + ", time=" + time
             + ", conceptUuid=" + conceptUuid
             + ", conceptType=" + conceptType
             + ", value=" + value
@@ -103,7 +114,9 @@ public final class Obs implements Comparable<Obs> {
         // equals() method to decide whether to re-render the chart grid.
         if (other instanceof Obs) {
             Obs o = (Obs) other;
-            return eq(time, o.time)
+            return eq(uuid, o.uuid)
+                && eq(patientUuid, o.patientUuid)
+                && eq(time, o.time)
                 && eq(conceptUuid, o.conceptUuid)
                 && eq(conceptType, o.conceptType)
                 && eq(value, o.value)
@@ -119,6 +132,8 @@ public final class Obs implements Comparable<Obs> {
         });
     }
 
+    // TODO(ping): This should be the comparison operator on ObsValue, not Obs.
+    // The natural comparison order for Obs should be chronological.
     /**
      * Compares value instances according to a total ordering such that:
      * - The empty value (present == false) is ordered before all others.
@@ -190,5 +205,39 @@ public final class Obs implements Comparable<Obs> {
                 break;
         }
         return json;
+    }
+
+    // ==== Parcelable protocol ====
+
+    public static final Parcelable.Creator<Obs> CREATOR = new Parcelable.Creator<Obs>() {
+        public Obs createFromParcel(Parcel src) {
+            return new Obs(
+                src.readString(),
+                src.readString(),
+                new DateTime(src.readLong()),
+                src.readString(),
+                ConceptType.valueOf(src.readString()),
+                src.readString(),
+                src.readString()
+            );
+        }
+
+        public Obs[] newArray(int size) {
+            return new Obs[size];
+        }
+    };
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(uuid);
+        dest.writeString(patientUuid);
+        dest.writeLong(time.getMillis());
+        dest.writeString(conceptUuid);
+        dest.writeString(conceptType.name());
+        dest.writeString(value);
+        dest.writeString(valueName);
     }
 }

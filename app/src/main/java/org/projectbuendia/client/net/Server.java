@@ -87,6 +87,7 @@ public interface Server {
     /** Deletes (voids) an observation by its UUID. */
     void deleteObservation(
         String uuid,
+        Response.Listener<Void> successListener,
         Response.ErrorListener errorListener);
 
     /**

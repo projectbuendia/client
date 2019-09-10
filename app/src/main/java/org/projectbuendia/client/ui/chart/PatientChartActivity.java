@@ -29,7 +29,6 @@ import android.webkit.WebViewClient;
 
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.odk.collect.android.model.Preset;
@@ -392,20 +391,20 @@ public final class PatientChartActivity extends LoggedInActivity {
             Utils.showDialogIf(mFormSubmissionDialog, show);
         }
 
-        @Override public void showOrderDialog(String patientUuid, Order order, List<DateTime> executionTimes) {
-            OrderDialogFragment.newInstance(patientUuid, order, executionTimes)
-                .show(getSupportFragmentManager(), null);
-        }
-
         @Override public void showObsDetailDialog(
             Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> conceptOrdering) {
             ObsDetailDialogFragment.newInstance(interval, conceptUuids, obsRows, conceptOrdering)
                 .show(getSupportFragmentManager(), null);
         }
 
+        @Override public void showOrderDialog(String patientUuid, Order order, List<Obs> executions) {
+            OrderDialogFragment.newInstance(patientUuid, order, executions)
+                .show(getSupportFragmentManager(), null);
+        }
+
         @Override public void showOrderExecutionDialog(
-            Order order, Interval interval, List<DateTime> executionTimes) {
-            OrderExecutionDialogFragment.newInstance(order, interval, executionTimes)
+            Order order, Interval interval, List<Obs> executions) {
+            OrderExecutionDialogFragment.newInstance(order, interval, executions)
                 .show(getSupportFragmentManager(), null);
         }
 

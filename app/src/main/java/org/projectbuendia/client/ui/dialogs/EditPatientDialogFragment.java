@@ -27,6 +27,7 @@ import android.widget.RadioGroup;
 
 import com.google.common.collect.ImmutableList;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.App;
@@ -237,11 +238,11 @@ public class EditPatientDialogFragment extends DialogFragment {
         if (args.getBoolean("new")) {
             BigToast.show(R.string.adding_new_patient_please_wait);
 
-            long now = System.currentTimeMillis(); // not actually used by PatientDelta
+            DateTime now = DateTime.now(); // not actually used by PatientDelta
             observations = ImmutableList.of(
-                new Obs(now, ConceptUuids.ADMISSION_DATE_UUID,
+                new Obs(null, null, now, ConceptUuids.ADMISSION_DATE_UUID,
                     ConceptType.DATE, LocalDate.now().toString(), ""),
-                new Obs(now, ConceptUuids.PLACEMENT_UUID,
+                new Obs(null, null, now, ConceptUuids.PLACEMENT_UUID,
                     ConceptType.TEXT, mModel.getDefaultLocation().uuid, "")
             );
             mModel.addPatient(mCrudEventBus, patient, observations);
