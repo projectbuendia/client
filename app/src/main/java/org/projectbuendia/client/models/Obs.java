@@ -23,6 +23,7 @@ import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import javax.annotation.Nonnull;
@@ -35,7 +36,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 // TODO: Make ObsPoint a member of Obs; change the structure of Obs to be simply:
 // { final @Nonnull String uuid; String name; final @Nonnull ObsPoint point; } then delete
 // getObsPoint(), getObsValue(), compareTo(), getTypeOrdering(), getCodedValueOrdering().
-public final class Obs extends Model implements Comparable<Obs>, Parcelable {
+public final class Obs extends Model implements Comparable<Obs>, Parcelable, Serializable {
     private static Logger LOG = Logger.create();
 
     /** The patient for which this observation was taken (null if yet to be created). */
