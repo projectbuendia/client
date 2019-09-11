@@ -788,30 +788,6 @@ public class Utils {
     };
 
 
-    // ==== Concurrency ====
-
-    public static void runInBackground(Runnable runnable) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override protected Void doInBackground(Void... voids) {
-                runnable.run();
-                return null;
-            }
-        }.execute();
-    }
-
-    public static <T> void runInBackground(Provider<T> provider, Receiver<T> receiver) {
-        new AsyncTask<Void, Void, T>() {
-            @Override protected T doInBackground(Void... voids) {
-                return provider.provide();
-            }
-
-            @Override protected void onPostExecute(T result) {
-                if (receiver != null) receiver.receive(result);
-            }
-        }.execute();
-    }
-
-
     // ==== Logging ====
 
     /**

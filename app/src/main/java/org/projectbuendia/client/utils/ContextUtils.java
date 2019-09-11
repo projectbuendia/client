@@ -56,7 +56,7 @@ public class ContextUtils extends ContextWrapper {
     }
 
 
-    // ==== Views
+    // ==== Views ====
 
     public View reuseOrInflate(View view, int layoutId, ViewGroup parent) {
         lastView = view != null ? view : inflate(layoutId, parent);
@@ -116,7 +116,7 @@ public class ContextUtils extends ContextWrapper {
         ((TextView) findView(id)).setBackgroundColor(status.getBackgroundColor());
     }
 
-    // ==== String formatting
+    // ==== String formatting ====
 
     /** Strings are always available in the app-wide resources. */
     public String str(int id, Object... args) {
@@ -187,7 +187,7 @@ public class ContextUtils extends ContextWrapper {
     }
 
 
-    // ==== UI
+    // ==== User interface ====
 
     public void prompt(int titleId, int messageId, int actionId, Runnable action) {
         new AlertDialog.Builder(this)
