@@ -124,8 +124,7 @@ public class LoginActivity extends BaseActivity {
 
     private final class Ui implements LoginController.Ui {
         @Override public void showAddNewUserDialog() {
-            NewUserDialogFragment.newInstance(mController.getDialogUi())
-                .show(getSupportFragmentManager(), null);
+            openDialog(NewUserDialogFragment.create(mController.getDialogUi()));
         }
 
         @Override public void showSettings() {

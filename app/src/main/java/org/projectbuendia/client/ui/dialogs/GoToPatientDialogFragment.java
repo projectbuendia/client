@@ -43,7 +43,7 @@ public class GoToPatientDialogFragment extends BaseDialogFragment {
         return R.layout.go_to_patient_dialog_fragment;
     }
 
-    @Override public void onOpen(Bundle args) {
+    @Override protected void onOpen(Bundle args) {
         App.getCrudEventBus().register(this);
 
         dialog.setTitle(R.string.go_to_patient_title);
@@ -52,7 +52,7 @@ public class GoToPatientDialogFragment extends BaseDialogFragment {
         dialog.getButton(BUTTON_POSITIVE).setText(R.string.go_to_chart);
     }
 
-    @Override public void onSubmit() {
+    @Override protected void onSubmit() {
         Utils.logUserAction("go_to_patient_submitted",
             "patient_id", mPatientId.getText().toString(),
             "patient_uuid", mPatientUuid);

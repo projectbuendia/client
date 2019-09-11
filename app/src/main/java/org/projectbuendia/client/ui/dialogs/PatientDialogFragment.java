@@ -14,7 +14,6 @@ package org.projectbuendia.client.ui.dialogs;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -25,12 +24,9 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
@@ -42,16 +38,10 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-
 import butterknife.InjectView;
 
 /** A {@link DialogFragment} for adding or editing a patient. */
 public class PatientDialogFragment extends BaseDialogFragment {
-    @Inject AppModel mModel;
-    @Inject AppSettings mSettings;
-    @Inject CrudEventBus mCrudEventBus;
-
     @InjectView(R.id.patient_id_prefix) EditText mIdPrefix;
     @InjectView(R.id.patient_id) EditText mId;
     @InjectView(R.id.patient_given_name) EditText mGivenName;
@@ -118,10 +108,8 @@ public class PatientDialogFragment extends BaseDialogFragment {
     }
 
     public void focusFirstEmptyField(AlertDialog dialog) {
-        // Open the keyboard.
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        showKeyboard();
 
-        // Set focus.
         EditText[] fields = {mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths};
         for (EditText field : fields) {
             if (field.isEnabled() && field.getText().toString().isEmpty()) {
@@ -130,7 +118,7 @@ public class PatientDialogFragment extends BaseDialogFragment {
             }
         }
 
-        // If all fields are populated, default to the end of the given name field.
+        // If all fields are populated, default to the given name field.
         mGivenName.requestFocus();
         mGivenName.setSelection(mGivenName.getText().length());
     }
@@ -204,16 +192,16 @@ public class PatientDialogFragment extends BaseDialogFragment {
         if (mPatient == null) {
             BigToast.show(R.string.adding_new_patient_please_wait);
             DateTime now = DateTime.now(); // not actually used by PatientDelta
-            mModel.addPatient(mCrudEventBus, patient, ImmutableList.of(
+            App.getModel().addPatient(App.getCrudEventBus(), patient, ImmutableList.of(
                 new Obs(null, null, now, ConceptUuids.ADMISSION_DATE_UUID,
                     ConceptType.DATE, LocalDate.now().toString(), ""),
                 new Obs(null, null, now, ConceptUuids.PLACEMENT_UUID,
-                    ConceptType.TEXT, mModel.getDefaultLocation().uuid, "")
+                    ConceptType.TEXT, App.getModel().getDefaultLocation().uuid, "")
             ));
         } else {
             BigToast.show(R.string.updating_patient_please_wait);
             patient.uuid = mPatient.uuid;
-            mModel.updatePatient(mCrudEventBus, patient);
+            App.getModel().updatePatient(App.getCrudEventBus(), patient);
         }
         // TODO: While the network request is in progress, show a spinner and/or keep the
         // dialog open but greyed out -- keep the UI blocked to make it clear that there is a

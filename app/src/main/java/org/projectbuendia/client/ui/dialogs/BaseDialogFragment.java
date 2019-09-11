@@ -17,10 +17,10 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.utils.ContextUtils;
@@ -45,7 +45,6 @@ public abstract class BaseDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         u = ContextUtils.from(getActivity());
-        App.inject(this);
     }
 
     @Override public @Nonnull AlertDialog onCreateDialog(Bundle state) {
@@ -87,14 +86,6 @@ public abstract class BaseDialogFragment extends DialogFragment {
         onClose();
     }
 
-    /** Attaches a validation error message to a text field. */
-    protected void setError(TextView field, int resourceId, Object... args) {
-        String message = getString(resourceId, args);
-        field.setError(message);
-        field.invalidate();
-        field.requestFocus();
-    }
-
     /** Returns the ID of the layout for the contents of the dialog. */
     protected abstract int getLayoutId();
 
@@ -106,4 +97,15 @@ public abstract class BaseDialogFragment extends DialogFragment {
 
     /** Invoked when the dialog is closed, either by the "Cancel" button or by .dismiss(). */
     protected void onClose() { }
+
+    /** Attaches a validation error message to a text field. */
+    protected void setError(TextView field, int messageId, Object... args) {
+        field.setError(getString(messageId, args));
+        field.invalidate();
+        field.requestFocus();
+    }
+
+    protected void showKeyboard() {
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
 }
