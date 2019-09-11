@@ -12,35 +12,22 @@
 package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.TextChangedWatcher;
-import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
@@ -48,48 +35,30 @@ import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
 import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.SHORT;
 
 /** A dialog for jumping to a patient by ID. */
-public class GoToPatientDialogFragment extends DialogFragment {
-    @Inject AppModel mAppModel;
-    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject SyncManager mSyncManager;
+public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDialogFragment> {
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
     @InjectView(R.id.go_to_patient_result) TextView mSearchResult;
-    private static ContextUtils u;
     String mPatientUuid;
-    CrudEventBus mBus;
 
-    public static GoToPatientDialogFragment newInstance() {
-        return new GoToPatientDialogFragment();
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.go_to_patient_dialog_fragment);
     }
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        App.inject(this);
-        u = ContextUtils.from(getActivity());
-        mBus = mCrudEventBusProvider.get();
-        mBus.register(this);
-    }
+    @Override protected void onOpen(Bundle args) {
+        App.getCrudEventBus().register(this);
 
-    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        final View fragment = u.inflateForDialog(R.layout.go_to_patient_dialog_fragment);
-        ButterKnife.inject(this, fragment);
+        dialog.setTitle(R.string.go_to_patient_title);
         mPatientId.addTextChangedListener(new TextChangedWatcher(this::search));
-
         mSearchResult.setOnClickListener(view -> onSubmit());
-        return new AlertDialog.Builder(getActivity())
-            .setTitle(R.string.go_to_patient_title)
-            .setPositiveButton(R.string.go_to_chart, (dialogInterface, i) -> onSubmit())
-            .setNegativeButton(R.string.cancel, null)
-            .setView(fragment)
-            .create();
+        dialog.getButton(BUTTON_POSITIVE).setText(R.string.go_to_chart);
     }
 
-    public void onSubmit() {
+    @Override protected void onSubmit() {
         Utils.logUserAction("go_to_patient_submitted",
             "patient_id", mPatientId.getText().toString(),
             "patient_uuid", mPatientUuid);
         if (mPatientUuid != null) {
-            getDialog().dismiss();
+            dialog.dismiss();
 
             // NOTE(ping): I don't fully understand why, but posting this on a
             // Handler is necessary to get the numeric keypad to close.  If we
@@ -140,11 +109,10 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 } else {  // not found locally; check server
                     mPatientUuid = null;
                     mSearchResult.setText(R.string.searching_ellipsis);
-                    mAppModel.fetchPatient(mBus, id);
+                    App.getModel().fetchPatient(App.getCrudEventBus(), id);
                 }
             }
         }
-        ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
-            .setEnabled(mPatientUuid != null);
+        dialog.getButton(BUTTON_POSITIVE).setEnabled(mPatientUuid != null);
     }
 }

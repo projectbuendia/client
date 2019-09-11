@@ -29,6 +29,7 @@ import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -64,7 +65,7 @@ import javax.annotation.concurrent.Immutable;
  * multi-word medication name, there are non-breaking spaces betwen the words
  * instead of regular spaces).
  */
-public final @Immutable class Order extends Model {
+public final @Immutable class Order extends Model implements Serializable {
     public static final char NON_BREAKING_SPACE = '\u00a0';
 
     public final String patientUuid;
@@ -269,7 +270,7 @@ public final @Immutable class Order extends Model {
      * in a way that is human-readable and can also be unambiguously unpacked
      * into the original fields.
      */
-    public static class Instructions implements Comparable<Instructions> {
+    public static class Instructions {
         // These String fields are empty if missing, but never null.
         public final @NonNull String medication;
         public final @NonNull String route;
@@ -355,10 +356,6 @@ public final @Immutable class Order extends Model {
                     && Objects.equals(notes, o.notes);
             }
             return false;
-        }
-
-        public int compareTo(Instructions other) {
-            return format().compareTo(other.format());
         }
     }
 }

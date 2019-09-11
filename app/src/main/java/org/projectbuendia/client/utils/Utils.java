@@ -15,12 +15,10 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcel;
 import android.view.View;
 import android.widget.TextView;
 
@@ -47,12 +45,12 @@ import org.projectbuendia.client.net.Server;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -566,40 +564,51 @@ public class Utils {
 
     // ==== Bundles ====
 
-    /** Gets a nullable Long value from a Bundle.  Always use this instead of getLong() directly. */
-    public static Long getLong(Bundle bundle, String key) {
-        // getLong never returns null; we have to check explicitly.
-        return bundle.containsKey(key) ? bundle.getLong(key) : null;
-    }
-
     /** Gets a nullable DateTime value from a Bundle.  Always use this instead of getLong() directly. */
     public static DateTime getDateTime(Bundle bundle, String key) {
         // getLong never returns null; we have to check explicitly.
         return bundle.containsKey(key) ? new DateTime(bundle.getLong(key)) : null;
     }
 
-    /** Puts a nullable DateTime into a Bundle.  Always use this instead of setLong() directly. */
-    public static void putDateTime(Bundle bundle, String key, DateTime time) {
-        if (time != null) {
-            bundle.putLong(key, time.getMillis());
-        }
+    /** Creates a Bundle containing one key-value pair. */
+    public static Bundle bundle(String key1, Object value1) {
+        return addToBundle(new Bundle(), key1, value1);
     }
 
-    /** Puts an integer into a Bundle in a chainable way. */
-    public static Bundle putInt(String key, int value, Bundle bundle) {
-        bundle.putInt(key, value);
-        return bundle;
+    /** Creates a Bundle containing two key-value pairs. */
+    public static Bundle bundle(String key1, Object value1, String key2, Object value2) {
+        return addToBundle(
+            addToBundle(
+                new Bundle(), key1, value1
+            ), key2, value2
+        );
     }
 
-    /** Puts a String into a Bundle in a chainable way. */
-    public static Bundle putString(String key, String value, Bundle bundle) {
-        bundle.putString(key, value);
-        return bundle;
+    /** Creates a Bundle containing three key-value pairs. */
+    public static Bundle bundle(String key1, Object value1, String key2, Object value2,
+                                String key3, Object value3) {
+        return addToBundle(
+            addToBundle(
+                addToBundle(
+                    new Bundle(), key1, value1
+                ), key2, value2
+            ), key3, value3
+        );
     }
 
-    /** Puts a Bundle into a Bundle in a chainable way. */
-    public static Bundle putBundle(String key, Bundle value, Bundle bundle) {
-        bundle.putBundle(key, value);
+    /** Adds a key-value pair to a Bundle and returns the Bundle for chaining. */
+    public static Bundle addToBundle(Bundle bundle, String key, Object value) {
+        if (value instanceof String) bundle.putString(key, (String) value);
+        else if (value instanceof Double) bundle.putDouble(key, (Double) value);
+        else if (value instanceof Float) bundle.putFloat(key, (Float) value);
+        else if (value instanceof Long) bundle.putLong(key, (Long) value);
+        else if (value instanceof Integer) bundle.putInt(key, (Integer) value);
+        else if (value instanceof Boolean) bundle.putBoolean(key, (Boolean) value);
+        else if (value instanceof ReadableInstant) bundle.putLong(key, ((ReadableInstant) value).getMillis());
+        else if (value instanceof Bundle) bundle.putBundle(key, (Bundle) value);
+        else if (value instanceof Serializable) bundle.putSerializable(key, (Serializable) value);
+        else if (value != null) throw new IllegalArgumentException(format(
+            "Don't know how to put a value of type %s into a Bundle", value.getClass()));
         return bundle;
     }
 
@@ -608,13 +617,6 @@ public class Utils {
         Message message = handler.obtainMessage(what);
         message.setData(data);
         return message;
-    }
-
-    /** Serializes a Bundle to a String. */
-    public static String toString(Bundle bundle) {
-        Parcel parcel = Parcel.obtain();
-        bundle.writeToParcel(parcel, 0);
-        return new String(parcel.marshall(), StandardCharsets.ISO_8859_1);
     }
 
 
@@ -652,6 +654,13 @@ public class Utils {
             TextView textView = view.findViewById(id);
             if (textView != null) textView.setText(text);
         }
+    }
+
+    /** Sets a view's enabled state and focusable state at the same time. */
+    public static void setEnabled(View view, boolean enabled) {
+        view.setEnabled(enabled);
+        view.setFocusable(enabled);
+        view.setFocusableInTouchMode(enabled);
     }
 
 
@@ -776,30 +785,6 @@ public class Utils {
             return parts;
         }
     };
-
-
-    // ==== Concurrency ====
-
-    public static void runInBackground(Runnable runnable) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override protected Void doInBackground(Void... voids) {
-                runnable.run();
-                return null;
-            }
-        }.execute();
-    }
-
-    public static <T> void runInBackground(Provider<T> provider, Receiver<T> receiver) {
-        new AsyncTask<Void, Void, T>() {
-            @Override protected T doInBackground(Void... voids) {
-                return provider.provide();
-            }
-
-            @Override protected void onPostExecute(T result) {
-                if (receiver != null) receiver.receive(result);
-            }
-        }.execute();
-    }
 
 
     // ==== Logging ====

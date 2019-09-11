@@ -19,9 +19,11 @@ import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Utils;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.Immutable;
 
-public final @Immutable class Patient extends Model {
+public final @Immutable class Patient extends Model implements Serializable {
     public final String id;
     public final String givenName;
     public final String familyName;

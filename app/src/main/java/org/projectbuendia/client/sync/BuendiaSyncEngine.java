@@ -95,7 +95,7 @@ public class BuendiaSyncEngine implements SyncEngine {
     }
 
     public static Bundle buildOptions(Phase... phases) {
-        return Utils.putString(KEY_PHASES, Joiner.on(",").join(phases), new Bundle());
+        return Utils.bundle(KEY_PHASES, Joiner.on(",").join(phases));
     }
 
     public static @NonNull List<Phase> getPhases(Bundle options) {

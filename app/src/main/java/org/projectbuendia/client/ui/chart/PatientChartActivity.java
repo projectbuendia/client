@@ -33,11 +33,8 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.odk.collect.android.model.Preset;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
@@ -46,16 +43,15 @@ import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
-import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
@@ -64,9 +60,7 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -78,14 +72,6 @@ import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
 public final class PatientChartActivity extends LoggedInActivity {
     private static final Logger LOG = Logger.create();
 
-    // TODO/cleanup: We don't need this anymore.  See updateEbolaPcrTestResultUi below.
-    // Minimum PCR Np or L value to be considered negative (displayed as "NEG").
-    // 39.95 is chosen as the threshold as it would be displayed as 40.0
-    // (and values slightly below 40.0 may be the result of rounding errors).
-    private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
-
-    private static final String KEY_CONTROLLER_STATE = "controllerState";
-
     private PatientChartController mController;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
@@ -95,12 +81,8 @@ public final class PatientChartActivity extends LoggedInActivity {
     private DatePickerDialog mSymptomOnsetDateDialog;
     private Ui mUi;
 
-    @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
-    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject SyncManager mSyncManager;
     @Inject ChartDataHelper mChartDataHelper;
-    @Inject AppSettings mSettings;
     @InjectView(R.id.chart_webview) WebView mWebView;
 
     private static final String EN_DASH = "\u2013";
@@ -153,11 +135,6 @@ public final class PatientChartActivity extends LoggedInActivity {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
 
-        @Nullable Bundle controllerState = null;
-        if (savedInstanceState != null) {
-            controllerState = savedInstanceState.getBundle(KEY_CONTROLLER_STATE);
-        }
-
         ButterKnife.inject(this);
         App.inject(this);
 
@@ -190,11 +167,11 @@ public final class PatientChartActivity extends LoggedInActivity {
                 }
             }
         });
-        mChartRenderer = new ChartRenderer(mWebView, getResources(), mSettings);
+        mChartRenderer = new ChartRenderer(mWebView, getResources(), App.getSettings());
 
         final OdkResultSender odkResultSender = (patientUuid, resultCode, data) ->
             OdkActivityLauncher.sendOdkResultToServer(
-                PatientChartActivity.this, mSettings,
+                PatientChartActivity.this, App.getSettings(),
                 patientUuid, resultCode, data);
         final MinimalHandler minimalHandler = new MinimalHandler() {
             private final Handler mHandler = new Handler();
@@ -205,16 +182,12 @@ public final class PatientChartActivity extends LoggedInActivity {
         };
         mUi = new Ui();
         mController = new PatientChartController(
-            mAppModel,
-            mSettings,
             new EventBusWrapper(mEventBus),
-            mCrudEventBusProvider.get(),
+            App.getCrudEventBus(),
             mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
             mChartDataHelper,
-            controllerState,
-            mSyncManager,
             minimalHandler);
 
         initChartTabs();
@@ -305,18 +278,12 @@ public final class PatientChartActivity extends LoggedInActivity {
         mController.onXFormResult(requestCode, resultCode, data);
     }
 
-    private String getFormattedPcrString(double pcrValue) {
-        return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
-            getString(R.string.pcr_negative) :
-            Utils.format("%1$.1f", pcrValue);
-    }
-
     private void showZoomDialog() {
         String[] labels = new String[ChartRenderer.ZOOM_LEVELS.length];
         for (int i = 0; i < labels.length; i++) {
             labels[i] = getString(ChartRenderer.ZOOM_LEVELS[i].labelId);
         }
-        int selected = mSettings.getChartZoomIndex();
+        int selected = App.getSettings().getChartZoomIndex();
         new AlertDialog.Builder(this)
             .setTitle(R.string.title_zoom)
             .setSingleChoiceItems(labels, selected, (dialog, which) -> {
@@ -398,8 +365,7 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showOrderDialog(String patientUuid, Order order, List<Obs> executions) {
-            OrderDialogFragment.newInstance(patientUuid, order, executions)
-                .show(getSupportFragmentManager(), null);
+            openDialog(OrderDialogFragment.create(patientUuid, order, executions));
         }
 
         @Override public void showOrderExecutionDialog(
@@ -409,13 +375,11 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showEditPatientDialog(Patient patient) {
-            EditPatientDialogFragment.newInstance(patient)
-                .show(getSupportFragmentManager(), null);
+            openDialog(PatientDialogFragment.create(patient));
         }
 
         @Override public void showPatientLocationDialog(Patient patient) {
-            PatientLocationDialogFragment.newInstance(patient)
-                .show(getSupportFragmentManager(), null);
+            openDialog(PatientLocationDialogFragment.create(patient));
         }
 
         @Override public void showPatientUpdateFailed(int reason) {

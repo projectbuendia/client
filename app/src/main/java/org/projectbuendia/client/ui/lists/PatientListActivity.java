@@ -36,7 +36,7 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
-import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Utils;
 
@@ -73,10 +73,9 @@ public abstract class PatientListActivity extends LoggedInActivity {
         menu.findItem(R.id.action_new_patient).setOnMenuItemClickListener(
             menuItem -> {
                 Utils.logEvent("add_patient_pressed");
-                EditPatientDialogFragment.newInstance(null)
-                    .show(getSupportFragmentManager(), null);
-                return true;
-            });
+                return openDialog(PatientDialogFragment.create(null));
+            }
+        );
 
         MenuItem search = menu.findItem(R.id.action_search);
         setMenuBarIcon(search, FontAwesomeIcons.fa_filter);

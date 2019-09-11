@@ -29,7 +29,7 @@ import static junit.framework.TestCase.assertTrue;
 /** Tests for adding a new patient. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class EditPatientDialogFragmentTest extends FunctionalTestCase {
+public class PatientDialogFragmentTest extends FunctionalTestCase {
 
     /**
      * Tests adding a new patient;

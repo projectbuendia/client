@@ -19,6 +19,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.StringRes;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -43,8 +44,10 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -71,9 +74,67 @@ public abstract class BaseActivity extends FragmentActivity {
     private FrameLayout mInnerContent;
     private SnackBar snackBar;
     private Locale initialLocale; // for restarting when locale has changed
+    private Set<String> openDialogTypes;
 
     @Inject @Qualifiers.HealthEventBus EventBus mHealthEventBus;
 
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initialLocale = Locale.getDefault();
+        openDialogTypes = new HashSet<>();
+        App.inject(this);
+    }
+
+    @Override protected void attachBaseContext(Context base) {
+        super.attachBaseContext(App.applyLocaleSetting(base));
+        u = ContextUtils.from(this);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (!eq(Locale.getDefault(), initialLocale)) Utils.restartActivity(this);
+        initializeSnackBar();
+        if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
+            // If the font scale was changed while this activity was paused, force a refresh.
+            restartWithFontScale(sScaleStep);
+        }
+        EventBus.getDefault().registerSticky(this);
+        App.getHealthMonitor().start();
+        App.getSyncManager().applyPeriodicSyncSettings();
+        mHealthEventBus.post(
+            App.getSettings().getPeriodicSyncDisabled() ?
+                HealthIssue.PERIODIC_SYNC_DISABLED.discovered :
+                HealthIssue.PERIODIC_SYNC_DISABLED.resolved
+        );
+        Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
+    }
+
+    @Override protected void onPause() {
+        EventBus.getDefault().unregister(this);
+        App.getHealthMonitor().stop();
+        pausedScaleStep = sScaleStep;
+        super.onPause();
+    }
+
+    /** Opens the dialog and returns true, unless a dialog of this type is already open. */
+    public boolean openDialog(DialogFragment fragment) {
+        String type = fragment.getClass().getName();
+        if (!openDialogTypes.contains(type)) {
+            fragment.show(getSupportFragmentManager(), null);
+            return true;
+        }
+        return false;
+    }
+
+    public void onDialogOpened(DialogFragment fragment) {
+        openDialogTypes.add(fragment.getClass().getName());
+    }
+
+    public void onDialogClosed(DialogFragment fragment) {
+        openDialogTypes.remove(fragment.getClass().getName());
+    }
+
+    /** Intercepts volume-up/volume-down presses and changes the UI scale step. */
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
@@ -433,43 +494,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
     /** The user has requested installation of the last downloaded software update. */
     public static class InstallationRequestedEvent {
-    }
-
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        initialLocale = Locale.getDefault();
-        App.inject(this);
-    }
-
-    @Override protected void attachBaseContext(Context base) {
-        super.attachBaseContext(App.applyLocaleSetting(base));
-        u = ContextUtils.from(this);
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-        if (!eq(Locale.getDefault(), initialLocale)) Utils.restartActivity(this);
-        initializeSnackBar();
-        if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
-            // If the font scale was changed while this activity was paused, force a refresh.
-            restartWithFontScale(sScaleStep);
-        }
-        EventBus.getDefault().registerSticky(this);
-        App.getHealthMonitor().start();
-        App.getSyncManager().applyPeriodicSyncSettings();
-        mHealthEventBus.post(
-            App.getSettings().getPeriodicSyncDisabled() ?
-                HealthIssue.PERIODIC_SYNC_DISABLED.discovered :
-                HealthIssue.PERIODIC_SYNC_DISABLED.resolved
-        );
-        Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
-    }
-
-    @Override protected void onPause() {
-        EventBus.getDefault().unregister(this);
-        App.getHealthMonitor().stop();
-        pausedScaleStep = sScaleStep;
-        super.onPause();
     }
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
