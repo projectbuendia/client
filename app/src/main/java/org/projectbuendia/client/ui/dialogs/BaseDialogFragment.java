@@ -51,9 +51,10 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
         u = ContextUtils.from(getActivity());
     }
 
-    @Override public @Nonnull AlertDialog onCreateDialog(Bundle state) {
+    /** Subclasses should implement onCreateDialog() by calling createAlertDialog(). */
+    protected @Nonnull AlertDialog createAlertDialog(int layoutId) {
         Activity activity = getActivity();
-        View view = u.inflateForDialog(getLayoutId());
+        View view = u.inflateForDialog(layoutId);
         ButterKnife.inject(this, view);
 
         dialog = new AlertDialog.Builder(activity)
@@ -91,9 +92,6 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
         }
         onClose();
     }
-
-    /** Returns the ID of the layout for the contents of the dialog. */
-    protected abstract int getLayoutId();
 
     /** Invoked just after the dialog opens; use this to populate the dialog. */
     protected void onOpen(Bundle args) { }

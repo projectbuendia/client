@@ -95,8 +95,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment>
         return new OrderDialogFragment().withArgs(args);
     }
 
-    @Override protected int getLayoutId() {
-        return R.layout.order_dialog_fragment;
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.order_dialog_fragment);
     }
 
     @Override public void onResume() {

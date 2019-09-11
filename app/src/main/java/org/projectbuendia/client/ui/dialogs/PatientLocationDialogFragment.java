@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.InputFilter;
@@ -48,8 +49,8 @@ public class PatientLocationDialogFragment extends BaseDialogFragment<PatientLoc
         );
     }
 
-    @Override protected int getLayoutId() {
-        return R.layout.patient_location_dialog_fragment;
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.patient_location_dialog_fragment);
     }
 
     @Override protected void onOpen(Bundle args) {

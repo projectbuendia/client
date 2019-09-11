@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
+import android.app.AlertDialog;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,8 +40,8 @@ public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDia
     @InjectView(R.id.go_to_patient_result) TextView mSearchResult;
     String mPatientUuid;
 
-    @Override protected int getLayoutId() {
-        return R.layout.go_to_patient_dialog_fragment;
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.go_to_patient_dialog_fragment);
     }
 
     @Override protected void onOpen(Bundle args) {

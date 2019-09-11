@@ -63,8 +63,8 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
         return new PatientDialogFragment().withArgs(Utils.bundleOf("patient", patient));
     }
 
-    @Override protected int getLayoutId() {
-        return R.layout.patient_dialog_fragment;
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.patient_dialog_fragment);
     }
 
     @Override public void onOpen(Bundle args) {

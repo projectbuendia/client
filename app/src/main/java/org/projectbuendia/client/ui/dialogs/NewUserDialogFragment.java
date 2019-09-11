@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.widget.EditText;
@@ -38,8 +39,8 @@ public class NewUserDialogFragment extends BaseDialogFragment<NewUserDialogFragm
         return this;
     }
 
-    @Override protected int getLayoutId() {
-        return R.layout.new_user_dialog_fragment;
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.new_user_dialog_fragment);
     }
 
     @Override protected void onOpen(Bundle args) {
