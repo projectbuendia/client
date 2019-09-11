@@ -44,9 +44,7 @@ public class PatientLocationDialogFragment extends BaseDialogFragment<PatientLoc
     private EditText bedNumber;
 
     public static PatientLocationDialogFragment create(Patient patient) {
-        return new PatientLocationDialogFragment().withArgs(
-            Utils.bundleOf("patient", patient)
-        );
+        return new PatientLocationDialogFragment().withArgs(Utils.bundle("patient", patient));
     }
 
     @Override public AlertDialog onCreateDialog(Bundle state) {

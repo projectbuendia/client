@@ -60,7 +60,7 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
     private boolean mAgeChanged;
 
     public static PatientDialogFragment create(Patient patient) {
-        return new PatientDialogFragment().withArgs(Utils.bundleOf("patient", patient));
+        return new PatientDialogFragment().withArgs(Utils.bundle("patient", patient));
     }
 
     @Override public AlertDialog onCreateDialog(Bundle state) {

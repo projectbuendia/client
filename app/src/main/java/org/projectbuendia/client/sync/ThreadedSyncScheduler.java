@@ -30,11 +30,6 @@ public class ThreadedSyncScheduler implements SyncScheduler {
     private static final int CLEAR_ALL_PERIODIC_SYNCS = 3;
     private static final int LOOP_TICK = 4;
 
-    // Bundle keys
-    private static final String KEY_OPTIONS = "OPTIONS";
-    private static final String KEY_PERIOD_SEC = "PERIOD_SEC";
-    private static final String KEY_LOOP_ID = "LOOP_ID";
-
     public ThreadedSyncScheduler(SyncEngine engine) {
         LOG.i("> start new SyncThread");
         thread = new SyncThread(engine);
@@ -43,7 +38,7 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
     @Override public void requestSync(Bundle options) {
         LOG.i("> requestSync(%s)", options);
-        thread.send(REQUEST_SYNC, Utils.putBundle(KEY_OPTIONS, options, new Bundle()));
+        thread.send(REQUEST_SYNC, Utils.bundle("options", options));
     }
 
     @Override public void stopSyncing() {
@@ -53,9 +48,8 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
     @Override public void setPeriodicSync(int periodSec, Bundle options) {
         LOG.i("> setPeriodicSync(periodSec=%d, options=%s)", periodSec, options);
-        thread.send(SET_PERIODIC_SYNC,
-            Utils.putBundle(KEY_OPTIONS, options,
-                Utils.putInt(KEY_PERIOD_SEC, periodSec, new Bundle())));
+        thread.send(SET_PERIODIC_SYNC, Utils.bundle(
+            "options", options, "periodSec", periodSec));
     }
 
     @Override public void clearAllPeriodicSyncs() {
@@ -110,9 +104,9 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
                 handler = new Handler(message -> {
                     Bundle data = message.getData();
-                    Bundle options = data.getBundle(KEY_OPTIONS);
-                    int periodSec = data.getInt(KEY_PERIOD_SEC, 0);
-                    int loopId = data.getInt(KEY_LOOP_ID, 0);
+                    Bundle options = data.getBundle("options");
+                    int periodSec = data.getInt("periodSec", 0);
+                    int loopId = data.getInt("loopId", 0);
                     Loop loop = getLoop(options);
 
                     switch (message.what) {
@@ -175,11 +169,11 @@ public class ThreadedSyncScheduler implements SyncScheduler {
 
         private void sendLoopTick(Loop loop) {
             LOG.d("* scheduling LOOP_TICK(%d) in %d sec for %s", loop.activeLoopId, loop.periodSec, loop);
-            handler.sendMessageDelayed(Utils.newMessage(handler, LOOP_TICK,
-                Utils.putBundle(KEY_OPTIONS, loop.options,
-                    Utils.putInt(KEY_PERIOD_SEC, loop.periodSec,
-                        Utils.putInt(KEY_LOOP_ID, loop.activeLoopId, new Bundle())))
-            ), loop.periodSec * 1000);
+            handler.sendMessageDelayed(Utils.newMessage(handler, LOOP_TICK, Utils.bundle(
+                "options", loop.options,
+                "periodSec", loop.periodSec,
+                "loopId", loop.activeLoopId
+            )), loop.periodSec * 1000);
         }
 
         private void runSync(Bundle options) {
