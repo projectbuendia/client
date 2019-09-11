@@ -182,7 +182,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         String patientUuid,
         OdkResultSender odkResultSender,
         ChartDataHelper chartHelper,
-        @Nullable Bundle savedState,
         SyncManager syncManager,
         MinimalHandler mainThreadHandler) {
         mAppModel = appModel;

@@ -52,10 +52,10 @@ import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
-import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
@@ -64,7 +64,6 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -77,14 +76,6 @@ import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
 /** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends LoggedInActivity {
     private static final Logger LOG = Logger.create();
-
-    // TODO/cleanup: We don't need this anymore.  See updateEbolaPcrTestResultUi below.
-    // Minimum PCR Np or L value to be considered negative (displayed as "NEG").
-    // 39.95 is chosen as the threshold as it would be displayed as 40.0
-    // (and values slightly below 40.0 may be the result of rounding errors).
-    private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
-
-    private static final String KEY_CONTROLLER_STATE = "controllerState";
 
     private PatientChartController mController;
     private ProgressDialog mFormLoadingDialog;
@@ -153,11 +144,6 @@ public final class PatientChartActivity extends LoggedInActivity {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
 
-        @Nullable Bundle controllerState = null;
-        if (savedInstanceState != null) {
-            controllerState = savedInstanceState.getBundle(KEY_CONTROLLER_STATE);
-        }
-
         ButterKnife.inject(this);
         App.inject(this);
 
@@ -213,7 +199,6 @@ public final class PatientChartActivity extends LoggedInActivity {
             getIntent().getStringExtra("uuid"),
             odkResultSender,
             mChartDataHelper,
-            controllerState,
             mSyncManager,
             minimalHandler);
 
@@ -303,12 +288,6 @@ public final class PatientChartActivity extends LoggedInActivity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mController.onXFormResult(requestCode, resultCode, data);
-    }
-
-    private String getFormattedPcrString(double pcrValue) {
-        return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
-            getString(R.string.pcr_negative) :
-            Utils.format("%1$.1f", pcrValue);
     }
 
     private void showZoomDialog() {
