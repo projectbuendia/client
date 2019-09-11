@@ -420,33 +420,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         ));
     }
 
-    public void showAssignGeneralConditionDialog(
-        Context context, final String generalConditionUuid) {
-        AssignGeneralConditionDialog.ConditionSelectedCallback callback =
-            newConditionUuid -> {
-                mUi.showWaitDialog(R.string.title_updating_patient);
-                setCondition(newConditionUuid);
-            };
-        mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
-            context, generalConditionUuid, callback);
-
-        mAssignGeneralConditionDialog.show();
-    }
-
-    public void setCondition(String newConditionUuid) {
-        LOG.v("Assigning general condition: %s", newConditionUuid);
-        mModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
-            null, mPatientUuid, DateTime.now(),
-            ConceptUuids.GENERAL_CONDITION_UUID, ConceptType.CODED, newConditionUuid, null
-        ));
-    }
-
-    public void showAssignLocationDialog(Context context) {
-        if (mPatient != null) {
-            mUi.showPatientLocationDialog(mPatient);
-        }
-    }
-
     public void setZoomIndex(int index) {
         App.getSettings().setChartZoomIndex(index);
         updatePatientObsUi();
