@@ -13,7 +13,6 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -30,18 +29,18 @@ import javax.annotation.Nonnull;
 
 import butterknife.ButterKnife;
 
-import static android.content.DialogInterface.BUTTON_NEGATIVE;
-import static android.content.DialogInterface.BUTTON_NEUTRAL;
-import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 
 /** Common behaviour for all dialogs. */
 public abstract class BaseDialogFragment extends DialogFragment {
+    public static int BUTTON_NEGATIVE = DialogInterface.BUTTON_NEGATIVE;
+    public static int BUTTON_NEUTRAL = DialogInterface.BUTTON_NEUTRAL;
+    public static int BUTTON_POSITIVE = DialogInterface.BUTTON_POSITIVE;
+    public static int[] BUTTONS = {BUTTON_NEGATIVE, BUTTON_NEUTRAL, BUTTON_POSITIVE};
+
     protected ContextUtils u;
     protected Bundle args;
     protected AlertDialog dialog;
-
-    private static int[] BUTTONS = {BUTTON_NEGATIVE, BUTTON_NEUTRAL, BUTTON_POSITIVE};
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -49,7 +48,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
         App.inject(this);
     }
 
-    @Override public @Nonnull Dialog onCreateDialog(Bundle state) {
+    @Override public @Nonnull AlertDialog onCreateDialog(Bundle state) {
         Activity activity = getActivity();
         View view = u.inflateForDialog(getLayoutId());
         ButterKnife.inject(this, view);
@@ -70,12 +69,12 @@ public abstract class BaseDialogFragment extends DialogFragment {
 
             // To prevent automatic dismissal of the dialog, we have to override
             // the listener instead of passing it in to setPositiveButton.
-            dialog.getButton(BUTTON_POSITIVE).setOnClickListener(v -> onSubmit(dialog));
+            dialog.getButton(BUTTON_POSITIVE).setOnClickListener(v -> onSubmit());
 
             if (activity instanceof BaseActivity) {
                 ((BaseActivity) activity).onDialogOpened(BaseDialogFragment.this);
             }
-            onOpen(dialog, getArguments());
+            onOpen(getArguments());
         });
         return dialog;
     }
@@ -85,7 +84,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
         if (activity instanceof BaseActivity) {
             ((BaseActivity) activity).onDialogClosed(this);
         }
-        onClose(dialog);
+        onClose();
     }
 
     /** Attaches a validation error message to a text field. */
@@ -100,11 +99,11 @@ public abstract class BaseDialogFragment extends DialogFragment {
     protected abstract int getLayoutId();
 
     /** Invoked just after the dialog opens; use this to populate the dialog. */
-    protected void onOpen(Dialog dialog, Bundle args) { }
+    protected void onOpen(Bundle args) { }
 
     /** Invoked when the user taps the "OK" button; should call .dismiss() if needed. */
-    protected void onSubmit(Dialog dialog) { }
+    protected void onSubmit() { }
 
     /** Invoked when the dialog is closed, either by the "Cancel" button or by .dismiss(). */
-    protected void onClose(Dialog dialog) { }
+    protected void onClose() { }
 }

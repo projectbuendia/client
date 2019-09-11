@@ -107,7 +107,7 @@ public abstract class LoggedInActivity extends BaseActivity {
 
         searchByIdItem.setOnMenuItemClickListener(menuItem -> {
             Utils.logUserAction("go_to_patient_pressed");
-            GoToPatientDialogFragment.newInstance().show(getSupportFragmentManager(), null);
+            openDialog(new GoToPatientDialogFragment());
             return true;
         });
 

@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.WindowManager;
@@ -79,7 +79,7 @@ public class PatientDialogFragment extends BaseDialogFragment {
         return R.layout.patient_dialog_fragment;
     }
 
-    @Override public void onOpen(Dialog dialog, Bundle args) {
+    @Override public void onOpen(Bundle args) {
         mPatient = (Patient) args.getSerializable("patient");
         dialog.setTitle(mPatient == null ?
             R.string.title_activity_patient_add : R.string.action_edit_patient);
@@ -117,7 +117,7 @@ public class PatientDialogFragment extends BaseDialogFragment {
         focusFirstEmptyField(dialog);
     }
 
-    public void focusFirstEmptyField(Dialog dialog) {
+    public void focusFirstEmptyField(AlertDialog dialog) {
         // Open the keyboard.
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
@@ -135,7 +135,7 @@ public class PatientDialogFragment extends BaseDialogFragment {
         mGivenName.setSelection(mGivenName.getText().length());
     }
 
-    @Override public void onSubmit(Dialog dialog) {
+    @Override public void onSubmit() {
         String idPrefix = mIdPrefix.getText().toString().trim();
         String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
         String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
