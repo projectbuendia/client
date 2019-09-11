@@ -12,8 +12,8 @@
 -->
 <resources>
   <string name="quoted_text">«%s»</string>
-  <string name="two_items">%$1s et %$2s</string>
-  <string name="more_than_two_items">%$1s, et %$2s</string>
+  <string name="two_items">%1$s et %2$s</string>
+  <string name="more_than_two_items">%1$s, et %2$s</string>
   <string name="month_day_format">d MMM</string>
   <string name="sentence_month_day_format">\'le\' d MMM</string>
   <string name="year_month_day_format">d MMM yyyy</string>
