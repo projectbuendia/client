@@ -115,7 +115,7 @@ public class AppSettings {
     }
 
     /** Gets the setting for whether to retain filled-in forms after submission. */
-    public boolean getformInstancesRetainedLocally() {
+    public boolean getFormInstancesRetainedLocally() {
         return prefs.getBoolean("form_instances_retained",
             resources.getBoolean(R.bool.form_instances_retained_default));
     }

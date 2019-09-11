@@ -33,11 +33,8 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.odk.collect.android.model.Preset;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
@@ -46,7 +43,6 @@ import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
@@ -65,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -86,12 +81,8 @@ public final class PatientChartActivity extends LoggedInActivity {
     private DatePickerDialog mSymptomOnsetDateDialog;
     private Ui mUi;
 
-    @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
-    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject SyncManager mSyncManager;
     @Inject ChartDataHelper mChartDataHelper;
-    @Inject AppSettings mSettings;
     @InjectView(R.id.chart_webview) WebView mWebView;
 
     private static final String EN_DASH = "\u2013";
@@ -176,11 +167,11 @@ public final class PatientChartActivity extends LoggedInActivity {
                 }
             }
         });
-        mChartRenderer = new ChartRenderer(mWebView, getResources(), mSettings);
+        mChartRenderer = new ChartRenderer(mWebView, getResources(), App.getSettings());
 
         final OdkResultSender odkResultSender = (patientUuid, resultCode, data) ->
             OdkActivityLauncher.sendOdkResultToServer(
-                PatientChartActivity.this, mSettings,
+                PatientChartActivity.this, App.getSettings(),
                 patientUuid, resultCode, data);
         final MinimalHandler minimalHandler = new MinimalHandler() {
             private final Handler mHandler = new Handler();
@@ -191,15 +182,12 @@ public final class PatientChartActivity extends LoggedInActivity {
         };
         mUi = new Ui();
         mController = new PatientChartController(
-            mAppModel,
-            mSettings,
             new EventBusWrapper(mEventBus),
-            mCrudEventBusProvider.get(),
+            App.getCrudEventBus(),
             mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
             mChartDataHelper,
-            mSyncManager,
             minimalHandler);
 
         initChartTabs();
@@ -295,7 +283,7 @@ public final class PatientChartActivity extends LoggedInActivity {
         for (int i = 0; i < labels.length; i++) {
             labels[i] = getString(ChartRenderer.ZOOM_LEVELS[i].labelId);
         }
-        int selected = mSettings.getChartZoomIndex();
+        int selected = App.getSettings().getChartZoomIndex();
         new AlertDialog.Builder(this)
             .setTitle(R.string.title_zoom)
             .setSingleChoiceItems(labels, selected, (dialog, which) -> {

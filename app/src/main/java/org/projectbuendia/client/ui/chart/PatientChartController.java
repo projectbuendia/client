@@ -15,7 +15,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
-import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.webkit.JavascriptInterface;
 
@@ -24,7 +23,6 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.odk.collect.android.model.Preset;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
@@ -33,9 +31,9 @@ import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
-import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
@@ -56,7 +54,6 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.ConceptService;
-import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -99,10 +96,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
     private final ChartDataHelper mChartHelper;
-    private final AppModel mAppModel;
-    private final AppSettings mSettings;
+    private final AppModel mModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
-    private final SyncManager mSyncManager;
     private final MinimalHandler mMainThreadHandler;
     private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
     private Runnable mActivePatientUpdater;
@@ -174,25 +169,20 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public PatientChartController(
-        AppModel appModel,
-        AppSettings settings,
         EventBusRegistrationInterface defaultEventBus,
         CrudEventBus crudEventBus,
         Ui ui,
         String patientUuid,
         OdkResultSender odkResultSender,
         ChartDataHelper chartHelper,
-        SyncManager syncManager,
         MinimalHandler mainThreadHandler) {
-        mAppModel = appModel;
-        mSettings = settings;
+        mModel = App.getModel();
         mDefaultEventBus = defaultEventBus;
         mCrudEventBus = crudEventBus;
         mUi = ui;
         currentPatientUuid = mPatientUuid = patientUuid;
         mOdkResultSender = odkResultSender;
         mChartHelper = chartHelper;
-        mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
         mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
         mCharts = mChartHelper.getCharts();
@@ -210,14 +200,14 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
         // Load a new patient, which will trigger UI updates.
         currentPatientUuid = mPatientUuid = uuid;
-        mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
+        mModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
     }
 
     /** Sets async operations going to collect data required by the UI. */
     public void init() {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
+        mModel.loadSinglePatient(mCrudEventBus, mPatientUuid);
     }
 
     /** Releases any resources used by the controller. */
@@ -229,7 +219,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
-        mSyncManager.setNewSyncsSuppressed(false);
+        App.getSyncManager().setNewSyncsSuppressed(false);
         mFormPending = false;
 
         FormRequest request = popFormRequest(requestCode);
@@ -302,7 +292,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             mUi.showError(R.string.no_user);
             return;
         }
-        if (mAppModel.getDefaultLocation() == null) {
+        if (mModel.getDefaultLocation() == null) {
             mUi.showError(R.string.no_location);
             return;
         }
@@ -312,8 +302,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         preset.providerUuid = user.getUuid();
         preset.locationUuid = mPatient.locationUuid;
         if (preset.locationUuid == null) {
-            if (mAppModel.getDefaultLocation() != null) {
-                preset.locationUuid = mAppModel.getDefaultLocation().uuid;
+            if (mModel.getDefaultLocation() != null) {
+                preset.locationUuid = mModel.getDefaultLocation().uuid;
             }
         }
         Map<String, Obs> observations = mChartHelper.getLatestObservations(mPatientUuid);
@@ -424,7 +414,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void submitDateObservation(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
-        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
+        mModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
             null, mPatientUuid, DateTime.now(),
             conceptUuid, ConceptType.DATE, date.toString(), null
         ));
@@ -445,7 +435,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
-        mAppModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
+        mModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
             null, mPatientUuid, DateTime.now(),
             ConceptUuids.GENERAL_CONDITION_UUID, ConceptType.CODED, newConditionUuid, null
         ));
@@ -458,7 +448,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     }
 
     public void setZoomIndex(int index) {
-        mSettings.setChartZoomIndex(index);
+        App.getSettings().setChartZoomIndex(index);
         updatePatientObsUi();
     }
 
@@ -538,7 +528,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
         public void onEventMainThread(SyncSucceededEvent event) {
             updatePatientObsUi(); // if the sync fetched observations
-            mAppModel.loadSinglePatient(mCrudEventBus, mPatientUuid); // if the sync touched this patient
+            mModel.loadSinglePatient(mCrudEventBus, mPatientUuid); // if the sync touched this patient
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -643,7 +633,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             }
 
             LOG.i("Saving order: %s", event.instructions);
-            mAppModel.addOrder(mCrudEventBus, new Order(
+            mModel.addOrder(mCrudEventBus, new Order(
                 event.orderUuid, event.patientUuid, event.instructions, start, stop));
         }
 
@@ -652,19 +642,19 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             DateTime newStop = DateTime.now();
             if (order.isSeries() && (order.stop == null || newStop.isBefore(order.stop))) {
                 LOG.i("Stopping order: %s", order.instructions);
-                mAppModel.addOrder(mCrudEventBus, new Order(
+                mModel.addOrder(mCrudEventBus, new Order(
                     event.orderUuid, order.patientUuid, order.instructions, order.start, newStop
                 ));
             }
         }
 
         public void onEventMainThread(OrderDeleteRequestedEvent event) {
-            mAppModel.deleteOrder(mCrudEventBus, event.orderUuid);
+            mModel.deleteOrder(mCrudEventBus, event.orderUuid);
         }
 
         public void onEventMainThread(ObsDeleteRequestedEvent event) {
             for (Obs obs : event.observations) {
-                mAppModel.deleteObs(mCrudEventBus, obs);
+                mModel.deleteObs(mCrudEventBus, obs);
             }
             updatePatientObsUi();
         }
@@ -672,7 +662,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         public void onEventMainThread(OrderExecutionAddRequestedEvent event) {
             Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
-                mAppModel.addOrderExecutionEncounter(
+                mModel.addOrderExecutionEncounter(
                     mCrudEventBus, mPatient.uuid, order.uuid, event.executionTime);
             }
         }
