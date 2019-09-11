@@ -53,6 +53,7 @@ import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
+import org.projectbuendia.client.ui.dialogs.TextObsDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -215,7 +216,7 @@ public final class PatientChartActivity extends LoggedInActivity {
                 PatientChartActivity.this,
                 (picker, year, zeroBasedMonth, day) -> {
                     int month = zeroBasedMonth + 1;
-                    mController.submitDateObservation(conceptUuid, new LocalDate(year, month, day));
+                    mController.submitDateObs(conceptUuid, new LocalDate(year, month, day));
                 },
                 date.getYear(),
                 date.getMonthOfYear() - 1,
@@ -299,11 +300,13 @@ public final class PatientChartActivity extends LoggedInActivity {
             PatientChartActivity.this.setTitle(title);
         }
 
-        @Override public void showDateObsDialog(String title, String uuid, LocalDate date) {
-            if (date == null) date = LocalDate.now();
-            DatePickerDialog dialog = new DateObsDialog(title, uuid, date);
-            dialog.updateDate(date.getYear(), date.getMonthOfYear() - 1, date.getDayOfMonth());
-            dialog.show();
+        @Override public void showDateObsDialog(String title, Obs obs) {
+            LocalDate date = Utils.toLocalDate(obs.value);
+            new DateObsDialog(title, obs.conceptUuid, date).show();
+        }
+
+        @Override public void showTextObsDialog(String title, Obs obs) {
+            openDialog(TextObsDialogFragment.create(title, obs));
         }
 
         @Override public void updateTilesAndGrid(Chart chart, Map<String, Obs> latestObservations,
