@@ -32,15 +32,19 @@ import butterknife.ButterKnife;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 
 /** Common behaviour for all dialogs. */
-public abstract class BaseDialogFragment extends DialogFragment {
+public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends DialogFragment {
     public static int BUTTON_NEGATIVE = DialogInterface.BUTTON_NEGATIVE;
     public static int BUTTON_NEUTRAL = DialogInterface.BUTTON_NEUTRAL;
     public static int BUTTON_POSITIVE = DialogInterface.BUTTON_POSITIVE;
     public static int[] BUTTONS = {BUTTON_NEGATIVE, BUTTON_NEUTRAL, BUTTON_POSITIVE};
 
     protected ContextUtils u;
-    protected Bundle args;
     protected AlertDialog dialog;
+
+    public T withArgs(Bundle args) {
+        setArguments(args);
+        return (T) this;
+    }
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -53,11 +57,13 @@ public abstract class BaseDialogFragment extends DialogFragment {
         ButterKnife.inject(this, view);
 
         dialog = new AlertDialog.Builder(activity)
+            .setTitle("Dialog")  // without this, there is no title bar
             .setView(view)
-            .setCancelable(false)
             .setPositiveButton(getString(R.string.ok), null)
             .setNegativeButton(getString(R.string.cancel), null)
             .create();
+
+        dialog.setCanceledOnTouchOutside(false);
 
         dialog.setOnShowListener(di -> {
             // Make the "Cancel" and "OK" button text match the rest of the UI text.

@@ -662,6 +662,13 @@ public class Utils {
         }
     }
 
+    /** Sets a view's enabled state and focusable state at the same time. */
+    public static void setEnabled(View view, boolean enabled) {
+        view.setEnabled(enabled);
+        view.setFocusable(enabled);
+        view.setFocusableInTouchMode(enabled);
+    }
+
 
     // ==== OpenMRS ====
 

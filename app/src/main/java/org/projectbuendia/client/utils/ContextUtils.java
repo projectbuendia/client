@@ -186,6 +186,19 @@ public class ContextUtils extends ContextWrapper {
         return Joiner.on(", ").join(labels);
     }
 
+
+    // ==== UI
+
+    public void prompt(int titleId, int messageId, int actionId, Runnable action) {
+        new AlertDialog.Builder(this)
+            .setTitle(titleId)
+            .setMessage(messageId)
+            .setPositiveButton(actionId, (d, i) -> action.run())
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+            .show();
+    }
+
     public interface ContextProvider {
         Context getContext();
     }

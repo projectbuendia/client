@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 import butterknife.InjectView;
 
 /** A {@link DialogFragment} for adding or editing a patient. */
-public class PatientDialogFragment extends BaseDialogFragment {
+public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragment> {
     @InjectView(R.id.patient_id_prefix) EditText mIdPrefix;
     @InjectView(R.id.patient_id) EditText mId;
     @InjectView(R.id.patient_given_name) EditText mGivenName;
@@ -60,9 +60,7 @@ public class PatientDialogFragment extends BaseDialogFragment {
     private boolean mAgeChanged;
 
     public static PatientDialogFragment create(Patient patient) {
-        PatientDialogFragment fragment = new PatientDialogFragment();
-        fragment.setArguments(Utils.bundleOf("patient", patient));
-        return fragment;
+        return new PatientDialogFragment().withArgs(Utils.bundleOf("patient", patient));
     }
 
     @Override protected int getLayoutId() {

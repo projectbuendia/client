@@ -34,7 +34,7 @@ import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
 import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.SHORT;
 
 /** A dialog for jumping to a patient by ID. */
-public class GoToPatientDialogFragment extends BaseDialogFragment {
+public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDialogFragment> {
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
     @InjectView(R.id.go_to_patient_result) TextView mSearchResult;
     String mPatientUuid;

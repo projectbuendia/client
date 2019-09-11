@@ -23,7 +23,7 @@ import org.projectbuendia.client.utils.Utils;
 import butterknife.InjectView;
 
 /** A DialogFragment for adding a new user. */
-public class NewUserDialogFragment extends BaseDialogFragment {
+public class NewUserDialogFragment extends BaseDialogFragment<NewUserDialogFragment> {
     @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
     @InjectView(R.id.add_user_family_name_tv) EditText mFamilyName;
     @Nullable private ActivityUi mActivityUi;  // optional UI for showing a spinner

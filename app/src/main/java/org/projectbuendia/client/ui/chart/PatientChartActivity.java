@@ -398,8 +398,7 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showOrderDialog(String patientUuid, Order order, List<Obs> executions) {
-            OrderDialogFragment.newInstance(patientUuid, order, executions)
-                .show(getSupportFragmentManager(), null);
+            openDialog(OrderDialogFragment.create(patientUuid, order, executions));
         }
 
         @Override public void showOrderExecutionDialog(
