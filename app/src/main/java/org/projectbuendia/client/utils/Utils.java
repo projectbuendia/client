@@ -453,7 +453,8 @@ public class Utils {
         if (locale == null) return null;
         if (Build.VERSION.SDK_INT >= 21) return locale.toLanguageTag();
         return locale.getLanguage() +
-            (Utils.isEmpty(locale.getCountry()) ? "" : "_" + locale.getCountry());
+            (Utils.isEmpty(locale.getCountry()) ? "" : "-" + locale.getCountry()) +
+            (Utils.isEmpty(locale.getVariant()) ? "" : "-" + locale.getVariant());
     }
 
     /** Restarts the current activity (for use after a configuration change). */

@@ -13,6 +13,7 @@ package org.projectbuendia.client.models;
 
 import android.support.annotation.Nullable;
 
+import org.projectbuendia.client.utils.Loc;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -26,8 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
@@ -70,26 +69,18 @@ public class LocationForest {
             totalNumPatients += record.numPatients;
         }
 
-        // Sort into a global ordering that is consistent with the ordering
-        // we want for any selected group of siblings.
+        // Sort into a global ordering consistent with the desired ordering for
+        // any group of siblings, then use it to assign each item a numeric ID.
         Collections.sort(uuids, (a, b) -> Utils.ALPHANUMERIC_COMPARATOR.compare(
             namesByUuid.get(a), namesByUuid.get(b)
         ));
-
-        // Use this global ordering to assign each item a short, uniform-length ID.
-        int len = String.valueOf(uuids.size()).length();
-        String format = "%0" + len + "d";
         for (int i = 0; i < uuids.size(); i++) {
-            shortIdsByUuid.put(uuids.get(i), Utils.format(format, i));
+            shortIdsByUuid.put(uuids.get(i), "" + i);
         }
 
-        String languageTag = Utils.toLanguageTag(locale);
-        Pattern EXTRAS_PATTERN = Pattern.compile("\\[(.*?)\\]");
         locations = new Location[uuids.size()];
         String defaultUuid = null;
         for (int i = 0; i < uuids.size(); i++) {
-            String uuid = uuids.get(i);
-
             // Parts of the name that are enclosed in square brackets are not
             // shown; this makes it possible to attach extra information to
             // locations using only the normal OpenMRS web interface:
@@ -100,20 +91,10 @@ public class LocationForest {
             //     location as the default location for new patients.
             //   - Bracketed parts starting with a language tag and a colon
             //     can specify localized names, e.g. "cat [fr:chat] [es:gato]"
+            String uuid = uuids.get(i);
             String name = namesByUuid.get(uuid);
-            Matcher matcher = EXTRAS_PATTERN.matcher(name);
-            int pos = 0;
-            while (matcher.find(pos)) {
-                String extras = matcher.group(1);
-                if (extras.contains("*")) {
-                    defaultUuid = uuid;
-                }
-                if (languageTag != null && extras.startsWith(languageTag + ":")) {
-                    name = extras.split(":", 2)[1];
-                }
-                pos = matcher.end(1);
-            }
-            name = EXTRAS_PATTERN.matcher(name).replaceAll("").trim();
+            if (name.contains("*")) defaultUuid = uuid;
+            Loc loc = new Loc(name);
 
             // Use the short IDs to construct a sortable path string for each node.
             // Each path component ends with a terminating character so that
@@ -125,7 +106,7 @@ public class LocationForest {
                 numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + count);
             }
 
-            locations[i] = new Location(uuid, name);
+            locations[i] = new Location(uuid, loc.get(locale));
             pathsByUuid.put(uuid, path);
             locationsByUuid.put(uuid, locations[i]);
         }
@@ -136,12 +117,10 @@ public class LocationForest {
 
         // The default location is either set with an asterisk in the name
         // (see above) or defaults to the first leaf node.
-        if (defaultUuid == null) {
-            for (Location location : locations) {
-                if (isLeaf(location)) {
-                    defaultUuid = location.uuid;
-                    break;
-                }
+        for (Location location : locations) {
+            if (defaultUuid == null && isLeaf(location)) {
+                defaultUuid = location.uuid;
+                break;
             }
         }
         defaultLocation = locationsByUuid.get(defaultUuid); // nullable
@@ -151,11 +130,9 @@ public class LocationForest {
     }
 
     public void sort(Location[] locations) {
-        Arrays.sort(locations, (a, b) -> {
-            String pathA = Utils.toNonnull(pathsByUuid.get(a.uuid));
-            String pathB = Utils.toNonnull(pathsByUuid.get(b.uuid));
-            return pathA.compareTo(pathB);
-        });
+        Arrays.sort(locations, (a, b) -> Utils.ALPHANUMERIC_COMPARATOR.compare(
+            pathsByUuid.get(a.uuid), pathsByUuid.get(b.uuid)
+        ));
     }
 
     public void updatePatientCounts(Map<String, Integer> patientCountsByLocationUuid) {
