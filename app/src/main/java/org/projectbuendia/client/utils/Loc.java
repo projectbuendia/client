@@ -14,6 +14,7 @@ public class Loc {
     protected final Map<String, String> options;
 
     public Loc(String packed) {
+        if (packed == null) packed = "";
         base = BRACKETED_PATTERN.matcher(packed).replaceAll("").trim();
         options = new HashMap<>();
         Matcher matcher = BRACKETED_PATTERN.matcher(packed);
