@@ -18,7 +18,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.utils.Logger;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,12 +30,10 @@ public class Database extends SQLiteOpenHelper {
     private static final Logger LOG = Logger.create();
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 36;
+    public static final int DATABASE_VERSION = 37;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
-
-    File file;
 
     /**
      * A map of SQL table schemas, with one entry per table.  The values should
@@ -61,13 +58,8 @@ public class Database extends SQLiteOpenHelper {
         SCHEMAS.put(Table.CONCEPTS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "xform_id INTEGER UNIQUE NOT NULL,"
-            + "concept_type TEXT");
-
-        SCHEMAS.put(Table.CONCEPT_NAMES, ""
-            + "concept_uuid TEXT,"
-            + "locale TEXT,"
-            + "name TEXT,"
-            + "UNIQUE (concept_uuid, locale)");
+            + "type TEXT,"
+            + "name TEXT");
 
         SCHEMAS.put(Table.FORMS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
@@ -136,7 +128,6 @@ public class Database extends SQLiteOpenHelper {
 
     public Database(Context context) {
         super(context, DATABASE_FILENAME, null, DATABASE_VERSION);
-        file = context.getDatabasePath(DATABASE_FILENAME);
     }
 
     @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

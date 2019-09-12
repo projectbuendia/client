@@ -128,7 +128,7 @@ public class ChartDataHelper {
         return results;
     }
 
-    /** Gets observations filtered by optional concept and optional time bounds. */
+    /** Gets localized observations, filtered by optional concept and time bounds. */
     public ArrayList<ObsRow> getPatientObservations(String patientUuid, String[] conceptUuids, Long startMillis, Long stopMillis) {
         ConceptService concepts = App.getConceptService();
         Locale locale = App.getSettings().getLocale();
