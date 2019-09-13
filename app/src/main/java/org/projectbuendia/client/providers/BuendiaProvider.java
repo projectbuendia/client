@@ -11,8 +11,8 @@
 
 package org.projectbuendia.client.providers;
 
+import org.projectbuendia.client.providers.Contracts.Bookmarks;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
-import org.projectbuendia.client.providers.Contracts.ConceptNames;
 import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.providers.Contracts.Forms;
 import org.projectbuendia.client.providers.Contracts.Locations;
@@ -20,7 +20,6 @@ import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.providers.Contracts.Bookmarks;
 import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.providers.Contracts.Users;
 import org.projectbuendia.client.sync.Database;
@@ -45,8 +44,6 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             new GroupProviderDelegate(ChartItems.GROUP_TYPE, Table.CHART_ITEMS));
         registry.registerDelegate(Concepts.URI.getPath(),
             new GroupProviderDelegate(Concepts.GROUP_TYPE, Table.CONCEPTS));
-        registry.registerDelegate(ConceptNames.URI.getPath(),
-            new GroupProviderDelegate(ConceptNames.GROUP_TYPE, Table.CONCEPT_NAMES));
         registry.registerDelegate(Forms.URI.getPath(),
             new GroupProviderDelegate(Forms.GROUP_TYPE, Table.FORMS));
         registry.registerDelegate(Locations.URI.getPath(),

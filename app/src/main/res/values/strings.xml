@@ -58,8 +58,8 @@
   <string name="given_name">Given name</string>
   <string name="family_name">Family name</string>
   <string name="title_new_user">New user</string>
-  <string name="guest_user_initials">GU</string>
-  <string name="guest_user_name">Guest User</string>
+  <string name="guest_user_initials">G</string>
+  <string name="guest_user_name">Guest</string>
   <string name="action_search">Search</string>
   <string name="action_edit">Edit</string>
   <string name="action_go_to">Search by ID</string>

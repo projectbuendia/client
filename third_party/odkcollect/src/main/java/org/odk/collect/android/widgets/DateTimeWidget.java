@@ -66,7 +66,6 @@ public class DateTimeWidget extends QuestionWidget {
         mTimePicker.setId(QuestionWidget.newUniqueId());
         mTimePicker.setFocusable(!prompt.isReadOnly());
         mTimePicker.setEnabled(!prompt.isReadOnly());
-        mTimePicker.setPadding(0, 20, 0, 0);
 
         String clockType =
             android.provider.Settings.System.getString(context.getContentResolver(),
@@ -148,6 +147,9 @@ public class DateTimeWidget extends QuestionWidget {
 	@SuppressLint("NewApi")
 	private void hideDayFieldIfNotInFormat(FormEntryPrompt prompt) {
         String appearance = prompt.getQuestion().getAppearanceAttr();
+        // NOTE(ping): Force no calendar, date and time only.
+        appearance = "date-time";
+
         if ( appearance == null ) {
         	if ( Build.VERSION.SDK_INT >= 11 ) {
         		showCalendar = true;
@@ -175,22 +177,26 @@ public class DateTimeWidget extends QuestionWidget {
 	        	this.mDatePicker.setSpinnersShown(true);
         	}
         } else if ("no-calendar".equals(appearance) ) {
-        	if ( Build.VERSION.SDK_INT >= 11 ) {
-	        	this.mDatePicker.setCalendarViewShown(false);
-	        	this.mDatePicker.setSpinnersShown(true);
-        	}
+            if (Build.VERSION.SDK_INT >= 11) {
+                this.mDatePicker.setCalendarViewShown(false);
+                this.mDatePicker.setSpinnersShown(true);
+            }
+        } else if ("date-time".equals(appearance)) {
+            showCalendar = true;
+            this.mDatePicker.setCalendarViewShown(false);
+            this.mDatePicker.setSpinnersShown(true);
         } else {
-        	if ( Build.VERSION.SDK_INT >= 11 ) {
-        		showCalendar = true;
-	        	this.mDatePicker.setCalendarViewShown(true);
-	        	if ( Build.VERSION.SDK_INT >= 12 ) {
-	        		CalendarView cv = this.mDatePicker.getCalendarView();
-	        		cv.setShowWeekNumber(false);
-	        	}
-	        	this.mDatePicker.setSpinnersShown(true);
-	        	hideDay = true;
-	        	hideMonth = false;
-        	}
+            if ( Build.VERSION.SDK_INT >= 11 ) {
+                showCalendar = true;
+                this.mDatePicker.setCalendarViewShown(true);
+                if ( Build.VERSION.SDK_INT >= 12 ) {
+                    CalendarView cv = this.mDatePicker.getCalendarView();
+                    cv.setShowWeekNumber(false);
+                }
+                this.mDatePicker.setSpinnersShown(true);
+                hideDay = true;
+                hideMonth = false;
+            }
         }
 
         if ( hideMonth || hideDay ) {

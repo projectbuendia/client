@@ -185,7 +185,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         mChartHelper = chartHelper;
         mMainThreadHandler = mainThreadHandler;
         mLastScrollPosition = new Point(Integer.MAX_VALUE, 0);
-        mCharts = mChartHelper.getCharts();
+        mCharts = mChartHelper.getCharts(App.getSettings().getLocale());
     }
 
     public void setPatient(String uuid) {

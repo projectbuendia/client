@@ -27,7 +27,6 @@ public interface Contracts {
     enum Table {
         BOOKMARKS("bookmarks"),
         CHART_ITEMS("chart_items"),
-        CONCEPT_NAMES("concept_names"),
         CONCEPTS("concepts"),
         FORMS("forms"),
         LOCATIONS("locations"),
@@ -84,16 +83,6 @@ public interface Contracts {
         String SCRIPT = "script";  // JavaScript for fancy rendering
     }
 
-    interface ConceptNames {
-        Uri URI = buildContentUri("concept-names");
-        String GROUP_TYPE = buildGroupType("concept-name");
-        String ITEM_TYPE = buildItemType("concept-name");
-
-        String CONCEPT_UUID = "concept_uuid";
-        String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
-        String NAME = "name";
-    }
-
     interface Concepts {
         Uri URI = buildContentUri("concepts");
         String GROUP_TYPE = buildGroupType("concept");
@@ -101,7 +90,8 @@ public interface Contracts {
 
         String UUID = "uuid";
         String XFORM_ID = "xform_id";  // ID for the concept in XForms (OpenMRS ID)
-        String CONCEPT_TYPE = "concept_type";  // data type name, e.g. NUMERIC, TEXT
+        String TYPE = "type";  // data type name, e.g. NUMERIC, TEXT
+        String NAME = "name";
     }
 
     interface Forms {

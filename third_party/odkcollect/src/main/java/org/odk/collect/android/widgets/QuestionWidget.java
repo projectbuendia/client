@@ -31,6 +31,7 @@ import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
+import org.odk.collect.android.utilities.Utils;
 import org.odk.collect.android.views.MediaLayout;
 
 import java.util.ArrayList;
@@ -68,7 +69,9 @@ public abstract class QuestionWidget extends LinearLayout {
         super(context);
 
         mQuestionFontsize = Collect.getQuestionFontsize();
-        mAnswerFontsize = mQuestionFontsize * 4;
+
+        // Make the answer field fairly large.
+        mAnswerFontsize = mQuestionFontsize * 3;
 
         mPrompt = p;
 
@@ -180,12 +183,7 @@ public abstract class QuestionWidget extends LinearLayout {
 
         // TODO: Un-unscreamify once server work is done.
 
-        mQuestionText.setText(promptText == null ? "" : promptText);
-
-        // TODO: Remove this hack!
-        if (promptText != null && promptText.toLowerCase().equals("date of birth")) {
-            mQuestionText.setText("Age");
-        }
+        mQuestionText.setText(promptText == null ? "" : Utils.localize(promptText, getContext()));
 
 //        mQuestionText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize);
 //        mQuestionText.setTypeface(null, Typeface.BOLD);

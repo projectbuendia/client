@@ -86,6 +86,7 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
     }
 
     @Override public void onDismiss(DialogInterface di) {
+        super.onDismiss(di);
         Activity activity = getActivity();
         if (activity instanceof BaseActivity) {
             ((BaseActivity) activity).onDialogClosed(this);

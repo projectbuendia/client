@@ -121,7 +121,7 @@ public final class PatientChartActivity extends LoggedInActivity {
             });
 
         for (final Form form : mChartDataHelper.getForms()) {
-            MenuItem item = editSubmenu.add(form.name);
+            MenuItem item = editSubmenu.add(App.localize(form.name));
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
                 menuItem -> {

@@ -14,6 +14,7 @@ import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.model.Preset;
+import org.odk.collect.android.utilities.Utils;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -67,7 +68,7 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
 
         boolean isReadOnly = forceReadOnly || prompt.isReadOnly();
 
-        mCheckBox.setText(prompt.getQuestionText());
+        mCheckBox.setText(Utils.localize(prompt.getQuestionText(), context));
         mCheckBox.setId(QuestionWidget.newUniqueId());
         mCheckBox.setEnabled(!isReadOnly);
         mCheckBox.setFocusable(!isReadOnly);

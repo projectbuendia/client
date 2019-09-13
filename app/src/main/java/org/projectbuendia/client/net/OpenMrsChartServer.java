@@ -49,7 +49,7 @@ public class OpenMrsChartServer {
     public void getConcepts(Response.Listener<JsonConceptsResponse> successListener,
                             Response.ErrorListener errorListener) {
         GsonRequest<JsonConceptsResponse> request = new GsonRequest<>(
-            mConnectionDetails.getBuendiaApiUrl() + "/concepts",
+            mConnectionDetails.getBuendiaApiUrl() + "/concepts?locale=buendia",
             JsonConceptsResponse.class,
             mConnectionDetails.addAuthHeader(new HashMap<>()),
             successListener, errorListener);
