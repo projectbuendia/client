@@ -166,7 +166,8 @@ public class OdkActivityLauncher {
         long formId,
         @Nullable org.odk.collect.android.model.Patient patient,
         @Nullable Preset preset) {
-        LOG.i("Launching FormEntryActivity with formId = %d", formId);
+        FormEntryActivity.locale = App.getSettings().getLocale();
+        LOG.i("Launching FormEntryActivity with formId = %d, locale = %s", formId, FormEntryActivity.locale);
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);

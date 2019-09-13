@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2009 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -37,6 +37,7 @@ import org.javarosa.xpath.expr.XPathFuncExpr;
 import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.external.ExternalDataUtil;
+import org.odk.collect.android.utilities.Utils;
 
 import java.util.Vector;
 
@@ -44,7 +45,7 @@ import java.util.Vector;
  * SpinnerWidget handles select-one fields. Instead of a list of buttons it uses a spinner, wherein
  * the user clicks a button and the choices pop up in a dialogue box. The goal is to be more
  * compact. If images, audio, or video are specified in the select answers they are ignored.
- * 
+ *
  * @author Jeff Beorse (jeff@beorse.net)
  */
 public class SpinnerWidget extends QuestionWidget {
@@ -78,7 +79,7 @@ public class SpinnerWidget extends QuestionWidget {
                     TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize);
 
         spinner.setAdapter(adapter);
-        spinner.setPrompt(prompt.getQuestionText());
+        spinner.setPrompt(Utils.localize(prompt.getQuestionText(), context));
         spinner.setEnabled(!prompt.isReadOnly());
         spinner.setFocusable(!prompt.isReadOnly());
 
@@ -104,19 +105,19 @@ public class SpinnerWidget extends QuestionWidget {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
 				if ( position == mItems.size() ) {
-					Collect.getInstance().getActivityLogger().logInstanceAction(this, "onCheckedChanged.clearValue", 
+					Collect.getInstance().getActivityLogger().logInstanceAction(this, "onCheckedChanged.clearValue",
 		    			"", mPrompt.getIndex());
 				} else {
-					Collect.getInstance().getActivityLogger().logInstanceAction(this, "onCheckedChanged", 
+					Collect.getInstance().getActivityLogger().logInstanceAction(this, "onCheckedChanged",
 			    			mItems.get(position).getValue(), mPrompt.getIndex());
 				}
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
-				
+
 			}});
-        
+
         addView(spinner);
 
     }
@@ -193,7 +194,7 @@ public class SpinnerWidget extends QuestionWidget {
             } else {
                 tv.setText(items[position]);
                 tv.setTextColor(Color.BLACK);
-            	tv.setTypeface(null, (spinner.getSelectedItemPosition() == position) 
+            	tv.setTypeface(null, (spinner.getSelectedItemPosition() == position)
             							? Typeface.BOLD : Typeface.NORMAL);
             }
             return convertView;
