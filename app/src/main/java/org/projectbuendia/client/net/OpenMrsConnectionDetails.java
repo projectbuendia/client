@@ -41,11 +41,7 @@ public class OpenMrsConnectionDetails {
     /** Gets the URL to the API served by the Buendia module in OpenMRS. */
     public String getBuendiaApiUrl() {
         // The default value is set by setDefaultValues, not specified here.
-        return mSettings.getOpenmrsUrl("/ws/rest/v1/projectbuendia");
-    }
-
-    public String getRestApiUrl() {
-        return mSettings.getOpenmrsUrl("/ws/rest/v1");
+        return mSettings.getOpenmrsUrl("/ws/rest/buendia");
     }
 
     /**

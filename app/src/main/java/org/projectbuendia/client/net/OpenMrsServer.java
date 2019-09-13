@@ -196,7 +196,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/users",
+            "/providers",
             requestBody,
             response -> {
                 try {
@@ -357,7 +357,7 @@ public class OpenMrsServer implements Server {
         String query = searchQuery != null ? "?q=" + Utils.urlEncode(searchQuery) : "";
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/users" + query,
+            "/providers" + query,
             null,
             response -> {
                 ArrayList<JsonUser> users = new ArrayList<>();
