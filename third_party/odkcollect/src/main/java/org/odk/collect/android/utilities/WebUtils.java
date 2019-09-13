@@ -197,7 +197,7 @@ public final class WebUtils {
 		GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
 		g.setTime(new Date());
 		req.setHeader(DATE_HEADER,
-				DateFormat.format("E, dd MMM yyyy hh:mm:ss zz", g).toString());
+				DateFormat.format("E, dd MMM yyyy HH:mm:ss zz", g).toString());
 	}
 
 	public static final HttpHead createOpenRosaHttpHead(Uri u) {
@@ -219,7 +219,7 @@ public final class WebUtils {
                 PreferenceManager.getDefaultSharedPreferences(Collect.getInstance()
                         .getApplication()
                         .getApplicationContext());
-		String protocol = settings.getString(PreferencesActivity.KEY_PROTOCOL, 
+		String protocol = settings.getString(PreferencesActivity.KEY_PROTOCOL,
 				Collect.getInstance().getApplication().getString(R.string.protocol_odk_default));
 
 		// TODO:  this doesn't exist....

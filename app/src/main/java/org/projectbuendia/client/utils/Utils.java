@@ -328,7 +328,7 @@ public class Utils {
     // ==== Dates and times ====
 
     private static final DateTimeFormatter ISO8601_UTC_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
