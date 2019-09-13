@@ -14,8 +14,6 @@ package org.projectbuendia.client.ui.login;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -36,6 +34,8 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.user.UserManager;
+
+import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.times;
@@ -212,8 +212,8 @@ public class LoginControllerTest {
         // GIVEN initialized controller
         mController.init();
         // WHEN a user fails to be added
-        JsonUser user = new JsonUser("idA", "nameA");
-        mFakeEventBus.post(new UserAddFailedEvent(new JsonNewUser(), 0));
+        JsonUser user = new JsonUser("uuid1", "name1");
+        mFakeEventBus.post(new UserAddFailedEvent(new JsonNewUser("given", "family"), 0));
         // THEN spinner is hidden
         verify(mMockFragmentUi).showSpinner(false);
     }

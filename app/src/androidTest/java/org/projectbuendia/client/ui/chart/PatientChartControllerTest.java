@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
@@ -52,7 +51,6 @@ import java.util.Map;
 import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -129,10 +127,7 @@ public final class PatientChartControllerTest {
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
         verify(mMockUi).updateTilesAndGrid(
-                mFakeChart, recentObservations, allObservations, ImmutableList.of(), null, null);
-        verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
-        verify(mMockUi).updateEbolaTestResultUi(recentObservations);
-        verify(mMockUi).updateSpecialLabels(recentObservations);
+                mFakeChart, recentObservations, allObservations, ImmutableList.of());
     }
 
     /** Tests that the UI is given updated patient data when patient data is fetched. */
@@ -145,19 +140,6 @@ public final class PatientChartControllerTest {
         mFakeCrudEventBus.post(new ItemLoadedEvent<>(PATIENT));
         // THEN the controller updates the UI
         verify(mMockUi).updatePatientDetailsUi(PATIENT);
-    }
-
-    /** Tests that selecting a new general condition results in adding a new encounter. */
-    @Test
-    @UiThreadTest
-    public void testSetCondition_AddsEncounterForNewCondition() {
-        // GIVEN controller is initialized
-        mController.init();
-        // WHEN a new general condition is set from the dialog
-        mController.setCondition(ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID);
-        // THEN a new encounter is added
-        verify(mMockAppModel).addObservationEncounter(
-            any(CrudEventBus.class), PATIENT_UUID_1, any(Obs.class));
     }
 
     /** Tests that selecting a form from the menu shows loading dialog. */
@@ -276,23 +258,19 @@ public final class PatientChartControllerTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         List<Chart> charts = ImmutableList.of(mFakeChart);
-        when(mMockChartHelper.getCharts()).thenReturn(charts);
+        when(mMockChartHelper.getCharts(AppSettings.APP_DEFAULT_LOCALE)).thenReturn(charts);
 
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
         mFakeHandler = new FakeHandler();
         when(mMockSettings.getLocale()).thenReturn(new Locale("en"));
         mController = new PatientChartController(
-            mMockAppModel,
-            mMockSettings,
             mFakeGlobalEventBus,
             mFakeCrudEventBus,
             mMockUi,
             PATIENT_UUID_1,
             mMockOdkResultSender,
             mMockChartHelper,
-            null,
-            mMockSyncManager,
             mFakeHandler);
     }
 

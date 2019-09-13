@@ -170,13 +170,11 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void movePatient(String location) {
-        click(firstViewWithText("Location"));
+        clickElementMatchingSelector(".tile.concept-1000003");
         click(location);
         click("OK");
-        waitFor(viewThat(hasId(R.id.patient_placement),
-            hasDescendantThat(hasId(R.id.view_attribute_name), hasText("Location")),
-            hasDescendantThat(hasId(R.id.view_attribute_value), hasText(location))
-        ));
+        waitFor(viewThat(containsElementMatchingSelectorWithText(
+            ".tile.concept-1000003 .value", location)));
     }
 
     private String internalGetLocationUuid(String name) {
@@ -225,7 +223,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void rewindAdmissionDate(int numDays, String expected) {
-        click(R.id.admission_day_number);
+        clickElementMatchingSelector(".tile.concept-162622");
         ViewAction tapUp = new GeneralClickAction(
             Tap.SINGLE, GeneralLocation.TOP_CENTER, Press.FINGER);
         for (int i = 0; i < numDays; i++) {
@@ -251,10 +249,10 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     private void addOrder(String medication, String dosage, String notes) {
         for (int i = 0; i < 10; i++) {
-            clickElementWithId("down");
+            clickElementMatchingSelector("#down");
             sleep(50);
         }
-        clickElementWithId("new_treatment");
+        clickElementMatchingSelector("#new-treatment");
 
         waitUntilVisible(viewThat(hasText("New treatment")));
         type(medication, R.id.order_medication);
@@ -262,22 +260,22 @@ import static org.projectbuendia.client.utils.Utils.eq;
         type(notes, R.id.order_notes);
         click("OK");
 
-        waitFor(viewThat(containsElementWithId(Utils.toCssIdentifier(medication))));
+        waitFor(viewThat(containsElementMatchingSelector(".order-" + Utils.toCssIdentifier(medication))));
     }
 
     private void editOrder(String medication, String notes) {
-        clickElementWithId(Utils.toCssIdentifier(medication) + "_row");
+        clickElementMatchingSelector(".order-" + Utils.toCssIdentifier(medication));
 
         waitFor("Edit treatment");
         clearAndType(notes, R.id.order_notes);
         click("OK");
 
-        waitFor(viewThat(containsElementWithIdAndText(
-            Utils.toCssIdentifier(medication) + "_notes", notes)));
+        waitFor(viewThat(containsElementMatchingSelectorWithText(
+            ".order-" + Utils.toCssIdentifier(medication) + " .notes", notes)));
     }
 
     private void deleteOrder(String medication) {
-        clickElementWithId(Utils.toCssIdentifier(medication) + "_row");
+        clickElementMatchingSelector(".order-" + Utils.toCssIdentifier(medication));
 
         waitFor("Edit treatment");
         click("Delete this treatment");
@@ -286,8 +284,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
         click("Delete");
 
         waitFor(viewThat(
-            containsElementWithId("new_treatment"),
-            containsNoElementWithId(Utils.toCssIdentifier(medication))
+            containsElementMatchingSelector("#new-treatment"),
+            containsNoElementMatchingSelector(".order-" + Utils.toCssIdentifier(medication))
         ));
     }
 

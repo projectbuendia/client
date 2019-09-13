@@ -834,11 +834,11 @@ public class Utils {
         return sw.toString();
     }
 
-    /** Converts a string to a CSS-safe identifier by replacing characters into underscores. */
+    /** Converts a string to a lowercase CSS-safe identifier. */
     // We use this to give predictable class names to HTML rows so that tests
     // can verify the values in the patient chart.  See PatientChartActivityTest.
     public static String toCssIdentifier(String input) {
-        return input.trim().replaceAll("[\\W]", "_");
+        return input.trim().toLowerCase().replaceAll("[^a-z0-9-]+", "-");
     }
 
     /** Returns an unambiguous string representation of a string, prefixed with its length. */
