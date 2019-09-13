@@ -82,7 +82,6 @@ public class SettingsActivity extends PreferenceActivity {
         "periodic_sync_disabled",
         "form_instances_retained",
         "non_wifi_allowed",
-        "sync_adapter_preferred",
         "server_responses_fabricated"
     };
     static boolean updatingPrefValues = false;

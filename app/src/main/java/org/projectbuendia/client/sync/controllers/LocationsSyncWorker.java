@@ -59,8 +59,6 @@ public class LocationsSyncWorker implements SyncWorker {
         RequestFuture<List<JsonLocation>> future = RequestFuture.newFuture();
         App.getServer().listLocations(future, future);
 
-        // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
-        // background thread
         List<JsonLocation> locations = future.get();
         LOG.d("After network call");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();

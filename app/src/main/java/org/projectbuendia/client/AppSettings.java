@@ -120,22 +120,6 @@ public class AppSettings {
             resources.getBoolean(R.bool.form_instances_retained_default));
     }
 
-    /** Gets the setting for whether to use the unreliable SyncAdapter framework. */
-    public boolean getSyncAdapterPreferred() {
-        return prefs.getBoolean("sync_adapter_preferred",
-            resources.getBoolean(R.bool.sync_adapter_preferred_default));
-    }
-
-    /** Gets the flag indicating whether the sync account has been initialized. */
-    public boolean getSyncAccountInitialized() {
-        return prefs.getBoolean("sync_account_initialized", false);
-    }
-
-    /** Sets the flag indicating whether the sync account has been initialized. */
-    public void setSyncAccountInitialized(boolean value) {
-        prefs.edit().putBoolean("sync_account_initialized", value).commit();
-    }
-
     /** Gets the flag controlling whether to assume no wifi means no network. */
     public boolean getNonWifiAllowed() {
         return prefs.getBoolean("non_wifi_allowed",

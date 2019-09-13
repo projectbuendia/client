@@ -20,11 +20,8 @@ import org.projectbuendia.client.events.EventsModule;
 import org.projectbuendia.client.models.AppModelModule;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.net.NetModule;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.BuendiaSyncEngine;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.SyncAccountService;
-import org.projectbuendia.client.sync.SyncAdapterSyncScheduler;
 import org.projectbuendia.client.sync.SyncEngine;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.sync.ThreadedSyncScheduler;
@@ -32,13 +29,13 @@ import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
-import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientLocationDialogFragment;
-import org.projectbuendia.client.ui.lists.PatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.ui.lists.LocationListFragment;
+import org.projectbuendia.client.ui.lists.PatientListActivity;
 import org.projectbuendia.client.ui.lists.PatientListController;
 import org.projectbuendia.client.ui.lists.PatientListFragment;
 import org.projectbuendia.client.ui.lists.SingleLocationActivity;
@@ -92,9 +89,6 @@ import dagger.Provides;
         LoginFragment.class,
         SettingsActivity.class,
         AddPatientTask.class
-    },
-    staticInjections = {
-        SyncAccountService.class
     })
 public final class AppModule {
 
@@ -118,11 +112,7 @@ public final class AppModule {
     }
 
     @Provides @Singleton SyncManager provideSyncManager(AppSettings settings, SyncEngine engine) {
-        return new SyncManager(
-            settings.getSyncAdapterPreferred() ?
-                new SyncAdapterSyncScheduler(engine, SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY) :
-                new ThreadedSyncScheduler(engine)
-        );
+        return new SyncManager(new ThreadedSyncScheduler(engine));
     }
 
     @Provides @Singleton SyncEngine provideSyncEngine(Application app) {

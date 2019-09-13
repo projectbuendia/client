@@ -190,7 +190,6 @@ def startingPatientId = project.findProperty('startingPatientId') ?: ''
 def periodicSyncDisabled = project.findProperty('periodicSyncDisabled') ?: false
 def formInstancesRetained = project.findProperty('formInstancesRetained') ?: false
 def nonWifiAllowed = project.findProperty('nonWifiAllowed') ?: false
-def syncAdapterPreferred = project.findProperty('syncAdapterPreferred') ?: false
 
 // This is the password used to encrypt the SQLite database on the tablet.
 // In development builds, the password is an empty string, which leaves the
@@ -246,7 +245,6 @@ android {
         resValue 'bool', 'periodic_sync_disabled_default', '' + periodicSyncDisabled
         resValue 'bool', 'form_instances_retained_default', '' + formInstancesRetained
         resValue 'bool', 'non_wifi_allowed_default', '' + nonWifiAllowed
-        resValue 'bool', 'sync_adapter_preferred_default', '' + syncAdapterPreferred
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue 'string', 'content_authority', contentAuthority
