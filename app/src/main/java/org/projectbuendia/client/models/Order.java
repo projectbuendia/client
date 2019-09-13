@@ -75,9 +75,8 @@ public final @Immutable class Order extends Model implements Serializable {
 
     public static Order fromJson(JsonOrder order) {
         return new Order(
-            order.uuid, order.patient_uuid,
-            order.instructions,
-            order.start_millis, order.stop_millis
+            order.uuid, order.patient_uuid, order.instructions,
+            order.start_time, order.stop_time
         );
     }
 
@@ -246,9 +245,9 @@ public final @Immutable class Order extends Model implements Serializable {
         JSONObject json = new JSONObject();
         json.put("patient_uuid", patientUuid);
         json.put("instructions", instructions.format());
-        json.put("start_millis", start.getMillis());
+        json.put("start_time", Utils.formatUtc8601(start));
         // Use `JSONObject.NULL` instead of `null` so that the value is actually set.
-        json.put("stop_millis", stop != null ? stop.getMillis() : JSONObject.NULL);
+        json.put("stop_time", stop != null ? Utils.formatUtc8601(stop) : JSONObject.NULL);
         return json;
     }
 

@@ -11,11 +11,13 @@
 
 package org.projectbuendia.client.json;
 
+import org.joda.time.DateTime;
+
 public class JsonOrder {
     public String uuid;
     public boolean voided;
     public String patient_uuid;
     public String instructions;
-    public Long start_millis;
-    public Long stop_millis;
+    public DateTime start_time;
+    public DateTime stop_time;
 }

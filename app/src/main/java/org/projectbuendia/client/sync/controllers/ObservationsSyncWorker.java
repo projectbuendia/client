@@ -81,7 +81,7 @@ public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservatio
         cvs.put(Observations.UUID, observation.uuid);
         cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
         cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
-        cvs.put(Observations.ENCOUNTER_MILLIS, observation.timestamp.getMillis());
+        cvs.put(Observations.ENCOUNTER_MILLIS, observation.time.getMillis());
         cvs.put(Observations.CONCEPT_UUID, observation.concept_uuid);
         cvs.put(Observations.PROVIDER_UUID, observation.provider_uuid);
         cvs.put(Observations.VALUE, observation.value);

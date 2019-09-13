@@ -38,7 +38,7 @@ public interface Server {
     public static final String PATIENT_SEX_KEY = "sex";
     public static final String PATIENT_OBSERVATIONS_KEY = "observations";
     public static final String ENCOUNTER_OBSERVATIONS_KEY = "observations";
-    public static final String ENCOUNTER_TIMESTAMP = "timestamp";
+    public static final String ENCOUNTER_TIME = "time";
     public static final String ENCOUNTER_ORDER_UUIDS = "order_uuids";
     public static final String OBS_QUESTION_UUID = "question_uuid";
     // TODO(ping): For consistency with ConceptType, it would be nice one day to

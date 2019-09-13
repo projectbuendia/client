@@ -50,8 +50,8 @@ public class OrdersSyncWorker extends IncrementalSyncWorker<JsonOrder> {
                 .withValue(Orders.UUID, order.uuid)
                 .withValue(Orders.PATIENT_UUID, order.patient_uuid)
                 .withValue(Orders.INSTRUCTIONS, order.instructions)
-                .withValue(Orders.START_MILLIS, order.start_millis)
-                .withValue(Orders.STOP_MILLIS, order.stop_millis)
+                .withValue(Orders.START_MILLIS, order.start_time.getMillis())
+                .withValue(Orders.STOP_MILLIS, order.stop_time.getMillis())
                 .build();
     }
 

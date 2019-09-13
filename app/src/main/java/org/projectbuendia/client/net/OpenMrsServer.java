@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +41,6 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
@@ -73,7 +73,7 @@ public class OpenMrsServer implements Server {
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but
         // ignored by the REST resource handler, which just returns the "Pulse" concept.
-        String timestamp = "time=" + (new Date().getTime());
+        String timestamp = "time=" + Utils.formatUtc8601(DateTime.now());
         final String urlPath = "/concepts/" + ConceptUuids.PULSE_UUID;
         List<String> params = new ArrayList<>();
         JsonUser user = App.getUserManager().getActiveUser();

@@ -50,16 +50,16 @@ public class Encounter extends Model {
     private static final Logger LOG = Logger.create();
 
     public final String patientUuid;
-    public final DateTime timestamp;
+    public final DateTime time;
     public final Obs[] observations;
     public final String[] orderUuids;
 
     public Encounter(
         @Nullable String uuid, String patientUuid,
-        DateTime timestamp, Obs[] observations, String[] orderUuids) {
+        DateTime time, Obs[] observations, String[] orderUuids) {
         super(uuid);
         this.patientUuid = patientUuid;
-        this.timestamp = timestamp;
+        this.time = time;
         this.observations = Utils.orDefault(observations, new Obs[0]);
         this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
     }
@@ -74,12 +74,12 @@ public class Encounter extends Model {
                 // observations to be deletable immediately, we would need the server
                 // to return them in the Encounter response with individual UUIDs.
                 observations.add(new Obs(
-                    null, encounter.patient_uuid, encounter.timestamp,
+                    null, encounter.patient_uuid, encounter.time,
                     key, estimatedTypeFor(key, value), value, null
                 ));
             }
         }
-        return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.timestamp,
+        return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.time,
             observations.toArray(new Obs[0]), encounter.order_uuids);
     }
 
@@ -87,7 +87,7 @@ public class Encounter extends Model {
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
         json.put(Server.PATIENT_UUID_KEY, patientUuid);
-        json.put(Server.ENCOUNTER_TIMESTAMP, timestamp.getMillis()/1000);
+        json.put(Server.ENCOUNTER_TIME, Utils.formatUtc8601(time));
         if (observations.length > 0) {
             JSONArray jsonObsArray = new JSONArray();
             for (Obs obs : observations) {
@@ -116,7 +116,7 @@ public class Encounter extends Model {
             Obs obs = observations[i];
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, obs.conceptUuid);
-            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
+            cv.put(Observations.ENCOUNTER_MILLIS, time.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, uuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, obs.value);
@@ -125,7 +125,7 @@ public class Encounter extends Model {
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_UUID);
-            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
+            cv.put(Observations.ENCOUNTER_MILLIS, time.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, uuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, orderUuids[i]);
@@ -174,7 +174,7 @@ public class Encounter extends Model {
 
     /** For developer use only, to help fabricate a response from a nonexistent server. */
     public Encounter withUuid(String uuid) {
-        return new Encounter(uuid, patientUuid, timestamp, observations, orderUuids);
+        return new Encounter(uuid, patientUuid, time, observations, orderUuids);
     }
 
 }

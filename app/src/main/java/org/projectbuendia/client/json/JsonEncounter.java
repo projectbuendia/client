@@ -19,7 +19,7 @@ import java.util.Map;
 public class JsonEncounter {
     public String uuid;
     public String patient_uuid;
-    public DateTime timestamp;
+    public DateTime time;
     public String provider_uuid;
     /** A {conceptUuid: value} map, where value can be a number, string, or answer UUID. */
     public Map<String, Object> observations;

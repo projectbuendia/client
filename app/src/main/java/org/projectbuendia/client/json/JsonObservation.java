@@ -9,7 +9,7 @@ public class JsonObservation {
     public String uuid;
     public String patient_uuid;
     public String encounter_uuid;
-    public DateTime timestamp;
+    public DateTime time;
     public String concept_uuid;
     public String provider_uuid;
     public String value;
