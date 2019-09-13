@@ -17,10 +17,10 @@ import java.util.Map;
 
 /** JSON representation of an OpenMRS Encounter; call Serializers.registerTo before use. */
 public class JsonEncounter {
-    public String patient_uuid;
     public String uuid;
+    public String patient_uuid;
     public DateTime timestamp;
-    public String enterer_id;
+    public String provider_uuid;
     /** A {conceptUuid: value} map, where value can be a number, string, or answer UUID. */
     public Map<String, Object> observations;
     public String[] order_uuids;  // orders executed during this encounter

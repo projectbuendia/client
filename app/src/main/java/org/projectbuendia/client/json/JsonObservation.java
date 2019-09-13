@@ -11,7 +11,7 @@ public class JsonObservation {
     public String encounter_uuid;
     public DateTime timestamp;
     public String concept_uuid;
-    public String enterer_uuid;
+    public String provider_uuid;
     public String value;
     public boolean voided;
 }

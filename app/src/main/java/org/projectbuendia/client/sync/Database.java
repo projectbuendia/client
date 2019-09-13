@@ -30,7 +30,7 @@ public class Database extends SQLiteOpenHelper {
     private static final Logger LOG = Logger.create();
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 37;
+    public static final int DATABASE_VERSION = 38;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
@@ -81,7 +81,7 @@ public class Database extends SQLiteOpenHelper {
             + "encounter_uuid TEXT,"
             + "encounter_millis INTEGER,"
             + "concept_uuid TEXT,"
-            + "enterer_uuid TEXT,"
+            + "provider_uuid TEXT,"
             + "value STRING,"
             + "voided INTEGER,"
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");

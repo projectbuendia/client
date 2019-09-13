@@ -113,32 +113,21 @@ public class OpenMrsXformsConnection {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    /**
-     * Send a single Xform to the OpenMRS server.
-     * @param patientUuid    null if this is to add a new patient, non-null for observation on existing
-     *                       patient
-     * @param resultListener the listener to be informed of the form asynchronously
-     * @param errorListener  a listener to be informed of any errors
-     */
+    /** Send a single Xform to the OpenMRS server. */
     public void postXformInstance(
         @Nullable String patientUuid,
-        String entererUuid,
+        String providerUuid,
         String xform,
         final Response.Listener<JSONObject> resultListener,
         Response.ErrorListener errorListener) {
 
-        // The JsonObject members in the API as written at the moment.
-        // int "patient_id"
-        // int "enterer_id"
-        // String "date_entered" in ISO8601 format (1977-01-10T
-        // String "xml" the form.
         JsonObject post = new JsonObject();
         post.addProperty("xml", xform);
         // Don't add patient property for create new patient
         if (patientUuid != null) {
             post.addProperty("patient_uuid", patientUuid);
         }
-        post.addProperty("enterer_uuid", entererUuid);
+        post.addProperty("provider_uuid", providerUuid);
 
         post.addProperty("date_entered", ISODateTimeFormat.dateTime().print(new DateTime()));
         JSONObject postBody = null;
