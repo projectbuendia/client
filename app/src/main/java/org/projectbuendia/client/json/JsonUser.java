@@ -50,11 +50,6 @@ public class JsonUser implements Serializable {
         this.name = name;
     }
 
-    public static JsonUser fromNewUser(JsonNewUser newUser) {
-        String fullName = newUser.givenName + " " + newUser.familyName;
-        return new JsonUser(newUser.username, fullName);
-    }
-
     public String toString() {
         return Utils.format("<User %s [%s]>", Utils.repr(name), uuid);
     }

@@ -69,8 +69,14 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
 
     @Override public void onOpen(Bundle args) {
         mPatient = (Patient) args.getSerializable("patient");
+
         dialog.setTitle(mPatient == null ?
             R.string.title_activity_patient_add : R.string.action_edit_patient);
+        mSexFemale.setTag(Sex.FEMALE);
+        mSexMale.setTag(Sex.MALE);
+        mSexOther.setTag(Sex.OTHER);
+        mSex = new ToggleRadioGroup<>(mSexRadioGroup);
+
         if (mPatient != null) {
             String idPrefix = "";
             String id = Utils.toNonnull(mPatient.id);
@@ -92,10 +98,6 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
                 mAgeMonths.setText(String.valueOf(age.getMonths()));
             }
 
-            mSexFemale.setTag(Sex.FEMALE);
-            mSexMale.setTag(Sex.MALE);
-            mSexOther.setTag(Sex.OTHER);
-            mSex = new ToggleRadioGroup<>(mSexRadioGroup);
             mSex.setSelection(mPatient.sex);
 
             mAgeYears.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));

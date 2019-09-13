@@ -186,11 +186,8 @@ public class OpenMrsServer implements Server {
         final Response.ErrorListener errorListener) {
         JSONObject requestBody = new JSONObject();
         try {
-            requestBody.put("user_name", user.username);
             requestBody.put("given_name", user.givenName);
             requestBody.put("family_name", user.familyName);
-            requestBody.put("password", user.password);
-
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
             // So treat like NPE and rethrow.
