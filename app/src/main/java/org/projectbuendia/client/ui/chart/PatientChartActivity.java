@@ -61,6 +61,7 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
@@ -211,7 +212,7 @@ public final class PatientChartActivity extends LoggedInActivity {
     class DateObsDialog extends DatePickerDialog {
         private String mTitle;
 
-        public DateObsDialog(String title, final String conceptUuid, LocalDate date) {
+        public DateObsDialog(String title, final String conceptUuid, @Nonnull LocalDate date) {
             super(
                 PatientChartActivity.this,
                 (picker, year, zeroBasedMonth, day) -> {
@@ -302,6 +303,7 @@ public final class PatientChartActivity extends LoggedInActivity {
 
         @Override public void showDateObsDialog(String title, Obs obs) {
             LocalDate date = Utils.toLocalDate(obs.value);
+            if (date == null) date = LocalDate.now();
             new DateObsDialog(title, obs.conceptUuid, date).show();
         }
 

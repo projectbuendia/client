@@ -36,14 +36,11 @@ public class ConceptUuids {
 
     // Ebola lab test results shown in a fixed tile.
     public static final String PCR_NP_UUID = toUuid(162826);
-    public static final String PCR_L_UUID = toUuid(162827);
     public static final String PCR_GP_UUID = toUuid(777000025);
 
-    // Essential status flags shown at top right: pregnancy, IV access, on O2, cannot eat.
-    public static final String IV_UUID = toUuid(777000011);
-    public static final String DYSPHAGIA_UUID = toUuid(888118789);
-    public static final String OXYGEN_UUID = toUuid(888162738);
+    // Concepts whose values are prefilled in forms.
     public static final String PREGNANCY_UUID = toUuid(5272);
+    public static final String IV_UUID = toUuid(777000011);
 
     // Condition question and values.  Used to colour-code patient ID chips in patient lists.
     public static final String GENERAL_CONDITION_UUID = toUuid(777000010);
