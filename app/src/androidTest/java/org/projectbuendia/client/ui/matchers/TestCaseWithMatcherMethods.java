@@ -83,6 +83,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         return Espresso.onView(hasTextContaining(text));
     }
 
+    public static ViewInteraction viewMatchingRegex(String regex) {
+        return Espresso.onView(hasTextMatchingRegex(regex));
+    }
+
     public static ViewInteraction firstViewWithText(Object obj) {
         return firstViewThat(hasText(obj));
     }
@@ -150,7 +154,9 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     @SafeVarargs public static void expect(ViewInteraction vi, Matcher<View>... matchers) {
-        vi.check(matches(combinedMatcher(matchers)));
+        Matcher matcher = combinedMatcher(matchers);
+        vi.check(matches(matcher));
+        LOG.i("Found expected view that " + StringDescription.asString(matcher));
     }
 
     @SafeVarargs public static void expect(DataInteraction di, Matcher<View>... matchers) {
@@ -233,6 +239,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
 
     public static void expect(String text) {
         expect(firstViewWithText(text));
+    }
+
+    public static void expectRegex(String regex) {
+        expect(firstViewThat(hasTextMatchingRegex(regex)));
     }
 
     public static void click(int id) {
@@ -470,11 +480,19 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     protected static ViewInteraction waitFor(int id) {
-        return waitFor(viewWithId(id));
+        return waitForViewThat(hasId(id));
     }
 
     protected static ViewInteraction waitFor(String text) {
-        return waitFor(firstViewWithText(text));
+        return waitForViewThat(hasText(text));
+    }
+
+    protected static ViewInteraction waitForViewThat(Matcher<View>... matchers) {
+        Matcher matcher = combinedMatcher(matchers);
+        LOG.i("Waiting for view that " + StringDescription.asString(matcher));
+        ViewInteraction vi = firstViewThat(matcher);
+        waitUntil(vi, exists());
+        return vi;
     }
 
     protected static ViewInteraction waitFor(ViewInteraction vi) {
@@ -495,14 +513,18 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     protected static ViewInteraction waitUntil(int timeoutMs, ViewInteraction vi, Matcher<View>... matchers) {
+        Matcher matcher = combinedMatcher(matchers);
+        String description = StringDescription.asString(matcher);
         long deadline = System.currentTimeMillis() + timeoutMs;
         while (true) {
             try {
-                expect(vi, matchers);
+                LOG.i("Waiting for view that " + description);
+                expect(vi, matcher);
                 return vi;
             } catch (Throwable t) {
                 if (System.currentTimeMillis() > deadline) throw t;
             }
+            LOG.i("Could not find view that " + description + ", retrying in 100 ms");
             sleep(100);
         }
     }
@@ -584,6 +606,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
 
             @Override protected boolean matchesSafely(View view) {
                 if (view == matchedView) return true;
+                LOG.i("Looking for element matching %s", Utils.repr(selector));
                 evalJs(view, "document.querySelector(" + jsQuote(selector) + ")", result -> {
                     if (!eq(result, "null")) {
                         matchedView = view;
@@ -625,6 +648,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
 
             @Override protected boolean matchesSafely(View view) {
                 if (view == matchedView) return true;
+                LOG.i("Looking for element matching %s with text %s", Utils.repr(selector), Utils.repr(text));
                 evalJs(view, "(document.querySelector(" + jsQuote(selector) + ") || {}).textContent", result -> {
                     if (eq(result, '"' + text + '"')) {
                         matchedView = view;
@@ -648,6 +672,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
             private View matchedView = null;
 
             @Override protected boolean matchesSafely(View view) {
+                LOG.i("Waiting until no element matches %s", Utils.repr(selector));
                 if (view == matchedView) return true;
                 evalJs(view, "document.querySelector(" + jsQuote(selector) + ")", result -> {
                     if (eq(result, "null")) {
