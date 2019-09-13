@@ -196,7 +196,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/users",
+            "/providers",
             requestBody,
             response -> {
                 try {
@@ -214,7 +214,7 @@ public class OpenMrsServer implements Server {
     }
 
     private JsonUser userFromJson(JSONObject object) throws JSONException {
-        return new JsonUser(object.getString("user_id"), object.getString("full_name"));
+        return new JsonUser(object.getString("uuid"), object.getString("full_name"));
     }
 
     @Override public void addEncounter(Encounter encounter,
@@ -357,7 +357,7 @@ public class OpenMrsServer implements Server {
         String query = searchQuery != null ? "?q=" + Utils.urlEncode(searchQuery) : "";
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/users" + query,
+            "/providers" + query,
             null,
             response -> {
                 ArrayList<JsonUser> users = new ArrayList<>();
