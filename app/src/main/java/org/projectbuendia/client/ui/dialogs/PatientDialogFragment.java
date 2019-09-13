@@ -99,11 +99,10 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             }
 
             mSex.setSelection(mPatient.sex);
-
-            mAgeYears.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
-            mAgeMonths.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
         }
 
+        mAgeYears.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
+        mAgeMonths.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
         focusFirstEmptyField(dialog);
     }
 
