@@ -214,7 +214,7 @@ public class OpenMrsServer implements Server {
     }
 
     private JsonUser userFromJson(JSONObject object) throws JSONException {
-        return new JsonUser(object.getString("user_id"), object.getString("full_name"));
+        return new JsonUser(object.getString("uuid"), object.getString("full_name"));
     }
 
     @Override public void addEncounter(Encounter encounter,
