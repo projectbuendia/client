@@ -408,8 +408,6 @@
   <string name="pref_desc_starting_patient_id">If set, cause the app to go directly to a patient chart on startup.</string>
   <string name="pref_title_server_responses_fabricated">Fabricate server responses</string>
   <string name="pref_desc_server_responses_fabricated">If the server is unavailable, fabricate its responses and proceed anyway.</string>
-  <string name="pref_title_sync_adapter_preferred">Old SyncAdapter framework preferred</string>
-  <string name="pref_desc_sync_adapter_preferred">Cause the app to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>

@@ -218,7 +218,6 @@ public class App extends Application {
         try {
             sUserManager.reset();
             sModel.reset();
-            sSettings.setSyncAccountInitialized(false);
         } catch (Throwable t) {
             LOG.e(t, "Failed to clear memory state");
         }

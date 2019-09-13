@@ -24,8 +24,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.net.Common;
-import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.SettingsActivity;
@@ -73,11 +71,6 @@ public final class LocationListActivity extends PatientListActivity {
         super.onCreateImpl(savedInstanceState);
         App.inject(this);
         setTitle(R.string.title_location_list);
-
-        if (Common.OFFLINE_SUPPORT) {
-            // Create account, if needed
-            SyncAccountService.initialize(this);
-        }
 
         mController = new LocationListController(
             mAppModel,

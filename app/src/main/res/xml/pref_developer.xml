@@ -37,13 +37,5 @@
             android:title="@string/pref_title_server_responses_fabricated"
             android:summary="@string/pref_desc_server_responses_fabricated"
             android:defaultValue="false" />
-
-        <!-- Whether to use the SyncAdapter framework; default is to use our own scheduler. -->
-        <CheckBoxPreference
-            android:key="sync_adapter_preferred"
-            android:title="@string/pref_title_sync_adapter_preferred"
-            android:summary="@string/pref_desc_sync_adapter_preferred"
-            android:defaultValue="false" />
-
     </PreferenceCategory>
 </PreferenceScreen>

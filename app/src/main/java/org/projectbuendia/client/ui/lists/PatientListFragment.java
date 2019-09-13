@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
@@ -24,8 +23,6 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.net.Common;
-import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.PatientListAdapter;
@@ -133,19 +130,6 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mActivatedPosition = position;
-    }
-
-    @Override public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (Common.OFFLINE_SUPPORT) {
-            // Create account, if needed
-            SyncAccountService.initialize(activity);
-        }
-    }
-
-    @Override public void onDetach() {
-        super.onDetach();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
