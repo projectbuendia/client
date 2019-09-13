@@ -69,7 +69,7 @@
       {% set top = true %}
       {% for row in group.rows %}
         {% set id = row.item.conceptIds | first %}
-        <tr class="obs {{row.item.label | to_css_identifier}}">
+        <tr class="obs concept-{{id}}">
           <th scope="row" onclick="c.showObsDialog('{{row.item.conceptUuidsList}}');">
             {{row.item.label}}
           </th>
@@ -132,13 +132,12 @@
     {% set top = true %}
     {% for order in orders %}
       {% set ins = order.instructions %}
-      {% set id = ins.medication | to_css_identifier %}
-      <tr class="order route-{{ins.route}}">
-        <th scope="row" id="{{id}}_row" onclick="c.onOrderHeadingPressed('{{order.uuid}}')">
+      <tr class="order order-{{ins.medication | to_css_identifier}}">
+        <th scope="row" onclick="c.onOrderHeadingPressed('{{order.uuid}}')">
           {% if ins.notes is not empty %}
-            <div class="notes" id="{{id}}_notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
+            <div class="notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
           {% endif %}
-          <div class="medication" id="{{id}}">{{ins.medication}}</div>
+          <div class="medication">{{ins.medication}}</div>
           <div class="dosing">
             <span class="dosage">{{ins.dosage}}</span
               >{% if ins.route is not empty %}
@@ -223,7 +222,7 @@
     {% endfor %}
 
     <tr>
-      <th scope="row" class="command" id="new_treatment" onclick="c.onNewOrderPressed()">
+      <th scope="row" class="command" id="new-treatment" onclick="c.onNewOrderPressed()">
         {{get_string("add_new_treatment")}}
       </th>
     </tr>
@@ -238,7 +237,7 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-      <div class="tile {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+      <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -257,7 +256,7 @@
           {% set values = tile.points | values %}
           {% set class = values | format_values(tile.item.cssClass) %}
           {% set style = values | format_values(tile.item.cssStyle) %}
-          <div class="tile {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+          <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
             <div class="heading">{{tile.item.label}}</div>
             <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
             <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>

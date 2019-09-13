@@ -23,7 +23,6 @@ import org.projectbuendia.client.ui.chart.PatientChartActivity;
 
 import androidx.test.filters.SmallTest;
 
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static junit.framework.TestCase.assertTrue;
 
 /** Tests for adding a new patient. */
@@ -47,17 +46,15 @@ public class PatientDialogFragmentTest extends FunctionalTestCase {
 
         waitUntilVisible(viewThat(hasTextContaining("Triage")));
 
-        // The symptom onset date should not be assigned a default value.
-        expectVisible(viewThat(
-                hasAncestorThat(withId(R.id.symptom_day_number)),
-                hasText("–")));
+        waitFor(viewThat(containsElementMatchingSelectorWithText(
+            ".tile.concept-162622 .value", "Day 1")));
 
-        waitUntilVisible(viewThat(
-                hasAncestorThat(withId(R.id.admission_day_number)),
-                hasText("Day 1")));
+        // The symptom onset date should not be assigned a default value.
+        waitFor(viewThat(containsElementMatchingSelectorWithText(
+            ".tile.concept-1730 .value", "–")));
 
         // Assign a location to the patient
-        click(viewWithId(R.id.patient_placement));
+        clickElementMatchingSelector(".tile.location");
         screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");

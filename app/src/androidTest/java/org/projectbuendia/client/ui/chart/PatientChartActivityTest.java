@@ -356,14 +356,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         saveForm();
 
         // Enter second set of observations for this encounter.
-        waitUntilVisible(10000, viewWithId(R.id.patient_chart_root));
+        waitUntilVisible(10000, viewWithId(R.id.chart_webview));
         openEncounterForm(VITALS_FORM);
         answerSingleCodedQuestion("Consciousness", "Responds to voice");
         answerMultipleCodedQuestion("Other symptoms", "Cough");
         saveForm();
 
         // Enter third set of observations for this encounter.
-        waitUntilVisible(10000, viewWithId(R.id.patient_chart_root));
+        waitUntilVisible(10000, viewWithId(R.id.chart_webview));
         openEncounterForm(VITALS_FORM);
         answerTextQuestion("Temperature", "37.7");
         answerSingleCodedQuestion("Condition", "Unwell");

@@ -49,6 +49,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.annotation.Nonnull;
+
 import static org.projectbuendia.client.utils.Utils.HOUR;
 import static org.projectbuendia.client.utils.Utils.eq;
 
@@ -110,16 +112,16 @@ public class ChartRenderer {
     /** Renders a patient's history of observations to an HTML table in the WebView. */
     // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
     public void render(Chart chart, Map<String, Obs> latestObservations,
-                       List<Obs> observations, List<Order> orders,
+                       @Nonnull List<Obs> observations, @Nonnull List<Order> orders,
                        JsInterface controllerInterface) {
         if (chart == null) {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
-        if (mLastChartName.equals(chart.name) &&
+        if (eq(mLastChartName, chart.name) &&
             mLastRenderedZoomIndex == mSettings.getChartZoomIndex() &&
-            observations.equals(mLastRenderedObs) &&
-            orders.equals(mLastRenderedOrders)) {
+            eq(observations, mLastRenderedObs) &&
+            eq(orders, mLastRenderedOrders)) {
             LOG.i("%d observations, %d orders, and zoom index %d unchanged; skipping render", observations.size(), orders.size(), mSettings.getChartZoomIndex());
             return;
         }

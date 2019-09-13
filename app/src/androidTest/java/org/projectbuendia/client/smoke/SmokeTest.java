@@ -66,7 +66,6 @@ import static org.projectbuendia.client.utils.Utils.eq;
     /** A test that exercises all the API methods and endpoints. */
     @Test @UiThreadTest public void testApi() {
         screenshot("Start");
-        expect("Guest User");
         initSettings();  // step 0
         screenshot("Loaded users");
         final String id = "" + getNextAvailableId(R.id.users);
@@ -77,9 +76,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
         int suspectedCount = getPatientCount("Suspected");
         addPatient(id, "Given" + id, "Family" + id, 11);  // step 3
         screenshot("Added new patient");
-        expect("Triage");
         String patientUuid = PatientChartController.currentPatientUuid;
-        movePatient("Suspected");
+        movePatient("Triage", "Suspected");
         back();  // back to location list
         screenshot("Moved patient away");
         expectPatientCount("Suspected", suspectedCount + 1);
@@ -100,7 +98,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
         answerMultipleCodedQuestion("Attributes", "Pregnant");
         submitForm(); // step 9
         screenshot("Submitted form");
-        waitFor(viewContainingText("pregnant, 22 y"));
+        waitForViewThat(hasTextContaining("pregnant, 22 y"));
         addOrder("Sunshine", "25 rays", "Get outside!");  // step 10
         screenshot("Added new order");
         editOrder("Sunshine", "Exercise!");  // step 11
@@ -111,12 +109,15 @@ import static org.projectbuendia.client.utils.Utils.eq;
     }
 
     private void initSettings() {
+        App.getSettings().setLocale("en");
+        Utils.restartActivity(getActivity());
         click(R.id.settings);
-        waitFor("Periodic sync disabled");
+        click("Developer");
         clickIfUnchecked(viewThat(
             isA(CheckBox.class),
             whoseParent(hasSiblingThat(hasChildThat(hasText("Periodic sync disabled"))))
         ));
+        click("General");
         enterSetting("Buendia server", HOSTNAME, "Apply and clear local data");
         enterSetting("OpenMRS username", OPENMRS_USERNAME, "Apply and clear local data");
         enterSetting("OpenMRS password", OPENMRS_PASSWORD, "Apply and clear local data");
@@ -157,26 +158,30 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     private void addPatient(String id, String given, String family, int age) {
         click(R.id.action_new_patient);
-        expect("New patient");
+        waitFor("New patient");
 
         type(id, R.id.patient_id);
         type(given, R.id.patient_given_name);
         type(family, R.id.patient_family_name);
         type(age, R.id.patient_age_years);
+        click("Male");
+        click("Female");
+        click("Other");
+        click("Other");
         click("OK");
 
         expect(id + ". " + given + " " + family);
-        expect(age + " y");
+        expectRegex("Sex unknown, " + age + " y");
     }
 
-    private void movePatient(String location) {
-        click(firstViewWithText("Location"));
-        click(location);
+    private void movePatient(String oldLocation, String newLocation) {
+        waitForViewThat(containsElementMatchingSelectorWithText(
+            ".tile.concept-buendia_concept_placement .value", oldLocation));
+        clickElementMatchingSelector(".tile.concept-buendia_concept_placement");
+        click(newLocation);
         click("OK");
-        waitFor(viewThat(hasId(R.id.patient_placement),
-            hasDescendantThat(hasId(R.id.view_attribute_name), hasText("Location")),
-            hasDescendantThat(hasId(R.id.view_attribute_value), hasText(location))
-        ));
+        waitForViewThat(containsElementMatchingSelectorWithText(
+            ".tile.concept-buendia_concept_placement .value", newLocation));
     }
 
     private String internalGetLocationUuid(String name) {
@@ -221,23 +226,24 @@ import static org.projectbuendia.client.utils.Utils.eq;
         click("Edit patient");
         clearAndType(age, R.id.patient_age_years);
         click("OK");
-        waitFor(viewContainingText(age + " y"));
+        waitForViewThat(hasTextContaining(age + " y"));
     }
 
     private void rewindAdmissionDate(int numDays, String expected) {
-        click(R.id.admission_day_number);
+        clickElementMatchingSelector(".tile.concept-162622");
         ViewAction tapUp = new GeneralClickAction(
             Tap.SINGLE, GeneralLocation.TOP_CENTER, Press.FINGER);
         for (int i = 0; i < numDays; i++) {
-            act(firstViewThat(
+            waitForViewThat(
                 isA(NumberPicker.class),
                 hasAncestorThat(isA(DatePicker.class)),
                 hasChildThat(hasTextMatchingRegex("[0-9]{1,2}"))
-            ), tapUp);
+            ).perform(tapUp);
             sleep(50);
         }
         click("OK");
-        waitFor(expected);
+        waitForViewThat(containsElementMatchingSelectorWithText(
+            ".tile.concept-162622 .value", expected));
     }
 
     private void openForm(String titleSubstring) {
@@ -251,10 +257,10 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     private void addOrder(String medication, String dosage, String notes) {
         for (int i = 0; i < 10; i++) {
-            clickElementWithId("down");
+            clickElementMatchingSelector("#down");
             sleep(50);
         }
-        clickElementWithId("new_treatment");
+        clickElementMatchingSelector("#new-treatment");
 
         waitUntilVisible(viewThat(hasText("New treatment")));
         type(medication, R.id.order_medication);
@@ -262,22 +268,23 @@ import static org.projectbuendia.client.utils.Utils.eq;
         type(notes, R.id.order_notes);
         click("OK");
 
-        waitFor(viewThat(containsElementWithId(Utils.toCssIdentifier(medication))));
+        waitForViewThat(containsElementMatchingSelector(
+            ".order-" + Utils.toCssIdentifier(medication)));
     }
 
     private void editOrder(String medication, String notes) {
-        clickElementWithId(Utils.toCssIdentifier(medication) + "_row");
+        clickElementMatchingSelector(".order-" + Utils.toCssIdentifier(medication) + " th");
 
         waitFor("Edit treatment");
         clearAndType(notes, R.id.order_notes);
         click("OK");
 
-        waitFor(viewThat(containsElementWithIdAndText(
-            Utils.toCssIdentifier(medication) + "_notes", notes)));
+        waitForViewThat(containsElementMatchingSelectorWithText(
+            ".order-" + Utils.toCssIdentifier(medication) + " .notes", notes));
     }
 
     private void deleteOrder(String medication) {
-        clickElementWithId(Utils.toCssIdentifier(medication) + "_row");
+        clickElementMatchingSelector(".order-" + Utils.toCssIdentifier(medication) + " th");
 
         waitFor("Edit treatment");
         click("Delete this treatment");
@@ -285,10 +292,10 @@ import static org.projectbuendia.client.utils.Utils.eq;
         waitFor("Confirmation");
         click("Delete");
 
-        waitFor(viewThat(
-            containsElementWithId("new_treatment"),
-            containsNoElementWithId(Utils.toCssIdentifier(medication))
-        ));
+        waitForViewThat(
+            containsElementMatchingSelector("#new-treatment"),
+            containsNoElementMatchingSelector(".order-" + Utils.toCssIdentifier(medication))
+        );
     }
 
     /** Matches Documents that do not have any elements with a given ID. */
@@ -371,7 +378,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
             JsonUser user = (JsonUser) adapter.getItem(i);
             names.add(user.getName());
         }
-        int nextId = 1;
+        int nextId = 9000;
         while (names.contains("Test" + nextId + " User" + nextId)) {
             nextId++;
         }
