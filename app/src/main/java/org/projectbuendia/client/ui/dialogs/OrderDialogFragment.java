@@ -220,7 +220,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment>
 
         // Post an event that triggers the PatientChartController to save the order.
         EventBus.getDefault().post(new OrderAddRequestedEvent(
-            mOrderUuid, mPatientUuid, instructions, mStart, durationDays
+            mOrderUuid, mPatientUuid, Utils.getProviderUuid(), instructions, mStart, durationDays
         ));
     }
 

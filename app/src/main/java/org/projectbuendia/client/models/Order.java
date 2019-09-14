@@ -69,14 +69,15 @@ public final @Immutable class Order extends Model implements Serializable {
     public static final char NON_BREAKING_SPACE = '\u00a0';
 
     public final String patientUuid;
+    public final String providerUuid;
     public final Instructions instructions;
     public final DateTime start;
     public final @Nullable DateTime stop;  // null if unary, non-null if series
 
     public static Order fromJson(JsonOrder order) {
         return new Order(
-            order.uuid, order.patient_uuid, order.instructions,
-            order.start_time, order.stop_time
+            order.uuid, order.patient_uuid, order.provider_uuid,
+            order.instructions, order.start_time, order.stop_time
         );
     }
 
@@ -84,32 +85,34 @@ public final @Immutable class Order extends Model implements Serializable {
         return new Order(
             cursor.getString(cursor.getColumnIndex(Orders.UUID)),
             cursor.getString(cursor.getColumnIndex(Orders.PATIENT_UUID)),
+            cursor.getString(cursor.getColumnIndex(Orders.PROVIDER_UUID)),
             cursor.getString(cursor.getColumnIndex(Orders.INSTRUCTIONS)),
             cursor.getLong(cursor.getColumnIndex(Orders.START_MILLIS)),
             cursor.getLong(cursor.getColumnIndex(Orders.STOP_MILLIS))
         );
     }
 
-    public Order(@Nullable String uuid, String patientUuid,
+    public Order(@Nullable String uuid, String patientUuid, String providerUuid,
                  Instructions instructions, DateTime start, @Nullable DateTime stop) {
         super(uuid);
         this.patientUuid = patientUuid;
+        this.providerUuid = providerUuid;
         this.instructions = instructions;
         this.start = start;
         this.stop = stop;
     }
 
     public Order(
-        @Nullable String uuid, String patientUuid,
+        @Nullable String uuid, String patientUuid, String providerUuid,
         String instructionsText, DateTime start, @Nullable DateTime stop) {
-        this(uuid, patientUuid, new Instructions(instructionsText), start, stop);
+        this(uuid, patientUuid, providerUuid, new Instructions(instructionsText), start, stop);
     }
 
     public Order(
-        @Nullable String uuid, String patientUuid,
+        @Nullable String uuid, String patientUuid, String providerUuid,
         String instructionsText, Long startMillis, @Nullable Long stopMillis) {
         this(
-            uuid, patientUuid, instructionsText,
+            uuid, patientUuid, providerUuid, instructionsText,
             new DateTime(startMillis),
             stopMillis != null ? new DateTime(stopMillis) : null
         );
@@ -255,6 +258,7 @@ public final @Immutable class Order extends Model implements Serializable {
         ContentValues cv = new ContentValues();
         cv.put(Orders.UUID, uuid);
         cv.put(Orders.PATIENT_UUID, patientUuid);
+        cv.put(Orders.PROVIDER_UUID, providerUuid);
         cv.put(Orders.INSTRUCTIONS, instructions.format());
         cv.put(Orders.START_MILLIS, start.getMillis());
         cv.put(Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());

@@ -72,8 +72,9 @@ public class ChartDataHelper {
         List<Order> orders = new ArrayList<>();
         while (c.moveToNext()) {
             orders.add(new Order(
-                Utils.getString(c, Orders.UUID, ""),
+                Utils.getString(c, Orders.UUID),
                 patientUuid,
+                Utils.getString(c, Orders.PROVIDER_UUID , ""),
                 Utils.getString(c, Orders.INSTRUCTIONS, ""),
                 Utils.getLong(c, Orders.START_MILLIS),
                 Utils.getLong(c, Orders.STOP_MILLIS)));
