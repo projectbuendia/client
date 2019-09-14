@@ -15,6 +15,6 @@ package org.projectbuendia.client.json;
 public class JsonConcept {
     public String uuid;
     public Integer xform_id;  // server-side ID, needed for some XForms tasks
-    public ConceptType type;
+    public Datatype type;
     public String name;
 }

@@ -51,6 +51,8 @@ import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
 import org.projectbuendia.client.net.OpenMrsXformsConnection;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.sync.ConceptService;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -66,7 +68,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -535,29 +536,33 @@ public class OdkActivityLauncher {
         ContentValues common = new ContentValues();
         // It's critical that UUID is {@code null} for temporary observations, so we make it
         // explicit here. See {@link Contracts.Observations.UUID} for details.
-        common.put(Contracts.Observations.UUID, (String) null);
-        common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
+        common.put(Observations.UUID, (String) null);
+        common.put(Observations.PATIENT_UUID, patientUuid);
+        common.put(Observations.PROVIDER_UUID, Utils.getProviderUuid());
 
         final DateTime encounterTime = getEncounterAnswerDateTime(savedRoot);
-        if(encounterTime == null) return;
-        common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
-        common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
+        if (encounterTime == null) return;
+        common.put(Observations.MILLIS, encounterTime.getMillis());
 
         Set<Integer> xformConceptIds = new HashSet<>();
         List<ContentValues> toInsert = getAnsweredObservations(common, savedRoot, xformConceptIds);
         Map<String, String> xformIdToUuid = mapFormConceptIdToUuid(xformConceptIds, resolver);
+        ConceptService concepts = App.getConceptService();
 
         // Remap concept ids to uuids, skipping anything we can't remap.
         for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext(); ) {
             ContentValues values = i.next();
-            if (!mapIdToUuid(xformIdToUuid, values, Contracts.Observations.CONCEPT_UUID)) {
+            String conceptUuid = mapIdToUuid(xformIdToUuid, values, Observations.CONCEPT_UUID);
+            if (conceptUuid == null) {
                 i.remove();
+            } else {
+                values.put(Observations.TYPE, concepts.getType(conceptUuid).name());
+                mapIdToUuid(xformIdToUuid, values, Observations.VALUE);
             }
-            mapIdToUuid(xformIdToUuid, values, Contracts.Observations.VALUE);
         }
 
         ContentValues[] values = toInsert.toArray(new ContentValues[toInsert.size()]);
-        resolver.bulkInsert(Contracts.Observations.URI, values);
+        resolver.bulkInsert(Observations.URI, values);
         if (DenormalizeObservationsTask.needsDenormalization(values)) {
             App.getModel().denormalizeObservations(App.getCrudEventBus(), patientUuid);
         }
@@ -592,9 +597,8 @@ public class OdkActivityLauncher {
      * @param savedRoot                     the root forest form element
      * @param xformConceptIdsAccumulator    the set to store the form concept ids found
      */
-    private static List<ContentValues> getAnsweredObservations(ContentValues common,
-                                                                    TreeElement savedRoot,
-                                                                    Set<Integer> xformConceptIdsAccumulator) {
+    private static List<ContentValues> getAnsweredObservations(
+        ContentValues common, TreeElement savedRoot, Set<Integer> xformConceptIdsAccumulator) {
         List<ContentValues> answeredObservations = new ArrayList<>();
         for (int i = 0; i < savedRoot.getNumChildren(); i++) {
             TreeElement group = savedRoot.getChildAt(i);
@@ -626,8 +630,8 @@ public class OdkActivityLauncher {
 
                 ContentValues observation = new ContentValues(common);
                 // Set to the id for now, we'll replace with uuid later
-                observation.put(Contracts.Observations.CONCEPT_UUID, id.toString());
-                observation.put(Contracts.Observations.VALUE, value);
+                observation.put(Observations.CONCEPT_UUID, id.toString());
+                observation.put(Observations.VALUE, value);
 
                 answeredObservations.add(observation);
             }
@@ -669,15 +673,12 @@ public class OdkActivityLauncher {
         return id;
     }
 
-    private static boolean mapIdToUuid(
+    private static String mapIdToUuid(
         Map<String, String> idToUuid, ContentValues values, String key) {
         String id = (String) values.get(key);
         String uuid = idToUuid.get(id);
-        if (uuid == null) {
-            return false;
-        }
-        values.put(key, uuid);
-        return true;
+        if (uuid != null) values.put(key, uuid);
+        return uuid;
     }
 
     private static Integer getConceptId(String encodedConcept) {

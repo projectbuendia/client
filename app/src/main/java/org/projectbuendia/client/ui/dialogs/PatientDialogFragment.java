@@ -25,7 +25,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
@@ -191,12 +192,19 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
         if (mPatient == null) {
             BigToast.show(R.string.adding_new_patient_please_wait);
             DateTime now = DateTime.now(); // not actually used by PatientDelta
-            App.getModel().addPatient(App.getCrudEventBus(), patient, ImmutableList.of(
-                new Obs(null, null, now, ConceptUuids.ADMISSION_DATE_UUID,
-                    ConceptType.DATE, LocalDate.now().toString(), ""),
-                new Obs(null, null, now, ConceptUuids.PLACEMENT_UUID,
-                    ConceptType.TEXT, App.getModel().getDefaultLocation().uuid, "")
-            ));
+            patient.observations = ImmutableList.of(
+                new JsonObservation(new Obs(
+                    null, null, null, Utils.getProviderUuid(),
+                    ConceptUuids.ADMISSION_DATE_UUID, Datatype.DATE,
+                    now, null, LocalDate.now().toString(), ""
+                )),
+                new JsonObservation(new Obs(
+                    null, null, null, Utils.getProviderUuid(),
+                    ConceptUuids.PLACEMENT_UUID, Datatype.TEXT,
+                    now, null, App.getModel().getDefaultLocation().uuid, ""
+                ))
+            );
+            App.getModel().addPatient(App.getCrudEventBus(), patient);
         } else {
             BigToast.show(R.string.updating_patient_please_wait);
             patient.uuid = mPatient.uuid;

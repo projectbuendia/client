@@ -45,14 +45,6 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     // TODO: Factor out common code between this class and AddPatientTask.
     private static final Logger LOG = Logger.create();
 
-    private static final String[] ENCOUNTER_PROJECTION = new String[] {
-        Observations.CONCEPT_UUID,
-        Observations.ENCOUNTER_MILLIS,
-        Observations.ENCOUNTER_UUID,
-        Observations.PATIENT_UUID,
-        Observations.VALUE
-    };
-
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
@@ -113,13 +105,13 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
                 EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
         }
 
-        ContentValues[] values = encounter.toContentValuesArray();
-        if (values.length > 0) {
-            int inserted = mContentResolver.bulkInsert(Observations.URI, values);
-            if (DenormalizeObservationsTask.needsDenormalization(values)) {
+        ContentValues[] cvs = encounter.toContentValuesArray();
+        if (cvs.length > 0) {
+            int inserted = mContentResolver.bulkInsert(Observations.URI, cvs);
+            if (DenormalizeObservationsTask.needsDenormalization(cvs)) {
                 App.getModel().denormalizeObservations(mBus, encounter.patientUuid);
             }
-            if (inserted != values.length) {
+            if (inserted != cvs.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
                     inserted, encounter.observations.length);
                 return new EncounterAddFailedEvent(
@@ -144,7 +136,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
         LoadItemTask<Encounter> task = mTaskFactory.newLoadItemTask(
-            Observations.URI, ENCOUNTER_PROJECTION, new EncounterUuidFilter(), mUuid, Encounter::load, mBus);
+            Observations.URI, null, new EncounterUuidFilter(), mUuid, Encounter::load, mBus);
         task.execute();
     }
 

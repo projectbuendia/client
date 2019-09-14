@@ -30,7 +30,7 @@ import org.odk.collect.android.widgets2.group.TableWidgetGroup;
 import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.ConceptUuids;
@@ -195,10 +195,10 @@ import static org.projectbuendia.client.utils.Utils.eq;
     /** Moves the patient on the server without updating the local data store. */
     private void internalMovePatient(String patientUuid, String locationUuid) {
         Encounter encounter = new Encounter(
-            null, patientUuid, DateTime.now(), new Obs[] {new Obs(
-                null, patientUuid, DateTime.now(),
-                ConceptUuids.PLACEMENT_UUID, ConceptType.TEXT, locationUuid, null
-            )}, null
+            null, patientUuid, Utils.getProviderUuid(), DateTime.now(), new Obs[] {new Obs(
+                null, null, patientUuid, Utils.getProviderUuid(), ConceptUuids.PLACEMENT_UUID,
+                Datatype.TEXT, DateTime.now(), null, locationUuid, null
+            )}
         );
         RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
         App.getServer().addEncounter(encounter, future, future);

@@ -41,6 +41,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.net.Server;
 
 import java.io.File;
@@ -690,6 +691,12 @@ public class Utils {
     /** Expands a UUID from a small integer. */
     public static String toUuid(int id) {
         return expandUuid(id);
+    }
+
+    /** Gets the UUID of the currently active user (provider). */
+    public static String getProviderUuid() {
+        JsonUser user = App.getUserManager().getActiveUser();
+        return user != null ? user.getUuid() : null;
     }
 
 

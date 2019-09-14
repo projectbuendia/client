@@ -271,7 +271,6 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 "orderUuid", orderUuid,
                 "instructions", instructions,
                 "executionTime", "" + executionTime);
-
             EventBus.getDefault().post(
                 new OrderExecutionAddRequestedEvent(orderUuid, executionTime));
         }

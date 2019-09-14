@@ -18,7 +18,7 @@ import com.google.common.base.Joiner;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
@@ -84,16 +84,17 @@ public class ChartDataHelper {
 
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
         String uuid = Utils.getString(c, Observations.UUID);
+        String encounterUuid = Utils.getString(c, Observations.ENCOUNTER_UUID);
         String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
-        DateTime time = Utils.getDateTime(c, Observations.ENCOUNTER_MILLIS);
+        String providerUuid = Utils.getString(c, Observations.PROVIDER_UUID);
         String conceptUuid = Utils.getString(c, Observations.CONCEPT_UUID, "");
-        ConceptType conceptType = concepts.getType(conceptUuid);
+        Datatype type = Datatype.valueOf(Utils.getString(c, Observations.TYPE));
+        DateTime time = Utils.getDateTime(c, Observations.MILLIS);
+        String orderUuid = Utils.getString(c, Observations.ORDER_UUID);
         String value = Utils.getString(c, Observations.VALUE, "");
-        String valueName = value;
-        if (eq(conceptType, ConceptType.CODED)) {
-            valueName = concepts.getName(value, locale);
-        }
-        return new Obs(uuid, patientUuid, time, conceptUuid, conceptType, value, valueName);
+        String valueName = type == Datatype.CODED ? concepts.getName(value, locale) : value;
+        return new Obs(uuid, encounterUuid, patientUuid, providerUuid,
+            conceptUuid, type, time, orderUuid, value, valueName);
     }
 
     private static @Nullable ObsRow loadObsRow(
@@ -120,7 +121,7 @@ public class ChartDataHelper {
             Observations.PATIENT_UUID + " = ? and "
                 + Observations.VOIDED + " IS NOT 1",
             new String[] {patientUuid},
-            Observations.ENCOUNTER_MILLIS
+            Observations.MILLIS
         )) {
             while (c.moveToNext()) {
                 results.add(loadObs(c, locale, concepts));
@@ -148,16 +149,16 @@ public class ChartDataHelper {
             args.addAll(Arrays.asList(UUIDS_TO_OMIT));
         }
         if (startMillis != null) {
-            query += " AND " + Observations.ENCOUNTER_MILLIS + " >= ?";
+            query += " AND " + Observations.MILLIS + " >= ?";
             args.add("" + startMillis);
         }
         if (stopMillis != null) {
-            query += " AND " + Observations.ENCOUNTER_MILLIS + " < ?";
+            query += " AND " + Observations.MILLIS + " < ?";
             args.add("" + stopMillis);
         }
         String[] argArray = args.toArray(new String[0]);
 
-        String order = Observations.ENCOUNTER_MILLIS + " ASC";
+        String order = Observations.MILLIS + " ASC";
 
         ArrayList<ObsRow> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(Observations.URI, null, query, argArray, order)) {
@@ -200,7 +201,7 @@ public class ChartDataHelper {
             Observations.VOIDED + " IS NOT 1 and "
                 + Observations.CONCEPT_UUID + " = ?",
             new String[] {conceptUuid},
-            Observations.ENCOUNTER_MILLIS + " DESC"
+            Observations.MILLIS + " DESC"
         )) {
             Map<String, Obs> result = new HashMap<>();
             while (c.moveToNext()) {

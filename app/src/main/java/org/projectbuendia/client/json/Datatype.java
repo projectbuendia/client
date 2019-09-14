@@ -13,8 +13,10 @@ package org.projectbuendia.client.json;
 
 import com.google.gson.annotations.SerializedName;
 
+import javax.annotation.Nullable;
+
 /** OpenMRS concept types (used for JSON representation and elsewhere). */
-public enum ConceptType {
+public enum Datatype {
     // These serialized names must match the HL7_TYPE_NAMES on the server side.
     @SerializedName("numeric") NUMERIC,
     @SerializedName("boolean") BOOLEAN,
@@ -22,5 +24,20 @@ public enum ConceptType {
     @SerializedName("text") TEXT,
     @SerializedName("date") DATE,
     @SerializedName("datetime") DATETIME,
-    @SerializedName("none") NONE
+    @SerializedName("none") NONE;
+
+    /** Converts a Sex value to a code for JSON communication with the server. */
+    public static @Nullable String serialize(@Nullable Datatype type) {
+        if (type == null) return null;
+        try {
+            return Datatype.class.getField(type.name()).getAnnotation(SerializedName.class).value();
+        } catch (NoSuchFieldException e) {
+            return null;
+        }
+    }
+
+    public static @Nullable Datatype deserialize(@Nullable String name) {
+        if (name == null) return null;
+        return Datatype.valueOf(name);
+    }
 }

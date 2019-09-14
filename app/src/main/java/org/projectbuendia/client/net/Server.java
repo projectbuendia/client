@@ -29,26 +29,6 @@ import java.util.List;
 
 /** An interface abstracting the idea of an RPC to a server. */
 public interface Server {
-    // TODO: Get rid of all these constants; use JsonPatient, JsonEncounter, etc. types instead.
-    public static final String PATIENT_ID_KEY = "id";
-    public static final String PATIENT_UUID_KEY = "uuid";
-    public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
-    public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
-    public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
-    public static final String PATIENT_SEX_KEY = "sex";
-    public static final String PATIENT_OBSERVATIONS_KEY = "observations";
-    public static final String ENCOUNTER_OBSERVATIONS_KEY = "observations";
-    public static final String ENCOUNTER_TIME = "time";
-    public static final String ENCOUNTER_ORDER_UUIDS = "order_uuids";
-    public static final String OBS_QUESTION_UUID = "question_uuid";
-    // TODO(ping): For consistency with ConceptType, it would be nice one day to
-    // rename answer_uuid to answer_coded and answer_number to answer_numeric.
-    public static final String OBS_ANSWER_DATE = "answer_date";
-    public static final String OBS_ANSWER_DATETIME = "answer_datetime";
-    public static final String OBS_ANSWER_UUID = "answer_uuid";
-    public static final String OBS_ANSWER_NUMBER = "answer_number";
-    public static final String OBS_ANSWER_TEXT = "answer_text";
-
     /**
      * Logs an event by sending a dummy request to the server.  (The server logs
      * can then be scanned later to produce analytics for the client app.)

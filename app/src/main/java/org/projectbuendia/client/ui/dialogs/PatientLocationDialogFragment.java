@@ -21,7 +21,7 @@ import android.widget.EditText;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
@@ -92,8 +92,8 @@ public class PatientLocationDialogFragment extends BaseDialogFragment<PatientLoc
         String bedNumber = this.bedNumber.getText().toString().toUpperCase();
         String placement = location != null ? location.uuid + "/" + bedNumber : null;
         App.getModel().addObservationEncounter(App.getCrudEventBus(), patient.uuid, new Obs(
-            null, patient.uuid, DateTime.now(), ConceptUuids.PLACEMENT_UUID,
-            ConceptType.TEXT, placement, null
+            null, null, patient.uuid, Utils.getProviderUuid(),
+            ConceptUuids.PLACEMENT_UUID, Datatype.TEXT, DateTime.now(), null, placement, null
         ));
         dismiss();
     }
