@@ -25,7 +25,7 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.List;
 
 /** A list of patients with a choice of several filters in a dropdown menu. */
-public class FilteredPatientListActivity extends BaseSearchablePatientListActivity {
+public class FilteredPatientListActivity extends PatientListActivity {
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 
     private PatientFilterController mFilterController;
@@ -45,7 +45,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
         mFilterController = new PatientFilterController(new FilterUi(), mAppModel);
 
-        App.getInstance().inject(this);
+        App.inject(this);
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {

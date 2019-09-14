@@ -30,8 +30,8 @@ import android.support.test.espresso.web.assertion.WebAssertion;
 import android.support.test.espresso.web.model.Atom;
 import android.support.test.espresso.web.model.ElementReference;
 import android.support.test.rule.ActivityTestRule;
-import android.util.Log;
 import android.view.View;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.widget.Checkable;
 
@@ -44,6 +44,8 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
+import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.text.MessageFormat;
 
@@ -56,6 +58,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
 /** Matchers for {@link View}s. */
 public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTestRule<T> {
+    private static Logger LOG = Logger.create();
 
     public TestCaseWithMatcherMethods(Class<T> startingActivity) {
         super(startingActivity, true, true);
@@ -80,6 +83,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         return Espresso.onView(hasTextContaining(text));
     }
 
+    public static ViewInteraction viewMatchingRegex(String regex) {
+        return Espresso.onView(hasTextMatchingRegex(regex));
+    }
+
     public static ViewInteraction firstViewWithText(Object obj) {
         return firstViewThat(hasText(obj));
     }
@@ -91,7 +98,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     public static Matcher<View> hasText(Object obj) {
         String text = "" + obj;
         return new MatcherWithDescription<>(ViewMatchers.withText(text),
-            "has the exact text \"" + text + "\"");
+            "has the exact text \"" + quote(text) + "\"");
     }
 
     public static ViewInteraction viewWithTextString(int resourceId) {
@@ -147,7 +154,9 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     @SafeVarargs public static void expect(ViewInteraction vi, Matcher<View>... matchers) {
-        vi.check(matches(combinedMatcher(matchers)));
+        Matcher matcher = combinedMatcher(matchers);
+        vi.check(matches(matcher));
+        LOG.i("Found expected view that " + StringDescription.asString(matcher));
     }
 
     @SafeVarargs public static void expect(DataInteraction di, Matcher<View>... matchers) {
@@ -232,6 +241,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         expect(firstViewWithText(text));
     }
 
+    public static void expectRegex(String regex) {
+        expect(firstViewThat(hasTextMatchingRegex(regex)));
+    }
+
     public static void click(int id) {
         click(viewWithId(id));
     }
@@ -291,7 +304,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         String name = cls.getSimpleName();
         return new MatcherWithDescription<>(
             ViewMatchers.isAssignableFrom(cls),
-            (name.matches("^[AEIOU]") ? "is an " : "is a ") + name);
+            (name.matches("^[AEIOU]") ? "is an " : "is a ") + quote(name));
     }
 
     // Names of Espresso matchers form expressions that don't make any grammatical sense,
@@ -319,7 +332,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
                 if (names.length == 2) {
                     list = list.replace(", ", " or ");
                 } else if (names.length > 2) {
-                    list = list.replaceAll(", ([^,*])$", ", or $1");
+                    list = list.replaceAll(", ([^,]*)$", ", or $1");
                 }
                 description.appendText(
                     (names[0].matches("^[AEIOU]") ? "is an " : "is a ") + list);
@@ -379,13 +392,13 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
 
     public static Matcher<View> hasTextContaining(String text) {
         return new MatcherWithDescription<>(ViewMatchers.withText(Matchers.containsString(text)),
-            "has text containing \"" + text + "\"");
+            "has text containing \"" + quote(text) + "\"");
     }
 
     public static Matcher<View> hasTextMatchingRegex(String regex) {
         return new MatcherWithDescription<>(
             ViewMatchers.withText(StringMatchers.matchesRegex(regex)),
-            "has text matching regex /" + regex + "/");
+            "has text matching regex /" + quote(regex) + "/");
     }
 
     public static Matcher<View> isAtLeastNPercentVisible(int percentage) {
@@ -467,11 +480,19 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     protected static ViewInteraction waitFor(int id) {
-        return waitFor(viewWithId(id));
+        return waitForViewThat(hasId(id));
     }
 
     protected static ViewInteraction waitFor(String text) {
-        return waitFor(firstViewWithText(text));
+        return waitForViewThat(hasText(text));
+    }
+
+    protected static ViewInteraction waitForViewThat(Matcher<View>... matchers) {
+        Matcher matcher = combinedMatcher(matchers);
+        LOG.i("Waiting for view that " + StringDescription.asString(matcher));
+        ViewInteraction vi = firstViewThat(matcher);
+        waitUntil(vi, exists());
+        return vi;
     }
 
     protected static ViewInteraction waitFor(ViewInteraction vi) {
@@ -492,14 +513,18 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     protected static ViewInteraction waitUntil(int timeoutMs, ViewInteraction vi, Matcher<View>... matchers) {
+        Matcher matcher = combinedMatcher(matchers);
+        String description = StringDescription.asString(matcher);
         long deadline = System.currentTimeMillis() + timeoutMs;
         while (true) {
             try {
-                expect(vi, matchers);
+                LOG.i("Waiting for view that " + description);
+                expect(vi, matcher);
                 return vi;
             } catch (Throwable t) {
                 if (System.currentTimeMillis() > deadline) throw t;
             }
+            LOG.i("Could not find view that " + description + ", retrying in 100 ms");
             sleep(100);
         }
     }
@@ -540,6 +565,13 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
         }
     }
 
+    /** Quotes a string for use in a MessageFormat. */
+    private static String quote(String text) {
+        if (Utils.isEmpty(text)) return "";
+        return "'" + text.replaceAll("'", "''") + "'";
+    }
+
+    /** Clicks a checkbox only if it is currently unchecked. */
     static ViewAction clickIfUncheckedAction() {
         return new ViewAction() {
             @Override public BaseMatcher<View> getConstraints() {
@@ -568,36 +600,33 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
     }
 
     /** This matcher is designed only to be used repeatedly in a waitFor() call. */
-    protected Matcher<View> containsElementWithId(String id) {
+    protected Matcher<View> containsElementMatchingSelector(String selector) {
         return new TypeSafeMatcher<View>() {
             private View matchedView = null;
 
             @Override protected boolean matchesSafely(View view) {
                 if (view == matchedView) return true;
-                if (view instanceof WebView) {
-                    ((WebView) view).evaluateJavascript(
-                        "document.getElementById('" + id + "')",
-                        result -> {
-                            if (!eq(result, "null")) {
-                                matchedView = view;
-                                Log.i("buendia/TestCase", "Found element '" + id + "'");
-                            }
-                        }
-                    );
-                }
+                LOG.i("Looking for element matching %s", Utils.repr(selector));
+                evalJs(view, "document.querySelector(" + jsQuote(selector) + ")", result -> {
+                    if (!eq(result, "null")) {
+                        matchedView = view;
+                        LOG.i("Found element matching %s", Utils.repr(selector));
+                    }
+                });
                 return false;
             }
 
             @Override public void describeTo(Description description) {
-                description.appendText("is a WebView containing an element with ID \"" + id + "\"");
+                description.appendText(
+                    "is a WebView containing an element matching the selector " + Utils.repr(selector));
             }
         };
     }
 
-    protected void clickElementWithId(String id) {
-        waitFor(viewThat(containsElementWithId(id))).perform(new ViewAction() {
+    protected void clickElementMatchingSelector(String selector) {
+        waitFor(viewThat(containsElementMatchingSelector(selector))).perform(new ViewAction() {
             @Override public String getDescription() {
-                return "click element with id \"" + id + "\"";
+                return "click element matching selector " + Utils.repr(selector);
             }
 
             @Override public Matcher<View> getConstraints() {
@@ -605,67 +634,71 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityTest
             }
 
             @Override public void perform(UiController controller, View view) {
-                Log.i("buendia/TestCase", "Clicking element '" + id + "'");
-                ((WebView) view).evaluateJavascript(
-                    "var e = document.getElementById('" + id + "'); " +
-                    "e.dispatchEvent(new Event('touchstart')); e.click()", null
-                );
+                LOG.i("Clicking element matching %s", Utils.repr(selector));
+                evalJs(view, "var e = document.querySelector(" + jsQuote(selector) + "); " +
+                    "e.dispatchEvent(new Event('touchstart')); e.click()", null);
             }
         });
     }
 
     /** This matcher is designed only to be used repeatedly in a waitFor() call. */
-    protected Matcher<View> containsElementWithIdAndText(String id, String text) {
+    protected Matcher<View> containsElementMatchingSelectorWithText(String selector, String text) {
         return new TypeSafeMatcher<View>() {
             private View matchedView = null;
 
             @Override protected boolean matchesSafely(View view) {
                 if (view == matchedView) return true;
-                if (view instanceof WebView) {
-                    ((WebView) view).evaluateJavascript(
-                        "document.getElementById('" + id + "').textContent",
-                        result -> {
-                            if (eq(result, '"' + text + '"')) {
-                                matchedView = view;
-                                Log.i("buendia/TestCase", "Found element '" + id + "' with text '" + text + "'");
-                            }
-                        }
-                    );
-                }
+                LOG.i("Looking for element matching %s with text %s", Utils.repr(selector), Utils.repr(text));
+                evalJs(view, "(document.querySelector(" + jsQuote(selector) + ") || {}).textContent", result -> {
+                    if (eq(result, '"' + text + '"')) {
+                        matchedView = view;
+                        LOG.i("Found element matching %s with text %s", Utils.repr(selector), Utils.repr(text));
+                    }
+                });
                 return false;
             }
 
             @Override public void describeTo(Description description) {
-                description.appendText("is a WebView containing an element with ID \""
-                    + id + "\" and text \"" + text + "\"");
+                description.appendText(
+                    "is a WebView containing an element matching the selector " +
+                        Utils.repr(selector) + " that has text " + Utils.repr(text));
             }
         };
     }
 
     /** This matcher is designed only to be used repeatedly in a waitFor() call. */
-    protected Matcher<View> containsNoElementWithId(String id) {
+    protected Matcher<View> containsNoElementMatchingSelector(String selector) {
         return new TypeSafeMatcher<View>() {
             private View matchedView = null;
 
             @Override protected boolean matchesSafely(View view) {
+                LOG.i("Waiting until no element matches %s", Utils.repr(selector));
                 if (view == matchedView) return true;
-                if (view instanceof WebView) {
-                    ((WebView) view).evaluateJavascript(
-                        "document.getElementById('" + id + "')",
-                        result -> {
-                            if (eq(result, "null")) {
-                                matchedView = view;
-                                Log.i("buendia/TestCase", "Confirmed that element '" + id + "' is not present");
-                            }
-                        }
-                    );
-                }
+                evalJs(view, "document.querySelector(" + jsQuote(selector) + ")", result -> {
+                    if (eq(result, "null")) {
+                        matchedView = view;
+                        LOG.i("Confirmed that no matches for %s are present", Utils.repr(selector));
+                    }
+                });
                 return false;
             }
 
-            @Override public void describeTo(Description description) {
-                description.appendText("is a WebView that does not contain any element with ID \"" + id + "\"");
+            @Override public void describeTo(Description desc) {
+                desc.appendText(
+                    "is a WebView containing no element matching the selector " + Utils.repr(selector));
             }
         };
+    }
+
+    protected String getString(int id, Object... args) {
+        return getActivity().getString(id, args);
+    }
+
+    private void evalJs(View view, String script, ValueCallback<String> callback) {
+        if (view instanceof WebView) ((WebView) view).evaluateJavascript(script, callback);
+    }
+
+    private static String jsQuote(String str) {
+        return '"' + str.replace("\\", "\\\\").replace("'", "\\'") + '"';
     }
 }

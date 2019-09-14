@@ -33,6 +33,7 @@ import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.BuendiaSyncEngine;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -79,19 +80,19 @@ public abstract class IncrementalSyncWorker<T> implements SyncWorker {
     @Override public final boolean sync(ContentResolver contentResolver, SyncResult syncResult,
         ContentProviderClient providerClient) throws Throwable {
 
-        String syncToken = BuendiaSyncEngine.getLastSyncToken(providerClient, dbTable);
-        LOG.d("%s: Using sync token %s", dbTable, syncToken);
+        String bookmark = BuendiaSyncEngine.getBookmark(providerClient, dbTable);
+        LOG.d("%s: Using bookmark %s", dbTable, Utils.repr(bookmark));
 
         RequestFuture<IncrementalSyncResponse<T>> future = RequestFuture.newFuture();
-        createRequest(syncToken, future, future);
+        createRequest(bookmark, future, future);
         IncrementalSyncResponse<T> response = future.get();
         ArrayList<ContentProviderOperation> ops = getUpdateOps(response.results, syncResult);
         providerClient.applyBatch(ops);
         LOG.i("%s: Applied %d db ops", dbTable, ops.size());
-        syncToken = response.syncToken;
+        bookmark = response.bookmark;
 
-        LOG.d("%s: Saving sync token %s", dbTable, syncToken);
-        BuendiaSyncEngine.storeSyncToken(providerClient, dbTable, response.syncToken);
+        LOG.d("%s: Saving bookmark %s", dbTable, Utils.repr(bookmark));
+        BuendiaSyncEngine.setBookmark(providerClient, dbTable, response.bookmark);
         return !response.more;
     }
 
@@ -101,26 +102,26 @@ public abstract class IncrementalSyncWorker<T> implements SyncWorker {
     protected abstract ArrayList<ContentProviderOperation> getUpdateOps(T[] list, SyncResult result);
 
 
-    private void createRequest(
-            @Nullable String lastSyncToken,
-            Response.Listener<IncrementalSyncResponse<T>> successListener,
-            final Response.ErrorListener errorListener) {
-        OpenMrsConnectionDetails connectionDetails = App.getConnectionDetails();
-        Uri.Builder url = Uri.parse(connectionDetails.getBuendiaApiUrl()).buildUpon();
-        url.appendPath(resourceType);
-        if (lastSyncToken == null) {
-            lastSyncToken = "{\"t\":\"0000-00-00T00:00:00.000Z\"}";
+    private void createRequest(@Nullable String bookmark,
+        Response.Listener<IncrementalSyncResponse<T>> successListener,
+        final Response.ErrorListener errorListener) {
+        if (bookmark == null) {
+            bookmark = "0000-00-00T00:00:00.000Z";
         }
-        url.appendQueryParameter("since", lastSyncToken);
+        OpenMrsConnectionDetails connectionDetails = App.getConnectionDetails();
+        Uri uri = Uri.parse(connectionDetails.getBuendiaApiUrl())
+            .buildUpon()
+            .appendPath(resourceType)
+            .encodedQuery("since=" + bookmark)
+            .build();
         GsonRequest<IncrementalSyncResponse<T>> request = new GsonRequest<>(
-                url.build().toString(),
-                new IncrementalSyncResponseType(clazz),
-                connectionDetails.addAuthHeader(new HashMap<>()),
-                successListener,
-                wrapErrorListener(errorListener));
+            uri.toString(),
+            new IncrementalSyncResponseType(clazz),
+            connectionDetails.addAuthHeader(new HashMap<>()),
+            successListener,
+            wrapErrorListener(errorListener));
         Serializers.registerTo(request.getGson());
-        request.setRetryPolicy(
-                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
         connectionDetails.getVolley().addToRequestQueue(request);
     }
 

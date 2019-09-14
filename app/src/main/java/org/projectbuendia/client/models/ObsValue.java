@@ -161,6 +161,9 @@ public final class ObsValue implements Comparable<ObsValue> {
         });
     }
 
+    // TODO(ping): This should subsume Obs.compareTo().  Boolean "true" should
+    // be greater than all values, and date values should be sorted among
+    // instant values.
     /**
      * Compares ObsValue instances according to a total ordering such that:
      * - All non-null values are greater than null.

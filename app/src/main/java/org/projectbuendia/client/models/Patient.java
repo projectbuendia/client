@@ -12,65 +12,50 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Utils;
+
+import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
 
-public final @Immutable class Patient extends Base<String> implements Comparable<Patient> {
-    public static final CursorLoader<Patient> LOADER = cursor -> builder()
-        .setUuid(Utils.getString(cursor, Contracts.Patients.UUID))
-        .setId(Utils.getString(cursor, Contracts.Patients.ID))
-        .setGivenName(Utils.getString(cursor, Contracts.Patients.GIVEN_NAME))
-        .setFamilyName(Utils.getString(cursor, Contracts.Patients.FAMILY_NAME))
-        .setBirthdate(Utils.getLocalDate(cursor, Contracts.Patients.BIRTHDATE))
-        .setSex(Sex.forCode(Utils.getString(cursor, Contracts.Patients.SEX)))
-        .setLocationUuid(Utils.getString(cursor, Contracts.Patients.LOCATION_UUID))
-        .build();
-
-    public final String uuid;
+public final @Immutable class Patient extends Model implements Serializable {
+    public final String id;
     public final String givenName;
     public final String familyName;
     public final Sex sex;
-    // TODO: Make PatientDelta.birthdate and Patient.birthdate same type (LocalDate or DateTime).
     public final LocalDate birthdate;
-    public final String locationUuid;
 
-    public static Builder builder() {
-        return new Builder();
-    }
+    // The fields below are denormalized from observations, not received
+    // as part of the patient model.
+    public final boolean pregnancy;
+    public final String locationUuid;
+    public final String bedNumber;
 
     /** Creates an instance of {@link Patient} from a network {@link JsonPatient} object. */
     public static Patient fromJson(JsonPatient patient) {
-        return builder()
-            .setId(patient.id)
-            .setUuid(patient.uuid)
-            .setGivenName(patient.given_name)
-            .setFamilyName(patient.family_name)
-            .setSex(Sex.forCode(patient.sex))
-            .setBirthdate(patient.birthdate)
-            .setLocationUuid(
-                patient.assigned_location != null ? patient.assigned_location.uuid : null)
-            .build();
-    }
-
-    @Override public int compareTo(Patient other) {
-        return Utils.ALPHANUMERIC_COMPARATOR.compare(id, other.id);
+        return new Patient(
+            patient.uuid, patient.id, patient.given_name, patient.family_name,
+            patient.sex, patient.birthdate, false /* pregnancy */,
+            "" /* locationUuid */, "" /* bedNumber */);
     }
 
     /** Puts this object's fields in a {@link ContentValues} object for insertion into a database. */
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(Contracts.Patients.UUID, uuid);
-        cv.put(Contracts.Patients.ID, id);
-        cv.put(Contracts.Patients.GIVEN_NAME, givenName);
-        cv.put(Contracts.Patients.FAMILY_NAME, familyName);
-        cv.put(Contracts.Patients.SEX, sex.code);
-        cv.put(Contracts.Patients.BIRTHDATE, Utils.formatDate(birthdate));
-        cv.put(Contracts.Patients.LOCATION_UUID, locationUuid);
+        cv.put(Patients.UUID, uuid);
+        cv.put(Patients.ID, id);
+        cv.put(Patients.GIVEN_NAME, givenName);
+        cv.put(Patients.FAMILY_NAME, familyName);
+        cv.put(Patients.SEX, Sex.nullableNameOf(sex));
+        cv.put(Patients.BIRTHDATE, Utils.format(birthdate));
+        // PREGNANCY is a denormalized column and is never written directly.
+        // LOCATION_UUID is a denormalized column and is never written directly.
+        // BED_NUMBER is a denormalized column and is never written directly.
         return cv;
     }
 
@@ -79,65 +64,31 @@ public final @Immutable class Patient extends Base<String> implements Comparable
             uuid, id, givenName, familyName);
     }
 
-    public static final class Builder {
-        private String mId;
-        private String mUuid;
-        private String mGivenName;
-        private String mFamilyName;
-        private Sex mSex;
-        private LocalDate mBirthdate;
-        private String mLocationUuid;
-
-        public Builder setId(String id) {
-            this.mId = id;
-            return this;
-        }
-
-        public Builder setUuid(String uuid) {
-            this.mUuid = uuid;
-            return this;
-        }
-
-        public Builder setGivenName(String givenName) {
-            this.mGivenName = givenName;
-            return this;
-        }
-
-        public Builder setFamilyName(String familyName) {
-            this.mFamilyName = familyName;
-            return this;
-        }
-
-        public Builder setSex(Sex sex) {
-            this.mSex = sex;
-            return this;
-        }
-
-        public Builder setBirthdate(LocalDate birthdate) {
-            this.mBirthdate = birthdate;
-            return this;
-        }
-
-        public Builder setLocationUuid(String locationUuid) {
-            this.mLocationUuid = locationUuid;
-            return this;
-        }
-
-        public Patient build() {
-            return new Patient(this);
-        }
-
-        private Builder() {
-        }
+    public Patient(String uuid, String id, String givenName, String familyName,
+                   Sex sex, LocalDate birthdate, boolean pregnancy,
+                   String locationUuid, String bedNumber) {
+        super(uuid);
+        this.id = Utils.toNonnull(id);
+        this.givenName = Utils.toNonnull(givenName);
+        this.familyName = Utils.toNonnull(familyName);
+        this.sex = sex;
+        this.birthdate = birthdate;
+        this.pregnancy = pregnancy;
+        this.locationUuid = Utils.toNonnull(locationUuid);
+        this.bedNumber = Utils.toNonnull(bedNumber);
     }
 
-    private Patient(Builder builder) {
-        super(builder.mId);
-        this.uuid = builder.mUuid;
-        this.givenName = builder.mGivenName;
-        this.familyName = builder.mFamilyName;
-        this.sex = builder.mSex;
-        this.birthdate = builder.mBirthdate;
-        this.locationUuid = builder.mLocationUuid;
+    public static Patient load(Cursor cursor) {
+        return new Patient(
+            Utils.getString(cursor, Patients.UUID),
+            Utils.getString(cursor, Patients.ID),
+            Utils.getString(cursor, Patients.GIVEN_NAME),
+            Utils.getString(cursor, Patients.FAMILY_NAME),
+            Sex.nullableValueOf(Utils.getString(cursor, Patients.SEX)),
+            Utils.getLocalDate(cursor, Patients.BIRTHDATE),
+            Utils.getBoolean(cursor, Patients.PREGNANCY, false),
+            Utils.getString(cursor, Patients.LOCATION_UUID),
+            Utils.getString(cursor, Patients.BED_NUMBER)
+        );
     }
 }

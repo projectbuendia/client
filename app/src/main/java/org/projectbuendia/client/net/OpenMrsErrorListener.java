@@ -22,7 +22,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.utils.Logger;
 
@@ -50,7 +49,7 @@ public class OpenMrsErrorListener implements ErrorListener {
 
         int code = error.networkResponse.statusCode;
         String message = extractErrorMessage(error.networkResponse);
-        BigToast.show(App.getInstance().getApplicationContext(), message);
+        BigToast.show(message);
     }
 
     /** Parses a JSON-formatted error response from the OpenMRS server. **/

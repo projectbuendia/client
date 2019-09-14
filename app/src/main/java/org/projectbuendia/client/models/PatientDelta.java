@@ -15,27 +15,20 @@ import android.content.ContentValues;
 
 import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 /** Represents the data to write to a new patient or the data to update on a patient. */
 public class PatientDelta {
-
     public Optional<String> id = Optional.absent();
     public Optional<String> givenName = Optional.absent();
     public Optional<String> familyName = Optional.absent();
     public Optional<Sex> sex = Optional.absent();
     public Optional<LocalDate> birthdate = Optional.absent();
-    public Optional<LocalDate> admissionDate = Optional.absent();
-    public Optional<LocalDate> firstSymptomDate = Optional.absent();
-    public Optional<String> assignedLocationUuid = Optional.absent();
     private static final Logger LOG = Logger.create();
 
     /** Returns the {@link ContentValues} corresponding to the delta. */
@@ -52,13 +45,10 @@ public class PatientDelta {
             cv.put(Contracts.Patients.FAMILY_NAME, familyName.get());
         }
         if (sex.isPresent()) {
-            cv.put(Contracts.Patients.SEX, sex.get().code);
+            cv.put(Contracts.Patients.SEX, Sex.nullableNameOf(sex.get()));
         }
         if (birthdate.isPresent()) {
             cv.put(Contracts.Patients.BIRTHDATE, birthdate.get().toString());
-        }
-        if (assignedLocationUuid.isPresent()) {
-            cv.put(Contracts.Patients.LOCATION_UUID, assignedLocationUuid.get());
         }
         return cv;
     }
@@ -79,65 +69,24 @@ public class PatientDelta {
         // TODO: Use a JsonPatient instead of all these field name constants.
         try {
             if (id.isPresent()) {
-                json.put(Server.PATIENT_ID_KEY, id.get());
+                json.put("id", id.get());
             }
             if (givenName.isPresent()) {
-                json.put(Server.PATIENT_GIVEN_NAME_KEY, givenName.get());
+                json.put("given_name", givenName.get());
             }
             if (familyName.isPresent()) {
-                json.put(Server.PATIENT_FAMILY_NAME_KEY, familyName.get());
+                json.put("family_name", familyName.get());
             }
             if (sex.isPresent()) {
-                json.put(Server.PATIENT_SEX_KEY, sex.get().code);
+                json.put("sex", Sex.serialize(sex.get()));
             }
             if (birthdate.isPresent()) {
-                json.put(
-                    Server.PATIENT_BIRTHDATE_KEY,
-                    Utils.formatDate(birthdate.get()));
+                json.put("birthdate", Utils.format(birthdate.get()));
             }
-
-            JSONArray observations = new JSONArray();
-            if (admissionDate.isPresent()) {
-                JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.ADMISSION_DATE_UUID);
-                observation.put(
-                    Server.OBSERVATION_ANSWER_DATE,
-                    Utils.formatDate(admissionDate.get()));
-                observations.put(observation);
-            }
-            if (firstSymptomDate.isPresent()) {
-                JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
-                observation.put(
-                    Server.OBSERVATION_ANSWER_DATE,
-                    Utils.formatDate(firstSymptomDate.get()));
-                observations.put(observation);
-            }
-            if (observations != null) {
-                json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
-            }
-
-            if (assignedLocationUuid.isPresent()) {
-                json.put(
-                    Server.PATIENT_ASSIGNED_LOCATION_KEY,
-                    getLocationObject(assignedLocationUuid.get()));
-            }
-
             return true;
         } catch (JSONException e) {
             LOG.w(e, "Unable to serialize a patient delta to JSON.");
-
             return false;
         }
-    }
-
-    private static JSONObject getLocationObject(String assignedLocationUuid) throws JSONException {
-        JSONObject location = new JSONObject();
-        location.put("uuid", assignedLocationUuid);
-        return location;
-    }
-
-    private static long getTimestamp(DateTime dateTime) {
-        return dateTime.toInstant().getMillis()/1000;
     }
 }

@@ -11,20 +11,18 @@
 
 package org.projectbuendia.client.providers;
 
+import org.projectbuendia.client.providers.Contracts.Bookmarks;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
-import org.projectbuendia.client.providers.Contracts.ConceptNames;
 import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.providers.Contracts.Forms;
-import org.projectbuendia.client.providers.Contracts.LocationNames;
 import org.projectbuendia.client.providers.Contracts.Locations;
 import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.providers.Contracts.SyncTokens;
+import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.providers.Contracts.Users;
 import org.projectbuendia.client.sync.Database;
-import org.projectbuendia.client.providers.Contracts.Table;
 
 /** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
 public class BuendiaProvider extends DelegatingProvider<Database> {
@@ -46,14 +44,10 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             new GroupProviderDelegate(ChartItems.GROUP_TYPE, Table.CHART_ITEMS));
         registry.registerDelegate(Concepts.URI.getPath(),
             new GroupProviderDelegate(Concepts.GROUP_TYPE, Table.CONCEPTS));
-        registry.registerDelegate(ConceptNames.URI.getPath(),
-            new GroupProviderDelegate(ConceptNames.GROUP_TYPE, Table.CONCEPT_NAMES));
         registry.registerDelegate(Forms.URI.getPath(),
             new GroupProviderDelegate(Forms.GROUP_TYPE, Table.FORMS));
         registry.registerDelegate(Locations.URI.getPath(),
             new GroupProviderDelegate(Locations.GROUP_TYPE, Table.LOCATIONS));
-        registry.registerDelegate(LocationNames.URI.getPath(),
-            new GroupProviderDelegate(LocationNames.GROUP_TYPE, Table.LOCATION_NAMES));
         registry.registerDelegate(Observations.URI.getPath(),
             new GroupProviderDelegate(Observations.GROUP_TYPE, Table.OBSERVATIONS));
         registry.registerDelegate(Orders.URI.getPath(),
@@ -70,8 +64,6 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             new ItemProviderDelegate(Forms.GROUP_TYPE, Table.FORMS, Forms.UUID));
         registry.registerDelegate(Locations.URI.getPath() + "/*",
             new ItemProviderDelegate(Locations.ITEM_TYPE, Table.LOCATIONS, Locations.UUID));
-        registry.registerDelegate(LocationNames.URI.getPath() + "/*",
-            new ItemProviderDelegate(LocationNames.ITEM_TYPE, Table.LOCATION_NAMES, null));
         registry.registerDelegate(Observations.URI.getPath() + "/*",
             new ItemProviderDelegate(Observations.ITEM_TYPE, Table.OBSERVATIONS, Observations.UUID));
         registry.registerDelegate(Orders.URI.getPath() + "/*",
@@ -81,21 +73,19 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
         registry.registerDelegate(Users.URI.getPath() + "/*",
             new ItemProviderDelegate(Users.ITEM_TYPE, Table.USERS, Users.UUID));
 
-        // Custom providers, usually with special logic.
+        // Custom providers with special logic.
         registry.registerDelegate(Contracts.PatientCounts.URI.getPath(),
             new PatientCountsDelegate());
-        registry.registerDelegate(Contracts.LocalizedLocations.URI.getPath() + "/*",
-            new LocalizedLocationsDelegate());
 
         // Content provider for our single-row table for storing miscellaneous values.
         registry.registerDelegate(Misc.URI.getPath(),
             new InsertableItemProviderDelegate(Misc.ITEM_TYPE, Table.MISC, "rowid"));
 
-        // Custom provider for our sync token table.
-        registry.registerDelegate(SyncTokens.URI.getPath(),
-            new GroupProviderDelegate(SyncTokens.ITEM_TYPE, Table.SYNC_TOKENS));
-        registry.registerDelegate(SyncTokens.URI.getPath() + "/*",
-                new ItemProviderDelegate(SyncTokens.ITEM_TYPE, Table.SYNC_TOKENS, SyncTokens.TABLE_NAME));
+        // Custom provider for our bookmark table.
+        registry.registerDelegate(Bookmarks.URI.getPath(),
+            new GroupProviderDelegate(Bookmarks.ITEM_TYPE, Table.BOOKMARKS));
+        registry.registerDelegate(Bookmarks.URI.getPath() + "/*",
+                new ItemProviderDelegate(Bookmarks.ITEM_TYPE, Table.BOOKMARKS, Bookmarks.TABLE_NAME));
 
         return registry;
     }

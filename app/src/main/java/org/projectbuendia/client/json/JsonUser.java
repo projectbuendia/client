@@ -11,20 +11,22 @@
 
 package org.projectbuendia.client.json;
 
-import com.google.common.base.Preconditions;
-
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /** JSON reprsentation of a user (an OpenMRS Provider). */
 public class JsonUser implements Serializable {
-    public String uuid;
-    public String fullName;
+    private String uuid;
+    private String name;
 
     /** This must match the same constant on the server. */
     public static final String PROVIDER_GUEST_UUID = "buendia_provider_guest";
@@ -36,40 +38,20 @@ public class JsonUser implements Serializable {
         if (aSection != bSection) {
             return aSection - bSection;
         }
-        return a.fullName.compareTo(b.fullName);
+        return Utils.ALPHANUMERIC_COMPARATOR.compare(a.name, b.name);
     };
 
     /** Default constructor for serialization. */
     public JsonUser() { }
 
     /** Creates a user with the given unique id and full name. */
-    public JsonUser(String uuid, String fullName) {
-        Preconditions.checkNotNull(uuid);
-        Preconditions.checkNotNull(fullName);
+    public JsonUser(@Nonnull String uuid, @Nonnull String name) {
         this.uuid = uuid;
-        this.fullName = fullName;
-    }
-
-    public static JsonUser fromNewUser(JsonNewUser newUser) {
-        String fullName = newUser.givenName + " " + newUser.familyName;
-        return new JsonUser(newUser.username, fullName);
+        this.name = name;
     }
 
     public String toString() {
-        return Utils.format("<User %s [%s]>", Utils.repr(fullName), uuid);
-    }
-
-    /** Returns the user's initials, using the first letter of each word of the user's full name. */
-    public String getInitials() {
-        String[] parts = fullName.split("\\s+");
-        switch (parts.length) {
-            case 0:
-                return "?";
-            case 1:
-                return parts[0].substring(0, 1);
-            default:
-                return parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1);
-        }
+        return Utils.format("<User %s [%s]>", Utils.repr(name), uuid);
     }
 
     @Override public int hashCode() {
@@ -81,6 +63,34 @@ public class JsonUser implements Serializable {
     }
 
     public final boolean isGuestUser() {
-        return eq(uuid, PROVIDER_GUEST_UUID);
+        return eq(getUuid(), PROVIDER_GUEST_UUID);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLocalizedName() {
+        return isGuestUser() ? App.str(R.string.guest_user_name) : name;
+    }
+
+    /** Returns the user's initials, using the first letter of each word of the user's full name. */
+    public String getLocalizedInitials() {
+        if (isGuestUser()) {
+            return App.str(R.string.guest_user_initials);
+        }
+        String[] parts = name.split("\\s+");
+        switch (parts.length) {
+            case 0:
+                return "?";
+            case 1:
+                return parts[0].substring(0, 1);
+            default:
+                return parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1);
+        }
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 }

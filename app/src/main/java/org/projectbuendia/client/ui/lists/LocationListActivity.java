@@ -24,8 +24,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.net.Common;
-import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.SettingsActivity;
@@ -38,7 +36,7 @@ import javax.inject.Provider;
 import de.greenrobot.event.EventBus;
 
 /** Displays a list of locations and allows users to search through a list of patients. */
-public final class LocationListActivity extends BaseSearchablePatientListActivity {
+public final class LocationListActivity extends PatientListActivity {
 
     private LocationListController mController;
     private AlertDialog mSyncFailedDialog;
@@ -71,12 +69,8 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
 
     @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
-        App.getInstance().inject(this);
-
-        if (Common.OFFLINE_SUPPORT) {
-            // Create account, if needed
-            SyncAccountService.initialize(this);
-        }
+        App.inject(this);
+        setTitle(R.string.title_location_list);
 
         mController = new LocationListController(
             mAppModel,

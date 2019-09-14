@@ -1,6 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.util.DisplayMetrics;
@@ -28,6 +29,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.ObsPoint;
+import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -47,7 +49,10 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.annotation.Nonnull;
+
 import static org.projectbuendia.client.utils.Utils.HOUR;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** Renders a patient's chart to HTML displayed in a WebView. */
 public class ChartRenderer {
@@ -60,8 +65,11 @@ public class ChartRenderer {
     };
 
     private static PebbleEngine sEngine;
+    private static PebbleTemplate sTemplate;
+    private static final Object sTemplateLock = new Object();
     private static final Logger LOG = Logger.create();
     private static final ExecutionHistory EMPTY_HISTORY = new ExecutionHistory();
+    private static final String TEMPLATE_PATH = "assets/chart.html";
 
     private WebView mView;  // view into which the HTML table will be rendered
     private Resources mResources;  // resources used for localizing the rendering
@@ -72,15 +80,23 @@ public class ChartRenderer {
     private int mLastRenderedZoomIndex;  // last zoom level index rendered
     private String mLastChartName = "";
 
+    // WARNING(kpy): The WebView only knows how to pass boolean, numeric, or
+    // String arguments to these methods from JavaScript, and does not always
+    // perform the obvious conversions.  Every parameter must be declared here
+    // as boolean, int, long, float, double, or String.  Methods must be called
+    // with exactly the declared number of arguments, or the call will cause
+    // a JavaScript "Method not found" exception.  Boolean parameters convert
+    // all non-boolean values to false.  Numeric parameters convert incoming
+    // numbers to the declared type and all non-numeric values to 0.  String
+    // parameters pass through nulls, convert all booleans and numbers to
+    // strings, and convert anything else to the string "undefined".
     public interface JsInterface {
         @JavascriptInterface void onNewOrderPressed();
-
         @JavascriptInterface void onOrderHeadingPressed(String orderUuid);
-
         @JavascriptInterface void onOrderCellPressed(String orderUuid, long startMillis);
-
-        @JavascriptInterface void onObsDialog(String conceptUuid, String startMillis, String stopMillis);
-
+        @JavascriptInterface void showObsDialog(String conceptUuids);
+        @JavascriptInterface void showObsDialog(long startMillis, long stopMillis);
+        @JavascriptInterface void showObsDialog(String conceptUuids, long startMillis, long stopMillis);
         @JavascriptInterface void onPageUnload(int scrollX, int scrollY);
     }
 
@@ -96,17 +112,16 @@ public class ChartRenderer {
     /** Renders a patient's history of observations to an HTML table in the WebView. */
     // TODO/cleanup: Have this take the types that getObservations and getLatestObservations return.
     public void render(Chart chart, Map<String, Obs> latestObservations,
-                       List<Obs> observations, List<Order> orders,
-                       LocalDate admissionDate, LocalDate firstSymptomsDate,
+                       @Nonnull List<Obs> observations, @Nonnull List<Order> orders,
                        JsInterface controllerInterface) {
         if (chart == null) {
             mView.loadUrl("file:///android_asset/no_chart.html");
             return;
         }
-        if (mLastChartName.equals(chart.name) &&
+        if (eq(mLastChartName, chart.name) &&
             mLastRenderedZoomIndex == mSettings.getChartZoomIndex() &&
-            observations.equals(mLastRenderedObs) &&
-            orders.equals(mLastRenderedOrders)) {
+            eq(observations, mLastRenderedObs) &&
+            eq(orders, mLastRenderedOrders)) {
             LOG.i("%d observations, %d orders, and zoom index %d unchanged; skipping render", observations.size(), orders.size(), mSettings.getChartZoomIndex());
             return;
         }
@@ -121,11 +136,10 @@ public class ChartRenderer {
         mView.getSettings().setDefaultFontSize((int) defaultFontSize);
 
         mView.getSettings().setJavaScriptEnabled(true);
-        mView.addJavascriptInterface(controllerInterface, "controller");
+        mView.addJavascriptInterface(controllerInterface, "c");
         mView.setWebChromeClient(new WebChromeClient());
         String html = new GridHtmlGenerator(
-            chart, latestObservations, observations, orders,
-            admissionDate, firstSymptomsDate).getHtml();
+            chart, latestObservations, observations, orders).getHtml();
 
         LOG.elapsed("render", "HTML generated");
 
@@ -159,7 +173,6 @@ public class ChartRenderer {
         DateTime mNow;
         Column mNowColumn;
         LocalDate mAdmissionDate;
-        LocalDate mFirstSymptomsDate;
 
         Map<String, ExecutionHistory> mExecutionHistories = new HashMap<String, ExecutionHistory>() {
             @Override public @NonNull ExecutionHistory get(Object key) {
@@ -168,47 +181,29 @@ public class ChartRenderer {
             }
         };
         List<List<Tile>> mTileRows = new ArrayList<>();
+        List<List<Tile>> mFixedRows = new ArrayList<>();
         List<RowGroup> mRowGroups = new ArrayList<>();
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         Set<String> mConceptsToDump = new HashSet<>();  // concepts whose data to dump in JSON
 
         GridHtmlGenerator(Chart chart, Map<String, Obs> latestObservations,
-                          List<Obs> observations, List<Order> orders,
-                          LocalDate admissionDate, LocalDate firstSymptomsDate) {
-            mAdmissionDate = admissionDate;
-            mFirstSymptomsDate = firstSymptomsDate;
+                          List<Obs> observations, List<Order> orders) {
+            LOG.start("GridHtmlGenerator");
+
             mOrders = orders;
             mNow = DateTime.now();
+            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATE_UUID);
+            mAdmissionDate = obs != null ? Utils.toLocalDate(obs.value) : null;
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
-            LOG.start("GridHtmlGenerator");
-            for (ChartSection tileGroup : chart.tileGroups) {
-                List<Tile> tileRow = new ArrayList<>();
-                for (ChartItem item : tileGroup.items) {
-                    ObsPoint[] points = new ObsPoint[item.conceptUuids.length];
-                    for (int i = 0; i < points.length; i++) {
-                        Obs obs = latestObservations.get(item.conceptUuids[i]);
-                        if (obs != null) {
-                            points[i] = obs.getObsPoint();
-                        }
-                    }
-                    tileRow.add(new Tile(item, points));
-                    if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
-                    }
-                }
-                mTileRows.add(tileRow);
+            for (ChartSection section : chart.fixedGroups) {
+                mFixedRows.add(createTiles(section, latestObservations));
             }
-
+            for (ChartSection section : chart.tileGroups) {
+                mTileRows.add(createTiles(section, latestObservations));
+            }
             for (ChartSection section : chart.rowGroups) {
-                RowGroup rowGroup = new RowGroup(section.label);
-                mRowGroups.add(rowGroup);
-                for (ChartItem item : section.items) {
-                    rowGroup.rows.add(new Row(item));
-                    if (!item.script.trim().isEmpty()) {
-                        mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
-                    }
-                }
+                mRowGroups.add(createRowGroup(section));
             }
 
             Map<String, Order> ordersByUuid = new HashMap<>();
@@ -222,13 +217,54 @@ public class ChartRenderer {
             LOG.elapsed("GridHtmlGenerator", "Data prepared");
         }
 
+        private List<Tile> createTiles(ChartSection section, Map<String, Obs> observations) {
+            List<Tile> tiles = new ArrayList<>();
+            for (ChartItem item : section.items) {
+                List<ObsPoint> points = new ArrayList<>();
+                for (String uuid : item.conceptUuids) {
+                    Obs obs = observations.get(uuid);
+                    if (eq(uuid, ConceptUuids.PLACEMENT_UUID)) {
+                        // Special case: a placement value is split into
+                        // two values, a location and a bed number.
+                        if (obs == null) {
+                            points.add(null);
+                            points.add(null);
+                            continue;
+                        }
+                        String value = obs.getObsValue().text;
+                        String[] parts = Utils.splitFields(value, "/", 2);
+                        points.add(new ObsPoint(obs.time, ObsValue.newText(parts[0])));
+                        points.add(new ObsPoint(obs.time, ObsValue.newText(parts[1])));
+                    } else {
+                        points.add(obs != null ? obs.getObsPoint() : null);
+                    }
+                }
+                tiles.add(new Tile(item, points.toArray(new ObsPoint[0])));
+                if (!item.script.trim().isEmpty()) {
+                    mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                }
+            }
+            return tiles;
+        }
+
+        private RowGroup createRowGroup(ChartSection section) {
+            RowGroup rowGroup = new RowGroup(section.label);
+            for (ChartItem item : section.items) {
+                rowGroup.rows.add(new Row(item));
+                if (!item.script.trim().isEmpty()) {
+                    mConceptsToDump.addAll(Arrays.asList(item.conceptUuids));
+                }
+            }
+            return rowGroup;
+        }
+
         /** Collects observations into Column objects that make up the grid. */
         void addObservations(List<Obs> observations, Map<String, Order> orders) {
             for (Obs obs : observations) {
                 if (obs == null) continue;
 
-                if (obs.conceptUuid.equals(ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID)) {
-                    Order order = orders.get(obs.value);
+                if (obs.conceptUuid.equals(ConceptUuids.ORDER_EXECUTED_UUID)) {
+                    Order order = orders.get(obs.orderUuid);
                     if (order != null) {
                         if (!mExecutionHistories.containsKey(order.uuid)) {
                             mExecutionHistories.put(order.uuid, new ExecutionHistory(order));
@@ -348,6 +384,7 @@ public class ChartRenderer {
             Map<String, Object> context = new HashMap<>();
             context.put("now", mNow);
             context.put("today", mNow.toLocalDate());
+            context.put("fixedRows", mFixedRows);
             context.put("tileRows", mTileRows);
             context.put("rowGroups", mRowGroups);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
@@ -357,7 +394,7 @@ public class ChartRenderer {
             context.put("orders", getSortedOrders());
             context.put("executionHistories", getSortedExecutionHistories());
             LOG.elapsed("GridHtmlGenerator", "Template context populated");
-            String result = renderTemplate("assets/chart.html", context);
+            String result = renderTemplate(context);
             LOG.finish("GridHtmlGenerator", "Finished rendering HTML");
             return result;
         }
@@ -400,26 +437,48 @@ public class ChartRenderer {
             }
         }
 
-        /** Renders a Pebble template. */
-        String renderTemplate(String filename, Map<String, Object> context) {
+        /** Renders the Pebble template for the chart. */
+        String renderTemplate(Map<String, Object> context) {
             LOG.start("renderTemplate");
-
-            if (sEngine == null) {
-                // PebbleEngine caches compiled templates by filename, so as long as we keep using the
-                // same engine instance, it's okay to call getTemplate(filename) on each render.
-                sEngine = new PebbleEngine.Builder().extension(new PebbleExtension()).build();
-            }
+            foregroundCompileTemplate();
             try {
                 StringWriter writer = new StringWriter();
-                PebbleTemplate template = sEngine.getTemplate(filename);
                 LOG.elapsed("renderTemplate", "Template loaded");
-                template.evaluate(writer, context);
+                sTemplate.evaluate(writer, context);
                 LOG.finish("renderTemplate");
                 return writer.toString();
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();
                 e.printStackTrace(new PrintWriter(writer));
                 return "<div style=\"font-size: 150%\">" + writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
+            }
+        }
+    }
+
+    public static void backgroundCompileTemplate() {
+        if (sEngine == null || sTemplate == null) {
+            new AsyncTask<Void, Void, Void>() {
+                public Void doInBackground(Void... param) {
+                    compileTemplate();
+                    return null;
+                }
+            }.execute();
+        }
+    }
+
+    public static void foregroundCompileTemplate() {
+        if (sEngine == null || sTemplate == null) {
+            compileTemplate();
+        }
+    }
+
+    private static void compileTemplate() {
+        synchronized (sTemplateLock) {
+            if (sEngine == null || sTemplate == null) {
+                LOG.start("compileTemplate");
+                sEngine = new PebbleEngine.Builder().extension(new PebbleExtension()).build();
+                sTemplate = sEngine.getTemplate(TEMPLATE_PATH);
+                LOG.finish("compileTemplate");
             }
         }
     }

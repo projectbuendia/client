@@ -18,7 +18,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import org.projectbuendia.client.providers.Contracts.Table;
 import org.projectbuendia.client.utils.Logger;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,12 +30,10 @@ public class Database extends SQLiteOpenHelper {
     private static final Logger LOG = Logger.create();
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 30;
+    public static final int DATABASE_VERSION = 38;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
-
-    File file;
 
     /**
      * A map of SQL table schemas, with one entry per table.  The values should
@@ -51,20 +48,18 @@ public class Database extends SQLiteOpenHelper {
             + "id TEXT,"
             + "given_name TEXT,"
             + "family_name TEXT,"
-            + "location_uuid TEXT,"
             + "birthdate TEXT,"
-            + "sex TEXT");
+            + "sex TEXT,"
+            + "pregnancy INTEGER,"
+            + "location_uuid TEXT,"
+            + "bed_number TEXT"
+        );
 
         SCHEMAS.put(Table.CONCEPTS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "xform_id INTEGER UNIQUE NOT NULL,"
-            + "concept_type TEXT");
-
-        SCHEMAS.put(Table.CONCEPT_NAMES, ""
-            + "concept_uuid TEXT,"
-            + "locale TEXT,"
-            + "name TEXT,"
-            + "UNIQUE (concept_uuid, locale)");
+            + "type TEXT,"
+            + "name TEXT");
 
         SCHEMAS.put(Table.FORMS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
@@ -73,13 +68,8 @@ public class Database extends SQLiteOpenHelper {
 
         SCHEMAS.put(Table.LOCATIONS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
-            + "parent_uuid TEXT");
-
-        SCHEMAS.put(Table.LOCATION_NAMES, ""
-            + "location_uuid TEXT,"
-            + "locale TEXT,"
             + "name TEXT,"
-            + "UNIQUE (location_uuid, locale)");
+            + "parent_uuid TEXT");
 
         SCHEMAS.put(Table.OBSERVATIONS, ""
             // uuid intentionally allows null values, because temporary observations inserted
@@ -87,11 +77,13 @@ public class Database extends SQLiteOpenHelper {
             // (and many other databases) treats all NULL values as different from all other values,
             // so it's still ok to insert multiple records with a NULL UUID.
             + "uuid TEXT PRIMARY KEY,"
-            + "patient_uuid TEXT,"
             + "encounter_uuid TEXT,"
-            + "encounter_millis INTEGER,"
+            + "patient_uuid TEXT,"
+            + "provider_uuid TEXT,"
             + "concept_uuid TEXT,"
-            + "enterer_uuid TEXT,"
+            + "type STRING,"
+            + "millis INTEGER,"
+            + "order_uuid STRING,"
             + "value STRING,"
             + "voided INTEGER,"
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
@@ -99,6 +91,7 @@ public class Database extends SQLiteOpenHelper {
         SCHEMAS.put(Table.ORDERS, ""
             + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "patient_uuid TEXT,"
+            + "provider_uuid TEXT,"
             + "instructions TEXT,"
             + "start_millis INTEGER,"
             + "stop_millis INTEGER");
@@ -131,14 +124,13 @@ public class Database extends SQLiteOpenHelper {
             + "full_sync_start_millis INTEGER,"
             + "full_sync_end_millis INTEGER");
 
-        SCHEMAS.put(Table.SYNC_TOKENS, ""
+        SCHEMAS.put(Table.BOOKMARKS, ""
             + "table_name TEXT PRIMARY KEY NOT NULL,"
-            + "sync_token TEXT NOT NULL");
+            + "bookmark TEXT NOT NULL");
     }
 
     public Database(Context context) {
         super(context, DATABASE_FILENAME, null, DATABASE_VERSION);
-        file = context.getDatabasePath(DATABASE_FILENAME);
     }
 
     @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -147,8 +139,8 @@ public class Database extends SQLiteOpenHelper {
         clear(db);
     }
 
-    public void clear(SQLiteDatabase db) {
-        LOG.i("Clearing database.");
+    private void clear(SQLiteDatabase db) {
+        LOG.i("Dropping all tables");
         for (Table table : Table.values()) {
             db.execSQL("DROP TABLE IF EXISTS " + table);
         }
@@ -156,7 +148,7 @@ public class Database extends SQLiteOpenHelper {
     }
 
     @Override public void onCreate(SQLiteDatabase db) {
-        LOG.i("Initializing database");
+        LOG.i("Creating tables");
         for (Table table : Table.values()) {
             db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
         }

@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -26,11 +27,11 @@ import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -44,18 +45,9 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     // TODO: Factor out common code between this class and AddPatientTask.
     private static final Logger LOG = Logger.create();
 
-    private static final String[] ENCOUNTER_PROJECTION = new String[] {
-        Observations.CONCEPT_UUID,
-        Observations.ENCOUNTER_MILLIS,
-        Observations.ENCOUNTER_UUID,
-        Observations.PATIENT_UUID,
-        Observations.VALUE
-    };
-
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
-    private final Patient mPatient;
     private final Encounter mEncounter;
     private final CrudEventBus mBus;
 
@@ -66,14 +58,12 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
-        Patient patient,
         Encounter encounter,
         CrudEventBus bus
     ) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
-        mPatient = patient;
         mEncounter = encounter;
         mBus = bus;
     }
@@ -81,10 +71,10 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     @Override protected EncounterAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
 
-        mServer.addEncounter(mPatient, mEncounter, future, future);
-        JsonEncounter jsonEncounter;
+        mServer.addEncounter(mEncounter, future, future);
+        Encounter encounter;
         try {
-            jsonEncounter = future.get();
+            encounter = Encounter.fromJson(future.get());
         } catch (InterruptedException e) {
             return new EncounterAddFailedEvent(EncounterAddFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
@@ -102,24 +92,26 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             }
             LOG.e("Error response: %s", ((VolleyError) e.getCause()).networkResponse);
 
-            return new EncounterAddFailedEvent(reason, (VolleyError) e.getCause());
+            if (App.getSettings().getServerResponsesFabricated()) {
+                encounter = mEncounter.withUuid(UUID.randomUUID().toString());
+            } else {
+                return new EncounterAddFailedEvent(reason, (VolleyError) e.getCause());
+            }
         }
 
-        if (jsonEncounter.uuid == null) {
-            LOG.e(
-                "Although the server reported an encounter successfully added, it did not "
-                    + "return a UUID for that encounter. This indicates a server error.");
-
+        if (encounter.uuid == null) {
+            LOG.e("Server returned an encounter with no UUID.");
             return new EncounterAddFailedEvent(
                 EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
         }
 
-        Encounter encounter = Encounter.fromJson(mPatient.uuid, jsonEncounter);
-        ContentValues[] values = encounter.toContentValuesArray();
-        if (values.length > 0) {
-            int inserted = mContentResolver.bulkInsert(Observations.URI, values);
-
-            if (inserted != values.length) {
+        ContentValues[] cvs = encounter.toContentValuesArray();
+        if (cvs.length > 0) {
+            int inserted = mContentResolver.bulkInsert(Observations.URI, cvs);
+            if (DenormalizeObservationsTask.needsDenormalization(cvs)) {
+                App.getModel().denormalizeObservations(mBus, encounter.patientUuid);
+            }
+            if (inserted != cvs.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
                     inserted, encounter.observations.length);
                 return new EncounterAddFailedEvent(
@@ -130,7 +122,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             LOG.w("Encounter was sent to the server but contained no observations.");
         }
 
-        mUuid = jsonEncounter.uuid;
+        mUuid = encounter.uuid;
         return null;
     }
 
@@ -141,26 +133,10 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             return;
         }
 
-        // If the UUID was not set, a programming error occurred. Log and post an error event.
-        if (mUuid == null) {
-            LOG.e(
-                "Although an encounter add ostensibly succeeded, no UUID was set for the newly-"
-                    + "added encounter. This indicates a programming error.");
-
-            mBus.post(new EncounterAddFailedEvent(
-                EncounterAddFailedEvent.Reason.UNKNOWN, null /*exception*/));
-            return;
-        }
-
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
         LoadItemTask<Encounter> task = mTaskFactory.newLoadItemTask(
-            Observations.URI,
-            ENCOUNTER_PROJECTION,
-            new EncounterUuidFilter(),
-            mUuid,
-            new Encounter.Loader(mPatient.uuid),
-            mBus);
+            Observations.URI, null, new EncounterUuidFilter(), mUuid, Encounter::load, mBus);
         task.execute();
     }
 
@@ -169,9 +145,11 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     // report success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(ItemLoadedEvent<Encounter> event) {
-            mBus.post(new ItemCreatedEvent<>(event.item));
-            mBus.unregister(this);
+        public void onEventMainThread(ItemLoadedEvent<?> event) {
+            if (event.item instanceof Encounter) {
+                mBus.post(new ItemCreatedEvent<>((Encounter) event.item));
+                mBus.unregister(this);
+            }
         }
 
         public void onEventMainThread(ItemLoadFailedEvent event) {

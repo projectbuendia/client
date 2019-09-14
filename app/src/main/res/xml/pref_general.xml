@@ -17,8 +17,12 @@
     <PreferenceCategory
         android:title="@string/pref_header_general">
 
-        <!-- The hostname to use as both OpenMRS server and package server -->
+        <!-- The UI language -->
+        <ListPreference
+            android:key="locale"
+            android:title="@string/pref_title_language" />
 
+        <!-- The hostname to use as both OpenMRS server and package server -->
         <org.projectbuendia.client.widgets.EditAndClearDataPreference
             android:key="server"
             android:title="@string/pref_title_server"

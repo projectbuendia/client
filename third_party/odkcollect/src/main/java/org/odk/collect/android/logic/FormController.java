@@ -90,7 +90,7 @@ public class FormController {
             this.instanceName = instanceName;
         }
     };
-    
+
     /**
      * Classes needed to serialize objects. Need to put anything from JR in here.
      */
@@ -124,12 +124,12 @@ public class FormController {
     };
 
     private static boolean isJavaRosaInitialized = false;
-    
+
     /**
-     * Isolate the initialization of JavaRosa into one method, called first 
+     * Isolate the initialization of JavaRosa into one method, called first
      * by the Collect Application.  Called subsequently whenever the Preferences
      * dialogs are exited (to potentially update username and email fields).
-     * 
+     *
      * @param mgr
      */
     public static synchronized void initializeJavaRosa(IPropertyManager mgr) {
@@ -145,7 +145,7 @@ public class FormController {
 
             isJavaRosaInitialized = true;
 		}
-        
+
 		// needed to override rms property manager
 		org.javarosa.core.services.PropertyManager
 				.setPropertyManager(mgr);
@@ -913,6 +913,10 @@ public class FormController {
         // For questions, there is only one.
         // For groups, there could be many, but we set that below
         FormEntryPrompt[] questions = new FormEntryPrompt[1];
+
+        // TODO(ping): Maybe this is where we can associate the FormEntryPrompts
+        // with their openmrs_concept attributes, so that each widget can find
+        // which preset to apply?
 
     	IFormElement element = mFormEntryController.getModel().getForm().getChild(currentIndex);
         if (element instanceof GroupDef) {

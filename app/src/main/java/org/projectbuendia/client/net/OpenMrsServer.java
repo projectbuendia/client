@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,14 +36,11 @@ import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
@@ -71,21 +69,19 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void logToServer(List<String> pairs) {
-        LOG.i("Not logging: %s", pairs);
-        if (1 + 8 > 3) return;
         // To avoid filling the server logs with big messy stack traces, let's make a dummy
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but
         // ignored by the REST resource handler, which just returns the "Pulse" concept.
-        String timestamp = "time=" + (new Date().getTime());
+        String timestamp = "time=" + Utils.formatUtc8601(DateTime.now());
         final String urlPath = "/concepts/" + ConceptUuids.PULSE_UUID;
         List<String> params = new ArrayList<>();
         JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
             pairs.add("user_name");
-            pairs.add(user.fullName);
+            pairs.add(user.getName());
             pairs.add("user_uuid");
-            pairs.add(user.uuid);
+            pairs.add(user.getUuid());
         }
         for (int i = 0; i + 1 < pairs.size(); i += 2) {
             params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
@@ -102,14 +98,10 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void addPatient(
-        PatientDelta patientDelta,
+        JsonPatient patient,
         final Response.Listener<JsonPatient> successListener,
         final Response.ErrorListener errorListener) {
-        JSONObject json = new JSONObject();
-        if (!patientDelta.toJson(json)) {
-            throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
-        }
-
+        JSONObject json = patientToJson(patient);
         LOG.v("Adding patient from JSON: %s", json.toString());
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
@@ -130,14 +122,16 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    private JsonPatient patientFromJson(JSONObject object) throws JSONException {
-        JsonPatient patient = mGson.fromJson(object.toString(), JsonPatient.class);
-
-        if (!patient.sex.matches("^[MFOU]$")) {
-            LOG.e("Invalid sex from server: " + patient.sex);
-            patient.sex = "U";
+    private JSONObject patientToJson(JsonPatient patient) throws IllegalArgumentException {
+        try {
+            return new JSONObject(mGson.toJson(patient));
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Unable to serialize the patient to JSON.");
         }
-        return patient;
+    }
+
+    private JsonPatient patientFromJson(JSONObject object) throws JSONException {
+        return mGson.fromJson(object.toString(), JsonPatient.class);
     }
 
     /**
@@ -161,18 +155,13 @@ public class OpenMrsServer implements Server {
     }
 
     @Override public void updatePatient(
-        String patientUuid,
-        PatientDelta patientDelta,
+        JsonPatient patient,
         final Response.Listener<JsonPatient> successListener,
         final Response.ErrorListener errorListener) {
-        JSONObject json = new JSONObject();
-        if (!patientDelta.toJson(json)) {
-            throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
-        }
-
+        JSONObject json = patientToJson(patient);
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patients/" + patientUuid,
+            "/patients/" + patient.uuid,
             json,
             response -> {
                 try {
@@ -195,11 +184,8 @@ public class OpenMrsServer implements Server {
         final Response.ErrorListener errorListener) {
         JSONObject requestBody = new JSONObject();
         try {
-            requestBody.put("user_name", user.username);
             requestBody.put("given_name", user.givenName);
             requestBody.put("family_name", user.familyName);
-            requestBody.put("password", user.password);
-
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
             // So treat like NPE and rethrow.
@@ -208,7 +194,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/users",
+            "/providers",
             requestBody,
             response -> {
                 try {
@@ -226,13 +212,12 @@ public class OpenMrsServer implements Server {
     }
 
     private JsonUser userFromJson(JSONObject object) throws JSONException {
-        return new JsonUser(object.getString("user_id"), object.getString("full_name"));
+        return new JsonUser(object.getString("uuid"), object.getString("full_name"));
     }
 
-    @Override public void addEncounter(Patient patient,
-                             Encounter encounter,
-                             final Response.Listener<JsonEncounter> successListener,
-                             final Response.ErrorListener errorListener) {
+    @Override public void addEncounter(Encounter encounter,
+                                       final Response.Listener<JsonEncounter> successListener,
+                                       final Response.ErrorListener errorListener) {
         JSONObject json;
         try {
             json = encounter.toJson();
@@ -258,14 +243,16 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override public void deleteObservation(String Uuid,
-                                         final Response.ErrorListener errorListener) {
+    @Override public void deleteObservation(
+        String uuid,
+        final Response.Listener<Void> successListener,
+        final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
             Request.Method.DELETE,
-            mConnectionDetails.getRestApiUrl() + "/obs/" + Uuid,
+            "/observations/" + uuid,
             null,
-            response -> LOG.i("Voided observation"),
+            response -> successListener.onResponse(null),
             wrapErrorListener(errorListener));
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
@@ -283,7 +270,7 @@ public class OpenMrsServer implements Server {
             json = order.toJson();
             JsonUser user = App.getUserManager().getActiveUser();
             if (user != null) {
-                json.put("orderer_uuid", user.uuid);
+                json.put("provider_uuid", user.getUuid());
             }
         } catch (Exception e) {
             errorListener.onErrorResponse(new VolleyError("failed to serialize request", e));
@@ -368,7 +355,7 @@ public class OpenMrsServer implements Server {
         String query = searchQuery != null ? "?q=" + Utils.urlEncode(searchQuery) : "";
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/users" + query,
+            "/providers" + query,
             null,
             response -> {
                 ArrayList<JsonUser> users = new ArrayList<>();
@@ -470,8 +457,6 @@ public class OpenMrsServer implements Server {
 
     @Override public void listLocations(final Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener) {
-
-
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails, "/locations",
             null,
@@ -482,6 +467,9 @@ public class OpenMrsServer implements Server {
                     for (int i = 0; i < results.length(); i++) {
                         JsonLocation location =
                             parseLocationJson(results.getJSONObject(i));
+                        if (location.names != null && !location.names.isEmpty()) {
+                            location.name = location.names.values().iterator().next();
+                        }
                         result.add(location);
                     }
                 } catch (JSONException e) {

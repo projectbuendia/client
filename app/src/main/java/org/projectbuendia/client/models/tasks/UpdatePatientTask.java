@@ -26,9 +26,8 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Patients;
 
 import java.util.concurrent.ExecutionException;
 
@@ -45,29 +44,28 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
+    private final JsonPatient mPatient;
     private final String mUuid;
-    private final PatientDelta mPatientDelta;
     private final CrudEventBus mBus;
 
     UpdatePatientTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
-        String patientUuid,
-        PatientDelta patientDelta,
+        JsonPatient patient,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
-        mUuid = patientUuid;
-        mPatientDelta = patientDelta;
+        mPatient = patient;
+        mUuid = patient.uuid;
         mBus = bus;
     }
 
     @Override protected PatientUpdateFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonPatient> patientFuture = RequestFuture.newFuture();
 
-        mServer.updatePatient(mUuid, mPatientDelta, patientFuture, patientFuture);
+        mServer.updatePatient(mPatient, patientFuture, patientFuture);
         try {
             patientFuture.get();
         } catch (InterruptedException e) {
@@ -79,8 +77,8 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
         }
 
         int count = mContentResolver.update(
-            Contracts.Patients.URI,
-            mPatientDelta.toContentValues(),
+            Patients.URI,
+            mPatient.toContentValues(),
             FILTER.getSelectionString(),
             FILTER.getSelectionArgs(mUuid));
 
@@ -106,12 +104,7 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
         LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
-            Contracts.Patients.URI,
-            null,
-            new UuidFilter(),
-            mUuid,
-            Patient.LOADER,
-            mBus);
+            Patients.URI, null, new UuidFilter(), mUuid, Patient::load, mBus);
         task.execute();
     }
 
@@ -120,9 +113,11 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class UpdateEventSubscriber {
-        public void onEventMainThread(ItemLoadedEvent<Patient> event) {
-            mBus.post(new ItemUpdatedEvent<>(mUuid, event.item));
-            mBus.unregister(this);
+        public void onEventMainThread(ItemLoadedEvent<?> event) {
+            if (event.item instanceof Patient) {
+                mBus.post(new ItemUpdatedEvent<>(mUuid, (Patient) event.item));
+                mBus.unregister(this);
+            }
         }
 
         public void onEventMainThread(ItemLoadFailedEvent event) {

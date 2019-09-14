@@ -21,7 +21,7 @@ public class RequestFactory {
     private final RequestConfigurator mConfigurator;
 
     /**
-     * Returns an {@link OpenMrsJsonRequest} for a GET request to an API URL.
+     * Returns an {@link OpenMrsJsonRequest} for a GET or POST request to an API URL.
      * @param connectionDetails the {@link OpenMrsConnectionDetails} used to communicate with the
      *                          OpenMRS server
      * @param urlSuffix         the API url to request, relative to the API root

@@ -35,7 +35,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
     private static Logger LOG = Logger.create();
 
     /**
-     * Constructs a GET request to OpenMRS.
+     * Constructs a GET or POST request to OpenMRS.
      * @param connectionDetails an {@link OpenMrsConnectionDetails} for communicating with OpenMRS
      * @param urlSuffix         the API URL being requested, relative to the API root
      * @param jsonRequest       a {@link JSONObject} containing the request body
@@ -98,6 +98,11 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Should never occur");
         }
+
+        // OkHttp deletes the Content-Type header, which breaks Unicode decoding! :(
+        // We have to set it to ensure that the data will be interpreted as UTF-8.
+        response.headers.put("Content-Type", "application/json; charset=utf-8");
+
         String requiredVersion = getMinimumVersionHeader(response);
         LOG.d("Client version is %s; server requires %s",
             BuildConfig.VERSION_NAME, requiredVersion);

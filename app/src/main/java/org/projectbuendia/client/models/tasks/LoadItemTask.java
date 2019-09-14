@@ -20,7 +20,7 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.models.Base;
+import org.projectbuendia.client.models.Model;
 import org.projectbuendia.client.models.CursorLoader;
 
 /**
@@ -30,7 +30,7 @@ import org.projectbuendia.client.models.CursorLoader;
  * {@link CrudEventBus} with the retrieved item. If the operation fails, a
  * {@link ItemLoadFailedEvent} is posted instead.
  */
-public class LoadItemTask<T extends Base> extends AsyncTask<Void, Void, Object> {
+public class LoadItemTask<T extends Model> extends AsyncTask<Void, Void, Object> {
     private final ContentResolver mContentResolver;
     private final Uri mContentUri;
     private final String[] mProjectionColumns;
@@ -64,7 +64,7 @@ public class LoadItemTask<T extends Base> extends AsyncTask<Void, Void, Object> 
             if (cursor == null || !cursor.moveToFirst()) {
                 return new ItemLoadFailedEvent("no results");
             }
-            return new ItemLoadedEvent<>(mLoader.fromCursor(cursor));
+            return new ItemLoadedEvent<>(mLoader.load(cursor));
         }
     }
 

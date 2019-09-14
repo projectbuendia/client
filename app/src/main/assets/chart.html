@@ -4,32 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="chart.css">
-<script>controller.log('Start loading scripts');</script>
+<script>c.log('Start loading scripts');</script>
 <script src="jquery-1.5.1.min.js"></script>
 <script src="chart.js"></script>
-<script>controller.log('Start HTML');</script>
+<script>c.log('Start HTML');</script>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 <body>
-<div id="tiles" cellspacing="0" cellpadding="0">
-  {% for tileRow in tileRows %}
-    <div class="row">
-      {% for tile in tileRow %}
-        {% set id = tile.item.conceptIds | first %}
-        {% set values = tile.points | values %}
-        {% set class = values | format_values(tile.item.cssClass) %}
-        {% set style = values | format_values(tile.item.cssStyle) %}
-        <div class="tile {{class}}" onclick="od('{{tile.item.conceptUuids[0]}}','','');" style="{{style}}">
-          <div class="heading">{{tile.item.label}}</div>
-          <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
-          <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% endfor %}
-</div>
 
-<table id="grid" cellspacing=0 cellpadding=0>
+<table id="grid-table" cellspacing=0 cellpadding=0>
   <thead>
     <tr class="top">
       <th class="corner">&nbsp;</th>
@@ -39,7 +22,7 @@
           <th class="gap" scope="col" rowspan=2>&nbsp;</th>
         {% endif %}
         {% if column.start == column.dayStart %}
-          <th class="day {{column.date == today ? 'now' : ''}} {{column.date.dayOfWeek > 5 ? 'weekend' : ''}}" colspan={{numColumnsPerDay}} onclick="od('','{{column.dayStart.millis}}','{{column.dayStop.millis}}');">
+          <th class="day {{column.date == today ? 'now' : ''}} {{column.date.dayOfWeek > 5 ? 'weekend' : ''}}" colspan={{numColumnsPerDay}} onclick="c.showObsDialog({{column.dayStart.millis}}, {{column.dayStop.millis}});">
             {% if numColumnsPerDay == 1 %}
               {% if column.dayLabel is empty %}&nbsp;{% else %}{{column.dayLabel}}{% endif %}
             {% elseif column.dayLabel is not empty %}
@@ -55,7 +38,7 @@
     <tr>
       <th class="corner">&nbsp;</th>
       {% for column in columns %}
-        <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="od('','{{column.start.millis}}','{{column.stop.millis}}');">
+        <th class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}}" scope="col" onclick="c.showObsDialog({{column.start.millis}}, {{column.stop.millis}});">
           {% if numColumnsPerDay == 1 %}
             {{column.shortDate}}
           {% else %}
@@ -86,8 +69,8 @@
       {% set top = true %}
       {% for row in group.rows %}
         {% set id = row.item.conceptIds | first %}
-        <tr class="obs {{row.item.label | to_css_identifier}}">
-          <th scope="row" onclick="od('{{row.item.conceptUuids[0]}}','','');">
+        <tr class="obs concept-{{id}}">
+          <th scope="row" onclick="c.showObsDialog('{{row.item.conceptUuidsList}}');">
             {{row.item.label}}
           </th>
           {% set prevStop = columns[0].start %}
@@ -108,7 +91,7 @@
             <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
               style="{{style}}"
               onclick="{% if points is not empty and row.item.type.string != 'text_icon' %}
-                         od('{{row.item.conceptUuids[0]}}','{{column.start.millis}}','{{column.stop.millis}}');
+                         c.showObsDialog('{{row.item.conceptUuidsList}}', {{column.start.millis}}, {{column.stop.millis}});
                        {% endif %}">
               {% if points is empty %}
                 &nbsp;
@@ -133,7 +116,7 @@
   <tbody class="orders">
     <tr>
       <th scope="rowgroup">
-        Treatments
+        {{get_string("treatments")}}
       </th>
       {% set prevStop = columns[0].start %}
       {% for column in columns %}
@@ -149,19 +132,19 @@
     {% set top = true %}
     {% for order in orders %}
       {% set ins = order.instructions %}
-      {% set id = ins.medication | to_css_identifier %}
-      <tr class="order route-{{ins.route}}">
-        <th scope="row" id="{{id}}_row" onclick="controller.onOrderHeadingPressed('{{order.uuid}}')">
+      <tr class="order order-{{ins.medication | to_css_identifier}}">
+        <th scope="row" onclick="c.onOrderHeadingPressed('{{order.uuid}}')">
           {% if ins.notes is not empty %}
-            <div class="notes" id="{{id}}_notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
+            <div class="notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
           {% endif %}
-          <div class="medication" id="{{id}}">{{ins.medication}}</div>
+          <div class="medication">{{ins.medication}}</div>
           <div class="dosing">
             <span class="dosage">{{ins.dosage}}</span
               >{% if ins.route is not empty %}
                 <span class="route">{{ins.route}}</span
-              >{% endif %}{% if ins.frequency > 0 %},
-                <span class="frequency">{{ins.frequency}}/day</span>
+                >{% endif %}{% if ins.dosage + ins.route is not empty and ins.frequency > 0 %}<span class="sep">, </span
+                >{% endif %}{% if ins.frequency > 0 %}
+                <span class="frequency">{{ins.formattedFrequency}}</span>
               {% endif %}
           </div>
         </th>
@@ -182,7 +165,7 @@
               {% set started = true %}
             {% endif %}
             <td class="day" colspan={{numColumnsPerDay}}
-                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
+                onclick="c.onOrderCellPressed('{{order.uuid}}', {{column.start.millis}})">
               &nbsp; {# ensure uniform height #}
               {% set totalScheduled = 0 %}
               {% set totalGiven = 0 %}
@@ -239,29 +222,75 @@
     {% endfor %}
 
     <tr>
-      <th scope="row" class="command" id="new_treatment" onclick="controller.onNewOrderPressed()">
-        Add a New Treatment
+      <th scope="row" class="command" id="new-treatment" onclick="c.onNewOrderPressed()">
+        {{get_string("add_new_treatment")}}
       </th>
     </tr>
   </tbody>
 </table>
 
-<div id="scroller" ontouchstart="seeking = false">
-  <div id="grid-left"></div>
-  <div id="grid-body"></div>
-  <div id="buttons">
-    <button id="up" ontouchstart="moveTarget(event, 0, -jumpY)"></button>
-    <button id="down" ontouchstart="moveTarget(event, 0, jumpY)"></button>
-    <button id="left" ontouchstart="moveTarget(event, -jumpX, 0)"></button>
-    <button id="home" ontouchstart="moveTarget(event, 0, 0, true)"></button>
-    <button id="right" ontouchstart="moveTarget(event, jumpX, 0)"></button>
+<div id="fixed" cellspacing="0" cellpadding="0">
+  {% for fixedRow in fixedRows %}
+    <div class="row">
+      {% for tile in fixedRow %}
+        {% set id = tile.item.conceptIds | first %}
+        {% set values = tile.points | values %}
+        {% set class = values | format_values(tile.item.cssClass) %}
+        {% set style = values | format_values(tile.item.cssStyle) %}
+      <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+          <div class="heading">{{tile.item.label}}</div>
+          <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
+          <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+
+<div id="scrolling" ontouchstart="seeking = false">
+  <div id="tiles" cellspacing="0" cellpadding="0">
+    {% for tileRow in tileRows %}
+      <div class="row">
+        {% for tile in tileRow %}
+          {% set id = tile.item.conceptIds | first %}
+          {% set values = tile.points | values %}
+          {% set class = values | format_values(tile.item.cssClass) %}
+          {% set style = values | format_values(tile.item.cssStyle) %}
+          <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+            <div class="heading">{{tile.item.label}}</div>
+            <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
+            <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  <div id="grid">
+    <div id="grid-left"></div>
+    <div id="grid-body"></div>
   </div>
 </div>
 
+<div id="buttons">
+  <button id="up" ontouchstart="moveTarget(event, 0, -jumpY)"></button>
+  <button id="down" ontouchstart="moveTarget(event, 0, jumpY)"></button>
+  <button id="left" ontouchstart="moveTarget(event, -jumpX, 0)"></button>
+  <button id="home" ontouchstart="moveTarget(event, 0, 0, true)"></button>
+  <button id="right" ontouchstart="moveTarget(event, jumpX, 0)"></button>
+</div>
+
 <script>
-  controller.log('Start running script');
+  c.log('Start running script');
 
   var data = {{dataCellsByConceptId | raw}};
+
+  {% for fixedRow in fixedRows %}
+    {% for tile in fixedRow %}
+      {% if tile.item.script is not empty %}
+        runTileScript(data, {{tile.item.conceptIds | join(',') | js | raw}}, {{tile.item.script | js | raw}});
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
 
   {% for tileRow in tileRows %}
     {% for tile in tileRow %}
@@ -277,18 +306,19 @@
     {% endif %}
   {% endfor %}
 
-  controller.log('Start constructing grid-left and grid-body');
+  c.log('Start constructing grid-left and grid-body');
 
-  var win = $(window);
-  var grid = $('#grid');
+  var scrolling = $('#scrolling');
+  var tiles = $('#tiles');
+  var gridTable = $('#grid-table');
   var gridLeft = $('#grid-left');
   var gridBody = $('#grid-body');
 
-  var left = grid.clone();
-  var body = grid.clone();
+  var left = gridTable.clone();
+  var body = gridTable.clone();
   left.find('th').add(left.find('td')).not(':first-child').remove();
   body.find('th:first-child').add(body.find('td:first-child')).remove();
-  grid.remove();
+  gridTable.remove();
   gridLeft.append(left.attr('id', null));
   gridBody.append(body.attr('id', null));
 
@@ -296,17 +326,23 @@
   var frozenCorner = corner.clone().addClass('frozen').hide();
   gridLeft.append(frozenCorner);
 
+  // We use two copies of the column headings.  The "frozen headings" are for
+  // vertical scrolling and are fixed at the top of the window.  The "floating
+  // headings" scroll horizontally with #grid-body.
   var headings = $('#grid-body thead');
   var frozenHeadings = headings.clone().addClass('frozen').hide();
   gridBody.append(frozenHeadings);
-
   var floatingHeadings = headings.clone().addClass('floating').hide();
   gridBody.append(floatingHeadings);
+
+  // The frozen parts are fixed at the top of the vertical scrolling region.
+  frozenCorner.css({top: scrolling.offset().top + 'px'});
+  frozenHeadings.css({top: scrolling.offset().top + 'px'});
 
   var yOffset = 0;
 
   function updateY() {
-    yOffset = win.scrollTop() - headings.offset().top;
+    yOffset = scrolling.scrollTop() - tiles.height();
     frozenCorner.toggle(yOffset > 0);
     frozenHeadings.toggle(yOffset > 0);
     floatingHeadings.hide();
@@ -325,29 +361,25 @@
     }
   }
 
-  win.scroll(updateY);
+  scrolling.scroll(updateY);
   gridBody.scroll(updateX);
 
   $(window).unload(function() {
-    controller.onPageUnload($('#grid-body').scrollLeft(), $(window).scrollTop());
+    c.onPageUnload($('#grid-body').scrollLeft(), $(window).scrollTop());
   });
-
-  function od(conceptUuid, startMillis, stopMillis) {
-    controller.onObsDialog(conceptUuid, startMillis, stopMillis);
-  }
 
   var nowColumn = $('.now[scope="col"]');
   var nowCenter = nowColumn.offset().left + nowColumn.width()/2;
   var bodyCenter = gridBody.offset().left + gridBody.width()/2;
   var jumpX = gridBody.width()/2;
-  var jumpY = (window.innerHeight - $('#scroller').offset().top)/2;
+  var jumpY = (window.innerHeight - $('#grid').offset().top)/2;
   var homeX = nowCenter - bodyCenter;
   var targetX = 0;
   var targetY = 0;
 
   function scrollJump(dx, dy, home) {
     var x = gridBody.scrollLeft();
-    var y = win.scrollTop();
+    var y = scrolling.scrollTop();
     if (home) {
       gridBody.scrollLeft(homeX);
       updateX();
@@ -357,7 +389,7 @@
       updateX();
     }
     if (dy != 0) {
-      win.scrollTop(y + dy);
+      scrolling.scrollTop(y + dy);
       updateY();
     }
   }
@@ -369,7 +401,7 @@
     event.stopPropagation();
     if (!seeking) {
       targetX = gridBody.scrollLeft();
-      targetY = win.scrollTop();
+      targetY = scrolling.scrollTop();
     }
     if (home) targetX = homeX;
     targetX += dx;
@@ -381,15 +413,15 @@
   function scrollStep() {
     if (!seeking) return;
     var x = gridBody.scrollLeft();
-    var y = win.scrollTop();
+    var y = scrolling.scrollTop();
     gridBody.scrollLeft(x * 0.6 + targetX * 0.4);
-    win.scrollTop(y * 0.6 + targetY * 0.4);
+    scrolling.scrollTop(y * 0.6 + targetY * 0.4);
     if (abs(gridBody.scrollLeft() - x) > 0.5) {
       updateX();
     } else {
       targetX = x;
     }
-    if (abs(win.scrollTop() - y) > 0.5) {
+    if (abs(scrolling.scrollTop() - y) > 0.5) {
       updateY();
     } else {
       targetY = y;
@@ -400,7 +432,7 @@
 
   gridBody.scrollLeft(homeX);
 
-  controller.finish();
+  c.finish();
 </script>
 </body>
 </html>

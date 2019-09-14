@@ -25,18 +25,16 @@ public interface Contracts {
 
     /** Names of tables in the local datastore. */
     enum Table {
+        BOOKMARKS("bookmarks"),
         CHART_ITEMS("chart_items"),
-        CONCEPT_NAMES("concept_names"),
         CONCEPTS("concepts"),
         FORMS("forms"),
-        LOCATION_NAMES("location_names"),
         LOCATIONS("locations"),
         MISC("misc"),
         OBSERVATIONS("observations"),
         ORDERS("orders"),
         PATIENTS("patients"),
-        USERS("users"),
-        SYNC_TOKENS("sync_tokens");
+        USERS("users");
 
         public String name;
 
@@ -51,6 +49,13 @@ public interface Contracts {
 
     // Each interface below corresponds to one SQLite table in the local datastore.  The column
     // names defined in the constants should exactly match the schemas defined in Database.java.
+
+    interface Bookmarks {
+        Uri URI = buildContentUri("bookmarks");
+        String ITEM_TYPE = buildItemType("bookmark");
+        String TABLE_NAME = "table_name";
+        String BOOKMARK = "bookmark";
+    }
 
     interface ChartItems {
         Uri URI = buildContentUri("chart-items");
@@ -78,16 +83,6 @@ public interface Contracts {
         String SCRIPT = "script";  // JavaScript for fancy rendering
     }
 
-    interface ConceptNames {
-        Uri URI = buildContentUri("concept-names");
-        String GROUP_TYPE = buildGroupType("concept-name");
-        String ITEM_TYPE = buildItemType("concept-name");
-
-        String CONCEPT_UUID = "concept_uuid";
-        String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
-        String NAME = "name";
-    }
-
     interface Concepts {
         Uri URI = buildContentUri("concepts");
         String GROUP_TYPE = buildGroupType("concept");
@@ -95,7 +90,8 @@ public interface Contracts {
 
         String UUID = "uuid";
         String XFORM_ID = "xform_id";  // ID for the concept in XForms (OpenMRS ID)
-        String CONCEPT_TYPE = "concept_type";  // data type name, e.g. NUMERIC, TEXT
+        String TYPE = "type";  // data type name, e.g. NUMERIC, TEXT
+        String NAME = "name";
     }
 
     interface Forms {
@@ -108,22 +104,13 @@ public interface Contracts {
         String VERSION = "version";
     }
 
-    interface LocationNames {
-        Uri URI = buildContentUri("location-names");
-        String GROUP_TYPE = buildGroupType("location-name");
-        String ITEM_TYPE = buildItemType("location-name");
-
-        String LOCATION_UUID = "location_uuid";
-        String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
-        String NAME = "name";
-    }
-
     interface Locations {
         Uri URI = buildContentUri("locations");
         String GROUP_TYPE = buildGroupType("location");
         String ITEM_TYPE = buildItemType("location");
 
         String UUID = "uuid";
+        String NAME = "name";
         String PARENT_UUID = "parent_uuid"; // parent location or null
     }
 
@@ -151,13 +138,6 @@ public interface Contracts {
 
     }
 
-    interface SyncTokens {
-        Uri URI = buildContentUri("sync-tokens");
-        String ITEM_TYPE = buildItemType("sync-token");
-        String TABLE_NAME = "table_name";
-        String SYNC_TOKEN = "sync_token";
-    }
-
     interface Observations {
         Uri URI = buildContentUri("observations");
         String GROUP_TYPE = buildGroupType("observation");
@@ -170,11 +150,13 @@ public interface Contracts {
          * authoritative version for each has been obtained from the server.
          */
         String UUID = "uuid";
-        String PATIENT_UUID = "patient_uuid";
         String ENCOUNTER_UUID = "encounter_uuid";
-        String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch
+        String PATIENT_UUID = "patient_uuid";
+        String PROVIDER_UUID = "provider_uuid";
         String CONCEPT_UUID = "concept_uuid";
-        String ENTERER_UUID = "enterer_uuid";
+        String TYPE = "type";
+        String MILLIS = "millis";
+        String ORDER_UUID = "order_uuid";
         String VALUE = "value";  // concept value or order UUID
         String VOIDED = "voided";
     }
@@ -186,6 +168,7 @@ public interface Contracts {
 
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
+        String PROVIDER_UUID = "provider_uuid";
         String INSTRUCTIONS = "instructions";
         String START_MILLIS = "start_millis";  // milliseconds since epoch
         String STOP_MILLIS = "stop_millis";  // milliseconds since epoch
@@ -200,9 +183,11 @@ public interface Contracts {
         String ID = "id";
         String GIVEN_NAME = "given_name";
         String FAMILY_NAME = "family_name";
-        String LOCATION_UUID = "location_uuid";
         String BIRTHDATE = "birthdate";  // a local date in yyyy-mm-dd format
         String SEX = "sex";
+        String PREGNANCY = "pregnancy";  // denormalized observation
+        String LOCATION_UUID = "location_uuid";  // denormalized observation
+        String BED_NUMBER = "bed_number";  // denormalized observation
     }
 
     interface Users {
@@ -217,18 +202,6 @@ public interface Contracts {
     // Each interface below describes a derived view implemented by a custom
     // ProviderDelegate.  The column name constants should match the columns
     // returned by the query() method of the corresponding ProviderDelegate.
-
-    interface LocalizedLocations {
-        Uri URI = buildContentUri("localized-locations");
-        String GROUP_TYPE = buildGroupType("localized-location");
-        String ITEM_TYPE = buildItemType("localized-location");
-
-        String UUID = "uuid";
-        String PARENT_UUID = "parent_uuid";
-        String NAME = "name";
-        /** Patient count for a location, not including child locations. */
-        String PATIENT_COUNT = "patient_count";
-    }
 
     interface PatientCounts {
         Uri URI = buildContentUri("patient-counts");
@@ -249,12 +222,5 @@ public interface Contracts {
 
     static String buildItemType(String name) {
         return ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
-    }
-
-    /** Returns the content URI for the localized locations for a given locale. */
-    static Uri getLocalizedLocationsUri(String locale) {
-        return LocalizedLocations.URI.buildUpon()
-            .appendPath(locale)
-            .build();
     }
 }

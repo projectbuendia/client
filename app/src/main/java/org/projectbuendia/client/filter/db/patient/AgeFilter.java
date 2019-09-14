@@ -31,11 +31,11 @@ final class AgeFilter extends SimpleSelectionFilter<Patient> {
     }
 
     @Override public String[] getSelectionArgs(CharSequence constraint) {
-        LocalDate earliestBirthdate = LocalDate.now().minusYears(mYears);
-        return new String[] {earliestBirthdate.toString()};
+        LocalDate minBirthdate = LocalDate.now().minusYears(mYears);
+        return new String[] {minBirthdate.toString()};
     }
 
     @Override public String getDescription() {
-        return App.getInstance().getString(R.string.age_filter_description, mYears);
+        return App.str(R.string.age_filter_description, mYears);
     }
 }

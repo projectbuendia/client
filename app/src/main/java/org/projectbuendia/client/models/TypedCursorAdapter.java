@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 /** A {@link BaseAdapter} backed by a {@link TypedCursor}. */
-public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
+public abstract class TypedCursorAdapter<T extends Model> extends BaseAdapter {
 
     private final Context mContext;
     private TypedCursor<T> mTypedCursor;
@@ -31,33 +31,12 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
         return mTypedCursor != null ? mTypedCursor.getCount() : 0;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p/>
-     * <p>The ID of an item will be the value of its {@link Base#id} field if its ID is a
-     * byte, short, int, or long; otherwise, it will be the hash of that value.
-     */
     @Override public long getItemId(int position) {
         if (mTypedCursor == null) {
             return 0;
         }
         T item = mTypedCursor.get(position);
-        if (item == null) {
-            return 0;
-        }
-        Object id = item.id;
-        if (id == null) {
-            return 0;
-        }
-
-        if (id instanceof Long
-            || id instanceof Integer
-            || id instanceof Short
-            || id instanceof Byte) {
-            return ((Number) id).longValue();
-        } else {
-            return id.hashCode();
-        }
+        return item != null ? item.hashCode() : 0;
     }
 
     @Override public boolean hasStableIds() {

@@ -46,19 +46,15 @@ public class UserStore {
     private static final Logger LOG = Logger.create();
     private static final String USER_SYNC_SAVEPOINT_NAME = "USER_SYNC_SAVEPOINT";
 
-    /**
-     * Loads the known users from local store. If there is no user in db or the application
-     * can't retrieve from there, then it fetches the users from server
-     * */
+    /** Loads users from the local store, fetching them from the server if there are none. */
     public Set<JsonUser> loadKnownUsers()
         throws InterruptedException, ExecutionException, RemoteException,
         OperationApplicationException {
         Set<JsonUser> users = getUsersFromDb();
-        if(users.isEmpty()) {
-            LOG.i("Database contains no user; fetching from server");
+        if (users.isEmpty()) {
+            LOG.i("No users in database; fetching from server");
             users = syncKnownUsers();
         }
-
         LOG.i("Found %d users in db", users.size());
         return users;
     }
@@ -81,12 +77,12 @@ public class UserStore {
 
     private void addUserLocally(JsonUser user) {
         LOG.i("Updating user db with newly added user");
-        ContentProviderClient client = App.getInstance().getContentResolver()
+        ContentProviderClient client = App.getResolver()
             .acquireContentProviderClient(Users.URI);
         try {
             ContentValues values = new ContentValues();
-            values.put(Users.UUID, user.uuid);
-            values.put(Users.FULL_NAME, user.fullName);
+            values.put(Users.UUID, user.getUuid());
+            values.put(Users.FULL_NAME, user.getName());
             client.insert(Users.URI, values);
         } catch (RemoteException e) {
             LOG.e(e, "Failed to update database");
@@ -133,17 +129,15 @@ public class UserStore {
 
     private void  updateDatabase(Set<JsonUser> users) throws RemoteException, OperationApplicationException {
         LOG.i("Updating local database with %d users", users.size());
-        ContentProviderClient client = App.getInstance().getContentResolver()
-            .acquireContentProviderClient(Users.URI);
-        BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
-        try (DatabaseTransaction tx = provider.startTransaction(USER_SYNC_SAVEPOINT_NAME)) {
-            try {
-                client.applyBatch(getUserUpdateOps(users, new SyncResult()));
-            } catch (RemoteException | OperationApplicationException e) {
-                tx.rollback();
-                throw e;
-            } finally {
-                client.release();
+        try (ContentProviderClient client = App.getResolver().acquireContentProviderClient(Users.URI)) {
+            BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
+            try (DatabaseTransaction tx = provider.startTransaction(USER_SYNC_SAVEPOINT_NAME)) {
+                try {
+                    client.applyBatch(getUserUpdateOps(users, new SyncResult()));
+                } catch (RemoteException | OperationApplicationException e) {
+                    tx.rollback();
+                    throw e;
+                }
             }
         }
     }
@@ -164,7 +158,7 @@ public class UserStore {
         Cursor cursor = null;
         ContentProviderClient client = null;
         try {
-            client = App.getInstance().getContentResolver()
+            client = App.getResolver()
                 .acquireContentProviderClient(Users.URI);
 
             // Request users from database.
@@ -210,8 +204,8 @@ public class UserStore {
         // TODO: Update syncResult delete counts.
         for (JsonUser user : response) {
             ops.add(ContentProviderOperation.newInsert(Contracts.Users.URI)
-                    .withValue(Contracts.Users.UUID, user.uuid)
-                    .withValue(Contracts.Users.FULL_NAME, user.fullName)
+                    .withValue(Contracts.Users.UUID, user.getUuid())
+                    .withValue(Contracts.Users.FULL_NAME, user.getName())
                     .build());
             syncResult.stats.numInserts++;
         }

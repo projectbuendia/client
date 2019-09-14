@@ -44,7 +44,7 @@ public class UpdateNotificationController {
 
     public UpdateNotificationController(Ui ui) {
         mUi = ui;
-        App.getInstance().inject(this);
+        App.inject(this);
     }
 
     /** Activate the controller.  Called whenever user enters a new activity. */

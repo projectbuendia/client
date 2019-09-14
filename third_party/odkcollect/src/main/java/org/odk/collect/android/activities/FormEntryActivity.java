@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -50,6 +52,9 @@ import android.widget.Toast;
 
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.data.IAnswerData;
+import org.javarosa.core.model.instance.FormInstance;
+import org.javarosa.core.model.instance.TreeElement;
+import org.javarosa.core.model.instance.TreeReference;
 import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
@@ -75,6 +80,7 @@ import org.odk.collect.android.tasks.SaveToDiskTask;
 import org.odk.collect.android.utilities.CompatibilityUtils;
 import org.odk.collect.android.utilities.FileUtils;
 import org.odk.collect.android.utilities.MediaUtils;
+import org.odk.collect.android.utilities.Utils;
 import org.odk.collect.android.views.ODKView;
 import org.odk.collect.android.widgets.QuestionWidget;
 
@@ -219,11 +225,27 @@ public class FormEntryActivity
 
     private enum ScrollDirection {UP, DOWN}
 
+    public static Locale locale;
+
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
 //	}
 
 //	private SharedPreferences mAdminPreferences;
+
+
+	@Override protected void attachBaseContext(Context base) {
+		super.attachBaseContext(applyLocaleSetting(base));
+	}
+
+	public Context applyLocaleSetting(Context base) {
+		Locale.setDefault(locale);
+		Resources resources = base.getResources();
+		Configuration config = resources.getConfiguration();
+		config.setLocale(locale);
+		config.setLayoutDirection(locale);
+		return base.createConfigurationContext(config);
+	}
 
 	/** Called when the activity is first created. */
 	@Override
@@ -1234,6 +1256,7 @@ public class FormEntryActivity
 	private View createView(int event, boolean advancingPage, Preset preset) {
 		FormController formController = Collect.getInstance()
 				.getFormController();
+		FormInstance formInstance = formController.getFormDef().getMainInstance();
 //		setTitle(getString(R.string.app_name) + " > "
 //				+ formController.getFormTitle());
 
@@ -1454,6 +1477,9 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
+				TreeReference ref = formController.getFormIndex().getReference();
+				TreeElement element = formInstance.resolveReference(ref);
+
 				odkv = new ODKView(this, prompts, groups, advancingPage, preset);
                 if (preset != null
                         && preset.targetGroup != null
@@ -1730,30 +1756,25 @@ public class FormEntryActivity
 	 * http://code.google.com/p/android/issues/detail?id=1639
 	 */
 
-	//
-	/**
-	 * Creates and displays a dialog displaying the violated constraint.
-	 */
+	/** Displays a toast message showing a violated constraint. */
 	private void createConstraintToast(FormIndex index, int saveStatus) {
-		FormController formController = Collect.getInstance()
-				.getFormController();
+		FormController formController = Collect.getInstance().getFormController();
 		String constraintText;
 		switch (saveStatus) {
 		case FormEntryController.ANSWER_CONSTRAINT_VIOLATED:
 			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this,
-							"createConstraintToast.ANSWER_CONSTRAINT_VIOLATED",
-							"show", index);
-			constraintText = formController
-					.getQuestionPromptConstraintText(index);
+				.getActivityLogger()
+				.logInstanceAction(this,
+					"createConstraintToast.ANSWER_CONSTRAINT_VIOLATED",
+					"show", index);
+			constraintText = formController.getQuestionPromptConstraintText(index);
 			if (constraintText == null) {
 				constraintText = formController.getQuestionPrompt(index)
-						.getSpecialFormQuestionText("constraintMsg");
+					.getSpecialFormQuestionText("constraintMsg");
 				if (constraintText == null) {
 					// TODO(i18n)
-					constraintText = formController.getQuestionPrompt(index).getQuestionText()
-                            + " is invalid.";
+					constraintText = formController.getQuestionPrompt(index)
+						.getQuestionText() + " is invalid.";
 				}
 			}
 			break;
@@ -1770,8 +1791,8 @@ public class FormEntryActivity
 						.getSpecialFormQuestionText("requiredMsg");
 				if (constraintText == null) {
 					// TODO(i18n)
-                    constraintText = formController.getQuestionPrompt(index).getQuestionText()
-                            + " is required.";
+                    constraintText = formController.getQuestionPrompt(index)
+						.getQuestionText() + " is required.";
 				}
 			}
 			break;
@@ -1779,7 +1800,7 @@ public class FormEntryActivity
 			return;
 		}
 
-		showCustomToast(constraintText, Toast.LENGTH_SHORT);
+		showCustomToast(Utils.localize(constraintText, this), Toast.LENGTH_SHORT);
 	}
 
 	/**

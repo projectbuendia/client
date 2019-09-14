@@ -12,6 +12,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -44,7 +45,8 @@
           android:inputType="textCapSentences|textNoSuggestions"
           android:maxLength="80"
           android:imeOptions="actionNext"
-          android:nextFocusDown="@id/order_dosage" />
+          android:nextFocusDown="@id/order_dosage"
+          android:nextFocusRight="@id/order_dosage" />
     </TableRow>
 
     <TableRow
@@ -69,7 +71,9 @@
           android:inputType="textNoSuggestions"
           android:maxLength="40"
           android:imeOptions="actionNext"
-          android:nextFocusRight="@id/order_frequency" />
+          android:nextFocusLeft="@id/order_medication"
+          android:nextFocusRight="@id/order_route"
+          android:nextFocusDown="@id/order_route" />
 
       <EditText
           android:id="@+id/order_route"
@@ -80,7 +84,9 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_column="2"
-          android:hint="Route" />
+          android:hint="@string/order_route"
+          android:nextFocusDown="@id/order_frequency" />
+
     </TableRow>
 
     <TableRow
@@ -108,7 +114,7 @@
 
       <TextView
           android:id="@+id/order_times_per_day_label"
-          android:layout_width="300dip"
+          android:layout_weight="1"
           android:layout_column="2"
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
@@ -141,7 +147,7 @@
 
       <TextView
           android:id="@+id/order_give_for_days_label"
-          android:layout_width="600sp"
+          android:layout_weight="1"
           android:layout_column="2"
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
@@ -155,12 +161,15 @@
       <TextView
           android:id="@+id/order_duration_label"
           style="@style/field_label"
+          android:minLines="2"
           android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
           android:layout_column="1"
           android:layout_gravity="top|start"
           android:layout_marginStart="4sp"
           android:layout_span="2"
-          android:text="@string/order_duration_unspecified"/>
+          tools:text="(commencé le 29 août; après 10 doses, arrêter le 31 août)"/>
     </TableRow>
 
     <TableRow
@@ -183,7 +192,7 @@
           android:layout_span="2"
           android:layout_weight="1"
           android:ems="15"
-          android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
+          android:inputType="textMultiLine|textCapSentences"
           android:lines="2"
           android:minLines="2"
           android:maxLines="2"
@@ -198,14 +207,23 @@
       android:layout_height="wrap_content"
       android:orientation="horizontal">
 
-  <Button
-      android:id="@+id/order_delete"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16sp"
-      android:layout_marginBottom="16sp"
-      android:padding="16sp"
-      android:text="@string/order_delete"/>
+    <Button
+        android:id="@+id/order_stop_now"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16sp"
+        android:layout_marginBottom="16sp"
+        android:padding="16sp"
+        android:text="@string/order_stop_now"/>
+
+    <Button
+        android:id="@+id/order_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16sp"
+        android:layout_marginBottom="16sp"
+        android:padding="16sp"
+        android:text="@string/order_delete"/>
   </LinearLayout>
 
 </LinearLayout>

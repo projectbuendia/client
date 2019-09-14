@@ -11,6 +11,21 @@
   specific language governing permissions and limitations under the License.
 -->
 <resources>
+  <string name="quoted_text">\"%s\"</string>
+  <string name="two_items">%1$s and %2$s</string>
+  <string name="more_than_two_items">%1$s, and %2$s</string>
+  <string name="month_day_format">MMM d</string>
+  <string name="sentence_month_day_format">\'on\' MMM d</string>
+  <string name="year_month_day_format">MMM d, yyyy</string>
+  <string name="sentence_year_month_day_format">\'on\' MMM d, yyyy</string>
+  <string name="hour_minute_format">HH:mm</string>
+  <string name="sentence_hour_minute_format">\'at\' HH:mm</string>
+  <string name="month_day_hour_minute_format">MMM d, HH:mm</string>
+  <string name="sentence_month_day_hour_minute_format">\'on\' MMM d \'at\' HH:mm</string>
+  <string name="sentence_yesterday">yesterday</string>
+  <string name="sentence_today">today</string>
+  <string name="sentence_tomorrow">tomorrow</string>
+
   <!-- Statuses -->
   <string name="status_unknown">Unknown</string>
   <string name="status_well">Well</string>
@@ -32,6 +47,7 @@
   <string name="action_view_xform">View first saved xform</string>
   <string name="action_new_round">New round</string>
   <string name="action_assign_location">Assign location</string>
+  <string name="bed_number">Bed number</string>
   <string name="action_edit_patient">Edit patient</string>
   <string name="action_view_round_archive">Round archive</string>
   <string name="snackbar_update_available">Application update available</string>
@@ -42,6 +58,8 @@
   <string name="given_name">Given name</string>
   <string name="family_name">Family name</string>
   <string name="title_new_user">New user</string>
+  <string name="guest_user_initials">G</string>
+  <string name="guest_user_name">Guest</string>
   <string name="action_search">Search</string>
   <string name="action_edit">Edit</string>
   <string name="action_go_to">Search by ID</string>
@@ -66,35 +84,49 @@
   <string name="one_present_patient">1 present patient</string>
   <string name="n_present_patients">%d present patients</string>
 
+  <string name="sex_unknown">Sex unknown</string>
+  <string name="age_unknown">age unknown</string>
   <string name="abbrev_n_months">%d mo</string>
   <string name="abbrev_n_years">%d y</string>
   <string name="abbrev_n_years_n_months">%1$d y %2$d mo</string>
+
+  <string name="treatments">Treatments</string>
+  <string name="add_new_treatment">Add a new treatment</string>
 
   <string name="title_new_order">New treatment</string>
   <string name="title_edit_order">Edit treatment</string>
   <string name="order_medication">Medication</string>
   <string name="order_dosage">Dosage</string>
+  <string name="order_route">Route</string>
   <string name="order_frequency">Frequency</string>
   <string name="order_time_per_day">time per day</string>
   <string name="order_times_per_day">times per day</string>
   <string name="order_give_for">Give for</string>
   <string name="order_give_for_days">days</string>
   <string name="order_give_for_day">day</string>
-  <string name="order_duration_stop_after_today">(stop after today)</string>
-  <string name="order_duration_stop_after_tomorrow">(stop after tomorrow)</string>
-  <string name="order_duration_stop_after_date">(stop after %s)</string>
-  <string name="order_duration_unspecified">(no specific duration)</string>
-  <string name="order_duration_indefinitely">(indefinitely)</string>
-  <string name="order_duration_administer_once">(one dose only)</string>
+
+  <string name="order_one_dose_only">(one dose only)</string>
+  <string name="order_start_now_indefinitely">(start now; continue indefinitely)</string>
+  <string name="order_start_now_stop_after_doses">(start now; stop after %d doses)</string>
+  <string name="order_start_now_after_doses_stop_date">(start now; after %1$d doses, stop %2$s)</string>
+
+  <string name="order_one_dose_only_ordered_date">(one dose only, ordered %s)</string>
+  <string name="order_started_date_stopped_date">(started %1$s; stopped %2$s)</string>
+  <string name="order_started_date_indefinitely">(started %s; continue indefinitely)</string>
+  <string name="order_started_date_stop_after_doses">(started %1$s; stop after %2$d doses)</string>
+  <string name="order_started_date_after_doses_stop_date">(started %1$s; after %2$d doses, stop %3$s)</string>
+
   <string name="order_notes">Notes</string>
   <string name="enter_medication">Enter a medication</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
   <string name="order_cannot_exceed_n_times_per_day">Cannot exceed %d times per day</string>
   <string name="order_cannot_exceed_n_days">Cannot exceed %d days</string>
+  <string name="order_cannot_stop_in_past">Cannot be stopped in the past</string>
   <string name="order_stop_now">Stop now</string>
   <string name="order_delete">Delete this treatment</string>
   <string name="title_confirmation">Confirmation</string>
-  <string name="confirm_order_delete">Really delete?</string>
+  <string name="confirm_order_stop">Stop this treatment now?</string>
+  <string name="confirm_order_delete">Delete this treatment?</string>
   <string name="delete">Delete</string>
 
   <string name="route_of_administration">Route of administration</string>
@@ -103,15 +135,17 @@
   <string name="order_medication_route">%1$s %2$s</string>
   <string name="order_dosage_unary">%1$s</string>
   <string name="order_dosage_series">%1$s, given %2$dx daily</string>
-  <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; on %2$s</string>
-  <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times on %2$s</string>
+  <string name="order_unspecified_dosage">Unspecified dosage</string>
+  <string name="order_frequency_value">%1$dx/day</string>
+  <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; %2$s</string>
+  <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times %2$s</string>
   <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today, %2$s</string>
   <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today, %2$s</string>
-  <string name="order_execution_mark_as_given">Mark as given now</string>
-  <string name="order_execution_marked_as_given">&#x2714; Marked as given now</string>
-  <string name="order_started_on_date_at_time">Started on %1$s at %2$s</string>
+  <string name="order_execution_mark_as_given_now">Mark as given now</string>
+  <string name="order_execution_marked_as_given_now">&#x2714; Marked as given now</string>
+  <string name="order_execution_delete_selected">Delete selected</string>
+  <string name="order_started_datetime">Started %s</string>
 
-  <string name="heading_with_patient_count">%1$s&#xa0;&#xa0;&#xb7;&#xa0;&#xa0;%2$s</string>
   <string name="unknown_tent">Unknown tent</string>
   <string name="unknown_zone">Unknown zone</string>
   <string name="mild_symptom">Mild</string>
@@ -124,9 +158,16 @@
   <string name="last_observation_none">No observations</string>
   <string name="male">Male</string>
   <string name="female">Female</string>
+  <string name="other">Other</string>
   <string name="unknown">Unknown</string>
+  <string name="sex_male_abbreviation">M</string>
+  <string name="sex_female_abbreviation">F</string>
+  <string name="sex_other_abbreviation">O</string>
   <string name="title_updating_patient">Updating patient</string>
-  <string name="please_wait">Please wait&#8230;</string>
+  <string name="title_adding_new_patient">Adding new patient</string>
+  <string name="please_wait_ellipsis">Please wait&#8230;</string>
+  <string name="updating_patient_please_wait">Updating patient; please wait...</string>
+  <string name="adding_new_patient_please_wait">Adding new patient; please wait...</string>
 
   <string name="title_zoom">Set zoom level</string>
   <string name="zoom_day">1 column per day</string>
@@ -136,15 +177,15 @@
   <string name="zoom_sixth">6 columns per day</string>
 
   <string name="go_to_patient_title">Go to patient chart</string>
-  <string name="go_to_patient_id_label">Patient ID</string>
-  <string name="go_to_patient_no_data">No data loaded from server yet</string>
-  <string name="go_to_patient_not_found_as_of_time">No such patient as of %s</string>
-  <string name="go_to_patient_not_found">No such patient on server</string>
-  <string name="go_to_patient_go">Go to chart</string>
+  <string name="patient_id">Patient ID</string>
+  <string name="searching_ellipsis">Searching&#8230;</string>
+  <string name="patient_not_found">No patient found with ID %s</string>
+  <string name="go_to_chart">Go to chart</string>
 
   <string name="since_admission">Since admission</string>
   <string name="since_symptom_onset">Since symptom onset</string>
   <string name="location">Location</string>
+  <string name="bed_number_n">Bed %s</string>
   <string name="id">ID</string>
   <string name="id_prefix">ID prefix</string>
   <string name="patient_creation_given_name_label">Given name</string>
@@ -154,7 +195,6 @@
   <string name="months">months</string>
   <string name="sex">Sex</string>
   <string name="patient_creation_location_label">Location</string>
-  <string name="patient_creation_location_assign">Assign location</string>
   <string name="add_patient">Create</string>
   <string name="patient_creation_create_busy">Working&#8230;</string>
   <string name="patient_creation_cancel">Cancel</string>
@@ -166,9 +206,10 @@
   <string name="given_name_cannot_be_null">Given name must not be null</string>
   <string name="family_name_cannot_be_null">Family name must not be null</string>
   <string name="invalid_username">Username must be between 2 and 50 characters. Only letters, digits, ".", "-", and "_" are allowed.</string>
-  <string name="latest_pcr_label">Ebola test</string>
+  <string name="ebola_test_label">Ebola test</string>
   <string name="latest_pcr_label_with_date">Ebola test (%s)</string>
   <string name="action_add_test_result">Add test result</string>
+  <string name="pregnant_abbreviation">prg</string>
   <string name="pregnant">Pregnant</string>
   <string name="iv_fitted">IV fitted</string>
   <string name="cannot_eat">Cannot eat</string>
@@ -263,6 +304,8 @@
   <string name="troubleshoot_wifi_disconnected">Wi-Fi is disconnected</string>
   <string name="troubleshoot_wifi_disconnected_solved">Wi-Fi connection is restored</string>
   <string name="troubleshoot_wifi_disconnected_action_connect">Connect</string>
+  <string name="troubleshoot_periodic_sync_disabled">Periodic sync is currently disabled.</string>
+  <string name="troubleshoot_periodic_sync_disabled_solved">Periodic sync is now enabled.</string>
   <string name="troubleshoot_server_auth">OpenMRS username or password is incorrect</string>
   <string name="troubleshoot_server_auth_solved">OpenMRS username and password accepted</string>
   <string name="troubleshoot_server_auth_action_check">Settings</string>
@@ -326,14 +369,11 @@
   <string name="patient_validation_missing_given_name">Enter the given name</string>
   <string name="patient_validation_missing_id">Enter the patient ID</string>
   <string name="patient_validation_missing_admission_date">Enter the admission date</string>
+  <string name="patient_validation_age_limit">Age cannot be greater than 120 years</string>
   <string name="patient_missing_sex">Please select Male or Female.</string>
-  <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
-  <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future.</string>
+  <string name="patient_validation_future_admission_date">Admission date cannot be in the future</string>
+  <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future</string>
   <string name="patient_creation_clear_symptom_onset_date">Clear</string>
-  <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
-  <string name="family_name_hint_unknown">–</string>
-  <string name="given_name_hint_unknown">–</string>
-  <string name="unknown_name">–</string>
 
   <!-- UI strings related to settings -->
   <string name="title_activity_settings">Settings</string>
@@ -349,6 +389,8 @@
   <string name="pref_title_openmrs_password">OpenMRS password</string>
   <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
   <string name="pref_title_package_server_url">Package server URL</string>
+  <string name="pref_title_language">Language</string>
+  <string name="select_language">Select Language</string>
 
   <string name="pref_title_apk_update_interval">App update check interval (seconds)</string>
   <string name="pref_title_small_sync_interval">Small sync interval (seconds)</string>
@@ -356,7 +398,6 @@
   <string name="pref_title_large_sync_interval">Large sync interval (seconds)</string>
 
   <string name="waiting_for_sync">Waiting for current sync to finish...</string>
-  <string name="periodic_sync_currently_disabled">Periodic sync is currently disabled.</string>
   <string name="pref_title_periodic_sync_disabled">Periodic sync disabled</string>
   <string name="pref_desc_periodic_sync_disabled">Disable periodic retrieval of data from the server.</string>
   <string name="pref_title_form_instances_retained">Form instances retained locally</string>
@@ -365,8 +406,8 @@
   <string name="pref_desc_non_wifi_allowed">Allow the app to work with non-Wi-Fi (emulated or Bluetooth tethered) networking.</string>
   <string name="pref_title_starting_patient_id">Starting patient ID</string>
   <string name="pref_desc_starting_patient_id">If set, cause the app to go directly to a patient chart on startup.</string>
-  <string name="pref_title_sync_adapter_preferred">Old SyncAdapter framework preferred</string>
-  <string name="pref_desc_sync_adapter_preferred">Cause the app to use SyncAdapter (which requires Internet connectivity) instead of the built-in ThreadedSyncScheduler.  The app must be restarted for this change to take effect.</string>
+  <string name="pref_title_server_responses_fabricated">Fabricate server responses</string>
+  <string name="pref_desc_server_responses_fabricated">If the server is unavailable, fabricate its responses and proceed anyway.</string>
 
   <!-- Dialog button for accepting a setting that clears the local database -->
   <string name="clear_data_button">Apply and clear local data</string>
@@ -380,4 +421,13 @@
   <string name="string_with_paren">%1$s (%2$s)</string>
   <string name="voiding">Void</string>
   <string name="void_observations">Void Observations</string>
+
+  <!-- Observation details dialog -->
+  <string name="obs_details_title">Observations</string>
+  <string name="obs_details_interval">Observations recorded between %1$s and %2$s:</string>
+  <string name="obs_details_interval_empty">No observations were recorded between %1$s and %2$s.</string>
+  <string name="obs_details_concept">All observations of %s:</string>
+  <string name="obs_details_concept_interval">Observations of %1$s recorded between %2$s and %3$s:</string>
+  <string name="obs_details_concept_empty">No observations of %1$s have been recorded.</string>
+  <string name="obs_details_concept_interval_empty">No observations of %1$s were recorded between %2$s and %3$s.</string>
 </resources>

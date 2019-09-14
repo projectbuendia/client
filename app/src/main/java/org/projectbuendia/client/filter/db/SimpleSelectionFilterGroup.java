@@ -15,7 +15,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Base;
+import org.projectbuendia.client.models.Model;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,14 +25,12 @@ import java.util.List;
  * A database filter that acts as a container for multiple filters or filter groups, with
  * an optional name used for string representations.
  */
-public final class SimpleSelectionFilterGroup<T extends Base>
+public final class SimpleSelectionFilterGroup<T extends Model>
     extends SimpleSelectionFilter<T> {
-    private static final String DEFAULT_FILTER_NAME =
-        App.getInstance().getString(R.string.filter_group_default_name);
 
     private final FilterType mFilterType;
     private final ImmutableList<SimpleSelectionFilter> mFilters;
-    private String mName = DEFAULT_FILTER_NAME;
+    private String mName = App.str(R.string.filter_group_default_name);
 
     /**
      * Specifies whether filters in this group will be AND'd or OR'd in the

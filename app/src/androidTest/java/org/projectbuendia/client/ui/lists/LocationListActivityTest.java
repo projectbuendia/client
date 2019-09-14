@@ -93,7 +93,7 @@ public class LocationListActivityTest extends FunctionalTestCase {
         screenshot("On Patient Chart");
 
         // Assign a location to the patient
-        click(viewWithId(R.id.attribute_location));
+        clickElementMatchingSelector(".tile.location");
         screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");

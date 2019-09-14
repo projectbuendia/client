@@ -7,12 +7,14 @@ body { margin: 0; }
 div, th, td { text-overflow: ellipsis; }
 th, td, table div { overflow: hidden; }
 th, td { font-weight: normal; text-align: left; vertical-align: baseline; }
+#grid-table { visibility: hidden; }
 
 /* Scrolling */
-#scroller { display: flex; flex-direction: row; width: 100%; }
-#grid { visibility: hidden; }
-#grid-left { flex-basis: 0; flex-grow: 0; }
-#grid-body { flex-basis: 0; flex-grow: 1; overflow: scroll; position: relative; }
+body { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; }
+#scrolling { flex: 1; overflow: scroll; }
+#grid { display: flex; flex-direction: row; width: 100%; overflow: scroll; }
+#grid-left { flex-grow: 0; }
+#grid-body { flex-grow: 1; overflow: scroll; position: relative; }
 
 #buttons button {
   font-size: 3.2rem;
@@ -40,7 +42,7 @@ button#up { bottom: 12rem; }
 button#down { bottom: 6rem; }
 
 /* Apply borders to all cells so their sizes are uniform. */
-.top th { border-top: 1px solid transparent; }
+.top th { border-top: 1px solid transparent; border-bottom: none; }
 th, td { border: 1px solid transparent; border-width: 0 1px 1px 0; }
 
 /* Grid lines */
@@ -163,11 +165,12 @@ th.command { /* should match @style/ActionButton */
 .order .notes + .medication { max-width: 60%; }
 
 /* Frozen headings */
-.frozen { position: fixed; top: 0; background: #fff; }
+.frozen { position: fixed; background: #fff; }
 .floating { position: absolute; background: #fff; }
 #grid-left .frozen { background: #fff; z-index: 1; }
 
 /* Tiles */
+#fixed { background: #eee; min-height: 1px; }
 #tiles { width: 100%; }
 .row { display: flex; flex-direction: row; }
 .tile { flex-basis: 0; flex-grow: 1; padding: 1rem 0 1rem 16px; }

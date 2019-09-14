@@ -52,6 +52,7 @@ public class DateTimeWidget extends QuestionWidget {
     private boolean hideMonth = false;
     private boolean showCalendar = false;
 	private HorizontalScrollView scrollView = null;
+	private boolean changed = false;
 
     public DateTimeWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
@@ -65,7 +66,6 @@ public class DateTimeWidget extends QuestionWidget {
         mTimePicker.setId(QuestionWidget.newUniqueId());
         mTimePicker.setFocusable(!prompt.isReadOnly());
         mTimePicker.setEnabled(!prompt.isReadOnly());
-        mTimePicker.setPadding(0, 20, 0, 0);
 
         String clockType =
             android.provider.Settings.System.getString(context.getContentResolver(),
@@ -79,6 +79,7 @@ public class DateTimeWidget extends QuestionWidget {
         mDateListener = new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int month, int day) {
+                changed = true;
                 if (mPrompt.isReadOnly()) {
                     setAnswer();
                 } else {
@@ -111,6 +112,7 @@ public class DateTimeWidget extends QuestionWidget {
         mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
 			@Override
 			public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                changed = true;
             	Collect.getInstance().getActivityLogger().logInstanceAction(DateTimeWidget.this, "onTimeChanged",
             			String.format("%1$02d:%2$02d",hourOfDay, minute), mPrompt.getIndex());
 			}
@@ -145,6 +147,9 @@ public class DateTimeWidget extends QuestionWidget {
 	@SuppressLint("NewApi")
 	private void hideDayFieldIfNotInFormat(FormEntryPrompt prompt) {
         String appearance = prompt.getQuestion().getAppearanceAttr();
+        // NOTE(ping): Force no calendar, date and time only.
+        appearance = "date-time";
+
         if ( appearance == null ) {
         	if ( Build.VERSION.SDK_INT >= 11 ) {
         		showCalendar = true;
@@ -172,22 +177,26 @@ public class DateTimeWidget extends QuestionWidget {
 	        	this.mDatePicker.setSpinnersShown(true);
         	}
         } else if ("no-calendar".equals(appearance) ) {
-        	if ( Build.VERSION.SDK_INT >= 11 ) {
-	        	this.mDatePicker.setCalendarViewShown(false);
-	        	this.mDatePicker.setSpinnersShown(true);
-        	}
+            if (Build.VERSION.SDK_INT >= 11) {
+                this.mDatePicker.setCalendarViewShown(false);
+                this.mDatePicker.setSpinnersShown(true);
+            }
+        } else if ("date-time".equals(appearance)) {
+            showCalendar = true;
+            this.mDatePicker.setCalendarViewShown(false);
+            this.mDatePicker.setSpinnersShown(true);
         } else {
-        	if ( Build.VERSION.SDK_INT >= 11 ) {
-        		showCalendar = true;
-	        	this.mDatePicker.setCalendarViewShown(true);
-	        	if ( Build.VERSION.SDK_INT >= 12 ) {
-	        		CalendarView cv = this.mDatePicker.getCalendarView();
-	        		cv.setShowWeekNumber(false);
-	        	}
-	        	this.mDatePicker.setSpinnersShown(true);
-	        	hideDay = true;
-	        	hideMonth = false;
-        	}
+            if ( Build.VERSION.SDK_INT >= 11 ) {
+                showCalendar = true;
+                this.mDatePicker.setCalendarViewShown(true);
+                if ( Build.VERSION.SDK_INT >= 12 ) {
+                    CalendarView cv = this.mDatePicker.getCalendarView();
+                    cv.setShowWeekNumber(false);
+                }
+                this.mDatePicker.setSpinnersShown(true);
+                hideDay = true;
+                hideMonth = false;
+            }
         }
 
         if ( hideMonth || hideDay ) {
@@ -279,6 +288,15 @@ public class DateTimeWidget extends QuestionWidget {
             new DateTime(mDatePicker.getYear(), mDatePicker.getMonth() + 1,
                     mDatePicker.getDayOfMonth(), mTimePicker.getCurrentHour(),
                     mTimePicker.getCurrentMinute(), 0);
+
+        // If the user hasn't touched anything, use the current time.
+        // The widget has no seconds, so without this we would be unable
+        // to tell which submission occurred later or earlier for two
+        // submissions up to a minute apart.
+        if (!changed) {
+            ldt = DateTime.now();
+        }
+
         //DateTime utc = ldt.withZone(DateTimeZone.forID("UTC"));
         return new DateTimeData(ldt.toDate());
     }

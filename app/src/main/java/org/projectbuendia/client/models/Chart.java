@@ -18,12 +18,15 @@ import java.util.List;
 public class Chart {
     // TODO(ping): Support multiple charts stored in multiple forms.  Right now,
     // there is no UUID field because there is only ever a single chart form.
+
+    public final String name;
+    public final List<ChartSection> fixedGroups;
     public final List<ChartSection> tileGroups;
     public final List<ChartSection> rowGroups;
-    public final String name;
 
     public Chart(String name) {
         this.name = name;
+        this.fixedGroups = new ArrayList<>();
         this.tileGroups = new ArrayList<>();
         this.rowGroups = new ArrayList<>();
     }

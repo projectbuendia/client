@@ -16,17 +16,20 @@ package org.projectbuendia.client.sync.controllers;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.RemoteException;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonObservation;
+import org.projectbuendia.client.models.tasks.DenormalizeObservationsTask;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Handles syncing observations. Uses an incremental sync mechanism - see
@@ -34,9 +37,15 @@ import java.util.ArrayList;
  */
 public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservation> {
     private static final Logger LOG = Logger.create();
+    private Set<String> patientUuidsToUpdate = new HashSet<>();
 
     public ObservationsSyncWorker() {
         super("observations", Contracts.Table.OBSERVATIONS, JsonObservation.class);
+    }
+
+    @Override public void initialize(
+        ContentResolver resolver, SyncResult result, ContentProviderClient client) {
+        patientUuidsToUpdate.clear();
     }
 
     @Override
@@ -52,8 +61,11 @@ public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservatio
                 numDeletes++;
             } else {
                 ops.add(ContentProviderOperation.newInsert(Observations.URI)
-                        .withValues(getObsValuesToInsert(observation)).build());
+                        .withValues(observation.toContentValues()).build());
                 numInserts++;
+            }
+            if (DenormalizeObservationsTask.needsDenormalization(observation.concept_uuid)) {
+                patientUuidsToUpdate.add(observation.patient_uuid);
             }
         }
         LOG.d("Observations: %d inserts, %d deletes", numInserts, numDeletes);
@@ -62,26 +74,13 @@ public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservatio
         return ops;
     }
 
-    /** Converts an encounter data response into appropriate inserts in the encounters table. */
-    public static ContentValues getObsValuesToInsert(JsonObservation observation) {
-        ContentValues cvs = new ContentValues();
-        cvs.put(Observations.UUID, observation.uuid);
-        cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
-        cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
-        cvs.put(Observations.ENCOUNTER_MILLIS, observation.timestamp.getMillis());
-        cvs.put(Observations.CONCEPT_UUID, observation.concept_uuid);
-        cvs.put(Observations.ENTERER_UUID, observation.enterer_uuid);
-        cvs.put(Observations.VALUE, observation.value);
-
-        return cvs;
-    }
-
     @Override public void finalize(
         ContentResolver resolver, SyncResult result, ContentProviderClient client
     ) throws RemoteException {
         // Remove all temporary observations now we have the real ones
-        client.delete(Observations.URI,
-                Observations.UUID + " IS NULL",
-                new String[0]);
+        client.delete(Observations.URI, Observations.UUID + " IS NULL", new String[0]);
+        for (String uuid : patientUuidsToUpdate) {
+            App.getModel().denormalizeObservations(App.getCrudEventBus(), uuid);
+        }
     }
 }

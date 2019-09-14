@@ -25,6 +25,7 @@ import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.SettingsActivity;
+import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -47,7 +48,8 @@ public class LoginActivity extends BaseActivity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        App.inject(this);
+        setTitle(R.string.app_name);
 
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
@@ -76,6 +78,8 @@ public class LoginActivity extends BaseActivity {
                 (dialog, which) -> SettingsActivity.start(LoginActivity.this))
             .setPositiveButton(R.string.sync_failed_retry, (dialog, which) -> mController.onSyncRetry())
             .create();
+
+        ChartRenderer.backgroundCompileTemplate();
     }
 
     /**
@@ -120,8 +124,7 @@ public class LoginActivity extends BaseActivity {
 
     private final class Ui implements LoginController.Ui {
         @Override public void showAddNewUserDialog() {
-            NewUserDialogFragment.newInstance(mController.getDialogUi())
-                .show(getSupportFragmentManager(), null);
+            openDialog(NewUserDialogFragment.create(mController.getDialogUi()));
         }
 
         @Override public void showSettings() {
@@ -129,7 +132,7 @@ public class LoginActivity extends BaseActivity {
         }
 
         @Override public void showErrorToast(int stringResourceId) {
-            BigToast.show(LoginActivity.this, getString(stringResourceId));
+            BigToast.show(stringResourceId);
         }
 
         @Override public void showSyncFailedDialog(boolean show) {

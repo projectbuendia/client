@@ -49,6 +49,7 @@ import org.odk.collect.android.exception.JavaRosaException;
 import org.odk.collect.android.external.ExternalAppsUtils;
 import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.model.Preset;
+import org.odk.collect.android.utilities.Utils;
 import org.odk.collect.android.widgets.IBinaryWidget;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets.WidgetFactory;
@@ -154,7 +155,7 @@ public class ODKView extends LinearLayout {
                 // set button formatting
                 Button mLaunchIntentButton = new Button(getContext());
                 mLaunchIntentButton.setId(QuestionWidget.newUniqueId());
-                mLaunchIntentButton.setText(buttonText);
+                mLaunchIntentButton.setText(Utils.localize(buttonText, context));
                 mLaunchIntentButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Collect.getQuestionFontsize() + 2);
                 mLaunchIntentButton.setPadding(20, 20, 20, 20);
                 mLaunchIntentButton.setLayoutParams(params);
@@ -369,12 +370,10 @@ public class ODKView extends LinearLayout {
         int i;
         // list all groups in one string
         for (FormEntryCaption g : groups) {
-
-
             i = g.getMultiplicity() + 1;
             t = g.getLongText();
             if (t != null) {
-                s.append(t);
+                s.append(Utils.localize(t, getContext()));
                 if (g.repeats() && i > 0) {
                     s.append(" (" + i + ")");
                 }

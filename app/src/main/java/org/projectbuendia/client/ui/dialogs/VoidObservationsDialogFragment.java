@@ -12,7 +12,7 @@ import android.widget.ExpandableListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.actions.VoidObservationsRequestEvent;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.ui.lists.ExpandableVoidObsRowAdapter;
 import org.projectbuendia.client.utils.Utils;
@@ -23,6 +23,8 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
+
+import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
 
 public class VoidObservationsDialogFragment extends DialogFragment {
 
@@ -63,7 +65,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
         for (ObsRow row: rows) {
 
-            Title = row.conceptName + " " + Utils.formatShortDate(row.time);
+            Title = row.conceptName + " " + Utils.format(row.time, MONTH_DAY);
 
             if(!isExistingHeader(Title)){
                 listDataHeader.add(Title);
@@ -77,7 +79,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
             for (ObsRow row: rows){
 
-                verifyTitle = row.conceptName + " " + Utils.formatShortDate(row.time);
+                verifyTitle = row.conceptName + " " + Utils.format(row.time, MONTH_DAY);
 
                 if (verifyTitle.equals(header)){
                     child.add(row);
@@ -97,7 +99,7 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList("obsrows");
         prepareData(obsrows);
 
-        final ExpandableVoidObsRowAdapter listAdapter = new ExpandableVoidObsRowAdapter(App.getInstance().getApplicationContext(), listDataHeader, listDataChild);
+        final ExpandableVoidObsRowAdapter listAdapter = new ExpandableVoidObsRowAdapter(App.getContext(), listDataHeader, listDataChild);
         ExpandableListView listView = fragment.findViewById(R.id.obs_list);
         listView.setAdapter(listAdapter);
 
@@ -108,10 +110,11 @@ public class VoidObservationsDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss())
                 .setPositiveButton(R.string.voiding, (dialogInterface, i) -> {
                     if ((listAdapter.mCheckedItems != null) && (!listAdapter.mCheckedItems.isEmpty())) {
-                        EventBus.getDefault().post(new VoidObservationsRequestEvent(listAdapter.mCheckedItems));
+                        // TODO(ping): Provide a list of observations to delete.
+                        EventBus.getDefault().post(new ObsDeleteRequestedEvent(null));
                     }
                     dialogInterface.dismiss();
-                }).setTitle(getResources().getString(R.string.void_observations))
+                }).setTitle(getString(R.string.void_observations))
                 .setView(fragment);
         return builder.create();
     }

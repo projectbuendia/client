@@ -18,8 +18,9 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_height="0sp"
+        android:layout_weight="1"
+        android:minHeight="240sp">
 
         <com.google.android.flexbox.FlexboxLayout
             xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -34,22 +35,26 @@
     </ScrollView>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
-        android:visibility="gone">
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="0sp"
+        android:layout_marginBottom="24sp"
+        android:layout_marginLeft="16sp"
+        android:layout_marginRight="16sp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bed number"
+            android:text="@string/bed_number"
         />
         <EditText
             android:id="@+id/bed_number"
             android:ems="5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="@style/text.huge"
         />
     </LinearLayout>
 

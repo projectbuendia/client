@@ -18,10 +18,7 @@ import android.util.AttributeSet;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.utils.Logger;
-
-import java.io.File;
 
 /** Custom Android preference widget that clears the database if new text is entered. */
 public class EditAndClearDataPreference extends EditTextPreference {
@@ -37,60 +34,7 @@ public class EditAndClearDataPreference extends EditTextPreference {
         super.onDialogClosed(positive);
         if (positive) {
             dialog = ProgressDialog.show(getContext(), "Clearing data", "Clearing all local data...");
-            App.getInstance().getSyncManager().setNewSyncsSuppressed(true);
-            App.getInstance().getSyncManager().stopSyncing(this::clearAllData);
+            App.reset(dialog::dismiss);
         }
-    }
-
-    private void clearAllData() {
-        clearDatabase();
-        clearMemoryState();
-        clearOdkState();
-        App.getInstance().getSyncManager().setNewSyncsSuppressed(false);
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
-    }
-
-    private void clearDatabase() {
-        try {
-            Database db = new Database(App.getInstance().getApplicationContext());
-            db.clear();
-            db.close();
-        } catch (Throwable t) {
-            LOG.e(t, "Failed to clear database");
-        }
-    }
-
-    private void clearMemoryState() {
-        try {
-            App.getUserManager().reset();
-            App.getModel().reset();
-            App.getSettings().setSyncAccountInitialized(false);
-        } catch (Throwable t) {
-            LOG.e(t, "Failed to clear in-memory state");
-        }
-    }
-
-    private void clearOdkState() {
-        try {
-            File filesDir = App.getInstance().getApplicationContext().getFilesDir();
-            File odkDir = new File(filesDir, "odk");
-            File odkTempDir = new File(filesDir, "odk-deleted." + System.currentTimeMillis());
-            odkDir.renameTo(odkTempDir);
-            recursivelyDelete(odkTempDir);
-        } catch (Throwable t) {
-            LOG.e(t, "Failed to clear ODK state");
-        }
-    }
-
-    private void recursivelyDelete(File path) {
-        if (path.isDirectory()) {
-            for (File child : path.listFiles()) {
-                recursivelyDelete(child);
-            }
-        }
-        path.delete();
     }
 }

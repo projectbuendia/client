@@ -13,7 +13,6 @@ package org.projectbuendia.client.events.data;
 
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.models.User;
 
 /** A factory that creates instances of subclasses of {@link TypedCursorLoadedEvent}. */
 public class TypedCursorLoadedEventFactory {
@@ -28,14 +27,11 @@ public class TypedCursorLoadedEventFactory {
         TypedCursor<T> cursor) {
         if (clazz.equals(Patient.class)) {
             return new AppPatientsLoadedEvent((TypedCursor<Patient>) cursor);
-        } else if (clazz.equals(User.class)) {
-            return new AppUsersLoadedEvent((TypedCursor<User>) cursor);
         } else {
             throw new IllegalArgumentException(
                 "Unable to create an event for unknown type " + clazz.getName());
         }
     }
 
-    private TypedCursorLoadedEventFactory() {
-    }
+    private TypedCursorLoadedEventFactory() { }
 }

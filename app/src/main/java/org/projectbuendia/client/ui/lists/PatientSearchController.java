@@ -14,14 +14,14 @@ package org.projectbuendia.client.ui.lists;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
+import org.projectbuendia.client.events.data.AppPatientsLoadedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilterGroup;
 import org.projectbuendia.client.filter.db.patient.LocationUuidFilter;
 import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
-import org.projectbuendia.client.filter.matchers.FilteredCursorWrapper;
+import org.projectbuendia.client.filter.matchers.FilteredCursor;
 import org.projectbuendia.client.filter.matchers.MatchingFilter;
 import org.projectbuendia.client.filter.matchers.MatchingFilterGroup;
 import org.projectbuendia.client.filter.matchers.patient.IdFilter;
@@ -41,7 +41,7 @@ import de.greenrobot.event.EventBus;
 
 import static org.projectbuendia.client.filter.matchers.MatchingFilterGroup.FilterType.OR;
 
-/** Controller for {@link BaseSearchablePatientListActivity}. */
+/** Controller for {@link PatientListActivity}. */
 public class PatientSearchController {
 
     private static final String TAG = PatientSearchController.class.getSimpleName();
@@ -160,7 +160,7 @@ public class PatientSearchController {
 
     /** Gets a cursor that returns the filtered list of patients. */
     private TypedCursor<Patient> getFilteredCursor() {
-        return new FilteredCursorWrapper<>(mPatientsCursor, mSearchFilter, mFilterQueryTerm);
+        return new FilteredCursor<>(mPatientsCursor, mSearchFilter, mFilterQueryTerm);
     }
 
     public void onPatientSelected(Patient patient) {
@@ -238,9 +238,11 @@ public class PatientSearchController {
     }
 
     private class CreationSubscriber {
-        public void onEventMainThread(ItemCreatedEvent<Patient> event) {
-            Utils.logEvent("add_patient_succeeded");
-            mUi.goToPatientChart(event.item.uuid);
+        public void onEventMainThread(ItemCreatedEvent<?> event) {
+            if (event.item instanceof Patient) {
+                Utils.logEvent("add_patient_succeeded");
+                mUi.goToPatientChart(((Patient) event.item).uuid);
+            }
         }
     }
 
@@ -253,7 +255,7 @@ public class PatientSearchController {
     }
 
     private final class FilterSubscriber {
-        public void onEventMainThread(TypedCursorLoadedEvent<Patient> event) {
+        public void onEventMainThread(AppPatientsLoadedEvent event) {
             mCrudEventBus.unregister(this);
 
             // If a patient cursor was already open, close it.

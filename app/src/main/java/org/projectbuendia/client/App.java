@@ -12,7 +12,11 @@
 package org.projectbuendia.client;
 
 import android.app.Application;
-import android.content.ContentProviderClient;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
 import com.android.volley.VolleyLog;
@@ -26,9 +30,16 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.sync.ConceptService;
+import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.user.UserManager;
+import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
+
+import java.io.File;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -36,18 +47,20 @@ import dagger.ObjectGraph;
 
 /** An {@link Application} the represents the Android Client. */
 public class App extends Application {
+    private static final Logger LOG = Logger.create();
 
     // Global instances of all our singletons.
     private static App sInstance;
+    private static Resources sResources;
     private static AppModel sModel;
     private static AppSettings sSettings;
-    private static ContentProviderClient sContentProviderClient;
     private static CrudEventBus sCrudEventBus;
     private static HealthMonitor sHealthMonitor;
     private static SyncManager sSyncManager;
     private static UserManager sUserManager;
     private static OpenMrsConnectionDetails sConnectionDetails;
     private static Server sServer;
+    private static ConceptService sConceptService;
 
     private ObjectGraph mObjectGraph;
     @Inject AppModel mModel;
@@ -63,16 +76,49 @@ public class App extends Application {
         return sInstance;
     }
 
+    public static Context getContext() {
+        return sInstance.getApplicationContext();
+    }
+
+    /** This should be called in every Activity's attachBaseContext method. */
+    public static Context applyLocaleSetting(Context base) {
+        Locale locale = getSettings().getLocale();
+        Locale.setDefault(locale);
+        Resources resources = base.getResources();
+        Configuration config = resources.getConfiguration();
+        config.setLocale(locale);
+        config.setLayoutDirection(locale);
+        Context context = base.createConfigurationContext(config);
+        sResources = context.getResources();
+        return context;
+    }
+
+    public static String str(int id, Object... args) {
+        return sResources.getString(id, args);
+    }
+
+    public static String localize(String packed) {
+        return new Loc(packed).get(getSettings().getLocale());
+    }
+
+    public static void inject(Object obj) {
+        sInstance.mObjectGraph.inject(obj);
+    }
+
+    public static synchronized ContentResolver getResolver() {
+        return sInstance.getContentResolver();
+    }
+
+    public static synchronized SharedPreferences getPrefs() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext());
+    }
+
     public static synchronized AppModel getModel() {
         return sModel;
     }
 
     public static synchronized AppSettings getSettings() {
         return sSettings;
-    }
-
-    public static synchronized ContentProviderClient getContentProviderClient() {
-        return sContentProviderClient;
     }
 
     public static synchronized CrudEventBus getCrudEventBus() {
@@ -99,7 +145,13 @@ public class App extends Application {
         return sServer;
     }
 
+    public static synchronized ConceptService getConceptService() {
+        return sConceptService;
+    }
+
     @Override public void onCreate() {
+        sInstance = this;
+        sResources = this.getResources();
         Collect.onCreate(this);
         super.onCreate();
 
@@ -113,7 +165,6 @@ public class App extends Application {
         // just by opening chrome://inspect in Chrome on a computer connected to the tablet.
         Stetho.initializeWithDefaults(this);
 
-        sInstance = this;
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);
         mObjectGraph.injectStatics();
@@ -124,22 +175,64 @@ public class App extends Application {
         synchronized (App.class) {
             sModel = mModel;
             sSettings = mSettings;
-            sContentProviderClient = getContentResolver().acquireContentProviderClient(Contracts.Users.URI);
             sCrudEventBus = mCrudEventBus;
             sHealthMonitor = mHealthMonitor;
             sSyncManager = mSyncManager;
-            sUserManager = mUserManager; // TODO: Remove when Daggered.
-            sConnectionDetails = mOpenMrsConnectionDetails; // TODO: Remove when Daggered.
-            sServer = mServer; // TODO: Remove when Daggered.
+            sUserManager = mUserManager;
+            sConnectionDetails = mOpenMrsConnectionDetails;
+            sServer = mServer;
+            sConceptService = new ConceptService(getContentResolver());
             mHealthMonitor.start();
         }
     }
 
-    public <T> T get(Class<T> type) {
-        return mObjectGraph.get(type);
+    public static void reset(Runnable callback) {
+        sSyncManager.setNewSyncsSuppressed(true);
+        LOG.i("reset(): Waiting for syncs to stop...");
+        sSyncManager.stopSyncing(() -> {
+            try {
+                clearDatabase();
+                clearMemoryState();
+                clearOdkFiles();
+                LOG.i("reset(): Completed");
+                if (callback != null) callback.run();
+            } finally {
+                sSyncManager.setNewSyncsSuppressed(false);
+            }
+        });
     }
 
-    public void inject(Object obj) {
-        mObjectGraph.inject(obj);
+    private static void clearDatabase() {
+        LOG.i("Clearing local database");
+        try {
+            Database db = new Database(getContext());
+            db.clear();
+            db.close();
+        } catch (Throwable t) {
+            LOG.e(t, "Failed to clear database");
+        }
+    }
+
+    private static void clearMemoryState() {
+        LOG.i("Clearing memory state");
+        try {
+            sUserManager.reset();
+            sModel.reset();
+        } catch (Throwable t) {
+            LOG.e(t, "Failed to clear memory state");
+        }
+    }
+
+    private static void clearOdkFiles() {
+        LOG.i("Clearing ODK files");
+        try {
+            File filesDir = getContext().getFilesDir();
+            File odkDir = new File(filesDir, "odk");
+            File odkTempDir = new File(filesDir, "odk-deleted." + System.currentTimeMillis());
+            odkDir.renameTo(odkTempDir);
+            Utils.recursivelyDelete(odkTempDir);
+        } catch (Throwable t) {
+            LOG.e(t, "Failed to clear ODK state");
+        }
     }
 }

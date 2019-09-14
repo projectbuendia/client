@@ -16,25 +16,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+
+import java.util.Locale;
 
 /** A {@link Toast} with a large text size. */
 public final class BigToast {
-    /**
-     * Displays a toast with the given message resource.
-     * @param context         the Application or Activity context to use
-     * @param messageResource the message to display
-     */
-    public static void show(Context context, int messageResource) {
-        show(context, context.getResources().getString(messageResource));
-    }
-
-    /**
-     * Displays a toast with the given message.
-     * @param context the Application or Activity context to use
-     * @param message the message to display
-     */
-    public static void show(Context context, String message) {
+    /** Displays a toast with the given message. */
+    public static void show(String message) {
+        Context context = App.getContext();
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
         LinearLayout layout = (LinearLayout) toast.getView();
         TextView view = (TextView) layout.getChildAt(0);
@@ -42,25 +33,16 @@ public final class BigToast {
         toast.show();
     }
 
-    /**
-     * Displays a toast with the given formatted string resource.
-     * @param context         the Application or Activity context to use
-     * @param messageResource the message to display, with placeholders for substitution
-     * @param args            arguments to substitute into the message
-     */
-    public static void show(Context context, int messageResource, Object... args) {
-        show(context, context.getResources().getString(messageResource), args);
+    /**  Displays a toast with the given formatted string resource. */
+    public static void show(int messageId, Object... args) {
+        show(App.str(messageId), args);
     }
 
-    /**
-     * Displays a toast with the given formatted string.
-     * @param context the Application or Activity context to use
-     * @param message the message to display, with placeholders for substitution
-     * @param args    arguments to substitute into the message
-     */
-    public static void show(Context context, String message, Object... args) {
-        show(context,
-            String.format(context.getResources().getConfiguration().locale, message, args));
+    /** Displays a toast with the given formatted string. */
+    public static void show(String message, Object... args) {
+        Context context = App.getContext();
+        Locale locale = context.getResources().getConfiguration().locale;
+        show(String.format(locale, message, args));
     }
 
     private BigToast() {

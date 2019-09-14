@@ -11,18 +11,10 @@
 
 package org.projectbuendia.client.json;
 
-import java.util.Map;
-
 /** JSON representation of an OpenMRS Concept */
 public class JsonConcept {
-
     public String uuid;
-
-    /** Server-side ID, needed for some XForms tasks. */
-    public Integer xform_id;
-
-    public ConceptType type;
-
-    /** A map from locales to localized names, e.g. {'en': 'heart', 'fr': 'coeur'} */
-    public Map<String, String> names;
+    public Integer xform_id;  // server-side ID, needed for some XForms tasks
+    public Datatype type;
+    public String name;
 }

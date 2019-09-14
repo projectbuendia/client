@@ -12,84 +12,53 @@
 package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
+import org.projectbuendia.client.ui.TextChangedWatcher;
 import org.projectbuendia.client.utils.Utils;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
+import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.SHORT;
+
 /** A dialog for jumping to a patient by ID. */
-public class GoToPatientDialogFragment extends DialogFragment {
-    @Inject AppModel mAppModel;
-    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject SyncManager mSyncManager;
+public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDialogFragment> {
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
-    @InjectView(R.id.go_to_patient_result) TextView mPatientSearchResult;
-    private LayoutInflater mInflater;
+    @InjectView(R.id.go_to_patient_result) TextView mSearchResult;
     String mPatientUuid;
-    CrudEventBus mBus;
 
-    public static GoToPatientDialogFragment newInstance() {
-        return new GoToPatientDialogFragment();
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.go_to_patient_dialog_fragment);
     }
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
-        mInflater = LayoutInflater.from(getActivity());
-        mBus = mCrudEventBusProvider.get();
-        mBus.register(this);
+    @Override protected void onOpen(Bundle args) {
+        App.getCrudEventBus().register(this);
+
+        dialog.setTitle(R.string.go_to_patient_title);
+        mPatientId.addTextChangedListener(new TextChangedWatcher(this::search));
+        mSearchResult.setOnClickListener(view -> onSubmit());
+        dialog.getButton(BUTTON_POSITIVE).setText(R.string.go_to_chart);
     }
 
-    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        final View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
-        ButterKnife.inject(this, fragment);
-        mPatientId.addTextChangedListener(new IdWatcher());
-        mPatientSearchResult.setOnClickListener(view -> onSubmit());
-        return new AlertDialog.Builder(getActivity())
-            .setTitle(R.string.go_to_patient_title)
-            .setPositiveButton(R.string.go_to_patient_go, (dialogInterface, i) -> onSubmit())
-            .setNegativeButton(R.string.cancel, null)
-            .setView(fragment)
-            .create();
-    }
-
-    public void onSubmit() {
+    @Override protected void onSubmit() {
         Utils.logUserAction("go_to_patient_submitted",
             "patient_id", mPatientId.getText().toString(),
             "patient_uuid", mPatientUuid);
         if (mPatientUuid != null) {
-            getDialog().dismiss();
+            dialog.dismiss();
 
             // NOTE(ping): I don't fully understand why, but posting this on a
             // Handler is necessary to get the numeric keypad to close.  If we
@@ -100,14 +69,14 @@ public class GoToPatientDialogFragment extends DialogFragment {
         }
     }
 
-    public void onEventMainThread(ItemLoadedEvent<Patient> event) {
-        String id = mPatientId.getText().toString().trim();
-        Patient patient = event.item;
-        if (id.equals(patient.id)) {  // server returned the patient we were looking for
-            mPatientUuid = patient.uuid;
-            mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                " (" + patient.sex + ", " + Utils.birthdateToAge(
-                patient.birthdate, App.getInstance().getResources()) + ")");
+    public void onEventMainThread(ItemLoadedEvent<?> event) {
+        if (event.item instanceof Patient) {
+            String id = mPatientId.getText().toString().trim();
+            Patient patient = (Patient) event.item;
+            if (id.equals(patient.id)) {  // server returned the patient we were looking for
+                mPatientUuid = patient.uuid;
+                mSearchResult.setText(formatSearchResult(patient));
+            }
         }
     }
 
@@ -115,54 +84,35 @@ public class GoToPatientDialogFragment extends DialogFragment {
         String id = mPatientId.getText().toString().trim();
         if (id.equals(event.id)) {  // server returned empty results for the ID we sought
             mPatientUuid = null;
-            mPatientSearchResult.setText(getResources().getString(R.string.go_to_patient_not_found));
+            mSearchResult.setText(u.str(R.string.patient_not_found, event.id));
         }
     }
 
-    class IdWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {
-        }
+    private String formatSearchResult(Patient patient) {
+        String details = u.formatPatientDetails(patient, SHORT, LONG, LONG);
+        return Utils.format("%s (%s)", u.formatPatientName(patient),
+            Utils.nonemptyOrDefault(details, u.str(R.string.unknown)));
+    }
 
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {
-        }
-
-        @Override public void afterTextChanged(Editable editable) {
-            String id = mPatientId.getText().toString().trim();
-            if (id.isEmpty()) {
-                mPatientUuid = null;
-                mPatientSearchResult.setText("");
-            } else {
-                try (Cursor cursor = getActivity().getContentResolver().query(
-                    Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
-                    if (cursor.moveToNext()) {
-                        String uuid = Utils.getString(cursor, Patients.UUID, null);
-                        String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
-                        String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
-                        LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
-                        String age = birthdate != null ?
-                            Utils.birthdateToAge(birthdate, getResources()) : "age unknown";
-                        String sex = Utils.getString(cursor, Patients.SEX, "");
-                        mPatientUuid = uuid;
-                        mPatientSearchResult.setText(givenName + " " + familyName +
-                            " (" + sex + ", " + age + ")");
-                    } else {
-                        String message = getResources().getString(R.string.go_to_patient_no_data);
-                        DateTime lastSyncTime = mAppModel.getLastFullSyncTime();
-                        if (lastSyncTime != null) {
-                            message = getResources().getString(
-                                R.string.go_to_patient_not_found_as_of_time,
-                                new RelativeDateTimeFormatter().format(lastSyncTime));
-                        }
-                        mPatientUuid = null;
-                        mPatientSearchResult.setText(message);
-
-                        // Immediately check for this patient on the server.
-                        mAppModel.fetchSinglePatient(mBus, id);
-                    }
+    private void search() {
+        String id = mPatientId.getText().toString().trim();
+        if (id.isEmpty()) {
+            mPatientUuid = null;
+            mSearchResult.setText("");
+        } else {
+            try (Cursor cursor = getActivity().getContentResolver().query(
+                Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
+                if (cursor.moveToNext()) {  // found locally
+                    Patient patient = Patient.load(cursor);
+                    mPatientUuid = patient.uuid;
+                    mSearchResult.setText(formatSearchResult(patient));
+                } else {  // not found locally; check server
+                    mPatientUuid = null;
+                    mSearchResult.setText(R.string.searching_ellipsis);
+                    App.getModel().fetchPatient(App.getCrudEventBus(), id);
                 }
             }
-            ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
-                .setEnabled(mPatientUuid != null);
         }
+        dialog.getButton(BUTTON_POSITIVE).setEnabled(mPatientUuid != null);
     }
 }

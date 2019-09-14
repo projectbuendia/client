@@ -17,19 +17,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
-/** An order in the app model. */
-@Immutable
-public final class Form extends Base<String> implements Comparable<Form> {
-    public final String uuid;
+@Immutable public final class Form extends Model implements Comparable<Form> {
     public final String name;
     public final String version;
 
     public Form(String uuid, String name, String version) {
-        super(null);  // Form objects never have an id
-        this.uuid = uuid;
+        super(uuid);
         this.name = name;
         this.version = version;
     }
@@ -39,9 +36,9 @@ public final class Form extends Base<String> implements Comparable<Form> {
     }
 
     public int compareTo(Form other) {
-        int result = name.compareTo(other.name);
-        if (result == 0) result = version.compareTo(other.version);
-        return result;
+        int result = Utils.ALPHANUMERIC_COMPARATOR.compare(name, other.name);
+        if (result != 0) return result;
+        return version.compareTo(other.version);
     }
 
     public JSONObject toJson() throws JSONException {

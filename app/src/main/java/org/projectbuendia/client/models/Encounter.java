@@ -18,15 +18,15 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.json.JsonEncounter;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -44,176 +44,109 @@ import javax.annotation.concurrent.Immutable;
  * currently only <code>DATE</code> and <code>UUID</code> (coded) types are supported.
  */
 @Immutable
-public class Encounter extends Base<String> {
-    public final String patientUuid;
-    public final
-    @Nullable String encounterUuid;
-    public final DateTime timestamp;
-    public final Observation[] observations;
-    public final String[] orderUuids;
+public class Encounter extends Model {
     private static final Logger LOG = Logger.create();
 
-    /**
-     * Creates a new Encounter for the given patient.
-     * @param patientUuid   The UUID of the patient.
-     * @param encounterUuid The UUID of this encounter, or null for encounters created on the client.
-     * @param timestamp     The encounter time.
-     * @param observations  An array of observations to include in the encounter.
-     * @param orderUuids    A list of UUIDs of the orders executed during this encounter.
-     */
-    public Encounter(
-        String patientUuid,
-        @Nullable String encounterUuid,
-        DateTime timestamp,
-        Observation[] observations,
-        String[] orderUuids) {
-        super(encounterUuid);
+    public final String patientUuid;
+    public final String providerUuid;
+    public final DateTime time;
+    public final Obs[] observations;
+
+    public Encounter(@Nullable String uuid, String patientUuid, String providerUuid,
+                     DateTime time, Obs[] observations) {
+        super(uuid);
         this.patientUuid = patientUuid;
-        this.encounterUuid = encounterUuid;
-        this.timestamp = timestamp;
-        this.observations = Utils.orDefault(observations, new Observation[0]);
-        this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
+        this.providerUuid = providerUuid;
+        this.time = time;
+        this.observations = Utils.orDefault(observations, new Obs[0]);
     }
 
-    /**
-     * Creates an instance of {@link Encounter} from a network
-     * {@link JsonEncounter} object and corresponding patient UUID.
-     */
-    public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
-        List<Observation> observations = new ArrayList<>();
+    public static Encounter fromJson(JsonEncounter encounter) {
+        List<Obs> observations = new ArrayList<>();
         if (encounter.observations != null) {
-            for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
-                observations.add(new Observation(
-                    (String) observation.getKey(),
-                    (String) observation.getValue(),
-                    Observation.estimatedTypeFor((String) observation.getValue())
+            for (JsonObservation obs : encounter.observations) {
+                observations.add(new Obs(
+                    obs.uuid, encounter.uuid, encounter.patient_uuid, encounter.provider_uuid,
+                    obs.concept_uuid, obs.type, obs.time, obs.order_uuid, obs.getValueAsString(), null
                 ));
             }
         }
-        return new Encounter(patientUuid, encounter.uuid, encounter.timestamp,
-            observations.toArray(new Observation[observations.size()]), encounter.order_uuids);
+        return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.provider_uuid,
+            encounter.time, observations.toArray(new Obs[0]));
     }
 
     /** Serializes this into a {@link JSONObject}. */
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put(Server.PATIENT_UUID_KEY, patientUuid);
-        json.put(Server.ENCOUNTER_TIMESTAMP, timestamp.getMillis()/1000);
+        json.put("patient_uuid", patientUuid);
+        json.put("time", Utils.formatUtc8601(time));
         if (observations.length > 0) {
-            JSONArray observationsJson = new JSONArray();
-            for (Observation obs : observations) {
-                JSONObject observationJson = new JSONObject();
-                observationJson.put(Server.OBSERVATION_QUESTION_UUID, obs.conceptUuid);
-                String valueKey = obs.type == Observation.Type.DATE ?
-                    Server.OBSERVATION_ANSWER_DATE : Server.OBSERVATION_ANSWER_UUID;
-                observationJson.put(valueKey, obs.value);
-                observationsJson.put(observationJson);
+            JSONArray jsonObsArray = new JSONArray();
+            for (Obs obs : observations) {
+                jsonObsArray.put(obs.toJson());
             }
-            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observationsJson);
-        }
-        if (orderUuids.length > 0) {
-            JSONArray orderUuidsJson = new JSONArray();
-            for (String orderUuid : orderUuids) {
-                orderUuidsJson.put(orderUuid);
-            }
-            json.put(Server.ENCOUNTER_ORDER_UUIDS, orderUuidsJson);
+            json.put("observations", jsonObsArray);
         }
         return json;
     }
 
     /**
-     * Converts this instance of {@link Encounter} to an array of
-     * {@link android.content.ContentValues} objects for insertion into a database or content
-     * provider.
+     * Converts this Encounter to an array of ContentValues objects for
+     * insertion into a database or content provider.
      */
     public ContentValues[] toContentValuesArray() {
-        ContentValues[] cvs = new ContentValues[observations.length + orderUuids.length];
-        for (int i = 0; i < observations.length; i++) {
-            Observation obs = observations[i];
+        ContentValues[] cvs = new ContentValues[observations.length];
+        int i = 0;
+        for (Obs obs : observations) {
             ContentValues cv = new ContentValues();
+            cv.put(Observations.UUID, obs.uuid);
+            cv.put(Observations.ENCOUNTER_UUID, uuid);
+            cv.put(Observations.PATIENT_UUID, patientUuid);
+            cv.put(Observations.PROVIDER_UUID, providerUuid);
             cv.put(Observations.CONCEPT_UUID, obs.conceptUuid);
-            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
-            cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
-            cv.put(Observations.PATIENT_UUID, patientUuid);
+            cv.put(Observations.TYPE, obs.type.name());
+            cv.put(Observations.MILLIS, time.getMillis());
+            cv.put(Observations.ORDER_UUID, obs.orderUuid);
             cv.put(Observations.VALUE, obs.value);
-            cvs[i] = cv;
-        }
-        for (int i = 0; i < orderUuids.length; i++) {
-            ContentValues cv = new ContentValues();
-            cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_CONCEPT_UUID);
-            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
-            cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
-            cv.put(Observations.PATIENT_UUID, patientUuid);
-            cv.put(Observations.VALUE, orderUuids[i]);
-            cvs[observations.length + i] = cv;
+            cvs[i++] = cv;
         }
         return cvs;
     }
 
-    /** Represents a single observation within this encounter. */
-    public static final class Observation {
-        public final String conceptUuid;
-        public final String value;
-        public final Type type;
-
-        /** Data type of the observation. */
-        public enum Type {
-            DATE,
-            NON_DATE
+    /**
+     * A CursorLoader that loads Encounters.  Expects the Cursor to contain only
+     * a single encounter, represented by multiple observations, with one observation per row.
+     */
+    public static Encounter load(Cursor cursor) {
+        String encounterUuid = null;
+        String patientUuid = null;
+        String providerUuid = null;
+        DateTime time = null;
+        List<Obs> observations = new ArrayList<>();
+        do { // cursor is already at the first matching observation
+            String uuid = Utils.getString(cursor, Observations.UUID);
+            encounterUuid = Utils.getString(cursor, Observations.ENCOUNTER_UUID);
+            patientUuid = Utils.getString(cursor, Observations.PATIENT_UUID);
+            providerUuid = Utils.getString(cursor, Observations.PROVIDER_UUID);
+            String conceptUuid = Utils.getString(cursor, Observations.CONCEPT_UUID);
+            Datatype type = Datatype.valueOf(Utils.getString(cursor, Observations.TYPE));
+            time = Utils.getDateTime(cursor, Observations.MILLIS);
+            String orderUuid = Utils.getString(cursor, Observations.ORDER_UUID);
+            String value = Utils.getString(cursor, Observations.VALUE);
+            observations.add(new Obs(
+                uuid, encounterUuid, patientUuid, providerUuid,
+                conceptUuid, type, time, orderUuid, value, null
+            ));
+        } while (cursor.moveToNext());
+        if (encounterUuid != null && patientUuid != null && time != null) {
+            return new Encounter(encounterUuid, patientUuid, providerUuid,
+                time, observations.toArray(new Obs[observations.size()]));
         }
-
-        public Observation(String conceptUuid, String value, Type type) {
-            this.conceptUuid = conceptUuid;
-            this.value = value;
-            this.type = type;
-        }
-
-        /**
-         * Produces a best guess for the type of a given value, since the server doesn't give us
-         * typing information.
-         */
-        public static Type estimatedTypeFor(String value) {
-            try {
-                new DateTime(Long.parseLong(value));
-                return Type.DATE;
-            } catch (Exception e) {
-                return Type.NON_DATE;
-            }
-        }
+        return null; // PATIENT_UUID should never be null, so this should never happen
     }
 
-    /**
-     * An {@link CursorLoader} that loads {@link Encounter}s. Expects the {@link Cursor} to
-     * contain only a single encounter, represented by multiple observations, with one observation per
-     * row.
-     * <p/>
-     * <p>Unlike other {@link CursorLoader}s, {@link Encounter.Loader} must be instantiated
-     * once per patient, since {@link Encounter} contains the patient's UUID as one of its fields,
-     * which is not present in the database representation of an encounter.
-     */
-    public static class Loader implements CursorLoader<Encounter> {
-        private String mPatientUuid;
-
-        public Loader(String patientUuid) {
-            mPatientUuid = patientUuid;
-        }
-
-        @Override public Encounter fromCursor(Cursor cursor) {
-            final String encounterUuid = cursor.getString(
-                cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
-            final long millis = cursor.getLong(
-                cursor.getColumnIndex(Observations.ENCOUNTER_MILLIS));
-            List<Observation> observations = new ArrayList<>();
-            cursor.move(-1);
-            while (cursor.moveToNext()) {
-                String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
-                observations.add(new Observation(
-                    cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
-                    value, Observation.estimatedTypeFor(value)
-                ));
-            }
-            return new Encounter(mPatientUuid, encounterUuid, new DateTime(millis),
-                observations.toArray(new Observation[observations.size()]), null);
-        }
+    /** For developer use only, to help fabricate a response from a nonexistent server. */
+    public Encounter withUuid(String uuid) {
+        return new Encounter(uuid, patientUuid, providerUuid, time, observations);
     }
 }

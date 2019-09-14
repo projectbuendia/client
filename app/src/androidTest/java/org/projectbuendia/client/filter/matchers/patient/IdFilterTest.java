@@ -13,12 +13,13 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.Sex;
+
+import androidx.test.filters.SmallTest;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -41,7 +42,9 @@ public class IdFilterTest {
     }
 
     private Patient getPatientWithId(String id) {
-        return Patient.builder().setId(id).build();
+        return new Patient(null, id, "Given", "Family", Sex.OTHER,
+            null /* birthdate */, false /* pregnancy */,
+            "" /* location_uuid */, "" /* bed_number */);
     }
 
     /** Tests that id matching allows for a prefix match. */

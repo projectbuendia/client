@@ -11,8 +11,11 @@
 
 package org.projectbuendia.client;
 
+import com.google.common.collect.ImmutableList;
+
 import org.projectbuendia.client.models.LocationForest;
-import org.projectbuendia.client.models.LocationQueryResult;
+
+import java.util.Arrays;
 
 /** Constructs a fake {@link LocationForest} for use in tests. */
 public class FakeForestFactory {
@@ -36,7 +39,7 @@ public class FakeForestFactory {
      * @return the constructed {@link LocationForest}
      */
     public static LocationForest build() {
-        return new LocationForest(new FakeTypedCursor<>(
+        return new LocationForest(Arrays.asList(
             getSiteLocation(),
             getTriageZoneLocation(),
             getDischargedZoneLocation(),
@@ -46,31 +49,31 @@ public class FakeForestFactory {
         ));
     }
 
-    private static LocationQueryResult getSiteLocation() {
-        return new LocationQueryResult(ROOT_UUID, null, SITE_NAME, 0);
+    private static LocationForest.Record getSiteLocation() {
+        return new LocationForest.Record(ROOT_UUID, null, SITE_NAME, 0);
     }
 
-    private static LocationQueryResult getTriageZoneLocation() {
-        return new LocationQueryResult(TRIAGE_ZONE_UUID, ROOT_UUID, TRIAGE_ZONE_NAME, 0);
+    private static LocationForest.Record getTriageZoneLocation() {
+        return new LocationForest.Record(TRIAGE_ZONE_UUID, ROOT_UUID, TRIAGE_ZONE_NAME, 0);
     }
 
-    private static LocationQueryResult getDischargedZoneLocation() {
-        return new LocationQueryResult(DISCHARGED_ZONE_UUID, ROOT_UUID, DISCHARGED_ZONE_NAME, 0);
+    private static LocationForest.Record getDischargedZoneLocation() {
+        return new LocationForest.Record(DISCHARGED_ZONE_UUID, ROOT_UUID, DISCHARGED_ZONE_NAME, 0);
     }
 
-    private static LocationQueryResult getSuspectZoneLocation() {
-        return new LocationQueryResult(SUSPECT_ZONE_UUID, ROOT_UUID, SUSPECT_ZONE_NAME, 0);
+    private static LocationForest.Record getSuspectZoneLocation() {
+        return new LocationForest.Record(SUSPECT_ZONE_UUID, ROOT_UUID, SUSPECT_ZONE_NAME, 0);
     }
 
-    private static LocationQueryResult getSuspect1TentLocation() {
-        return new LocationQueryResult(SUSPECT_1_UUID, SUSPECT_ZONE_UUID, SUSPECT_1_TENT_NAME, 0);
+    private static LocationForest.Record getSuspect1TentLocation() {
+        return new LocationForest.Record(SUSPECT_1_UUID, SUSPECT_ZONE_UUID, SUSPECT_1_TENT_NAME, 0);
     }
 
-    private static LocationQueryResult getSuspect2TentLocation() {
-        return new LocationQueryResult(SUSPECT_2_UUID, SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME, 0);
+    private static LocationForest.Record getSuspect2TentLocation() {
+        return new LocationForest.Record(SUSPECT_2_UUID, SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME, 0);
     }
 
     public static LocationForest emptyForest() {
-        return new LocationForest(new FakeTypedCursor<>());
+        return new LocationForest(ImmutableList.of());
     }
 }

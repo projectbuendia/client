@@ -45,16 +45,11 @@ public class OpenMrsXformsConnection {
         this.mConnectionDetails = connection;
     }
 
-    /**
-     * Get a single (full) Xform from the OpenMRS server.
-     * @param uuid           the uuid of the form to fetch
-     * @param resultListener the listener to be informed of the form asynchronously
-     * @param errorListener  a listener to be informed of any errors
-     */
+    /** Fetches the XML for a form from the server, using the special "buendia" locale. */
     public void getXform(String uuid, final Response.Listener<String> resultListener,
                          Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(mConnectionDetails,
-            "/xforms/" + uuid + "?v=full",
+            "/xforms/" + uuid + "?v=full&locale=buendia",
             null, // null implies GET
             response -> {
                 try {
@@ -73,11 +68,7 @@ public class OpenMrsXformsConnection {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    /**
-     * List all xforms on the server, but not their contents.
-     * @param listener      a listener to be told about the index entries for all forms asynchronously.
-     * @param errorListener a listener to be told about any errors.
-     */
+    /** Lists all the forms on the server, without fetching their contents. */
     public void listXforms(final Response.Listener<List<OpenMrsXformIndexEntry>> listener,
                            final Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xforms", // list all forms
@@ -122,32 +113,21 @@ public class OpenMrsXformsConnection {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    /**
-     * Send a single Xform to the OpenMRS server.
-     * @param patientUuid    null if this is to add a new patient, non-null for observation on existing
-     *                       patient
-     * @param resultListener the listener to be informed of the form asynchronously
-     * @param errorListener  a listener to be informed of any errors
-     */
+    /** Send a single Xform to the OpenMRS server. */
     public void postXformInstance(
         @Nullable String patientUuid,
-        String entererUuid,
+        String providerUuid,
         String xform,
         final Response.Listener<JSONObject> resultListener,
         Response.ErrorListener errorListener) {
 
-        // The JsonObject members in the API as written at the moment.
-        // int "patient_id"
-        // int "enterer_id"
-        // String "date_entered" in ISO8601 format (1977-01-10T
-        // String "xml" the form.
         JsonObject post = new JsonObject();
         post.addProperty("xml", xform);
         // Don't add patient property for create new patient
         if (patientUuid != null) {
             post.addProperty("patient_uuid", patientUuid);
         }
-        post.addProperty("enterer_uuid", entererUuid);
+        post.addProperty("provider_uuid", providerUuid);
 
         post.addProperty("date_entered", ISODateTimeFormat.dateTime().print(new DateTime()));
         JSONObject postBody = null;

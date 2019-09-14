@@ -24,6 +24,6 @@ import dagger.Provides;
 @Module(includes = {TaskModule.class}, complete = false, library = true)
 public class AppModelModule {
     @Provides @Singleton AppModel provideAppModel(TaskFactory taskFactory) {
-        return new AppModel(App.getInstance().getContentResolver(), taskFactory);
+        return new AppModel(App.getResolver(), taskFactory);
     }
 }

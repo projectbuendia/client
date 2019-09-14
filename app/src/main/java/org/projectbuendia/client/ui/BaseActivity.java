@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui;
 
-import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +19,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.StringRes;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -36,20 +36,29 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
+import org.projectbuendia.client.inject.Qualifiers;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
 import org.projectbuendia.client.updater.DownloadedUpdateInfo;
+import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.utils.Utils.eq;
+
 /**
- * An abstract {@link FragmentActivity} that is the base for all activities, providing a "content
- * view" that can be populated by implementing classes and a "status view" that can be used for
- * troubleshooting and status messages.
+ * An abstract {@link FragmentActivity} that is the base for all activities
+ * except SettingsActivity, providing a "content view" that is populated by
+ * subclasses and a SnackBar for troubleshooting and status messages.
  */
 public abstract class BaseActivity extends FragmentActivity {
     private static final Logger LOG = Logger.create();
@@ -58,13 +67,74 @@ public abstract class BaseActivity extends FragmentActivity {
     private static final long MIN_STEP = -2;
     private static final long MAX_STEP = 2;
 
-    // TODO: Store sScaleStep in an app preference.
+    protected ContextUtils u;
     private static long sScaleStep = 0; // app-wide scale step, selected by user
     private Long pausedScaleStep = null; // this activity's scale step when last paused
     private LinearLayout mWrapperView;
     private FrameLayout mInnerContent;
     private SnackBar snackBar;
+    private Locale initialLocale; // for restarting when locale has changed
+    private Set<String> openDialogTypes;
 
+    @Inject @Qualifiers.HealthEventBus EventBus mHealthEventBus;
+
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initialLocale = Locale.getDefault();
+        openDialogTypes = new HashSet<>();
+        App.inject(this);
+    }
+
+    @Override protected void attachBaseContext(Context base) {
+        super.attachBaseContext(App.applyLocaleSetting(base));
+        u = ContextUtils.from(this);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (!eq(Locale.getDefault(), initialLocale)) Utils.restartActivity(this);
+        initializeSnackBar();
+        if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
+            // If the font scale was changed while this activity was paused, force a refresh.
+            restartWithFontScale(sScaleStep);
+        }
+        EventBus.getDefault().registerSticky(this);
+        App.getHealthMonitor().start();
+        App.getSyncManager().applyPeriodicSyncSettings();
+        mHealthEventBus.post(
+            App.getSettings().getPeriodicSyncDisabled() ?
+                HealthIssue.PERIODIC_SYNC_DISABLED.discovered :
+                HealthIssue.PERIODIC_SYNC_DISABLED.resolved
+        );
+        Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
+    }
+
+    @Override protected void onPause() {
+        EventBus.getDefault().unregister(this);
+        App.getHealthMonitor().stop();
+        pausedScaleStep = sScaleStep;
+        super.onPause();
+    }
+
+    /** Opens the dialog and returns true, unless a dialog of this type is already open. */
+    public boolean openDialog(DialogFragment fragment) {
+        String type = fragment.getClass().getName();
+        if (!openDialogTypes.contains(type)) {
+            fragment.show(getSupportFragmentManager(), null);
+            return true;
+        }
+        return false;
+    }
+
+    public void onDialogOpened(DialogFragment fragment) {
+        openDialogTypes.add(fragment.getClass().getName());
+    }
+
+    public void onDialogClosed(DialogFragment fragment) {
+        openDialogTypes.remove(fragment.getClass().getName());
+    }
+
+    /** Intercepts volume-up/volume-down presses and changes the UI scale step. */
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
@@ -94,10 +164,9 @@ public abstract class BaseActivity extends FragmentActivity {
     public void restartWithFontScale(long newScaleStep) {
         Configuration config = getResources().getConfiguration();
         config.fontScale = (float) Math.pow(STEP_FACTOR, newScaleStep);
-        sScaleStep = newScaleStep;
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        finish();
-        startActivity(getIntent(), ActivityOptions.makeCustomAnimation(getApplicationContext(), 0, 0).toBundle());
+        sScaleStep = newScaleStep;
+        Utils.restartActivity(this);
     }
 
     public void setMenuBarIcon(MenuItem item, Icon icon) {
@@ -138,6 +207,7 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation." {@link SnackBar#message(int)}
      */
     public void snackBar(@StringRes int message) {
+        initializeSnackBar();
         snackBar.message(message);
     }
 
@@ -146,6 +216,7 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation." {@link SnackBar#message(int, int)}
      */
     public void snackBar(@StringRes int message, int priority) {
+        initializeSnackBar();
         snackBar.message(message, priority);
     }
 
@@ -153,8 +224,8 @@ public abstract class BaseActivity extends FragmentActivity {
      * Adds a message to the SnackBar. Priority defaults to 999.
      * @see "SnackBar Documentation." {@link SnackBar#message(int, int, View.OnClickListener, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener listener) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage, View.OnClickListener listener) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, listener, 999);
     }
 
@@ -162,8 +233,9 @@ public abstract class BaseActivity extends FragmentActivity {
      * Adds a message to the SnackBar with informed priority.
      * @see "SnackBar Documentation." {@link SnackBar#message(int, int, View.OnClickListener, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener listener, int priority) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage,
+                         View.OnClickListener listener, int priority) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, listener, priority);
     }
 
@@ -172,8 +244,9 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation."
      * {@link SnackBar#message(int, int, View.OnClickListener, int, boolean, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener actionOnClick, int priority, boolean isDismissible) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage,
+                         View.OnClickListener actionOnClick, int priority, boolean isDismissible) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible, 0);
     }
 
@@ -182,8 +255,10 @@ public abstract class BaseActivity extends FragmentActivity {
      * @see "SnackBar Documentation."
      * {@link SnackBar#message(int, int, View.OnClickListener, int, boolean, int)}
      */
-    public void snackBar(@StringRes int message, @StringRes int actionMessage, View
-        .OnClickListener actionOnClick, int priority, boolean isDismissible, int secondsToTimeOut) {
+    public void snackBar(@StringRes int message, @StringRes int actionMessage,
+                         View.OnClickListener actionOnClick, int priority,
+                         boolean isDismissible, int secondsToTimeOut) {
+        initializeSnackBar();
         snackBar.message(message, actionMessage, actionOnClick, priority, isDismissible,
             secondsToTimeOut);
     }
@@ -193,15 +268,15 @@ public abstract class BaseActivity extends FragmentActivity {
      * @param id The @StringRes for the message.
      */
     public void snackBarDismiss(@StringRes int id) {
-        snackBar.dismiss(id);
+        if (snackBar != null) snackBar.dismiss(id);
     }
 
     /**
      * Programmatically dismiss multiple messages at once
      * @param id a @StringRes message Array
      */
-    public void snackBarDismiss(@StringRes int[] id) {
-        snackBar.dismiss(id);
+    public void snackBarDismiss(@StringRes int[] ids) {
+        if (snackBar != null) snackBar.dismiss(ids);
     }
 
     @Override public void setContentView(View view) {
@@ -228,68 +303,74 @@ public abstract class BaseActivity extends FragmentActivity {
             return;
         }
 
-        for (TroubleshootingAction troubleshootingAction: event.actions) {
-            switch (troubleshootingAction) {
+        for (TroubleshootingAction action : event.actions) {
+            if (action != null) switch (action) {
                 case ENABLE_WIFI:
                     snackBar(R.string.troubleshoot_wifi_disabled,
                         R.string.troubleshoot_wifi_disabled_action_enable,
                         view -> ((WifiManager) getApplicationContext()
                             .getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true),
-                        995, false);
+                        10, false);
                     break;
                 case CONNECT_WIFI:
                     snackBar(R.string.troubleshoot_wifi_disconnected,
                         R.string.troubleshoot_wifi_disconnected_action_connect,
-                        view -> startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)), 996, false);
-                    break;
-                case CHECK_SERVER_AUTH:
-                    snackBar(R.string.troubleshoot_server_auth,
-                        R.string.troubleshoot_server_auth_action_check,
-                        view -> SettingsActivity.start(BaseActivity.this), 999, false);
+                        view -> startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)),
+                        20, false);
                     break;
                 case CHECK_SERVER_CONFIGURATION:
                     snackBar(R.string.troubleshoot_server_address,
                         R.string.troubleshoot_server_address_action_check,
-                        view -> SettingsActivity.start(BaseActivity.this), 999, false);
+                        view -> SettingsActivity.start(BaseActivity.this),
+                        30, false);
                     break;
                 case CHECK_SERVER_REACHABILITY:
                     snackBar(R.string.troubleshoot_server_unreachable,
                         R.string.troubleshoot_action_more_info,
-                        view -> {
+                        view -> showMoreInfoDialog(
                             // TODO: Display the actual server URL that couldn't be reached in
                             // this message. This will require that injection be hooked up
                             // through to this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_unreachable),
-                                getString(R.string.troubleshoot_server_unreachable_details),
-                                true);
-                        }, 997, false);
+                            getString(R.string.troubleshoot_server_unreachable),
+                            getString(R.string.troubleshoot_server_unreachable_details),
+                            true
+                        ), 40, false);
                     break;
-                case CHECK_SERVER_SETUP:
+                case CHECK_SERVER_AUTH:
+                    snackBar(R.string.troubleshoot_server_auth,
+                        R.string.troubleshoot_server_auth_action_check,
+                        view -> SettingsActivity.start(BaseActivity.this),
+                        50, false);
+                    break;
+                case CHECK_SERVER_SETUP:  // server is returning 500
                     snackBar(R.string.troubleshoot_server_unstable,
                         R.string.troubleshoot_action_more_info,
-                        view -> {
+                        view -> showMoreInfoDialog(
                             // TODO: Display the actual server URL that couldn't be reached in
                             // this message. This will require that injection be hooked up
                             // through to this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_unstable),
-                                getString(R.string.troubleshoot_server_unstable_details),
-                                false);
-                        }, 999, false);
+                            getString(R.string.troubleshoot_server_unstable),
+                            getString(R.string.troubleshoot_server_unstable_details),
+                            false
+                        ), 60, false);
                     break;
-                case CHECK_SERVER_STATUS:
+                case CHECK_SERVER_STATUS:  // server is not responding
                     snackBar(R.string.troubleshoot_server_not_responding,
                         R.string.troubleshoot_action_more_info,
-                        view -> {
+                        view -> showMoreInfoDialog(
                             // TODO: Display the actual server URL that couldn't be reached in
                             // this message. This will require that injection be hooked up
                             // through to this inner class, which may be complicated.
-                            showMoreInfoDialog(
-                                getString(R.string.troubleshoot_server_not_responding),
-                                getString(R.string.troubleshoot_server_not_responding_details),
-                                false);
-                        }, 999, false);
+                            getString(R.string.troubleshoot_server_not_responding),
+                            getString(R.string.troubleshoot_server_not_responding_details),
+                            false
+                        ), 60, false);
+                    break;
+                case CHECK_PERIODIC_SYNC_SETTINGS:
+                    snackBar(R.string.troubleshoot_periodic_sync_disabled,
+                        R.string.troubleshoot_action_check_settings,
+                        view -> SettingsActivity.start(BaseActivity.this),
+                        70, false);
                     break;
                 case CHECK_PACKAGE_SERVER_REACHABILITY:
                     snackBar(R.string.troubleshoot_package_server_unreachable,
@@ -298,7 +379,7 @@ public abstract class BaseActivity extends FragmentActivity {
                             getString(R.string.troubleshoot_package_server_unreachable),
                             getString(R.string.troubleshoot_update_server_unreachable_details),
                             true
-                        ), 998, false);
+                        ), 80, false);
                     break;
                 case CHECK_PACKAGE_SERVER_CONFIGURATION:
                     snackBar(R.string.troubleshoot_package_server_misconfigured,
@@ -307,10 +388,10 @@ public abstract class BaseActivity extends FragmentActivity {
                             getString(R.string.troubleshoot_package_server_misconfigured),
                             getString(R.string.troubleshoot_update_server_misconfigured_details),
                             true
-                        ), 999, false);
+                        ), 90, false);
                     break;
                 default:
-                    LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
+                    LOG.w("Troubleshooting action '%1$s' is unknown.", action);
                     return;
             }
         }
@@ -375,10 +456,16 @@ public abstract class BaseActivity extends FragmentActivity {
                 R.string.troubleshoot_package_server_misconfigured_solved,
                 10
         ));
+        troubleshootingMessages.put(HealthIssue.PERIODIC_SYNC_DISABLED,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_periodic_sync_disabled,
+                R.string.troubleshoot_periodic_sync_disabled_solved,
+                10
+            ));
 
         TroubleshootingMessage messages = troubleshootingMessages.get(solvedIssue);
-
         if (messages != null) {
+            initializeSnackBar();
             SnackBar.Message snackBarMessage = snackBar.getMessage(messages.messageId);
             if (snackBarMessage != null) {
                 snackBar.dismiss(snackBarMessage.key);
@@ -407,31 +494,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
     /** The user has requested installation of the last downloaded software update. */
     public static class InstallationRequestedEvent {
-    }
-
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-        initializeSnackBar();
-        if (pausedScaleStep != null && sScaleStep != pausedScaleStep) {
-            // If the font scale was changed while this activity was paused, force a refresh.
-            restartWithFontScale(sScaleStep);
-        }
-        EventBus.getDefault().registerSticky(this);
-        App.getInstance().getHealthMonitor().start();
-        App.getInstance().getSyncManager().applyPeriodicSyncSettings();
-        Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
-    }
-
-    @Override protected void onPause() {
-        EventBus.getDefault().unregister(this);
-        App.getInstance().getHealthMonitor().stop();
-        pausedScaleStep = sScaleStep;
-        super.onPause();
     }
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {

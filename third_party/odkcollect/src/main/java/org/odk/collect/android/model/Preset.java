@@ -17,8 +17,8 @@ public class Preset implements Parcelable {
     public DateTime encounterDatetime;  // the preset value for encounter.encounter_datetime
     public String locationUuid;  // UUID of the preset value for encounter.location_id
     public String providerUuid;  // UUID of the preset value for encounter.provider_id
-    public int pregnant = UNSPECIFIED;
-    public int ivFitted = UNSPECIFIED;
+    public int pregnancy = UNSPECIFIED;
+    public int ivAccess = UNSPECIFIED;
     public String targetGroup;  // text of a section heading in the form to scroll to
 
     public Preset() {}
@@ -27,8 +27,8 @@ public class Preset implements Parcelable {
         encounterDatetime = Parcels.readNullableDateTime(in);
         locationUuid = Parcels.readNullableString(in);
         providerUuid = Parcels.readNullableString(in);
-        pregnant = in.readInt();
-        ivFitted = in.readInt();
+        pregnancy = in.readInt();
+        ivAccess = in.readInt();
         targetGroup = Parcels.readNullableString(in);
     }
 
@@ -42,8 +42,8 @@ public class Preset implements Parcelable {
         Parcels.writeNullableDateTime(dest, encounterDatetime);
         Parcels.writeNullableString(dest, locationUuid);
         Parcels.writeNullableString(dest, providerUuid);
-        dest.writeInt(pregnant);
-        dest.writeInt(ivFitted);
+        dest.writeInt(pregnancy);
+        dest.writeInt(ivAccess);
         Parcels.writeNullableString(dest, targetGroup);
     }
 

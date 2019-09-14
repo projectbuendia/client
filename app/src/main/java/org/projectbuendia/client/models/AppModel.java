@@ -12,7 +12,6 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -27,12 +26,12 @@ import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 import org.projectbuendia.client.events.data.TypedCursorLoadedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
-import org.projectbuendia.client.models.tasks.AddPatientTask;
+import org.projectbuendia.client.json.Datatype;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.tasks.TaskFactory;
-import org.projectbuendia.client.models.tasks.UpdatePatientTask;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Misc;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -69,15 +68,11 @@ public class AppModel {
     }
 
     public @Nonnull LocationForest getForest() {
-        return getForest(App.getInstance().getSettings().getLocaleTag());
+        return forestProvider.getForest(App.getSettings().getLocale());
     }
 
     public @Nullable Location getDefaultLocation() {
         return getForest().getDefaultLocation();
-    }
-
-    private @Nonnull LocationForest getForest(String locale) {
-        return forestProvider.getForest(locale);
     }
 
     public void setOnForestReplacedListener(Runnable listener) {
@@ -102,17 +97,13 @@ public class AppModel {
         return fullSyncEnd;
     }
 
-    public void VoidObservation(CrudEventBus bus, VoidObs voidObs) {
-        String conditions = Contracts.Observations.UUID + " = ?";
-        ContentValues values = new ContentValues();
-        values.put(Contracts.Observations.VOIDED,1);
-        mContentResolver.update(Contracts.Observations.URI, values, conditions, new String[]{voidObs.Uuid});
-        mTaskFactory.voidObsTask(bus, voidObs).execute();
+    public void deleteObs(CrudEventBus bus, Obs obs) {
+        mTaskFactory.newDeleteObsTask(bus, obs).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
-    public void fetchSinglePatient(CrudEventBus bus, String patientId) {
-        mTaskFactory.newFetchSinglePatientTask(patientId, bus).execute();
+    public void fetchPatient(CrudEventBus bus, String patientId) {
+        mTaskFactory.newFetchPatientTask(patientId, bus).execute();
     }
 
     /**
@@ -126,13 +117,12 @@ public class AppModel {
         // See http://stackoverflow.com/questions/24136126/fatal-exception-asynctask and
         // https://github.com/projectbuendia/client/issues/7
         LoadTypedCursorAsyncTask<Patient> task = new LoadTypedCursorAsyncTask<>(
-            Contracts.Patients.URI,
+            Patients.URI,
             // The projection must contain an "_id" column for the ListAdapter as well as all
             // the columns used in Patient.Loader.fromCursor().
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
                 //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.SEX, Patients.LOCATION_UUID},
-            Patient.class, mContentResolver,
-            filter, constraint, Patient.LOADER, bus);
+            Patient.class, mContentResolver, filter, constraint, Patient::load, bus);
         task.execute();
     }
 
@@ -142,7 +132,7 @@ public class AppModel {
      */
     public void loadSinglePatient(CrudEventBus bus, String uuid) {
         mTaskFactory.newLoadItemTask(
-            Contracts.Patients.URI, null, new UuidFilter(), uuid, Patient.LOADER, bus
+            Patients.URI, null, new UuidFilter(), uuid, Patient::load, bus
         ).execute();
     }
 
@@ -151,9 +141,8 @@ public class AppModel {
      * {@link ItemCreatedEvent} with the newly-added patient on
      * the specified event bus when complete.
      */
-    public void addPatient(CrudEventBus bus, PatientDelta patientDelta) {
-        AddPatientTask task = mTaskFactory.newAddPatientTask(patientDelta, bus);
-        task.execute();
+    public void addPatient(CrudEventBus bus, JsonPatient patient) {
+        mTaskFactory.newAddPatientTask(patient, bus).execute();
     }
 
     /**
@@ -161,19 +150,16 @@ public class AppModel {
      * {@link ItemUpdatedEvent} with the updated
      * {@link Patient} on the specified event bus when complete.
      */
-    public void updatePatient(
-        CrudEventBus bus, String patientUuid, PatientDelta patientDelta) {
-        UpdatePatientTask task =
-            mTaskFactory.newUpdatePatientTask(patientUuid, patientDelta, bus);
-        task.execute();
+    public void updatePatient(CrudEventBus bus, JsonPatient patient) {
+        mTaskFactory.newUpdatePatientTask(patient, bus).execute();
     }
 
     /**
      * Asynchronously adds or updates an order (depending whether order.uuid is null), posting an
      * {@link ItemCreatedEvent} or {@link ItemUpdatedEvent} when complete.
      */
-    public void saveOrder(CrudEventBus bus, Order order) {
-        mTaskFactory.newSaveOrderTask(order, bus).execute();
+    public void addOrder(CrudEventBus bus, Order order) {
+        mTaskFactory.newAddOrderTask(order, bus).execute();
     }
 
     /** Asynchronously deletes an order. */
@@ -185,25 +171,37 @@ public class AppModel {
      * Asynchronously adds an encounter that records an order as executed, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
-        addEncounter(bus, patient, new Encounter(
-                patient.uuid, null, DateTime.now(), null, new String[]{orderUuid}
-        ));
+    public void addOrderExecutionEncounter(
+        CrudEventBus bus, String patientUuid, String orderUuid, DateTime executionTime) {
+        addObservationEncounter(bus, patientUuid, new Obs(
+            null, null, patientUuid, Utils.getProviderUuid(), ConceptUuids.ORDER_EXECUTED_UUID,
+            Datatype.NUMERIC, executionTime, orderUuid, "1", null));
+    }
+
+    /** Adds a single observation in an encounter, posting ItemCreatedEvent when complete. */
+    public void addObservationEncounter(CrudEventBus bus, String patientUuid, Obs obs) {
+        mTaskFactory.newAddEncounterTask(new Encounter(
+            null, patientUuid, Utils.getProviderUuid(), DateTime.now(), new Obs[] {obs}
+        ), bus).execute();
     }
 
     /**
      * Asynchronously adds an encounter to a patient, posting a
      * {@link ItemCreatedEvent} when complete.
      */
-    public void addEncounter(CrudEventBus bus, Patient patient, Encounter encounter) {
-        mTaskFactory.newAddEncounterTask(patient, encounter, bus).execute();
+    public void addEncounter(CrudEventBus bus, Encounter encounter) {
+        mTaskFactory.newAddEncounterTask(encounter, bus).execute();
     }
 
-    public void voidObservation(CrudEventBus bus, VoidObs obs) {
-        mTaskFactory.newVoidObsAsyncTask(obs, bus).execute();
+    /**
+     * Updates the denormalized observation fields in a row in the patient table
+     * with the latest unvoided values in the observations table.
+     */
+    public void denormalizeObservations(CrudEventBus bus, String patientUuid) {
+        mTaskFactory.newDenormalizeObservationsTask(patientUuid, bus).execute();
     }
 
-    private static class LoadTypedCursorAsyncTask<T extends Base>
+    private static class LoadTypedCursorAsyncTask<T extends Model>
         extends AsyncTask<Void, Void, TypedCursor<T>> {
 
         private final Uri mContentUri;

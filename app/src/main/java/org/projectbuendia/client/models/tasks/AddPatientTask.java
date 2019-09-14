@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models.tasks;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.net.Uri;
 import android.os.AsyncTask;
 
@@ -25,11 +26,12 @@ import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.Logger;
 
@@ -51,7 +53,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     private final TaskFactory mTaskFactory;
     private final Server mServer;
     private final ContentResolver mContentResolver;
-    private final PatientDelta mPatientDelta;
+    private final JsonPatient mPatient;
     private final CrudEventBus mBus;
     @Inject SyncManager mSyncManager;
 
@@ -62,20 +64,20 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
-        PatientDelta patientDelta,
+        JsonPatient patient,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
-        mPatientDelta = patientDelta;
+        mPatient = patient;
         mBus = bus;
-        App.getInstance().inject(this);
+        App.inject(this);
     }
 
     @Override protected PatientAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonPatient> future = RequestFuture.newFuture();
 
-        mServer.addPatient(mPatientDelta, future, future);
+        mServer.addPatient(mPatient, future, future);
         JsonPatient json;
         try {
             json = future.get();
@@ -104,12 +106,22 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         }
 
         Patient patient = Patient.fromJson(json);
-        Uri uri = mContentResolver.insert(Contracts.Patients.URI, patient.toContentValues());
+        Uri uri = mContentResolver.insert(Patients.URI, patient.toContentValues());
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_CLIENT, null);
         }
-
         mUuid = json.uuid;
+        if (json.observations != null) {
+            ContentValues[] cvs = new ContentValues[json.observations.size()];
+            int i = 0;
+            for (JsonObservation obs : json.observations) {
+                cvs[i++] = obs.toContentValues();
+            }
+            mContentResolver.bulkInsert(Observations.URI, cvs);
+            if (DenormalizeObservationsTask.needsDenormalization(cvs)) {
+                App.getModel().denormalizeObservations(mBus, patient.uuid);
+            }
+        }
         return null;
     }
 
@@ -125,26 +137,10 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
             return;
         }
 
-        // If the UUID was not set, a programming error occurred. Log and post an error event.
-        if (mUuid == null) {
-            LOG.e(
-                "Although a patient add ostensibly succeeded, no UUID was set for the newly-"
-                    + "added patient. This indicates a programming error.");
-
-            mBus.post(new PatientAddFailedEvent(
-                PatientAddFailedEvent.REASON_UNKNOWN, null /*exception*/));
-            return;
-        }
-
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(
-            Contracts.Patients.URI,
-            null,
-            new UuidFilter(),
-            mUuid,
-            Patient.LOADER,
-            mBus);
+            Patients.URI, null, new UuidFilter(), mUuid, Patient::load, mBus);
         task.execute();
     }
 
@@ -153,9 +149,11 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(ItemLoadedEvent<Patient> event) {
-            mBus.post(new ItemCreatedEvent<>(event.item));
-            mBus.unregister(this);
+        public void onEventMainThread(ItemLoadedEvent<?> event) {
+            if (event.item instanceof Patient) {
+                mBus.post(new ItemCreatedEvent<>((Patient) event.item));
+                mBus.unregister(this);
+            }
         }
 
         public void onEventMainThread(ItemLoadFailedEvent event) {

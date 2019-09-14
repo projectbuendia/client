@@ -11,20 +11,21 @@
 
 package org.projectbuendia.client.utils;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Dialog;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcel;
 import android.view.View;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
@@ -35,22 +36,26 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
+import org.joda.time.ReadablePartial;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.net.Server;
 
+import java.io.File;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -71,13 +76,13 @@ public class Utils {
     public static final DateTime MAX_DATETIME = new DateTime(MAX_TIME, DateTimeZone.UTC);
     public static final LocalDate MIN_DATE = new LocalDate(0, 1, 1).year().withMinimumValue();
     public static final LocalDate MAX_DATE = new LocalDate(0, 12, 31).year().withMaximumValue();
+
     public static final int SECOND = 1000;  // in ms
     public static final int MINUTE = 60 * SECOND;  // in ms
     public static final int HOUR = 60 * MINUTE;  // in ms
     public static final int DAY = 24 * HOUR;  // in ms
 
     private static Map<Integer, String> sHttpMethods = initHttpMethods();
-
     private static Map<Integer, String> initHttpMethods() {
         Map<Integer, String> map = new HashMap<>();
         map.put(Request.Method.DEPRECATED_GET_OR_POST, "DEPRECATED_GET_OR_POST");
@@ -91,6 +96,7 @@ public class Utils {
         map.put(Request.Method.PATCH, "PATCH");
         return map;
     }
+
 
     /** Prevent instantiation. */
     private Utils() { }
@@ -112,6 +118,11 @@ public class Utils {
         return value != null ? value : defaultValue;
     }
 
+    /** Returns a value if that value is not null, or a specified default value otherwise. */
+    public static @Nonnull String nonemptyOrDefault(@Nullable String value, @Nonnull String defaultValue) {
+        return isEmpty(value) ? defaultValue : value;
+    }
+
     /** Converts nulls to a default integer value. */
     public static int toNonnull(@Nullable Integer n, int defaultValue) {
         return n == null ? defaultValue : n;
@@ -130,8 +141,15 @@ public class Utils {
         return array[index];
     }
 
+    /** Converts a list of Strings to an array of Strings. */
+    public static String[] toStringArray(List<String> items) {
+        if (items == null) return new String[0];
+        return items.toArray(new String[0]);
+    }
+
     /** Converts a list of Longs to an array of primitive longs. */
-    public static long[] toArray(List<Long> items) {
+    public static long[] toLongArray(List<Long> items) {
+        if (items == null) return new long[0];
         long[] array = new long[items.size()];
         int i = 0;
         for (Long item : items) {
@@ -151,11 +169,49 @@ public class Utils {
     }
 
 
-    // ==== String handling ====
+    // ==== Collections ====
 
-    /** Performs a null-safe check for a null or empty string. */
+    /** Performs a null-safe check for a null or empty array. */
+    public static <T> boolean isEmpty(@Nullable T[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /** Performs a null-safe check for a null or empty Collection. */
+    public static boolean isEmpty(@Nullable Collection collection) {
+        return collection == null || collection.size() == 0;
+    }
+
+    /** Converts nulls to empty Lists. */
+    public static <T> List<T> toNonnull(@Nullable List<T> list) {
+        return list != null ? list : ImmutableList.of();
+    }
+
+    /** Performs a null-safe check for an array with at least one item. */
+    public static <T> boolean hasItems(@Nullable T[] array) {
+        return array != null && array.length > 0;
+    }
+
+    /** Performs a null-safe check for a Collection with at least one item. */
+    public static boolean hasItems(@Nullable Collection collection) {
+        return collection != null && collection.size() > 0;
+    }
+
+
+    // ==== Strings ====
+
+    /** Performs a null-safe check for a null or empty String. */
     public static boolean isEmpty(@Nullable String str) {
-        return str == null || str.isEmpty();
+        return str == null || str.length() == 0;
+    }
+
+    /** Performs a null-safe check for a null, empty, or whitespace String. */
+    public static boolean isBlank(@Nullable String str) {
+        return str == null || str.length() == 0 || str.trim().length() == 0;
+    }
+
+    /** Performs a null-safe check for a String with at least one character. */
+    public static boolean hasChars(@Nullable String str) {
+        return str != null && str.length() > 0;
     }
 
     /** Converts empty strings to null. */
@@ -252,33 +308,28 @@ public class Utils {
         }
     }
 
+    /** Converts objects of integer types to longs. */
+    public static Long toLongOrNull(Object obj) {
+        if (obj instanceof Integer) return (long) (Integer) obj;
+        if (obj instanceof Long) return (long) obj;
+        if (obj instanceof BigInteger) return ((BigInteger) obj).longValue();
+        if (obj instanceof String) return toLongOrNull((String) obj);
+        return null;
+    }
+
     /** Converts objects of integer types to BigIntegers. */
     public static BigInteger toBigInteger(Object obj) {
-        if (obj instanceof Integer) {
-            return BigInteger.valueOf(((Integer) obj).longValue());
-        }
-        if (obj instanceof Long) {
-            return BigInteger.valueOf((Long) obj);
-        }
-        if (obj instanceof BigInteger) {
-            return (BigInteger) obj;
-        }
+        if (obj instanceof Integer) return BigInteger.valueOf(((Integer) obj).longValue());
+        if (obj instanceof Long) return BigInteger.valueOf((Long) obj);
+        if (obj instanceof BigInteger) return (BigInteger) obj;
         return null;
     }
 
 
     // ==== Dates and times ====
 
-    private static final DateTimeFormatter SHORT_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM"); // TODO/i18n
-    private static final DateTimeFormatter MEDIUM_DATE_FORMATTER =
-        DateTimeFormat.forPattern("d MMM yyyy"); // TODO/i18n
-    private static final DateTimeFormatter SHORT_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("d MMM 'at' HH:mm"); // TODO/i18n
-    private static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER =
-        DateTimeFormat.mediumDateTime();
-    private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
-        DateTimeFormat.forPattern("HH:mm"); // TODO/i18n
+    private static final DateTimeFormatter ISO8601_UTC_DATETIME_FORMATTER =
+        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
@@ -291,7 +342,7 @@ public class Utils {
     }
 
     /** Converts a nullable LocalDate to a yyyy-mm-dd String or null. */
-    public static @Nullable String formatDate(@Nullable LocalDate date) {
+    public static @Nullable String format(@Nullable LocalDate date) {
         return date != null ? date.toString() : null;
     }
 
@@ -304,37 +355,46 @@ public class Utils {
         }
     }
 
-    /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
-    public static @Nullable String formatShortDate(@Nullable LocalDate localDate) {
-        return localDate != null ? SHORT_DATE_FORMATTER.print(localDate) : null;
+    /** Converts a nullable DateTime to a yyyy-mm-ddThh:mm:ssZ String or null. */
+    public static @Nullable String formatUtc8601(@Nullable DateTime dt) {
+        return dt != null ? ISO8601_UTC_DATETIME_FORMATTER.print(dt.withZone(DateTimeZone.UTC)) : null;
     }
 
-    /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
-    public static @Nullable String formatMediumDate(@Nullable LocalDate localDate) {
-        return localDate != null ? MEDIUM_DATE_FORMATTER.print(localDate) : null;
+    public static enum DateStyle {
+        MONTH_DAY(R.string.month_day_format),
+        SENTENCE_MONTH_DAY(R.string.sentence_month_day_format),
+        YEAR_MONTH_DAY(R.string.year_month_day_format),
+        SENTENCE_YEAR_MONTH_DAY(R.string.sentence_year_month_day_format),
+        HOUR_MINUTE(R.string.hour_minute_format),
+        SENTENCE_HOUR_MINUTE(R.string.sentence_hour_minute_format),
+        MONTH_DAY_HOUR_MINUTE(R.string.month_day_hour_minute_format),
+        SENTENCE_MONTH_DAY_HOUR_MINUTE(R.string.sentence_month_day_hour_minute_format);
+
+        private final int formatId;
+        private Map<Locale, DateTimeFormatter> formatters = new HashMap<>();
+        private DateTimeFormatter formatter = null;
+
+        private DateStyle(int formatId) {
+            this.formatId = formatId;
+        }
+
+        public DateTimeFormatter getFormatter() {
+            Locale locale = App.getSettings().getLocale();
+            if (formatters.get(locale) == null) {
+                formatters.put(locale, DateTimeFormat.forPattern(App.str(formatId)));
+            }
+            return formatters.get(locale);
+        }
     }
 
-    /** Converts a nullable {@link DateTime} to a nullable String with day and month only. */
-    public static @Nullable String formatShortDate(@Nullable DateTime dateTime) {
-        return dateTime != null ? SHORT_DATE_FORMATTER.print(dateTime) : null;
+    public static @Nullable String format(@Nullable ReadablePartial partial, DateStyle style) {
+        if (partial == null) return null;
+        return style.getFormatter().print(partial);
     }
 
-    /** Converts a nullable {@link DateTime} to a nullable String with time, day, and month only. */
-    public static @Nullable String formatShortDateTime(@Nullable DateTime dateTime) {
-        return dateTime != null ? SHORT_DATETIME_FORMATTER.print(dateTime) : null;
-    }
-
-    /** Converts a nullable {@link DateTime} to a nullable String in HH:MM format. */
-    public static @Nullable String formatTimeOfDay(@Nullable DateTime dateTime) {
-        return dateTime != null ? TIME_OF_DAY_FORMATTER.print(dateTime) : null;
-    }
-
-    /**
-     * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
-     * time zone.
-     */
-    public static @Nullable String formatMediumDateTime(@Nullable DateTime dateTime) {
-        return dateTime != null ? MEDIUM_DATETIME_FORMATTER.print(dateTime) : null;
+    public static @Nullable String format(@Nullable DateTime datetime, DateStyle style) {
+        if (datetime == null) return null;
+        return style.getFormatter().print(datetime.toLocalDateTime());
     }
 
     /** Gets the DateTime at the start of a day. */
@@ -374,11 +434,36 @@ public class Utils {
     }
 
     /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate, Resources resources) {
+    public static String birthdateToAge(LocalDate birthdate) {
         Period age = new Period(birthdate, LocalDate.now());
         int years = age.getYears(), months = age.getMonths();
-        return years >= 5 ? resources.getString(R.string.abbrev_n_years, years) :
-            resources.getString(R.string.abbrev_n_months, months + years * 12);
+        return years >= 5 ? App.str(R.string.abbrev_n_years, years) :
+            App.str(R.string.abbrev_n_months, months + years * 12);
+    }
+
+
+    // ==== Localization ====
+
+    public static Locale toLocale(String languageTag) {
+        if (Build.VERSION.SDK_INT >= 21) return Locale.forLanguageTag(languageTag);
+        String[] parts = splitFields(languageTag, "_", 2);
+        return new Locale(parts[0], parts[1]);
+    }
+
+    public static @Nullable String toLanguageTag(@Nullable Locale locale) {
+        if (locale == null) return null;
+        if (Build.VERSION.SDK_INT >= 21) return locale.toLanguageTag();
+        return locale.getLanguage() +
+            (Utils.isEmpty(locale.getCountry()) ? "" : "-" + locale.getCountry()) +
+            (Utils.isEmpty(locale.getVariant()) ? "" : "-" + locale.getVariant());
+    }
+
+    /** Restarts the current activity (for use after a configuration change). */
+    public static void restartActivity(Activity activity) {
+        activity.finish();
+        activity.startActivity(
+            activity.getIntent(),
+            ActivityOptions.makeCustomAnimation(activity, 0, 0).toBundle());
     }
 
 
@@ -397,6 +482,15 @@ public class Utils {
         } catch (Exception e) {  // should never happen
             return null;
         }
+    }
+
+    public static void recursivelyDelete(File path) {
+        if (path.isDirectory()) {
+            for (File child : path.listFiles()) {
+                recursivelyDelete(child);
+            }
+        }
+        path.delete();
     }
 
 
@@ -425,6 +519,18 @@ public class Utils {
         return millis == null ? null : new DateTime(millis);
     }
 
+    /** Gets a nullable boolean value from a cursor. */
+    public static Boolean getBoolean(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : (c.getLong(index) != 0);
+    }
+
+    /** Gets a boolean value from a cursor, returning a default value instead of null. */
+    public static boolean getBoolean(Cursor c, String columnName, boolean defaultValue) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? defaultValue : (c.getLong(index) != 0);
+    }
+
     /** Gets a nullable integer value from a cursor. */
     public static Integer getInt(Cursor c, String columnName) {
         int index = c.getColumnIndex(columnName);
@@ -432,7 +538,7 @@ public class Utils {
     }
 
     /** Gets an integer value from a cursor, returning a default value instead of null. */
-    public static int getInt(Cursor c, String columnName, @Nonnull int defaultValue) {
+    public static int getInt(Cursor c, String columnName, int defaultValue) {
         int index = c.getColumnIndex(columnName);
         // The cast (Long) c.getLong(index) is necessary to work around the fact that
         // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
@@ -460,40 +566,51 @@ public class Utils {
 
     // ==== Bundles ====
 
-    /** Gets a nullable Long value from a Bundle.  Always use this instead of getLong() directly. */
-    public static Long getLong(Bundle bundle, String key) {
-        // getLong never returns null; we have to check explicitly.
-        return bundle.containsKey(key) ? bundle.getLong(key) : null;
-    }
-
     /** Gets a nullable DateTime value from a Bundle.  Always use this instead of getLong() directly. */
     public static DateTime getDateTime(Bundle bundle, String key) {
         // getLong never returns null; we have to check explicitly.
         return bundle.containsKey(key) ? new DateTime(bundle.getLong(key)) : null;
     }
 
-    /** Puts a nullable DateTime into a Bundle.  Always use this instead of setLong() directly. */
-    public static void putDateTime(Bundle bundle, String key, DateTime time) {
-        if (time != null) {
-            bundle.putLong(key, time.getMillis());
-        }
+    /** Creates a Bundle containing one key-value pair. */
+    public static Bundle bundle(String key1, Object value1) {
+        return addToBundle(new Bundle(), key1, value1);
     }
 
-    /** Puts an integer into a Bundle in a chainable way. */
-    public static Bundle putInt(String key, int value, Bundle bundle) {
-        bundle.putInt(key, value);
-        return bundle;
+    /** Creates a Bundle containing two key-value pairs. */
+    public static Bundle bundle(String key1, Object value1, String key2, Object value2) {
+        return addToBundle(
+            addToBundle(
+                new Bundle(), key1, value1
+            ), key2, value2
+        );
     }
 
-    /** Puts a String into a Bundle in a chainable way. */
-    public static Bundle putString(String key, String value, Bundle bundle) {
-        bundle.putString(key, value);
-        return bundle;
+    /** Creates a Bundle containing three key-value pairs. */
+    public static Bundle bundle(String key1, Object value1, String key2, Object value2,
+                                String key3, Object value3) {
+        return addToBundle(
+            addToBundle(
+                addToBundle(
+                    new Bundle(), key1, value1
+                ), key2, value2
+            ), key3, value3
+        );
     }
 
-    /** Puts a Bundle into a Bundle in a chainable way. */
-    public static Bundle putBundle(String key, Bundle value, Bundle bundle) {
-        bundle.putBundle(key, value);
+    /** Adds a key-value pair to a Bundle and returns the Bundle for chaining. */
+    public static Bundle addToBundle(Bundle bundle, String key, Object value) {
+        if (value instanceof String) bundle.putString(key, (String) value);
+        else if (value instanceof Double) bundle.putDouble(key, (Double) value);
+        else if (value instanceof Float) bundle.putFloat(key, (Float) value);
+        else if (value instanceof Long) bundle.putLong(key, (Long) value);
+        else if (value instanceof Integer) bundle.putInt(key, (Integer) value);
+        else if (value instanceof Boolean) bundle.putBoolean(key, (Boolean) value);
+        else if (value instanceof ReadableInstant) bundle.putLong(key, ((ReadableInstant) value).getMillis());
+        else if (value instanceof Bundle) bundle.putBundle(key, (Bundle) value);
+        else if (value instanceof Serializable) bundle.putSerializable(key, (Serializable) value);
+        else if (value != null) throw new IllegalArgumentException(format(
+            "Don't know how to put a value of type %s into a Bundle", value.getClass()));
         return bundle;
     }
 
@@ -502,13 +619,6 @@ public class Utils {
         Message message = handler.obtainMessage(what);
         message.setData(data);
         return message;
-    }
-
-    /** Serializes a Bundle to a String. */
-    public static String toString(Bundle bundle) {
-        Parcel parcel = Parcel.obtain();
-        bundle.writeToParcel(parcel, 0);
-        return new String(parcel.marshall(), StandardCharsets.ISO_8859_1);
     }
 
 
@@ -548,6 +658,13 @@ public class Utils {
         }
     }
 
+    /** Sets a view's enabled state and focusable state at the same time. */
+    public static void setEnabled(View view, boolean enabled) {
+        view.setEnabled(enabled);
+        view.setFocusable(enabled);
+        view.setFocusableInTouchMode(enabled);
+    }
+
 
     // ==== OpenMRS ====
 
@@ -574,6 +691,12 @@ public class Utils {
     /** Expands a UUID from a small integer. */
     public static String toUuid(int id) {
         return expandUuid(id);
+    }
+
+    /** Gets the UUID of the currently active user (provider). */
+    public static String getProviderUuid() {
+        JsonUser user = App.getUserManager().getActiveUser();
+        return user != null ? user.getUuid() : null;
     }
 
 
@@ -672,30 +795,6 @@ public class Utils {
     };
 
 
-    // ==== Concurrency ====
-
-    public static void runInBackground(Runnable runnable) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override protected Void doInBackground(Void... voids) {
-                runnable.run();
-                return null;
-            }
-        }.execute();
-    }
-
-    public static <T> void runInBackground(Provider<T> provider, Receiver<T> receiver) {
-        new AsyncTask<Void, Void, T>() {
-            @Override protected T doInBackground(Void... voids) {
-                return provider.provide();
-            }
-
-            @Override protected void onPostExecute(T result) {
-                if (receiver != null) receiver.receive(result);
-            }
-        }.execute();
-    }
-
-
     // ==== Logging ====
 
     /**
@@ -707,7 +806,7 @@ public class Utils {
      *               arbitrary data to record with the event.
      */
     public static void logUserAction(String action, String... pairs) {
-        Server server = App.getInstance().getServer();
+        Server server = App.getServer();
         if (server != null) {
             List<String> allPairs = Lists.newArrayList("action", action);
             allPairs.addAll(Arrays.asList(pairs));
@@ -724,7 +823,7 @@ public class Utils {
      *              arbitrary data to record with the event.
      */
     public static void logEvent(String event, String... pairs) {
-        Server server = App.getInstance().getServer();
+        Server server = App.getServer();
         if (server != null) {
             List<String> allPairs = Lists.newArrayList("event", event);
             allPairs.addAll(Arrays.asList(pairs));
@@ -742,11 +841,11 @@ public class Utils {
         return sw.toString();
     }
 
-    /** Converts a string to a CSS-safe identifier by replacing characters into underscores. */
+    /** Converts a string to a lowercase CSS-safe identifier. */
     // We use this to give predictable class names to HTML rows so that tests
     // can verify the values in the patient chart.  See PatientChartActivityTest.
     public static String toCssIdentifier(String input) {
-        return input.trim().replaceAll("[\\W]", "_");
+        return input.trim().toLowerCase().replaceAll("[^a-z0-9-]+", "-");
     }
 
     /** Returns an unambiguous string representation of a string, prefixed with its length. */

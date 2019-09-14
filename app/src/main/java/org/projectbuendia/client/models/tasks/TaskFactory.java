@@ -17,14 +17,13 @@ import android.os.AsyncTask;
 
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Base;
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.CursorLoader;
-import org.projectbuendia.client.models.VoidObs;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Model;
+import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.net.Server;
 
 /**
@@ -35,59 +34,42 @@ public class TaskFactory {
     private final Server mServer;
     private final ContentResolver mContentResolver;
 
-    /** Creates a new {@link TaskFactory}. */
-    public TaskFactory(
-        Server server, ContentResolver contentResolver) {
+    public TaskFactory(Server server, ContentResolver contentResolver) {
         mServer = server;
         mContentResolver = contentResolver;
     }
 
-    /** Creates a new {@link AddPatientTask}. */
-    public AddPatientTask newAddPatientTask(PatientDelta patientDelta, CrudEventBus bus) {
-        return new AddPatientTask(this, mServer, mContentResolver, patientDelta, bus);
+    public AddPatientTask newAddPatientTask(JsonPatient patient, CrudEventBus bus) {
+        return new AddPatientTask(this, mServer, mContentResolver, patient, bus);
     }
 
-    public FetchSinglePatientTask newFetchSinglePatientTask(
+    public FetchPatientTask newFetchPatientTask(
         String patientId, CrudEventBus bus) {
-        return new FetchSinglePatientTask(
+        return new FetchPatientTask(
             this, mServer, mContentResolver, patientId, bus);
     }
 
-    public VoidObsTask voidObsTask(CrudEventBus bus, VoidObs voidObs) {
-        return new VoidObsTask(this, mServer, mContentResolver, voidObs, bus);
+    public DeleteObsTask newDeleteObsTask(CrudEventBus bus, Obs obs) {
+        return new DeleteObsTask(this, mServer, mContentResolver, obs, bus);
     }
 
-    /** Creates a new {@link UpdatePatientTask}. */
-    public UpdatePatientTask newUpdatePatientTask(
-        String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
-        return new UpdatePatientTask(
-            this, mServer, mContentResolver, patientUuid, patientDelta, bus);
+    public UpdatePatientTask newUpdatePatientTask(JsonPatient patient, CrudEventBus bus) {
+        return new UpdatePatientTask(this, mServer, mContentResolver, patient, bus);
     }
 
-    /** Creates a new {@link AddEncounterTask}. */
-    public AddEncounterTask newAddEncounterTask(
-        Patient patient, Encounter encounter, CrudEventBus bus) {
-        return new AddEncounterTask(
-            this, mServer, mContentResolver, patient, encounter, bus);
+    public AddEncounterTask newAddEncounterTask(Encounter encounter, CrudEventBus bus) {
+        return new AddEncounterTask(this, mServer, mContentResolver, encounter, bus);
     }
 
-    /** Creates a new {@link SaveOrderTask}. */
-    public SaveOrderTask newSaveOrderTask(Order order, CrudEventBus bus) {
-        return new SaveOrderTask(this, mServer, mContentResolver, order, bus);
+    public AddOrderTask newAddOrderTask(Order order, CrudEventBus bus) {
+        return new AddOrderTask(this, mServer, mContentResolver, order, bus);
     }
 
-    // DO NOT SUBMIT: work out why there's two of these.
-    public VoidObsTask newVoidObsAsyncTask(VoidObs obs, CrudEventBus bus) {
-        return new VoidObsTask(this, mServer, mContentResolver, obs, bus);
-    }
-
-    /** Creates a new {@link DeleteOrderTask}. */
     public DeleteOrderTask newDeleteOrderTask(String orderUuid, CrudEventBus bus) {
         return new DeleteOrderTask(mServer, mContentResolver, orderUuid, bus);
     }
 
-    /** Creates a new {@link LoadItemTask}. */
-    public <T extends Base<?>> LoadItemTask<T> newLoadItemTask(
+    public <T extends Model> LoadItemTask<T> newLoadItemTask(
         Uri contentUri,
         String[] projectionColumns,
         SimpleSelectionFilter filter,
@@ -96,5 +78,9 @@ public class TaskFactory {
         CrudEventBus bus) {
         return new LoadItemTask<>(
             mContentResolver, contentUri, projectionColumns, filter, constraint, loader, bus);
+    }
+
+    public DenormalizeObservationsTask newDenormalizeObservationsTask(String patientUuid, CrudEventBus bus) {
+        return new DenormalizeObservationsTask(this, mServer, mContentResolver, patientUuid, bus);
     }
 }

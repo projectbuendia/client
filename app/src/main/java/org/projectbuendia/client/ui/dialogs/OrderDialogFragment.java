@@ -12,17 +12,12 @@
 package org.projectbuendia.client.ui.dialogs;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -34,21 +29,26 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
-import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.MedCompleter;
+import org.projectbuendia.client.ui.TextChangedWatcher;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.Arrays;
+import java.util.List;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
-/** A {@link DialogFragment} for adding a new user. */
-public class OrderDialogFragment extends DialogFragment {
+import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY;
+
+/** A DialogFragment for creating or editing a treatment order. */
+public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment> {
     public static final int MAX_FREQUENCY = 24;  // maximum 24 times per day
     public static final int MAX_DURATION_DAYS = 30;  // maximum 30 days
     public static final String[] ROUTE_LABELS = {
@@ -61,44 +61,42 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_route) EditText mRoute;
     @InjectView(R.id.order_dosage) EditText mDosage;
     @InjectView(R.id.order_frequency) EditText mFrequency;
+    @InjectView(R.id.order_times_per_day_label) TextView mTimesPerDayLabel;
     @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
     @InjectView(R.id.order_duration_label) TextView mDurationLabel;
     @InjectView(R.id.order_notes) EditText mNotes;
+    @InjectView(R.id.order_stop_now) Button mStopNow;
     @InjectView(R.id.order_delete) Button mDelete;
 
-    private LayoutInflater mInflater;
+    private String mPatientUuid;
+    private Order mOrder;
     private String mOrderUuid;
+    private DateTime mNow;
+    private DateTime mStart;
+    private boolean mExecuted;
+    private boolean mStopped;
 
     /** Creates a new instance and registers the given UI, if specified. */
-    public static OrderDialogFragment newInstance(String patientUuid, Order order) {
+    public static OrderDialogFragment create(
+        String patientUuid, Order order, List<Obs> executions) {
+        // This time is used as the current time for all calculations in this dialog.
+        // Always use this value instead of calling now(), in order to maintain UI
+        // consistency (e.g. if opened before midnight and submitted after midnight).
+        DateTime now = DateTime.now();
+
         Bundle args = new Bundle();
         args.putString("patientUuid", patientUuid);
-        args.putBoolean("new", order == null);
-
-        // This time is used as the current time for any calculations in this dialog.
-        // Use this value throughout instead of calling now().  This is necessary to maintain UI
-        // consistency (e.g. if the dialog is opened before midnight and submitted after midnight).
-        args.putLong("now_millis", DateTime.now().getMillis());
-
-        if (order != null) {
-            args.putString("uuid", order.uuid);
-            args.putString("medication", order.instructions.medication);
-            args.putString("route", order.instructions.route);
-            args.putString("dosage", order.instructions.dosage);
-            args.putInt("frequency", order.instructions.frequency);
-            args.putString("notes", order.instructions.notes);
-            Utils.putDateTime(args, "start_millis", order.start);
-            Utils.putDateTime(args, "stop_millis", order.stop);
-        }
-        OrderDialogFragment fragment = new OrderDialogFragment();
-        fragment.setArguments(args);
-        return fragment;
+        args.putSerializable("order", order);
+        args.putBoolean("executed", Utils.hasItems(executions));
+        args.putBoolean("stopped", order != null && (
+            !order.isSeries() || (order.stop != null && now.isAfter(order.stop))));
+        args.putLong("nowMillis", now.getMillis());
+        return new OrderDialogFragment().withArgs(args);
     }
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mInflater = LayoutInflater.from(getActivity());
+    @Override public AlertDialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.order_dialog_fragment);
     }
 
     @Override public void onResume() {
@@ -115,24 +113,26 @@ public class OrderDialogFragment extends DialogFragment {
         });
     }
 
-    private void populateFields(Bundle args) {
-        mMedication.setText(args.getString("medication"));
-        mRoute.setText(args.getString("route"));
-        mDosage.setText(args.getString("dosage"));
-        int frequency = args.getInt("frequency");
-        mFrequency.setText(frequency > 0 ? Integer.toString(frequency) : "");
-        mNotes.setText(args.getString("notes"));
-        DateTime now = Utils.getDateTime(args, "now_millis");
-        DateTime stop = Utils.getDateTime(args, "stop_millis");
-        if (stop != null) {
-            LocalDate lastDay = stop.toLocalDate();
-            // TODO(ping): Orders that stopped in the past will have a blank duration.
-            int days = Days.daysBetween(now.toLocalDate(), lastDay).getDays();
-            if (days >= 0) {
-                mGiveForDays.setText(Utils.format("%d", days + 1));  // 1 day means stop after today
-            }
-        }
-        updateLabels();
+    @Override public void onOpen(Bundle args) {
+        mPatientUuid = args.getString("patientUuid");
+        mOrder = (Order) args.getSerializable("order");
+        mOrderUuid = mOrder != null ? mOrder.uuid : null;
+        mNow = Utils.getDateTime(args, "nowMillis");
+        mStart = mOrder != null ? mOrder.start : mNow;
+        mExecuted = args.getBoolean("executed");
+        mStopped = args.getBoolean("stopped");
+
+        // Finish building the dialog's behaviour.
+        addClearButton(mMedication, R.drawable.abc_ic_clear_mtrl_alpha);
+        mMedication.setThreshold(1);
+        mMedication.setAdapter(new AutocompleteAdapter(
+            getActivity(), R.layout.captioned_item, new MedCompleter()));
+        addListeners();
+
+        // Populate the dialog appropriately.
+        dialog.setTitle(mOrder == null ? R.string.title_new_order : R.string.title_edit_order);
+        if (mOrder != null) populateFields();
+        updateUi();
     }
 
     private void addListeners() {
@@ -152,39 +152,27 @@ public class OrderDialogFragment extends DialogFragment {
                 .show();
         });
 
-        mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
+        mFrequency.addTextChangedListener(new TextChangedWatcher(this::updateUi));
+        mGiveForDays.addTextChangedListener(new TextChangedWatcher(this::updateUi));
 
-        mDelete.setOnClickListener(view -> onDelete(getDialog(), mOrderUuid));
+        mStopNow.setOnClickListener(view -> onStopNow());
+        mDelete.setOnClickListener(view -> onDelete());
     }
 
-    /** Adjusts the size of the autocomplete dropdown according to other UI elements. */
-    private void adjustDropDownSize(AutoCompleteTextView textView, int itemHorizontalPadding) {
-        // Get the visible area of the activity, excluding the soft keyboard.
-        View activityRoot = getActivity().getWindow().getDecorView().getRootView();
-        Rect visibleFrame = new Rect();
-        activityRoot.getWindowVisibleDisplayFrame(visibleFrame);
-
-        // Find the bottom of the text field, where the dropdown list is attached.
-        int[] textViewLocation = new int[2];
-        textView.getLocationOnScreen(textViewLocation);
-        int textViewTop = textViewLocation[1];
-        int textViewBottom = textViewTop + textView.getHeight();
-
-        // Limit the height of the autocomplete dropdown list to stay within the
-        // visible area of the activity; otherwise, the list will extend to the
-        // bottom of the screen, where it is covered up by the soft keyboard.
-        textView.setDropDownHeight(visibleFrame.bottom - textViewBottom);
-
-        // Expand the dropdown window left and right to accommodate left/right
-        // padding inside dropdown list items, so that the text in the list items
-        // is horizontally aligned with the text in the input field.
-        textView.setDropDownHorizontalOffset(-itemHorizontalPadding);
-        textView.setDropDownWidth(mMedication.getWidth() + itemHorizontalPadding * 2);
+    private void populateFields() {
+        mMedication.setText(mOrder.instructions.medication);
+        mRoute.setText(mOrder.instructions.route);
+        mDosage.setText(mOrder.instructions.dosage);
+        int frequency = mOrder.instructions.frequency;
+        mFrequency.setText(frequency > 0 ? Integer.toString(frequency) : "");
+        mNotes.setText(mOrder.instructions.notes);
+        if (mOrder.stop != null) {
+            int days = Days.daysBetween(mStart.toLocalDate(), mOrder.stop.toLocalDate()).getDays();
+            if (days > 0) mGiveForDays.setText("" + days);
+        }
     }
 
-    public void onSubmit(DialogInterface dialog) {
-        String uuid = getArguments().getString("uuid");
-        String patientUuid = getArguments().getString("patientUuid");
+    @Override protected void onSubmit() {
         String medication = mMedication.getText().toString().trim();
         String route = mRoute.getText().toString().trim();
         String dosage = mDosage.getText().toString().trim();
@@ -203,64 +191,52 @@ public class OrderDialogFragment extends DialogFragment {
             setError(mFrequency, R.string.order_cannot_exceed_n_times_per_day, MAX_FREQUENCY);
             valid = false;
         }
-        if (durationDays != null && durationDays == 0) {
-            setError(mGiveForDays, R.string.order_give_for_days_cannot_be_zero);
-            valid = false;
-        }
-        if (durationDays != null && durationDays > MAX_DURATION_DAYS) {
-            setError(mGiveForDays, R.string.order_cannot_exceed_n_days, MAX_DURATION_DAYS);
-            valid = false;
+        if (durationDays != null) {
+            if (durationDays == 0) {
+                setError(mGiveForDays, R.string.order_give_for_days_cannot_be_zero);
+                valid = false;
+            }
+            if (durationDays > MAX_DURATION_DAYS) {
+                setError(mGiveForDays, R.string.order_cannot_exceed_n_days, MAX_DURATION_DAYS);
+                valid = false;
+            }
+            if (mStart.plusDays(durationDays).isBefore(mNow)) {
+                setError(mGiveForDays, R.string.order_cannot_stop_in_past);
+                valid = false;
+            }
         }
         Utils.logUserAction("order_submitted",
             "valid", "" + valid,
-            "uuid", uuid,
+            "uuid", mOrderUuid,
             "medication", medication,
             "route", route,
             "dosage", dosage,
             "frequency", "" + frequency,
             "notes", notes,
             "durationDays", "" + durationDays);
-        if (!valid) {
-            return;
-        }
+        if (!valid) return;
 
         dialog.dismiss();
-
-        DateTime start = Utils.getDateTime(getArguments(), "start_millis");
-        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
-        start = Utils.orDefault(start, now);
-
-        if (durationDays != null) {
-            // Adjust durationDays to account for a start date in the past.  Entering "2"
-            // always means two more days, stopping after tomorrow, regardless of start date.
-            LocalDate firstDay = start.toLocalDate();
-            LocalDate lastDay = now.toLocalDate().plusDays(durationDays - 1);
-            durationDays = Days.daysBetween(firstDay, lastDay).getDays() + 1;
-        }
 
         // Post an event that triggers the PatientChartController to save the order.
-        EventBus.getDefault().post(new OrderSaveRequestedEvent(
-            uuid, patientUuid, instructions, start, durationDays));
+        EventBus.getDefault().post(new OrderAddRequestedEvent(
+            mOrderUuid, mPatientUuid, Utils.getProviderUuid(), instructions, mStart, durationDays
+        ));
     }
 
-    public void onDelete(DialogInterface dialog, final String orderUuid) {
+    private void onStopNow() {
         dialog.dismiss();
-
-        new AlertDialog.Builder(getActivity())
-            .setMessage(R.string.confirm_order_delete)
-            .setTitle(R.string.title_confirmation)
-            .setPositiveButton(R.string.delete,
-                (dialog1, i) -> EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid)))
-            .setNegativeButton(R.string.cancel, null)
-            .create().show();
+        u.prompt(R.string.title_confirmation, R.string.confirm_order_stop, R.string.order_stop_now,
+            () -> EventBus.getDefault().post(new OrderStopRequestedEvent(mOrderUuid)));
     }
 
-    private void setError(EditText field, int resourceId, Object... args) {
-        field.setError(getResources().getString(resourceId, args));
-        field.invalidate();
-        field.requestFocus();
+    private void onDelete() {
+        dialog.dismiss();
+        u.prompt(R.string.title_confirmation, R.string.confirm_order_delete, R.string.delete,
+            () -> EventBus.getDefault().post(new OrderDeleteRequestedEvent(mOrderUuid)));
     }
 
+    /** Adds an "X" button to a text edit field. */
     private static void addClearButton(final TextView view, int drawableId) {
         final Drawable icon = view.getResources().getDrawable(drawableId);
         icon.setColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY);  // draw icon in black
@@ -295,70 +271,93 @@ public class OrderDialogFragment extends DialogFragment {
         });
     }
 
-    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
-        ButterKnife.inject(this, fragment);
-
-        Bundle args = getArguments();
-        boolean newOrder = args.getBoolean("new");
-        String title = getString(newOrder ? R.string.title_new_order : R.string.title_edit_order);
-        mOrderUuid = args.getString("uuid");
-        populateFields(args);
-
-        addListeners();
-        addClearButton(mMedication, R.drawable.abc_ic_clear_mtrl_alpha);
-        mMedication.setThreshold(1);
-        mMedication.setAdapter(new AutocompleteAdapter(
-            getActivity(), R.layout.captioned_item, new MedCompleter()));
-
-        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
-            .setCancelable(false)
-            .setTitle(title)
-            .setPositiveButton(R.string.ok, (dialog1, which) -> onSubmit(dialog1))
-            .setNegativeButton(R.string.cancel, null)
-            .setView(fragment)
-            .create();
-
-        // Hide or show the "Stop" and "Delete" buttons appropriately.
-        Long stopMillis = Utils.getLong(args, "stop_millis");
-        Long nowMillis = Utils.getLong(args, "now_millis");
-        Utils.showIf(mDelete, !newOrder);
-
-        return dialog;
-    }
-
-
-    /** Updates the various labels in the form that react to changes in input fields. */
-    void updateLabels() {
+    /** Updates labels and disables or hides elements according to the input fields. */
+    private void updateUi() {
         int frequency = Utils.toIntOrDefault(mFrequency.getText().toString().trim(), 0);
-        DateTime now = Utils.getDateTime(getArguments(), "now_millis");
+
         String text = mGiveForDays.getText().toString().trim();
         int days = text.isEmpty() ? 0 : Integer.parseInt(text);
-        LocalDate lastDay = now.toLocalDate().plusDays(days - 1);
+        LocalDate startDay = mStart.toLocalDate();
+        LocalDate stopDay = startDay.plusDays(days);
+
+        if (frequency == 0) mGiveForDays.setText("");
+        mTimesPerDayLabel.setText(
+            frequency == 1 ? R.string.order_time_per_day : R.string.order_times_per_day);
         mGiveForDaysLabel.setText(
-            days == 0 ? R.string.order_give_for_days :
-                days == 1 ? R.string.order_give_for_day :
-                    R.string.order_give_for_days);
-        mDurationLabel.setText(getResources().getString(
-            days == 0 ? (
-                frequency == 0 ?
-                R.string.order_duration_administer_once :
-                R.string.order_duration_indefinitely
-            ) :
-                days == 1 ? R.string.order_duration_stop_after_today :
-                    days == 2 ? R.string.order_duration_stop_after_tomorrow :
-                        R.string.order_duration_stop_after_date
-        ).replace("%s", Utils.formatShortDate(lastDay)));
-    }
+            days == 1 ? R.string.order_give_for_day : R.string.order_give_for_days);
 
-    class DurationDaysWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) { }
+        int doses = frequency * days;
+        String startDate = friendlyDateFormat(startDay);
+        String stopDate = friendlyDateFormat(stopDay);
 
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) { }
-
-        @Override public void afterTextChanged(Editable editable) {
-            updateLabels();
+        if (mOrder == null) {
+            mDurationLabel.setText(
+                frequency == 0 || frequency * days == 1 ?
+                    u.str(R.string.order_one_dose_only) :
+                days == 0 ?
+                    u.str(R.string.order_start_now_indefinitely) :
+                days == 1 ?
+                    u.str(R.string.order_start_now_stop_after_doses, doses) :
+                u.str(R.string.order_start_now_after_doses_stop_date, doses, stopDate)
+            );
+        } else if (mStopped) {
+            mDurationLabel.setText(
+                frequency == 0 || frequency * days == 1 ?
+                    u.str(R.string.order_one_dose_only_ordered_date, startDate) :
+                u.str(R.string.order_started_date_stopped_date, startDate, stopDate)
+            );
+        } else {
+            mDurationLabel.setText(
+                frequency == 0 || frequency * days == 1 ?
+                    u.str(R.string.order_one_dose_only_ordered_date, startDate) :
+                days == 0 ?
+                    u.str(R.string.order_started_date_indefinitely, startDate) :
+                days == 1 ?
+                    u.str(R.string.order_started_date_stop_after_doses, startDate, doses) :
+                u.str(R.string.order_started_date_after_doses_stop_date, startDate, doses, stopDate)
+            );
         }
+
+        // If the order has stopped, you can't change the frequency or duration.
+        Utils.setEnabled(mFrequency, !mStopped);
+        // You can't specify a duration if the order isn't a series.
+        Utils.setEnabled(mGiveForDays, !mStopped && frequency > 0);
+
+        // Hide or show the "Stop" and "Delete" buttons appropriately.
+        Utils.showIf(mStopNow, mOrder != null && !mStopped);
+        Utils.showIf(mDelete, mOrder != null && !mExecuted);
     }
 
+    private String friendlyDateFormat(LocalDate date) {
+        int days = Days.daysBetween(LocalDate.now(), date).getDays();
+        return days == 0 ? u.str(R.string.sentence_today)
+            : days == 1 ? u.str(R.string.sentence_tomorrow)
+            : days == -1 ? u.str(R.string.sentence_yesterday)
+            : Utils.format(date, SENTENCE_MONTH_DAY);
+    }
+
+    /** Adjusts the size of the autocomplete dropdown according to other UI elements. */
+    private void adjustDropDownSize(AutoCompleteTextView textView, int itemHorizontalPadding) {
+        // Get the visible area of the activity, excluding the soft keyboard.
+        View activityRoot = getActivity().getWindow().getDecorView().getRootView();
+        Rect visibleFrame = new Rect();
+        activityRoot.getWindowVisibleDisplayFrame(visibleFrame);
+
+        // Find the bottom of the text field, where the dropdown list is attached.
+        int[] textViewLocation = new int[2];
+        textView.getLocationOnScreen(textViewLocation);
+        int textViewTop = textViewLocation[1];
+        int textViewBottom = textViewTop + textView.getHeight();
+
+        // Limit the height of the autocomplete dropdown list to stay within the
+        // visible area of the activity; otherwise, the list will extend to the
+        // bottom of the screen, where it is covered up by the soft keyboard.
+        textView.setDropDownHeight(visibleFrame.bottom - textViewBottom);
+
+        // Expand the dropdown window left and right to accommodate left/right
+        // padding inside dropdown list items, so that the text in the list items
+        // is horizontally aligned with the text in the input field.
+        textView.setDropDownHorizontalOffset(-itemHorizontalPadding);
+        textView.setDropDownWidth(mMedication.getWidth() + itemHorizontalPadding * 2);
+    }
 }

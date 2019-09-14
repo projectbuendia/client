@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -22,14 +23,16 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.Immutable;
@@ -62,50 +65,54 @@ import javax.annotation.concurrent.Immutable;
  * multi-word medication name, there are non-breaking spaces betwen the words
  * instead of regular spaces).
  */
-public final @Immutable class Order extends Base<String> {
+public final @Immutable class Order extends Model implements Serializable {
     public static final char NON_BREAKING_SPACE = '\u00a0';
 
-    public static final CursorLoader<Order> LOADER = cursor -> new Order(
-        cursor.getString(cursor.getColumnIndex(Orders.UUID)),
-        cursor.getString(cursor.getColumnIndex(Orders.PATIENT_UUID)),
-        cursor.getString(cursor.getColumnIndex(Orders.INSTRUCTIONS)),
-        cursor.getLong(cursor.getColumnIndex(Orders.START_MILLIS)),
-        cursor.getLong(cursor.getColumnIndex(Orders.STOP_MILLIS))
-    );
-
-    public final @Nullable String uuid;
     public final String patientUuid;
+    public final String providerUuid;
     public final Instructions instructions;
     public final DateTime start;
     public final @Nullable DateTime stop;  // null if unary, non-null if series
 
     public static Order fromJson(JsonOrder order) {
         return new Order(
-            order.uuid, order.patient_uuid,
-            order.instructions,
-            order.start_millis, order.stop_millis
+            order.uuid, order.patient_uuid, order.provider_uuid,
+            order.instructions, order.start_time, order.stop_time
         );
     }
 
-    public Order(@Nullable String uuid, String patientUuid,
+    public static Order load(Cursor cursor) {
+        return new Order(
+            cursor.getString(cursor.getColumnIndex(Orders.UUID)),
+            cursor.getString(cursor.getColumnIndex(Orders.PATIENT_UUID)),
+            cursor.getString(cursor.getColumnIndex(Orders.PROVIDER_UUID)),
+            cursor.getString(cursor.getColumnIndex(Orders.INSTRUCTIONS)),
+            cursor.getLong(cursor.getColumnIndex(Orders.START_MILLIS)),
+            cursor.getLong(cursor.getColumnIndex(Orders.STOP_MILLIS))
+        );
+    }
+
+    public Order(@Nullable String uuid, String patientUuid, String providerUuid,
                  Instructions instructions, DateTime start, @Nullable DateTime stop) {
-        super(null);  // Order objects never have an id
-        this.uuid = uuid;
+        super(uuid);
         this.patientUuid = patientUuid;
+        this.providerUuid = providerUuid;
         this.instructions = instructions;
         this.start = start;
         this.stop = stop;
     }
 
-    public Order(@Nullable String uuid, String patientUuid,
-                 String instructionsText, DateTime start, @Nullable DateTime stop) {
-        this(uuid, patientUuid, new Instructions(instructionsText), start, stop);
+    public Order(
+        @Nullable String uuid, String patientUuid, String providerUuid,
+        String instructionsText, DateTime start, @Nullable DateTime stop) {
+        this(uuid, patientUuid, providerUuid, new Instructions(instructionsText), start, stop);
     }
 
-    public Order(@Nullable String uuid, String patientUuid,
-                 String instructionsText, Long startMillis, @Nullable Long stopMillis) {
+    public Order(
+        @Nullable String uuid, String patientUuid, String providerUuid,
+        String instructionsText, Long startMillis, @Nullable Long stopMillis) {
         this(
-            uuid, patientUuid, instructionsText,
+            uuid, patientUuid, providerUuid, instructionsText,
             new DateTime(startMillis),
             stopMillis != null ? new DateTime(stopMillis) : null
         );
@@ -224,10 +231,11 @@ public final @Immutable class Order extends Base<String> {
     }
 
     @Override public boolean equals(Object other) {
+        // This compares all fields because ChartRenderer relies on this
+        // equals() method to decide whether to re-render the chart grid.
         if (other instanceof Order) {
             Order o = (Order) other;
-            return Objects.equals(id, o.id)
-                && Objects.equals(uuid, o.uuid)
+            return Objects.equals(uuid, o.uuid)
                 && Objects.equals(patientUuid, o.patientUuid)
                 && Objects.equals(instructions, o.instructions)
                 && Objects.equals(start, o.start)
@@ -240,9 +248,9 @@ public final @Immutable class Order extends Base<String> {
         JSONObject json = new JSONObject();
         json.put("patient_uuid", patientUuid);
         json.put("instructions", instructions.format());
-        json.put("start_millis", start.getMillis());
+        json.put("start_time", Utils.formatUtc8601(start));
         // Use `JSONObject.NULL` instead of `null` so that the value is actually set.
-        json.put("stop_millis", stop != null ? stop.getMillis() : JSONObject.NULL);
+        json.put("stop_time", stop != null ? Utils.formatUtc8601(stop) : JSONObject.NULL);
         return json;
     }
 
@@ -250,6 +258,7 @@ public final @Immutable class Order extends Base<String> {
         ContentValues cv = new ContentValues();
         cv.put(Orders.UUID, uuid);
         cv.put(Orders.PATIENT_UUID, patientUuid);
+        cv.put(Orders.PROVIDER_UUID, providerUuid);
         cv.put(Orders.INSTRUCTIONS, instructions.format());
         cv.put(Orders.START_MILLIS, start.getMillis());
         cv.put(Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());
@@ -264,7 +273,7 @@ public final @Immutable class Order extends Base<String> {
      * in a way that is human-readable and can also be unambiguously unpacked
      * into the original fields.
      */
-    public static class Instructions implements Comparable<Instructions> {
+    public static class Instructions {
         // These String fields are empty if missing, but never null.
         public final @NonNull String medication;
         public final @NonNull String route;
@@ -305,38 +314,26 @@ public final @Immutable class Order extends Base<String> {
             //   - Record 1: dosage, unit, concentration, unit
             //   - Record 2: frequency, unit
             //   - Record 3: notes
-            if (instructionsText.contains(RS)) {
-                String[] records = Utils.splitFields(instructionsText, RS, 4);
+            String[] records = Utils.splitFields(instructionsText, RS, 4);
 
-                // Medication
-                String[] fields = Utils.splitFields(records[0], US, 2);
-                medication = fields[0].trim();
-                route = fields[1].trim();
+            // Medication
+            String[] fields = Utils.splitFields(records[0], US, 2);
+            medication = fields[0].trim();
+            route = fields[1].trim();
 
-                // Dosage
-                fields = Utils.splitFields(records[1], US, 2);
-                dosage = fields[0].trim();
-                // TODO(ping): Support dosage units and concentration.
+            // Dosage
+            fields = Utils.splitFields(records[1], US, 2);
+            dosage = fields[0].trim();
+            // TODO(ping): Support dosage units and concentration.
 
-                // Frequency
-                fields = Utils.splitFields(records[2], US, 2);
-                frequency = Utils.toIntOrDefault(fields[0].trim(), 0);
-                // TODO(ping): Support frequency units (currently "per day" is assumed).
+            // Frequency
+            fields = Utils.splitFields(records[2], US, 2);
+            frequency = Utils.toIntOrDefault(fields[0].trim(), 0);
+            // TODO(ping): Support frequency units (currently "per day" is assumed).
 
-                // Notes
-                fields = Utils.splitFields(records[3], US, 2);
-                notes = fields[0].trim();
-            } else {
-                Matcher matcher = OLD_PATTERN.matcher(Utils.toNonnull(instructionsText));
-                if (!matcher.matches()) {
-                    throw new IllegalArgumentException("Invalid order instructions: " + Utils.repr(instructionsText));
-                }
-                medication = Utils.orDefault(matcher.group(1), matcher.group(4)).replace(NON_BREAKING_SPACE, ' ');
-                route = "";
-                dosage = Utils.orDefault(matcher.group(2), matcher.group(5));
-                frequency = matcher.group(3) != null ? Integer.valueOf(matcher.group(3)) : 0;
-                notes = "";
-            }
+            // Notes
+            fields = Utils.splitFields(records[3], US, 2);
+            notes = fields[0].trim();
         }
 
         /** Packs medication, dosage, and frequency into a single instruction string. */
@@ -344,7 +341,12 @@ public final @Immutable class Order extends Base<String> {
             return (medication + US + route)
                 + RS + (dosage)
                 + RS + (frequency > 0 ? (frequency + US + "x daily") : "")
-                + RS + (notes);
+                + RS + (notes)
+                + RS + US + US + ".";
+        }
+
+        public String getFormattedFrequency() {
+            return frequency != 0 ? App.str(R.string.order_frequency_value, frequency) : "";
         }
 
         public boolean equals(Object other) {
@@ -357,10 +359,6 @@ public final @Immutable class Order extends Base<String> {
                     && Objects.equals(notes, o.notes);
             }
             return false;
-        }
-
-        public int compareTo(Instructions other) {
-            return format().compareTo(other.format());
         }
     }
 }

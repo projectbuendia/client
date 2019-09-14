@@ -15,7 +15,7 @@ import android.app.Application;
 
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.net.VolleySingleton;
-import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
+import org.projectbuendia.client.ui.lists.PatientListActivity;
 
 import javax.inject.Singleton;
 
@@ -25,7 +25,7 @@ import dagger.Provides;
 /** A Dagger module that provides bindings for update-related classes. */
 @Module(
     injects = {
-        BaseSearchablePatientListActivity.class
+        PatientListActivity.class
     },
     complete = false,
     library = true)
