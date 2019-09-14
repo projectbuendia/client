@@ -16,7 +16,6 @@ package org.projectbuendia.client.sync.controllers;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -62,7 +61,7 @@ public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservatio
                 numDeletes++;
             } else {
                 ops.add(ContentProviderOperation.newInsert(Observations.URI)
-                        .withValues(getObsValuesToInsert(observation)).build());
+                        .withValues(observation.toContentValues()).build());
                 numInserts++;
             }
             if (DenormalizeObservationsTask.needsDenormalization(observation.concept_uuid)) {
@@ -73,19 +72,6 @@ public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservatio
         syncResult.stats.numInserts += numInserts;
         syncResult.stats.numDeletes += numDeletes;
         return ops;
-    }
-
-    /** Converts an encounter data response into appropriate inserts in the encounters table. */
-    public static ContentValues getObsValuesToInsert(JsonObservation observation) {
-        ContentValues cvs = new ContentValues();
-        cvs.put(Observations.UUID, observation.uuid);
-        cvs.put(Observations.PATIENT_UUID, observation.patient_uuid);
-        cvs.put(Observations.ENCOUNTER_UUID, observation.encounter_uuid);
-        cvs.put(Observations.ENCOUNTER_MILLIS, observation.time.getMillis());
-        cvs.put(Observations.CONCEPT_UUID, observation.concept_uuid);
-        cvs.put(Observations.PROVIDER_UUID, observation.provider_uuid);
-        cvs.put(Observations.VALUE, observation.value);
-        return cvs;
     }
 
     @Override public void finalize(

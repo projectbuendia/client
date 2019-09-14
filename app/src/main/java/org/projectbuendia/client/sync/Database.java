@@ -77,11 +77,13 @@ public class Database extends SQLiteOpenHelper {
             // (and many other databases) treats all NULL values as different from all other values,
             // so it's still ok to insert multiple records with a NULL UUID.
             + "uuid TEXT PRIMARY KEY,"
-            + "patient_uuid TEXT,"
             + "encounter_uuid TEXT,"
-            + "encounter_millis INTEGER,"
-            + "concept_uuid TEXT,"
+            + "patient_uuid TEXT,"
             + "provider_uuid TEXT,"
+            + "concept_uuid TEXT,"
+            + "type STRING,"
+            + "millis INTEGER,"
+            + "order_uuid STRING,"
             + "value STRING,"
             + "voided INTEGER,"
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");

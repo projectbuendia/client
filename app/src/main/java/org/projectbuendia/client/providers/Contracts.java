@@ -150,11 +150,13 @@ public interface Contracts {
          * authoritative version for each has been obtained from the server.
          */
         String UUID = "uuid";
-        String PATIENT_UUID = "patient_uuid";
         String ENCOUNTER_UUID = "encounter_uuid";
-        String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch
-        String CONCEPT_UUID = "concept_uuid";
+        String PATIENT_UUID = "patient_uuid";
         String PROVIDER_UUID = "provider_uuid";
+        String CONCEPT_UUID = "concept_uuid";
+        String TYPE = "type";
+        String MILLIS = "millis";
+        String ORDER_UUID = "order_uuid";
         String VALUE = "value";  // concept value or order UUID
         String VOIDED = "voided";
     }

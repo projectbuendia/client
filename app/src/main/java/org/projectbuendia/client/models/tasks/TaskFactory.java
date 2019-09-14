@@ -26,8 +26,6 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.net.Server;
 
-import java.util.List;
-
 /**
  * An assisted injection factory that creates {@link AsyncTask}s for performing {@link AppModel}
  * operations.
@@ -41,8 +39,8 @@ public class TaskFactory {
         mContentResolver = contentResolver;
     }
 
-    public AddPatientTask newAddPatientTask(JsonPatient patient, List<Obs> observations, CrudEventBus bus) {
-        return new AddPatientTask(this, mServer, mContentResolver, patient, observations, bus);
+    public AddPatientTask newAddPatientTask(JsonPatient patient, CrudEventBus bus) {
+        return new AddPatientTask(this, mServer, mContentResolver, patient, bus);
     }
 
     public FetchPatientTask newFetchPatientTask(

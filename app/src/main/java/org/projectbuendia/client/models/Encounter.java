@@ -18,9 +18,9 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.json.JsonEncounter;
-import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -30,8 +30,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-
-import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * An encounter in the app model. Encounters contain one or more observations taken at a particular
@@ -50,99 +48,69 @@ public class Encounter extends Model {
     private static final Logger LOG = Logger.create();
 
     public final String patientUuid;
+    public final String providerUuid;
     public final DateTime time;
     public final Obs[] observations;
-    public final String[] orderUuids;
 
-    public Encounter(
-        @Nullable String uuid, String patientUuid,
-        DateTime time, Obs[] observations, String[] orderUuids) {
+    public Encounter(@Nullable String uuid, String patientUuid, String providerUuid,
+                     DateTime time, Obs[] observations) {
         super(uuid);
         this.patientUuid = patientUuid;
+        this.providerUuid = providerUuid;
         this.time = time;
         this.observations = Utils.orDefault(observations, new Obs[0]);
-        this.orderUuids = Utils.orDefault(orderUuids, new String[0]);
     }
 
     public static Encounter fromJson(JsonEncounter encounter) {
         List<Obs> observations = new ArrayList<>();
         if (encounter.observations != null) {
-            for (String key : encounter.observations.keySet()) {
-                String value = Utils.toNullableString(encounter.observations.get(key));
-                // TODO(ping): These observations will be undeletable until the next
-                // sync replaces them with observations that have UUIDs.  For these
-                // observations to be deletable immediately, we would need the server
-                // to return them in the Encounter response with individual UUIDs.
+            for (JsonObservation obs : encounter.observations) {
                 observations.add(new Obs(
-                    null, encounter.patient_uuid, encounter.time,
-                    key, estimatedTypeFor(key, value), value, null
+                    obs.uuid, encounter.uuid, encounter.patient_uuid, encounter.provider_uuid,
+                    obs.concept_uuid, obs.type, obs.time, obs.order_uuid, obs.getValueAsString(), null
                 ));
             }
         }
-        return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.time,
-            observations.toArray(new Obs[0]), encounter.order_uuids);
+        return new Encounter(encounter.uuid, encounter.patient_uuid, encounter.provider_uuid,
+            encounter.time, observations.toArray(new Obs[0]));
     }
 
     /** Serializes this into a {@link JSONObject}. */
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put(Server.PATIENT_UUID_KEY, patientUuid);
-        json.put(Server.ENCOUNTER_TIME, Utils.formatUtc8601(time));
+        json.put("patient_uuid", patientUuid);
+        json.put("time", Utils.formatUtc8601(time));
         if (observations.length > 0) {
             JSONArray jsonObsArray = new JSONArray();
             for (Obs obs : observations) {
                 jsonObsArray.put(obs.toJson());
             }
-            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, jsonObsArray);
-        }
-        if (orderUuids.length > 0) {
-            JSONArray orderUuidsJson = new JSONArray();
-            for (String orderUuid : orderUuids) {
-                orderUuidsJson.put(orderUuid);
-            }
-            json.put(Server.ENCOUNTER_ORDER_UUIDS, orderUuidsJson);
+            json.put("observations", jsonObsArray);
         }
         return json;
     }
 
     /**
-     * Converts this instance of {@link Encounter} to an array of
-     * {@link android.content.ContentValues} objects for insertion into a database or content
-     * provider.
+     * Converts this Encounter to an array of ContentValues objects for
+     * insertion into a database or content provider.
      */
     public ContentValues[] toContentValuesArray() {
-        ContentValues[] cvs = new ContentValues[observations.length + orderUuids.length];
-        for (int i = 0; i < observations.length; i++) {
-            Obs obs = observations[i];
+        ContentValues[] cvs = new ContentValues[observations.length];
+        int i = 0;
+        for (Obs obs : observations) {
             ContentValues cv = new ContentValues();
+            cv.put(Observations.UUID, obs.uuid);
+            cv.put(Observations.ENCOUNTER_UUID, uuid);
+            cv.put(Observations.PATIENT_UUID, patientUuid);
+            cv.put(Observations.PROVIDER_UUID, providerUuid);
             cv.put(Observations.CONCEPT_UUID, obs.conceptUuid);
-            cv.put(Observations.ENCOUNTER_MILLIS, time.getMillis());
-            cv.put(Observations.ENCOUNTER_UUID, uuid);
-            cv.put(Observations.PATIENT_UUID, patientUuid);
+            cv.put(Observations.TYPE, obs.type.name());
+            cv.put(Observations.MILLIS, time.getMillis());
+            cv.put(Observations.ORDER_UUID, obs.orderUuid);
             cv.put(Observations.VALUE, obs.value);
-            cvs[i] = cv;
-        }
-        for (int i = 0; i < orderUuids.length; i++) {
-            ContentValues cv = new ContentValues();
-            cv.put(Observations.CONCEPT_UUID, ConceptUuids.ORDER_EXECUTED_UUID);
-            cv.put(Observations.ENCOUNTER_MILLIS, time.getMillis());
-            cv.put(Observations.ENCOUNTER_UUID, uuid);
-            cv.put(Observations.PATIENT_UUID, patientUuid);
-            cv.put(Observations.VALUE, orderUuids[i]);
-            cvs[observations.length + i] = cv;
+            cvs[i++] = cv;
         }
         return cvs;
-    }
-
-    /** A hacky attempt to guess the type of an observation value. :( */
-    public static ConceptType estimatedTypeFor(String conceptUuid, String value) {
-        if (eq(conceptUuid, ConceptUuids.PLACEMENT_UUID)) return ConceptType.TEXT;
-        try {
-            new DateTime(Long.parseLong(value));
-            return ConceptType.DATE;
-        } catch (Exception e) {
-            return ConceptType.CODED;
-        }
     }
 
     /**
@@ -150,31 +118,35 @@ public class Encounter extends Model {
      * a single encounter, represented by multiple observations, with one observation per row.
      */
     public static Encounter load(Cursor cursor) {
-        final String encounterUuid = Utils.getString(cursor, Observations.ENCOUNTER_UUID);
-        final DateTime time = Utils.getDateTime(cursor, Observations.ENCOUNTER_MILLIS);
-        String uuid = null;
+        String encounterUuid = null;
         String patientUuid = null;
+        String providerUuid = null;
+        DateTime time = null;
         List<Obs> observations = new ArrayList<>();
-        cursor.move(-1); // TODO(ping): Why?
-        while (cursor.moveToNext()) {
-            uuid = Utils.getString(cursor, Observations.UUID);
+        do { // cursor is already at the first matching observation
+            String uuid = Utils.getString(cursor, Observations.UUID);
+            encounterUuid = Utils.getString(cursor, Observations.ENCOUNTER_UUID);
             patientUuid = Utils.getString(cursor, Observations.PATIENT_UUID);
+            providerUuid = Utils.getString(cursor, Observations.PROVIDER_UUID);
             String conceptUuid = Utils.getString(cursor, Observations.CONCEPT_UUID);
+            Datatype type = Datatype.valueOf(Utils.getString(cursor, Observations.TYPE));
+            time = Utils.getDateTime(cursor, Observations.MILLIS);
+            String orderUuid = Utils.getString(cursor, Observations.ORDER_UUID);
             String value = Utils.getString(cursor, Observations.VALUE);
             observations.add(new Obs(
-                uuid, patientUuid, time, conceptUuid, estimatedTypeFor(conceptUuid, value), value, null
+                uuid, encounterUuid, patientUuid, providerUuid,
+                conceptUuid, type, time, orderUuid, value, null
             ));
-        }
-        if (patientUuid != null) {
-            return new Encounter(encounterUuid, patientUuid, time,
-                observations.toArray(new Obs[observations.size()]), null);
+        } while (cursor.moveToNext());
+        if (encounterUuid != null && patientUuid != null && time != null) {
+            return new Encounter(encounterUuid, patientUuid, providerUuid,
+                time, observations.toArray(new Obs[observations.size()]));
         }
         return null; // PATIENT_UUID should never be null, so this should never happen
     }
 
     /** For developer use only, to help fabricate a response from a nonexistent server. */
     public Encounter withUuid(String uuid) {
-        return new Encounter(uuid, patientUuid, time, observations, orderUuids);
+        return new Encounter(uuid, patientUuid, providerUuid, time, observations);
     }
-
 }

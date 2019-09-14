@@ -18,7 +18,7 @@ import android.widget.EditText;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.utils.Utils;
 
@@ -58,8 +58,8 @@ public class TextObsDialogFragment extends BaseDialogFragment<TextObsDialogFragm
 
         App.getModel().addObservationEncounter(
             App.getCrudEventBus(), obs.patientUuid, new Obs(
-                null, obs.patientUuid, DateTime.now(),
-                obs.conceptUuid, ConceptType.TEXT, newValue, null
+                null, null, obs.patientUuid, Utils.getProviderUuid(),
+                obs.conceptUuid, Datatype.TEXT, DateTime.now(), null, newValue, null
             )
         );
         dialog.dismiss();

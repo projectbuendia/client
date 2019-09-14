@@ -26,6 +26,7 @@ import org.projectbuendia.client.events.data.TypedCursorLoadedEvent;
 import org.projectbuendia.client.events.data.TypedCursorLoadedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.net.Server;
@@ -33,8 +34,6 @@ import org.projectbuendia.client.providers.Contracts.Misc;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
-
-import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -142,8 +141,8 @@ public class AppModel {
      * {@link ItemCreatedEvent} with the newly-added patient on
      * the specified event bus when complete.
      */
-    public void addPatient(CrudEventBus bus, JsonPatient patient, List<Obs> observations) {
-        mTaskFactory.newAddPatientTask(patient, observations, bus).execute();
+    public void addPatient(CrudEventBus bus, JsonPatient patient) {
+        mTaskFactory.newAddPatientTask(patient, bus).execute();
     }
 
     /**
@@ -174,15 +173,15 @@ public class AppModel {
      */
     public void addOrderExecutionEncounter(
         CrudEventBus bus, String patientUuid, String orderUuid, DateTime executionTime) {
-        mTaskFactory.newAddEncounterTask(new Encounter(
-            null, patientUuid, executionTime, null, new String[] {orderUuid}
-        ), bus).execute();
+        addObservationEncounter(bus, patientUuid, new Obs(
+            null, null, patientUuid, Utils.getProviderUuid(), ConceptUuids.ORDER_EXECUTED_UUID,
+            Datatype.NUMERIC, executionTime, orderUuid, "1", null));
     }
 
     /** Adds a single observation in an encounter, posting ItemCreatedEvent when complete. */
     public void addObservationEncounter(CrudEventBus bus, String patientUuid, Obs obs) {
         mTaskFactory.newAddEncounterTask(new Encounter(
-            null, patientUuid, DateTime.now(), new Obs[] {obs}, null
+            null, patientUuid, Utils.getProviderUuid(), DateTime.now(), new Obs[] {obs}
         ), bus).execute();
     }
 

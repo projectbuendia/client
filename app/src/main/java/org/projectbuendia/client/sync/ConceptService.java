@@ -3,7 +3,7 @@ package org.projectbuendia.client.sync;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.utils.Loc;
@@ -17,14 +17,14 @@ import java.util.Map;
 public class ConceptService {
     private final ContentResolver resolver;
 
-    private Map<String, ConceptType> types = null;
+    private Map<String, Datatype> types = null;
     private Map<String, Loc> names = null;
 
     public ConceptService(ContentResolver resolver) {
         this.resolver = resolver;
     }
 
-    public synchronized ConceptType getType(String uuid) {
+    public synchronized Datatype getType(String uuid) {
         if (types == null) load();
         return types.get(uuid);
     }
@@ -41,12 +41,12 @@ public class ConceptService {
     }
 
     private void load() {
-        Map<String, ConceptType> types = new HashMap<>();
+        Map<String, Datatype> types = new HashMap<>();
         Map<String, Loc> names = new HashMap<>();
 
         // Special case: these are dates even if no forms or charts mention them.
-        types.put(ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE);
-        types.put(ConceptUuids.FIRST_SYMPTOM_DATE_UUID, ConceptType.DATE);
+        types.put(ConceptUuids.ADMISSION_DATE_UUID, Datatype.DATE);
+        types.put(ConceptUuids.FIRST_SYMPTOM_DATE_UUID, Datatype.DATE);
 
         try (Cursor c = resolver.query(Concepts.URI, null, null, null, null)) {
             while (c.moveToNext()) {
@@ -54,7 +54,7 @@ public class ConceptService {
                 String type = Utils.getString(c, Concepts.TYPE);
                 String name = Utils.getString(c, Concepts.NAME);
                 try {
-                    types.put(uuid, ConceptType.valueOf(type));
+                    types.put(uuid, Datatype.valueOf(type));
                 } catch (IllegalArgumentException e) {
                     continue;  // bad concept type name
                 }

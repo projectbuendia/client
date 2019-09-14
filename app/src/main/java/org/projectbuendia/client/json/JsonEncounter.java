@@ -13,7 +13,7 @@ package org.projectbuendia.client.json;
 
 import org.joda.time.DateTime;
 
-import java.util.Map;
+import java.util.List;
 
 /** JSON representation of an OpenMRS Encounter; call Serializers.registerTo before use. */
 public class JsonEncounter {
@@ -21,7 +21,5 @@ public class JsonEncounter {
     public String patient_uuid;
     public DateTime time;
     public String provider_uuid;
-    /** A {conceptUuid: value} map, where value can be a number, string, or answer UUID. */
-    public Map<String, Object> observations;
-    public String[] order_uuids;  // orders executed during this encounter
+    public List<JsonObservation> observations;
 }

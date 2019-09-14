@@ -18,6 +18,7 @@ import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.providers.Contracts.Patients;
 
 import java.io.Serializable;
+import java.util.List;
 
 /** JSON representation of an OpenMRS Patient. */
 public class JsonPatient implements Serializable {
@@ -28,6 +29,8 @@ public class JsonPatient implements Serializable {
     public Sex sex;
     public LocalDate birthdate;
     public boolean voided;
+
+    public List<JsonObservation> observations;  // observations at patient creation
 
     public JsonPatient() { }
 

@@ -12,13 +12,13 @@
 package org.projectbuendia.client.models.tasks;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
-import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
@@ -26,16 +26,15 @@ import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.Logger;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -55,7 +54,6 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final JsonPatient mPatient;
-    private final List<Obs> mObservations;
     private final CrudEventBus mBus;
     @Inject SyncManager mSyncManager;
 
@@ -67,13 +65,11 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         Server server,
         ContentResolver contentResolver,
         JsonPatient patient,
-        List<Obs> observations,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mServer = server;
         mContentResolver = contentResolver;
         mPatient = patient;
-        mObservations = observations;
         mBus = bus;
         App.inject(this);
     }
@@ -115,12 +111,17 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_CLIENT, null);
         }
         mUuid = json.uuid;
-
-        Encounter encounter = new Encounter(
-            null, mUuid, DateTime.now(), mObservations.toArray(new Obs[0]), null
-        );
-        App.getModel().addEncounter(App.getCrudEventBus(), encounter);
-
+        if (json.observations != null) {
+            ContentValues[] cvs = new ContentValues[json.observations.size()];
+            int i = 0;
+            for (JsonObservation obs : json.observations) {
+                cvs[i++] = obs.toContentValues();
+            }
+            mContentResolver.bulkInsert(Observations.URI, cvs);
+            if (DenormalizeObservationsTask.needsDenormalization(cvs)) {
+                App.getModel().denormalizeObservations(mBus, patient.uuid);
+            }
+        }
         return null;
     }
 
@@ -133,17 +134,6 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         // If an error occurred, post the error event.
         if (event != null) {
             mBus.post(event);
-            return;
-        }
-
-        // If the UUID was not set, a programming error occurred. Log and post an error event.
-        if (mUuid == null) {
-            LOG.e(
-                "Although a patient add ostensibly succeeded, no UUID was set for the newly-"
-                    + "added patient. This indicates a programming error.");
-
-            mBus.post(new PatientAddFailedEvent(
-                PatientAddFailedEvent.REASON_UNKNOWN, null /*exception*/));
             return;
         }
 

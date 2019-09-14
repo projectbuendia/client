@@ -18,8 +18,7 @@ import android.support.annotation.NonNull;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.json.ConceptType;
-import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -39,17 +38,26 @@ import static org.projectbuendia.client.utils.Utils.eq;
 public final class Obs extends Model implements Comparable<Obs>, Parcelable, Serializable {
     private static Logger LOG = Logger.create();
 
+    /** The encounter during which this observation was taken. */
+    public final @Nullable String encounterUuid;
+
     /** The patient for which this observation was taken (null if yet to be created). */
     public final @Nullable String patientUuid;
 
-    /** The time at which this observation was taken. */
-    public final @Nonnull DateTime time;
+    /** The provider that recorded this observation. */
+    public final @Nullable String providerUuid;
 
     /** The UUID of the concept that was observed. */
     public final @Nonnull String conceptUuid;
 
-    /** The data type of the concept that was observed. */
-    public final @Nonnull ConceptType conceptType;
+    /** The data type of the value that was observed. */
+    public final @Nonnull Datatype type;
+
+    /** The time at which this observation was taken. */
+    public final @Nonnull DateTime time;
+
+    /** The UUID of the order, if there is a related order. */
+    public final @Nullable String orderUuid;
 
     /** The observed value (a string, number as a string, or answer concept UUID). */
     public final @Nullable String value;
@@ -59,17 +67,23 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
 
     public Obs(
         @Nullable String uuid,
+        @Nullable String encounterUuid,
         @Nullable String patientUuid,
-        @Nonnull DateTime time,
+        @Nullable String providerUuid,
         @Nonnull String conceptUuid,
-        @Nonnull ConceptType conceptType,
+        @Nonnull Datatype type,
+        @Nonnull DateTime time,
+        @Nullable String orderUuid,
         @Nullable String value,
         @Nullable String valueName) {
         super(uuid);
+        this.encounterUuid = encounterUuid;
         this.patientUuid = patientUuid;
-        this.time = time;
+        this.providerUuid = providerUuid;
         this.conceptUuid = checkNotNull(conceptUuid);
-        this.conceptType = conceptType;
+        this.type = type;
+        this.time = time;
+        this.orderUuid = orderUuid;
         this.value = value;
         this.valueName = valueName;
     }
@@ -82,8 +96,8 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
 
     /** Returns the value of this observation as an ObsValue. */
     public @Nullable ObsValue getObsValue() {
-        if (value == null || conceptType == null) return null;
-        switch (conceptType) {
+        if (value == null || type == null) return null;
+        switch (type) {
             case CODED:
                 return ObsValue.newCoded(value, valueName);
             case NUMERIC:
@@ -105,7 +119,7 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
             + ", patientUuid=" + patientUuid
             + ", time=" + time
             + ", conceptUuid=" + conceptUuid
-            + ", conceptType=" + conceptType
+            + ", type=" + type
             + ", value=" + value
             + ", valueName=" + valueName + ")";
     }
@@ -119,7 +133,7 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
                 && eq(patientUuid, o.patientUuid)
                 && eq(time, o.time)
                 && eq(conceptUuid, o.conceptUuid)
-                && eq(conceptType, o.conceptType)
+                && eq(type, o.type)
                 && eq(value, o.value)
                 && eq(valueName, o.valueName);
         } else {
@@ -129,7 +143,7 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
 
     @Override public int hashCode() {
         return Arrays.hashCode(new Object[] {
-            time, conceptUuid, conceptType, value, valueName
+            time, conceptUuid, type, value, valueName
         });
     }
 
@@ -152,13 +166,13 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
         if (value == null || other.value == null) {
             return value == other.value ? 0 : value != null ? 1 : -1;
         }
-        if (conceptType != other.conceptType) {
+        if (type != other.type) {
             return Integer.compare(getTypeOrdering(), other.getTypeOrdering());
         }
-        if (conceptType == ConceptType.NUMERIC) {
+        if (type == Datatype.NUMERIC) {
             return Double.valueOf(value).compareTo(Double.valueOf(other.value));
         }
-        if (conceptType == ConceptType.CODED || conceptType == ConceptType.BOOLEAN) {
+        if (type == Datatype.CODED || type == Datatype.BOOLEAN) {
             return ConceptUuids.compareUuids(value, other.value);
         }
         return value.compareTo(other.value);
@@ -166,7 +180,7 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
 
     /** Gets a number defining the ordering of Values of different types. */
     public int getTypeOrdering() {
-        switch (conceptType) {
+        switch (type) {
             case BOOLEAN:
                 return ConceptUuids.isYes(value) ? 5 : 1;
             case NUMERIC:
@@ -181,29 +195,29 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
 
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put(Server.OBS_QUESTION_UUID, conceptUuid);
-        switch (conceptType) {
-            case DATE:
-                json.put(Server.OBS_ANSWER_DATE, value);
-                break;
-            case DATETIME:
+        if (Utils.hasChars(uuid)) json.put("uuid", uuid);
+        json.put("encounter_uuid", encounterUuid);
+        json.put("patient_uuid", patientUuid);
+        json.put("provider_uuid", providerUuid);
+        json.put("concept_uuid", conceptUuid);
+        json.put("type", Datatype.serialize(type));
+        json.put("time", Utils.formatUtc8601(time));
+        json.put("order_uuid", orderUuid);
+        if (value != null) {
+            if (type == Datatype.BOOLEAN || type == Datatype.CODED) {
+                json.put("value_coded", value);
+            } else if (type == Datatype.NUMERIC) {
+                json.put("value_numeric", Double.valueOf(value));
+            } else if (type == Datatype.TEXT) {
+                json.put("value_text", value);
+            } else if (type == Datatype.DATE) {
+                json.put("value_date", value);
+            } else if (type == Datatype.DATETIME) {
                 // Obs stores DATETIME in millis, but we want ISO8601 for JSON.
-                json.put(Server.OBS_ANSWER_DATETIME,
-                    Utils.formatUtc8601(new DateTime(Long.valueOf(value))));
-                break;
-            case NUMERIC:
-                json.put(Server.OBS_ANSWER_NUMBER, getObsValue().number);
-                break;
-            case BOOLEAN:
-            case CODED:
-                json.put(Server.OBS_ANSWER_UUID, value);
-                break;
-            case TEXT:
-                json.put(Server.OBS_ANSWER_TEXT, value);
-                break;
-            default:
-                LOG.w("Ignoring %s with a type that EncounterResource cannot handle", this);
-                break;
+                json.put("value_datetime", Utils.formatUtc8601(new DateTime(Long.valueOf(value))));
+            } else {
+                LOG.w("Ignoring Obs with unknown type: %s", this);
+            }
         }
         return json;
     }
@@ -215,9 +229,12 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
             return new Obs(
                 src.readString(),
                 src.readString(),
+                src.readString(),
+                src.readString(),
+                src.readString(),
+                Datatype.deserialize(src.readString()),
                 new DateTime(src.readLong()),
                 src.readString(),
-                ConceptType.valueOf(src.readString()),
                 src.readString(),
                 src.readString()
             );
@@ -234,10 +251,13 @@ public final class Obs extends Model implements Comparable<Obs>, Parcelable, Ser
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(uuid);
+        dest.writeString(encounterUuid);
         dest.writeString(patientUuid);
-        dest.writeLong(time.getMillis());
+        dest.writeString(providerUuid);
         dest.writeString(conceptUuid);
-        dest.writeString(conceptType.name());
+        dest.writeString(type != null ? type.name() : null);
+        dest.writeLong(time.getMillis());
+        dest.writeString(orderUuid);
         dest.writeString(value);
         dest.writeString(valueName);
     }

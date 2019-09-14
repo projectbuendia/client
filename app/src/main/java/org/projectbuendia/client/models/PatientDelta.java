@@ -18,7 +18,6 @@ import com.google.common.base.Optional;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -70,21 +69,19 @@ public class PatientDelta {
         // TODO: Use a JsonPatient instead of all these field name constants.
         try {
             if (id.isPresent()) {
-                json.put(Server.PATIENT_ID_KEY, id.get());
+                json.put("id", id.get());
             }
             if (givenName.isPresent()) {
-                json.put(Server.PATIENT_GIVEN_NAME_KEY, givenName.get());
+                json.put("given_name", givenName.get());
             }
             if (familyName.isPresent()) {
-                json.put(Server.PATIENT_FAMILY_NAME_KEY, familyName.get());
+                json.put("family_name", familyName.get());
             }
             if (sex.isPresent()) {
-                json.put(Server.PATIENT_SEX_KEY, Sex.serialize(sex.get()));
+                json.put("sex", Sex.serialize(sex.get()));
             }
             if (birthdate.isPresent()) {
-                json.put(
-                    Server.PATIENT_BIRTHDATE_KEY,
-                    Utils.format(birthdate.get()));
+                json.put("birthdate", Utils.format(birthdate.get()));
             }
             return true;
         } catch (JSONException e) {

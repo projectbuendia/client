@@ -39,7 +39,7 @@ import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
@@ -338,17 +338,17 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
                 return;
             }
             ConceptService concepts = App.getConceptService();
-            ConceptType type = concepts.getType(uuid);
+            Datatype type = concepts.getType(uuid);
 
-            if (type == ConceptType.DATE || type == ConceptType.TEXT) {
+            if (type == Datatype.DATE || type == Datatype.TEXT) {
                 String title = concepts.getName(uuid, App.getSettings().getLocale());
                 Map<String, Obs> latest = mChartHelper.getLatestObservations(mPatientUuid);
                 Obs obs = latest.get(uuid);
                 if (obs == null) {
-                    obs = new Obs(null, mPatientUuid, DateTime.now(), uuid, type, "", "");
+                    obs = new Obs(null, null, mPatientUuid, null, uuid, type, DateTime.now(), null, "", "");
                 }
-                if (type == ConceptType.DATE) mUi.showDateObsDialog(title, obs);
-                if (type == ConceptType.TEXT) mUi.showTextObsDialog(title, obs);
+                if (type == Datatype.DATE) mUi.showDateObsDialog(title, obs);
+                if (type == Datatype.TEXT) mUi.showTextObsDialog(title, obs);
                 return;
             }
         }
@@ -399,7 +399,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         List<Obs> executions = new ArrayList<>();
         for (Obs obs : mObservations) {
             if (eq(obs.conceptUuid, ConceptUuids.ORDER_EXECUTED_UUID) &&
-                eq(orderUuid, obs.value)) {
+                eq(orderUuid, obs.orderUuid)) {
                 executions.add(obs);
             }
         }
@@ -421,8 +421,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     public void submitDateObs(String conceptUuid, LocalDate date) {
         mUi.showWaitDialog(R.string.title_updating_patient);
         mModel.addObservationEncounter(mCrudEventBus, mPatientUuid, new Obs(
-            null, mPatientUuid, DateTime.now(),
-            conceptUuid, ConceptType.DATE, date.toString(), null
+            null, null, mPatientUuid, Utils.getProviderUuid(), conceptUuid, Datatype.DATE,
+            DateTime.now(), null, date.toString(), null
         ));
     }
 

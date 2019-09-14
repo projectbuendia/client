@@ -105,7 +105,7 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
                 " AND " + Observations.CONCEPT_UUID + " = ?" +
                 " AND " + Observations.VOIDED + " IS NOT 1",
             new String[] {patientUuid, conceptUuid},
-            Observations.ENCOUNTER_MILLIS + " DESC"
+            Observations.MILLIS + " DESC"
         )) {
             return cursor.moveToNext() ? cursor.getString(0) : null;
         }

@@ -264,7 +264,7 @@ public class ChartRenderer {
                 if (obs == null) continue;
 
                 if (obs.conceptUuid.equals(ConceptUuids.ORDER_EXECUTED_UUID)) {
-                    Order order = orders.get(obs.value);
+                    Order order = orders.get(obs.orderUuid);
                     if (order != null) {
                         if (!mExecutionHistories.containsKey(order.uuid)) {
                             mExecutionHistories.put(order.uuid, new ExecutionHistory(order));

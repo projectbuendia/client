@@ -30,7 +30,7 @@ import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
-import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
@@ -65,8 +65,9 @@ public final class PatientChartControllerTest {
         new Patient(PATIENT_UUID_1, PATIENT_ID_1, "Given", "Family", Sex.OTHER, null, false, "", "");
 
     private static final Obs OBS_1 = new Obs(
-        null, PATIENT_ID_1, new DateTime(1568091838123L),
-        ConceptUuids.ADMISSION_DATE_UUID, ConceptType.DATE, "2019-01-01", ""
+        null, null, PATIENT_ID_1, null,
+        ConceptUuids.ADMISSION_DATE_UUID, Datatype.DATE,
+        new DateTime(1568091838123L), null, "2019-01-01", ""
     );
 
     private PatientChartController mController;
