@@ -613,7 +613,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
             LOG.i("Saving order: %s", event.instructions);
             mModel.addOrder(mCrudEventBus, new Order(
-                event.orderUuid, event.patientUuid, event.instructions, start, stop));
+                event.orderUuid, event.patientUuid, event.providerUuid,
+                event.instructions, start, stop));
         }
 
         public void onEventMainThread(OrderStopRequestedEvent event) {
@@ -622,7 +623,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             if (order.isSeries() && (order.stop == null || newStop.isBefore(order.stop))) {
                 LOG.i("Stopping order: %s", order.instructions);
                 mModel.addOrder(mCrudEventBus, new Order(
-                    event.orderUuid, order.patientUuid, order.instructions, order.start, newStop
+                    event.orderUuid, order.patientUuid, order.providerUuid,
+                    order.instructions, order.start, newStop
                 ));
             }
         }

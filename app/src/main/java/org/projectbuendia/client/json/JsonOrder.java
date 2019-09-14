@@ -15,9 +15,10 @@ import org.joda.time.DateTime;
 
 public class JsonOrder {
     public String uuid;
-    public boolean voided;
     public String patient_uuid;
+    public String provider_uuid;
     public String instructions;
     public DateTime start_time;
     public DateTime stop_time;
+    public boolean voided;
 }

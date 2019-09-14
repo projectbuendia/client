@@ -25,15 +25,17 @@ public class OrderAddRequestedEvent {
     // order; otherwise, the event indicates a creation of a new order.
     public final String orderUuid;
     public final String patientUuid;
+    public final String providerUuid;
     public final Order.Instructions instructions;
     public final DateTime start;
     public final Integer durationDays;
 
     public OrderAddRequestedEvent(
-        @Nullable String orderUuid, String patientUuid, Order.Instructions instructions,
-        DateTime start, @Nullable Integer durationDays) {
+        @Nullable String orderUuid, String patientUuid, String providerUuid,
+        Order.Instructions instructions, DateTime start, @Nullable Integer durationDays) {
         this.orderUuid = orderUuid;
         this.patientUuid = patientUuid;
+        this.providerUuid = providerUuid;
         this.instructions = instructions;
         this.start = start;
         this.durationDays = durationDays;

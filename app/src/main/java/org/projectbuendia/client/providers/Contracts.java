@@ -168,6 +168,7 @@ public interface Contracts {
 
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
+        String PROVIDER_UUID = "provider_uuid";
         String INSTRUCTIONS = "instructions";
         String START_MILLIS = "start_millis";  // milliseconds since epoch
         String STOP_MILLIS = "stop_millis";  // milliseconds since epoch
