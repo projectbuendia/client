@@ -26,11 +26,11 @@
 
         <TextView
             style="@style/field_label"
-            android:text="@string/given_name"
+            android:text="@string/pref_title_server"
             />
 
         <EditText
-            android:id="@+id/given_name_field"
+            android:id="@+id/server_field"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -47,11 +47,32 @@
 
         <TextView
             style="@style/field_label"
-            android:text="@string/family_name"
+            android:text="@string/pref_title_openmrs_user"
             />
 
         <EditText
-            android:id="@+id/family_name_field"
+            android:id="@+id/openmrs_user_field"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textCapWords|textPersonName"
+            android:maxLength="50"
+            />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+
+        <TextView
+            style="@style/field_label"
+            android:text="@string/pref_title_openmrs_password"
+            />
+
+        <EditText
+            android:id="@+id/openmrs_password_field"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"

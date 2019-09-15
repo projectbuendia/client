@@ -38,8 +38,8 @@ public class LoginActivityTest extends FunctionalTestCase {
         // Add new user
         click(viewWithId(R.id.action_new_user));
         screenshot("After Add User Clicked");
-        type(given, viewWithId(R.id.add_user_given_name_tv));
-        type(family, viewWithId(R.id.add_user_family_name_tv));
+        type(given, viewWithId(R.id.given_name_field));
+        type(family, viewWithId(R.id.family_name_field));
         screenshot("After User Populated");
         click(viewWithText("OK"));
         screenshot("After OK Pressed");

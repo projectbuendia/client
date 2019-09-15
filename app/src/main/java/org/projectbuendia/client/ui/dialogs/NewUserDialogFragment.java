@@ -25,8 +25,8 @@ import butterknife.InjectView;
 
 /** A DialogFragment for adding a new user. */
 public class NewUserDialogFragment extends BaseDialogFragment<NewUserDialogFragment> {
-    @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
-    @InjectView(R.id.add_user_family_name_tv) EditText mFamilyName;
+    @InjectView(R.id.given_name_field) EditText mGivenName;
+    @InjectView(R.id.family_name_field) EditText mFamilyName;
     @Nullable private ActivityUi mActivityUi;  // optional UI for showing a spinner
 
     /** Creates a new instance and registers the given UI, if specified. */
