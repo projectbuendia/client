@@ -144,7 +144,7 @@ def serverDev = 'demo.buendia.org'  // an AWS machine running Linux AMI 2017.09
 def serverIntegration = 'staging.buendia.org'
 
 // Portable server (Raspberry Pi, NUC, Edison, etc.) on a local network.
-def serverLan = 'server'
+def serverLan = 'buendia'
 
 // Host machine when client runs in an emulator (AVD).
 def serverEmulatorHost = '10.0.2.2'
@@ -166,7 +166,7 @@ def largeSyncIntervalDefault = 120  // for syncs that take up to 2000 ms
 
 // Just for development.  In production builds, these should be overridden
 // using -Pserver=server -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def serverDefault = serverDev
+def serverDefault = serverLan
 def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs'
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
