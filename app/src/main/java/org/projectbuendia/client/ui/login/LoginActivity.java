@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.ui.BaseActivity;
@@ -44,7 +43,6 @@ public class LoginActivity extends BaseActivity {
     private AlertDialog mSyncFailedDialog;
 
     @Inject Troubleshooter mTroubleshooter;
-    @Inject AppSettings mSettings;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +65,7 @@ public class LoginActivity extends BaseActivity {
             mTroubleshooter,
             new Ui(),
             fragment.getFragmentUi(),
-            mSettings);
+            settings);
 
         // TODO/cleanup: Consider factoring out some common code between here and tent selection.
         mSyncFailedDialog = new AlertDialog.Builder(this)

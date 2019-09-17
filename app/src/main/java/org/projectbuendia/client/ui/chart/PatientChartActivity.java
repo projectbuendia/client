@@ -169,11 +169,11 @@ public final class PatientChartActivity extends LoggedInActivity {
                 }
             }
         });
-        mChartRenderer = new ChartRenderer(mWebView, getResources(), App.getSettings());
+        mChartRenderer = new ChartRenderer(mWebView, getResources(), settings);
 
         final OdkResultSender odkResultSender = (patientUuid, resultCode, data) ->
             OdkActivityLauncher.sendOdkResultToServer(
-                PatientChartActivity.this, App.getSettings(),
+                PatientChartActivity.this, settings,
                 patientUuid, resultCode, data);
         final MinimalHandler minimalHandler = new MinimalHandler() {
             private final Handler mHandler = new Handler();
@@ -285,7 +285,7 @@ public final class PatientChartActivity extends LoggedInActivity {
         for (int i = 0; i < labels.length; i++) {
             labels[i] = getString(ChartRenderer.ZOOM_LEVELS[i].labelId);
         }
-        int selected = App.getSettings().getChartZoomIndex();
+        int selected = settings.getChartZoomIndex();
         new AlertDialog.Builder(this)
             .setTitle(R.string.title_zoom)
             .setSingleChoiceItems(labels, selected, (dialog, which) -> {

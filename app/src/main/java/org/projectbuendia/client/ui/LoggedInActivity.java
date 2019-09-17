@@ -242,8 +242,8 @@ public abstract class LoggedInActivity extends BaseActivity {
 
         @InjectView(R.id.user_name) TextView mUserName;
         @InjectView(R.id.language) TextView mLanguage;
-        @InjectView(R.id.button_settings) ImageButton mSettings;
-        @InjectView(R.id.button_log_out) ImageButton mLogOut;
+        @InjectView(R.id.button_settings) ImageButton mSettingsButton;
+        @InjectView(R.id.button_log_out) ImageButton mLogOutButton;
 
         @SuppressLint("InflateParams")
         public UserMenuPopup() {
