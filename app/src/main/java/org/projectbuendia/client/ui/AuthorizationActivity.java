@@ -16,11 +16,10 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 
-import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.utils.Utils;
 
 /**
  * The starting activity for the app.  The app cannot navigate to any other
@@ -34,9 +33,7 @@ public class AuthorizationActivity extends BaseActivity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (settings.isAuthorized()) startActivity(new Intent(this, LoginActivity.class).addFlags());
-
+        if (settings.isAuthorized()) startActivity(new Intent(this, LoginActivity.class));
 
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
@@ -53,6 +50,7 @@ public class AuthorizationActivity extends BaseActivity {
 
         populateFields();
         updateUi();
+        passwordField.addTextChangedListener(new TextChangedWatcher(this::updateUi));
 
         ChartRenderer.backgroundCompileTemplate();
     }
@@ -64,6 +62,7 @@ public class AuthorizationActivity extends BaseActivity {
     }
 
     private void updateUi() {
-
+        String password = passwordField.getText().toString();
+        authorizeButton.setEnabled(Utils.hasChars(password));
     }
 }

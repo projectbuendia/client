@@ -83,9 +83,11 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        settings = App.getSettings();
+        if (!settings.isAuthorized()) startActivity(new Intent(this, AuthorizationActivity.class));
+
         initialLocale = Locale.getDefault();
         openDialogTypes = new HashSet<>();
-        settings = App.getSettings();
         App.inject(this);
     }
 
