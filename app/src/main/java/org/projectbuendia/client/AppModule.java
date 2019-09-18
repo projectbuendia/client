@@ -25,6 +25,7 @@ import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncEngine;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.sync.ThreadedSyncScheduler;
+import org.projectbuendia.client.ui.AuthorizationActivity;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
@@ -88,6 +89,7 @@ import dagger.Provides;
         LoginActivity.class,
         LoginFragment.class,
         SettingsActivity.class,
+        AuthorizationActivity.class,
         AddPatientTask.class
     })
 public final class AppModule {

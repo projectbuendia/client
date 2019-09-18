@@ -32,6 +32,7 @@ import com.joanzapata.iconify.Icon;
 import com.joanzapata.iconify.IconDrawable;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
@@ -68,6 +69,8 @@ public abstract class BaseActivity extends FragmentActivity {
     private static final long MAX_STEP = 2;
 
     protected ContextUtils u;
+    protected AppSettings settings;
+
     private static long sScaleStep = 0; // app-wide scale step, selected by user
     private Long pausedScaleStep = null; // this activity's scale step when last paused
     private LinearLayout mWrapperView;
@@ -80,6 +83,12 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        settings = App.getSettings();
+        if (!settings.isAuthorized() && !(this instanceof AuthorizationActivity)) {
+            finish();
+            startActivity(new Intent(this, AuthorizationActivity.class));
+        }
+
         initialLocale = Locale.getDefault();
         openDialogTypes = new HashSet<>();
         App.inject(this);
@@ -337,10 +346,12 @@ public abstract class BaseActivity extends FragmentActivity {
                         ), 40, false);
                     break;
                 case CHECK_SERVER_AUTH:
-                    snackBar(R.string.troubleshoot_server_auth,
-                        R.string.troubleshoot_server_auth_action_check,
-                        view -> SettingsActivity.start(BaseActivity.this),
-                        50, false);
+                    if (settings.isAuthorized()) {
+                        snackBar(R.string.troubleshoot_server_auth,
+                            R.string.troubleshoot_server_auth_action_check,
+                            view -> SettingsActivity.start(BaseActivity.this),
+                            50, false);
+                    }
                     break;
                 case CHECK_SERVER_SETUP:  // server is returning 500
                     snackBar(R.string.troubleshoot_server_unstable,

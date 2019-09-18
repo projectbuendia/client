@@ -10,54 +10,54 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<FrameLayout
+<TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:padding="16dp"
+    android:stretchColumns="1"
+    >
 
-    <TableLayout
-        android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:stretchColumns="1">
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+        <TextView
+            style="@style/field_label"
+            android:text="@string/given_name"
+            />
 
-            <TextView
-                style="@style/field_label"
-                android:text="@string/given_name"
-                android:id="@+id/add_user_given_name_label" />
+        <EditText
+            android:id="@+id/given_name_field"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textCapWords|textPersonName"
+            android:maxLength="50"
+            />
 
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords|textPersonName"
-                android:ems="10"
-                android:id="@+id/add_user_given_name_tv"
-                android:maxLength="50" />
+    </TableRow>
 
-        </TableRow>
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+        <TextView
+            style="@style/field_label"
+            android:text="@string/family_name"
+            />
 
-            <TextView
-                style="@style/field_label"
-                android:text="@string/family_name"
-                android:id="@+id/add_user_family_name_label" />
+        <EditText
+            android:id="@+id/family_name_field"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textCapWords|textPersonName"
+            android:maxLength="50"
+            />
 
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords|textPersonName"
-                android:ems="10"
-                android:id="@+id/add_user_family_name_tv"
-                android:maxLength="50" />
-
-        </TableRow>
-    </TableLayout>
-</FrameLayout>
+    </TableRow>
+</TableLayout>

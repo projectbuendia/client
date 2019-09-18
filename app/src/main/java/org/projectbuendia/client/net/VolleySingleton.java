@@ -13,8 +13,10 @@ package org.projectbuendia.client.net;
 
 import android.content.Context;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.Volley;
 import com.circle.android.api.OkHttpStack;
 import com.facebook.stetho.okhttp.StethoInterceptor;
@@ -28,6 +30,7 @@ public class VolleySingleton {
     private static VolleySingleton sInstance;
     private static Logger LOG = Logger.create();
     private final RequestQueue mRequestQueue;
+    private static RetryPolicy policy = new DefaultRetryPolicy(5000, 1, 1);
 
     /**
      * Get the VolleySingleton instance for doing multiple operations on a single context.
@@ -47,7 +50,7 @@ public class VolleySingleton {
      * handling and contexts correct.
      */
     public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
+        getRequestQueue().add(req.setRetryPolicy(policy));
         LOG.start("HTTP." + req.getSequence(), "Queued %s", Utils.repr(req));
     }
 

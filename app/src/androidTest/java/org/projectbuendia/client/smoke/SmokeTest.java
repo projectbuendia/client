@@ -145,8 +145,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
     private void addUser(String given, String family) {
         click(R.id.action_new_user);
-        type(given, R.id.add_user_given_name_tv);
-        type(family, R.id.add_user_family_name_tv);
+        type(given, R.id.given_name_field);
+        type(family, R.id.family_name_field);
         click("OK");
         expect(given + " " + family);
     }
