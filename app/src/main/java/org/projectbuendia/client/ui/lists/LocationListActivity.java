@@ -19,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
@@ -42,7 +41,6 @@ public final class LocationListActivity extends PatientListActivity {
     private AlertDialog mSyncFailedDialog;
 
     @Inject AppModel mAppModel;
-    @Inject AppSettings mAppSettings;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject SyncManager mSyncManager;
 
@@ -74,7 +72,7 @@ public final class LocationListActivity extends PatientListActivity {
 
         mController = new LocationListController(
             mAppModel,
-            mAppSettings,
+            settings,
             mCrudEventBusProvider.get(),
             new Ui(),
             new EventBusWrapper(EventBus.getDefault()),

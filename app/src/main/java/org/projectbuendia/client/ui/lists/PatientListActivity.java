@@ -22,7 +22,6 @@ import android.widget.SearchView;
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
@@ -31,8 +30,8 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
+import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
@@ -54,7 +53,6 @@ public abstract class PatientListActivity extends LoggedInActivity {
     @Inject EventBus mEventBus;
     @Inject CrudEventBus mCrudEventBus;
     @Inject SyncManager mSyncManager;
-    @Inject AppSettings mSettings;
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
@@ -126,10 +124,10 @@ public abstract class PatientListActivity extends LoggedInActivity {
 
         // To facilitate chart development, there's a developer setting that
         // causes the app to go straight to a patient chart on startup.
-        if (!sSkippedPatientList && mSettings.shouldSkipToPatientChart()) {
+        if (!sSkippedPatientList && settings.shouldSkipToPatientChart()) {
             try (Cursor cursor = getContentResolver().query(
                 Patients.URI, null, Patients.ID + " = ?",
-                new String[] {mSettings.getStartingPatientId()}, null)) {
+                new String[] {settings.getStartingPatientId()}, null)) {
                 if (cursor.moveToNext()) {
                     sSkippedPatientList = true;
                     PatientChartActivity.start(this, Utils.getString(cursor, Patients.UUID, null));

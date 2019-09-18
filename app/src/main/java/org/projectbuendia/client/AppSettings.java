@@ -60,16 +60,48 @@ public class AppSettings {
             resources.getString(R.string.openmrs_root_url_default));
     }
 
-    /** Gets the OpenMRS username. */
+    /** Gets the OpenMRS username to use for API requests. */
     public String getOpenmrsUser() {
         return prefs.getString("openmrs_user",
             resources.getString(R.string.openmrs_user_default));
     }
 
-    /** Gets the OpenMRS password. */
+    /** Gets the OpenMRS password to use for API requests. */
     public String getOpenmrsPassword() {
-        return prefs.getString("openmrs_password",
-            resources.getString(R.string.openmrs_password_default));
+        String defaultPassword = "";
+        try {
+            // Usually, this resource isn't set; the app comes without a
+            // password and the user has to enter one.  For demos, this can
+            // be set in order to let the user skip the authorization activity.
+            defaultPassword = resources.getString(R.string.openmrs_password_default);
+        } catch (Resources.NotFoundException e) {
+            defaultPassword = "";
+        }
+        return prefs.getString("openmrs_password", defaultPassword);
+    }
+
+    /**
+     * The app can be in an "unauthorized" state (user must provide the correct
+     * OpenMRS password before being allowed to do anything) or an "authorized"
+     * state (the user provided the correct OpenMRS password and we don't need
+     * to ask for it again).  The state is determined and defined by whether
+     * the OpenMRS password pref is set to anything.
+     */
+    public boolean isAuthorized() {
+        return Utils.hasChars(getOpenmrsPassword());
+    }
+
+    /**
+     * Records an OpenMRS password entered by the user that has successfully
+     * authorized at least one request.
+     */
+    public void authorize(String password) {
+        prefs.edit().putString("openmrs_password", password).commit();
+    }
+
+    /** Puts the app back in the "unauthorized" state where an OpenMRS password is required. */
+    public void deauthorize() {
+        prefs.edit().putString("openmrs_password", "").commit();
     }
 
     /** Constructs the URL for a given URL path on the package server. */

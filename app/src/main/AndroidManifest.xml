@@ -11,9 +11,10 @@
     specific language governing permissions and limitations under the License.
 -->
 <manifest
+    package="org.projectbuendia.client"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.projectbuendia.client">
+    >
 
     <!-- used for a unique identifier for forms for JavaRosa in ODK Collect -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -36,7 +37,8 @@
 
     <instrumentation
         android:name="android.support.test.runner.AndroidJUnitRunner"
-        android:targetPackage="org.projectbuendia.client" />
+        android:targetPackage="org.projectbuendia.client"
+        />
 
     <application
         android:name="org.projectbuendia.client.App"
@@ -44,7 +46,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        >
 
         <uses-library android:name="android.test.runner" />
 
@@ -52,27 +55,33 @@
         <provider
             android:name="org.odk.collect.android.provider.FormsProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.forms"
-            android:exported="false" />
+            android:exported="false"
+            />
 
         <!-- Content Provider for ODK form instances. -->
         <provider
             android:name="org.odk.collect.android.provider.InstanceProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.instances"
-            android:exported="false" />
+            android:exported="false"
+            />
 
         <!-- Content Provider for medical records. -->
         <provider
             android:name=".providers.BuendiaProvider"
             android:authorities="@string/content_authority"
-            android:exported="false" />
+            android:exported="false"
+            />
 
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name=".ui.AuthorizationActivity"
             android:label="@string/app_name"
-            android:screenOrientation="userPortrait" >
+            android:launchMode="singleTop"
+            android:screenOrientation="userPortrait"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -81,56 +90,65 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.login.LoginActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:screenOrientation="userPortrait"
+            >
+        </activity>
+        <activity
             android:name=".ui.lists.LocationListActivity"
             android:label="@string/title_location_list"
-            android:screenOrientation="userPortrait" >
-            <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+            android:launchMode="singleTop"
+            android:screenOrientation="userPortrait"
+            >
         </activity>
         <activity
             android:name=".ui.lists.FilteredPatientListActivity"
             android:label="@string/title_patient_list"
+            android:launchMode="singleTop"
             android:parentActivityName=".ui.lists.LocationListActivity"
             android:screenOrientation="userPortrait"
-            android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+            >
         </activity>
         <activity
             android:name="org.projectbuendia.client.ui.chart.PatientChartActivity"
             android:label="@string/title_patient_chart"
+            android:launchMode="singleTop"
             android:parentActivityName=".ui.lists.FilteredPatientListActivity"
             android:screenOrientation="userPortrait"
             android:uiOptions="splitActionBarWhenNarrow"
-            android:launchMode="singleTop">
+            >
             <meta-data
                 android:name="android.support.UI_OPTIONS"
-                android:value="splitActionBarWhenNarrow" />
+                android:value="splitActionBarWhenNarrow"
+                />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.lists.FilteredPatientListActivity" />
+                android:value=".ui.lists.FilteredPatientListActivity"
+                />
         </activity>
         <activity
             android:name="org.projectbuendia.client.ui.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".ui.lists.FilteredPatientListActivity"
-            android:screenOrientation="userPortrait" >
+            android:screenOrientation="userPortrait"
+            >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.lists.FilteredPatientListActivity" />
+                android:value=".ui.lists.FilteredPatientListActivity"
+                />
         </activity>
         <activity
             android:name=".ui.lists.SingleLocationActivity"
             android:label="@string/title_single_location"
             android:parentActivityName=".ui.lists.LocationListActivity"
-            android:screenOrientation="userPortrait"  >
+            android:screenOrientation="userPortrait"
+            >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.lists.LocationListActivity" />
+                android:value=".ui.lists.LocationListActivity"
+                />
         </activity>
     </application>
 </manifest>

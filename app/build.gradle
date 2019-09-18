@@ -169,7 +169,7 @@ def largeSyncIntervalDefault = 120  // for syncs that take up to 2000 ms
 def serverDefault = serverLan
 def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs'
 def openmrsUserDefault = 'buendia'
-def openmrsPasswordDefault = 'buendia'
+def openmrsPasswordDefault = ''
 def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001'
 
 // Apply overrides such as -Pserver=server -PnonWifiAllowed=true etc.
