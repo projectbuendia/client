@@ -129,7 +129,8 @@ public class UserStore {
 
     private void  updateDatabase(Set<JsonUser> users) throws RemoteException, OperationApplicationException {
         LOG.i("Updating local database with %d users", users.size());
-        try (ContentProviderClient client = App.getResolver().acquireContentProviderClient(Users.URI)) {
+        ContentProviderClient client = App.getResolver().acquireContentProviderClient(Users.URI);
+        try {
             BuendiaProvider provider = (BuendiaProvider) client.getLocalContentProvider();
             try (DatabaseTransaction tx = provider.startTransaction(USER_SYNC_SAVEPOINT_NAME)) {
                 try {
@@ -139,6 +140,10 @@ public class UserStore {
                     throw e;
                 }
             }
+        } finally {
+            // NOTE: We aren't using try-with-resources here because
+            // ContentProviderClient wasn't autocloseable in Android 5.
+            client.release();
         }
     }
 
