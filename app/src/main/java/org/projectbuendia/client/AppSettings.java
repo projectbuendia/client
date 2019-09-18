@@ -43,6 +43,12 @@ public class AppSettings {
         this.resources = resources;
     }
 
+    /** Gets the server hostname for Buendia API requests. */
+    public String getServer() {
+        return prefs.getString("server",
+            resources.getString(R.string.server_default));
+    }
+
     /** Constructs the URL for a given URL path under the OpenMRS root URL. */
     public String getOpenmrsUrl(String urlPath) {
         return getOpenmrsUrl().replaceAll("/*$", "") + urlPath;
