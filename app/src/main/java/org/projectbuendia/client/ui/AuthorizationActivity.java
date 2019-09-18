@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -48,6 +49,8 @@ public class AuthorizationActivity extends BaseActivity {
         passwordField = findViewById(R.id.openmrs_password_field);
         authorizeButton = findViewById(R.id.authorize_button);
 
+        authorizeButton.setOnClickListener(this::submit);
+
         populateFields();
         updateUi();
         passwordField.addTextChangedListener(new TextChangedWatcher(this::updateUi));
@@ -64,5 +67,14 @@ public class AuthorizationActivity extends BaseActivity {
     private void updateUi() {
         String password = passwordField.getText().toString();
         authorizeButton.setEnabled(Utils.hasChars(password));
+    }
+
+    private void submit(View view) {
+        String server = serverField.getText().toString();
+        String username = usernameField.getText().toString();
+        String password = passwordField.getText().toString();
+        settings.setServer(server);
+        settings.authorize(username, password);
+        startActivity(new Intent(this, LoginActivity.class));
     }
 }

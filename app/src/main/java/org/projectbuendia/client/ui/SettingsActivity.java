@@ -286,6 +286,10 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        if (!App.getSettings().isAuthorized()) {
+            finish();
+            startActivity(new Intent(this, AuthorizationActivity.class));
+        }
 
         setupSimplePreferencesScreen();
     }

@@ -45,8 +45,17 @@ public class AppSettings {
 
     /** Gets the server hostname for Buendia API requests. */
     public String getServer() {
-        return prefs.getString("server",
-            resources.getString(R.string.server_default));
+        String server = prefs.getString("server", "");
+        return Utils.hasChars(server) ? server : resources.getString(R.string.server_default);
+    }
+
+    public void setServer(String server) {
+        server = server.trim();
+        prefs.edit()
+            .putString("server", server)
+            .putString("openmrs_root_url", "http://" + server + ":9000/openmrs")
+            .putString("package_server_root_url", "http://" + server + ":9001")
+            .commit();
     }
 
     /** Constructs the URL for a given URL path under the OpenMRS root URL. */
@@ -95,8 +104,11 @@ public class AppSettings {
      * Records an OpenMRS password entered by the user that has successfully
      * authorized at least one request.
      */
-    public void authorize(String password) {
-        prefs.edit().putString("openmrs_password", password).commit();
+    public void authorize(String username, String password) {
+        prefs.edit()
+            .putString("openmrs_user", username)
+            .putString("openmrs_password", password)
+            .commit();
     }
 
     /** Puts the app back in the "unauthorized" state where an OpenMRS password is required. */

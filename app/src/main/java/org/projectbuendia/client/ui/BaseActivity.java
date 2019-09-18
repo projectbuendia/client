@@ -84,7 +84,10 @@ public abstract class BaseActivity extends FragmentActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         settings = App.getSettings();
-        if (!settings.isAuthorized()) startActivity(new Intent(this, AuthorizationActivity.class));
+        if (!settings.isAuthorized() && !(this instanceof AuthorizationActivity)) {
+            finish();
+            startActivity(new Intent(this, AuthorizationActivity.class));
+        }
 
         initialLocale = Locale.getDefault();
         openDialogTypes = new HashSet<>();
@@ -343,10 +346,12 @@ public abstract class BaseActivity extends FragmentActivity {
                         ), 40, false);
                     break;
                 case CHECK_SERVER_AUTH:
-                    snackBar(R.string.troubleshoot_server_auth,
-                        R.string.troubleshoot_server_auth_action_check,
-                        view -> SettingsActivity.start(BaseActivity.this),
-                        50, false);
+                    if (settings.isAuthorized()) {
+                        snackBar(R.string.troubleshoot_server_auth,
+                            R.string.troubleshoot_server_auth_action_check,
+                            view -> SettingsActivity.start(BaseActivity.this),
+                            50, false);
+                    }
                     break;
                 case CHECK_SERVER_SETUP:  // server is returning 500
                     snackBar(R.string.troubleshoot_server_unstable,
