@@ -417,6 +417,11 @@ public class Utils {
         return interval.getStart().plus(interval.toDuration().dividedBy(2));
     }
 
+    /** Converts a nullable DateTime to a nullable number of millis since 1970-01-01T00:00:00. */
+    public static Long toNullableMillis(ReadableInstant instant) {
+        return instant != null ? instant.getMillis() : null;
+    }
+
     /**
      * Describes a given date as a number of days since a starting date, where the starting date
      * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
