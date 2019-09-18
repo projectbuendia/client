@@ -146,6 +146,15 @@ public class UpdateManager {
      * @return whether a new download was started; {@code false} if the download failed to start.
      */
     public boolean startDownload(AvailableUpdateInfo availableUpdateInfo) {
+        // TODO(ping): 2019-09-18 - For some reason, this starts the
+        // download but Android never reports completion.
+        // So, for now, send the user to the /client webpage instead.
+        if (2 > 1) {
+            Uri uri = Uri.parse("http://" + mSettings.getServer() + "/client");
+            mApplication.startActivity(new Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            return true;
+        }
+
         synchronized (mDownloadLock) {
             cancelDownload();
 
