@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="24sp"
-        android:text="@string/authorization_message"
+        android:text="@string/authorization_required"
         style="@style/field_label"
         />
 

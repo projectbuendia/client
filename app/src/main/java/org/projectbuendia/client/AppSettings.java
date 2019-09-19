@@ -45,7 +45,7 @@ public class AppSettings {
 
     /** Gets the server hostname for Buendia API requests. */
     public String getServer() {
-        String server = prefs.getString("server", "");
+        String server = prefs.getString("server", "").trim();
         return Utils.hasChars(server) ? server : resources.getString(R.string.server_default);
     }
 

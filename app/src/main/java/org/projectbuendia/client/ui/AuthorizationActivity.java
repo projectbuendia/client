@@ -17,7 +17,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
+import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Utils;
@@ -49,11 +52,12 @@ public class AuthorizationActivity extends BaseActivity {
         passwordField = findViewById(R.id.openmrs_password_field);
         authorizeButton = findViewById(R.id.authorize_button);
 
+        new EditTextWatcher(serverField, usernameField, passwordField).onChange(this::updateUi);
         authorizeButton.setOnClickListener(this::submit);
 
         populateFields();
         updateUi();
-        passwordField.addTextChangedListener(new TextChangedWatcher(this::updateUi));
+        Utils.focusFirstEmptyField(serverField, usernameField, passwordField);
 
         ChartRenderer.backgroundCompileTemplate();
     }
@@ -61,20 +65,33 @@ public class AuthorizationActivity extends BaseActivity {
     private void populateFields() {
         serverField.setText(settings.getServer());
         usernameField.setText(settings.getOpenmrsUser());
-        serverField.setText(settings.getOpenmrsPassword());
+        passwordField.setText(settings.getOpenmrsPassword());
     }
 
     private void updateUi() {
+        String server = serverField.getText().toString().trim();
+        String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
-        authorizeButton.setEnabled(Utils.hasChars(password));
+        authorizeButton.setEnabled(Utils.hasChars(server)
+            && Utils.hasChars(username) && Utils.hasChars(password));
     }
 
     private void submit(View view) {
-        String server = serverField.getText().toString();
+        String server = serverField.getText().toString().trim();
         String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
         settings.setServer(server);
         settings.authorize(username, password);
+        App.getUserManager().loadKnownUsers();
+    }
+
+    private void onEventMainThread(KnownUsersLoadedEvent event) {
+        BigToast.show(R.string.authorization_successful);
         startActivity(new Intent(this, LoginActivity.class));
+    }
+
+    private void onEventMainThread(KnownUsersLoadFailedEvent event) {
+        BigToast.show(R.string.authorization_failed);
+        settings.deauthorize();
     }
 }
