@@ -1791,8 +1791,8 @@ public class FormEntryActivity
 						.getSpecialFormQuestionText("requiredMsg");
 				if (constraintText == null) {
 					// TODO(i18n)
-                    constraintText = formController.getQuestionPrompt(index)
-						.getQuestionText() + " is required.";
+                    constraintText = getString(R.string.question_is_required,
+						formController.getQuestionPrompt(index));
 				}
 			}
 			break;

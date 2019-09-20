@@ -54,7 +54,7 @@
   <string name="action_new_round">Nouveau tour</string>
   <string name="action_assign_location">Attribuer emplacement</string>
   <string name="bed_number">Numéro de lit</string>
-  <string name="action_edit_patient">Modifier patient</string>
+  <string name="action_edit_patient">Modifier ce patient</string>
   <string name="action_view_round_archive">Archive de tours</string>
   <string name="snackbar_update_available">Mise à jour de l\'app disponible</string>
   <string name="snackbar_update_downloaded">Mise à jour de l\'app téléchargée</string>
@@ -105,7 +105,7 @@
   <string name="order_frequency">Fréquence</string>
   <string name="order_time_per_day">fois par jour</string>
   <string name="order_times_per_day">fois par jour</string>
-  <string name="order_give_for">Donne pour</string>
+  <string name="order_give_for">Donner pour</string>
   <string name="order_give_for_days">jours</string>
   <string name="order_give_for_day">jour</string>
 
