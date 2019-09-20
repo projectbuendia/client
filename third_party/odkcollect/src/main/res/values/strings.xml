@@ -126,6 +126,7 @@
 <string name="replace_location">Replace Location</string>
 <string name="required_answer_error">Sorry, this response is required!</string>
 <string name="question_is_required">%s is required</string>
+<string name="question_is_invalid">%s is invalid</string>
 <string name="review_data">Edit Saved Form</string>
 <string name="review_data_button">Edit Saved Form (%s)</string>
 <string name="saved_data">Incomplete (%s)</string>

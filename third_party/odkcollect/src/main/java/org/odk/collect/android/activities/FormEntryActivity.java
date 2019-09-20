@@ -1772,9 +1772,8 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 					.getSpecialFormQuestionText("constraintMsg");
 				if (constraintText == null) {
-					// TODO(i18n)
-					constraintText = formController.getQuestionPrompt(index)
-						.getQuestionText() + " is invalid.";
+					constraintText = getString(R.string.question_is_invalid,
+						formController.getQuestionPrompt(index).getQuestionText());
 				}
 			}
 			break;
@@ -1790,9 +1789,8 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 						.getSpecialFormQuestionText("requiredMsg");
 				if (constraintText == null) {
-					// TODO(i18n)
                     constraintText = getString(R.string.question_is_required,
-						formController.getQuestionPrompt(index));
+						formController.getQuestionPrompt(index).getQuestionText());
 				}
 			}
 			break;

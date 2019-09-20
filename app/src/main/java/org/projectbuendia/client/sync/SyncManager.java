@@ -141,6 +141,9 @@ public class SyncManager {
         return BuendiaSyncEngine.buildOptions(phases);
     }
 
+    // TODO(ping): This receiver will receive events from any instance of the
+    // Buendia app, so if there are two instances running (e.g. dev and prod)
+    // sync errors in one will abort the other and cause mayhem.
     /** Listens for sync status events that are broadcast by the BuendiaSyncEngine. */
     public class StatusReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
