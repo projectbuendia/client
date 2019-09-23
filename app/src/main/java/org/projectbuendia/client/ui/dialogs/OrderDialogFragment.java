@@ -122,17 +122,17 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment>
         mExecuted = args.getBoolean("executed");
         mStopped = args.getBoolean("stopped");
 
+        // Populate the dialog appropriately.
+        dialog.setTitle(mOrder == null ? R.string.title_new_order : R.string.title_edit_order);
+        if (mOrder != null) populateFields();
+        updateUi();
+
         // Finish building the dialog's behaviour.
         addClearButton(mMedication, R.drawable.abc_ic_clear_mtrl_alpha);
         mMedication.setThreshold(1);
         mMedication.setAdapter(new AutocompleteAdapter(
             getActivity(), R.layout.captioned_item, new MedCompleter()));
         addListeners();
-
-        // Populate the dialog appropriately.
-        dialog.setTitle(mOrder == null ? R.string.title_new_order : R.string.title_edit_order);
-        if (mOrder != null) populateFields();
-        updateUi();
     }
 
     private void addListeners() {
