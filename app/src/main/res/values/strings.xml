@@ -32,6 +32,7 @@
   <string name="authorization_successful">This device is now authorized.</string>
   <string name="authorization_failed">Authorization failed.</string>
   <string name="server_connection_failed">Could not connect to server.  Please check the server and OpenMRS account settings.</string>
+  <string name="title_authorizing">Authorizing</string>
 
   <!-- Statuses -->
   <string name="status_unknown">Unknown</string>

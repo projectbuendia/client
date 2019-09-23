@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.ui;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -35,12 +36,13 @@ public class AuthorizationActivity extends BaseActivity {
     private EditText usernameField;
     private EditText passwordField;
     private Button authorizeButton;
+    private Dialog progressDialog;
 
     private Subscriber subscriber = new Subscriber();
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (settings.isAuthorized()) startActivity(new Intent(this, LoginActivity.class));
+        if (settings.isAuthorized()) skipToLoginActivity();
 
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
@@ -77,6 +79,7 @@ public class AuthorizationActivity extends BaseActivity {
         String password = passwordField.getText().toString();
         authorizeButton.setEnabled(Utils.hasChars(server)
             && Utils.hasChars(username) && Utils.hasChars(password));
+        settings.setServer(server);
     }
 
     private void submit(View view) {
@@ -84,6 +87,13 @@ public class AuthorizationActivity extends BaseActivity {
         String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
         new FetchUsersTask(App.getCrudEventBus(), server, username, password).execute();
+        progressDialog = u.showProgressDialog(
+            getString(R.string.title_authorizing), getString(R.string.please_wait_ellipsis));
+    }
+
+    private void skipToLoginActivity() {
+        finish();
+        startActivity(new Intent(AuthorizationActivity.this, LoginActivity.class));
     }
 
     protected void onResume() {
@@ -98,12 +108,14 @@ public class AuthorizationActivity extends BaseActivity {
 
     class Subscriber {
         public void onEventMainThread(UsersFetchedEvent event) {
+            progressDialog.dismiss();
             BigToast.show(R.string.authorization_successful);
             settings.authorize(event.server, event.username, event.password);
-            startActivity(new Intent(AuthorizationActivity.this, LoginActivity.class));
+            skipToLoginActivity();
         }
 
         public void onEventMainThread(FetchUsersTaskFailedEvent event) {
+            progressDialog.dismiss();
             BigToast.show(R.string.authorization_failed);
             settings.deauthorize();
         }

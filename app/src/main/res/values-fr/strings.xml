@@ -28,10 +28,11 @@
 
   <!-- Authorization activity -->
   <string name="authorization_required">Cet appareil n\'est pas autorisé.  Pour accedér aux données des patients, SVP entrez les identifiants de votre compte OpenMRS.</string>
-  <string name="authorize">Authorize</string>
+  <string name="authorize">Autoriser</string>
   <string name="authorization_successful">Cet appareil est maintenant autorisé.</string>
   <string name="authorization_failed">L\'autorisation a échoué.</string>
   <string name="server_connection_failed">Ne peut pas faire connexion au serveur.  SVP vérifier les paramètres du serveur et du compte OpenMRS.</string>
+  <string name="title_authorizing">Authorisation</string>
 
   <!-- Statuses -->
   <string name="status_unknown">Inconnu</string>
