@@ -65,30 +65,34 @@ import static org.projectbuendia.client.utils.Utils.eq;
     public static final String OPENMRS_PASSWORD = "tester";
     public static final Logger LOG = Logger.create();
 
+    public static final String DEFAULT_LOCATION = "Suspect";
+    public static final String TARGET_LOCATION = "Confirmed";
+    public static final String FINAL_LOCATION = "Discharged";
+
     /** A test that exercises all the API methods and endpoints. */
     @Test @UiThreadTest public void testApi() {
         screenshot("Start");
-        authorize();  // step 0
+        initSettings();  // step 0
         screenshot("Loaded users");
         final String id = "" + getNextAvailableId(R.id.users);
         addUser("Test" + id, "User" + id);  // step 1
         screenshot("Added new user");
         signInFullSync("Test" + id + " User" + id);  // step 2
         screenshot("Signed in");
-        int suspectedCount = getPatientCount("Suspected");
+        int targetCount = getPatientCount(TARGET_LOCATION);
         addPatient(id, "Given" + id, "Family" + id, 11);  // step 3
         screenshot("Added new patient");
         String patientUuid = PatientChartController.currentPatientUuid;
-        movePatient("Triage", "Suspected");
+        movePatient(DEFAULT_LOCATION, TARGET_LOCATION);
         back();  // back to location list
         screenshot("Moved patient away");
-        expectPatientCount("Suspected", suspectedCount + 1);
-        int dischargedCount = getPatientCount("Discharged");
-        internalMovePatient(patientUuid, internalGetLocationUuid("Discharged"));
+        expectPatientCount(TARGET_LOCATION, targetCount + 1);
+        int finalCount = getPatientCount(FINAL_LOCATION);
+        internalMovePatient(patientUuid, internalGetLocationUuid(FINAL_LOCATION));
         internalIncrementalSync();  // step 4
         screenshot("Moved patient back");
-        expectPatientCount("Suspected", suspectedCount);
-        expectPatientCount("Discharged", dischargedCount + 1);
+        expectPatientCount(TARGET_LOCATION, targetCount);
+        expectPatientCount(FINAL_LOCATION, finalCount + 1);
         goToPatientById(id, "Given" + id, "Family" + id);  // step 5
         screenshot("Opened chart by ID");
         editPatientAge(22);  // step 6
@@ -123,6 +127,24 @@ import static org.projectbuendia.client.utils.Utils.eq;
         clearAndType(OPENMRS_USERNAME, R.id.openmrs_user_field);
         clearAndType(OPENMRS_PASSWORD, R.id.openmrs_password_field);
         click(R.id.authorize_button);
+    }
+
+    private void initSettings() {
+        App.getSettings().setPeriodicSyncDisabled(true);
+        App.getSyncManager().applyPeriodicSyncSettings();
+        App.getSettings().setLocale("en");
+        Utils.restartActivity(getActivity());
+        click(R.id.settings);
+        click("Developer");
+        clickIfUnchecked(viewThat(
+            isA(CheckBox.class),
+            whoseParent(hasSiblingThat(hasChildThat(hasText("Periodic sync disabled"))))
+        ));
+        click("General");
+        enterSetting("Buendia server", HOSTNAME, "Apply and clear local data");
+        enterSetting("OpenMRS username", OPENMRS_USERNAME, "Apply and clear local data");
+        enterSetting("OpenMRS password", OPENMRS_PASSWORD, "Apply and clear local data");
+        back();
     }
 
     private void enterSetting(String title, Object value) {
