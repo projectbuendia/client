@@ -1,5 +1,6 @@
 package org.projectbuendia.client.smoke;
 
+import android.content.Intent;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.ViewAction;
@@ -39,6 +40,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.ui.AuthorizationActivity;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartController;
 import org.projectbuendia.client.utils.Logger;
@@ -58,7 +60,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A quick test suite that exercises all basic functionality. */
 @MediumTest public class SmokeTest extends FunctionalTestCase {
-    public static final String HOSTNAME = "ping.buendia.org";
+    public static final String HOSTNAME = "buendia";
     public static final String OPENMRS_USERNAME = "tester";
     public static final String OPENMRS_PASSWORD = "tester";
     public static final Logger LOG = Logger.create();
@@ -66,7 +68,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
     /** A test that exercises all the API methods and endpoints. */
     @Test @UiThreadTest public void testApi() {
         screenshot("Start");
-        initSettings();  // step 0
+        authorize();  // step 0
         screenshot("Loaded users");
         final String id = "" + getNextAvailableId(R.id.users);
         addUser("Test" + id, "User" + id);  // step 1
@@ -108,20 +110,19 @@ import static org.projectbuendia.client.utils.Utils.eq;
         toast("Smoke test passed!");
     }
 
-    private void initSettings() {
+    private void authorize() {
+        App.getSettings().setPeriodicSyncDisabled(true);
+        App.getSyncManager().applyPeriodicSyncSettings();
         App.getSettings().setLocale("en");
-        Utils.restartActivity(getActivity());
-        click(R.id.settings);
-        click("Developer");
-        clickIfUnchecked(viewThat(
-            isA(CheckBox.class),
-            whoseParent(hasSiblingThat(hasChildThat(hasText("Periodic sync disabled"))))
-        ));
-        click("General");
-        enterSetting("Buendia server", HOSTNAME, "Apply and clear local data");
-        enterSetting("OpenMRS username", OPENMRS_USERNAME, "Apply and clear local data");
-        enterSetting("OpenMRS password", OPENMRS_PASSWORD, "Apply and clear local data");
-        back();
+        App.getSettings().deauthorize();
+        getActivity().startActivity(
+            new Intent(getActivity(), AuthorizationActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        );
+        clearAndType(HOSTNAME, R.id.server_field);
+        clearAndType(OPENMRS_USERNAME, R.id.openmrs_user_field);
+        clearAndType(OPENMRS_PASSWORD, R.id.openmrs_password_field);
+        click(R.id.authorize_button);
     }
 
     private void enterSetting(String title, Object value) {

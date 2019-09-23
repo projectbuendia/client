@@ -30,7 +30,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -53,7 +52,7 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
  * Base class for functional tests that sets timeouts to be permissive, optionally logs in as a
  * user before continuing, and provides some utility functions for convenience.
  */
-public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity> {
+public class FunctionalTestCase extends TestCaseWithMatcherMethods<AuthorizationActivity> {
     private static final Logger LOG = Logger.create();
 
     public static final String LOCATION_NAME = "Triage";
@@ -66,7 +65,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     protected EventBusRegistrationInterface mEventBus;
 
     public FunctionalTestCase() {
-        super(LoginActivity.class);
+        super(AuthorizationActivity.class);
     }
 
     @Before
@@ -126,8 +125,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     }
 
     /**
-     * Determines the currently loaded activity, rather than {@link #getActivity()}, which will
-     * always return {@link LoginActivity}.
+     * Determines the currently loaded activity, rather than {@link #getActivity()},
+     * which will always return the AuthorizationActivity.
      */
     protected Activity getCurrentActivity() throws Throwable {
         getInstrumentation().waitForIdleSync();

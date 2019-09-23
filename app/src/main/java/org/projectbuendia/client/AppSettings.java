@@ -115,6 +115,7 @@ public class AppSettings {
     /** Puts the app back in the "unauthorized" state where an OpenMRS password is required. */
     public void deauthorize() {
         prefs.edit().putString("openmrs_password", "").commit();
+        App.reset(null);
     }
 
     /** Constructs the URL for a given URL path on the package server. */
@@ -163,6 +164,11 @@ public class AppSettings {
     public boolean getPeriodicSyncDisabled() {
         return prefs.getBoolean("periodic_sync_disabled",
             resources.getBoolean(R.bool.periodic_sync_disabled_default));
+    }
+
+    /** Sets whether periodic sync is disabled in the settings. */
+    public void setPeriodicSyncDisabled(boolean disabled) {
+        prefs.edit().putBoolean("periodic_sync_disabled", disabled).commit();
     }
 
     /** Gets the setting for whether to retain filled-in forms after submission. */
