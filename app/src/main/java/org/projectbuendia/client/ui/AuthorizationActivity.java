@@ -19,10 +19,11 @@ import android.widget.EditText;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
-import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
+import org.projectbuendia.client.events.user.FetchUsersTaskFailedEvent;
+import org.projectbuendia.client.events.user.UsersFetchedEvent;
 import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.user.FetchUsersTask;
 import org.projectbuendia.client.utils.Utils;
 
 /**
@@ -30,10 +31,12 @@ import org.projectbuendia.client.utils.Utils;
  * activities until a successful authorization taken place.
  */
 public class AuthorizationActivity extends BaseActivity {
-    EditText serverField;
-    EditText usernameField;
-    EditText passwordField;
-    Button authorizeButton;
+    private EditText serverField;
+    private EditText usernameField;
+    private EditText passwordField;
+    private Button authorizeButton;
+
+    private Subscriber subscriber = new Subscriber();
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,18 +83,29 @@ public class AuthorizationActivity extends BaseActivity {
         String server = serverField.getText().toString().trim();
         String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
-        settings.setServer(server);
-        settings.authorize(username, password);
-        App.getUserManager().loadKnownUsers();
+        new FetchUsersTask(App.getCrudEventBus(), server, username, password).execute();
     }
 
-    private void onEventMainThread(KnownUsersLoadedEvent event) {
-        BigToast.show(R.string.authorization_successful);
-        startActivity(new Intent(this, LoginActivity.class));
+    protected void onResume() {
+        super.onResume();
+        App.getCrudEventBus().register(subscriber);
     }
 
-    private void onEventMainThread(KnownUsersLoadFailedEvent event) {
-        BigToast.show(R.string.authorization_failed);
-        settings.deauthorize();
+    protected void onPause() {
+        App.getCrudEventBus().unregister(subscriber);
+        super.onPause();
+    }
+
+    class Subscriber {
+        public void onEventMainThread(UsersFetchedEvent event) {
+            BigToast.show(R.string.authorization_successful);
+            settings.authorize(event.server, event.username, event.password);
+            startActivity(new Intent(AuthorizationActivity.this, LoginActivity.class));
+        }
+
+        public void onEventMainThread(FetchUsersTaskFailedEvent event) {
+            BigToast.show(R.string.authorization_failed);
+            settings.deauthorize();
+        }
     }
 }

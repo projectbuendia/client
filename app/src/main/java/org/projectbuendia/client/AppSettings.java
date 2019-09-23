@@ -104,7 +104,8 @@ public class AppSettings {
      * Records an OpenMRS password entered by the user that has successfully
      * authorized at least one request.
      */
-    public void authorize(String username, String password) {
+    public void authorize(String server, String username, String password) {
+        setServer(server);
         prefs.edit()
             .putString("openmrs_user", username)
             .putString("openmrs_password", password)
