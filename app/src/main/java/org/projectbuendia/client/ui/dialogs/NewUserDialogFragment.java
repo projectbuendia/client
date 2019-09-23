@@ -46,7 +46,7 @@ public class NewUserDialogFragment extends BaseDialogFragment<NewUserDialogFragm
     @Override protected void onOpen(Bundle args) {
         dialog.setTitle(R.string.title_new_user);
         mGivenName.requestFocus();
-        showKeyboard();
+        Utils.showKeyboard(dialog.getWindow());
     }
 
     @Override protected void onSubmit() {

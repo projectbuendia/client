@@ -253,7 +253,9 @@ public class SettingsActivity extends PreferenceActivity {
                 pref.setSummary(str);
                 break;
             case "openmrs_password":
-                pref.setSummary(Utils.isEmpty(str) ? "" :  "••••••••");
+                String dots = "";
+                while (dots.length() < str.length()) dots += "•";
+                pref.setSummary(Utils.isEmpty(str) ? "" : dots);
                 break;
             case "locale":
                 Locale locale = Utils.toLocale(str);

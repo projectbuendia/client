@@ -27,7 +27,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.ui.TextChangedWatcher;
+import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.lists.LocationOptionList;
 import org.projectbuendia.client.utils.Utils;
@@ -69,11 +69,11 @@ public class PatientLocationDialogFragment extends BaseDialogFragment<PatientLoc
         bedNumber.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
         bedNumber.setText(initialBedNumber);
         bedNumber.setSelection(bedNumber.getText().length());
-        bedNumber.addTextChangedListener(new TextChangedWatcher(() -> {
+        new EditTextWatcher(bedNumber).onChange(() -> {
             if (eq(list.getSelectedLocation().uuid, initialLocationUuid)) {
                 initialBedNumber = bedNumber.getText().toString();
             }
-        }));
+        });
         list.setOnLocationSelectedListener(location -> {
             if (eq(location.uuid, initialLocationUuid)) {
                 bedNumber.setText(initialBedNumber);

@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Users;
@@ -148,8 +149,13 @@ public class UserStore {
     }
 
     private Set<JsonUser> getUsersFromServer() throws ExecutionException, InterruptedException {
+        return getUsersFromServer(null);
+    }
+
+    public Set<JsonUser> getUsersFromServer(OpenMrsConnectionDetails connection)
+        throws ExecutionException, InterruptedException {
         RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
-        App.getServer().listUsers(null, future, future);
+        App.getServer().listUsers(connection, future, future);
         List<JsonUser> users = future.get();
         LOG.i("Got %d users from server", users.size());
         return new HashSet<>(users);

@@ -11,15 +11,20 @@
 
 package org.projectbuendia.client.ui;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.user.FetchUsersTaskFailedEvent;
+import org.projectbuendia.client.events.user.UsersFetchedEvent;
 import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.user.FetchUsersTask;
 import org.projectbuendia.client.utils.Utils;
 
 /**
@@ -27,14 +32,17 @@ import org.projectbuendia.client.utils.Utils;
  * activities until a successful authorization taken place.
  */
 public class AuthorizationActivity extends BaseActivity {
-    EditText serverField;
-    EditText usernameField;
-    EditText passwordField;
-    Button authorizeButton;
+    private EditText serverField;
+    private EditText usernameField;
+    private EditText passwordField;
+    private Button authorizeButton;
+    private Dialog progressDialog;
+
+    private Subscriber subscriber = new Subscriber();
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (settings.isAuthorized()) startActivity(new Intent(this, LoginActivity.class));
+        if (settings.isAuthorized()) skipToLoginActivity();
 
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
@@ -49,11 +57,12 @@ public class AuthorizationActivity extends BaseActivity {
         passwordField = findViewById(R.id.openmrs_password_field);
         authorizeButton = findViewById(R.id.authorize_button);
 
+        new EditTextWatcher(serverField, usernameField, passwordField).onChange(this::updateUi);
         authorizeButton.setOnClickListener(this::submit);
 
         populateFields();
         updateUi();
-        passwordField.addTextChangedListener(new TextChangedWatcher(this::updateUi));
+        Utils.focusFirstEmptyField(serverField, usernameField, passwordField);
 
         ChartRenderer.backgroundCompileTemplate();
     }
@@ -61,20 +70,54 @@ public class AuthorizationActivity extends BaseActivity {
     private void populateFields() {
         serverField.setText(settings.getServer());
         usernameField.setText(settings.getOpenmrsUser());
-        serverField.setText(settings.getOpenmrsPassword());
+        passwordField.setText(settings.getOpenmrsPassword());
     }
 
     private void updateUi() {
+        String server = serverField.getText().toString().trim();
+        String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
-        authorizeButton.setEnabled(Utils.hasChars(password));
+        authorizeButton.setEnabled(Utils.hasChars(server)
+            && Utils.hasChars(username) && Utils.hasChars(password));
+        settings.setServer(server);
     }
 
     private void submit(View view) {
-        String server = serverField.getText().toString();
+        String server = serverField.getText().toString().trim();
         String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
-        settings.setServer(server);
-        settings.authorize(username, password);
-        startActivity(new Intent(this, LoginActivity.class));
+        new FetchUsersTask(App.getCrudEventBus(), server, username, password).execute();
+        progressDialog = u.showProgressDialog(
+            getString(R.string.title_authorizing), getString(R.string.please_wait_ellipsis));
+    }
+
+    private void skipToLoginActivity() {
+        finish();
+        startActivity(new Intent(AuthorizationActivity.this, LoginActivity.class));
+    }
+
+    protected void onResume() {
+        super.onResume();
+        App.getCrudEventBus().register(subscriber);
+    }
+
+    protected void onPause() {
+        App.getCrudEventBus().unregister(subscriber);
+        super.onPause();
+    }
+
+    class Subscriber {
+        public void onEventMainThread(UsersFetchedEvent event) {
+            progressDialog.dismiss();
+            BigToast.show(R.string.authorization_successful);
+            settings.authorize(event.server, event.username, event.password);
+            skipToLoginActivity();
+        }
+
+        public void onEventMainThread(FetchUsersTaskFailedEvent event) {
+            progressDialog.dismiss();
+            BigToast.show(R.string.authorization_failed);
+            settings.deauthorize();
+        }
     }
 }

@@ -17,7 +17,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -108,9 +107,5 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
         field.setError(getString(messageId, args));
         field.invalidate();
         field.requestFocus();
-    }
-
-    protected void showKeyboard() {
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 }

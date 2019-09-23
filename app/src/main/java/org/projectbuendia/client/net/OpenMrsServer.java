@@ -349,13 +349,12 @@ public class OpenMrsServer implements Server {
         // TODO: Implement or remove (currently handled by updatePatient).
     }
 
-    @Override public void listUsers(@Nullable String searchQuery,
+    @Override public void listUsers(@Nullable OpenMrsConnectionDetails connection,
                           final Response.Listener<List<JsonUser>> successListener,
                           Response.ErrorListener errorListener) {
-        String query = searchQuery != null ? "?q=" + Utils.urlEncode(searchQuery) : "";
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails,
-            "/providers" + query,
+            connection != null ? connection : mConnectionDetails,
+            "/providers",
             null,
             response -> {
                 ArrayList<JsonUser> users = new ArrayList<>();

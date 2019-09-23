@@ -44,7 +44,7 @@ public class TextObsDialogFragment extends BaseDialogFragment<TextObsDialogFragm
         dialog.setTitle((String) args.get("title"));
         obs = (Obs) args.get("obs");
         text.setText(obs.value);
-        showKeyboard();
+        Utils.showKeyboard(dialog.getWindow());
     }
 
     @Override protected void onSubmit() {

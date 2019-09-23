@@ -126,8 +126,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     }
 
     /**
-     * Determines the currently loaded activity, rather than {@link #getActivity()}, which will
-     * always return {@link LoginActivity}.
+     * Determines the currently loaded activity, rather than {@link #getActivity()},
+     * which will always return the LoginActivity.
      */
     protected Activity getCurrentActivity() throws Throwable {
         getInstrumentation().waitForIdleSync();

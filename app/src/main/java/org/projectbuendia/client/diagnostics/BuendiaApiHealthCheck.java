@@ -46,11 +46,11 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
     // Under normal conditions, make requests to the server with this frequency
     // to check if it's reachable and responding.
-    private static final int CHECK_PERIOD_MS = 20000;
+    private static final int CHECK_PERIOD_MS = 10000;
 
     // During certain problem conditions, check more often so that when the
     // problem is resolved, we can hide the snackbar more promptly.
-    private static final int FAST_CHECK_PERIOD_MS = 10000;
+    private static final int FAST_CHECK_PERIOD_MS = 1000;
 
     // These are the issues for which we use the faster checking period.
     private static final Set<HealthIssue> FAST_CHECK_ISSUES = ImmutableSet.of(

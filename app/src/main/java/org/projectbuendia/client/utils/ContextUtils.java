@@ -1,6 +1,8 @@
 package org.projectbuendia.client.utils;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.Cursor;
@@ -197,6 +199,17 @@ public class ContextUtils extends ContextWrapper {
             .setNegativeButton(R.string.cancel, null)
             .create()
             .show();
+    }
+
+    public Dialog showProgressDialog(String title, String message) {
+        ProgressDialog d = new ProgressDialog(this);
+        d.setIcon(android.R.drawable.ic_dialog_info);
+        d.setTitle(title);
+        d.setMessage(message);
+        d.setIndeterminate(true);
+        d.setCancelable(false);
+        d.show();
+        return d;
     }
 
     public interface ContextProvider {
