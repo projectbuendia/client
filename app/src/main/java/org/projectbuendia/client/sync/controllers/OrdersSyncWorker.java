@@ -10,6 +10,7 @@ import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -51,8 +52,8 @@ public class OrdersSyncWorker extends IncrementalSyncWorker<JsonOrder> {
                 .withValue(Orders.PATIENT_UUID, order.patient_uuid)
                 .withValue(Orders.PROVIDER_UUID, order.provider_uuid)
                 .withValue(Orders.INSTRUCTIONS, order.instructions)
-                .withValue(Orders.START_MILLIS, order.start_time.getMillis())
-                .withValue(Orders.STOP_MILLIS, order.stop_time.getMillis())
+                .withValue(Orders.START_MILLIS, Utils.toNullableMillis(order.start_time))
+                .withValue(Orders.STOP_MILLIS, Utils.toNullableMillis(order.stop_time))
                 .build();
     }
 

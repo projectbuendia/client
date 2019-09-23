@@ -177,6 +177,11 @@ public class ThreadedSyncScheduler implements SyncScheduler {
         }
 
         private void runSync(Bundle options) {
+            if (!App.getSettings().isAuthorized()) {
+                LOG.w("Skipping sync: App is not authorized.");
+                return;
+            }
+
             if (App.getSyncManager().getNewSyncsSuppressed()) {
                 LOG.w("Skipping sync: New syncs are currently suppressed.");
                 return;

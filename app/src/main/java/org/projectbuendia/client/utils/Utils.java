@@ -20,6 +20,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -417,6 +420,11 @@ public class Utils {
         return interval.getStart().plus(interval.toDuration().dividedBy(2));
     }
 
+    /** Converts a nullable DateTime to a nullable number of millis since 1970-01-01T00:00:00. */
+    public static Long toNullableMillis(ReadableInstant instant) {
+        return instant != null ? instant.getMillis() : null;
+    }
+
     /**
      * Describes a given date as a number of days since a starting date, where the starting date
      * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
@@ -663,6 +671,27 @@ public class Utils {
         view.setEnabled(enabled);
         view.setFocusable(enabled);
         view.setFocusableInTouchMode(enabled);
+    }
+
+    /** Brings up the soft keyboard. */
+    public static void showKeyboard(Window window) {
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
+    /** Puts focus on the first empty field, or otherwise the first field. */
+    public static void focusFirstEmptyField(EditText... fields) {
+        for (EditText field : fields) {
+            if (field.isEnabled() && field.getText().toString().isEmpty()) {
+                field.requestFocus();
+                return;
+            }
+        }
+
+        // If all fields are populated, default to the first field.
+        if (fields.length >= 1) {
+            fields[0].requestFocus();
+            fields[0].setSelection(fields[0].getText().length());
+        }
     }
 
 

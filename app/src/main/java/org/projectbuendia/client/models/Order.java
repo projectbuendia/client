@@ -261,7 +261,7 @@ public final @Immutable class Order extends Model implements Serializable {
         cv.put(Orders.PROVIDER_UUID, providerUuid);
         cv.put(Orders.INSTRUCTIONS, instructions.format());
         cv.put(Orders.START_MILLIS, start.getMillis());
-        cv.put(Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());
+        cv.put(Orders.STOP_MILLIS, Utils.toNullableMillis(stop));
         return cv;
     }
 

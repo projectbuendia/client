@@ -36,7 +36,7 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.MedCompleter;
-import org.projectbuendia.client.ui.TextChangedWatcher;
+import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.Arrays;
@@ -152,9 +152,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment>
                 .show();
         });
 
-        mFrequency.addTextChangedListener(new TextChangedWatcher(this::updateUi));
-        mGiveForDays.addTextChangedListener(new TextChangedWatcher(this::updateUi));
-
+        new EditTextWatcher(mFrequency, mGiveForDays).onChange(this::updateUi);
         mStopNow.setOnClickListener(view -> onStopNow());
         mDelete.setOnClickListener(view -> onDelete());
     }

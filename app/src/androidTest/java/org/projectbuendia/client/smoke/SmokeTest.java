@@ -1,5 +1,6 @@
 package org.projectbuendia.client.smoke;
 
+import android.content.Intent;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.ViewAction;
@@ -39,6 +40,7 @@ import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.ui.AuthorizationActivity;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.chart.PatientChartController;
 import org.projectbuendia.client.utils.Logger;
@@ -58,10 +60,14 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A quick test suite that exercises all basic functionality. */
 @MediumTest public class SmokeTest extends FunctionalTestCase {
-    public static final String HOSTNAME = "ping.buendia.org";
+    public static final String HOSTNAME = "buendia";
     public static final String OPENMRS_USERNAME = "tester";
     public static final String OPENMRS_PASSWORD = "tester";
     public static final Logger LOG = Logger.create();
+
+    public static final String DEFAULT_LOCATION = "Suspect";
+    public static final String TARGET_LOCATION = "Confirmed";
+    public static final String FINAL_LOCATION = "Discharged";
 
     /** A test that exercises all the API methods and endpoints. */
     @Test @UiThreadTest public void testApi() {
@@ -73,20 +79,20 @@ import static org.projectbuendia.client.utils.Utils.eq;
         screenshot("Added new user");
         signInFullSync("Test" + id + " User" + id);  // step 2
         screenshot("Signed in");
-        int suspectedCount = getPatientCount("Suspected");
+        int targetCount = getPatientCount(TARGET_LOCATION);
         addPatient(id, "Given" + id, "Family" + id, 11);  // step 3
         screenshot("Added new patient");
         String patientUuid = PatientChartController.currentPatientUuid;
-        movePatient("Triage", "Suspected");
+        movePatient(DEFAULT_LOCATION, TARGET_LOCATION);
         back();  // back to location list
         screenshot("Moved patient away");
-        expectPatientCount("Suspected", suspectedCount + 1);
-        int dischargedCount = getPatientCount("Discharged");
-        internalMovePatient(patientUuid, internalGetLocationUuid("Discharged"));
+        expectPatientCount(TARGET_LOCATION, targetCount + 1);
+        int finalCount = getPatientCount(FINAL_LOCATION);
+        internalMovePatient(patientUuid, internalGetLocationUuid(FINAL_LOCATION));
         internalIncrementalSync();  // step 4
         screenshot("Moved patient back");
-        expectPatientCount("Suspected", suspectedCount);
-        expectPatientCount("Discharged", dischargedCount + 1);
+        expectPatientCount(TARGET_LOCATION, targetCount);
+        expectPatientCount(FINAL_LOCATION, finalCount + 1);
         goToPatientById(id, "Given" + id, "Family" + id);  // step 5
         screenshot("Opened chart by ID");
         editPatientAge(22);  // step 6
@@ -108,7 +114,24 @@ import static org.projectbuendia.client.utils.Utils.eq;
         toast("Smoke test passed!");
     }
 
+    private void authorize() {
+        App.getSettings().setPeriodicSyncDisabled(true);
+        App.getSyncManager().applyPeriodicSyncSettings();
+        App.getSettings().setLocale("en");
+        App.getSettings().deauthorize();
+        getActivity().startActivity(
+            new Intent(getActivity(), AuthorizationActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        );
+        clearAndType(HOSTNAME, R.id.server_field);
+        clearAndType(OPENMRS_USERNAME, R.id.openmrs_user_field);
+        clearAndType(OPENMRS_PASSWORD, R.id.openmrs_password_field);
+        click(R.id.authorize_button);
+    }
+
     private void initSettings() {
+        App.getSettings().setPeriodicSyncDisabled(true);
+        App.getSyncManager().applyPeriodicSyncSettings();
         App.getSettings().setLocale("en");
         Utils.restartActivity(getActivity());
         click(R.id.settings);

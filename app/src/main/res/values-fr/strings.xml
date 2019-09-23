@@ -26,6 +26,14 @@
   <string name="sentence_today">aujourd\'hui</string>
   <string name="sentence_tomorrow">demain</string>
 
+  <!-- Authorization activity -->
+  <string name="authorization_required">Cet appareil n\'est pas autorisé.  Pour accedér aux données des patients, SVP entrez les identifiants de votre compte OpenMRS.</string>
+  <string name="authorize">Autoriser</string>
+  <string name="authorization_successful">Cet appareil est maintenant autorisé.</string>
+  <string name="authorization_failed">L\'autorisation a échoué.</string>
+  <string name="server_connection_failed">Ne peut pas faire connexion au serveur.  SVP vérifier les paramètres du serveur et du compte OpenMRS.</string>
+  <string name="title_authorizing">Authorisation</string>
+
   <!-- Statuses -->
   <string name="status_unknown">Inconnu</string>
   <string name="status_well">Bien</string>
@@ -47,10 +55,10 @@
   <string name="action_new_round">Nouveau tour</string>
   <string name="action_assign_location">Attribuer emplacement</string>
   <string name="bed_number">Numéro de lit</string>
-  <string name="action_edit_patient">Modifier patient</string>
+  <string name="action_edit_patient">Modifier ce patient</string>
   <string name="action_view_round_archive">Archive de tours</string>
-  <string name="snackbar_update_available">Mise à jour des applications disponibles</string>
-  <string name="snackbar_update_downloaded">Mise à jour l\'application téléchargée</string>
+  <string name="snackbar_update_available">Mise à jour de l\'app disponible</string>
+  <string name="snackbar_update_downloaded">Mise à jour de l\'app téléchargée</string>
   <string name="snackbar_action_download">Télécharger</string>
   <string name="snackbar_action_install">Installer</string>
   <string name="title_edit_patient_location">Modifier l\'emplacement du patient</string>
@@ -98,7 +106,7 @@
   <string name="order_frequency">Fréquence</string>
   <string name="order_time_per_day">fois par jour</string>
   <string name="order_times_per_day">fois par jour</string>
-  <string name="order_give_for">Donne pour</string>
+  <string name="order_give_for">Donner pour</string>
   <string name="order_give_for_days">jours</string>
   <string name="order_give_for_day">jour</string>
 

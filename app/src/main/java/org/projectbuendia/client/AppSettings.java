@@ -45,7 +45,7 @@ public class AppSettings {
 
     /** Gets the server hostname for Buendia API requests. */
     public String getServer() {
-        String server = prefs.getString("server", "");
+        String server = prefs.getString("server", "").trim();
         return Utils.hasChars(server) ? server : resources.getString(R.string.server_default);
     }
 
@@ -104,7 +104,8 @@ public class AppSettings {
      * Records an OpenMRS password entered by the user that has successfully
      * authorized at least one request.
      */
-    public void authorize(String username, String password) {
+    public void authorize(String server, String username, String password) {
+        setServer(server);
         prefs.edit()
             .putString("openmrs_user", username)
             .putString("openmrs_password", password)
@@ -114,6 +115,7 @@ public class AppSettings {
     /** Puts the app back in the "unauthorized" state where an OpenMRS password is required. */
     public void deauthorize() {
         prefs.edit().putString("openmrs_password", "").commit();
+        App.reset(null);
     }
 
     /** Constructs the URL for a given URL path on the package server. */
@@ -162,6 +164,11 @@ public class AppSettings {
     public boolean getPeriodicSyncDisabled() {
         return prefs.getBoolean("periodic_sync_disabled",
             resources.getBoolean(R.bool.periodic_sync_disabled_default));
+    }
+
+    /** Sets whether periodic sync is disabled in the settings. */
+    public void setPeriodicSyncDisabled(boolean disabled) {
+        prefs.edit().putBoolean("periodic_sync_disabled", disabled).commit();
     }
 
     /** Gets the setting for whether to retain filled-in forms after submission. */

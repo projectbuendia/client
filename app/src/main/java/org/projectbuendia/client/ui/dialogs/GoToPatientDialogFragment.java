@@ -25,7 +25,7 @@ import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.ui.TextChangedWatcher;
+import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.utils.Utils;
 
 import butterknife.InjectView;
@@ -48,7 +48,7 @@ public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDia
         App.getCrudEventBus().register(this);
 
         dialog.setTitle(R.string.go_to_patient_title);
-        mPatientId.addTextChangedListener(new TextChangedWatcher(this::search));
+        new EditTextWatcher(mPatientId).onChange(this::search);
         mSearchResult.setOnClickListener(view -> onSubmit());
         dialog.getButton(BUTTON_POSITIVE).setText(R.string.go_to_chart);
     }

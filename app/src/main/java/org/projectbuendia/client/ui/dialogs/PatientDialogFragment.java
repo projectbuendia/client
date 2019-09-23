@@ -33,7 +33,7 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.Sex;
 import org.projectbuendia.client.ui.BigToast;
-import org.projectbuendia.client.ui.TextChangedWatcher;
+import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.regex.Matcher;
@@ -102,25 +102,9 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             mSex.setSelection(mPatient.sex);
         }
 
-        mAgeYears.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
-        mAgeMonths.addTextChangedListener(new TextChangedWatcher(() -> mAgeChanged = true));
-        focusFirstEmptyField(dialog);
-    }
-
-    public void focusFirstEmptyField(AlertDialog dialog) {
-        showKeyboard();
-
-        EditText[] fields = {mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths};
-        for (EditText field : fields) {
-            if (field.isEnabled() && field.getText().toString().isEmpty()) {
-                field.requestFocus();
-                return;
-            }
-        }
-
-        // If all fields are populated, default to the given name field.
-        mGivenName.requestFocus();
-        mGivenName.setSelection(mGivenName.getText().length());
+        new EditTextWatcher(mAgeYears, mAgeMonths).onChange(() -> mAgeChanged = true);
+        Utils.showKeyboard(dialog.getWindow());
+        Utils.focusFirstEmptyField(mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);
     }
 
     @Override public void onSubmit() {

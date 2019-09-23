@@ -89,7 +89,7 @@ public interface Server {
     public void updatePatientLocation(String patientId, String newLocationId);
 
     /** Lists all existing users. */
-    public void listUsers(@Nullable String filterQueryTerm,
+    public void listUsers(@Nullable OpenMrsConnectionDetails connection,
                           Response.Listener<List<JsonUser>> successListener,
                           Response.ErrorListener errorListener);
 
