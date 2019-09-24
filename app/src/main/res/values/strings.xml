@@ -139,7 +139,7 @@
 
   <string name="route_of_administration">Route of administration</string>
 
-  <string name="order_execution_title">Treatment history</string>
+  <string name="order_execution_title">Treatment history for %s</string>
   <string name="order_medication_route">%1$s %2$s</string>
   <string name="order_dosage_unary">%1$s</string>
   <string name="order_dosage_series">%1$s, given %2$dx daily</string>
@@ -147,8 +147,8 @@
   <string name="order_frequency_value">%1$dx/day</string>
   <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; %2$s</string>
   <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times %2$s</string>
-  <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today, %2$s</string>
-  <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today, %2$s</string>
+  <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today</string>
+  <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today</string>
   <string name="order_execution_mark_as_given_now">Mark as given now</string>
   <string name="order_execution_marked_as_given_now">&#x2714; Marked as given now</string>
   <string name="order_execution_delete_selected">Delete selected</string>

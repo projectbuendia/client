@@ -137,7 +137,7 @@ public final @Immutable class Order extends Model implements Serializable {
         int dayIndex = Days.daysBetween(start.toLocalDate(), day).getDays();
         Duration timeOfDay = new Duration(daySpan.getStart(), time);
         float fractionOfDay = (float) timeOfDay.getMillis() / daySpan.toDurationMillis();
-        return (int) ((dayIndex + fractionOfDay) * instructions.frequency);
+        return (int) ((dayIndex + fractionOfDay) * getNumDivisionsPerDay());
     }
 
     /**

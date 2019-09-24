@@ -72,13 +72,7 @@ public class DeleteOrderTask extends AsyncTask<Void, Void, OrderDeleteFailedEven
     }
 
     @Override protected void onPostExecute(OrderDeleteFailedEvent event) {
-        // If an error occurred, post the error event.
-        if (event != null) {
-            mBus.post(event);
-            return;
-        }
-
-        // Otherwise, broadcast that the deletion succeeded.
-        mBus.post(new ItemDeletedEvent(mOrderUuid));
+        mBus.post(event != null ? event  // error
+            : new ItemDeletedEvent(mOrderUuid)); // success
     }
 }
