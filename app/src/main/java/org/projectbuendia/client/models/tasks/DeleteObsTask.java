@@ -9,6 +9,7 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ObsDeleteFailedEvent;
 import org.projectbuendia.client.events.data.ObsDeleteFailedEvent.Reason;
 import org.projectbuendia.client.models.Obs;
@@ -62,8 +63,7 @@ public class DeleteObsTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
     }
 
     @Override protected void onPostExecute(ObsDeleteFailedEvent event) {
-        if (event != null) {
-            mBus.post(event);
-        }
+        mBus.post(event != null ? event  // error
+            : new ItemDeletedEvent(mObs.uuid)); // success
     }
 }

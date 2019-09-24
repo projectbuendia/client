@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui.dialogs;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -43,7 +41,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
@@ -51,7 +48,7 @@ import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
 import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY;
 
 /** A {@link DialogFragment} for recording that an order was executed. */
-public class OrderExecutionDialogFragment extends DialogFragment {
+public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecutionDialogFragment> {
     @InjectView(R.id.order_medication) TextView mOrderMedication;
     @InjectView(R.id.order_dosage) TextView mOrderDosage;
     @InjectView(R.id.order_notes) TextView mOrderNotes;
@@ -60,13 +57,14 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @InjectView(R.id.execution_list) ViewGroup mExecutionList;
     @InjectView(R.id.execute_toggle) ToggleButton mExecuteToggle;
     @InjectView(R.id.delete_button) Button mDeleteButton;
-    private ContextUtils u;
+
+    private LocalDate mDate;
     private List<View> mItems;
     private View mNewItem;
     private Set<String> mObsUuidsToDelete = new HashSet<>();
 
     /** Creates a new instance showing a list of executions in the order given. */
-    public static OrderExecutionDialogFragment newInstance(
+    public static OrderExecutionDialogFragment create(
         Order order, Interval interval, List<Obs> executions) {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
@@ -87,36 +85,17 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         DateTime executionTime = DateTime.now();
         args.putLong("executionTimeMillis", executionTime.getMillis());
         args.putBoolean("executable", interval.contains(executionTime));
-        OrderExecutionDialogFragment f = new OrderExecutionDialogFragment();
-        f.setArguments(args);
-        return f;
-    }
-
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        u = ContextUtils.from(getActivity());
-        mObsUuidsToDelete.clear();
+        return new OrderExecutionDialogFragment().withArgs(args);
     }
 
     @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = u.inflateForDialog(R.layout.order_execution_dialog_fragment);
-        ButterKnife.inject(this, fragment);
-
-        populateUi();
-        updateUi();
-        mExecuteToggle.setOnCheckedChangeListener((button, checked) -> updateUi());
-        mDeleteButton.setOnClickListener(view -> deleteSelected());
-
-        return new AlertDialog.Builder(getActivity())
-            .setTitle(getString(R.string.order_execution_title))
-            .setPositiveButton(R.string.ok, (di, which) -> onSubmit())
-            .setNegativeButton(R.string.cancel, null)
-            .setView(fragment)
-            .create();
+        return createAlertDialog(R.layout.order_execution_dialog_fragment);
     }
 
-    private void populateUi() {
-        Bundle args = getArguments();
+    protected void onOpen(Bundle args) {
+        mDate = (LocalDate) args.getSerializable("date");
+        dialog.setTitle(getString(
+            R.string.order_execution_title, Utils.format(mDate, SENTENCE_MONTH_DAY)));
 
         // Show what was ordered and when the order started.
         mOrderMedication.setText(getString(
@@ -126,8 +105,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         ));
         int frequency = args.getInt("frequency");
         String dosage = args.getString("dosage");
-        if (Utils.isBlank(dosage))
+        if (Utils.isBlank(dosage)) {
             dosage = u.str(R.string.order_unspecified_dosage);
+        }
         mOrderDosage.setText(getString(
             frequency > 0 ? R.string.order_dosage_series : R.string.order_dosage_unary,
             dosage, frequency
@@ -170,6 +150,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             mExecutionList.addView(mNewItem);
             mNewItem.setVisibility(View.INVISIBLE);
         }
+
+        // Set up listeners.
+        updateUi();
+        mExecuteToggle.setOnCheckedChangeListener((button, checked) -> updateUi());
+        mDeleteButton.setOnClickListener(view -> deleteSelected());
     }
 
     /** Updates the UI to reflect the changes proposed by the user. */
@@ -178,16 +163,15 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         boolean executeNow = mExecuteToggle.isChecked();
 
         // Describe how many times the order was executed during the selected interval.
-        int count = mItems.size() + (executeNow ? 1 : 0);
+        int count = mItems.size() - mObsUuidsToDelete.size() + (executeNow ? 1 : 0);
         boolean plural = count != 1;
-        LocalDate date = (LocalDate) args.getSerializable("date");
         mExecutionCount.setText(Html.fromHtml(getString(
-            date.equals(LocalDate.now()) ?
+            mDate.equals(LocalDate.now()) ?
                 (plural ? R.string.order_execution_today_plural_html
                     : R.string.order_execution_today_singular_html) :
                 (plural ? R.string.order_execution_historical_plural_html
                     : R.string.order_execution_historical_singular_html),
-            count, Utils.format(date, SENTENCE_MONTH_DAY))));
+            count, Utils.format(mDate, SENTENCE_MONTH_DAY))));
 
         // Update the list of execution times.
         for (View item : mItems) {
@@ -260,7 +244,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     }
 
     /** Applies the requested new execution or deletions. */
-    public void onSubmit() {
+    @Override public void onSubmit() {
         Bundle args = getArguments();
         String orderUuid = args.getString("orderUuid");
         String instructions = args.getString("instructions");
@@ -290,5 +274,6 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             EventBus.getDefault().post(
                 new ObsDeleteRequestedEvent(executionsToDelete));
         }
+        dialog.dismiss();
     }
 }
