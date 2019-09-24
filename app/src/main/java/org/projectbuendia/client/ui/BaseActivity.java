@@ -118,7 +118,6 @@ public abstract class BaseActivity extends FragmentActivity {
         initialLocale = Locale.getDefault();
         openDialogTypes = new HashSet<>();
         App.inject(this);
-        ButterKnife.inject(this);
         ChartRenderer.backgroundCompileTemplate();
         return true;
     }
@@ -236,9 +235,9 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override public void setContentView(int layoutResId) {
         initializeWrapperView();
-
         mInnerContent.removeAllViews();
         getLayoutInflater().inflate(layoutResId, mInnerContent);
+        ButterKnife.inject(this);
     }
 
     private void initializeWrapperView() {
