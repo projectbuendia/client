@@ -21,7 +21,6 @@ import android.widget.SearchView;
 
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
@@ -41,7 +40,6 @@ import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -105,10 +103,9 @@ public abstract class PatientListActivity extends LoggedInActivity {
         });
     }
 
-    @Override protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
 
-        App.inject(this);
         mSearchController = new PatientSearchController(
             new SearchUi(),
             mCrudEventBus,
@@ -119,8 +116,6 @@ public abstract class PatientListActivity extends LoggedInActivity {
         mUpdateNotificationController = new UpdateNotificationController(
             new UpdateNotificationUi()
         );
-
-        ButterKnife.inject(this);
 
         // To facilitate chart development, there's a developer setting that
         // causes the app to go straight to a patient chart on startup.
@@ -134,6 +129,7 @@ public abstract class PatientListActivity extends LoggedInActivity {
                 }
             }
         }
+        return true;
     }
 
     @Override protected void onResumeImpl() {

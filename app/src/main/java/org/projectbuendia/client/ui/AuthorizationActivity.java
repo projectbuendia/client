@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,7 +21,6 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.user.FetchUsersTaskFailedEvent;
 import org.projectbuendia.client.events.user.UsersFetchedEvent;
-import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.user.FetchUsersTask;
 import org.projectbuendia.client.utils.Utils;
@@ -38,11 +36,12 @@ public class AuthorizationActivity extends BaseActivity {
     private Button authorizeButton;
     private Dialog progressDialog;
 
-    private Subscriber subscriber = new Subscriber();
-
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (settings.isAuthorized()) skipToLoginActivity();
+    @Override public boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
+        if (settings.isAuthorized()) {
+            Utils.jumpToActivity(this, LoginActivity.class);
+            return false;
+        }
 
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
@@ -63,8 +62,7 @@ public class AuthorizationActivity extends BaseActivity {
         populateFields();
         updateUi();
         Utils.focusFirstEmptyField(serverField, usernameField, passwordField);
-
-        ChartRenderer.backgroundCompileTemplate();
+        return true;
     }
 
     private void populateFields() {
@@ -91,33 +89,26 @@ public class AuthorizationActivity extends BaseActivity {
             getString(R.string.title_authorizing), getString(R.string.please_wait_ellipsis));
     }
 
-    private void skipToLoginActivity() {
-        finish();
-        startActivity(new Intent(AuthorizationActivity.this, LoginActivity.class));
-    }
-
     protected void onResume() {
         super.onResume();
-        App.getCrudEventBus().register(subscriber);
+        App.getCrudEventBus().register(this);
     }
 
     protected void onPause() {
-        App.getCrudEventBus().unregister(subscriber);
+        App.getCrudEventBus().unregister(this);
         super.onPause();
     }
 
-    class Subscriber {
-        public void onEventMainThread(UsersFetchedEvent event) {
-            progressDialog.dismiss();
-            BigToast.show(R.string.authorization_successful);
-            settings.authorize(event.server, event.username, event.password);
-            skipToLoginActivity();
-        }
+    public void onEventMainThread(UsersFetchedEvent event) {
+        progressDialog.dismiss();
+        BigToast.show(R.string.authorization_successful);
+        settings.authorize(event.server, event.username, event.password);
+        Utils.jumpToActivity(this, LoginActivity.class);
+    }
 
-        public void onEventMainThread(FetchUsersTaskFailedEvent event) {
-            progressDialog.dismiss();
-            BigToast.show(R.string.authorization_failed);
-            settings.deauthorize();
-        }
+    public void onEventMainThread(FetchUsersTaskFailedEvent event) {
+        progressDialog.dismiss();
+        BigToast.show(R.string.authorization_failed);
+        settings.deauthorize();
     }
 }

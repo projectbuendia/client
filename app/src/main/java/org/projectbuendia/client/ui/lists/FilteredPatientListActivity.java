@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.ui.SectionedSpinnerAdapter;
@@ -35,17 +34,13 @@ public class FilteredPatientListActivity extends PatientListActivity {
         caller.startActivity(new Intent(caller, FilteredPatientListActivity.class));
     }
 
-    @Override protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
+
         setContentView(R.layout.activity_patient_list);
-
-        if (savedInstanceState != null) {
-            mSelectedFilter = savedInstanceState.getInt(SELECTED_FILTER_KEY, 0);
-        }
-
+        if (state != null) mSelectedFilter = state.getInt(SELECTED_FILTER_KEY, 0);
         mFilterController = new PatientFilterController(new FilterUi(), mAppModel);
-
-        App.inject(this);
+        return true;
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {

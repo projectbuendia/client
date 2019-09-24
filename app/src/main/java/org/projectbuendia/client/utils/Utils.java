@@ -14,6 +14,7 @@ package org.projectbuendia.client.utils;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Dialog;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -464,6 +465,15 @@ public class Utils {
         return locale.getLanguage() +
             (Utils.isEmpty(locale.getCountry()) ? "" : "-" + locale.getCountry()) +
             (Utils.isEmpty(locale.getVariant()) ? "" : "-" + locale.getVariant());
+    }
+
+    /** Clears the activity stack and launches the given activity. */
+    public static void jumpToActivity(Activity current, Class target) {
+        if (!target.isInstance(current)) {
+            current.finish();
+            current.startActivity(new Intent(current, target).setFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
     }
 
     /** Restarts the current activity (for use after a configuration change). */

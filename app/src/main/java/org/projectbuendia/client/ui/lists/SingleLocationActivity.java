@@ -31,13 +31,14 @@ public class SingleLocationActivity extends PatientListActivity {
                 .putExtra("uuid", location.uuid));
     }
 
-    @Override protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
-        setTitle(R.string.title_single_location);
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
 
+        setTitle(R.string.title_single_location);
         mLocationUuid = getIntent().getStringExtra("uuid");
         setContentView(R.layout.activity_round);
         getSearchController().setLocationFilter(mLocationUuid);
+        return true;
     }
 
     @Override protected void setPatients(TypedCursor<Patient> patients) {
