@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
@@ -65,9 +64,8 @@ public final class LocationListActivity extends PatientListActivity {
         });
     }
 
-    @Override protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
-        App.inject(this);
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
         setTitle(R.string.title_location_list);
 
         mController = new LocationListController(
@@ -102,11 +100,12 @@ public final class LocationListActivity extends PatientListActivity {
             .create();
 
         setContentView(R.layout.activity_location_selection);
-        if (savedInstanceState == null) {
+        if (state == null) {
             getSupportFragmentManager().beginTransaction()
                 .add(R.id.location_selection_container, new LocationListFragment())
                 .commit();
         }
+        return true;
     }
 
     LocationListController getController() {

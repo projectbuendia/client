@@ -64,7 +64,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
@@ -90,9 +89,10 @@ public final class PatientChartActivity extends LoggedInActivity {
     private static final String EN_DASH = "\u2013";
 
     public static void start(Context caller, String uuid) {
-        Intent intent = new Intent(caller, PatientChartActivity.class);
-        intent.putExtra("uuid", uuid);
-        caller.startActivity(intent);
+        caller.startActivity(
+            new Intent(caller, PatientChartActivity.class)
+                .putExtra("uuid", uuid)
+        );
     }
 
     @Override public void onExtendOptionsMenu(Menu menu) {
@@ -133,12 +133,10 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
     }
 
-    @Override protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
-        setContentView(R.layout.fragment_patient_chart);
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
 
-        ButterKnife.inject(this);
-        App.inject(this);
+        setContentView(R.layout.fragment_patient_chart);
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
@@ -193,6 +191,7 @@ public final class PatientChartActivity extends LoggedInActivity {
             minimalHandler);
 
         initChartTabs();
+        return true;
     }
 
     public Ui getUi() {

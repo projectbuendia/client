@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
+import org.joda.time.Duration;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
@@ -47,55 +48,33 @@ import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class LoggedInActivity extends BaseActivity {
-
     private static final Logger LOG = Logger.create();
+    private static final Duration IDLE_AUTO_LOGOUT_DURATION = Duration.standardMinutes(5);
+    private static final Duration DOCKED_AUTO_LOGOUT_DURATION = Duration.ZERO; // log out immediately
 
     private JsonUser mLastActiveUser;
     private Menu mMenu;
     private UserMenuPopup mUserMenu;
 
-    private boolean mIsCreated = false;
-
     protected UpdateNotificationController mUpdateNotificationController = null;
 
     private ReadyState mReadyState = ReadyState.READY;
 
-    /**
-     * {@inheritDoc}
-     * <p/>
-     * <p>Instead of overriding this method, override {@link #onCreateImpl}.
-     */
-    @Override public final void onCreate(Bundle savedInstanceState) {
-        JsonUser user = App.getUserManager().getActiveUser();
-        if (user == null) {
-            super.onCreate(savedInstanceState);
-
-            // If there is no active user, then return the user to the user login activity.
-            BigToast.show("Please login to continue"); // TODO/i18n
-
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            Utils.logEvent("redirected_to_login");
-            return;
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
+        if (App.getUserManager().getActiveUser() == null) {
+            Utils.jumpToActivity(this, LoginActivity.class);
+            return false;
         }
 
         // Turn the action bar icon into a "back" arrow that goes back in the activity stack.
         getActionBar().setIcon(R.drawable.ic_back_36dp);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        onCreateImpl(savedInstanceState);
-        mIsCreated = true;
-    }
-
-    protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        return true;
     }
 
     @Override public final boolean onCreateOptionsMenu(Menu menu) {
-        if (!mIsCreated) {
-            return true;
-        }
+        if (!mIsCreated) return true;
 
         mMenu = menu;
         onExtendOptionsMenu(menu);
@@ -161,7 +140,6 @@ public abstract class LoggedInActivity extends BaseActivity {
     @Override protected final void onStart() {
         if (!mIsCreated) {
             super.onStart();
-
             return;
         }
 
@@ -175,7 +153,6 @@ public abstract class LoggedInActivity extends BaseActivity {
     @Override protected final void onResume() {
         if (!mIsCreated) {
             super.onResume();
-
             return;
         }
 
@@ -192,7 +169,6 @@ public abstract class LoggedInActivity extends BaseActivity {
     @Override protected final void onPause() {
         if (!mIsCreated) {
             super.onPause();
-
             return;
         }
 
@@ -213,7 +189,6 @@ public abstract class LoggedInActivity extends BaseActivity {
     @Override protected final void onStop() {
         if (!mIsCreated) {
             super.onStop();
-
             return;
         }
 
@@ -222,6 +197,17 @@ public abstract class LoggedInActivity extends BaseActivity {
 
     protected void onStopImpl() {
         super.onStop();
+    }
+
+    protected void onTick() {
+        Duration idle = getIdleDuration();
+        Duration docked = batteryWatcher.getDockedDuration();
+        if (docked.isLongerThan(DOCKED_AUTO_LOGOUT_DURATION) ||
+            idle.isLongerThan(IDLE_AUTO_LOGOUT_DURATION)) {
+            LOG.i("Auto logout (idle for %s, docked for %s)", idle, docked);
+            BigToast.show("Automatically logging out");
+            Utils.jumpToActivity(this, LoginActivity.class);
+        }
     }
 
     protected ReadyState getReadyState() {

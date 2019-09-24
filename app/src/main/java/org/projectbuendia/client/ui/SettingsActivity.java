@@ -270,9 +270,11 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.inject(this);
+        if (!App.getSettings().isAuthorized()) Utils.jumpToActivity(this, AuthorizationActivity.class);
+
         setTitle(R.string.title_activity_settings);
         setupActionBar();
+        App.inject(this);
     }
 
     /** Set up the {@link android.app.ActionBar}, if the API is available. */
@@ -288,11 +290,6 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (!App.getSettings().isAuthorized()) {
-            finish();
-            startActivity(new Intent(this, AuthorizationActivity.class));
-        }
-
         setupSimplePreferencesScreen();
     }
 
