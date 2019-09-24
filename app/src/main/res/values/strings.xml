@@ -139,7 +139,7 @@
 
   <string name="route_of_administration">Route of administration</string>
 
-  <string name="order_execution_title">Treatment history for %s</string>
+  <string name="order_execution_title">Treatment history %s</string>
   <string name="order_medication_route">%1$s %2$s</string>
   <string name="order_dosage_unary">%1$s</string>
   <string name="order_dosage_series">%1$s, given %2$dx daily</string>
