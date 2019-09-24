@@ -269,6 +269,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="api_health_problem">Impossible de contacter le serveur. SVP voir la barre du bas de l\'écran pour plus d\'informations.</string>
   <string name="sync_failed_back">Arrière</string>
   <string name="no_user">Aucun utilisateur n\'est connecté.</string>
+  <string name="signed_out">Déconnecté.</string>
   <string name="no_location">Aucune information des lieux n\'a encore été chargée.</string>
   <string name="encounter_add_failed_unknown_reason">Erreur inconnue</string>
   <string name="encounter_add_failed_unknown_server_error">Erreur inconnue sur le serveur.</string>

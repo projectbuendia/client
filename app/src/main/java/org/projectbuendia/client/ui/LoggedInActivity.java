@@ -205,7 +205,7 @@ public abstract class LoggedInActivity extends BaseActivity {
         if (docked.isLongerThan(DOCKED_AUTO_LOGOUT_DURATION) ||
             idle.isLongerThan(IDLE_AUTO_LOGOUT_DURATION)) {
             LOG.i("Auto logout (idle for %s, docked for %s)", idle, docked);
-            BigToast.show("Automatically logging out");
+            BigToast.show(R.string.signed_out);
             Utils.jumpToActivity(this, LoginActivity.class);
         }
     }
