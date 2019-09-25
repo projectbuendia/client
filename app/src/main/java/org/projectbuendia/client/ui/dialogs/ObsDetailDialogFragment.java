@@ -2,9 +2,10 @@ package org.projectbuendia.client.ui.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
+import android.text.Html;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import org.joda.time.Interval;
@@ -13,10 +14,10 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.ConceptService;
-import org.projectbuendia.client.ui.lists.ExpandableObsAdapter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +25,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
 import static org.projectbuendia.client.utils.Utils.DateStyle.RELATIVE_MONTH_DAY_HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogFragment> {
 
@@ -37,11 +40,13 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     private static String EM_DASH = "\u2014";
     private static String BULLET = "\u2022";
 
+    private ConceptService concepts;
     private Interval interval;
     private String[] queriedConceptUuids;
     private String[] conceptOrdering;
     private List<Obs> observations;
-    private SortedMap<Section, List<Obs>> observationsBySection;
+    private SortedMap<Group, List<Obs>> observationsBySection;
+    private List<View> items;
 
     public static ObsDetailDialogFragment create(
         Interval interval, String[] queriedConceptUuids,
@@ -60,53 +65,76 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
 
     @Override public void onOpen(Bundle args) {
         dialog.setTitle(R.string.obs_details_title);
+        concepts = App.getConceptService();
         interval = Utils.toNullableInterval(args.getString("interval"));
-        queriedConceptUuids = args.getStringArray("queriedConceptUuids");
+        queriedConceptUuids = Utils.orDefault(
+            args.getStringArray("queriedConceptUuids"), new String[0]);
         conceptOrdering = args.getStringArray("conceptOrdering");
         observations = args.getParcelableArrayList("observations");
 
-        observationsBySection = new TreeMap<>(new SectionComparator(conceptOrdering));
-        if (observations != null) {
-            for (Obs obs : observations) {
-                if (obs.valueName != null) {
-                    Section section = new Section(obs);
-                    if (!observationsBySection.containsKey(section)) {
-                        observationsBySection.put(section, new ArrayList<>());
-                    }
-                    observationsBySection.get(section).add(obs);
-                }
+        Map<Group, List<Obs>> groupObs = new HashMap<>();
+        for (Obs obs : observations) {
+            Group group = new Group(obs.time.toLocalDate(), obs.conceptUuid);
+            if (!groupObs.containsKey(group)) {
+                groupObs.put(group, new ArrayList<>());
             }
+            groupObs.get(group).add(obs);
         }
 
         TextView message = dialog.findViewById(R.id.message);
         message.setText(describeQuery());
 
-        ExpandableListAdapter adapter = new ExpandableObsAdapter(u, observationsBySection);
-        ExpandableListView listView = dialog.findViewById(R.id.obs_list);
-        listView.setAdapter(adapter);
-        for (int i = 0; i < adapter.getGroupCount(); i++) {
-            listView.expandGroup(i);
-        }
 
-        // Omit the "void observations switch" for now.  (Ping, 2019-03-19)
-        //
-        // LinearLayout listFooterView = (LinearLayout)mInflater.inflate(R.layout.void_observations_switch, null);
-        // listView.addFooterView(listFooterView);
+        List<Group> groups = new ArrayList<>(groupObs.keySet());
+        items = new ArrayList<>();
+        Collections.sort(groups, new GroupComparator(conceptOrdering));
 
-        // Omit the "void observations switch" for now.  (Ping, 2019-03-19)
-        /*
-        final Switch swVoid = (Switch) fragment.findViewById(R.id.swVoid);
-        swVoid.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (swVoid.isChecked()){
-                    VoidObservationsDialogFragment.newInstance(obsrows)
-                            .show(getActivity().getSupportFragmentManager(), null);
-                }
-                dialog.dismiss();
+        ViewGroup list = dialog.findViewById(R.id.obs_list);
+        list.addView(u.inflate(R.layout.group_spacer, list));
+        for (Group group : groups) {
+            // No need to show a heading if there's only one date and one concept.
+            if (interval == null || queriedConceptUuids.length != 1) {
+                View heading = u.inflate(R.layout.heading, list);
+                TextView headingText = u.findView(R.id.heading);
+                headingText.setText(formatHeading(group));
+                list.addView(heading);
             }
-        });
-        */
+
+            for (Obs obs : groupObs.get(group)) {
+                View item = u.inflate(R.layout.checkable_item, list);
+                TextView itemText = u.findView(R.id.text);
+                itemText.setText(formatValue(obs));
+                App.getUserManager().showChip(u.findView(R.id.user_initials), obs.providerUuid);
+                list.addView(item);
+
+                item.setTag(obs);
+                items.add(item);
+
+                final CheckBox checkbox = u.findView(R.id.checkbox);
+                checkbox.setOnCheckedChangeListener((view, checked) -> updateUi());
+                item.setOnClickListener(view -> {
+                    if (checkbox.isEnabled()) checkbox.setChecked(!checkbox.isChecked());
+                });
+            }
+
+            list.addView(u.inflate(R.layout.group_spacer, list));
+        }
+    }
+
+    private CharSequence formatHeading(Group group) {
+        if (queriedConceptUuids.length != 1) return concepts.getName(group.conceptUuid);
+        if (interval == null) return Utils.format(group.date, MONTH_DAY);
+        return "";
+    }
+
+    private CharSequence formatValue(Obs obs) {
+        return Html.fromHtml(
+            "<span style='color: #33b5e5'>" + Utils.format(obs.time, HOUR_MINUTE) + ":</span> " +
+                Html.escapeHtml(obs.valueName));
+    }
+
+    private void updateUi() {
+
     }
 
     private String describeQuery() {
@@ -151,55 +179,43 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         }
     }
 
-    @Override public void show(FragmentManager manager, String tag) {
-        if (manager.findFragmentByTag(tag) == null) {
-            super.show(manager, tag);
-        }
-    }
-
     @Override protected void onSubmit() {
         dialog.dismiss();
     }
 
-    /**
-     * The listing is divided into sections, with each section showing all the
-     * observations on a particular date for a particular concept.
-     */
-    public static class Section {
-        public final LocalDate date;
+    /** Observations are grouped by date and concept. */
+    public static class Group {
+        public final @Nonnull LocalDate date;
         public final @Nonnull String conceptUuid;
-        public final @Nonnull String conceptName;
 
-        public Section(Obs obs) {
+        public Group(Obs obs) {
             this(obs.time.toLocalDate(), obs.conceptUuid);
         }
 
-        public Section(LocalDate date, String conceptUuid) {
+        public Group(@Nonnull LocalDate date, @Nonnull String conceptUuid) {
             this.date = date;
-            this.conceptUuid = Utils.toNonnull(conceptUuid);
-            this.conceptName = App.getConceptService().getName(conceptUuid);
+            this.conceptUuid = conceptUuid;
         }
 
         @Override public boolean equals(Object other) {
-            if (other instanceof Section) {
-                Section o = (Section) other;
-                return date.equals(o.date)
-                    && conceptUuid.equals(o.conceptUuid)
-                    && conceptName.equals(o.conceptName);
+            if (other instanceof Group) {
+                Group o = (Group) other;
+                return eq(date, o.date) && eq(conceptUuid, o.conceptUuid);
             }
             return false;
         }
 
         @Override public int hashCode() {
-            return Objects.hash(date, conceptUuid, conceptName);
+            return Objects.hash(date, conceptUuid);
         }
     }
 
-    public static class SectionComparator implements Comparator<Section> {
+    /** Arranges groups in order by date and by concept according to a given ordering. */
+    public static class GroupComparator implements Comparator<Group> {
         private final Map<String, Integer> orderingByUuid = new HashMap<>();
         private final int orderingMax;
 
-        public SectionComparator(@Nullable String[] conceptOrdering) {
+        public GroupComparator(@Nullable String[] conceptOrdering) {
             if (conceptOrdering != null) {
                 for (int i = 0; i < conceptOrdering.length; i++) {
                     orderingByUuid.put(conceptOrdering[i], i);
@@ -210,14 +226,11 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
             }
         }
 
-        @Override public int compare(Section a, Section b) {
+        @Override public int compare(Group a, Group b) {
             int result = a.date.compareTo(b.date);
             if (result != 0) return result;
 
             result = Integer.compare(getOrdering(a.conceptUuid), getOrdering(b.conceptUuid));
-            if (result != 0) return result;
-
-            result = a.conceptName.compareTo(b.conceptName);
             if (result != 0) return result;
 
             return a.conceptUuid.compareTo(b.conceptUuid);

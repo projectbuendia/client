@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
+        android:id="@+id/message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8sp"
-        android:paddingBottom="8sp"
-        android:paddingLeft="16sp"
-        android:paddingRight="16sp"
-        android:id="@+id/message"/>
+        android:padding="16sp"
+        tools:text="Observations of &quot;Pulse&quot; on Sep 25"
+        />
 
-    <ExpandableListView
-        android:id="@+id/obs_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#dddddd"
+        />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <LinearLayout
+            android:id="@+id/obs_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            />
+
+    </ScrollView>
 
 </LinearLayout>

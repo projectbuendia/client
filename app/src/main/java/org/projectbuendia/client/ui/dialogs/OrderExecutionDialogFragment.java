@@ -29,6 +29,7 @@ import com.google.common.base.Joiner;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
@@ -131,14 +132,17 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
         for (Obs obs : executions) {
             View item = u.inflate(R.layout.checkable_item, mExecutionList);
             u.setText(R.id.text, Utils.format(obs.time, HOUR_MINUTE));
+            App.getUserManager().showChip(u.findView(R.id.user_initials), obs.providerUuid);
             mExecutionList.addView(item);
+
+            item.setTag(obs);
+            mItems.add(item);
+
             final CheckBox checkbox = u.findView(R.id.checkbox);
             checkbox.setOnCheckedChangeListener((view, checked) -> updateUi());
             item.setOnClickListener(view -> {
                 if (checkbox.isEnabled()) checkbox.setChecked(!checkbox.isChecked());
             });
-            item.setTag(obs);
-            mItems.add(item);
         }
         if (executable) {
             mNewItem = u.inflate(R.layout.checkable_item, mExecutionList);

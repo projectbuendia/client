@@ -67,6 +67,10 @@ public class ConceptService {
             }
         }
 
+        // Special case: yes and no concepts.
+        names.put(ConceptUuids.YES_UUID, new Loc("Yes [fr:Oui]"));
+        names.put(ConceptUuids.NO_UUID, new Loc("No [fr:Non]"));
+
         synchronized (this) {
             this.types = types;
             this.names = names;

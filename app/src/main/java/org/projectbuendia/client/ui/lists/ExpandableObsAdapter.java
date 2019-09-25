@@ -7,7 +7,8 @@ import android.widget.BaseExpandableListAdapter;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Section;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Group;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
@@ -22,22 +23,22 @@ import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
 
 public class ExpandableObsAdapter extends BaseExpandableListAdapter {
     private final ContextUtils u;
-    private final List<Section> mSections;
+    private final List<Group> mGroups;
     private final List<List<Obs>> mSectionObservations;
 
     private static String EM_DASH = "\u2014";
     private static String BULLET = "\u2022";
 
-    public ExpandableObsAdapter(Context context, Map<Section, List<Obs>> observationsBySection) {
+    public ExpandableObsAdapter(Context context, Map<Group, List<Obs>> observationsBySection) {
         u = ContextUtils.from(context);
-        mSections = new ArrayList<>(observationsBySection.keySet());
+        mGroups = new ArrayList<>(observationsBySection.keySet());
         mSectionObservations = new ArrayList<>();
 
         Comparator<Obs> orderByTime = (a, b) -> a.time.compareTo(b.time);
 
-        for (int i = 0; i < mSections.size(); i++) {
-            Section section = mSections.get(i);
-            List<Obs> observations = new ArrayList<>(observationsBySection.get(section));
+        for (int i = 0; i < mGroups.size(); i++) {
+            ObsDetailDialogFragment.Group group = mGroups.get(i);
+            List<Obs> observations = new ArrayList<>(observationsBySection.get(group));
             Collections.sort(observations, orderByTime);
             mSectionObservations.add(observations);
         }
@@ -58,9 +59,9 @@ public class ExpandableObsAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public Object getGroup(int groupIndex) {
-        Section section = mSections.get(groupIndex);
+        Group group = mGroups.get(groupIndex);
         return Utils.format("%s " + BULLET + " %s",
-            section.conceptName, Utils.format(section.date, MONTH_DAY));
+            group.conceptUuid, Utils.format(group.date, MONTH_DAY));
     }
 
     @Override public Object getChild(int groupIndex, int childIndex) {
@@ -70,7 +71,7 @@ public class ExpandableObsAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public int getGroupCount() {
-        return mSections.size();
+        return mGroups.size();
     }
 
     @Override public int getChildrenCount(int groupIndex) {
