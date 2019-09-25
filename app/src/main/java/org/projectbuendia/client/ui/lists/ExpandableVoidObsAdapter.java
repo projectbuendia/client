@@ -7,22 +7,22 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.utils.ContextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
+public class ExpandableVoidObsAdapter extends BaseExpandableListAdapter {
 
     private ContextUtils u;
     private List<String> _listDataHeader;
-    private HashMap<String, ArrayList<ObsRow>> _listDataChild;
+    private HashMap<String, ArrayList<Obs>> _listDataChild;
     public  ArrayList<String> mCheckedItems = new ArrayList<>();
 
-    public ExpandableVoidObsRowAdapter(Context context, List<String> listDataHeader,
-                                   HashMap<String, ArrayList<ObsRow>> listChildData) {
+    public ExpandableVoidObsAdapter(Context context, List<String> listDataHeader,
+                                    HashMap<String, ArrayList<Obs>> listChildData) {
         u = ContextUtils.from(context);
         this._listDataHeader = listDataHeader;
         this._listDataChild = listChildData;
@@ -32,7 +32,7 @@ public class ExpandableVoidObsRowAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupIndex, final int childIndex,
                              boolean isLastChild, View view, ViewGroup parent) {
         view = u.reuseOrInflate(view, R.layout.item_void_observation, parent);
-        final ObsRow childRow = (ObsRow) getChild(groupIndex, childIndex);
+        final Obs childRow = (Obs) getChild(groupIndex, childIndex);
         u.setText(R.id.tvVoidValue, childRow.time + " " + childRow.valueName);
 
         CheckBox cbVoid = u.findView(R.id.cbVoid);

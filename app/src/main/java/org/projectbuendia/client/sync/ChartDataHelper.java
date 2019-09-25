@@ -25,7 +25,6 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
@@ -43,8 +42,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.projectbuendia.client.utils.Utils.eq;
@@ -96,15 +93,6 @@ public class ChartDataHelper {
         String valueName = type == Datatype.CODED ? concepts.getName(value, locale) : value;
         return new Obs(uuid, encounterUuid, patientUuid, providerUuid,
             conceptUuid, type, time, orderUuid, value, valueName);
-    }
-
-    private static @Nullable ObsRow loadObsRow(
-        Cursor c, Locale locale, ConceptService concepts) {
-        Obs obs = loadObs(c, locale, concepts);
-        String uuid = Utils.getString(c, Observations.UUID);
-        String conceptName = concepts.getName(obs.conceptUuid, locale);
-        return new ObsRow(uuid, obs.time.getMillis(),
-            conceptName, obs.conceptUuid, obs.value, obs.valueName);
     }
 
     /** Gets all observations for a given patient in chronological order. */

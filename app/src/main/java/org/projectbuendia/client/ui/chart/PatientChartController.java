@@ -48,6 +48,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -485,7 +486,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
     private @Nullable LocalDate getObservedDate(
         Map<String, Obs> observations, String conceptUuid) {
         Obs obs = observations.get(conceptUuid);
-        return obs != null ? Utils.toLocalDate(obs.valueName) : null;
+        ObsValue value = obs != null ? obs.getObsValue() : null;
+        return value != null ? value.date : null;
     }
 
     /** Represents an instance of a form being opened by the user. */
