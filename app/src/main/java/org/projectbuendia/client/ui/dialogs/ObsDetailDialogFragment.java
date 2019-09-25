@@ -79,45 +79,8 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         }
 
         TextView message = dialog.findViewById(R.id.message);
-        String conceptNames = null;
-        if (Utils.hasItems(queriedConceptUuids)) {
-            ConceptService concepts = App.getConceptService();
-            Locale locale = App.getSettings().getLocale();
-            String[] names = new String[queriedConceptUuids.length];
-            for (int i = 0; i < queriedConceptUuids.length; i++) {
-                names[i] = getString(R.string.quoted_text, concepts.getName(queriedConceptUuids[i], locale));
-            }
-            conceptNames = u.formatItems(names);
-        }
-        if (interval != null) {
-            String start = Utils.format(interval.getStart(), RELATIVE_MONTH_DAY_HOUR_MINUTE);
-            String stop = Utils.format(interval.getEnd(), RELATIVE_MONTH_DAY_HOUR_MINUTE);
-            if (conceptNames != null) {
-                message.setText(getString(
-                    Utils.hasItems(obsRows)
-                        ? R.string.obs_details_concept_interval
-                        : R.string.obs_details_concept_interval_empty,
-                    conceptNames, start, stop
-                ));
-            } else {
-                message.setText(getString(
-                    Utils.hasItems(obsRows)
-                        ? R.string.obs_details_interval
-                        : R.string.obs_details_interval_empty,
-                    start, stop
-                ));
-            }
-        } else if (conceptNames != null) {
-            message.setText(getString(
-                Utils.hasItems(obsRows)
-                    ? R.string.obs_details_concept
-                    : R.string.obs_details_concept_empty,
-                conceptNames
-            ));
-        } else {
-            // Should never get here (no concepts and no interval).
-            message.setText("");
-        }
+        message.setText(describeQuery());
+
         ExpandableListAdapter adapter = new ExpandableObsRowAdapter(u, rowsBySection);
         ExpandableListView listView = dialog.findViewById(R.id.obs_list);
         listView.setAdapter(adapter);
@@ -144,6 +107,48 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
             }
         });
         */
+    }
+
+    private String describeQuery() {
+        String conceptNames = null;
+        if (Utils.hasItems(queriedConceptUuids)) {
+            ConceptService concepts = App.getConceptService();
+            Locale locale = App.getSettings().getLocale();
+            String[] names = new String[queriedConceptUuids.length];
+            for (int i = 0; i < queriedConceptUuids.length; i++) {
+                names[i] = getString(R.string.quoted_text, concepts.getName(queriedConceptUuids[i], locale));
+            }
+            conceptNames = u.formatItems(names);
+        }
+        if (interval != null) {
+            String start = Utils.format(interval.getStart(), RELATIVE_MONTH_DAY_HOUR_MINUTE);
+            String stop = Utils.format(interval.getEnd(), RELATIVE_MONTH_DAY_HOUR_MINUTE);
+            if (conceptNames != null) {
+                return getString(
+                    Utils.hasItems(obsRows)
+                        ? R.string.obs_details_concept_interval
+                        : R.string.obs_details_concept_interval_empty,
+                    conceptNames, start, stop
+                );
+            } else {
+                return getString(
+                    Utils.hasItems(obsRows)
+                        ? R.string.obs_details_interval
+                        : R.string.obs_details_interval_empty,
+                    start, stop
+                );
+            }
+        } else if (conceptNames != null) {
+            return getString(
+                Utils.hasItems(obsRows)
+                    ? R.string.obs_details_concept
+                    : R.string.obs_details_concept_empty,
+                conceptNames
+            );
+        } else {
+            // Should never get here (no concepts and no interval).
+            return "";
+        }
     }
 
     @Override public void show(FragmentManager manager, String tag) {

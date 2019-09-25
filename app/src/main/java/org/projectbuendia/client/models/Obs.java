@@ -31,6 +31,24 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.projectbuendia.client.utils.Utils.eq;
 
+// Obs obs {  // an observation is a sourced data point (where did it come from)
+//     String uuid;
+//     String providerUuid;
+//     String encounterUuid;
+//     String patientUuid;
+//     String orderUuid;
+//     String conceptUuid;
+//     ObsPoint point {  // a data point is a timed value (when was it recorded)
+//         DateTime time;
+//         ObsValue value {  // a value is a polymorphic union
+//             Datatype type;
+//             String textValue;
+//             LocalDate dateValue;
+//             ...
+//         }
+//     }
+//
+
 /** A simple bean class representing an observation with localized names and values. */
 // TODO: Make ObsPoint a member of Obs; change the structure of Obs to be simply:
 // { final @Nonnull String uuid; String name; final @Nonnull ObsPoint point; } then delete
