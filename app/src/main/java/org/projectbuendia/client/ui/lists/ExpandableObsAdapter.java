@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Section;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
@@ -20,26 +20,26 @@ import java.util.Map;
 import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
 import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
 
-public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
+public class ExpandableObsAdapter extends BaseExpandableListAdapter {
     private final ContextUtils u;
     private final List<Section> mSections;
-    private final List<List<ObsRow>> mSectionRows;
+    private final List<List<Obs>> mSectionObservations;
 
     private static String EM_DASH = "\u2014";
     private static String BULLET = "\u2022";
 
-    public ExpandableObsRowAdapter(Context context, Map<Section, List<ObsRow>> rowsBySection) {
+    public ExpandableObsAdapter(Context context, Map<Section, List<Obs>> observationsBySection) {
         u = ContextUtils.from(context);
-        mSections = new ArrayList<>(rowsBySection.keySet());
-        mSectionRows = new ArrayList<>();
+        mSections = new ArrayList<>(observationsBySection.keySet());
+        mSectionObservations = new ArrayList<>();
 
-        Comparator<ObsRow> orderByTime = (a, b) -> a.time.compareTo(b.time);
+        Comparator<Obs> orderByTime = (a, b) -> a.time.compareTo(b.time);
 
         for (int i = 0; i < mSections.size(); i++) {
             Section section = mSections.get(i);
-            List<ObsRow> rows = new ArrayList<>(rowsBySection.get(section));
-            Collections.sort(rows, orderByTime);
-            mSectionRows.add(rows);
+            List<Obs> observations = new ArrayList<>(observationsBySection.get(section));
+            Collections.sort(observations, orderByTime);
+            mSectionObservations.add(observations);
         }
     }
 
@@ -64,9 +64,9 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public Object getChild(int groupIndex, int childIndex) {
-        ObsRow row = mSectionRows.get(groupIndex).get(childIndex);
+        Obs obs = mSectionObservations.get(groupIndex).get(childIndex);
         return Utils.format("%s " + EM_DASH + " %s",
-            Utils.format(row.time, HOUR_MINUTE), row.valueName);
+            Utils.format(obs.time, HOUR_MINUTE), obs.valueName);
     }
 
     @Override public int getGroupCount() {
@@ -74,7 +74,7 @@ public class ExpandableObsRowAdapter extends BaseExpandableListAdapter {
     }
 
     @Override public int getChildrenCount(int groupIndex) {
-        return mSectionRows.get(groupIndex).size();
+        return mSectionObservations.get(groupIndex).size();
     }
 
     @Override public long getGroupId(int groupIndex) {

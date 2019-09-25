@@ -39,7 +39,6 @@ import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -364,8 +363,8 @@ public final class PatientChartActivity extends LoggedInActivity {
 
         @Override public void showObsDetailDialog(
             Interval interval, String[] queriedConceptUuids,
-            String[] conceptOrdering, List<ObsRow> obsRows) {
-            ObsDetailDialogFragment.create(interval, queriedConceptUuids, conceptOrdering, obsRows)
+            String[] conceptOrdering, List<Obs> observations) {
+            ObsDetailDialogFragment.create(interval, queriedConceptUuids, conceptOrdering, observations)
                 .show(getSupportFragmentManager(), null);
         }
 

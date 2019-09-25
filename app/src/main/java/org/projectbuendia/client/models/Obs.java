@@ -31,20 +31,20 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.projectbuendia.client.utils.Utils.eq;
 
-// Obs obs {  // an observation is a sourced data point (where did it come from)
+// TODO(ping): Here's the data model we want to get to.
+//
+// Obs obs {  // a sourced data point (where did it come from), ordered by time
 //     String uuid;
 //     String providerUuid;
 //     String encounterUuid;
 //     String patientUuid;
-//     String orderUuid;
 //     String conceptUuid;
-//     ObsPoint point {  // a data point is a timed value (when was it recorded)
+//     String orderUuid;
+//     ObsPoint point {  // a timed value (when was it recorded), ordered by time
 //         DateTime time;
-//         ObsValue value {  // a value is a polymorphic union
+//         ObsValue value {  // a polymorphic union, ordered by magnitude
 //             Datatype type;
-//             String textValue;
-//             LocalDate dateValue;
-//             ...
+//             String serializedValue;
 //         }
 //     }
 //

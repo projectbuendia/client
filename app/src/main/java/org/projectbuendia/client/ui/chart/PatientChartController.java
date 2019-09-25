@@ -48,7 +48,6 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -153,7 +152,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         void showEditPatientDialog(Patient patient);
         void showObsDetailDialog(
             Interval interval, String[] queriedConceptUuids,
-            String[] conceptOrdering, List<ObsRow> obsRows);
+            String[] conceptOrdering, List<Obs> observations);
         void showPatientLocationDialog(Patient patient);
         void showPatientUpdateFailed(int reason);
     }
@@ -272,9 +271,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     public void onEbolaTestResultsPressed() {
         String[] conceptUuids = new String[] {ConceptUuids.PCR_GP_UUID, ConceptUuids.PCR_NP_UUID};
-        List<ObsRow> obsRows = mChartHelper.getPatientObservations(mPatientUuid, conceptUuids, null, null);
-        if (!obsRows.isEmpty()) {
-            mUi.showObsDetailDialog(null, conceptUuids, conceptUuids, obsRows);
+        List<Obs> observations = mChartHelper.getPatientObservations(mPatientUuid, conceptUuids, null, null);
+        if (!observations.isEmpty()) {
+            mUi.showObsDetailDialog(null, conceptUuids, conceptUuids, observations);
         }
     }
 

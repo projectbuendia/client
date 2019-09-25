@@ -11,9 +11,9 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.ConceptService;
-import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
+import org.projectbuendia.client.ui.lists.ExpandableObsAdapter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -32,7 +32,6 @@ import javax.annotation.Nullable;
 import static org.projectbuendia.client.utils.Utils.DateStyle.RELATIVE_MONTH_DAY_HOUR_MINUTE;
 
 public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogFragment> {
-    private SortedMap<Section, List<ObsRow>> rowsBySection;
 
     private static String EN_DASH = "\u2013";
     private static String EM_DASH = "\u2014";
@@ -41,16 +40,17 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     private Interval interval;
     private String[] queriedConceptUuids;
     private String[] conceptOrdering;
-    private List<ObsRow> obsRows;
+    private List<Obs> observations;
+    private SortedMap<Section, List<Obs>> observationsBySection;
 
     public static ObsDetailDialogFragment create(
         Interval interval, String[] queriedConceptUuids,
-        String[] conceptOrdering, List<ObsRow> obsRows) {
+        String[] conceptOrdering, List<Obs> observations) {
         Bundle args = new Bundle();
         args.putString("interval", Utils.toNullableString(interval));
         args.putStringArray("queriedConceptUuids", queriedConceptUuids);
         args.putStringArray("conceptOrdering", conceptOrdering);
-        args.putParcelableArrayList("obsRows", new ArrayList<>(obsRows));
+        args.putParcelableArrayList("observations", new ArrayList<>(observations));
         return new ObsDetailDialogFragment().withArgs(args);
     }
 
@@ -63,17 +63,17 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         interval = Utils.toNullableInterval(args.getString("interval"));
         queriedConceptUuids = args.getStringArray("queriedConceptUuids");
         conceptOrdering = args.getStringArray("conceptOrdering");
-        obsRows = args.getParcelableArrayList("obsRows");
+        observations = args.getParcelableArrayList("observations");
 
-        rowsBySection = new TreeMap<>(new SectionComparator(conceptOrdering));
-        if (obsRows != null) {
-            for (ObsRow row : obsRows) {
-                if (row.valueName != null) {
-                    Section section = new Section(row);
-                    if (!rowsBySection.containsKey(section)) {
-                        rowsBySection.put(section, new ArrayList<>());
+        observationsBySection = new TreeMap<>(new SectionComparator(conceptOrdering));
+        if (observations != null) {
+            for (Obs obs : observations) {
+                if (obs.valueName != null) {
+                    Section section = new Section(obs);
+                    if (!observationsBySection.containsKey(section)) {
+                        observationsBySection.put(section, new ArrayList<>());
                     }
-                    rowsBySection.get(section).add(row);
+                    observationsBySection.get(section).add(obs);
                 }
             }
         }
@@ -81,7 +81,7 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         TextView message = dialog.findViewById(R.id.message);
         message.setText(describeQuery());
 
-        ExpandableListAdapter adapter = new ExpandableObsRowAdapter(u, rowsBySection);
+        ExpandableListAdapter adapter = new ExpandableObsAdapter(u, observationsBySection);
         ExpandableListView listView = dialog.findViewById(R.id.obs_list);
         listView.setAdapter(adapter);
         for (int i = 0; i < adapter.getGroupCount(); i++) {
@@ -125,14 +125,14 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
             String stop = Utils.format(interval.getEnd(), RELATIVE_MONTH_DAY_HOUR_MINUTE);
             if (conceptNames != null) {
                 return getString(
-                    Utils.hasItems(obsRows)
+                    Utils.hasItems(observations)
                         ? R.string.obs_details_concept_interval
                         : R.string.obs_details_concept_interval_empty,
                     conceptNames, start, stop
                 );
             } else {
                 return getString(
-                    Utils.hasItems(obsRows)
+                    Utils.hasItems(observations)
                         ? R.string.obs_details_interval
                         : R.string.obs_details_interval_empty,
                     start, stop
@@ -140,7 +140,7 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
             }
         } else if (conceptNames != null) {
             return getString(
-                Utils.hasItems(obsRows)
+                Utils.hasItems(observations)
                     ? R.string.obs_details_concept
                     : R.string.obs_details_concept_empty,
                 conceptNames
@@ -170,14 +170,14 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         public final @Nonnull String conceptUuid;
         public final @Nonnull String conceptName;
 
-        public Section(ObsRow row) {
-            this(row.time.toLocalDate(), row.conceptUuid, row.conceptName);
+        public Section(Obs obs) {
+            this(obs.time.toLocalDate(), obs.conceptUuid);
         }
 
-        public Section(LocalDate date, String conceptUuid, String conceptName) {
-            this.conceptUuid = Utils.toNonnull(conceptUuid);
-            this.conceptName = Utils.toNonnull(conceptName);
+        public Section(LocalDate date, String conceptUuid) {
             this.date = date;
+            this.conceptUuid = Utils.toNonnull(conceptUuid);
+            this.conceptName = App.getConceptService().getName(conceptUuid);
         }
 
         @Override public boolean equals(Object other) {

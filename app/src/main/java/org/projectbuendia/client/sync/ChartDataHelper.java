@@ -85,13 +85,13 @@ public class ChartDataHelper {
 
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
         String uuid = Utils.getString(c, Observations.UUID);
+        String providerUuid = Utils.getString(c, Observations.PROVIDER_UUID);
         String encounterUuid = Utils.getString(c, Observations.ENCOUNTER_UUID);
         String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
-        String providerUuid = Utils.getString(c, Observations.PROVIDER_UUID);
         String conceptUuid = Utils.getString(c, Observations.CONCEPT_UUID, "");
-        Datatype type = Datatype.valueOf(Utils.getString(c, Observations.TYPE));
-        DateTime time = Utils.getDateTime(c, Observations.MILLIS);
         String orderUuid = Utils.getString(c, Observations.ORDER_UUID);
+        DateTime time = Utils.getDateTime(c, Observations.MILLIS);
+        Datatype type = Datatype.valueOf(Utils.getString(c, Observations.TYPE));
         String value = Utils.getString(c, Observations.VALUE, "");
         String valueName = type == Datatype.CODED ? concepts.getName(value, locale) : value;
         return new Obs(uuid, encounterUuid, patientUuid, providerUuid,
@@ -132,7 +132,7 @@ public class ChartDataHelper {
     }
 
     /** Gets localized observations, filtered by optional concept and time bounds. */
-    public ArrayList<ObsRow> getPatientObservations(String patientUuid, String[] conceptUuids, Long startMillis, Long stopMillis) {
+    public List<Obs> getPatientObservations(String patientUuid, String[] conceptUuids, Long startMillis, Long stopMillis) {
         ConceptService concepts = App.getConceptService();
         Locale locale = App.getSettings().getLocale();
         List<String> args = new ArrayList<>();
@@ -161,11 +161,10 @@ public class ChartDataHelper {
 
         String order = Observations.MILLIS + " ASC";
 
-        ArrayList<ObsRow> results = new ArrayList<>();
+        List<Obs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(Observations.URI, null, query, argArray, order)) {
             while (c.moveToNext()) {
-                ObsRow row = loadObsRow(c, locale, concepts);
-                if (row != null) results.add(row);
+                results.add(loadObs(c, locale, concepts));
             }
         }
         return results;
