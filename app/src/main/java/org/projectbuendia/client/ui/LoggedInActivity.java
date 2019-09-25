@@ -37,6 +37,7 @@ import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.utils.Flashlight;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -49,8 +50,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
 /** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class LoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
-    private static final Duration IDLE_AUTO_LOGOUT_DURATION = Duration.standardMinutes(5);
-    private static final Duration DOCKED_AUTO_LOGOUT_DURATION = Duration.ZERO; // log out immediately
+    private static final Duration AUTO_LOGOUT_IDLE_DURATION = Duration.standardMinutes(5);
+    private static final Duration AUTO_LOGOUT_DOCKED_DURATION = Duration.ZERO; // log out immediately
 
     private JsonUser mLastActiveUser;
     private Menu mMenu;
@@ -202,9 +203,10 @@ public abstract class LoggedInActivity extends BaseActivity {
     protected void onTick() {
         Duration idle = getIdleDuration();
         Duration docked = batteryWatcher.getDockedDuration();
-        if (docked.isLongerThan(DOCKED_AUTO_LOGOUT_DURATION) ||
-            idle.isLongerThan(IDLE_AUTO_LOGOUT_DURATION)) {
+        if (docked.isLongerThan(AUTO_LOGOUT_DOCKED_DURATION) ||
+            idle.isLongerThan(AUTO_LOGOUT_IDLE_DURATION)) {
             LOG.i("Auto logout (idle for %s, docked for %s)", idle, docked);
+            Flashlight.get().activate(false);
             BigToast.show(R.string.signed_out);
             Utils.jumpToActivity(this, LoginActivity.class);
         }
@@ -228,6 +230,7 @@ public abstract class LoggedInActivity extends BaseActivity {
 
         @InjectView(R.id.user_name) TextView mUserName;
         @InjectView(R.id.language) TextView mLanguage;
+        @InjectView(R.id.flashlight) TextView mFlashlight;
         @InjectView(R.id.button_settings) ImageButton mSettingsButton;
         @InjectView(R.id.button_log_out) ImageButton mLogOutButton;
 
@@ -253,6 +256,11 @@ public abstract class LoggedInActivity extends BaseActivity {
             super.showAsDropDown(anchor);
             JsonUser user = App.getUserManager().getActiveUser();
             mUserName.setText(user != null ? user.getLocalizedName() : "?");
+        }
+
+        @OnClick(R.id.flashlight)
+        public void onFlashlightClick() {
+            Flashlight.get().toggle();
         }
 
         @OnClick(R.id.language)

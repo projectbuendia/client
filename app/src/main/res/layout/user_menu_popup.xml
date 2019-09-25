@@ -44,6 +44,16 @@
         android:background="?android:attr/selectableItemBackground"
         android:text="@string/pref_title_language" />
 
+    <TextView
+        android:id="@+id/flashlight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="180sp"
+        android:padding="9sp"
+        android:gravity="start|center_vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:text="@string/flashlight" />
+
     <View
         android:id="@+id/hr2"
         android:layout_width="match_parent"

@@ -46,6 +46,7 @@
   <string name="status_suspected_dead">Suspected Dead</string>
   <string name="status_confirmed_dead">Confirmed Dead</string>
 
+  <!-- App-wide strings -->
   <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>
   <string name="title_patient_chart">Patient chart</string>
@@ -82,6 +83,7 @@
   <string name="add_user_user_exists_on_server">Username already exists on server</string>
   <string name="add_user_connection_error">Error connecting to server</string>
   <string name="title_single_location">Patients at this location</string>
+  <string name="flashlight">Flashlight</string>
 
   <string name="no_locations">No locations</string>
   <string name="no_patients">No patients</string>

@@ -45,13 +45,15 @@
   <string name="status_discharged_cured">Déchargée guéri</string>
   <string name="status_suspected_dead">Susceptible morte</string>
   <string name="status_confirmed_dead">Confirmé mort</string>
+
+  <!-- App-wide strings -->
   <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>
   <string name="title_patient_chart">Dossier du patient</string>
   <string name="title_activity_patient_add">Nouveau patient</string>
   <string name="cancel">Annuler</string>
-  <string name="action_new_patient">+ Créer un nouveau patient</string>
-  <string name="action_view_xform">+ Voir la première xform sauvegardé</string>
+  <string name="action_new_patient">Créer un nouveau patient</string>
+  <string name="action_view_xform">Voir la première xform enregistré</string>
   <string name="action_new_round">Nouveau tour</string>
   <string name="action_assign_location">Attribuer emplacement</string>
   <string name="bed_number">Numéro de lit</string>
@@ -77,6 +79,7 @@
   <string name="add_user_user_exists_on_server">Nom d\'utilisateur existe déjà sur le serveur</string>
   <string name="add_user_connection_error">Erreur de connexion au serveur</string>
   <string name="title_single_location">Les patients dans ce lieu</string>
+  <string name="flashlight">Lampe de poche</string>
 
   <string name="no_locations">Aucun lieu</string>
   <string name="no_patients">Aucun patient</string>

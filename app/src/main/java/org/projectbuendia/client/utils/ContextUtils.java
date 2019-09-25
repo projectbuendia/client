@@ -118,6 +118,7 @@ public class ContextUtils extends ContextWrapper {
         ((TextView) findView(id)).setBackgroundColor(status.getBackgroundColor());
     }
 
+
     // ==== String formatting ====
 
     /** Strings are always available in the app-wide resources. */
