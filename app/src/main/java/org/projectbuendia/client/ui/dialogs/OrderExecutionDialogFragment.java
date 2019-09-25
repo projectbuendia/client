@@ -88,7 +88,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
         return new OrderExecutionDialogFragment().withArgs(args);
     }
 
-    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Override public @NonNull Dialog onCreateDialog(Bundle state) {
         return createAlertDialog(R.layout.order_execution_dialog_fragment);
     }
 

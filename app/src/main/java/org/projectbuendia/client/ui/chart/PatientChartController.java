@@ -151,7 +151,9 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         void showOrderDialog(String patientUuid, Order order, List<Obs> executions);
         void showOrderExecutionDialog(Order order, Interval interval, List<Obs> executions);
         void showEditPatientDialog(Patient patient);
-        void showObsDetailDialog(Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> orderedConceptUuids);
+        void showObsDetailDialog(
+            Interval interval, String[] queriedConceptUuids,
+            String[] conceptOrdering, List<ObsRow> obsRows);
         void showPatientLocationDialog(Patient patient);
         void showPatientUpdateFailed(int reason);
     }
@@ -272,7 +274,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         String[] conceptUuids = new String[] {ConceptUuids.PCR_GP_UUID, ConceptUuids.PCR_NP_UUID};
         List<ObsRow> obsRows = mChartHelper.getPatientObservations(mPatientUuid, conceptUuids, null, null);
         if (!obsRows.isEmpty()) {
-            mUi.showObsDetailDialog(null, conceptUuids, obsRows, Arrays.asList(conceptUuids));
+            mUi.showObsDetailDialog(null, conceptUuids, conceptUuids, obsRows);
         }
     }
 
@@ -355,8 +357,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         mUi.showObsDetailDialog(
             null,
             conceptUuids.split(","),
-            mChartHelper.getPatientObservations(mPatientUuid, conceptUuids.split(","), null, null),
-            getConceptUuidsInChartOrder(getCurrentChart())
+            getConceptUuidsInChartOrder(getCurrentChart()),
+            mChartHelper.getPatientObservations(mPatientUuid, conceptUuids.split(","), null, null)
         );
     }
 
@@ -365,8 +367,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         mUi.showObsDetailDialog(
             interval,
             null,
-            mChartHelper.getPatientObservations(mPatientUuid, null, startMillis, stopMillis),
-            getConceptUuidsInChartOrder(getCurrentChart())
+            getConceptUuidsInChartOrder(getCurrentChart()),
+            mChartHelper.getPatientObservations(mPatientUuid, null, startMillis, stopMillis)
         );
     }
 
@@ -375,8 +377,8 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         mUi.showObsDetailDialog(
             interval,
             conceptUuids.split(","),
-            mChartHelper.getPatientObservations(mPatientUuid, conceptUuids.split(","), startMillis, stopMillis),
-            getConceptUuidsInChartOrder(getCurrentChart())
+            getConceptUuidsInChartOrder(getCurrentChart()),
+            mChartHelper.getPatientObservations(mPatientUuid, conceptUuids.split(","), startMillis, stopMillis)
         );
     }
 
@@ -470,14 +472,14 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         return mCharts.get(mChartIndex);
     }
 
-    private ArrayList<String> getConceptUuidsInChartOrder(Chart chart) {
+    private String[] getConceptUuidsInChartOrder(Chart chart) {
         ArrayList<String> conceptUuids = new ArrayList<>();
         for (ChartSection chartSection : chart.rowGroups) {
             for (ChartItem chartItem : chartSection.items) {
                 conceptUuids.addAll(Arrays.asList(chartItem.conceptUuids));
             }
         }
-        return conceptUuids;
+        return conceptUuids.toArray(new String[0]);
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */

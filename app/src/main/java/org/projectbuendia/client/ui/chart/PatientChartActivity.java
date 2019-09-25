@@ -363,8 +363,9 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showObsDetailDialog(
-            Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> conceptOrdering) {
-            ObsDetailDialogFragment.newInstance(interval, conceptUuids, obsRows, conceptOrdering)
+            Interval interval, String[] queriedConceptUuids,
+            String[] conceptOrdering, List<ObsRow> obsRows) {
+            ObsDetailDialogFragment.create(interval, queriedConceptUuids, conceptOrdering, obsRows)
                 .show(getSupportFragmentManager(), null);
         }
 

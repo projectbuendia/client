@@ -14,17 +14,29 @@
   <string name="quoted_text">«%s»</string>
   <string name="two_items">%1$s et %2$s</string>
   <string name="more_than_two_items">%1$s, et %2$s</string>
+
   <string name="month_day_format">d MMM</string>
-  <string name="sentence_month_day_format">\'le\' d MMM</string>
   <string name="year_month_day_format">d MMM yyyy</string>
-  <string name="sentence_year_month_day_format">\'le\' d MMM yyyy</string>
   <string name="hour_minute_format">HH\'h\'mm</string>
-  <string name="sentence_hour_minute_format">\'à\' HH\'h\'mm</string>
   <string name="month_day_hour_minute_format">MMM d, HH\'h\'mm</string>
+
+  <!-- "Sentence" formats should work in phrases like "Le magasin s'ouvre X" -->
+  <string name="sentence_month_day_format">\'le\' d MMM</string>
+  <string name="sentence_year_month_day_format">\'le\' d MMM yyyy</string>
+  <string name="sentence_hour_minute_format">\'à\' HH\'h\'mm</string>
   <string name="sentence_month_day_hour_minute_format">\'le\' d MMM \'à\' HH\'h\'mm</string>
   <string name="sentence_yesterday">hier</string>
   <string name="sentence_today">aujourd\'hui</string>
   <string name="sentence_tomorrow">demain</string>
+
+  <!-- "Relative" formats should work in phrases like "après X", "entre X et Y" -->
+  <string name="relative_month_day_format">\'le\' d MMM</string>
+  <string name="relative_year_month_day_format">\'le\' d MMM yyyy</string>
+  <string name="relative_hour_minute_format">\'à\' HH\'h\'mm</string>
+  <string name="relative_month_day_hour_minute_format">\'le\' d MMM \'à\' HH\'h\'mm</string>
+  <string name="relative_yesterday">hier</string>
+  <string name="relative_today">aujourd\'hui</string>
+  <string name="relative_tomorrow">demain</string>
 
   <!-- Authorization activity -->
   <string name="authorization_required">Cet appareil n\'est pas autorisé.  Pour accedér aux données des patients, SVP entrez les identifiants de votre compte OpenMRS.</string>
