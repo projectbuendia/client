@@ -16,52 +16,53 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     >
 
-    <TextView
-        android:id="@+id/order_medication"
+    <LinearLayout
+        android:id="@+id/prescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/text.heading"
-        tools:text="Paracetamol"
-        />
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16sp"
+        android:paddingBottom="16sp"
+        >
 
-    <TextView
-        android:id="@+id/order_dosage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:text="200 mg, given 2x daily"
-        />
+        <TextView
+            android:id="@+id/order_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Paracetamol"
+            />
 
-    <TextView
-        android:id="@+id/order_notes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="italic"
-        tools:text="Administer as needed for pain"
-        />
+        <TextView
+            android:id="@+id/order_start_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16sp"
+            tools:text="Started on Apr 21 at 12:34"
+            />
 
-    <TextView
-        android:id="@+id/order_start_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24sp"
-        tools:text="Started on Apr 21 at 12:34"
-        />
+        <TextView
+            android:id="@+id/execution_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16sp"
+            tools:text="Given 2 times today, Apr 22"
+            />
 
-    <TextView
-        android:id="@+id/execution_count"
+    </LinearLayout>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:text="Given 2 times today, Apr 22"
+        android:layout_height="1dp"
+        android:background="#dddddd"
         />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12sp"
-        android:background="#ddd"
         >
 
         <LinearLayout
@@ -69,16 +70,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="18sp"
-            android:paddingBottom="18sp"
             />
 
     </ScrollView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#dddddd"
+        />
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24sp"
+        android:layout_marginTop="16sp"
+        android:layout_marginBottom="16sp"
         android:orientation="horizontal"
         >
 
@@ -87,10 +93,12 @@
             android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:background="@drawable/toggle_button_selector"
             android:checked="false"
-            android:paddingBottom="18sp"
-            android:paddingTop="18sp"
+            android:paddingBottom="12sp"
+            android:paddingTop="12sp"
             android:textAppearance="@style/text"
             android:textColor="#fff"
             android:textOff="@string/order_execution_mark_as_given_now"
@@ -102,10 +110,11 @@
             android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:background="#f66"
-            android:checked="false"
-            android:paddingBottom="18sp"
-            android:paddingTop="18sp"
+            android:paddingBottom="12sp"
+            android:paddingTop="12sp"
             android:text="@string/order_execution_delete_selected"
             android:textAppearance="@style/text"
             android:textColor="#fff"

@@ -109,7 +109,7 @@ public class ContextUtils extends ContextWrapper {
         findView(id).setVisibility(View.GONE);
     }
 
-    public void setText(int id, String text) {
+    public void setText(int id, CharSequence text) {
         ((TextView) findView(id)).setText(text);
     }
 

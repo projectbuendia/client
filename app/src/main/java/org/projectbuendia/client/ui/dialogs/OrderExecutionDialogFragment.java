@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui.dialogs;
 
 import android.app.Dialog;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -50,9 +49,7 @@ import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY
 
 /** A {@link DialogFragment} for recording that an order was executed. */
 public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecutionDialogFragment> {
-    @InjectView(R.id.order_medication) TextView mOrderMedication;
-    @InjectView(R.id.order_dosage) TextView mOrderDosage;
-    @InjectView(R.id.order_notes) TextView mOrderNotes;
+    @InjectView(R.id.order_description) TextView mOrderDescription;
     @InjectView(R.id.order_start_time) TextView mOrderStartTime;
     @InjectView(R.id.execution_count) TextView mExecutionCount;
     @InjectView(R.id.execution_list) ViewGroup mExecutionList;
@@ -99,23 +96,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
             R.string.order_execution_title, Utils.format(mDate, SENTENCE_MONTH_DAY)));
 
         // Show what was ordered and when the order started.
-        mOrderMedication.setText(getString(
-            R.string.order_medication_route,
-            args.getString("medication"),
-            args.getString("route")
-        ));
-        int frequency = args.getInt("frequency");
-        String dosage = args.getString("dosage");
-        if (Utils.isBlank(dosage)) {
-            dosage = u.str(R.string.order_unspecified_dosage);
-        }
-        mOrderDosage.setText(getString(
-            frequency > 0 ? R.string.order_dosage_series : R.string.order_dosage_unary,
-            dosage, frequency
-        ));
-        String notes = args.getString("notes");
-        mOrderNotes.setText(notes);
-        mOrderNotes.setVisibility(notes.trim().isEmpty() ? View.GONE : View.VISIBLE);
+        mOrderDescription.setText(Html.fromHtml(describeOrderHtml(args)));
 
         DateTime start = Utils.getDateTime(args, "orderStartMillis");
         mOrderStartTime.setText(getString(
@@ -147,9 +128,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
         if (executable) {
             mNewItem = u.inflate(R.layout.checkable_item, mExecutionList);
             DateTime executionTime = Utils.getDateTime(args, "executionTimeMillis");
-            TextView text = u.findView(R.id.text);
-            text.setText(Utils.format(executionTime, HOUR_MINUTE));
-            text.setTypeface(text.getTypeface(), Typeface.BOLD);
+            u.setText(R.id.text, Html.fromHtml(toBoldHtml(Utils.format(executionTime, HOUR_MINUTE))));
             u.findView(R.id.checkbox).setVisibility(View.INVISIBLE);
             mExecutionList.addView(mNewItem);
             mNewItem.setVisibility(View.INVISIBLE);
@@ -162,7 +141,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
     }
 
     /** Updates the UI to reflect the changes proposed by the user. */
-    void updateUi() {
+    private void updateUi() {
         Bundle args = getArguments();
         boolean executeNow = mExecuteToggle.isChecked();
 
@@ -232,6 +211,29 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
                     !mObsUuidsToDelete.contains(obs.uuid));
             }
         }
+    }
+
+    private String describeOrderHtml(Bundle args) {
+        int frequency = args.getInt("frequency");
+        String dosage = args.getString("dosage");
+        String notes = args.getString("notes");
+
+        String htmlDescription = toBoldHtml(getString(
+            R.string.order_medication_route,
+            args.getString("medication"),
+            args.getString("route")
+        ));
+        if (Utils.isBlank(dosage)) {
+            dosage = u.str(R.string.order_unspecified_dosage);
+        }
+        htmlDescription += "<br>" + toHtml(getString(
+            frequency > 0 ? R.string.order_dosage_series : R.string.order_dosage_unary,
+            dosage, frequency
+        ));
+        if (!Utils.isBlank(notes)) {
+            htmlDescription += "<br>" + toItalicHtml(notes);
+        }
+        return htmlDescription;
     }
 
     /** Marks the checked items for deletion. */

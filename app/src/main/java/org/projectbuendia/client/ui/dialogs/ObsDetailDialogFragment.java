@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 
 import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
 import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
-import static org.projectbuendia.client.utils.Utils.DateStyle.RELATIVE_MONTH_DAY_HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.DateStyle.RELATIVE_HOUR_MINUTE;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogFragment> {
@@ -64,13 +64,19 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     }
 
     @Override public void onOpen(Bundle args) {
-        dialog.setTitle(R.string.obs_details_title);
+        dialog.setTitle(R.string.obs_detail_title);
         concepts = App.getConceptService();
         interval = Utils.toNullableInterval(args.getString("interval"));
         queriedConceptUuids = Utils.orDefault(
             args.getStringArray("queriedConceptUuids"), new String[0]);
         conceptOrdering = args.getStringArray("conceptOrdering");
         observations = args.getParcelableArrayList("observations");
+
+        u.setText(R.id.message, Html.fromHtml(describeQueryHtml()));
+        if (observations.isEmpty()) {
+            u.hide(R.id.body);
+            return;
+        }
 
         Map<Group, List<Obs>> groupObs = new HashMap<>();
         for (Obs obs : observations) {
@@ -81,10 +87,6 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
             groupObs.get(group).add(obs);
         }
 
-        TextView message = dialog.findViewById(R.id.message);
-        message.setText(describeQuery());
-
-
         List<Group> groups = new ArrayList<>(groupObs.keySet());
         items = new ArrayList<>();
         Collections.sort(groups, new GroupComparator(conceptOrdering));
@@ -92,7 +94,6 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         ViewGroup list = dialog.findViewById(R.id.obs_list);
         list.addView(u.inflate(R.layout.group_spacer, list));
         for (Group group : groups) {
-            // No need to show a heading if there's only one date and one concept.
             if (interval == null || queriedConceptUuids.length != 1) {
                 View heading = u.inflate(R.layout.heading, list);
                 TextView headingText = u.findView(R.id.heading);
@@ -102,8 +103,7 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
 
             for (Obs obs : groupObs.get(group)) {
                 View item = u.inflate(R.layout.checkable_item, list);
-                TextView itemText = u.findView(R.id.text);
-                itemText.setText(formatValue(obs));
+                u.setText(R.id.text, formatValue(obs));
                 App.getUserManager().showChip(u.findView(R.id.user_initials), obs.providerUuid);
                 list.addView(item);
 
@@ -122,61 +122,81 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     }
 
     private CharSequence formatHeading(Group group) {
-        if (queriedConceptUuids.length != 1) return concepts.getName(group.conceptUuid);
-        if (interval == null) return Utils.format(group.date, MONTH_DAY);
+        if (queriedConceptUuids.length != 1) {
+            return Html.fromHtml(toBoldHtml(concepts.getName(group.conceptUuid)));
+        }
+        if (interval == null) {
+            return Html.fromHtml(toAccentHtml(Utils.format(group.date, MONTH_DAY)));
+        }
         return "";
     }
 
     private CharSequence formatValue(Obs obs) {
         return Html.fromHtml(
-            "<span style='color: #33b5e5'>" + Utils.format(obs.time, HOUR_MINUTE) + ":</span> " +
-                Html.escapeHtml(obs.valueName));
+            "<span style='color: #33b5e5'>" + Utils.format(obs.time, HOUR_MINUTE)
+                + "</span>" + "&nbsp;&nbsp;&nbsp;"
+                + Html.escapeHtml(obs.valueName));
     }
 
     private void updateUi() {
 
     }
 
-    private String describeQuery() {
-        String conceptNames = null;
-        if (Utils.hasItems(queriedConceptUuids)) {
+    private String describeQueryHtml() {
+        String htmlConceptNames = null;
+        if (queriedConceptUuids.length > 0) {
             ConceptService concepts = App.getConceptService();
             Locale locale = App.getSettings().getLocale();
-            String[] names = new String[queriedConceptUuids.length];
+            String[] htmlNames = new String[queriedConceptUuids.length];
             for (int i = 0; i < queriedConceptUuids.length; i++) {
-                names[i] = getString(R.string.quoted_text, concepts.getName(queriedConceptUuids[i], locale));
+                htmlNames[i] = toBoldHtml(
+                    concepts.getName(queriedConceptUuids[i], locale));
             }
-            conceptNames = u.formatItems(names);
+            // For this to work, R.string.two_items and R.string.more_than_two_items
+            // must not contain any HTML special characters.
+            htmlConceptNames = u.formatItems(htmlNames);
         }
+        boolean empty = observations.isEmpty();
         if (interval != null) {
-            String start = Utils.format(interval.getStart(), RELATIVE_MONTH_DAY_HOUR_MINUTE);
-            String stop = Utils.format(interval.getEnd(), RELATIVE_MONTH_DAY_HOUR_MINUTE);
-            if (conceptNames != null) {
-                return getString(
-                    Utils.hasItems(observations)
-                        ? R.string.obs_details_concept_interval
-                        : R.string.obs_details_concept_interval_empty,
-                    conceptNames, start, stop
+            LocalDate day = interval.getStart().toLocalDate();
+            String htmlDate = toAccentHtml(Utils.format(day, MONTH_DAY));
+            if (eq(interval, day.toInterval())) {
+                return htmlConceptNames != null ? getString(
+                    empty ? R.string.obs_detail_concept_day_empty
+                        : R.string.obs_detail_concept_day,
+                    htmlConceptNames, htmlDate
+                ) : getString(
+                    empty ? R.string.obs_detail_day_empty
+                        : R.string.obs_detail_day,
+                    htmlDate
                 );
             } else {
-                return getString(
-                    Utils.hasItems(observations)
-                        ? R.string.obs_details_interval
-                        : R.string.obs_details_interval_empty,
-                    start, stop
+                String htmlStart = toAccentHtml(Utils.format(
+                    interval.getStart(), RELATIVE_HOUR_MINUTE));
+                String htmlStop = toAccentHtml(Utils.format(
+                    interval.getEnd(), RELATIVE_HOUR_MINUTE));
+                if (eq(interval.getEnd(), day.toInterval().getEnd())) {
+                    htmlStop = toAccentHtml(getString(R.string.end_of_day_hour_minute));
+                }
+                return htmlConceptNames != null ? getString(
+                    empty ? R.string.obs_detail_concept_interval_empty
+                        : R.string.obs_detail_concept_interval,
+                    htmlConceptNames, htmlDate, htmlStart, htmlStop
+                ) : getString(
+                    empty ? R.string.obs_detail_interval_empty
+                        : R.string.obs_detail_interval,
+                    htmlDate, htmlStart, htmlStop
                 );
             }
-        } else if (conceptNames != null) {
+        } else if (htmlConceptNames != null) {
             return getString(
-                Utils.hasItems(observations)
-                    ? R.string.obs_details_concept
-                    : R.string.obs_details_concept_empty,
-                conceptNames
+                empty ? R.string.obs_detail_concept_empty
+                    : R.string.obs_detail_concept,
+                htmlConceptNames
             );
-        } else {
-            // Should never get here (no concepts and no interval).
-            return "";
         }
+        // Should never get here (no concepts and no interval).
+        return "";
     }
 
     @Override protected void onSubmit() {

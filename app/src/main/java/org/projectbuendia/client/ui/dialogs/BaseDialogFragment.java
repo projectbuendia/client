@@ -16,6 +16,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.text.Html;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -107,5 +108,25 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
         field.setError(getString(messageId, args));
         field.invalidate();
         field.requestFocus();
+    }
+
+    /** Returns the HTML for the given text. */
+    protected String toHtml(String text) {
+        return Html.escapeHtml(text);
+    }
+
+    /** Returns the HTML for the given text in bold. */
+    protected String toBoldHtml(String text) {
+        return "<b>" + Html.escapeHtml(text) + "</b>";
+    }
+
+    /** Returns the HTML for the given text. */
+    protected String toItalicHtml(String text) {
+        return "<i>" + Html.escapeHtml(text) + "</i>";
+    }
+
+    /** Applies an accent colour that matches the colour of the dialog title. */
+    protected String toAccentHtml(String text) {
+        return "<span style='color: #33b5e5'>" + Html.escapeHtml(text) + "</span>";
     }
 }
