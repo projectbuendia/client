@@ -56,6 +56,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
     @InjectView(R.id.execute_toggle) ToggleButton mExecuteToggle;
     @InjectView(R.id.delete_button) Button mDeleteButton;
 
+    private Order mOrder;
     private LocalDate mDate;
     private List<View> mItems;
     private View mNewItem;
@@ -65,13 +66,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
     public static OrderExecutionDialogFragment create(
         Order order, Interval interval, List<Obs> executions) {
         Bundle args = new Bundle();
-        args.putString("orderUuid", order.uuid);
-        args.putString("medication", order.instructions.medication);
-        args.putString("route", order.instructions.route);
-        args.putString("dosage", order.instructions.dosage);
-        args.putInt("frequency", order.instructions.frequency);
-        args.putString("notes", order.instructions.notes);
-        args.putLong("orderStartMillis", order.start.getMillis());
+        args.putSerializable("order", order);
         args.putSerializable("date", interval.getStart().toLocalDate());
         ArrayList<Obs> executionsInInterval = new ArrayList<>();
         for (Obs obs : executions) {
@@ -91,21 +86,20 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
     }
 
     protected void onOpen(Bundle args) {
+        mOrder = (Order) args.getSerializable("order");
         mDate = (LocalDate) args.getSerializable("date");
+
         dialog.setTitle(getString(
             R.string.order_execution_title, Utils.format(mDate, SENTENCE_MONTH_DAY)));
 
         // Show what was ordered and when the order started.
-        mOrderDescription.setText(Html.fromHtml(describeOrderHtml(args)));
-
-        DateTime start = Utils.getDateTime(args, "orderStartMillis");
+        mOrderDescription.setText(Html.fromHtml(describeOrderHtml(mOrder)));
         mOrderStartTime.setText(getString(
             R.string.order_started_datetime,
-            Utils.format(start, Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE)));
+            Utils.format(mOrder.start, Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE)));
 
         // Populate the list of execution times with checkable items.
         boolean executable = args.getBoolean("executable");
-
         List<Obs> executions = args.getParcelableArrayList("executions");
         Utils.showIf(mExecutionList, executions.size() > 0 || executable);
 
@@ -213,25 +207,23 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
         }
     }
 
-    private String describeOrderHtml(Bundle args) {
-        int frequency = args.getInt("frequency");
-        String dosage = args.getString("dosage");
-        String notes = args.getString("notes");
-
+    /** Constructs an HTML description of the order. */
+    private String describeOrderHtml(Order order) {
         String htmlDescription = toBoldHtml(getString(
             R.string.order_medication_route,
-            args.getString("medication"),
-            args.getString("route")
+            order.instructions.medication,
+            order.instructions.route
         ));
+        String dosage = order.instructions.dosage;
         if (Utils.isBlank(dosage)) {
             dosage = u.str(R.string.order_unspecified_dosage);
         }
         htmlDescription += "<br>" + toHtml(getString(
-            frequency > 0 ? R.string.order_dosage_series : R.string.order_dosage_unary,
-            dosage, frequency
+            order.isSeries() ? R.string.order_dosage_series : R.string.order_dosage_unary,
+            dosage, order.instructions.frequency
         ));
-        if (!Utils.isBlank(notes)) {
-            htmlDescription += "<br>" + toItalicHtml(notes);
+        if (!Utils.isBlank(order.instructions.notes)) {
+            htmlDescription += "<br>" + toItalicHtml(order.instructions.notes);
         }
         return htmlDescription;
     }
