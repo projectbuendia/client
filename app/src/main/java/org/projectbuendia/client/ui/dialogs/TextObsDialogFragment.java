@@ -22,44 +22,47 @@ import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.utils.Utils;
 
-import butterknife.InjectView;
+import java.io.Serializable;
 
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A DialogFragment for editing a text observation. */
-public class TextObsDialogFragment extends BaseDialogFragment<TextObsDialogFragment> {
-    @InjectView(R.id.text) EditText text;
-
-    private Obs obs;
+public class TextObsDialogFragment extends BaseDialogFragment<TextObsDialogFragment, TextObsDialogFragment.Args> {
+    static class Args implements Serializable {
+        String title;
+        Obs obs;
+    }
 
     public static TextObsDialogFragment create(String title, Obs obs) {
-        return new TextObsDialogFragment().withArgs(Utils.bundle("title", title, "obs", obs));
+        Args args = new Args();
+        args.title = title;
+        args.obs = obs;
+        return new TextObsDialogFragment().withArgs(args);
     }
 
     @Override public AlertDialog onCreateDialog(Bundle state) {
         return createAlertDialog(R.layout.text_obs_dialog_fragment);
     }
 
-    @Override protected void onOpen(Bundle args) {
-        dialog.setTitle((String) args.get("title"));
-        obs = (Obs) args.get("obs");
-        text.setText(obs.value);
+    @Override protected void onOpen() {
+        dialog.setTitle(args.title);
+        u.setText(R.id.text, args.obs.value);
         Utils.showKeyboard(dialog.getWindow());
     }
 
     @Override protected void onSubmit() {
-        String newValue = text.getText().toString();
-        if (eq(newValue, obs.value)) return;
+        String newValue = ((EditText) u.findView(R.id.text)).getText().toString();
+        if (eq(newValue, args.obs.value)) return;
 
         Utils.logUserAction("text_obs_submitted",
-            "patient_uuid", obs.patientUuid,
-            "concept_uuid", obs.conceptUuid,
+            "patient_uuid", args.obs.patientUuid,
+            "concept_uuid", args.obs.conceptUuid,
             "text", newValue);
 
         App.getModel().addObservationEncounter(
-            App.getCrudEventBus(), obs.patientUuid, new Obs(
-                null, null, obs.patientUuid, Utils.getProviderUuid(),
-                obs.conceptUuid, Datatype.TEXT, DateTime.now(), null, newValue, null
+            App.getCrudEventBus(), args.obs.patientUuid, new Obs(
+                null, null, args.obs.patientUuid, Utils.getProviderUuid(),
+                args.obs.conceptUuid, Datatype.TEXT, DateTime.now(), null, newValue, null
             )
         );
         dialog.dismiss();

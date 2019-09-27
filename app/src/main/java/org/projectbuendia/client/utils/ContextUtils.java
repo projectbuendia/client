@@ -92,6 +92,12 @@ public class ContextUtils extends ContextWrapper {
         lastView = view;
     }
 
+    /** Sets the view in which findView() will search. */
+    public ContextUtils inView(View view) {
+        lastView = view;
+        return this;
+    }
+
     /** Finds a view in the last view that was inflated. */
     public <T extends View> T findView(int id) {
         return lastView != null ? lastView.findViewById(id) : null;

@@ -21,13 +21,16 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.utils.Utils;
 
-import butterknife.InjectView;
+import java.io.Serializable;
 
 /** A DialogFragment for adding a new user. */
-public class NewUserDialogFragment extends BaseDialogFragment<NewUserDialogFragment> {
-    @InjectView(R.id.given_name_field) EditText mGivenName;
-    @InjectView(R.id.family_name_field) EditText mFamilyName;
+public class NewUserDialogFragment extends BaseDialogFragment<NewUserDialogFragment, Serializable> {
+    class Views {
+        EditText givenName = u.findView(R.id.given_name_field);
+        EditText familyName = u.findView(R.id.family_name_field);
+    }
     @Nullable private ActivityUi mActivityUi;  // optional UI for showing a spinner
+    private Views v;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static NewUserDialogFragment create(ActivityUi activityUi) {
@@ -43,22 +46,24 @@ public class NewUserDialogFragment extends BaseDialogFragment<NewUserDialogFragm
         return createAlertDialog(R.layout.new_user_dialog_fragment);
     }
 
-    @Override protected void onOpen(Bundle args) {
+    @Override protected void onOpen() {
+        v = new Views();
+
         dialog.setTitle(R.string.title_new_user);
-        mGivenName.requestFocus();
+        v.givenName.requestFocus();
         Utils.showKeyboard(dialog.getWindow());
     }
 
     @Override protected void onSubmit() {
-        String givenName = Utils.toNonnullString(mGivenName.getText()).trim();
-        String familyName = Utils.toNonnullString(mFamilyName.getText()).trim();
+        String givenName = Utils.toNonnullString(v.givenName.getText()).trim();
+        String familyName = Utils.toNonnullString(v.familyName.getText()).trim();
         boolean valid = true;
         if (givenName.isEmpty()) {
-            setError(mGivenName, R.string.given_name_cannot_be_null);
+            setError(v.givenName, R.string.given_name_cannot_be_null);
             valid = false;
         }
         if (familyName.isEmpty()) {
-            setError(mFamilyName, R.string.family_name_cannot_be_null);
+            setError(v.familyName, R.string.family_name_cannot_be_null);
             valid = false;
         }
         Utils.logUserAction("add_user_submitted",

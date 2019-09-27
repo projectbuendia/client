@@ -24,6 +24,9 @@ import android.widget.TextView;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.utils.ContextUtils;
+import org.projectbuendia.client.utils.Utils;
+
+import java.io.Serializable;
 
 import javax.annotation.Nonnull;
 
@@ -32,7 +35,7 @@ import butterknife.ButterKnife;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 
 /** Common behaviour for all dialogs. */
-public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends DialogFragment {
+public abstract class BaseDialogFragment<T extends BaseDialogFragment, A extends Serializable> extends DialogFragment {
     public static int BUTTON_NEGATIVE = DialogInterface.BUTTON_NEGATIVE;
     public static int BUTTON_NEUTRAL = DialogInterface.BUTTON_NEUTRAL;
     public static int BUTTON_POSITIVE = DialogInterface.BUTTON_POSITIVE;
@@ -40,9 +43,11 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
 
     protected ContextUtils u;
     protected AlertDialog dialog;
+    protected A args;  // construction arguments passed in via setArguments()
 
-    public T withArgs(Bundle args) {
-        setArguments(args);
+    /** Sets an object that will become the "args" member when the dialog is built. */
+    public T withArgs(Serializable args) {
+        setArguments(Utils.bundle("args", args));
         return (T) this;
     }
 
@@ -80,7 +85,9 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
             if (activity instanceof BaseActivity) {
                 ((BaseActivity) activity).onDialogOpened(BaseDialogFragment.this);
             }
-            onOpen(getArguments());
+            Bundle bundle = getArguments();
+            args = bundle != null ? (A) bundle.getSerializable("args") : null;
+            onOpen();
         });
         return dialog;
     }
@@ -95,7 +102,7 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
     }
 
     /** Invoked just after the dialog opens; use this to populate the dialog. */
-    protected void onOpen(Bundle args) { }
+    protected void onOpen() { }
 
     /** Invoked when the user taps the "OK" button; should call .dismiss() if needed. */
     protected void onSubmit() { }

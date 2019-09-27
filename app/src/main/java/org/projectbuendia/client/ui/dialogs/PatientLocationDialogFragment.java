@@ -35,7 +35,7 @@ import org.projectbuendia.client.utils.Utils;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A {@link DialogFragment} for updating a patient's location and bed number. */
-public class PatientLocationDialogFragment extends BaseDialogFragment<PatientLocationDialogFragment> {
+public class PatientLocationDialogFragment extends BaseDialogFragment<PatientLocationDialogFragment, Patient> {
     private Patient patient;
     private String initialLocationUuid;
     private String initialBedNumber;
@@ -44,15 +44,15 @@ public class PatientLocationDialogFragment extends BaseDialogFragment<PatientLoc
     private EditText bedNumber;
 
     public static PatientLocationDialogFragment create(Patient patient) {
-        return new PatientLocationDialogFragment().withArgs(Utils.bundle("patient", patient));
+        return new PatientLocationDialogFragment().withArgs(patient);
     }
 
     @Override public AlertDialog onCreateDialog(Bundle state) {
         return createAlertDialog(R.layout.patient_location_dialog_fragment);
     }
 
-    @Override protected void onOpen(Bundle args) {
-        patient = (Patient) args.getSerializable("patient");
+    @Override protected void onOpen() {
+        patient = args;
         initialLocationUuid = patient.locationUuid;
         initialBedNumber = patient.bedNumber;
 

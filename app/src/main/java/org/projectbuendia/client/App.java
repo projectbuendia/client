@@ -44,6 +44,7 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.ObjectGraph;
+import de.greenrobot.event.EventBus;
 
 /** An {@link Application} the represents the Android Client. */
 public class App extends Application {
@@ -55,6 +56,7 @@ public class App extends Application {
     private static AppModel sModel;
     private static AppSettings sSettings;
     private static CrudEventBus sCrudEventBus;
+    private static EventBus sHealthEventBus;
     private static HealthMonitor sHealthMonitor;
     private static SyncManager sSyncManager;
     private static UserManager sUserManager;
@@ -66,6 +68,7 @@ public class App extends Application {
     @Inject AppModel mModel;
     @Inject AppSettings mSettings;
     @Inject CrudEventBus mCrudEventBus;
+    @Inject EventBus mHealthEventBus;
     @Inject HealthMonitor mHealthMonitor;
     @Inject SyncManager mSyncManager;
     @Inject UserManager mUserManager;
@@ -125,6 +128,10 @@ public class App extends Application {
         return sCrudEventBus;
     }
 
+    public static synchronized EventBus getHealthEventBus() {
+        return sHealthEventBus;
+    }
+
     public static synchronized HealthMonitor getHealthMonitor() {
         return sHealthMonitor;
     }
@@ -176,6 +183,7 @@ public class App extends Application {
             sModel = mModel;
             sSettings = mSettings;
             sCrudEventBus = mCrudEventBus;
+            sHealthEventBus = mHealthEventBus;
             sHealthMonitor = mHealthMonitor;
             sSyncManager = mSyncManager;
             sUserManager = mUserManager;

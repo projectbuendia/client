@@ -28,36 +28,42 @@ import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.utils.Utils;
 
-import butterknife.InjectView;
+import java.io.Serializable;
+
 import de.greenrobot.event.EventBus;
 
 import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.LONG;
 import static org.projectbuendia.client.utils.ContextUtils.FormatStyle.SHORT;
 
 /** A dialog for jumping to a patient by ID. */
-public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDialogFragment> {
-    @InjectView(R.id.go_to_patient_id) EditText mPatientId;
-    @InjectView(R.id.go_to_patient_result) TextView mSearchResult;
-    String mPatientUuid;
+public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDialogFragment, Serializable> {
+    class Views {
+        EditText patientId = u.findView(R.id.go_to_patient_id);
+        TextView searchResult = u.findView(R.id.go_to_patient_result);
+    }
+
+    private Views v;
+    String patientUuid = null;
 
     @Override public AlertDialog onCreateDialog(Bundle state) {
         return createAlertDialog(R.layout.go_to_patient_dialog_fragment);
     }
 
-    @Override protected void onOpen(Bundle args) {
+    @Override protected void onOpen() {
+        v = new Views();
         App.getCrudEventBus().register(this);
 
         dialog.setTitle(R.string.go_to_patient_title);
-        new EditTextWatcher(mPatientId).onChange(this::search);
-        mSearchResult.setOnClickListener(view -> onSubmit());
+        new EditTextWatcher(v.patientId).onChange(this::search);
+        v.searchResult.setOnClickListener(view -> onSubmit());
         dialog.getButton(BUTTON_POSITIVE).setText(R.string.go_to_chart);
     }
 
     @Override protected void onSubmit() {
         Utils.logUserAction("go_to_patient_submitted",
-            "patient_id", mPatientId.getText().toString(),
-            "patient_uuid", mPatientUuid);
-        if (mPatientUuid != null) {
+            "patient_id", v.patientId.getText().toString(),
+            "patient_uuid", patientUuid);
+        if (patientUuid != null) {
             dialog.dismiss();
 
             // NOTE(ping): I don't fully understand why, but posting this on a
@@ -65,26 +71,26 @@ public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDia
             // post the event to the EventBus immediately, the numeric keypad
             // stays up even as the new activity launches underneath it!
             new Handler().postDelayed(() -> EventBus.getDefault().post(
-                new PatientChartRequestedEvent(mPatientUuid)), 100);
+                new PatientChartRequestedEvent(patientUuid)), 100);
         }
     }
 
     public void onEventMainThread(ItemLoadedEvent<?> event) {
         if (event.item instanceof Patient) {
-            String id = mPatientId.getText().toString().trim();
+            String id = v.patientId.getText().toString().trim();
             Patient patient = (Patient) event.item;
             if (id.equals(patient.id)) {  // server returned the patient we were looking for
-                mPatientUuid = patient.uuid;
-                mSearchResult.setText(formatSearchResult(patient));
+                patientUuid = patient.uuid;
+                v.searchResult.setText(formatSearchResult(patient));
             }
         }
     }
 
     public void onEventMainThread(ItemLoadFailedEvent event) {
-        String id = mPatientId.getText().toString().trim();
+        String id = v.patientId.getText().toString().trim();
         if (id.equals(event.id)) {  // server returned empty results for the ID we sought
-            mPatientUuid = null;
-            mSearchResult.setText(u.str(R.string.patient_not_found, event.id));
+            patientUuid = null;
+            v.searchResult.setText(u.str(R.string.patient_not_found, event.id));
         }
     }
 
@@ -95,24 +101,24 @@ public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDia
     }
 
     private void search() {
-        String id = mPatientId.getText().toString().trim();
+        String id = v.patientId.getText().toString().trim();
         if (id.isEmpty()) {
-            mPatientUuid = null;
-            mSearchResult.setText("");
+            patientUuid = null;
+            v.searchResult.setText("");
         } else {
             try (Cursor cursor = getActivity().getContentResolver().query(
                 Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
                 if (cursor.moveToNext()) {  // found locally
                     Patient patient = Patient.load(cursor);
-                    mPatientUuid = patient.uuid;
-                    mSearchResult.setText(formatSearchResult(patient));
+                    patientUuid = patient.uuid;
+                    v.searchResult.setText(formatSearchResult(patient));
                 } else {  // not found locally; check server
-                    mPatientUuid = null;
-                    mSearchResult.setText(R.string.searching_ellipsis);
+                    patientUuid = null;
+                    v.searchResult.setText(R.string.searching_ellipsis);
                     App.getModel().fetchPatient(App.getCrudEventBus(), id);
                 }
             }
         }
-        dialog.getButton(BUTTON_POSITIVE).setEnabled(mPatientUuid != null);
+        dialog.getButton(BUTTON_POSITIVE).setEnabled(patientUuid != null);
     }
 }

@@ -152,6 +152,8 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                         LOG.w("The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
                             uri, httpResponse.getStatusLine().getStatusCode());
                         switch (httpResponse.getStatusLine().getStatusCode()) {
+                            // TODO(ping): Detect whether the HTTP error code is coming
+                            // from a Buendia server or a zealous network firewall.
                             case HttpURLConnection.HTTP_INTERNAL_ERROR:
                                 reportIssue(HealthIssue.SERVER_INTERNAL_ISSUE);
                                 break;
@@ -164,6 +166,8 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                                 reportIssue(HealthIssue.SERVER_NOT_RESPONDING);
                                 break;
                         }
+                        // TODO(ping): Confirm that the content returned is valid JSON,
+                        // as some firewalls can return 200 with an error page.
                         if (hasIssue(HealthIssue.SERVER_HOST_UNREACHABLE)){
                             resolveIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
                         }
