@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -20,10 +21,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedMap;
 
 import javax.annotation.Nonnull;
@@ -35,10 +38,7 @@ import static org.projectbuendia.client.utils.Utils.DateStyle.RELATIVE_HOUR_MINU
 import static org.projectbuendia.client.utils.Utils.eq;
 
 public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogFragment> {
-
-    private static String EN_DASH = "\u2013";
-    private static String EM_DASH = "\u2014";
-    private static String BULLET = "\u2022";
+    private Button deleteButton;
 
     private ConceptService concepts;
     private Interval interval;
@@ -47,6 +47,7 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     private List<Obs> observations;
     private SortedMap<Group, List<Obs>> observationsBySection;
     private List<View> items;
+    private Set<String> obsUuidsToDelete = new HashSet<>();
 
     public static ObsDetailDialogFragment create(
         Interval interval, String[] queriedConceptUuids,
@@ -64,7 +65,6 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     }
 
     @Override public void onOpen(Bundle args) {
-        dialog.setTitle(R.string.obs_detail_title);
         concepts = App.getConceptService();
         interval = Utils.toNullableInterval(args.getString("interval"));
         queriedConceptUuids = Utils.orDefault(
@@ -72,6 +72,9 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         conceptOrdering = args.getStringArray("conceptOrdering");
         observations = args.getParcelableArrayList("observations");
 
+        deleteButton = u.findView(R.id.delete_button);
+
+        dialog.setTitle(R.string.obs_detail_title);
         u.setText(R.id.message, Html.fromHtml(describeQueryHtml()));
         if (observations.isEmpty()) {
             u.hide(R.id.body);
@@ -119,6 +122,7 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
 
             list.addView(u.inflate(R.layout.group_spacer, list));
         }
+        deleteButton.setOnClickListener(view -> deleteSelected());
     }
 
     private CharSequence formatHeading(Group group) {
@@ -139,7 +143,17 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     }
 
     private void updateUi() {
-
+        boolean anyItemsChecked = false;
+        for (View item : items) {
+            CheckBox checkbox = item.findViewById(R.id.checkbox);
+            if (checkbox.isChecked()) anyItemsChecked = true;
+            Obs obs = (Obs) item.getTag();
+            if (obsUuidsToDelete.contains(obs.uuid)) {
+                strikeCheckableItem(item);
+            }
+        }
+        deleteButton.setEnabled(anyItemsChecked);
+        deleteButton.setBackgroundColor(anyItemsChecked ? 0xffff6666 : 0xffcccccc);
     }
 
     private String describeQueryHtml() {
@@ -197,6 +211,19 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         }
         // Should never get here (no concepts and no interval).
         return "";
+    }
+
+    /** Marks the checked items for deletion. */
+    private void deleteSelected() {
+        for (View item : items) {
+            Obs obs = (Obs) item.getTag();
+            CheckBox checkbox = item.findViewById(R.id.checkbox);
+            if (checkbox.isChecked()) {
+                obsUuidsToDelete.add(obs.uuid);
+                checkbox.setChecked(false);
+            }
+        }
+        updateUi();
     }
 
     @Override protected void onSubmit() {

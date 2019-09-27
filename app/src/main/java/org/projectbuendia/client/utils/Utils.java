@@ -73,6 +73,15 @@ import javax.annotation.Nullable;
 
 /** Utility methods. */
 public class Utils {
+    public static final int SECOND = 1000;  // in ms
+    public static final int MINUTE = 60 * SECOND;  // in ms
+    public static final int HOUR = 60 * MINUTE;  // in ms
+    public static final int DAY = 24 * HOUR;  // in ms
+
+    public static final String EN_DASH = "\u2013";
+    public static final String EM_DASH = "\u2014";
+    public static final String BULLET = "\u2022";
+
     // Minimum and maximum representable Instant, DateTime, and LocalDate values.
     public static final Instant MIN_TIME = new Instant(Long.MIN_VALUE);
     public static final Instant MAX_TIME = new Instant(Long.MAX_VALUE);
@@ -80,11 +89,6 @@ public class Utils {
     public static final DateTime MAX_DATETIME = new DateTime(MAX_TIME, DateTimeZone.UTC);
     public static final LocalDate MIN_DATE = new LocalDate(0, 1, 1).year().withMinimumValue();
     public static final LocalDate MAX_DATE = new LocalDate(0, 12, 31).year().withMaximumValue();
-
-    public static final int SECOND = 1000;  // in ms
-    public static final int MINUTE = 60 * SECOND;  // in ms
-    public static final int HOUR = 60 * MINUTE;  // in ms
-    public static final int DAY = 24 * HOUR;  // in ms
 
     private static Map<Integer, String> sHttpMethods = initHttpMethods();
     private static Map<Integer, String> initHttpMethods() {

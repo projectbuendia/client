@@ -154,9 +154,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
         for (View item : mItems) {
             Obs obs = (Obs) item.getTag();
             if (mObsUuidsToDelete.contains(obs.uuid)) {
-                item.setBackgroundColor(0xffffcccc);
-                ((TextView) item.findViewById(R.id.text)).setTextColor(0xff999999);
-                item.findViewById(R.id.strikethrough).setVisibility(View.VISIBLE);
+                strikeCheckableItem(item);
             }
         }
         if (mNewItem != null) {

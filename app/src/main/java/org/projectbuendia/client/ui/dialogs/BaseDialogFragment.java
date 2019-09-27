@@ -129,4 +129,10 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment> extends D
     protected String toAccentHtml(String text) {
         return "<span style='color: #33b5e5'>" + Html.escapeHtml(text) + "</span>";
     }
+
+    protected void strikeCheckableItem(View item) {
+        item.setBackgroundColor(0xffffcccc);
+        ((TextView) item.findViewById(R.id.text)).setTextColor(0xff999999);
+        item.findViewById(R.id.strikethrough).setVisibility(View.VISIBLE);
+    }
 }
