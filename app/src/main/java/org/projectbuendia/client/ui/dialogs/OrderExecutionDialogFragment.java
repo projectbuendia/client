@@ -18,7 +18,6 @@ import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -63,7 +62,6 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
         TextView executionCount = u.findView(R.id.execution_count);
         ViewGroup executionList = u.findView(R.id.execution_list);
         ToggleButton execute = u.findView(R.id.execute_toggle);
-        Button delete = u.findView(R.id.delete_button);
     }
 
     private Views v;
@@ -97,6 +95,8 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
 
         dialog.setTitle(getString(
             R.string.order_execution_title, Utils.format(args.date, SENTENCE_MONTH_DAY)));
+        dialog.getButton(BUTTON_NEUTRAL).setText(R.string.delete_selected);
+        u.show(dialog.getButton(BUTTON_NEUTRAL), args.executions.size() > 0);
 
         // Show what was ordered and when the order started.
         v.orderDescription.setText(Html.fromHtml(describeOrderHtml(args.order)));
@@ -109,12 +109,11 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
 
         items = new ArrayList<>();
         for (Obs obs : args.executions) {
-            View item = u.inflate(R.layout.checkable_item, v.executionList);
+            View item = u.addInflated(R.layout.checkable_item, v.executionList);
             u.setText(R.id.text, Utils.format(obs.time, HOUR_MINUTE));
             App.getUserManager().showChip(u.findView(R.id.user_initials), obs.providerUuid);
-            item.setTag(obs);
+            item.setTag(obs.uuid);
             items.add(item);
-            v.executionList.addView(item);
 
             final CheckBox checkbox = u.findView(R.id.checkbox);
             checkbox.setOnCheckedChangeListener((view, checked) -> updateUi());
@@ -123,17 +122,18 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
             });
         }
         if (args.executable) {
-            newItem = u.inflate(R.layout.checkable_item, v.executionList);
+            newItem = u.addInflated(R.layout.checkable_item, v.executionList);
             u.setText(R.id.text, Html.fromHtml(toBoldHtml(Utils.format(args.now, HOUR_MINUTE))));
+            String providerUuid = App.getUserManager().getActiveUser().getUuid();
+            App.getUserManager().showChip(u.findView(R.id.user_initials), providerUuid);
             u.findView(R.id.checkbox).setVisibility(View.INVISIBLE);
-            v.executionList.addView(newItem);
+            u.findView(R.id.arrow).setVisibility(View.VISIBLE);
             newItem.setVisibility(View.INVISIBLE);
         }
 
-        // Set up listeners.
-        updateUi();
         v.execute.setOnCheckedChangeListener((button, checked) -> updateUi());
-        v.delete.setOnClickListener(view -> deleteSelected());
+        dialog.getButton(BUTTON_NEUTRAL).setOnClickListener(v -> deleteSelected());
+        updateUi();
     }
 
     /** Updates the UI to reflect the changes proposed by the user. */
@@ -152,9 +152,11 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
             count, Utils.format(args.date, SENTENCE_MONTH_DAY))));
 
         // Update the list of execution times.
+        boolean anyItemsChecked = false;
         for (View item : items) {
-            Obs obs = (Obs) item.getTag();
-            if (obsUuidsToDelete.contains(obs.uuid)) {
+            CheckBox checkbox = item.findViewById(R.id.checkbox);
+            if (checkbox.isChecked()) anyItemsChecked = true;
+            if (obsUuidsToDelete.contains(item.getTag())) {
                 strikeCheckableItem(item);
             }
         }
@@ -162,46 +164,15 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
             newItem.setVisibility(executeNow ? View.VISIBLE : View.INVISIBLE);
         }
 
-        boolean anyItemsChecked = false;
-        for (View item : items) {
-            CheckBox checkbox = item.findViewById(R.id.checkbox);
-            if (checkbox.isChecked()) anyItemsChecked = true;
-        }
-
-        // To keep the dialog simple, we only show one button at a time (either
-        // the Mark button or the Delete button).  To keep the dialog from
-        // resizing, we always show one button.
-        boolean showDeleteButton;
-        if (anyItemsChecked || obsUuidsToDelete.size() > 0) {
-            showDeleteButton = true;
-        } else if (args.executable) {
-            showDeleteButton = false;
-        } else {
-            showDeleteButton = true;
-        }
-        Utils.showIf(v.execute, !showDeleteButton);
-        Utils.showIf(v.delete, showDeleteButton);
-
-        // Special case: if neither button can ever be used, hide both.
-        if (!args.executable && !Utils.hasItems(items)) {
-            Utils.showIf(v.execute, false);
-            Utils.showIf(v.delete, false);
-        }
-
-        // Light up the Delete button only if it has an effect.
-        v.delete.setEnabled(anyItemsChecked);
-        v.delete.setBackgroundColor(anyItemsChecked ? 0xffff6666 : 0xffcccccc);
+        dialog.getButton(BUTTON_NEUTRAL).setEnabled(anyItemsChecked);
+        v.execute.setEnabled(!anyItemsChecked && obsUuidsToDelete.isEmpty());
 
         // If execution is requested, prevent marking anything for deletion;
-        // otherwise just disable the checkboxes of items already marked for deletion.
-        if (v.execute.isChecked()) {
-            for (View item : items) item.findViewById(R.id.checkbox).setEnabled(false);
-        } else {
-            for (View item : items) {
-                Obs obs = (Obs) item.getTag();
-                item.findViewById(R.id.checkbox).setEnabled(
-                    !obsUuidsToDelete.contains(obs.uuid));
-            }
+        // otherwise, disable the items that are marked for deletion.
+        for (View item : items) {
+            item.findViewById(R.id.checkbox).setEnabled(
+                v.execute.isChecked() ? false : !obsUuidsToDelete.contains(item.getTag())
+            );
         }
     }
 
@@ -229,10 +200,9 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
     /** Marks the checked items for deletion. */
     private void deleteSelected() {
         for (View item : items) {
-            Obs obs = (Obs) item.getTag();
             CheckBox checkbox = item.findViewById(R.id.checkbox);
             if (checkbox.isChecked()) {
-                obsUuidsToDelete.add(obs.uuid);
+                obsUuidsToDelete.add((String) item.getTag());
                 checkbox.setChecked(false);
             }
         }
@@ -250,14 +220,13 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
                 new OrderExecutionAddRequestedEvent(args.order.uuid, args.now));
         }
 
-        List<Obs> executionsToDelete = new ArrayList<>();
-        for (Obs obs : args.executions) {
-            if (obsUuidsToDelete.contains(obs.uuid)) {
-                executionsToDelete.add(obs);
-            }
-        }
-
         if (obsUuidsToDelete.size() > 0) {
+            List<Obs> executionsToDelete = new ArrayList<>();
+            for (Obs obs : args.executions) {
+                if (obsUuidsToDelete.contains(obs.uuid)) {
+                    executionsToDelete.add(obs);
+                }
+            }
             Utils.logUserAction("order_execution_deleted",
                 "orderUuid", args.order.uuid,
                 "obsUuids", Joiner.on(",").join(obsUuidsToDelete));

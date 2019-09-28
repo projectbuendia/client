@@ -81,6 +81,7 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment, A extends
             // To prevent automatic dismissal of the dialog, we have to override
             // the listener instead of passing it in to setPositiveButton.
             dialog.getButton(BUTTON_POSITIVE).setOnClickListener(v -> onSubmit());
+            dialog.getButton(BUTTON_NEGATIVE).setOnClickListener(v -> onCancel());
 
             if (activity instanceof BaseActivity) {
                 ((BaseActivity) activity).onDialogOpened(BaseDialogFragment.this);
@@ -106,6 +107,11 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment, A extends
 
     /** Invoked when the user taps the "OK" button; should call .dismiss() if needed. */
     protected void onSubmit() { }
+
+    /** Invoked when the user taps the "Cancel" button; should call .dismiss() if needed. */
+    protected void onCancel() {
+        dialog.dismiss();
+    }
 
     /** Invoked when the dialog is closed, either by the "Cancel" button or by .dismiss(). */
     protected void onClose() { }
@@ -137,9 +143,11 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment, A extends
         return "<span style='color: #33b5e5'>" + Html.escapeHtml(text) + "</span>";
     }
 
+    /** Strikes through and disables a checkable list item (see checkable_item.xml). */
     protected void strikeCheckableItem(View item) {
         item.setBackgroundColor(0xffffcccc);
         ((TextView) item.findViewById(R.id.text)).setTextColor(0xff999999);
         item.findViewById(R.id.strikethrough).setVisibility(View.VISIBLE);
+        item.findViewById(R.id.checkbox).setEnabled(false);
     }
 }

@@ -44,28 +44,6 @@
 
         </ScrollView>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#dddddd"
-            />
-
-        <Button
-            android:id="@+id/delete_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="16sp"
-            android:layout_marginBottom="16sp"
-            android:background="#f66"
-            android:paddingBottom="12sp"
-            android:paddingTop="12sp"
-            android:text="@string/obs_detail_delete_selected"
-            android:textAppearance="@style/text"
-            android:textColor="#fff"
-            />
-
     </LinearLayout>
 
 </LinearLayout>

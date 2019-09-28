@@ -163,8 +163,7 @@
   <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today</string>
   <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today</string>
   <string name="order_execution_mark_as_given_now">Mark as given now</string>
-  <string name="order_execution_marked_as_given_now">&#x2714; Marked as given now</string>
-  <string name="order_execution_delete_selected">Delete selected</string>
+  <string name="order_execution_marked_as_given_now">&#x2713; Marked as given now</string>
   <string name="order_started_datetime">Started %s</string>
 
   <string name="unknown_tent">Unknown tent</string>
@@ -456,5 +455,5 @@
   <string name="obs_detail_concept_day_empty">No observations of %1$s were recorded on %2$s.</string>
   <string name="obs_detail_concept_interval">Observations of %1$s recorded on %2$s between %3$s and %4$s:</string>
   <string name="obs_detail_concept_interval_empty">No observations of %1$s were recorded on %2$s between %3$s and %4$s.</string>
-  <string name="obs_detail_delete_selected">Delete selected</string>
+  <string name="delete_selected">Delete selected</string>
 </resources>
