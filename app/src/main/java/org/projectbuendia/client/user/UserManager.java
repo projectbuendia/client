@@ -14,6 +14,8 @@ package org.projectbuendia.client.user;
 import android.content.OperationApplicationException;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.view.View;
+import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.google.common.collect.ImmutableSet;
@@ -35,7 +37,9 @@ import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.EventBusInterface;
 import org.projectbuendia.client.utils.Logger;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -81,6 +85,7 @@ public class UserManager {
     private final AsyncTaskRunner mAsyncTaskRunner;
 
     private final Set<JsonUser> mKnownUsers = new HashSet<>();
+    private final Map<String, JsonUser> mUsersByUuid = new HashMap<>();
     private boolean mSynced = false;
     private boolean mAutoCancelEnabled = false;
     private boolean mIsDirty = false;
@@ -100,6 +105,7 @@ public class UserManager {
     /** Resets the UserManager to its initial empty state. */
     public void reset() {
         mKnownUsers.clear();
+        mUsersByUuid.clear();
         mSynced = false;
     }
 
@@ -156,6 +162,10 @@ public class UserManager {
 
         mKnownUsers.clear();
         mKnownUsers.addAll(syncedUsers);
+        mUsersByUuid.clear();
+        for (JsonUser user : mKnownUsers) {
+            mUsersByUuid.put(user.getUuid(), user);
+        }
         mEventBus.post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
 
         if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
@@ -233,8 +243,23 @@ public class UserManager {
         App.inject(this);
     }
 
+    public JsonUser getByUuid(String uuid) {
+        return mUsersByUuid.get(uuid);
+    }
+
     public int getColor(JsonUser user) {
         return user.isGuestUser() ? 0xff666666 : mColorizer.getColorArgb(user.getName());
+    }
+
+    public void showChip(TextView view, String providerUuid) {
+        JsonUser user = getByUuid(providerUuid);
+        if (user != null) {
+            view.setText(user.getLocalizedInitials());
+            view.setBackgroundColor(getColor(user));
+            view.setVisibility(View.VISIBLE);
+        } else {
+            view.setVisibility(View.INVISIBLE);
+        }
     }
 
     /**
@@ -268,8 +293,12 @@ public class UserManager {
 
         @Override protected void onPostExecute(Set<JsonUser> knownUsers) {
             mKnownUsers.clear();
+            mUsersByUuid.clear();
             if (knownUsers != null) {
                 mKnownUsers.addAll(knownUsers);
+                for (JsonUser user : knownUsers) {
+                    mUsersByUuid.put(user.getUuid(), user);
+                }
             }
             mSynced = true;
             mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
@@ -305,6 +334,7 @@ public class UserManager {
         @Override protected void onPostExecute(JsonUser addedUser) {
             if (addedUser != null) {
                 mKnownUsers.add(addedUser);
+                mUsersByUuid.put(addedUser.getUuid(), addedUser);
                 mEventBus.post(new UserAddedEvent(addedUser));
 
                 // Set of known users has changed.

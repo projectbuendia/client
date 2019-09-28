@@ -39,48 +39,50 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import butterknife.InjectView;
-
 /** A {@link DialogFragment} for adding or editing a patient. */
-public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragment> {
-    @InjectView(R.id.patient_id_prefix) EditText mIdPrefix;
-    @InjectView(R.id.patient_id) EditText mId;
-    @InjectView(R.id.patient_given_name) EditText mGivenName;
-    @InjectView(R.id.patient_family_name) EditText mFamilyName;
-    @InjectView(R.id.patient_age_years) EditText mAgeYears;
-    @InjectView(R.id.patient_age_months) EditText mAgeMonths;
-    @InjectView(R.id.patient_sex) RadioGroup mSexRadioGroup;
-    @InjectView(R.id.patient_sex_female) RadioButton mSexFemale;
-    @InjectView(R.id.patient_sex_male) RadioButton mSexMale;
-    @InjectView(R.id.patient_sex_other) RadioButton mSexOther;
-
+public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragment, Patient> {
     private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]+)/?([0-9]+)*");
 
-    private Patient mPatient;
-    private ToggleRadioGroup<Sex> mSex;
-    private boolean mAgeChanged;
+    class Views {
+        EditText idPrefix = u.findView(R.id.patient_id_prefix);
+        EditText id = u.findView(R.id.patient_id);
+        EditText givenName = u.findView(R.id.patient_given_name);
+        EditText familyName = u.findView(R.id.patient_family_name);
+        EditText ageYears = u.findView(R.id.patient_age_years);
+        EditText ageMonths = u.findView(R.id.patient_age_months);
+        RadioGroup sexRadioGroup = u.findView(R.id.patient_sex);
+        RadioButton sexFemale = u.findView(R.id.patient_sex_female);
+        RadioButton sexMale = u.findView(R.id.patient_sex_male);
+        RadioButton sexOther = u.findView(R.id.patient_sex_other);
+    }
+
+    private Views v;
+    private Patient patient;
+    private ToggleRadioGroup<Sex> sexToggleGroup;
+    private boolean ageChanged;
 
     public static PatientDialogFragment create(Patient patient) {
-        return new PatientDialogFragment().withArgs(Utils.bundle("patient", patient));
+        return new PatientDialogFragment().withArgs(patient);
     }
 
     @Override public AlertDialog onCreateDialog(Bundle state) {
         return createAlertDialog(R.layout.patient_dialog_fragment);
     }
 
-    @Override public void onOpen(Bundle args) {
-        mPatient = (Patient) args.getSerializable("patient");
+    @Override public void onOpen() {
+        v = new Views();
+        patient = args;
 
-        dialog.setTitle(mPatient == null ?
+        dialog.setTitle(patient == null ?
             R.string.title_activity_patient_add : R.string.action_edit_patient);
-        mSexFemale.setTag(Sex.FEMALE);
-        mSexMale.setTag(Sex.MALE);
-        mSexOther.setTag(Sex.OTHER);
-        mSex = new ToggleRadioGroup<>(mSexRadioGroup);
+        v.sexFemale.setTag(Sex.FEMALE);
+        v.sexMale.setTag(Sex.MALE);
+        v.sexOther.setTag(Sex.OTHER);
+        sexToggleGroup = new ToggleRadioGroup<>(v.sexRadioGroup);
 
-        if (mPatient != null) {
+        if (patient != null) {
             String idPrefix = "";
-            String id = Utils.toNonnull(mPatient.id);
+            String id = Utils.toNonnull(patient.id);
             Matcher matcher = ID_PATTERN.matcher(id);
             if (matcher.matches()) {
                 idPrefix = matcher.group(1);
@@ -89,43 +91,47 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             if (idPrefix.isEmpty() && id.isEmpty()) {
                 idPrefix = App.getSettings().getLastIdPrefix();
             }
-            mIdPrefix.setText(idPrefix);
-            mId.setText(id);
-            mGivenName.setText(Utils.toNonnull(mPatient.givenName));
-            mFamilyName.setText(Utils.toNonnull(mPatient.familyName));
-            if (mPatient.birthdate != null) {
-                Period age = new Period(mPatient.birthdate, LocalDate.now());
-                mAgeYears.setText(String.valueOf(age.getYears()));
-                mAgeMonths.setText(String.valueOf(age.getMonths()));
+            v.idPrefix.setText(idPrefix);
+            v.id.setText(id);
+            v.givenName.setText(Utils.toNonnull(patient.givenName));
+            v.familyName.setText(Utils.toNonnull(patient.familyName));
+            if (patient.birthdate != null) {
+                Period age = new Period(patient.birthdate, LocalDate.now());
+                v.ageYears.setText(String.valueOf(age.getYears()));
+                v.ageMonths.setText(String.valueOf(age.getMonths()));
             }
 
-            mSex.setSelection(mPatient.sex);
+            sexToggleGroup.setSelection(patient.sex);
         }
 
-        new EditTextWatcher(mAgeYears, mAgeMonths).onChange(() -> mAgeChanged = true);
+        new EditTextWatcher(v.ageYears, v.ageMonths).onChange(() -> ageChanged = true);
+        // TODO(ping): Figure out why the keyboard doesn't appear and focus
+        // isn't placed on the first field.
+        // TODO(ping): Make the name fields auto-capitalize the first letter.
         Utils.showKeyboard(dialog.getWindow());
-        Utils.focusFirstEmptyField(mIdPrefix, mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);
+        Utils.focusFirstEmptyField(v.idPrefix, v.id, v.givenName,
+            v.familyName, v.ageYears, v.ageMonths);
     }
 
     @Override public void onSubmit() {
-        String idPrefix = mIdPrefix.getText().toString().trim();
-        String id = Utils.toNonemptyOrNull(mId.getText().toString().trim());
-        String givenName = Utils.toNonemptyOrNull(mGivenName.getText().toString().trim());
-        String familyName = Utils.toNonemptyOrNull(mFamilyName.getText().toString().trim());
-        Sex sex = mSex.getSelection();
-        String ageYears = mAgeYears.getText().toString().trim();
-        String ageMonths = mAgeMonths.getText().toString().trim();
-        LocalDate birthdate = mPatient != null ? mPatient.birthdate : null;
+        String idPrefix = v.idPrefix.getText().toString().trim();
+        String id = Utils.toNonemptyOrNull(v.id.getText().toString().trim());
+        String givenName = Utils.toNonemptyOrNull(v.givenName.getText().toString().trim());
+        String familyName = Utils.toNonemptyOrNull(v.familyName.getText().toString().trim());
+        Sex sex = sexToggleGroup.getSelection();
+        String ageYears = v.ageYears.getText().toString().trim();
+        String ageMonths = v.ageMonths.getText().toString().trim();
+        LocalDate birthdate = patient != null ? patient.birthdate : null;
         boolean valid = true;
 
         if (id == null) {
-            setError(mId, R.string.patient_validation_missing_id);
+            setError(v.id, R.string.patient_validation_missing_id);
             valid = false;
         }
         // Recalculate the birthdate only when the age fields have been edited;
         // otherwise, simply opening and submitting the dialog would shift the
         // birthdate every time to make the age a whole number of months.
-        if (mAgeChanged) {
+        if (ageChanged) {
             if (ageYears.isEmpty() && ageMonths.isEmpty()) {
                 // The user can clear the birthdate information by clearing the fields.
                 birthdate = null;
@@ -147,7 +153,7 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
         }
         if (birthdate != null && new Period(
             birthdate, LocalDate.now().plusDays(1)).getYears() >= 120) {
-            setError(mAgeYears, R.string.patient_validation_age_limit);
+            setError(v.ageYears, R.string.patient_validation_age_limit);
             valid = false;
         }
         if (!valid) return;
@@ -166,17 +172,17 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             "sex", "" + sex);
         dialog.dismiss();
 
-        JsonPatient patient = new JsonPatient();
-        patient.id = id;
-        patient.given_name = givenName;
-        patient.family_name = familyName;
-        patient.birthdate = birthdate;
-        patient.sex = sex;
+        JsonPatient newPatient = new JsonPatient();
+        newPatient.id = id;
+        newPatient.given_name = givenName;
+        newPatient.family_name = familyName;
+        newPatient.birthdate = birthdate;
+        newPatient.sex = sex;
 
-        if (mPatient == null) {
+        if (patient == null) {
             BigToast.show(R.string.adding_new_patient_please_wait);
             DateTime now = DateTime.now(); // not actually used by PatientDelta
-            patient.observations = ImmutableList.of(
+            newPatient.observations = ImmutableList.of(
                 new JsonObservation(new Obs(
                     null, null, null, Utils.getProviderUuid(),
                     ConceptUuids.ADMISSION_DATE_UUID, Datatype.DATE,
@@ -188,11 +194,11 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
                     now, null, App.getModel().getDefaultLocation().uuid, ""
                 ))
             );
-            App.getModel().addPatient(App.getCrudEventBus(), patient);
+            App.getModel().addPatient(App.getCrudEventBus(), newPatient);
         } else {
             BigToast.show(R.string.updating_patient_please_wait);
-            patient.uuid = mPatient.uuid;
-            App.getModel().updatePatient(App.getCrudEventBus(), patient);
+            newPatient.uuid = patient.uuid;
+            App.getModel().updatePatient(App.getCrudEventBus(), newPatient);
         }
         // TODO: While the network request is in progress, show a spinner and/or keep the
         // dialog open but greyed out -- keep the UI blocked to make it clear that there is a

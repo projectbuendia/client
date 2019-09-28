@@ -10,10 +10,7 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false"
-        android:drawable="@drawable/toggle_button_disabled" />
-    <item android:state_checked="true"
-          android:drawable="@drawable/toggle_button_checked" />
-    <item android:drawable="@drawable/toggle_button_unchecked"/>
-</selector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="#ccc" />
+</shape>

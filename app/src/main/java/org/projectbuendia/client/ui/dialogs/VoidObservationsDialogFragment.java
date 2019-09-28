@@ -13,8 +13,8 @@ import android.widget.ExpandableListView;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
-import org.projectbuendia.client.models.ObsRow;
-import org.projectbuendia.client.ui.lists.ExpandableVoidObsRowAdapter;
+import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.ui.lists.ExpandableVoidObsAdapter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -31,9 +31,9 @@ public class VoidObservationsDialogFragment extends DialogFragment {
     private LayoutInflater mInflater;
     private ExpandableListView expListView;
     private List<String> listDataHeader;
-    private HashMap<String, ArrayList<ObsRow>> listDataChild;
+    private HashMap<String, ArrayList<Obs>> listDataChild;
 
-    public static VoidObservationsDialogFragment newInstance(ArrayList<ObsRow> observations) {
+    public static VoidObservationsDialogFragment newInstance(ArrayList<Obs> observations) {
         Bundle args = new Bundle();
         args.putParcelableArrayList("obsrows", observations);
         VoidObservationsDialogFragment f = new VoidObservationsDialogFragment();
@@ -54,18 +54,18 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         return false;
     }
 
-    private void prepareData(ArrayList<ObsRow> rows){
+    private void prepareData(ArrayList<Obs> rows){
 
-        ArrayList<ObsRow> child;
+        ArrayList<Obs> child;
         String verifyTitle;
         String Title;
 
         listDataHeader = new ArrayList<>();
         listDataChild = new HashMap<>();
 
-        for (ObsRow row: rows) {
+        for (Obs row: rows) {
 
-            Title = row.conceptName + " " + Utils.format(row.time, MONTH_DAY);
+            Title = App.getConceptService().getName(row.conceptUuid) + " " + Utils.format(row.time, MONTH_DAY);
 
             if(!isExistingHeader(Title)){
                 listDataHeader.add(Title);
@@ -77,9 +77,9 @@ public class VoidObservationsDialogFragment extends DialogFragment {
 
             child = new ArrayList<>();
 
-            for (ObsRow row: rows){
+            for (Obs row: rows){
 
-                verifyTitle = row.conceptName + " " + Utils.format(row.time, MONTH_DAY);
+                verifyTitle = App.getConceptService().getName(row.conceptUuid) + " " + Utils.format(row.time, MONTH_DAY);
 
                 if (verifyTitle.equals(header)){
                     child.add(row);
@@ -96,10 +96,10 @@ public class VoidObservationsDialogFragment extends DialogFragment {
         View fragment = mInflater.inflate(R.layout.obs_detail_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
-        final ArrayList<ObsRow> obsrows = getArguments().getParcelableArrayList("obsrows");
+        final ArrayList<Obs> obsrows = getArguments().getParcelableArrayList("obsrows");
         prepareData(obsrows);
 
-        final ExpandableVoidObsRowAdapter listAdapter = new ExpandableVoidObsRowAdapter(App.getContext(), listDataHeader, listDataChild);
+        final ExpandableVoidObsAdapter listAdapter = new ExpandableVoidObsAdapter(App.getContext(), listDataHeader, listDataChild);
         ExpandableListView listView = fragment.findViewById(R.id.obs_list);
         listView.setAdapter(listAdapter);
 

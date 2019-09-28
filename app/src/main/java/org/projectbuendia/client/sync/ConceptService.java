@@ -3,6 +3,7 @@ package org.projectbuendia.client.sync;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.providers.Contracts.Concepts;
@@ -27,6 +28,10 @@ public class ConceptService {
     public synchronized Datatype getType(String uuid) {
         if (types == null) load();
         return types.get(uuid);
+    }
+
+    public synchronized String getName(String uuid) {
+        return getName(uuid, App.getSettings().getLocale());
     }
 
     public synchronized String getName(String uuid, Locale locale) {
@@ -61,6 +66,10 @@ public class ConceptService {
                 names.put(uuid, new Loc(name));
             }
         }
+
+        // Special case: yes and no concepts.
+        names.put(ConceptUuids.YES_UUID, new Loc("Yes [fr:Oui]"));
+        names.put(ConceptUuids.NO_UUID, new Loc("No [fr:Non]"));
 
         synchronized (this) {
             this.types = types;

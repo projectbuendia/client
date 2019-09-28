@@ -41,7 +41,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
-import org.projectbuendia.client.inject.Qualifiers;
 import org.projectbuendia.client.receivers.BatteryWatcher;
 import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
@@ -57,7 +56,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
@@ -94,8 +92,6 @@ public abstract class BaseActivity extends FragmentActivity {
     private SnackBar snackBar;
     private Locale initialLocale; // for restarting when locale has changed
     private Set<String> openDialogTypes;
-
-    @Inject @Qualifiers.HealthEventBus EventBus mHealthEventBus;
 
     // NOTE: Don't override this method; override onCreateImpl() instead.
     @Override protected final void onCreate(Bundle state) {
@@ -139,7 +135,7 @@ public abstract class BaseActivity extends FragmentActivity {
         registerReceiver(batteryWatcher, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         App.getHealthMonitor().start();
         App.getSyncManager().applyPeriodicSyncSettings();
-        mHealthEventBus.post(
+        App.getHealthEventBus().post(
             App.getSettings().getPeriodicSyncDisabled() ?
                 HealthIssue.PERIODIC_SYNC_DISABLED.discovered :
                 HealthIssue.PERIODIC_SYNC_DISABLED.resolved
