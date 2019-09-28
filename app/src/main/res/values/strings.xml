@@ -437,11 +437,8 @@
   <string name="discharged">Discharged</string>
   <string name="admission">Since admission</string>
   <string name="loading">Loading...</string>
-  <string name="no_such_patient_as_of_48_min_ago">No such patient as of 48 min ago</string>
   <string name="observation">Observation</string>
   <string name="string_with_paren">%1$s (%2$s)</string>
-  <string name="voiding">Void</string>
-  <string name="void_observations">Void Observations</string>
 
   <!-- Observation details dialog -->
   <string name="obs_detail_title">Observations</string>

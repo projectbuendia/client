@@ -432,14 +432,11 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="action_edit">Modifier</string>
   <string name="admission">depuis l\'admission</string>
   <string name="loading">Chargement...</string>
-  <string name="no_such_patient_as_of_48_min_ago">Aucun patient d\'il y a 48 min</string>
   <string name="observation">Observation</string>
   <string name="title_new_user">Nouvel utilisateur</string>
   <string name="guest_user_initials">I</string>
   <string name="guest_user_name">Invité</string>
   <string name="troubleshoot_action_check_settings">Vérifiez les paramètres</string>
-  <string name="voiding">vide</string>
-  <string name="void_observations">Observations Vides</string>
 
   <!-- Observation details dialog -->
   <string name="obs_detail_title">Observations</string>

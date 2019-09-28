@@ -14,36 +14,49 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
+
     <TableLayout
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        >
+
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            >
+
             <TextView
+                style="@style/field_label"
                 android:text="@string/patient_id"
-                style="@style/field_label" />
+                />
+
             <EditText
+                android:id="@+id/go_to_patient_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
+                android:layout_column="1"
                 android:digits="0123456789"
                 android:ems="12"
-                android:id="@+id/go_to_patient_id"
-                android:layout_column="1"
-                tools:text="23" />
+                android:inputType="numberDecimal"
+                tools:text="23"
+                />
         </TableRow>
+
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            >
+
             <TextView
+                android:id="@+id/go_to_patient_result"
                 style="@style/field_label"
                 android:layout_column="0"
                 android:layout_span="2"
-                android:id="@+id/go_to_patient_result"
-                tools:text="@string/no_such_patient_as_of_48_min_ago" />
+                tools:text="No such patient"
+                />
         </TableRow>
     </TableLayout>
 </LinearLayout>

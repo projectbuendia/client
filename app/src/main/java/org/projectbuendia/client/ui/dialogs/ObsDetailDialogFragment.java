@@ -80,6 +80,7 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
         dialog.getButton(BUTTON_NEUTRAL).setText(R.string.delete_selected);
         u.show(dialog.getButton(BUTTON_NEUTRAL), !empty);
         u.show(dialog.getButton(BUTTON_NEGATIVE), !empty);
+
         u.setText(R.id.message, Html.fromHtml(describeQueryHtml()));
         u.show(R.id.body, !empty);
 
