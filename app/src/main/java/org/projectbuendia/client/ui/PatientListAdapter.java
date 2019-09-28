@@ -67,7 +67,7 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
     public PatientListAdapter(Context context) {
         u = ContextUtils.from(context);
         mPatientsByLocation = new HashMap<>();
-        mChartDataHelper = new ChartDataHelper(App.getResolver());
+        mChartDataHelper = App.getChartDataHelper();
     }
 
     @Override public int getGroupCount() {

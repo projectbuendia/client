@@ -18,27 +18,18 @@ import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.ui.ReadyState;
-import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.Collection;
 
-import javax.inject.Inject;
-
 /** Displays a list of all locations. */
 public final class LocationListFragment extends ProgressFragment {
     private static final Logger LOG = Logger.create();
-
-    @Inject AppModel mModel;
-    @Inject AppSettings mSettings;
-    private ContextUtils c;
 
     private LocationListController mController;
     private final Ui mUi = new Ui();
@@ -52,8 +43,6 @@ public final class LocationListFragment extends ProgressFragment {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.inject(this);
-        c = ContextUtils.from(getActivity());
         setContentLayout(R.layout.fragment_location_selection);
     }
 
@@ -64,8 +53,8 @@ public final class LocationListFragment extends ProgressFragment {
         mScroll = view.findViewById(R.id.scroll_container);
         mEmpty = view.findViewById(R.id.empty);
         mList = new LocationOptionList(view.findViewById(R.id.list_container), false);
-        if (mModel.isReady()) {
-            LocationForest forest = mModel.getForest();
+        if (App.getModel().isReady()) {
+            LocationForest forest = App.getModel().getForest();
             mUi.setLocations(forest, forest.allNodes());
         }
         return view;

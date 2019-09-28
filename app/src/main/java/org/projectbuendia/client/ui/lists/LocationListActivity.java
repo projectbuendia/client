@@ -18,18 +18,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Utils;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 import de.greenrobot.event.EventBus;
 
@@ -38,10 +33,6 @@ public final class LocationListActivity extends PatientListActivity {
 
     private LocationListController mController;
     private AlertDialog mSyncFailedDialog;
-
-    @Inject AppModel mAppModel;
-    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject SyncManager mSyncManager;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, LocationListActivity.class));
@@ -69,12 +60,12 @@ public final class LocationListActivity extends PatientListActivity {
         setTitle(R.string.title_location_list);
 
         mController = new LocationListController(
-            mAppModel,
+            App.getModel(),
             settings,
-            mCrudEventBusProvider.get(),
+            App.getCrudEventBus(),
             new Ui(),
             new EventBusWrapper(EventBus.getDefault()),
-            mSyncManager,
+            App.getSyncManager(),
             getSearchController());
 
         mSyncFailedDialog = new AlertDialog.Builder(this)

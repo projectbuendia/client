@@ -21,14 +21,12 @@ import android.widget.SearchView;
 
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.ReadyState;
@@ -47,10 +45,7 @@ import de.greenrobot.event.EventBus;
  * Clicking on patients in the list displays details for that patient.
  */
 public abstract class PatientListActivity extends LoggedInActivity {
-    @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
-    @Inject CrudEventBus mCrudEventBus;
-    @Inject SyncManager mSyncManager;
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
@@ -108,10 +103,10 @@ public abstract class PatientListActivity extends LoggedInActivity {
 
         mSearchController = new PatientSearchController(
             new SearchUi(),
-            mCrudEventBus,
+            App.getCrudEventBus(),
             new EventBusWrapper(mEventBus),
-            mAppModel,
-            mSyncManager);
+            App.getModel(),
+            App.getSyncManager());
 
         mUpdateNotificationController = new UpdateNotificationController(
             new UpdateNotificationUi()
@@ -138,7 +133,7 @@ public abstract class PatientListActivity extends LoggedInActivity {
     }
 
     protected void attemptInit() {
-        if (mAppModel.isReady()) {
+        if (App.getModel().isReady()) {
             mSearchController.init();
             mSearchController.loadSearchResults();
         } else {

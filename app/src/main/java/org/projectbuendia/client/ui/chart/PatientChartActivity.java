@@ -41,7 +41,6 @@ import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
@@ -82,7 +81,6 @@ public final class PatientChartActivity extends LoggedInActivity {
     private Ui mUi;
 
     @Inject EventBus mEventBus;
-    @Inject ChartDataHelper mChartDataHelper;
     @InjectView(R.id.chart_webview) WebView mWebView;
 
     private static final String EN_DASH = "\u2013";
@@ -120,7 +118,7 @@ public final class PatientChartActivity extends LoggedInActivity {
                 return true;
             });
 
-        for (final Form form : mChartDataHelper.getForms()) {
+        for (final Form form : App.getChartDataHelper().getForms()) {
             MenuItem item = editSubmenu.add(App.localize(form.name));
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
@@ -186,7 +184,7 @@ public final class PatientChartActivity extends LoggedInActivity {
             mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
-            mChartDataHelper,
+            App.getChartDataHelper(),
             minimalHandler);
 
         initChartTabs();

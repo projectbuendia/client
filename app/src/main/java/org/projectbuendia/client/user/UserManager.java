@@ -21,7 +21,6 @@ import com.android.volley.VolleyError;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.user.ActiveUserSetEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
@@ -44,7 +43,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -89,7 +87,7 @@ public class UserManager {
     private boolean mSynced = false;
     private boolean mAutoCancelEnabled = false;
     private boolean mIsDirty = false;
-    @Inject Colorizer mColorizer;
+    private Colorizer mColorizer;
     @Nullable private AsyncTask mLastTask;
     @Nullable private JsonUser mActiveUser;
 
@@ -236,11 +234,12 @@ public class UserManager {
     UserManager(
         UserStore userStore,
         EventBusInterface eventBus,
-        AsyncTaskRunner asyncTaskRunner) {
+        AsyncTaskRunner asyncTaskRunner,
+        Colorizer colorizer) {
         mAsyncTaskRunner = checkNotNull(asyncTaskRunner);
         mEventBus = checkNotNull(eventBus);
         mUserStore = checkNotNull(userStore);
-        App.inject(this);
+        mColorizer = colorizer;
     }
 
     public JsonUser getByUuid(String uuid) {

@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.ui.SectionedSpinnerAdapter;
@@ -39,7 +40,7 @@ public class FilteredPatientListActivity extends PatientListActivity {
 
         setContentView(R.layout.activity_patient_list);
         if (state != null) mSelectedFilter = state.getInt(SELECTED_FILTER_KEY, 0);
-        mFilterController = new PatientFilterController(new FilterUi(), mAppModel);
+        mFilterController = new PatientFilterController(new FilterUi(), App.getModel());
         return true;
     }
 

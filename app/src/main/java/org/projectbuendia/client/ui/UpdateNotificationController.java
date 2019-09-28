@@ -16,9 +16,6 @@ import org.projectbuendia.client.events.UpdateAvailableEvent;
 import org.projectbuendia.client.events.UpdateReadyToInstallEvent;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
 import org.projectbuendia.client.updater.DownloadedUpdateInfo;
-import org.projectbuendia.client.updater.UpdateManager;
-
-import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -29,7 +26,6 @@ import de.greenrobot.event.EventBus;
  */
 public class UpdateNotificationController {
     Ui mUi;
-    @Inject UpdateManager mUpdateManager;
     AvailableUpdateInfo mAvailableUpdateInfo;
     DownloadedUpdateInfo mDownloadedUpdateInfo;
 
@@ -44,13 +40,12 @@ public class UpdateNotificationController {
 
     public UpdateNotificationController(Ui ui) {
         mUi = ui;
-        App.inject(this);
     }
 
     /** Activate the controller.  Called whenever user enters a new activity. */
     public void init() {
         EventBus.getDefault().register(this);
-        mUpdateManager.checkForUpdate();
+        App.getUpdateManager().checkForUpdate();
         updateAvailabilityNotifications();
     }
 
@@ -95,14 +90,14 @@ public class UpdateNotificationController {
     /** Starts a download of the last known available update. */
     public void onEventMainThread(BaseActivity.DownloadRequestedEvent event) {
         if (mAvailableUpdateInfo != null) {
-            mUpdateManager.startDownload(mAvailableUpdateInfo);
+            App.getUpdateManager().startDownload(mAvailableUpdateInfo);
         }
     }
 
     /** Installs the last downloaded update. */
     public void onEventMainThread(BaseActivity.InstallationRequestedEvent event) {
         if (mDownloadedUpdateInfo != null) {
-            mUpdateManager.installUpdate(mDownloadedUpdateInfo);
+            App.getUpdateManager().installUpdate(mDownloadedUpdateInfo);
         }
     }
 }
