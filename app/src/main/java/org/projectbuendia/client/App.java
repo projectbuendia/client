@@ -150,6 +150,10 @@ public class App extends Application {
         return sSyncManager;
     }
 
+    public static synchronized UpdateManager getUpdateManager() {
+        return sUpdateManager;
+    }
+
     public static synchronized UserManager getUserManager() {
         return sUserManager;
     }

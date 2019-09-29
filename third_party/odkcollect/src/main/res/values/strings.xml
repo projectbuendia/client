@@ -127,6 +127,9 @@
 <string name="required_answer_error">Sorry, this response is required!</string>
 <string name="question_is_required">%s is required</string>
 <string name="question_is_invalid">%s is invalid</string>
+<string name="invalid_min">%1$s: Value should not be less than %2$s</string>
+<string name="invalid_max">%1$s: Value should not exceed %2$s</string>
+<string name="invalid_min_max">%1$s: Value should be between %2$s and %3$s</string>
 <string name="review_data">Edit Saved Form</string>
 <string name="review_data_button">Edit Saved Form (%s)</string>
 <string name="saved_data">Incomplete (%s)</string>

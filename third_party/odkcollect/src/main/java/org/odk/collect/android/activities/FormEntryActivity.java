@@ -93,6 +93,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
+
+import static org.odk.collect.android.utilities.Utils.eq;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -1756,49 +1759,71 @@ public class FormEntryActivity
 	 * http://code.google.com/p/android/issues/detail?id=1639
 	 */
 
+	private String getAttribute(Vector<TreeElement> attrs, String name) {
+		for (TreeElement attr : attrs) {
+		    if (eq(attr.getName(), name)) {
+		        return attr.getAttributeValue();
+			}
+        }
+		return null;
+	}
+
 	/** Displays a toast message showing a violated constraint. */
 	private void createConstraintToast(FormIndex index, int saveStatus) {
 		FormController formController = Collect.getInstance().getFormController();
-		String constraintText;
+		FormEntryPrompt prompt = formController.getQuestionPrompt(index);
+		String questionText = Utils.localize(prompt.getQuestionText(), this).trim();
+		String message;
+
 		switch (saveStatus) {
-		case FormEntryController.ANSWER_CONSTRAINT_VIOLATED:
-			Collect.getInstance()
-				.getActivityLogger()
-				.logInstanceAction(this,
-					"createConstraintToast.ANSWER_CONSTRAINT_VIOLATED",
-					"show", index);
-			constraintText = formController.getQuestionPromptConstraintText(index);
-			if (constraintText == null) {
-				constraintText = formController.getQuestionPrompt(index)
-					.getSpecialFormQuestionText("constraintMsg");
-				if (constraintText == null) {
-					constraintText = getString(R.string.question_is_invalid,
-						formController.getQuestionPrompt(index).getQuestionText());
-				}
-			}
-			break;
-		case FormEntryController.ANSWER_REQUIRED_BUT_EMPTY:
-			Collect.getInstance()
+			case FormEntryController.ANSWER_CONSTRAINT_VIOLATED:
+				Collect.getInstance()
 					.getActivityLogger()
 					.logInstanceAction(this,
-							"createConstraintToast.ANSWER_REQUIRED_BUT_EMPTY",
-							"show", index);
-			constraintText = formController
-					.getQuestionPromptRequiredText(index);
-			if (constraintText == null) {
-				constraintText = formController.getQuestionPrompt(index)
-						.getSpecialFormQuestionText("requiredMsg");
-				if (constraintText == null) {
-                    constraintText = getString(R.string.question_is_required,
-						formController.getQuestionPrompt(index).getQuestionText());
+						"createConstraintToast.ANSWER_CONSTRAINT_VIOLATED",
+						"show", index);
+
+				Vector<TreeElement> attrs = prompt.getBindAttributes();
+				String min = getAttribute(attrs, "constraint-min");
+				String max = getAttribute(attrs, "constraint-max");
+				if (min != null && max != null) {
+					message = getString(R.string.invalid_min_max, questionText, min, max);
+				} else if (min != null) {
+					message = getString(R.string.invalid_min, questionText, min);
+				} else if (max != null) {
+					message = getString(R.string.invalid_max, questionText, max);
+				} else {
+					message = Utils.localize(prompt.getConstraintText(), this);
+					if (message == null) {
+						message = Utils.localize(prompt.getSpecialFormQuestionText("constraintMsg"), this);
+					}
+					if (message == null) {
+						message = questionText + ": " + Utils.localize(getAttribute(prompt.getBindAttributes(), "message"), this);
+					}
+					if (message == null) {
+						message = getString(R.string.question_is_invalid, questionText);
+					}
 				}
-			}
-			break;
-		default:
-			return;
+				break;
+			case FormEntryController.ANSWER_REQUIRED_BUT_EMPTY:
+				Collect.getInstance()
+						.getActivityLogger()
+						.logInstanceAction(this,
+								"createConstraintToast.ANSWER_REQUIRED_BUT_EMPTY",
+								"show", index);
+				message = Utils.localize(formController.getQuestionPromptRequiredText(index), this);
+				if (message == null) {
+					message = Utils.localize(prompt.getSpecialFormQuestionText("requiredMsg"), this);
+				}
+				if (message == null) {
+					message = getString(R.string.question_is_required, questionText);
+				}
+				break;
+			default:
+				return;
 		}
 
-		showCustomToast(Utils.localize(constraintText, this), Toast.LENGTH_SHORT);
+		showCustomToast(message, Toast.LENGTH_SHORT);
 	}
 
 	/**
