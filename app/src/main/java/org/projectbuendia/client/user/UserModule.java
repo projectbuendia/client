@@ -12,6 +12,7 @@
 package org.projectbuendia.client.user;
 
 import org.projectbuendia.client.utils.AsyncTaskRunner;
+import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.EventBusInterface;
 
 import javax.inject.Singleton;
@@ -34,7 +35,8 @@ public class UserModule {
     @Singleton UserManager provideUserManage(
         UserStore userStore,
         EventBusInterface eventBus,
-        AsyncTaskRunner asyncTaskRunner) {
-        return new UserManager(userStore, eventBus, asyncTaskRunner);
+        AsyncTaskRunner asyncTaskRunner,
+        Colorizer colorizer) {
+        return new UserManager(userStore, eventBus, asyncTaskRunner, colorizer);
     }
 }

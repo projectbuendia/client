@@ -65,6 +65,12 @@ public class ContextUtils extends ContextWrapper {
         return lastView;
     }
 
+    public View addInflated(int layoutId, @Nonnull ViewGroup layoutParent) {
+        View view = inflate(layoutId, layoutParent);
+        layoutParent.addView(view);
+        return view;
+    }
+
     /** Always use this method, never the awful, confusing LayoutInflater.inflate(). */
     public View inflate(int layoutId, @Nonnull ViewGroup layoutParent) {
         if (inflater == null) {
@@ -92,6 +98,12 @@ public class ContextUtils extends ContextWrapper {
         lastView = view;
     }
 
+    /** Sets the view in which findView() will search. */
+    public ContextUtils inView(View view) {
+        lastView = view;
+        return this;
+    }
+
     /** Finds a view in the last view that was inflated. */
     public <T extends View> T findView(int id) {
         return lastView != null ? lastView.findViewById(id) : null;
@@ -101,15 +113,27 @@ public class ContextUtils extends ContextWrapper {
         findView(id).setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
+    public void show(View view, boolean visible) {
+        view.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
     public void show(int id) {
         findView(id).setVisibility(View.VISIBLE);
+    }
+
+    public void show(View view) {
+        view.setVisibility(View.VISIBLE);
     }
 
     public void hide(int id) {
         findView(id).setVisibility(View.GONE);
     }
 
-    public void setText(int id, String text) {
+    public void hide(View view) {
+        view.setVisibility(View.GONE);
+    }
+
+    public void setText(int id, CharSequence text) {
         ((TextView) findView(id)).setText(text);
     }
 

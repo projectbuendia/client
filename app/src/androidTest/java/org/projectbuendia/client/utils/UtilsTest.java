@@ -15,8 +15,9 @@ import com.google.common.base.Joiner;
 
 import org.joda.time.LocalDate;
 import org.junit.Test;
-import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Section;
-import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.SectionComparator;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Group;
+import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.GroupComparator;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,30 +40,30 @@ public class UtilsTest {
     }
 
     @Test public void testSectionComparator() {
-        List<String> conceptUuids = Arrays.asList("5", "1", "3");
+        String[] conceptUuids = {"5", "1", "3"};
 
-        List<Section> sections = Arrays.asList(
-            new Section(new LocalDate(2019, 1, 7), "1", "a"),
-            new Section(new LocalDate(2019, 1, 4), "1", "a"),
-            new Section(new LocalDate(2019, 1, 8), "2", "b"),
-            new Section(new LocalDate(2019, 1, 3), "2", "b"),
-            new Section(new LocalDate(2019, 1, 4), "3", "c"),
-            new Section(new LocalDate(2019, 1, 4), "4", "d"),
-            new Section(new LocalDate(2019, 1, 4), "5", "e")
+        List<ObsDetailDialogFragment.Group> groups = Arrays.asList(
+            new ObsDetailDialogFragment.Group(new LocalDate(2019, 1, 7), "1"),
+            new ObsDetailDialogFragment.Group(new LocalDate(2019, 1, 4), "1"),
+            new ObsDetailDialogFragment.Group(new LocalDate(2019, 1, 8), "2"),
+            new ObsDetailDialogFragment.Group(new LocalDate(2019, 1, 3), "2"),
+            new Group(new LocalDate(2019, 1, 4), "3"),
+            new Group(new LocalDate(2019, 1, 4), "4"),
+            new Group(new LocalDate(2019, 1, 4), "5")
         );
 
-        Collections.sort(sections, new SectionComparator(conceptUuids));
+        Collections.sort(groups, new GroupComparator(conceptUuids));
 
-        assertEquals("2019-01-03/2/b", toString(sections.get(0)));
-        assertEquals("2019-01-04/5/e", toString(sections.get(1)));
-        assertEquals("2019-01-04/1/a", toString(sections.get(2)));
-        assertEquals("2019-01-04/3/c", toString(sections.get(3)));
-        assertEquals("2019-01-04/4/d", toString(sections.get(4)));
-        assertEquals("2019-01-07/1/a", toString(sections.get(5)));
-        assertEquals("2019-01-08/2/b", toString(sections.get(6)));
+        assertEquals("2019-01-03/2", toString(groups.get(0)));
+        assertEquals("2019-01-04/5", toString(groups.get(1)));
+        assertEquals("2019-01-04/1", toString(groups.get(2)));
+        assertEquals("2019-01-04/3", toString(groups.get(3)));
+        assertEquals("2019-01-04/4", toString(groups.get(4)));
+        assertEquals("2019-01-07/1", toString(groups.get(5)));
+        assertEquals("2019-01-08/2", toString(groups.get(6)));
     }
 
-    private String toString(Section section) {
-        return section.date.toString() + "/" + section.conceptUuid + "/" + section.conceptName;
+    private String toString(ObsDetailDialogFragment.Group group) {
+        return group.date.toString() + "/" + group.conceptUuid;
     }
 }

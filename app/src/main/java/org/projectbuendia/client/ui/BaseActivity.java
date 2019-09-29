@@ -14,9 +14,11 @@ package org.projectbuendia.client.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
@@ -31,13 +33,16 @@ import android.widget.LinearLayout;
 import com.joanzapata.iconify.Icon;
 import com.joanzapata.iconify.IconDrawable;
 
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.diagnostics.TroubleshootingAction;
 import org.projectbuendia.client.events.diagnostics.TroubleshootingActionsChangedEvent;
-import org.projectbuendia.client.inject.Qualifiers;
+import org.projectbuendia.client.receivers.BatteryWatcher;
+import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.updater.AvailableUpdateInfo;
 import org.projectbuendia.client.updater.DownloadedUpdateInfo;
 import org.projectbuendia.client.utils.ContextUtils;
@@ -50,8 +55,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
+import javax.annotation.Nonnull;
 
+import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 import static org.projectbuendia.client.utils.Utils.eq;
@@ -70,6 +76,14 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected ContextUtils u;
     protected AppSettings settings;
+    protected Instant idleStartTime = null;
+    protected Handler tickHandler = new Handler();
+    protected Runnable tick = () -> {
+        onTick();
+        tickHandler.postDelayed(this.tick, 1000);
+    };
+    protected final BatteryWatcher batteryWatcher = new BatteryWatcher();
+    protected boolean mIsCreated = false; // activity creation completed successfully
 
     private static long sScaleStep = 0; // app-wide scale step, selected by user
     private Long pausedScaleStep = null; // this activity's scale step when last paused
@@ -79,19 +93,29 @@ public abstract class BaseActivity extends FragmentActivity {
     private Locale initialLocale; // for restarting when locale has changed
     private Set<String> openDialogTypes;
 
-    @Inject @Qualifiers.HealthEventBus EventBus mHealthEventBus;
+    // NOTE: Don't override this method; override onCreateImpl() instead.
+    @Override protected final void onCreate(Bundle state) {
+        super.onCreate(state);
+        mIsCreated = onCreateImpl(state);
+    }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    /**
+     * Performs setup operations for this activity and returns true if creation
+     * should continue.  All overrides of this method should start with:
+     *     if (!super.onCreateImpl(state)) return false;
+     */
+    protected boolean onCreateImpl(Bundle state) {
         settings = App.getSettings();
-        if (!settings.isAuthorized() && !(this instanceof AuthorizationActivity)) {
-            finish();
-            startActivity(new Intent(this, AuthorizationActivity.class));
+        if (!settings.isAuthorized()) {
+            Utils.jumpToActivity(this, AuthorizationActivity.class);
+            return false;
         }
 
         initialLocale = Locale.getDefault();
         openDialogTypes = new HashSet<>();
         App.inject(this);
+        ChartRenderer.backgroundCompileTemplate();
+        return true;
     }
 
     @Override protected void attachBaseContext(Context base) {
@@ -108,21 +132,39 @@ public abstract class BaseActivity extends FragmentActivity {
             restartWithFontScale(sScaleStep);
         }
         EventBus.getDefault().registerSticky(this);
+        registerReceiver(batteryWatcher, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         App.getHealthMonitor().start();
         App.getSyncManager().applyPeriodicSyncSettings();
-        mHealthEventBus.post(
+        App.getHealthEventBus().post(
             App.getSettings().getPeriodicSyncDisabled() ?
                 HealthIssue.PERIODIC_SYNC_DISABLED.discovered :
                 HealthIssue.PERIODIC_SYNC_DISABLED.resolved
         );
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
+        idleStartTime = Instant.now();
+        tick.run();
     }
 
     @Override protected void onPause() {
+        unregisterReceiver(batteryWatcher);
         EventBus.getDefault().unregister(this);
         App.getHealthMonitor().stop();
         pausedScaleStep = sScaleStep;
+        tickHandler.removeCallbacks(tick);
         super.onPause();
+    }
+
+    /** Invoked once every second. */
+    protected void onTick() { }
+
+    @Override public void onUserInteraction() {
+        idleStartTime = Instant.now();
+    }
+
+    protected @Nonnull Duration getIdleDuration() {
+        return idleStartTime != null
+            ? new Duration(idleStartTime, Instant.now())
+            : new Duration(0);
     }
 
     /** Opens the dialog and returns true, unless a dialog of this type is already open. */
@@ -189,9 +231,9 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override public void setContentView(int layoutResId) {
         initializeWrapperView();
-
         mInnerContent.removeAllViews();
         getLayoutInflater().inflate(layoutResId, mInnerContent);
+        ButterKnife.inject(this);
     }
 
     private void initializeWrapperView() {

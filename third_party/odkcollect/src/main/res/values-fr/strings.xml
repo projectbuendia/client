@@ -7,4 +7,7 @@
 <string name="form_entry_discard">Jeter</string>
 <string name="question_is_required">Champ manquant: %s</string>
 <string name="question_is_invalid">Champ invalide: %s</string>
+<string name="invalid_min">%1$s: La valeur ne doit pas être inférieure à %2$s</string>
+<string name="invalid_max">%1$s: La valeur ne doit pas dépasser %2$s</string>
+<string name="invalid_min_max">%1$s: La valeur doit être comprise entre %2$s et %3$s</string>
 </resources>

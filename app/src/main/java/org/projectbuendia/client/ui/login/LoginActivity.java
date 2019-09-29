@@ -24,7 +24,6 @@ import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.SettingsActivity;
-import org.projectbuendia.client.ui.chart.ChartRenderer;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -44,11 +43,10 @@ public class LoginActivity extends BaseActivity {
 
     @Inject Troubleshooter mTroubleshooter;
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        App.inject(this);
-        setTitle(R.string.app_name);
+    @Override public boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
 
+        setTitle(R.string.app_name);
         getActionBar().setDisplayUseLogoEnabled(false);
         getActionBar().setIcon(R.drawable.ic_launcher);  // don't show the back arrow
         getActionBar().setDisplayHomeAsUpEnabled(false);  // don't behave like a back button
@@ -76,8 +74,7 @@ public class LoginActivity extends BaseActivity {
                 (dialog, which) -> SettingsActivity.start(LoginActivity.this))
             .setPositiveButton(R.string.sync_failed_retry, (dialog, which) -> mController.onSyncRetry())
             .create();
-
-        ChartRenderer.backgroundCompileTemplate();
+        return true;
     }
 
     /**

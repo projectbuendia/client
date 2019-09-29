@@ -39,10 +39,8 @@ import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
@@ -64,7 +62,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
@@ -84,15 +81,15 @@ public final class PatientChartActivity extends LoggedInActivity {
     private Ui mUi;
 
     @Inject EventBus mEventBus;
-    @Inject ChartDataHelper mChartDataHelper;
     @InjectView(R.id.chart_webview) WebView mWebView;
 
     private static final String EN_DASH = "\u2013";
 
     public static void start(Context caller, String uuid) {
-        Intent intent = new Intent(caller, PatientChartActivity.class);
-        intent.putExtra("uuid", uuid);
-        caller.startActivity(intent);
+        caller.startActivity(
+            new Intent(caller, PatientChartActivity.class)
+                .putExtra("uuid", uuid)
+        );
     }
 
     @Override public void onExtendOptionsMenu(Menu menu) {
@@ -121,7 +118,7 @@ public final class PatientChartActivity extends LoggedInActivity {
                 return true;
             });
 
-        for (final Form form : mChartDataHelper.getForms()) {
+        for (final Form form : App.getChartDataHelper().getForms()) {
             MenuItem item = editSubmenu.add(App.localize(form.name));
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
             item.setOnMenuItemClickListener(
@@ -133,12 +130,10 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
     }
 
-    @Override protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
-        setContentView(R.layout.fragment_patient_chart);
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
 
-        ButterKnife.inject(this);
-        App.inject(this);
+        setContentView(R.layout.fragment_patient_chart);
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
@@ -189,10 +184,11 @@ public final class PatientChartActivity extends LoggedInActivity {
             mUi,
             getIntent().getStringExtra("uuid"),
             odkResultSender,
-            mChartDataHelper,
+            App.getChartDataHelper(),
             minimalHandler);
 
         initChartTabs();
+        return true;
     }
 
     public Ui getUi() {
@@ -364,8 +360,9 @@ public final class PatientChartActivity extends LoggedInActivity {
         }
 
         @Override public void showObsDetailDialog(
-            Interval interval, String[] conceptUuids, List<ObsRow> obsRows, List<String> conceptOrdering) {
-            ObsDetailDialogFragment.newInstance(interval, conceptUuids, obsRows, conceptOrdering)
+            Interval interval, String[] queriedConceptUuids,
+            String[] conceptOrdering, List<Obs> observations) {
+            ObsDetailDialogFragment.create(interval, queriedConceptUuids, conceptOrdering, observations)
                 .show(getSupportFragmentManager(), null);
         }
 
@@ -375,7 +372,7 @@ public final class PatientChartActivity extends LoggedInActivity {
 
         @Override public void showOrderExecutionDialog(
             Order order, Interval interval, List<Obs> executions) {
-            OrderExecutionDialogFragment.newInstance(order, interval, executions)
+            OrderExecutionDialogFragment.create(order, interval, executions)
                 .show(getSupportFragmentManager(), null);
         }
 

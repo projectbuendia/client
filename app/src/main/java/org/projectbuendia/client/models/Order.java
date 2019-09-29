@@ -137,7 +137,7 @@ public final @Immutable class Order extends Model implements Serializable {
         int dayIndex = Days.daysBetween(start.toLocalDate(), day).getDays();
         Duration timeOfDay = new Duration(daySpan.getStart(), time);
         float fractionOfDay = (float) timeOfDay.getMillis() / daySpan.toDurationMillis();
-        return (int) ((dayIndex + fractionOfDay) * instructions.frequency);
+        return (int) ((dayIndex + fractionOfDay) * getNumDivisionsPerDay());
     }
 
     /**
@@ -273,7 +273,7 @@ public final @Immutable class Order extends Model implements Serializable {
      * in a way that is human-readable and can also be unambiguously unpacked
      * into the original fields.
      */
-    public static class Instructions {
+    public static class Instructions implements Serializable {
         // These String fields are empty if missing, but never null.
         public final @NonNull String medication;
         public final @NonNull String route;

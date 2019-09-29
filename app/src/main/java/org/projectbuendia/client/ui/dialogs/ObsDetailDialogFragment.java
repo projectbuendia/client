@@ -1,229 +1,290 @@
 package org.projectbuendia.client.ui.dialogs;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
+import android.text.Html;
 import android.view.View;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+
+import com.google.common.base.Joiner;
 
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ObsRow;
+import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
+import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.sync.ConceptService;
-import org.projectbuendia.client.ui.lists.ExpandableObsRowAdapter;
-import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
-import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.DateStyle.HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.DateStyle.MONTH_DAY;
+import static org.projectbuendia.client.utils.Utils.DateStyle.RELATIVE_HOUR_MINUTE;
+import static org.projectbuendia.client.utils.Utils.eq;
 
-public class ObsDetailDialogFragment extends DialogFragment {
-    private ContextUtils u;
-    private SortedMap<Section, List<ObsRow>> rowsBySection;
-
-    private static String EN_DASH = "\u2013";
-    private static String EM_DASH = "\u2014";
-    private static String BULLET = "\u2022";
-
-    public static ObsDetailDialogFragment newInstance(
-        Interval interval, String[] conceptUuids,
-        List<ObsRow> obsRows, List<String> conceptOrdering) {
-        Bundle args = new Bundle();
-        args.putString("interval", Utils.toNullableString(interval));
-        args.putStringArray("conceptUuids", conceptUuids);
-        args.putParcelableArrayList("obsRows", new ArrayList<>(obsRows));
-        args.putStringArrayList("conceptOrdering", new ArrayList<>(conceptOrdering));
-        ObsDetailDialogFragment fragment = new ObsDetailDialogFragment();
-        fragment.setArguments(args);
-        return fragment;
+public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogFragment, ObsDetailDialogFragment.Args> {
+    static class Args implements Serializable {
+        Interval interval;
+        String[] queriedConceptUuids;
+        String[] conceptOrdering;
+        List<Obs> observations;
     }
 
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        u = ContextUtils.from(getActivity());
+    private ViewGroup obsList;
+    private ConceptService concepts;
+    private boolean empty;
+    private SortedMap<Group, List<Obs>> observationsBySection;
+    private List<View> items;
+    private Set<String> obsUuidsToDelete = new HashSet<>();
+
+    public static ObsDetailDialogFragment create(
+        Interval interval, String[] queriedConceptUuids,
+        String[] conceptOrdering, List<Obs> observations) {
+        Args args = new Args();
+        args.interval = interval;
+        args.queriedConceptUuids = Utils.orDefault(queriedConceptUuids, new String[0]);
+        args.conceptOrdering = conceptOrdering;
+        args.observations = observations;
+        return new ObsDetailDialogFragment().withArgs(args);
     }
 
-    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = u.inflateForDialog(R.layout.obs_detail_dialog_fragment);
-        ButterKnife.inject(this, fragment);
+    @Override public @Nonnull Dialog onCreateDialog(Bundle state) {
+        return createAlertDialog(R.layout.obs_detail_dialog_fragment);
+    }
 
-        String arg = getArguments().getString("interval");
-        Interval interval = arg != null ? Interval.parse(arg) : null;
-        String[] conceptUuids = getArguments().getStringArray("conceptUuids");
-        List<ObsRow> obsRows = getArguments().getParcelableArrayList("obsRows");
-        List<String> conceptOrdering = getArguments().getStringArrayList("conceptOrdering");
+    @Override public void onOpen() {
+        obsList = u.findView(R.id.obs_list);
+        concepts = App.getConceptService();
+        empty = args.observations.isEmpty();
 
-        rowsBySection = new TreeMap<>(new SectionComparator(conceptOrdering));
-        if (obsRows != null) {
-            for (ObsRow row : obsRows) {
-                if (row.valueName != null) {
-                    Section section = new Section(row);
-                    if (!rowsBySection.containsKey(section)) {
-                        rowsBySection.put(section, new ArrayList<>());
-                    }
-                    rowsBySection.get(section).add(row);
-                }
+        dialog.setTitle(R.string.obs_detail_title);
+        dialog.getButton(BUTTON_NEUTRAL).setText(R.string.delete_selected);
+        u.show(dialog.getButton(BUTTON_NEUTRAL), !empty);
+        u.show(dialog.getButton(BUTTON_NEGATIVE), !empty);
+
+        u.setText(R.id.message, Html.fromHtml(describeQueryHtml()));
+        u.show(R.id.body, !empty);
+
+        Map<Group, List<Obs>> groupObs = new HashMap<>();
+        for (Obs obs : args.observations) {
+            Group group = new Group(obs.time.toLocalDate(), obs.conceptUuid);
+            if (!groupObs.containsKey(group)) {
+                groupObs.put(group, new ArrayList<>());
             }
+            groupObs.get(group).add(obs);
         }
 
-        TextView message = fragment.findViewById(R.id.message);
-        String conceptNames = null;
-        if (Utils.hasItems(conceptUuids)) {
-            ConceptService concepts = App.getConceptService();
+        List<Group> groups = new ArrayList<>(groupObs.keySet());
+        items = new ArrayList<>();
+        Collections.sort(groups, new GroupComparator(args.conceptOrdering));
+
+        u.addInflated(R.layout.group_spacer, obsList);
+        for (Group group : groups) {
+            if (args.interval == null || args.queriedConceptUuids.length != 1) {
+                View heading = u.addInflated(R.layout.heading, obsList);
+                u.setText(R.id.heading, formatHeading(group));
+            }
+
+            for (Obs obs : groupObs.get(group)) {
+                View item = u.addInflated(R.layout.checkable_item, obsList);
+                u.setText(R.id.text, formatValue(obs));
+                App.getUserManager().showChip(u.findView(R.id.user_initials), obs.providerUuid);
+                item.setTag(obs.uuid);
+                items.add(item);
+
+                final CheckBox checkbox = u.findView(R.id.checkbox);
+                checkbox.setOnCheckedChangeListener((view, checked) -> updateUi());
+                item.setOnClickListener(view -> {
+                    if (checkbox.isEnabled()) checkbox.setChecked(!checkbox.isChecked());
+                });
+            }
+
+            u.addInflated(R.layout.group_spacer, obsList);
+        }
+        dialog.getButton(BUTTON_NEUTRAL).setOnClickListener(v -> deleteSelected());
+        updateUi();
+    }
+
+    private CharSequence formatHeading(Group group) {
+        if (args.queriedConceptUuids.length != 1) {
+            return Html.fromHtml(toBoldHtml(concepts.getName(group.conceptUuid)));
+        }
+        if (args.interval == null) {
+            return Html.fromHtml(toAccentHtml(Utils.format(group.date, MONTH_DAY)));
+        }
+        return "";
+    }
+
+    private CharSequence formatValue(Obs obs) {
+        return Html.fromHtml(
+            "<span style='color: #33b5e5'>" + Utils.format(obs.time, HOUR_MINUTE)
+                + "</span>" + "&nbsp;&nbsp;&nbsp;"
+                + Html.escapeHtml(obs.valueName));
+    }
+
+    private void updateUi() {
+        boolean anyItemsChecked = false;
+        for (View item : items) {
+            CheckBox checkbox = item.findViewById(R.id.checkbox);
+            if (checkbox.isChecked()) anyItemsChecked = true;
+            if (obsUuidsToDelete.contains(item.getTag())) {
+                strikeCheckableItem(item);
+            }
+        }
+        dialog.getButton(BUTTON_NEUTRAL).setEnabled(anyItemsChecked);
+    }
+
+    private String describeQueryHtml() {
+        String htmlConceptNames = null;
+        if (args.queriedConceptUuids.length > 0) {
             Locale locale = App.getSettings().getLocale();
-            String[] names = new String[conceptUuids.length];
-            for (int i = 0; i < conceptUuids.length; i++) {
-                names[i] = getString(R.string.quoted_text, concepts.getName(conceptUuids[i], locale));
+            String[] htmlNames = new String[args.queriedConceptUuids.length];
+            for (int i = 0; i < args.queriedConceptUuids.length; i++) {
+                htmlNames[i] = toBoldHtml(
+                    concepts.getName(args.queriedConceptUuids[i], locale));
             }
-            conceptNames = u.formatItems(names);
+            // For this to work, R.string.two_items and R.string.more_than_two_items
+            // must not contain any HTML special characters.
+            htmlConceptNames = u.formatItems(htmlNames);
         }
-        if (interval != null) {
-            String start = Utils.format(interval.getStart(), SENTENCE_MONTH_DAY_HOUR_MINUTE);
-            String stop = Utils.format(interval.getEnd(), SENTENCE_MONTH_DAY_HOUR_MINUTE);
-            if (conceptNames != null) {
-                message.setText(getString(
-                    Utils.hasItems(obsRows)
-                        ? R.string.obs_details_concept_interval
-                        : R.string.obs_details_concept_interval_empty,
-                    conceptNames, start, stop
-                ));
+        if (args.interval != null) {
+            LocalDate day = args.interval.getStart().toLocalDate();
+            String htmlDate = toAccentHtml(Utils.format(day, MONTH_DAY));
+            if (eq(args.interval, day.toInterval())) {
+                return htmlConceptNames != null ? getString(
+                    empty ? R.string.obs_detail_concept_day_empty
+                        : R.string.obs_detail_concept_day,
+                    htmlConceptNames, htmlDate
+                ) : getString(
+                    empty ? R.string.obs_detail_day_empty
+                        : R.string.obs_detail_day,
+                    htmlDate
+                );
             } else {
-                message.setText(getString(
-                    Utils.hasItems(obsRows)
-                        ? R.string.obs_details_interval
-                        : R.string.obs_details_interval_empty,
-                    start, stop
-                ));
-            }
-        } else if (conceptNames != null) {
-            message.setText(getString(
-                Utils.hasItems(obsRows)
-                    ? R.string.obs_details_concept
-                    : R.string.obs_details_concept_empty,
-                conceptNames
-            ));
-        } else {
-            // Should never get here (no concepts and no interval).
-            message.setText("");
-        }
-        ExpandableListAdapter adapter = new ExpandableObsRowAdapter(u, rowsBySection);
-        ExpandableListView listView = fragment.findViewById(R.id.obs_list);
-        listView.setAdapter(adapter);
-        for (int i = 0; i < adapter.getGroupCount(); i++) {
-            listView.expandGroup(i);
-        }
-
-        // Omit the "void observations switch" for now.  (Ping, 2019-03-19)
-        //
-        // LinearLayout listFooterView = (LinearLayout)mInflater.inflate(R.layout.void_observations_switch, null);
-        // listView.addFooterView(listFooterView);
-
-        return new AlertDialog.Builder(getActivity())
-            .setTitle(R.string.obs_details_title)
-            .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
-            .setView(fragment)
-            .create();
-
-        // Omit the "void observations switch" for now.  (Ping, 2019-03-19)
-        /*
-        final Switch swVoid = (Switch) fragment.findViewById(R.id.swVoid);
-        swVoid.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (swVoid.isChecked()){
-                    VoidObservationsDialogFragment.newInstance(obsrows)
-                            .show(getActivity().getSupportFragmentManager(), null);
+                String htmlStart = toAccentHtml(Utils.format(
+                    args.interval.getStart(), RELATIVE_HOUR_MINUTE));
+                String htmlStop = toAccentHtml(Utils.format(
+                    args.interval.getEnd(), RELATIVE_HOUR_MINUTE));
+                if (eq(args.interval.getEnd(), day.toInterval().getEnd())) {
+                    htmlStop = toAccentHtml(getString(R.string.end_of_day_hour_minute));
                 }
-                dialog.dismiss();
+                return htmlConceptNames != null ? getString(
+                    empty ? R.string.obs_detail_concept_interval_empty
+                        : R.string.obs_detail_concept_interval,
+                    htmlConceptNames, htmlDate, htmlStart, htmlStop
+                ) : getString(
+                    empty ? R.string.obs_detail_interval_empty
+                        : R.string.obs_detail_interval,
+                    htmlDate, htmlStart, htmlStop
+                );
             }
-        });
-        */
-    }
-
-    @Override public void show(FragmentManager manager, String tag) {
-        if (manager.findFragmentByTag(tag) == null) {
-            super.show(manager, tag);
+        } else if (htmlConceptNames != null) {
+            return getString(
+                empty ? R.string.obs_detail_concept_empty
+                    : R.string.obs_detail_concept,
+                htmlConceptNames
+            );
         }
+        // Should never get here (no concepts and no interval).
+        return "";
     }
 
-    /**
-     * The listing is divided into sections, with each section showing all the
-     * observations on a particular date for a particular concept.
-     */
-    public static class Section {
-        public final LocalDate date;
+    /** Marks the checked items for deletion. */
+    private void deleteSelected() {
+        for (View item : items) {
+            CheckBox checkbox = item.findViewById(R.id.checkbox);
+            if (checkbox.isChecked()) {
+                obsUuidsToDelete.add((String) item.getTag());
+                checkbox.setChecked(false);
+            }
+        }
+        updateUi();
+        // This button doesn't dismiss the dialog.
+    }
+
+    @Override protected void onSubmit() {
+        if (obsUuidsToDelete.size() > 0) {
+            List<Obs> observationsToDelete = new ArrayList<>();
+            for (Obs obs : args.observations) {
+                if (obsUuidsToDelete.contains(obs.uuid)) {
+                    observationsToDelete.add(obs);
+                }
+            }
+            Utils.logUserAction("obs_deleted",
+                "obsUuids", Joiner.on(",").join(obsUuidsToDelete));
+            EventBus.getDefault().post(
+                new ObsDeleteRequestedEvent(observationsToDelete));
+        }
+        dialog.dismiss();
+    }
+
+    /** Observations are grouped by date and concept. */
+    public static class Group {
+        public final @Nonnull LocalDate date;
         public final @Nonnull String conceptUuid;
-        public final @Nonnull String conceptName;
 
-        public Section(ObsRow row) {
-            this(row.time.toLocalDate(), row.conceptUuid, row.conceptName);
+        public Group(Obs obs) {
+            this(obs.time.toLocalDate(), obs.conceptUuid);
         }
 
-        public Section(LocalDate date, String conceptUuid, String conceptName) {
-            this.conceptUuid = Utils.toNonnull(conceptUuid);
-            this.conceptName = Utils.toNonnull(conceptName);
+        public Group(@Nonnull LocalDate date, @Nonnull String conceptUuid) {
             this.date = date;
+            this.conceptUuid = conceptUuid;
         }
 
         @Override public boolean equals(Object other) {
-            if (other instanceof Section) {
-                Section o = (Section) other;
-                return date.equals(o.date)
-                    && conceptUuid.equals(o.conceptUuid)
-                    && conceptName.equals(o.conceptName);
+            if (other instanceof Group) {
+                Group o = (Group) other;
+                return eq(date, o.date) && eq(conceptUuid, o.conceptUuid);
             }
             return false;
         }
 
         @Override public int hashCode() {
-            return Objects.hash(date, conceptUuid, conceptName);
+            return Objects.hash(date, conceptUuid);
         }
     }
 
-    public static class SectionComparator implements Comparator<Section> {
+    /** Arranges groups in order by date and by concept according to a given ordering. */
+    public static class GroupComparator implements Comparator<Group> {
         private final Map<String, Integer> orderingByUuid = new HashMap<>();
         private final int orderingMax;
 
-        public SectionComparator(@Nullable List<String> conceptOrdering) {
+        public GroupComparator(@Nullable String[] conceptOrdering) {
             if (conceptOrdering != null) {
-                for (int i = 0; i < conceptOrdering.size(); i++) {
-                    orderingByUuid.put(conceptOrdering.get(i), i);
+                for (int i = 0; i < conceptOrdering.length; i++) {
+                    orderingByUuid.put(conceptOrdering[i], i);
                 }
-                orderingMax = conceptOrdering.size();
+                orderingMax = conceptOrdering.length;
             } else {
                 orderingMax = 0;
             }
         }
 
-        @Override public int compare(Section a, Section b) {
+        @Override public int compare(Group a, Group b) {
             int result = a.date.compareTo(b.date);
             if (result != 0) return result;
 
             result = Integer.compare(getOrdering(a.conceptUuid), getOrdering(b.conceptUuid));
-            if (result != 0) return result;
-
-            result = a.conceptName.compareTo(b.conceptName);
             if (result != 0) return result;
 
             return a.conceptUuid.compareTo(b.conceptUuid);

@@ -74,7 +74,7 @@ public class Utils {
             (Utils.isEmpty(locale.getVariant()) ? "" : "-" + locale.getVariant());
     }
 
-    public static String localize(String packed, Context context) {
+    public static @Nullable String localize(@Nullable String packed, Context context) {
         if (packed == null) return null;
         return new Loc(packed).get(context.getResources().getConfiguration().locale);
     }

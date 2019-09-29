@@ -25,7 +25,6 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsRow;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
@@ -43,8 +42,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.projectbuendia.client.utils.Utils.eq;
@@ -85,26 +82,17 @@ public class ChartDataHelper {
 
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
         String uuid = Utils.getString(c, Observations.UUID);
+        String providerUuid = Utils.getString(c, Observations.PROVIDER_UUID);
         String encounterUuid = Utils.getString(c, Observations.ENCOUNTER_UUID);
         String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
-        String providerUuid = Utils.getString(c, Observations.PROVIDER_UUID);
         String conceptUuid = Utils.getString(c, Observations.CONCEPT_UUID, "");
-        Datatype type = Datatype.valueOf(Utils.getString(c, Observations.TYPE));
-        DateTime time = Utils.getDateTime(c, Observations.MILLIS);
         String orderUuid = Utils.getString(c, Observations.ORDER_UUID);
+        DateTime time = Utils.getDateTime(c, Observations.MILLIS);
+        Datatype type = Datatype.valueOf(Utils.getString(c, Observations.TYPE));
         String value = Utils.getString(c, Observations.VALUE, "");
         String valueName = type == Datatype.CODED ? concepts.getName(value, locale) : value;
         return new Obs(uuid, encounterUuid, patientUuid, providerUuid,
             conceptUuid, type, time, orderUuid, value, valueName);
-    }
-
-    private static @Nullable ObsRow loadObsRow(
-        Cursor c, Locale locale, ConceptService concepts) {
-        Obs obs = loadObs(c, locale, concepts);
-        String uuid = Utils.getString(c, Observations.UUID);
-        String conceptName = concepts.getName(obs.conceptUuid, locale);
-        return new ObsRow(uuid, obs.time.getMillis(),
-            conceptName, obs.conceptUuid, obs.value, obs.valueName);
     }
 
     /** Gets all observations for a given patient in chronological order. */
@@ -132,7 +120,7 @@ public class ChartDataHelper {
     }
 
     /** Gets localized observations, filtered by optional concept and time bounds. */
-    public ArrayList<ObsRow> getPatientObservations(String patientUuid, String[] conceptUuids, Long startMillis, Long stopMillis) {
+    public List<Obs> getPatientObservations(String patientUuid, String[] conceptUuids, Long startMillis, Long stopMillis) {
         ConceptService concepts = App.getConceptService();
         Locale locale = App.getSettings().getLocale();
         List<String> args = new ArrayList<>();
@@ -161,11 +149,10 @@ public class ChartDataHelper {
 
         String order = Observations.MILLIS + " ASC";
 
-        ArrayList<ObsRow> results = new ArrayList<>();
+        List<Obs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(Observations.URI, null, query, argArray, order)) {
             while (c.moveToNext()) {
-                ObsRow row = loadObsRow(c, locale, concepts);
-                if (row != null) results.add(row);
+                results.add(loadObs(c, locale, concepts));
             }
         }
         return results;

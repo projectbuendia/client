@@ -23,13 +23,10 @@ import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.providers.Contracts.Patients;
-import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.ReadyState;
@@ -41,7 +38,6 @@ import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -49,10 +45,7 @@ import de.greenrobot.event.EventBus;
  * Clicking on patients in the list displays details for that patient.
  */
 public abstract class PatientListActivity extends LoggedInActivity {
-    @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
-    @Inject CrudEventBus mCrudEventBus;
-    @Inject SyncManager mSyncManager;
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
@@ -105,22 +98,19 @@ public abstract class PatientListActivity extends LoggedInActivity {
         });
     }
 
-    @Override protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
+    @Override protected boolean onCreateImpl(Bundle state) {
+        if (!super.onCreateImpl(state)) return false;
 
-        App.inject(this);
         mSearchController = new PatientSearchController(
             new SearchUi(),
-            mCrudEventBus,
+            App.getCrudEventBus(),
             new EventBusWrapper(mEventBus),
-            mAppModel,
-            mSyncManager);
+            App.getModel(),
+            App.getSyncManager());
 
         mUpdateNotificationController = new UpdateNotificationController(
             new UpdateNotificationUi()
         );
-
-        ButterKnife.inject(this);
 
         // To facilitate chart development, there's a developer setting that
         // causes the app to go straight to a patient chart on startup.
@@ -134,6 +124,7 @@ public abstract class PatientListActivity extends LoggedInActivity {
                 }
             }
         }
+        return true;
     }
 
     @Override protected void onResumeImpl() {
@@ -142,7 +133,7 @@ public abstract class PatientListActivity extends LoggedInActivity {
     }
 
     protected void attemptInit() {
-        if (mAppModel.isReady()) {
+        if (App.getModel().isReady()) {
             mSearchController.init();
             mSearchController.loadSearchResults();
         } else {

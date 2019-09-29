@@ -33,7 +33,6 @@ import android.view.MenuItem;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Logger;
@@ -45,7 +44,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 
 import static org.projectbuendia.client.utils.Utils.eq;
 
@@ -135,8 +133,6 @@ public class SettingsActivity extends PreferenceActivity {
         }
         return true;
     };
-
-    @Inject AppModel mAppModel;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, SettingsActivity.class));
@@ -270,7 +266,8 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.inject(this);
+        if (!App.getSettings().isAuthorized()) Utils.jumpToActivity(this, AuthorizationActivity.class);
+
         setTitle(R.string.title_activity_settings);
         setupActionBar();
     }
@@ -288,11 +285,6 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (!App.getSettings().isAuthorized()) {
-            finish();
-            startActivity(new Intent(this, AuthorizationActivity.class));
-        }
-
         setupSimplePreferencesScreen();
     }
 
@@ -331,7 +323,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override protected void onPause() {
         super.onPause();
-        if (!mAppModel.isReady()) {
+        if (!App.getModel().isReady()) {
             // The database was cleared; go back to the login activity.
             LOG.w("Database is empty; restarting at login activity");
             startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));

@@ -30,9 +30,11 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.ConceptService;
 import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.updater.UpdateManager;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.Loc;
 import org.projectbuendia.client.utils.Logger;
@@ -44,6 +46,7 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.ObjectGraph;
+import de.greenrobot.event.EventBus;
 
 /** An {@link Application} the represents the Android Client. */
 public class App extends Application {
@@ -54,9 +57,12 @@ public class App extends Application {
     private static Resources sResources;
     private static AppModel sModel;
     private static AppSettings sSettings;
+    private static ChartDataHelper sChartDataHelper;
     private static CrudEventBus sCrudEventBus;
+    private static EventBus sHealthEventBus;
     private static HealthMonitor sHealthMonitor;
     private static SyncManager sSyncManager;
+    private static UpdateManager sUpdateManager;
     private static UserManager sUserManager;
     private static OpenMrsConnectionDetails sConnectionDetails;
     private static Server sServer;
@@ -65,9 +71,12 @@ public class App extends Application {
     private ObjectGraph mObjectGraph;
     @Inject AppModel mModel;
     @Inject AppSettings mSettings;
+    @Inject ChartDataHelper mChartDataHelper;
     @Inject CrudEventBus mCrudEventBus;
+    @Inject EventBus mHealthEventBus;
     @Inject HealthMonitor mHealthMonitor;
     @Inject SyncManager mSyncManager;
+    @Inject UpdateManager mUpdateManager;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject Server mServer;
@@ -121,8 +130,16 @@ public class App extends Application {
         return sSettings;
     }
 
+    public static synchronized ChartDataHelper getChartDataHelper() {
+        return sChartDataHelper;
+    }
+
     public static synchronized CrudEventBus getCrudEventBus() {
         return sCrudEventBus;
+    }
+
+    public static synchronized EventBus getHealthEventBus() {
+        return sHealthEventBus;
     }
 
     public static synchronized HealthMonitor getHealthMonitor() {
@@ -131,6 +148,10 @@ public class App extends Application {
 
     public static synchronized SyncManager getSyncManager() {
         return sSyncManager;
+    }
+
+    public static synchronized UpdateManager getUpdateManager() {
+        return sUpdateManager;
     }
 
     public static synchronized UserManager getUserManager() {
@@ -175,9 +196,12 @@ public class App extends Application {
         synchronized (App.class) {
             sModel = mModel;
             sSettings = mSettings;
+            sChartDataHelper = mChartDataHelper;
             sCrudEventBus = mCrudEventBus;
+            sHealthEventBus = mHealthEventBus;
             sHealthMonitor = mHealthMonitor;
             sSyncManager = mSyncManager;
+            sUpdateManager = mUpdateManager;
             sUserManager = mUserManager;
             sConnectionDetails = mOpenMrsConnectionDetails;
             sServer = mServer;
@@ -186,7 +210,7 @@ public class App extends Application {
         }
     }
 
-    public static void reset(Runnable callback) {
+    public static synchronized void reset(Runnable callback) {
         sSyncManager.setNewSyncsSuppressed(true);
         LOG.i("reset(): Waiting for syncs to stop...");
         sSyncManager.stopSyncing(() -> {
@@ -213,7 +237,7 @@ public class App extends Application {
         }
     }
 
-    private static void clearMemoryState() {
+    private static synchronized void clearMemoryState() {
         LOG.i("Clearing memory state");
         try {
             sUserManager.reset();

@@ -14,17 +14,30 @@
   <string name="quoted_text">\"%s\"</string>
   <string name="two_items">%1$s and %2$s</string>
   <string name="more_than_two_items">%1$s, and %2$s</string>
+
   <string name="month_day_format">MMM d</string>
-  <string name="sentence_month_day_format">\'on\' MMM d</string>
   <string name="year_month_day_format">MMM d, yyyy</string>
-  <string name="sentence_year_month_day_format">\'on\' MMM d, yyyy</string>
   <string name="hour_minute_format">HH:mm</string>
-  <string name="sentence_hour_minute_format">\'at\' HH:mm</string>
+  <string name="end_of_day_hour_minute">24:00</string>
   <string name="month_day_hour_minute_format">MMM d, HH:mm</string>
+
+  <!-- "Sentence" formats should work in phrases like "The store opens X" -->
+  <string name="sentence_month_day_format">\'on\' MMM d</string>
+  <string name="sentence_year_month_day_format">\'on\' MMM d, yyyy</string>
+  <string name="sentence_hour_minute_format">\'at\' HH:mm</string>
   <string name="sentence_month_day_hour_minute_format">\'on\' MMM d \'at\' HH:mm</string>
   <string name="sentence_yesterday">yesterday</string>
   <string name="sentence_today">today</string>
   <string name="sentence_tomorrow">tomorrow</string>
+
+  <!-- "Relative" formats should work in phrases like "after X", "between X and Y" -->
+  <string name="relative_month_day_format">MMM d</string>
+  <string name="relative_year_month_day_format">MMM d, yyyy</string>
+  <string name="relative_hour_minute_format">HH:mm</string>
+  <string name="relative_month_day_hour_minute_format">HH:mm \'on\' MMM d</string>
+  <string name="relative_yesterday">yesterday</string>
+  <string name="relative_today">today</string>
+  <string name="relative_tomorrow">tomorrow</string>
 
   <!-- Authorization activity -->
   <string name="authorization_required">This device is not authorized.  To access patient data, please enter your OpenMRS account credentials.</string>
@@ -139,7 +152,7 @@
 
   <string name="route_of_administration">Route of administration</string>
 
-  <string name="order_execution_title">Treatment history</string>
+  <string name="order_execution_title">Treatment history %s</string>
   <string name="order_medication_route">%1$s %2$s</string>
   <string name="order_dosage_unary">%1$s</string>
   <string name="order_dosage_series">%1$s, given %2$dx daily</string>
@@ -147,11 +160,10 @@
   <string name="order_frequency_value">%1$dx/day</string>
   <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; %2$s</string>
   <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times %2$s</string>
-  <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today, %2$s</string>
-  <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today, %2$s</string>
+  <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today</string>
+  <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today</string>
   <string name="order_execution_mark_as_given_now">Mark as given now</string>
-  <string name="order_execution_marked_as_given_now">&#x2714; Marked as given now</string>
-  <string name="order_execution_delete_selected">Delete selected</string>
+  <string name="order_execution_marked_as_given_now">&#x2713; Marked as given now</string>
   <string name="order_started_datetime">Started %s</string>
 
   <string name="unknown_tent">Unknown tent</string>
@@ -269,7 +281,8 @@
   <string name="patient_list_fragment_sync_error">Error syncing patient data. Please check settings or try again.</string>
   <string name="api_health_problem">Unable to contact the server.  Please see the bar along the bottom of the screen for more information about the problem.</string>
   <string name="sync_failed_back">Back</string>
-  <string name="no_user">No user is logged in.</string>
+  <string name="no_user">No user is signed in.</string>
+  <string name="signed_out">Signed out.</string>
   <string name="no_location">No location information has been loaded yet.</string>
   <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
   <string name="encounter_add_failed_unknown_server_error">An unknown error occurred on the server.</string>
@@ -424,18 +437,20 @@
   <string name="discharged">Discharged</string>
   <string name="admission">Since admission</string>
   <string name="loading">Loading...</string>
-  <string name="no_such_patient_as_of_48_min_ago">No such patient as of 48 min ago</string>
   <string name="observation">Observation</string>
   <string name="string_with_paren">%1$s (%2$s)</string>
-  <string name="voiding">Void</string>
-  <string name="void_observations">Void Observations</string>
 
   <!-- Observation details dialog -->
-  <string name="obs_details_title">Observations</string>
-  <string name="obs_details_interval">Observations recorded between %1$s and %2$s:</string>
-  <string name="obs_details_interval_empty">No observations were recorded between %1$s and %2$s.</string>
-  <string name="obs_details_concept">All observations of %s:</string>
-  <string name="obs_details_concept_interval">Observations of %1$s recorded between %2$s and %3$s:</string>
-  <string name="obs_details_concept_empty">No observations of %1$s have been recorded.</string>
-  <string name="obs_details_concept_interval_empty">No observations of %1$s were recorded between %2$s and %3$s.</string>
+  <string name="obs_detail_title">Observations</string>
+  <string name="obs_detail_day">All observations recorded on %s:</string>
+  <string name="obs_detail_day_empty">No observations were recorded on %s.</string>
+  <string name="obs_detail_interval">Observations recorded on %1$s between %2$s and %3$s:</string>
+  <string name="obs_detail_interval_empty">No observations were recorded on %1$s between %2$s and %3$s.</string>
+  <string name="obs_detail_concept">All observations of %s:</string>
+  <string name="obs_detail_concept_empty">No observations of %s have been recorded.</string>
+  <string name="obs_detail_concept_day">Observations of %1$s recorded on %2$s:</string>
+  <string name="obs_detail_concept_day_empty">No observations of %1$s were recorded on %2$s.</string>
+  <string name="obs_detail_concept_interval">Observations of %1$s recorded on %2$s between %3$s and %4$s:</string>
+  <string name="obs_detail_concept_interval_empty">No observations of %1$s were recorded on %2$s between %3$s and %4$s.</string>
+  <string name="delete_selected">Delete selected</string>
 </resources>
