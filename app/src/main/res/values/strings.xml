@@ -424,7 +424,7 @@
   <string name="pref_title_form_instances_retained">Form instances retained locally</string>
   <string name="pref_desc_form_instances_retained">Keep forms on the device instead of deleting them after they are sent to the server.</string>
   <string name="pref_title_non_wifi_allowed">Non-Wi-Fi connections allowed</string>
-  <string name="pref_desc_non_wifi_allowed">Allow the app to work with non-Wi-Fi (emulated or Bluetooth tethered) networking.</string>
+  <string name="pref_desc_non_wifi_allowed">Allow the app to work with non-Wi-Fi (mobile data, tethered, or emulated) networking.</string>
   <string name="pref_title_starting_patient_id">Starting patient ID</string>
   <string name="pref_desc_starting_patient_id">If set, cause the app to go directly to a patient chart on startup.</string>
   <string name="pref_title_server_responses_fabricated">Fabricate server responses</string>
