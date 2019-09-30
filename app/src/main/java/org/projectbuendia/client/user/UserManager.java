@@ -165,7 +165,9 @@ public class UserManager {
             mUsersByUuid.put(user.getUuid(), user);
         }
         mEventBus.post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
-        mEventBus.post(new KnownUsersLoadedEvent(mKnownUsers));
+        if (addedUsers.size() + deletedUsers.size() > 0) {
+            mEventBus.post(new KnownUsersLoadedEvent(mKnownUsers));
+        }
 
         if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
             // TODO: Potentially clear mActiveUser here.
