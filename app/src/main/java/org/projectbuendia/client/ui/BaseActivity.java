@@ -106,13 +106,13 @@ public abstract class BaseActivity extends FragmentActivity {
      */
     protected boolean onCreateImpl(Bundle state) {
         settings = App.getSettings();
-        if (!settings.isAuthorized()) {
+        initialLocale = Locale.getDefault();
+        openDialogTypes = new HashSet<>();
+
+        if (!settings.isAuthorized() && !(this instanceof AuthorizationActivity)) {
             Utils.jumpToActivity(this, AuthorizationActivity.class);
             return false;
         }
-
-        initialLocale = Locale.getDefault();
-        openDialogTypes = new HashSet<>();
         App.inject(this);
         ChartRenderer.backgroundCompileTemplate();
         return true;
