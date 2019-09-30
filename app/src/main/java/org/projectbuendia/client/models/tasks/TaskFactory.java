@@ -80,7 +80,7 @@ public class TaskFactory {
             mContentResolver, contentUri, projectionColumns, filter, constraint, loader, bus);
     }
 
-    public DenormalizeObservationsTask newDenormalizeObservationsTask(String patientUuid, CrudEventBus bus) {
-        return new DenormalizeObservationsTask(this, mServer, mContentResolver, patientUuid, bus);
+    public DenormalizeObsTask newDenormalizeObsTask(String patientUuid, CrudEventBus bus) {
+        return new DenormalizeObsTask(this, mServer, mContentResolver, patientUuid, bus);
     }
 }

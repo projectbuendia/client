@@ -45,7 +45,7 @@ import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.exception.ValidationException;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.models.tasks.DenormalizeObservationsTask;
+import org.projectbuendia.client.models.tasks.DenormalizeObsTask;
 import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
@@ -563,7 +563,7 @@ public class OdkActivityLauncher {
 
         ContentValues[] values = toInsert.toArray(new ContentValues[toInsert.size()]);
         resolver.bulkInsert(Observations.URI, values);
-        if (DenormalizeObservationsTask.needsDenormalization(values)) {
+        if (DenormalizeObsTask.needsDenormalization(values)) {
             App.getModel().denormalizeObservations(App.getCrudEventBus(), patientUuid);
         }
     }

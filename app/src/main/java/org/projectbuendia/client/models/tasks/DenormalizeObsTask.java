@@ -34,7 +34,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.Set;
 
-public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
+public class DenormalizeObsTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
     private static final Logger LOG = Logger.create();
     private final TaskFactory mTaskFactory;
     private final Server mServer;
@@ -58,7 +58,7 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
         ConceptUuids.PLACEMENT_UUID
     );
 
-    DenormalizeObservationsTask(
+    DenormalizeObsTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,

@@ -198,7 +198,7 @@ public class AppModel {
      * with the latest unvoided values in the observations table.
      */
     public void denormalizeObservations(CrudEventBus bus, String patientUuid) {
-        mTaskFactory.newDenormalizeObservationsTask(patientUuid, bus).execute();
+        mTaskFactory.newDenormalizeObsTask(patientUuid, bus).execute();
     }
 
     private static class LoadTypedCursorAsyncTask<T extends Model>

@@ -108,7 +108,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         ContentValues[] cvs = encounter.toContentValuesArray();
         if (cvs.length > 0) {
             int inserted = mContentResolver.bulkInsert(Observations.URI, cvs);
-            if (DenormalizeObservationsTask.needsDenormalization(cvs)) {
+            if (DenormalizeObsTask.needsDenormalization(cvs)) {
                 App.getModel().denormalizeObservations(mBus, encounter.patientUuid);
             }
             if (inserted != cvs.length) {
