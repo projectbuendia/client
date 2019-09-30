@@ -34,7 +34,7 @@ import org.projectbuendia.client.utils.Utils;
 
 import java.util.Set;
 
-public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
+public class DenormalizeObsTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
     private static final Logger LOG = Logger.create();
     private final TaskFactory mTaskFactory;
     private final Server mServer;
@@ -58,7 +58,7 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
         ConceptUuids.PLACEMENT_UUID
     );
 
-    DenormalizeObservationsTask(
+    DenormalizeObsTask(
         TaskFactory taskFactory,
         Server server,
         ContentResolver contentResolver,
@@ -92,10 +92,9 @@ public class DenormalizeObservationsTask extends AsyncTask<Void, Void, PatientUp
         );
         if (count == 1) return null;
 
-        return new PatientUpdateFailedEvent(
-            count == 0 ? PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT :
-                PatientUpdateFailedEvent.REASON_CLIENT,
-            null /*exception*/);
+        // If the patient doesn't exist, that's okay.  It's possible for observations
+        // about a patient to arrive before a newly created patient arrives.
+        return null;
     }
 
     private String getLatestValue(String patientUuid, String conceptUuid) {

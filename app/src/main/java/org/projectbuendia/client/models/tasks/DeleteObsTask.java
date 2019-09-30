@@ -56,7 +56,7 @@ public class DeleteObsTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
         cv.put(Observations.VOIDED, 1);
         mContentResolver.update(
             Observations.URI, cv, Observations.UUID + " = ?", new String[] {mObs.uuid});
-        if (DenormalizeObservationsTask.needsDenormalization(mObs.conceptUuid)) {
+        if (DenormalizeObsTask.needsDenormalization(mObs.conceptUuid)) {
             App.getModel().denormalizeObservations(App.getCrudEventBus(), mObs.patientUuid);
         }
         return null;
