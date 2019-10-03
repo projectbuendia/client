@@ -15,14 +15,16 @@ import com.google.common.collect.ImmutableSet;
 
 import org.projectbuendia.client.json.JsonUser;
 
+import java.util.Set;
+
 /** An event bus event indicating that the set of known users has changed. */
 public class KnownUsersChangedEvent {
 
     public final ImmutableSet<JsonUser> addedUsers;
     public final ImmutableSet<JsonUser> deletedUsers;
 
-    public KnownUsersChangedEvent(ImmutableSet<JsonUser> addedUsers, ImmutableSet<JsonUser> deletedUsers) {
-        this.addedUsers = addedUsers;
-        this.deletedUsers = deletedUsers;
+    public KnownUsersChangedEvent(Set<JsonUser> addedUsers, Set<JsonUser> deletedUsers) {
+        this.addedUsers = ImmutableSet.copyOf(addedUsers);
+        this.deletedUsers = ImmutableSet.copyOf(deletedUsers);
     }
 }

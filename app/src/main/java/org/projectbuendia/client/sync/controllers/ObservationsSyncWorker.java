@@ -22,7 +22,7 @@ import android.os.RemoteException;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonObservation;
-import org.projectbuendia.client.models.tasks.DenormalizeObservationsTask;
+import org.projectbuendia.client.models.tasks.DenormalizeObsTask;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
@@ -64,7 +64,7 @@ public class ObservationsSyncWorker extends IncrementalSyncWorker<JsonObservatio
                         .withValues(observation.toContentValues()).build());
                 numInserts++;
             }
-            if (DenormalizeObservationsTask.needsDenormalization(observation.concept_uuid)) {
+            if (DenormalizeObsTask.needsDenormalization(observation.concept_uuid)) {
                 patientUuidsToUpdate.add(observation.patient_uuid);
             }
         }

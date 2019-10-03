@@ -21,6 +21,7 @@ import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
+import org.projectbuendia.client.sync.BuendiaSyncEngine;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.SettingsActivity;
@@ -110,9 +111,11 @@ public class LoginActivity extends BaseActivity {
     @Override protected void onResume() {
         super.onResume();
         mController.init();
+        App.getSyncManager().setPeriodicSync(10, BuendiaSyncEngine.Phase.USERS);
     }
 
     @Override protected void onPause() {
+        App.getSyncManager().setPeriodicSync(0, BuendiaSyncEngine.Phase.USERS);
         mController.suspend();
         super.onPause();
     }

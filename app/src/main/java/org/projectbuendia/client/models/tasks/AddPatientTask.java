@@ -118,7 +118,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
                 cvs[i++] = obs.toContentValues();
             }
             mContentResolver.bulkInsert(Observations.URI, cvs);
-            if (DenormalizeObservationsTask.needsDenormalization(cvs)) {
+            if (DenormalizeObsTask.needsDenormalization(cvs)) {
                 App.getModel().denormalizeObservations(mBus, patient.uuid);
             }
         }

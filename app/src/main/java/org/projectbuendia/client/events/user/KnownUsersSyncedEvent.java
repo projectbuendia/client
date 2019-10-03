@@ -11,14 +11,14 @@
 
 package org.projectbuendia.client.events.user;
 
-import com.google.common.collect.ImmutableSet;
-
 import org.projectbuendia.client.json.JsonUser;
+
+import java.util.Set;
 
 /** An event bus event indicating that the set of known users was synced from the server. */
 public class KnownUsersSyncedEvent extends KnownUsersChangedEvent {
 
-    public KnownUsersSyncedEvent(ImmutableSet<JsonUser> addedUsers, ImmutableSet<JsonUser> deletedUsers) {
+    public KnownUsersSyncedEvent(Set<JsonUser> addedUsers, Set<JsonUser> deletedUsers) {
         super(addedUsers, deletedUsers);
     }
 }

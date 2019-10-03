@@ -15,13 +15,15 @@ import com.google.common.collect.ImmutableSet;
 
 import org.projectbuendia.client.json.JsonUser;
 
+import java.util.Set;
+
 /** An event bus event indicating that the set of known users has been loaded from local cache. */
 public final class KnownUsersLoadedEvent {
 
     public final ImmutableSet<JsonUser> knownUsers;
 
-    public KnownUsersLoadedEvent(ImmutableSet<JsonUser> knownUsers) {
-        this.knownUsers = knownUsers;
+    public KnownUsersLoadedEvent(Set<JsonUser> knownUsers) {
+        this.knownUsers = ImmutableSet.copyOf(knownUsers);
     }
 
     @Override public boolean equals(Object obj) {
