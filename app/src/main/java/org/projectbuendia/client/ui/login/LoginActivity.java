@@ -111,7 +111,7 @@ public class LoginActivity extends BaseActivity {
     @Override protected void onResume() {
         super.onResume();
         mController.init();
-        App.getSyncManager().setPeriodicSync(2, BuendiaSyncEngine.Phase.USERS);
+        App.getSyncManager().setPeriodicSync(10, BuendiaSyncEngine.Phase.USERS);
     }
 
     @Override protected void onPause() {

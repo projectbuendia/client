@@ -65,14 +65,14 @@ public class BuendiaSyncEngine implements SyncEngine {
 
     /** The available phases, in the default order in which to run them. */
     public enum Phase {
-        USERS(R.string.syncing_users, new UsersSyncWorker()),
         LOCATIONS(R.string.syncing_locations, new LocationsSyncWorker()),
-        PATIENTS(R.string.syncing_patients, new PatientsSyncWorker()),
-        OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncWorker()),
-        ORDERS(R.string.syncing_orders, new OrdersSyncWorker()),
+        USERS(R.string.syncing_users, new UsersSyncWorker()),
+        CONCEPTS(R.string.syncing_concepts, new ConceptsSyncWorker()),
         CHART_ITEMS(R.string.syncing_charts, new ChartsSyncWorker()),
         FORMS(R.string.syncing_forms, new FormsSyncWorker()),
-        CONCEPTS(R.string.syncing_concepts, new ConceptsSyncWorker());
+        PATIENTS(R.string.syncing_patients, new PatientsSyncWorker()),
+        OBSERVATIONS(R.string.syncing_observations, new ObservationsSyncWorker()),
+        ORDERS(R.string.syncing_orders, new OrdersSyncWorker());
 
         public final @StringRes int message;
         public final SyncWorker worker;
