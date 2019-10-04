@@ -14,18 +14,22 @@ import javax.annotation.Nonnull;
 public class BatteryWatcher extends BroadcastReceiver {
     private static final Logger LOG = Logger.create();
     private Instant dockTime = null;
+    private boolean acPlugged = false;
 
     @Override public void onReceive(Context context, Intent intent) {
         int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         // NOTE(ping): The charging docks we are using don't seem to trigger
         // DOCK_EVENT actions, so we watch for AC charging instead.
-        if ((plugged & BatteryManager.BATTERY_PLUGGED_AC) > 0) {
+        boolean newAcPlugged = (plugged & BatteryManager.BATTERY_PLUGGED_AC) > 0;
+        if (newAcPlugged && !acPlugged) {
             LOG.i("AC charging started");
             dockTime = Instant.now();
-        } else {
+        }
+        if (acPlugged && !newAcPlugged) {
             LOG.i("AC charging stopped");
             dockTime = null;
         }
+        acPlugged = newAcPlugged;
     }
 
     public @Nonnull Duration getDockedDuration() {

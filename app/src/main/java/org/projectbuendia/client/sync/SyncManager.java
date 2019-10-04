@@ -153,7 +153,7 @@ public class SyncManager {
                 int denominator = intent.getIntExtra(SYNC_DENOMINATOR, 1);
                 int messageId = intent.getIntExtra(SYNC_MESSAGE_ID, R.string.sync_in_progress);
                 LOG.d("SyncStatus: IN_PROGRESS: %d/%d", numerator, denominator);
-                EventBus.getDefault().post(new SyncProgressEvent(numerator, denominator, messageId));
+                EventBus.getDefault().postSticky(new SyncProgressEvent(numerator, denominator, messageId));
             } else {
                 // All three other statuses indicate that sync has stopped.
                 LOG.d("SyncStatus: %s", status);

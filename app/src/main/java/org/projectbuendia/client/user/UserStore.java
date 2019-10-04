@@ -28,6 +28,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.providers.BuendiaProvider;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.Users;
@@ -40,6 +41,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /** A store for users. */
 public class UserStore {
@@ -49,7 +52,7 @@ public class UserStore {
 
     /** Loads users from the local store, fetching them from the server if there are none. */
     public Set<JsonUser> loadKnownUsers()
-        throws InterruptedException, ExecutionException, RemoteException,
+        throws InterruptedException, ExecutionException, TimeoutException, RemoteException,
         OperationApplicationException {
         Set<JsonUser> users = getUsersFromDb();
         if (users.isEmpty()) {
@@ -62,7 +65,7 @@ public class UserStore {
 
     /** Syncs known users with the server. */
     public Set<JsonUser> syncKnownUsers()
-        throws ExecutionException, InterruptedException, RemoteException,
+        throws ExecutionException, InterruptedException, TimeoutException, RemoteException,
         OperationApplicationException {
         Set<JsonUser> users = getUsersFromServer();
         updateDatabase(users);
@@ -148,15 +151,16 @@ public class UserStore {
         }
     }
 
-    private Set<JsonUser> getUsersFromServer() throws ExecutionException, InterruptedException {
+    private Set<JsonUser> getUsersFromServer()
+        throws ExecutionException, InterruptedException, TimeoutException {
         return getUsersFromServer(null);
     }
 
     public Set<JsonUser> getUsersFromServer(OpenMrsConnectionDetails connection)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, TimeoutException {
         RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
         App.getServer().listUsers(connection, future, future);
-        List<JsonUser> users = future.get();
+        List<JsonUser> users = future.get(OpenMrsServer.TIMEOUT_SECONDS, TimeUnit.SECONDS);
         LOG.i("Got %d users from server", users.size());
         return new HashSet<>(users);
     }

@@ -9,7 +9,8 @@ public class ObsDeleteFailedEvent {
         UNKNOWN,
         UNKNOWN_SERVER_ERROR,
         CLIENT_ERROR,
-        INTERRUPTED
+        INTERRUPTED,
+        TIMEOUT
     }
 
     public ObsDeleteFailedEvent(Reason reason, Exception exception) {

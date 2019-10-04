@@ -395,6 +395,14 @@ public abstract class BaseActivity extends FragmentActivity {
                             50, false);
                     }
                     break;
+                case CHECK_SERVER_PERMISSIONS:
+                    if (settings.isAuthorized()) {
+                        snackBar(R.string.troubleshoot_server_permission,
+                            R.string.troubleshoot_server_auth_action_check,
+                            view -> SettingsActivity.start(BaseActivity.this),
+                            50, false);
+                    }
+                    break;
                 case CHECK_SERVER_SETUP:  // server is returning 500
                     snackBar(R.string.troubleshoot_server_unstable,
                         R.string.troubleshoot_action_more_info,
@@ -472,6 +480,12 @@ public abstract class BaseActivity extends FragmentActivity {
                 R.string.troubleshoot_server_auth,
                 R.string.troubleshoot_server_auth_solved,
                 10
+            ));
+        troubleshootingMessages.put(HealthIssue.SERVER_PERMISSION_ISSUE,
+            new TroubleshootingMessage(
+                R.string.troubleshoot_server_permission,
+                R.string.troubleshoot_server_permission_solved,
+                10
         ));
         troubleshootingMessages.put(HealthIssue.SERVER_CONFIGURATION_INVALID,
             new TroubleshootingMessage(
@@ -516,13 +530,13 @@ public abstract class BaseActivity extends FragmentActivity {
                 10
             ));
 
-        TroubleshootingMessage messages = troubleshootingMessages.get(solvedIssue);
-        if (messages != null) {
+        TroubleshootingMessage message = troubleshootingMessages.get(solvedIssue);
+        if (message != null) {
             initializeSnackBar();
-            SnackBar.Message snackBarMessage = snackBar.getMessage(messages.messageId);
+            SnackBar.Message snackBarMessage = snackBar.getMessage(message.messageId);
             if (snackBarMessage != null) {
                 snackBar.dismiss(snackBarMessage.key);
-                snackBar.message(messages.resolvedMessageId, 0, null, 994, true, messages.timeout);
+                snackBar.message(message.resolvedMessageId, 0, null, 994, true, message.timeout);
             }
         }
     }

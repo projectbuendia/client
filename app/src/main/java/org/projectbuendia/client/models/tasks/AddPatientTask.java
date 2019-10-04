@@ -29,6 +29,7 @@ import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonObservation;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Patients;
@@ -36,8 +37,11 @@ import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * An {@link AsyncTask} that adds a patient to a server.
@@ -80,7 +84,9 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         mServer.addPatient(mPatient, future, future);
         JsonPatient json;
         try {
-            json = future.get();
+            json = future.get(OpenMrsServer.TIMEOUT_SECONDS, SECONDS);
+        } catch (TimeoutException e) {
+            return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_TIMEOUT, e);
         } catch (InterruptedException e) {
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_INTERRUPTED, e);
         } catch (ExecutionException e) {

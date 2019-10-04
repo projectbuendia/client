@@ -26,10 +26,13 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Patients;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * An {@link AsyncTask} that updates a patient on a server.
@@ -67,7 +70,9 @@ public class UpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailed
 
         mServer.updatePatient(mPatient, patientFuture, patientFuture);
         try {
-            patientFuture.get();
+            patientFuture.get(OpenMrsServer.TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            return new PatientUpdateFailedEvent(PatientUpdateFailedEvent.REASON_TIMEOUT, e);
         } catch (InterruptedException e) {
             return new PatientUpdateFailedEvent(PatientUpdateFailedEvent.REASON_INTERRUPTED, e);
         } catch (ExecutionException e) {

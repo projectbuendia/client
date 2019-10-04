@@ -46,6 +46,7 @@ import java.util.List;
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
 public class OpenMrsServer implements Server {
     private static final Logger LOG = Logger.create();
+    public static final int TIMEOUT_SECONDS = 10;
 
     private final OpenMrsConnectionDetails mConnectionDetails;
     private final RequestFactory mRequestFactory;
@@ -146,10 +147,8 @@ public class OpenMrsServer implements Server {
         return new OpenMrsErrorListener() {
             @Override public void onErrorResponse(VolleyError error) {
                 super.onErrorResponse(error);
-                if (error.getMessage() == null) {
-                    error = new VolleyError("Error", error);
-                }
-                errorListener.onErrorResponse(error);
+                errorListener.onErrorResponse(new VolleyError(
+                    formatErrorMessage(error), error));
             }
         };
     }

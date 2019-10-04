@@ -13,6 +13,7 @@ import com.android.volley.toolbox.RequestFuture;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonForm;
 import org.projectbuendia.client.models.Form;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.utils.Logger;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Handles syncing forms. All forms are always fetched, which is okay because there are only a few
@@ -65,12 +68,12 @@ public class FormsSyncWorker implements SyncWorker {
     }
 
     private static List<ContentProviderOperation> getFormUpdateOps(SyncResult syncResult)
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, TimeoutException {
         LOG.i("Listing all forms on server");
         RequestFuture<List<JsonForm>> future = RequestFuture.newFuture();
         App.getServer().listForms(future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
-        for (JsonForm form : future.get()) {
+        for (JsonForm form : future.get(OpenMrsServer.TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
             cvs.put(form.id, Form.fromJson(form).toContentValues());
         }
 

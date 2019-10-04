@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nullable;
 
@@ -139,7 +140,7 @@ public class UserManager {
 
     /** Sync users synchronously. Blocks until the list of users is synced, or interrupted. */
     public void syncKnownUsersSynchronously()
-        throws InterruptedException, ExecutionException, RemoteException,
+        throws InterruptedException, ExecutionException, TimeoutException, RemoteException,
         OperationApplicationException, UserSyncException {
         onUsersSynced(mUserStore.syncKnownUsers());
     }

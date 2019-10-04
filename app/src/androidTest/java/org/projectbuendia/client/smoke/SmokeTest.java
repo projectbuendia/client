@@ -39,6 +39,7 @@ import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.AuthorizationActivity;
 import org.projectbuendia.client.ui.FunctionalTestCase;
@@ -50,6 +51,8 @@ import org.w3c.dom.Document;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import androidx.test.filters.MediumTest;
 
@@ -226,8 +229,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
         RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
         App.getServer().addEncounter(encounter, future, future);
         try {
-            JsonEncounter result = future.get();
-        } catch (InterruptedException | ExecutionException e) {
+            JsonEncounter result = future.get(OpenMrsServer.TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException("Could not move patient", e);
         }
     }
