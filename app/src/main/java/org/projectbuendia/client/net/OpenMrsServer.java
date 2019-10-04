@@ -46,6 +46,7 @@ import java.util.List;
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
 public class OpenMrsServer implements Server {
     private static final Logger LOG = Logger.create();
+    public static final int TIMEOUT_SECONDS = 10;
 
     private final OpenMrsConnectionDetails mConnectionDetails;
     private final RequestFactory mRequestFactory;

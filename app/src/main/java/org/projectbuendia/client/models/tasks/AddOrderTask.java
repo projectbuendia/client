@@ -26,11 +26,15 @@ import org.projectbuendia.client.events.data.OrderAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /** A task that submits a new order to the server and then saves it locally. */
 public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
@@ -82,7 +86,9 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
         mServer.saveOrder(mOrder, future, future);
         JsonOrder json;
         try {
-            json = future.get();
+            json = future.get(OpenMrsServer.TIMEOUT_SECONDS, SECONDS);
+        } catch (TimeoutException e) {
+            return new OrderAddFailedEvent(OrderAddFailedEvent.Reason.TIMEOUT, e);
         } catch (InterruptedException e) {
             return new OrderAddFailedEvent(OrderAddFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {

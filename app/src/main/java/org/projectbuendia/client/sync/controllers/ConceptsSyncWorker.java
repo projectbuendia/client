@@ -11,10 +11,12 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonConcept;
 import org.projectbuendia.client.json.JsonConceptsResponse;
 import org.projectbuendia.client.net.OpenMrsChartServer;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /** Syncs concepts.  All concepts are fetched every time. */
 public class ConceptsSyncWorker implements SyncWorker {
@@ -27,7 +29,7 @@ public class ConceptsSyncWorker implements SyncWorker {
         RequestFuture<JsonConceptsResponse> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
-        for (JsonConcept concept : future.get().results) {
+        for (JsonConcept concept : future.get(OpenMrsServer.TIMEOUT_SECONDS, TimeUnit.SECONDS).results) {
             // This is safe because the ContentProvider implements insert as replace.
             ContentValues conceptInsert = new ContentValues();
             conceptInsert.put(Contracts.Concepts.UUID, concept.uuid);

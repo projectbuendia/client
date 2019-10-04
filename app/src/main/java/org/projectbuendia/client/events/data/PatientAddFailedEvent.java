@@ -29,7 +29,7 @@ public class PatientAddFailedEvent {
     public static final int REASON_DUPLICATE_ID = 6;
     public static final int REASON_INVALID_GIVEN_NAME = 7;
     public static final int REASON_INVALID_FAMILY_NAME = 8;
-
+    public static final int REASON_TIMEOUT = 9;
 
     public final int reason;
     public final Exception exception;

@@ -25,6 +25,7 @@ public class PatientUpdateFailedEvent {
     public static final int REASON_CLIENT = 2;
     public static final int REASON_SERVER = 3;
     public static final int REASON_NO_SUCH_PATIENT = 4;
+    public static final int REASON_TIMEOUT = 5;
 
     public final int reason;
     public final Exception exception;

@@ -30,6 +30,7 @@ import org.projectbuendia.client.json.Serializers;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.net.GsonRequest;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.sync.BuendiaSyncEngine;
 import org.projectbuendia.client.utils.Logger;
@@ -39,6 +40,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import static org.projectbuendia.client.net.OpenMrsServer.wrapErrorListener;
 
@@ -85,7 +87,7 @@ public abstract class IncrementalSyncWorker<T> implements SyncWorker {
 
         RequestFuture<IncrementalSyncResponse<T>> future = RequestFuture.newFuture();
         createRequest(bookmark, future, future);
-        IncrementalSyncResponse<T> response = future.get();
+        IncrementalSyncResponse<T> response = future.get(OpenMrsServer.TIMEOUT_SECONDS, TimeUnit.SECONDS);
         ArrayList<ContentProviderOperation> ops = getUpdateOps(response.results, syncResult);
         providerClient.applyBatch(ops);
         LOG.i("%s: Applied %d db ops", dbTable, ops.size());

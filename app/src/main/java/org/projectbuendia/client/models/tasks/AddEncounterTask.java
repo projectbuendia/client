@@ -27,12 +27,16 @@ import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * An {@link AsyncTask} that adds a patient encounter to the server.
@@ -74,9 +78,11 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         mServer.addEncounter(mEncounter, future, future);
         Encounter encounter;
         try {
-            encounter = Encounter.fromJson(future.get());
+            encounter = Encounter.fromJson(future.get(OpenMrsServer.TIMEOUT_SECONDS, SECONDS));
         } catch (InterruptedException e) {
             return new EncounterAddFailedEvent(EncounterAddFailedEvent.Reason.INTERRUPTED, e);
+        } catch (TimeoutException e) {
+            return new EncounterAddFailedEvent(EncounterAddFailedEvent.Reason.TIMEOUT, e);
         } catch (ExecutionException e) {
             LOG.e(e, "Server error while adding encounter");
 
