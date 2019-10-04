@@ -325,8 +325,10 @@
   <string name="troubleshoot_wifi_disconnected">Wi-Fi is disconnected</string>
   <string name="troubleshoot_wifi_disconnected_solved">Wi-Fi connection is restored</string>
   <string name="troubleshoot_wifi_disconnected_action_connect">Connect</string>
-  <string name="troubleshoot_periodic_sync_disabled">Periodic sync is currently disabled.</string>
-  <string name="troubleshoot_periodic_sync_disabled_solved">Periodic sync is now enabled.</string>
+  <string name="troubleshoot_periodic_sync_disabled">Periodic sync is currently disabled</string>
+  <string name="troubleshoot_periodic_sync_disabled_solved">Periodic sync is now enabled</string>
+  <string name="troubleshoot_server_permission">Required permissions are missing</string>
+  <string name="troubleshoot_server_permission_solved">Required permissions have been granted</string>
   <string name="troubleshoot_server_auth">OpenMRS username or password is incorrect</string>
   <string name="troubleshoot_server_auth_solved">OpenMRS username and password accepted</string>
   <string name="troubleshoot_server_auth_action_check">Settings</string>

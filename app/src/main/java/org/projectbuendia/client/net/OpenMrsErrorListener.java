@@ -17,6 +17,7 @@ import com.android.volley.NoConnectionError;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -38,22 +39,21 @@ public class OpenMrsErrorListener implements ErrorListener {
     public void displayVolleyError(VolleyError error) {
         // TODO(ping): Hand off to the HealthMonitor or use the snackbar.
         LOG.w(error.getClass().getSimpleName() + ": " + error.getMessage());
-        if (error.networkResponse == null ||
-            error instanceof NoConnectionError ||
-            error instanceof AuthFailureError ||
-            error instanceof TimeoutError) {
-            // No toast needed; let the BuendiaApiHealthCheck catch these
-            // and show a message in the snackbar.
-            return;
-        }
-
-        int code = error.networkResponse.statusCode;
-        String message = extractErrorMessage(error.networkResponse);
-        BigToast.show(message);
+        BigToast.show(formatErrorMessage(error));
     }
 
     /** Parses a JSON-formatted error response from the OpenMRS server. **/
-    public String extractErrorMessage(NetworkResponse response) {
+    public static String formatErrorMessage(VolleyError volleyError) {
+        if (volleyError instanceof NoConnectionError) {
+            return "Failed to connect to the server.";
+        }
+        if (volleyError instanceof TimeoutError) {
+            return "Server did not respond.";
+        }
+        if (volleyError == null || volleyError.networkResponse == null) {
+            return "Sorry, there was a problem communicating with the server.";
+        }
+        NetworkResponse response = volleyError.networkResponse;
         byte[] data = response.data;
         String problem = "status code " + response.statusCode;
         if (data != null) {
@@ -61,25 +61,24 @@ public class OpenMrsErrorListener implements ErrorListener {
             LOG.i(json);
             try {
                 JsonObject result = new JsonParser().parse(json).getAsJsonObject();
-                if (result.has("error")) {
-                    JsonObject error = result.getAsJsonObject("error");
+                JsonArray errors = result.getAsJsonArray("errors");
+                if (errors != null && errors.size() > 0) {
+                    JsonObject error = (JsonObject) errors.get(0);
                     JsonElement message = error.get("message");
                     if (message != null && message.isJsonPrimitive()) {
                         return message.getAsString();
                     }
-                    JsonElement detail = error.get("detail");
-                    if (detail != null && detail.isJsonPrimitive()) {
-                        problem = detail.getAsString().split("\n")[0];
-                    }
-                    JsonElement code = error.get("code");
-                    if (code != null && code.isJsonPrimitive()) {
-                        problem += " at " + code.getAsString();
-                    }
+                    JsonArray frames = error.getAsJsonArray("frames");
+                    JsonElement frame = frames.get(0);
+                    return frame.getAsString();
                 }
             } catch (JsonParseException | IllegalStateException | UnsupportedOperationException e) {
                 LOG.w("Problem parsing error message: " + e.getMessage());
             }
         }
-        return "Sorry, there was a problem communicating with the server (" + problem + ")";
+        if (volleyError instanceof AuthFailureError) {
+            return "Operation was not permitted by the server (" + problem + ").";
+        }
+        return "Sorry, there was a problem communicating with the server (" + problem + ").";
     }
 }
