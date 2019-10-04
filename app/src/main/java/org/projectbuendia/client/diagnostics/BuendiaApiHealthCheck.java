@@ -158,6 +158,8 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                                 reportIssue(HealthIssue.SERVER_INTERNAL_ISSUE);
                                 break;
                             case HttpURLConnection.HTTP_FORBIDDEN:
+                                reportIssue(HealthIssue.SERVER_PERMISSION_ISSUE);
+                                break;
                             case HttpURLConnection.HTTP_UNAUTHORIZED:
                                 reportIssue(HealthIssue.SERVER_AUTHENTICATION_ISSUE);
                                 break;

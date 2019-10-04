@@ -326,6 +326,8 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="troubleshoot_wifi_disconnected_action_connect">Connectez</string>
   <string name="troubleshoot_periodic_sync_disabled">Synchronisation périodique est actuellement désactivée.</string>
   <string name="troubleshoot_periodic_sync_disabled_solved">Synchronisation périodique est maintenant activée.</string>
+  <string name="troubleshoot_server_permission">Ne peut pas obtenir les permissions necessaires</string>
+  <string name="troubleshoot_server_permission_solved">Les permissions sont maintenant correcte</string>
   <string name="troubleshoot_server_auth">Serveur nom d\'utilisateur / mot de passe peut être incorrect</string>
   <string name="troubleshoot_server_auth_solved">Nom d\'utilisateur/mot de passe corrigé</string>
   <string name="troubleshoot_server_auth_action_check">Vérifier</string>

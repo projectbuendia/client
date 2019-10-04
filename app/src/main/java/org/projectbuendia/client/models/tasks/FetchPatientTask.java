@@ -24,11 +24,15 @@ import org.projectbuendia.client.events.data.ItemLoadedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * An {@link AsyncTask} that downloads one specific patient from the server and
@@ -71,7 +75,9 @@ public class FetchPatientTask extends AsyncTask<Void, Void, ItemLoadFailedEvent>
         mServer.getPatient(mPatientId, future, future);
         JsonPatient json;
         try {
-            json = future.get();
+            json = future.get(OpenMrsServer.TIMEOUT_SECONDS, SECONDS);
+        } catch (TimeoutException e) {
+            return new ItemLoadFailedEvent("timeout", mPatientId, e);
         } catch (InterruptedException e) {
             return new ItemLoadFailedEvent("interrupted", mPatientId, e);
         } catch (ExecutionException e) {

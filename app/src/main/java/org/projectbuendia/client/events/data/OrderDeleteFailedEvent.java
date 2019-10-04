@@ -26,7 +26,8 @@ public class OrderDeleteFailedEvent {
         UNKNOWN,
         UNKNOWN_SERVER_ERROR,
         CLIENT_ERROR,
-        INTERRUPTED
+        INTERRUPTED,
+        TIMEOUT
     }
 
     public OrderDeleteFailedEvent(Reason reason, Exception exception) {

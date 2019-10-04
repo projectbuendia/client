@@ -10,6 +10,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.user.UserManager;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Handles syncing users. This logic always fetches all users, which is okay because the set of
@@ -18,8 +19,8 @@ import java.util.concurrent.ExecutionException;
 public class UsersSyncWorker implements SyncWorker {
     @Override public boolean sync(
         ContentResolver resolver, SyncResult result, ContentProviderClient client
-    ) throws InterruptedException, ExecutionException, UserManager.UserSyncException,
-            RemoteException, OperationApplicationException {
+    ) throws InterruptedException, ExecutionException, TimeoutException,
+        UserManager.UserSyncException, RemoteException, OperationApplicationException {
         App.getUserManager().syncKnownUsersSynchronously();
         return true;
     }

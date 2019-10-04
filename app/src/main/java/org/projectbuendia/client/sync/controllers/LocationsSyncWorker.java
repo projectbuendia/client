@@ -11,6 +11,7 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonLocation;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.providers.Contracts.Locations;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -20,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.projectbuendia.client.utils.Utils.eq;
 
@@ -46,7 +49,7 @@ public class LocationsSyncWorker implements SyncWorker {
      * {@link ContentProviderOperation}s for updating the database.
      */
     private static ArrayList<ContentProviderOperation> getLocationUpdateOps(SyncResult syncResult)
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, TimeoutException {
         final ContentResolver contentResolver = App.getResolver();
 
         final String[] projection = new String[] {
@@ -59,7 +62,7 @@ public class LocationsSyncWorker implements SyncWorker {
         RequestFuture<List<JsonLocation>> future = RequestFuture.newFuture();
         App.getServer().listLocations(future, future);
 
-        List<JsonLocation> locations = future.get();
+        List<JsonLocation> locations = future.get(OpenMrsServer.TIMEOUT_SECONDS, TimeUnit.SECONDS);
         LOG.d("After network call");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 

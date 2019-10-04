@@ -20,10 +20,14 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.OrderDeleteFailedEvent;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * An {@link AsyncTask} that adds an order, both on the server and in the local store.
@@ -56,7 +60,9 @@ public class DeleteOrderTask extends AsyncTask<Void, Void, OrderDeleteFailedEven
 
         mServer.deleteOrder(mOrderUuid, future, future);
         try {
-            future.get();
+            future.get(OpenMrsServer.TIMEOUT_SECONDS, SECONDS);
+        } catch (TimeoutException e) {
+            return new OrderDeleteFailedEvent(OrderDeleteFailedEvent.Reason.TIMEOUT, e);
         } catch (InterruptedException e) {
             return new OrderDeleteFailedEvent(OrderDeleteFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {

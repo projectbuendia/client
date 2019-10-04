@@ -20,7 +20,8 @@ public class OrderAddFailedEvent {
         UNKNOWN,
         UNKNOWN_SERVER_ERROR,
         CLIENT_ERROR,
-        INTERRUPTED
+        INTERRUPTED,
+        TIMEOUT
     }
 
     public OrderAddFailedEvent(Reason reason, Exception exception) {

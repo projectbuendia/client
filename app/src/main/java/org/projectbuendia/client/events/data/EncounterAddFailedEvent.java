@@ -26,6 +26,7 @@ public class EncounterAddFailedEvent {
         UNKNOWN,
         UNKNOWN_SERVER_ERROR,
         INTERRUPTED,
+        TIMEOUT,
         FAILED_TO_VALIDATE,
         FAILED_TO_AUTHENTICATE,
         FAILED_TO_SAVE_ON_SERVER,

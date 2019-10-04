@@ -14,11 +14,14 @@ import org.projectbuendia.client.json.JsonChartItem;
 import org.projectbuendia.client.json.JsonChartSection;
 import org.projectbuendia.client.json.JsonChartsResponse;
 import org.projectbuendia.client.net.OpenMrsChartServer;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Handles syncing charts. Always fetches everything. This is okay because the full set of chart
@@ -34,7 +37,7 @@ public class ChartsSyncWorker implements SyncWorker {
         RequestFuture<JsonChartsResponse> future = RequestFuture.newFuture();
         // errors handled by caller
         chartServer.getChartStructures(future, future);
-        final JsonChartsResponse response = future.get();
+        final JsonChartsResponse response = future.get(OpenMrsServer.TIMEOUT_SECONDS, SECONDS);
 
         // When we do a chart update, delete everything first, then insert all the new rows.
         result.stats.numDeletes += client.delete(Contracts.ChartItems.URI, null, null);

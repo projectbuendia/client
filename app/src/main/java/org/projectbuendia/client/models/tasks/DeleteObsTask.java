@@ -13,11 +13,15 @@ import org.projectbuendia.client.events.data.ItemDeletedEvent;
 import org.projectbuendia.client.events.data.ObsDeleteFailedEvent;
 import org.projectbuendia.client.events.data.ObsDeleteFailedEvent.Reason;
 import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class DeleteObsTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
 
@@ -46,7 +50,9 @@ public class DeleteObsTask extends AsyncTask<Void, Void, ObsDeleteFailedEvent> {
         RequestFuture future = RequestFuture.newFuture();
         mServer.deleteObservation(mObs.uuid, future, future);
         try {
-            future.get();
+            future.get(OpenMrsServer.TIMEOUT_SECONDS, SECONDS);
+        } catch (TimeoutException e) {
+            return new ObsDeleteFailedEvent(Reason.TIMEOUT, e);
         } catch (InterruptedException e) {
             return new ObsDeleteFailedEvent(Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
