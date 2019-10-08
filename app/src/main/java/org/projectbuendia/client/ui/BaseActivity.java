@@ -70,8 +70,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
 public abstract class BaseActivity extends FragmentActivity {
     private static final Logger LOG = Logger.create();
     private static final double PHI = (Math.sqrt(5) + 1)/2; // golden ratio
-    private static final double STEP_FACTOR = Math.sqrt(PHI); // each step up/down scales this much
-    private static final long MIN_STEP = -2;
+    private static final double STEP_FACTOR = Math.sqrt(Math.sqrt(PHI)); // each step up/down scales this much
+    private static final long MIN_STEP = -4;
     private static final long MAX_STEP = 2;
 
     protected ContextUtils u;
