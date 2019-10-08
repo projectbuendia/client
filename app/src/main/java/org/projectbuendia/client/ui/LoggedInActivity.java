@@ -49,7 +49,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 /** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class LoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
-    private static final Duration IDLE_AUTO_LOGOUT_DURATION = Duration.standardMinutes(5);
+    private static final Duration IDLE_AUTO_LOGOUT_DURATION = Duration.standardMinutes(15);
     private static final Duration DOCKED_AUTO_LOGOUT_DURATION = Duration.ZERO; // log out immediately
 
     private JsonUser mLastActiveUser;
