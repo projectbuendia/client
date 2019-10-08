@@ -133,6 +133,14 @@ public class ContextUtils extends ContextWrapper {
         view.setVisibility(View.GONE);
     }
 
+    public void cloak(int id) {
+        findView(id).setVisibility(View.INVISIBLE);
+    }
+
+    public void cloak(View view) {
+        view.setVisibility(View.INVISIBLE);
+    }
+
     public void setText(int id, CharSequence text) {
         ((TextView) findView(id)).setText(text);
     }
