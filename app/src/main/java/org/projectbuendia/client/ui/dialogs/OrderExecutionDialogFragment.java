@@ -126,11 +126,12 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
             u.setText(R.id.text, Html.fromHtml(toBoldHtml(Utils.format(args.now, HOUR_MINUTE))));
             String providerUuid = App.getUserManager().getActiveUser().getUuid();
             App.getUserManager().showChip(u.findView(R.id.user_initials), providerUuid);
-            u.findView(R.id.checkbox).setVisibility(View.INVISIBLE);
-            u.findView(R.id.arrow).setVisibility(View.VISIBLE);
-            newItem.setVisibility(View.INVISIBLE);
+            u.cloak(R.id.checkbox);
+            u.show(R.id.arrow);
+            u.cloak(newItem);
         }
 
+        u.show(v.execute, args.executable);
         v.execute.setOnCheckedChangeListener((button, checked) -> updateUi());
         dialog.getButton(BUTTON_NEUTRAL).setOnClickListener(v -> deleteSelected());
         updateUi();
