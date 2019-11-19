@@ -29,6 +29,8 @@ import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.common.collect.Lists;
+
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -46,8 +48,10 @@ import org.projectbuendia.client.ui.MsfMedCompleter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
@@ -57,9 +61,9 @@ import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY
 public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment, OrderDialogFragment.Args> {
     public static final int MAX_FREQUENCY = 24;  // maximum 24 times per day
     public static final int MAX_DURATION_DAYS = 30;  // maximum 30 days
-    public static final String[] ROUTE_LABELS = {
-        "PO", "IV", "IM", "SC"
-    };
+
+    private static final Map<Integer, List<String>> ROUTES_BY_CATEGORY_ID = getRoutesByCategoryId();
+
     // This should match the left/right padding in the TextViews in captioned_item.xml.
     private static final int ITEM_HORIZONTAL_PADDING = 12;
 
@@ -192,7 +196,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         String medication = Utils.getText(v.medication);
         String format = toFormatCode(v.format.getSelectedItemPosition());
         String dosage = Utils.getText(v.dosage);
-        String route = toRouteAbbreviation(v.route.getSelectedItemId());
+        String route = (String) v.route.getSelectedItem();
         double volume = Utils.getDouble(v.volume, 0);
         double infusionHours = Utils.getDouble(v.infusionDuration, 0);
         int frequency = Utils.getInt(v.frequency, 0);
@@ -200,7 +204,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         int categoryId = v.category.getCheckedRadioButtonId();
         Order.Instructions instructions;
-        if (isInfusion(categoryId)) {
+        if (isLiquidInfusionCategory(categoryId)) {
             instructions = new Order.Instructions(
                 medication, format, volume, infusionHours, frequency, notes);
         } else {
@@ -302,33 +306,56 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         return Utils.toIntOrDefault(field.getText().toString().trim(), defaultValue);
     }
 
+    private boolean isSingleNumericDosageCategory(int categoryId) {
+        return categoryId == R.id.oral_category ||
+            categoryId == R.id.injectable_category;
+    }
+
+    private boolean isLiquidInfusionCategory(int categoryId) {
+        return categoryId == R.id.infusible_category;
+    }
+
     private MsfMedCompleter.Drug.Format getFormat() {
         return null;
     }
 
-    private boolean isInfusion(int categoryId) {
-        return false;
-    }
-
-    private boolean isInjection(int categoryId) {
-        return false;
-    }
-
     private void updateFormatSpinner() {
+    }
 
+    private void updateRouteSpinner(List<String> routes) {
+    }
+
+    private int toFormatIndex(String code) {
+        return 0;
+    }
+
+    private String toFormatCode(int index) {
+        return "";
+    }
+
+    private int toRouteIndex(String route) {
+        return 0;
     }
 
     /** Updates labels and disables or hides elements according to the input fields. */
     private void updateUi() {
         int categoryId = v.category.getCheckedRadioButtonId();
-        Utils.showIf(v.dosageRow, !isInfusion(categoryId));
-        Utils.showIf(v.infusionRow, isInfusion(categoryId));
-        Utils.showIf(v.route, isInjection(categoryId));
+        Utils.showIf(v.dosageRow, !isLiquidInfusionCategory(categoryId));
+        Utils.showIf(v.infusionRow, isLiquidInfusionCategory(categoryId));
+
+        List<String> routes = ROUTES_BY_CATEGORY_ID.get(categoryId);
+        int numRoutes = routes == null ? 0 : routes.size();
+        updateRouteSpinner(routes);
+        if (numRoutes == 1) {
+            v.route.setSelection(0);
+        }
+        Utils.showIf(v.route, numRoutes > 0);
+        v.route.setEnabled(numRoutes > 1);
 
         MsfMedCompleter.Drug.Format format = getFormat();
         Locale locale = App.getSettings().getLocale();
         v.dosage.setEnabled(format != null);
-        v.route.setEnabled(format != null);
+        v.route.setEnabled(format != null && !isSingleNumericDosageCategory(categoryId));
         v.volume.setEnabled(format != null);
         v.infusionDuration.setEnabled(format != null);
         v.isSeries.setEnabled(format != null);
@@ -339,10 +366,10 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         Utils.showIf(v.frequencyRow, isSeries);
         Utils.showIf(v.seriesDuration, isSeries);
 
-        int dosage = getIntField(v.dosage, 0);
-        int hours = getIntField(v.infusionDuration, 0);
-        int timesPerDay = getIntField(v.frequency, 0);
-        int days = getIntField(v.seriesDuration, 0);
+        int dosage = Utils.getInt(v.dosage, 0);
+        double hours = Utils.getDouble(v.infusionDuration, 0);
+        int timesPerDay = Utils.getInt(v.frequency, 0);
+        int days = Utils.getInt(v.seriesDuration, 0);
 
         LocalDate startDay = start.toLocalDate();
         LocalDate stopDay = startDay.plusDays(days);
@@ -429,5 +456,12 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         // is horizontally aligned with the text in the input field.
         textView.setDropDownHorizontalOffset(-itemHorizontalPadding);
         textView.setDropDownWidth(v.medication.getWidth() + itemHorizontalPadding * 2);
+    }
+
+    private static Map<Integer, List<String>> getRoutesByCategoryId() {
+        Map<Integer, List<String>> map = new HashMap<>();
+        map.put(R.id.oral_category, Lists.newArrayList("PO"));
+        map.put(R.id.injectable_category, Lists.newArrayList("IV", "SC", "IM"));
+        return map;
     }
 }

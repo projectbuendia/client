@@ -13,55 +13,45 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+    style="@style/vertical"
     android:padding="16dp"
     >
 
   <org.odk.collect.android.views.WrappingRadioGroup
       android:id="@+id/order_category"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
+      style="@style/horizontal"
       android:layout_marginLeft="-4sp"
       android:layout_marginBottom="8sp"
       >
 
     <RadioButton
         android:id="@+id/oral_category"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:checked="true"
+        style="@style/tight"
         android:text="@string/oral_category_abbr"
+        android:checked="true"
         />
 
     <RadioButton
         android:id="@+id/injectable_category"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/tight"
         android:text="@string/injectable_category_abbr"
         />
 
     <RadioButton
         android:id="@+id/infusible_category"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/tight"
         android:text="@string/infusible_category_abbr"
         />
 
     <RadioButton
         android:id="@+id/external_category"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/tight"
         android:text="@string/external_category_abbr"
         />
 
     <RadioButton
         android:id="@+id/vaccine_category"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/tight"
         android:text="@string/vaccine_category_abbr"
         />
 
@@ -82,25 +72,32 @@
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
           android:text="@string/order_drug"
           android:labelFor="@id/order_medication"
           />
 
-      <AutoCompleteTextView
-          android:id="@+id/order_medication"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
-          android:layout_weight="1"
-          android:ems="15"
-          android:inputType="textCapSentences|textNoSuggestions"
-          android:maxLength="80"
-          android:imeOptions="actionNext"
-          android:nextFocusDown="@id/order_dosage"
-          android:nextFocusRight="@id/order_dosage"
-          tools:text="Paracetamol"
-          />
+      <LinearLayout style="@style/order_cell_container">
+
+        <AutoCompleteTextView
+            android:id="@+id/order_medication"
+            style="@style/text_field"
+            android:layout_width="match_parent"
+            android:ems="15"
+            android:inputType="textCapSentences|textNoSuggestions"
+            android:maxLength="80"
+            android:nextFocusDown="@id/order_dosage"
+            android:nextFocusRight="@id/order_dosage"
+            tools:text="Paracetamol"
+            />
+
+        <!-- For consistent vertical alignment -->
+        <TextView
+            style="@style/inner_field_label"
+            android:text=" "
+            android:labelFor="@id/order_dosage"
+            />
+
+      </LinearLayout>
 
     </TableRow>
 
@@ -111,32 +108,36 @@
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
           android:text="@string/order_format"
           android:labelFor="@id/order_format"
           />
 
-      <Spinner
-          android:id="@+id/order_format"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
-          android:layout_weight="1"
-          />
+      <LinearLayout style="@style/order_cell_container">
+
+        <Spinner
+            android:id="@+id/order_format"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <!-- For consistent vertical alignment -->
+        <TextView
+            style="@style/inner_field_label"
+            android:text=" "
+            android:labelFor="@id/order_dosage"
+            />
+
+      </LinearLayout>
 
     </TableRow>
 
     <TableRow
         android:id="@+id/dosage_row"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="start|center_vertical"
-        android:minHeight="40sp"
+        style="@style/order_table_row"
         >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
           android:text="@string/order_dosage"
           android:labelFor="@id/order_dosage"
           />
@@ -144,20 +145,17 @@
       <LinearLayout style="@style/order_cell_container">
 
         <EditText
-          android:id="@+id/order_dosage"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:ems="3"
-          android:inputType="numberDecimal"
-          android:maxLength="4"
-          android:imeOptions="actionNext"
-          android:nextFocusUp="@id/order_medication"
-          android:nextFocusLeft="@id/order_medication"
-          android:nextFocusDown="@id/order_volume"
-          android:nextFocusRight="@id/order_volume"
-          android:gravity="right|center_vertical"
-          tools:text="100"
-          />
+            android:id="@+id/order_dosage"
+            style="@style/number_field"
+            android:ems="3"
+            android:maxLength="4"
+            android:inputType="numberDecimal"
+            android:nextFocusUp="@id/order_medication"
+            android:nextFocusLeft="@id/order_medication"
+            android:nextFocusDown="@id/order_volume"
+            android:nextFocusRight="@id/order_volume"
+            tools:text="100"
+            />
 
       <TextView
           android:id="@+id/order_dosage_units"
@@ -168,9 +166,7 @@
 
       <Spinner
           android:id="@+id/order_route"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
+          style="@style/tight"
           />
 
       </LinearLayout>
@@ -179,13 +175,12 @@
 
     <TableRow
         android:id="@+id/infusion_rate_row"
-        android:visibility=""
+        android:visibility="gone"
         style="@style/order_table_row"
         >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
           android:text="@string/order_dosage"
           android:labelFor="@id/order_volume"
           />
@@ -194,18 +189,14 @@
 
         <EditText
             android:id="@+id/order_volume"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/number_field"
             android:ems="3"
-            android:inputType="numberDecimal"
             android:maxLength="4"
-            android:imeOptions="actionNext"
-            android:gravity="right|center_vertical"
-            tools:text="1500"
             android:nextFocusUp="@id/order_dosage"
             android:nextFocusLeft="@id/order_dosage"
             android:nextFocusRight="@id/order_infusion_duration"
             android:nextFocusDown="@id/order_frequency"
+            tools:text="1500"
             />
 
         <TextView
@@ -216,18 +207,14 @@
 
         <EditText
             android:id="@+id/order_infusion_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/number_field"
             android:ems="3"
-            android:inputType="numberDecimal"
             android:maxLength="2"
-            android:imeOptions="actionNext"
-            android:gravity="right|center_vertical"
-            tools:text="8"
             android:nextFocusUp="@id/order_dosage"
             android:nextFocusLeft="@id/order_volume"
             android:nextFocusRight="@id/order_frequency"
             android:nextFocusDown="@id/order_frequency"
+            tools:text="8"
             />
 
         <TextView
@@ -248,56 +235,51 @@
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
           android:text="Give"
           android:labelFor="@id/order_is_series"
           />
 
-      <org.odk.collect.android.views.WrappingRadioGroup
-          android:id="@+id/order_is_series"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          android:layout_column="1"
-          android:layout_marginTop="2sp"
-          >
+      <LinearLayout style="@style/order_cell_container">
 
-        <RadioButton
-            android:id="@+id/order_unary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/once"
-            android:checked="true"
-            />
+        <org.odk.collect.android.views.WrappingRadioGroup
+            android:id="@+id/order_is_series"
+            style="@style/horizontal"
+            android:layout_marginTop="2sp"
+            >
 
-        <RadioButton
-            android:id="@+id/order_series"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/multiple_times"
-            />
+          <RadioButton
+              android:id="@+id/order_unary"
+              style="@style/tight"
+              android:text="@string/once"
+              android:checked="true"
+              />
 
-      </org.odk.collect.android.views.WrappingRadioGroup>
+          <RadioButton
+              android:id="@+id/order_series"
+              style="@style/tight"
+              android:text="@string/multiple_times"
+              />
+
+        </org.odk.collect.android.views.WrappingRadioGroup>
+
+      </LinearLayout>
 
     </TableRow>
 
     <TableRow
         android:id="@+id/frequency_row"
-        android:visibility=""
         style="@style/order_table_row"
+        android:visibility="gone"
         >
 
       <LinearLayout style="@style/order_cell_container">
 
         <EditText
             android:id="@+id/order_frequency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/number_field"
             android:digits="0123456789"
             android:ems="3"
-            android:inputType="numberDecimal"
             android:maxLength="2"
-            android:imeOptions="actionNext"
             android:nextFocusUp="@id/order_frequency"
             android:nextFocusLeft="@id/order_frequency"
             android:nextFocusRight="@id/order_series_duration"
@@ -317,13 +299,12 @@
 
     <TableRow
         android:id="@+id/series_duration_row"
-        android:visibility=""
         style="@style/order_table_row"
+        android:visibility="gone"
         >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
           android:text="@string/order_series_duration_prefix"
           android:labelFor="@id/order_series_duration"
           />
@@ -332,14 +313,10 @@
 
         <EditText
             android:id="@+id/order_series_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="1"
+            style="@style/number_field"
             android:digits="0123456789"
             android:ems="3"
-            android:inputType="numberDecimal"
             android:maxLength="2"
-            android:imeOptions="actionNext"
             android:nextFocusUp="@id/order_frequency"
             android:nextFocusLeft="@id/order_frequency"
             android:nextFocusRight="@id/order_notes"
@@ -349,7 +326,6 @@
         <TextView
             android:id="@+id/order_series_duration_units"
             style="@style/inner_field_label"
-            android:layout_column="2"
             android:text="@string/order_days"
             />
 
@@ -363,75 +339,74 @@
         android:layout_marginTop="8sp"
         >
 
-      <TextView
-          android:id="@+id/order_schedule_description"
-          style="@style/field_label"
-          android:layout_column="1"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          android:layout_marginStart="12sp"
-          android:layout_marginEnd="0sp"
-          android:layout_gravity="top|start"
-          android:gravity="start|top"
-          android:minLines="2"
-          tools:text="(commencé le 29 août; après 10 doses, arrêter le 31 août)"/>
-      />
+      <LinearLayout style="@style/order_cell_container">
+
+        <TextView
+            android:id="@+id/order_schedule_description"
+            style="@style/field_label"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12sp"
+            android:layout_marginEnd="0sp"
+            android:layout_gravity="top|start"
+            android:gravity="top|start"
+            android:minLines="2"
+            android:lines="2"
+            tools:text="(commencé le 29 août; après 10 doses, arrêter le 31 août)"/>
+        />
+
+      </LinearLayout>
 
     </TableRow>
 
     <TableRow
         android:id="@+id/notes_row"
         style="@style/order_table_row"
-        android:layout_marginTop="16sp"
+        android:layout_marginTop="8sp"
         >
 
       <TextView
           style="@style/field_label"
           android:layout_gravity="top"
-          android:layout_column="0"
           android:layout_marginTop="0sp"
           android:text="@string/order_notes"
           android:labelFor="@id/order_notes"
           />
 
-      <EditText
-          android:id="@+id/order_notes"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
-          android:layout_weight="1"
-          android:inputType="textMultiLine|textCapSentences"
-          android:minLines="2"
-          android:gravity="top|start"
-          android:imeOptions="actionNone"
-          android:nextFocusUp="@id/order_series_duration"
-          android:nextFocusLeft="@id/order_series_duration"
-          tools:text="Administer carefully"
-          />
+      <LinearLayout style="@style/order_cell_container">
+
+        <EditText
+            android:id="@+id/order_notes"
+            style="@style/text_field"
+            android:layout_width="match_parent"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="2"
+            android:gravity="top|start"
+            android:nextFocusUp="@id/order_series_duration"
+            android:nextFocusLeft="@id/order_series_duration"
+            tools:text="Administer carefully"
+            />
+
+      </LinearLayout>
 
     </TableRow>
 
   </TableLayout>
 
   <LinearLayout
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
+      style="@style/horizontal"
       android:layout_marginTop="16sp"
-      android:orientation="horizontal"
       >
 
     <Button
         android:id="@+id/order_stop_now"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/tight"
         android:layout_marginBottom="16sp"
         android:text="@string/order_stop_now"
         />
 
     <Button
         android:id="@+id/order_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/tight"
         android:layout_marginStart="16sp"
         android:layout_marginBottom="16sp"
         android:text="@string/order_delete"

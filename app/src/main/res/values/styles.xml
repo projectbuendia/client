@@ -109,6 +109,7 @@
 
   <!-- A label next to a form field in a table of fields. -->
   <style name="field_label">
+    <item name="android:layout_column">0</item>
     <item name="android:layout_width">wrap_content</item>
     <item name="android:layout_height">40sp</item> <!-- makes rows uniform -->
     <item name="android:layout_marginEnd">12sp</item> <!-- space before field -->
@@ -258,19 +259,49 @@
   </style>
 
 
+  <style name="tight">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+  </style>
+
+  <style name="text_field">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:imeOptions">actionNext</item>
+  </style>
+  <style name="number_field">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:gravity">end|center_vertical</item>
+    <item name="android:inputType">numberDecimal</item>
+    <item name="android:imeOptions">actionNext</item>
+  </style>
+
   <!-- order_dialog_fragment -->
   <style name="order_table_row">
     <item name="android:layout_width">match_parent</item>
     <item name="android:layout_height">wrap_content</item>
     <item name="android:gravity">start|center_vertical</item>
-    <item name="android:minHeight">40sp</item>
+    <item name="android:minHeight">42sp</item>
+  </style>
+
+  <!-- LinearLayout styles -->
+  <style name="horizontal">
+    <item name="android:layout_width">match_parent</item>>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:orientation">horizontal</item>
+  </style>
+  <style name="vertical">
+    <item name="android:layout_width">match_parent</item>>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:orientation">vertical</item>
   </style>
   <style name="order_cell_container">
     <item name="android:layout_width">match_parent</item>
     <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_column">1</item>
     <item name="android:layout_weight">1</item>
     <item name="android:orientation">horizontal</item>
-    <item name="android:layout_column">1</item>
   </style>
 
 </resources>
