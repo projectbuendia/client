@@ -120,8 +120,8 @@
   <string name="order_time_per_day">fois par jour</string>
   <string name="order_times_per_day">fois par jour</string>
   <string name="order_give_for">Donner pour</string>
-  <string name="order_give_for_days">jours</string>
-  <string name="order_give_for_day">jour</string>
+  <string name="order_days">jours</string>
+  <string name="order_day">jour</string>
 
   <string name="order_one_dose_only">(seul dose)</string>
   <string name="order_start_now_indefinitely">(commencer maintenant; continuer indéfiniment)</string>

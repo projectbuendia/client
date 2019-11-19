@@ -116,15 +116,27 @@
 
   <string name="title_new_order">New treatment</string>
   <string name="title_edit_order">Edit treatment</string>
-  <string name="order_medication">Medication</string>
+  <string name="order_drug">Drug</string>
+  <string name="order_format">Format</string>
   <string name="order_dosage">Dosage</string>
   <string name="order_route">Route</string>
-  <string name="order_frequency">Frequency</string>
+  <string name="order_frequency_prefix">Give</string>
   <string name="order_time_per_day">time per day</string>
   <string name="order_times_per_day">times per day</string>
-  <string name="order_give_for">Give for</string>
-  <string name="order_give_for_days">days</string>
-  <string name="order_give_for_day">day</string>
+  <string name="order_series_duration_prefix">For</string>
+  <string name="order_days">days</string>
+  <string name="order_day">day</string>
+  <string name="order_hours">hours</string>
+  <string name="order_hour">hour</string>
+
+  <string name="oral_category_abbr">Oral</string>
+  <string name="injectable_category_abbr">Inj</string>
+  <string name="infusible_category_abbr">Inf</string>
+  <string name="external_category_abbr">Ext</string>
+  <string name="vaccine_category_abbr">Vacc</string>
+
+  <string name="once">Once</string>
+  <string name="multiple_times">Multiple times</string>
 
   <string name="order_one_dose_only">(one dose only)</string>
   <string name="order_start_now_indefinitely">(start now; continue indefinitely)</string>

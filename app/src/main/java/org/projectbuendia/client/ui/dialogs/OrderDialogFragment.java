@@ -23,11 +23,16 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
@@ -37,11 +42,12 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.ui.MedCompleter;
+import org.projectbuendia.client.ui.MsfMedCompleter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import de.greenrobot.event.EventBus;
 
@@ -66,14 +72,29 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     class Views {
+        RadioGroup category = u.findView(R.id.order_category);
+
         AutoCompleteTextView medication = u.findView(R.id.order_medication);
-        EditText route = u.findView(R.id.order_route);
+        Spinner format = u.findView(R.id.order_format);
+        TableRow dosageRow = u.findView(R.id.dosage_row);
         EditText dosage = u.findView(R.id.order_dosage);
+        TextView dosageUnits = u.findView(R.id.order_dosage_units);
+        Spinner route = u.findView(R.id.order_route);
+        TableRow infusionRow = u.findView(R.id.infusion_rate_row);
+        EditText volume = u.findView(R.id.order_volume);
+        EditText infusionDuration = u.findView(R.id.order_infusion_duration);
+        TextView infusionDurationUnits = u.findView(R.id.order_infusion_duration_units);
+
+        RadioGroup isSeries = u.findView(R.id.order_is_series);
+        RadioButton unary = u.findView(R.id.order_unary);
+        RadioButton series = u.findView(R.id.order_series);
+        TableRow frequencyRow = u.findView(R.id.frequency_row);
         EditText frequency = u.findView(R.id.order_frequency);
-        TextView timesPerDayLabel = u.findView(R.id.order_times_per_day_label);
-        EditText giveForDays = u.findView(R.id.order_give_for_days);
-        TextView giveForDaysLabel = u.findView(R.id.order_give_for_days_label);
-        TextView durationLabel = u.findView(R.id.order_duration_label);
+        TextView frequencyUnits = u.findView(R.id.order_frequency_units);
+        TableRow seriesDurationRow = u.findView(R.id.series_duration_row);
+        EditText seriesDuration = u.findView(R.id.order_series_duration);
+        TextView seriesDurationUnits = u.findView(R.id.order_series_duration_units);
+        TextView scheduleDescription = u.findView(R.id.order_schedule_description);
         EditText notes = u.findView(R.id.order_notes);
         Button stopNow = u.findView(R.id.order_stop_now);
         Button delete = u.findView(R.id.order_delete);
@@ -130,21 +151,6 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void addListeners() {
-        // TODO(ping): Replace the route EditText with a properly styled Spinner.
-        v.route.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) v.callOnClick();
-        });
-        v.route.setOnClickListener(v -> {
-            int index = Arrays.asList(ROUTE_LABELS).indexOf(this.v.route.getText().toString());
-            new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.route_of_administration)
-                .setSingleChoiceItems(ROUTE_LABELS, index, (dialog, which) -> {
-                    this.v.route.setText(ROUTE_LABELS[which]);
-                    dialog.dismiss();
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .show();
-        });
         // After the dialog has been laid out and positioned, we can figure out
         // how to position and size the autocompletion dropdown.
         v.medication.getViewTreeObserver().addOnPreDrawListener(() -> {
@@ -152,34 +158,57 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             return true;
         });
 
-        new EditTextWatcher(v.frequency, v.giveForDays).onChange(this::updateUi);
+        v.category.setOnCheckedChangeListener((v, id) -> updateUi());
+        v.isSeries.setOnCheckedChangeListener((v, id) -> updateUi());
+        new EditTextWatcher(
+            v.dosage, v.infusionDuration,
+            v.frequency, v.seriesDuration
+        ).onChange(this::updateUi);
         v.stopNow.setOnClickListener(view -> onStopNow());
         v.delete.setOnClickListener(view -> onDelete());
     }
 
     private void populateFields() {
         v.medication.setText(args.order.instructions.medication);
-        v.route.setText(args.order.instructions.route);
+        v.format.setSelection(toFormatIndex(args.order.instructions.formatCode));
         v.dosage.setText(args.order.instructions.dosage);
+        v.route.setSelection(toRouteIndex(args.order.instructions.route));
+        v.volume.setText("" + args.order.instructions.volumeMilliliters);
+        v.infusionDuration.setText("" + args.order.instructions.infusionHours);
+
+        v.unary.setChecked(!args.order.isSeries());
+        v.series.setChecked(args.order.isSeries());
+
         int frequency = args.order.instructions.frequency;
-        v.frequency.setText(frequency > 0 ? Integer.toString(frequency) : "");
-        v.notes.setText(args.order.instructions.notes);
+        v.frequency.setText(frequency > 0 ? "" + frequency : "");
         if (args.order.stop != null) {
             int days = Days.daysBetween(start.toLocalDate(), args.order.stop.toLocalDate()).getDays();
-            if (days > 0) v.giveForDays.setText("" + days);
+            if (days > 0) v.seriesDuration.setText("" + days);
         }
+        v.notes.setText(args.order.instructions.notes);
     }
 
     @Override protected void onSubmit() {
-        String medication = v.medication.getText().toString().trim();
-        String route = v.route.getText().toString().trim();
-        String dosage = v.dosage.getText().toString().trim();
-        int frequency = Utils.toIntOrDefault(v.frequency.getText().toString().trim(), 0);
-        String notes = v.notes.getText().toString().trim();
-        Order.Instructions instructions = new Order.Instructions(medication, route, dosage, frequency, notes);
+        String medication = Utils.getText(v.medication);
+        String format = toFormatCode(v.format.getSelectedItemPosition());
+        String dosage = Utils.getText(v.dosage);
+        String route = toRouteAbbreviation(v.route.getSelectedItemId());
+        double volume = Utils.getDouble(v.volume, 0);
+        double infusionHours = Utils.getDouble(v.infusionDuration, 0);
+        int frequency = Utils.getInt(v.frequency, 0);
+        String notes = Utils.getText(v.notes);
 
-        String durationStr = v.giveForDays.getText().toString().trim();
-        Integer durationDays = durationStr.isEmpty() ? null : Integer.valueOf(durationStr);
+        int categoryId = v.category.getCheckedRadioButtonId();
+        Order.Instructions instructions;
+        if (isInfusion(categoryId)) {
+            instructions = new Order.Instructions(
+                medication, format, volume, infusionHours, frequency, notes);
+        } else {
+            instructions = new Order.Instructions(
+                medication, format, dosage, route, frequency, notes);
+        }
+
+        int durationDays = Utils.getInt(v.seriesDuration, -1);
         boolean valid = true;
         if (medication.isEmpty()) {
             setError(v.medication, R.string.enter_medication);
@@ -189,17 +218,17 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             setError(v.frequency, R.string.order_cannot_exceed_n_times_per_day, MAX_FREQUENCY);
             valid = false;
         }
-        if (durationDays != null) {
+        if (durationDays != -1) {
             if (durationDays == 0) {
-                setError(v.giveForDays, R.string.order_give_for_days_cannot_be_zero);
+                setError(v.seriesDuration, R.string.order_give_for_days_cannot_be_zero);
                 valid = false;
             }
             if (durationDays > MAX_DURATION_DAYS) {
-                setError(v.giveForDays, R.string.order_cannot_exceed_n_days, MAX_DURATION_DAYS);
+                setError(v.seriesDuration, R.string.order_cannot_exceed_n_days, MAX_DURATION_DAYS);
                 valid = false;
             }
             if (start.plusDays(durationDays).isBefore(args.now)) {
-                setError(v.giveForDays, R.string.order_cannot_stop_in_past);
+                setError(v.seriesDuration, R.string.order_cannot_stop_in_past);
                 valid = false;
             }
         }
@@ -269,28 +298,73 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         });
     }
 
+    private static int getIntField(EditText field, int defaultValue) {
+        return Utils.toIntOrDefault(field.getText().toString().trim(), defaultValue);
+    }
+
+    private MsfMedCompleter.Drug.Format getFormat() {
+        return null;
+    }
+
+    private boolean isInfusion(int categoryId) {
+        return false;
+    }
+
+    private boolean isInjection(int categoryId) {
+        return false;
+    }
+
+    private void updateFormatSpinner() {
+
+    }
+
     /** Updates labels and disables or hides elements according to the input fields. */
     private void updateUi() {
-        int frequency = Utils.toIntOrDefault(v.frequency.getText().toString().trim(), 0);
+        int categoryId = v.category.getCheckedRadioButtonId();
+        Utils.showIf(v.dosageRow, !isInfusion(categoryId));
+        Utils.showIf(v.infusionRow, isInfusion(categoryId));
+        Utils.showIf(v.route, isInjection(categoryId));
 
-        String text = v.giveForDays.getText().toString().trim();
-        int days = text.isEmpty() ? 0 : Integer.parseInt(text);
+        MsfMedCompleter.Drug.Format format = getFormat();
+        Locale locale = App.getSettings().getLocale();
+        v.dosage.setEnabled(format != null);
+        v.route.setEnabled(format != null);
+        v.volume.setEnabled(format != null);
+        v.infusionDuration.setEnabled(format != null);
+        v.isSeries.setEnabled(format != null);
+        v.frequency.setEnabled(format != null);
+        v.seriesDuration.setEnabled(format != null);
+
+        boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
+        Utils.showIf(v.frequencyRow, isSeries);
+        Utils.showIf(v.seriesDuration, isSeries);
+
+        int dosage = getIntField(v.dosage, 0);
+        int hours = getIntField(v.infusionDuration, 0);
+        int timesPerDay = getIntField(v.frequency, 0);
+        int days = getIntField(v.seriesDuration, 0);
+
         LocalDate startDay = start.toLocalDate();
         LocalDate stopDay = startDay.plusDays(days);
 
-        if (frequency == 0) v.giveForDays.setText("");
-        v.timesPerDayLabel.setText(
-            frequency == 1 ? R.string.order_time_per_day : R.string.order_times_per_day);
-        v.giveForDaysLabel.setText(
-            days == 1 ? R.string.order_give_for_day : R.string.order_give_for_days);
+        v.dosageUnits.setText(
+            format == null ? "" :
+            (dosage == 1 ? format.dosageUnit.singular :
+                format.dosageUnit.plural).get(locale));
+        v.infusionDurationUnits.setText(
+            hours == 1 ? R.string.order_hour : R.string.order_hours);
+        v.frequencyUnits.setText(
+            timesPerDay == 1 ? R.string.order_time_per_day : R.string.order_times_per_day);
+        v.seriesDurationUnits.setText(
+            days == 1 ? R.string.order_day : R.string.order_days);
 
-        int doses = frequency * days;
+        int doses = timesPerDay * days;
         String startDate = friendlyDateFormat(startDay);
         String stopDate = friendlyDateFormat(stopDay);
 
         if (args.order == null) {
-            v.durationLabel.setText(
-                frequency == 0 || frequency * days == 1 ?
+            v.scheduleDescription.setText(
+                timesPerDay == 0 || timesPerDay * days == 1 ?
                     u.str(R.string.order_one_dose_only) :
                 days == 0 ?
                     u.str(R.string.order_start_now_indefinitely) :
@@ -299,14 +373,14 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
                 u.str(R.string.order_start_now_after_doses_stop_date, doses, stopDate)
             );
         } else if (args.stopped) {
-            v.durationLabel.setText(
-                frequency == 0 || frequency * days == 1 ?
+            v.scheduleDescription.setText(
+                timesPerDay == 0 || timesPerDay * days == 1 ?
                     u.str(R.string.order_one_dose_only_ordered_date, startDate) :
                 u.str(R.string.order_started_date_stopped_date, startDate, stopDate)
             );
         } else {
-            v.durationLabel.setText(
-                frequency == 0 || frequency * days == 1 ?
+            v.scheduleDescription.setText(
+                timesPerDay == 0 || timesPerDay * days == 1 ?
                     u.str(R.string.order_one_dose_only_ordered_date, startDate) :
                 days == 0 ?
                     u.str(R.string.order_started_date_indefinitely, startDate) :
@@ -318,8 +392,6 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         // If the order has stopped, you can't change the frequency or duration.
         Utils.setEnabled(v.frequency, !args.stopped);
-        // You can't specify a duration if the order isn't a series.
-        Utils.setEnabled(v.giveForDays, !args.stopped && frequency > 0);
 
         // Hide or show the "Stop" and "Delete" buttons appropriately.
         Utils.showIf(v.stopNow, args.order != null && !args.stopped);

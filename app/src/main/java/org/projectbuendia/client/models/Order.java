@@ -235,11 +235,11 @@ public final @Immutable class Order extends Model implements Serializable {
         // equals() method to decide whether to re-render the chart grid.
         if (other instanceof Order) {
             Order o = (Order) other;
-            return Objects.equals(uuid, o.uuid)
-                && Objects.equals(patientUuid, o.patientUuid)
-                && Objects.equals(instructions, o.instructions)
-                && Objects.equals(start, o.start)
-                && Objects.equals(stop, o.stop);
+            return Utils.eq(uuid, o.uuid)
+                && Utils.eq(patientUuid, o.patientUuid)
+                && Utils.eq(instructions, o.instructions)
+                && Utils.eq(start, o.start)
+                && Utils.eq(stop, o.stop);
         }
         return false;
     }
@@ -276,8 +276,11 @@ public final @Immutable class Order extends Model implements Serializable {
     public static class Instructions implements Serializable {
         // These String fields are empty if missing, but never null.
         public final @NonNull String medication;
-        public final @NonNull String route;
+        public final @NonNull String formatCode;
         public final @NonNull String dosage;
+        public final @NonNull String route;
+        public final @NonNull double volumeMilliliters;
+        public final @NonNull double infusionHours;
         public final int frequency;  // == 0 if unary, > 0 if series
         public final @NonNull String notes;
 
@@ -298,10 +301,24 @@ public final @Immutable class Order extends Model implements Serializable {
                 + "|" +
                 "([^ ]*) ?(.*)");  // example: "Prednisone 1 L 10 mg/L"
 
-        public Instructions(String medication, String route, String dosage, int frequency, String notes) {
+        public Instructions(String medication, String formatCode, String dosage, String route, int frequency, String notes) {
             this.medication = Utils.toNonnull(medication);
-            this.route = Utils.toNonnull(route);
+            this.formatCode = Utils.toNonnull(formatCode);
             this.dosage = Utils.toNonnull(dosage);
+            this.route = Utils.toNonnull(route);
+            this.volumeMilliliters = 0;
+            this.infusionHours = 0;
+            this.frequency = frequency > 0 ? frequency : 0;
+            this.notes = Utils.toNonnull(notes);
+        }
+
+        public Instructions(String medication, String formatCode, double volumeMilliliters, double infusionHours, int frequency, String notes) {
+            this.medication = Utils.toNonnull(medication);
+            this.formatCode = Utils.toNonnull(formatCode);
+            this.dosage = "";
+            this.route = "";
+            this.volumeMilliliters = volumeMilliliters;
+            this.infusionHours = infusionHours;
             this.frequency = frequency > 0 ? frequency : 0;
             this.notes = Utils.toNonnull(notes);
         }
@@ -310,21 +327,23 @@ public final @Immutable class Order extends Model implements Serializable {
             // Instructions are serialized to a String consisting of records
             // separated by RS, and fields within those records separated by US.
             // The records and fields within them are as follows:
-            //   - Record 0: medication, route
-            //   - Record 1: dosage, unit, concentration, unit
+            //   - Record 0: medication, route, formatCode
+            //   - Record 1: dosage, volumeMilliliters, infusionHours
             //   - Record 2: frequency, unit
             //   - Record 3: notes
             String[] records = Utils.splitFields(instructionsText, RS, 4);
 
             // Medication
-            String[] fields = Utils.splitFields(records[0], US, 2);
+            String[] fields = Utils.splitFields(records[0], US, 3);
             medication = fields[0].trim();
             route = fields[1].trim();
+            formatCode = fields[2].trim();
 
             // Dosage
-            fields = Utils.splitFields(records[1], US, 2);
-            dosage = fields[0].trim();
-            // TODO(ping): Support dosage units and concentration.
+            fields = Utils.splitFields(records[1], US, 3);
+            dosage = fields[0].trim();  // dosage units are determined by the formatCode
+            volumeMilliliters = Utils.toDoubleOrDefault(fields[1], 0);
+            infusionHours = Utils.toDoubleOrDefault(fields[2], 0);
 
             // Frequency
             fields = Utils.splitFields(records[2], US, 2);
@@ -336,10 +355,10 @@ public final @Immutable class Order extends Model implements Serializable {
             notes = fields[0].trim();
         }
 
-        /** Packs medication, dosage, and frequency into a single instruction string. */
+        /** Packs all the fields into a single instruction string. */
         public String format() {
-            return (medication + US + route)
-                + RS + (dosage)
+            return (medication + US + route + US + formatCode)
+                + RS + (dosage + US + volumeMilliliters + US + infusionHours)
                 + RS + (frequency > 0 ? (frequency + US + "x daily") : "")
                 + RS + (notes)
                 + RS + US + US + ".";
@@ -354,7 +373,10 @@ public final @Immutable class Order extends Model implements Serializable {
                 Instructions o = (Instructions) other;
                 return Objects.equals(medication, o.medication)
                     && Objects.equals(route, o.route)
+                    && Objects.equals(formatCode, o.formatCode)
                     && Objects.equals(dosage, o.dosage)
+                    && Objects.equals(volumeMilliliters, o.volumeMilliliters)
+                    && Objects.equals(infusionHours, o.infusionHours)
                     && Objects.equals(frequency, o.frequency)
                     && Objects.equals(notes, o.notes);
             }

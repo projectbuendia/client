@@ -564,10 +564,10 @@ public class MsfMedCompleter implements Completer {
     };
 
     public static class Category {
-        Loc name;  // drug category, e.g. "oral", "injectable", "external"
-        String code;  // stock code prefix, e.g. "DORA", "DINJ", "DEXT"
-        Loc[] routes; // routes of administration, e.g. PO, IV, SC
-        Drug[] drugs;
+        public final Loc name;  // drug category, e.g. "oral", "injectable", "external"
+        public final String code;  // stock code prefix, e.g. "DORA", "DINJ", "DEXT"
+        public final Loc[] routes; // routes of administration, e.g. PO, IV, SC
+        public Drug[] drugs;
 
         public Category(String name, String code, String... routes) {
             this.name = new Loc(name);
@@ -585,10 +585,10 @@ public class MsfMedCompleter implements Completer {
     }
 
     public static class Drug {
-        Loc name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
-        String[] aliases;  // alternative names, title case, e.g. {"Aspirin", "ASA"}
-        Loc[] captions;  // therapeutic action, lowercase noun, e.g. {"analgesic", "antipyretic"}
-        Format[] formats;
+        public final Loc name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
+        public final String[] aliases;  // alternative names, title case, e.g. {"Aspirin", "ASA"}
+        public Loc[] captions;  // therapeutic action, lowercase noun, e.g. {"analgesic", "antipyretic"}
+        public Format[] formats;
 
         public Drug(String name, String... aliases) {
             this.name = new Loc(name);
@@ -608,9 +608,9 @@ public class MsfMedCompleter implements Completer {
         }
 
         public static class Format {
-            String code;  // stock code, e.g. "DORAACSA3TD"
-            Loc formulation;  // quantity, concentration, form, e.g. "300 mg, disp. tab."
-            Unit dosageUnit;
+            public final String code;  // stock code, e.g. "DORAACSA3TD"
+            public final Loc formulation;  // quantity, concentration, form, e.g. "300 mg, disp. tab."
+            public final Unit dosageUnit;
 
             public Format(String code, String formulation, Unit dosageUnit) {
                 this(code, new Loc(formulation), dosageUnit);
@@ -624,8 +624,8 @@ public class MsfMedCompleter implements Completer {
         }
 
         public static class Unit {
-            Loc singular;  // unit of prescription, singular, e.g. "tablet"
-            Loc plural;  // unit of prescription, plural, e.g. "tablets"
+            public final Loc singular;  // unit of prescription, singular, e.g. "tablet"
+            public final Loc plural;  // unit of prescription, plural, e.g. "tablets"
 
             public Unit(String unit) {
                 this(new Loc(unit));

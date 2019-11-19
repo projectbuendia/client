@@ -279,24 +279,22 @@ public class Utils {
     // ==== Number parsing ====
 
     /** Converts a String to an integer, returning null if parsing fails. */
-    public static Integer toIntOrNull(String text) {
+    public static Integer toIntOrNull(@Nullable String str) {
+        if (str == null) return null;
         try {
-            return Integer.valueOf(text);
+            return Integer.valueOf(str);
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
     /** Converts a String to an integer, returning a default value if parsing fails. */
-    public static int toIntOrDefault(String text, int defaultValue) {
-        try {
-            return Integer.valueOf(text);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+    public static int toIntOrDefault(String str, int defaultValue) {
+        Integer value = toIntOrNull(str);
+        return value == null ? defaultValue : value;
     }
 
-    /** Parses a long integer value from a string, or returns null if parsing fails. */
+    /** Converts a String to a long integer, returning null if parsing fails. */
     public static @Nullable Long toLongOrNull(@Nullable String str) {
         if (str == null) return null;
         try {
@@ -306,14 +304,20 @@ public class Utils {
         }
     }
 
-    /** Parses a double value from a string, or returns null if parsing fails. */
+    /** Converts a String to a double, returning null if parsing fails. */
     public static @Nullable Double toDoubleOrNull(@Nullable String str) {
         if (str == null) return null;
         try {
-            return Double.parseDouble(str);
+            return Double.parseDouble(str.trim());
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    /** Converts a String to a double, returning a default value if parsing fails. */
+    public static double toDoubleOrDefault(@Nullable String str, double defaultValue) {
+        Double value = toDoubleOrNull(str);
+        return value == null ? defaultValue : value;
     }
 
     /** Converts objects of integer types to longs. */
@@ -665,7 +669,7 @@ public class Utils {
     }
 
 
-    // ==== User interface ====
+    // ==== UI Views ====
 
     /** Shows or hides a dialog based on a boolean flag. */
     public static void showDialogIf(@Nullable Dialog dialog, boolean show) {
@@ -719,6 +723,21 @@ public class Utils {
             fields[0].requestFocus();
             fields[0].setSelection(fields[0].getText().length());
         }
+    }
+
+    /** Gets the text in an editable text field and trims away whitespace. */
+    public static String getText(EditText field) {
+        return field.getText().toString().trim();
+    }
+
+    /** Gets the integer value in a text field, or a default value if invalid. */
+    public static int getInt(EditText field, int defaultValue) {
+        return toIntOrDefault(field.getText().toString().trim(), defaultValue);
+    }
+
+    /** Gets the numeric value in a text field, or a default value if invalid. */
+    public static double getDouble(EditText field, double defaultValue) {
+        return toDoubleOrDefault(field.getText().toString().trim(), defaultValue);
     }
 
 
