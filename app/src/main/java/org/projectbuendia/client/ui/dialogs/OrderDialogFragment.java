@@ -39,12 +39,12 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
+import org.projectbuendia.client.models.Catalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.ui.MedCompleter;
-import org.projectbuendia.client.ui.MsfMedCompleter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
@@ -315,7 +315,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         return categoryId == R.id.infusible_category;
     }
 
-    private MsfMedCompleter.Drug.Format getFormat() {
+    private Catalog.Format getFormat() {
         return null;
     }
 
@@ -352,7 +352,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         Utils.showIf(v.route, numRoutes > 0);
         v.route.setEnabled(numRoutes > 1);
 
-        MsfMedCompleter.Drug.Format format = getFormat();
+        Catalog.Format format = getFormat();
         Locale locale = App.getSettings().getLocale();
         v.dosage.setEnabled(format != null);
         v.route.setEnabled(format != null && !isSingleNumericDosageCategory(categoryId));

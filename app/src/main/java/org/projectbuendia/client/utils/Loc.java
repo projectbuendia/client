@@ -51,4 +51,12 @@ public class Loc {
 
         return base;
     }
+
+    public static Loc[] newArray(String... strings) {
+        Loc[] locs = new Loc[strings.length];
+        for (int i = 0; i < locs.length; i++) {
+            locs[i] = new Loc(strings[i]);
+        }
+        return locs;
+    }
 }

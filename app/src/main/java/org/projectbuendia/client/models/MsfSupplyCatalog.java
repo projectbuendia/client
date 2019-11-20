@@ -1,4 +1,4 @@
-package org.projectbuendia.client.ui;
+package org.projectbuendia.client.models;
 
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -6,8 +6,6 @@ import android.view.View;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.AutocompleteAdapter.Completer;
 import org.projectbuendia.client.ui.AutocompleteAdapter.Completion;
-import org.projectbuendia.client.ui.MsfMedCompleter.Drug.Format;
-import org.projectbuendia.client.ui.MsfMedCompleter.Drug.Unit;
 import org.projectbuendia.client.utils.Loc;
 import org.projectbuendia.client.utils.Utils;
 
@@ -20,7 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class MsfMedCompleter implements Completer {
+public class MsfSupplyCatalog implements Completer {
 
     // ==== Style conventions for captions ====
     //
@@ -539,111 +537,6 @@ public class MsfMedCompleter implements Completer {
 
     public static class Inventory {
         Map<String, List<Med>> categories;  // oral, injectable, infusion, etc.
-    }
-
-    Unit TABLET = new Unit("tablet [fr:comprimé]", "tablets [fr:comprimés]");
-    Unit CAPSULE = new Unit("capsule", "capsules");
-    Unit ML = new Unit("mL", "mL");
-    Unit DROP = new Unit("drop", "drops");
-    Unit PUFF = new Unit("puff", "puffs");
-    Unit AMPOULE = new Unit("ampoule", "ampoules");
-    Unit SACHET = new Unit("sachet", "sachets");
-
-    Category[] categories = {
-        new Category("oral", "DORA", "PO").withDrugs(
-            new Drug("ABACAVIR sulfate", "ABC").withCaptions(ANTIRETROVIRAL).withFormats(
-                new Format("DORAABCV3T", "eq. 300 mg base, tab.", TABLET),
-                new Format("DORAABCV6TD", "eq. 60 mg, disp. tab.", TABLET)
-            ),
-            new Drug("ABACAVIR/LAMIVUDINE", "ABC/3TC").withCaptions(ANTIRETROVIRAL).withFormats(
-                new Format("DORAABLA1TD", "60 mg/30 mg, disp. tab.", TABLET),
-                new Format("DORAABLA2T3", "600 mg/300 mg, tab.", TABLET),
-                new Format("DORAABLA3TD", "120 mg/60 mg, disp. tab.", TABLET)
-            )
-        )
-    };
-
-    public static class Category {
-        public final Loc name;  // drug category, e.g. "oral", "injectable", "external"
-        public final String code;  // stock code prefix, e.g. "DORA", "DINJ", "DEXT"
-        public final Loc[] routes; // routes of administration, e.g. PO, IV, SC
-        public Drug[] drugs;
-
-        public Category(String name, String code, String... routes) {
-            this.name = new Loc(name);
-            this.code = code;
-            this.routes = new Loc[routes.length];
-            for (int i = 0; i < routes.length; i++) {
-                this.routes[i] = new Loc(routes[i]);
-            }
-        }
-
-        public Category withDrugs(Drug... drug) {
-            this.drugs = drugs;
-            return this;
-        }
-    }
-
-    public static class Drug {
-        public final Loc name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
-        public final String[] aliases;  // alternative names, title case, e.g. {"Aspirin", "ASA"}
-        public Loc[] captions;  // therapeutic action, lowercase noun, e.g. {"analgesic", "antipyretic"}
-        public Format[] formats;
-
-        public Drug(String name, String... aliases) {
-            this.name = new Loc(name);
-            this.aliases = aliases;
-            this.captions = new Loc[0];
-            this.formats = new Format[0];
-        }
-
-        public Drug withCaptions(Loc... captions) {
-            this.captions = captions;
-            return this;
-        }
-
-        public Drug withFormats(Format... formats) {
-            this.formats = formats;
-            return this;
-        }
-
-        public static class Format {
-            public final String code;  // stock code, e.g. "DORAACSA3TD"
-            public final Loc formulation;  // quantity, concentration, form, e.g. "300 mg, disp. tab."
-            public final Unit dosageUnit;
-
-            public Format(String code, String formulation, Unit dosageUnit) {
-                this(code, new Loc(formulation), dosageUnit);
-            }
-
-            public Format(String code, Loc formulation, Unit dosageUnit) {
-                this.code = code;
-                this.formulation = formulation;
-                this.dosageUnit = dosageUnit;
-            }
-        }
-
-        public static class Unit {
-            public final Loc singular;  // unit of prescription, singular, e.g. "tablet"
-            public final Loc plural;  // unit of prescription, plural, e.g. "tablets"
-
-            public Unit(String unit) {
-                this(new Loc(unit));
-            }
-
-            public Unit(Loc unit) {
-                singular = plural = unit;
-            }
-
-            public Unit(String singular, String plural) {
-                this(new Loc(singular), new Loc(plural));
-            }
-
-            public Unit(Loc singular, Loc plural) {
-                this.singular = singular;
-                this.plural = plural;
-            }
-        }
     }
 
     // Examples of combined medications:
