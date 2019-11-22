@@ -29,7 +29,7 @@ import java.util.List;
  * group; see {@link WidgetGroupBuilderFactory}.
  */
 public class BinarySelectOneTableWidgetGroupBuilder implements
-        WidgetGroupBuilder<TableWidgetGroup, BinarySelectOneTableWidgetGroupBuilder> {
+        WidgetGroupBuilder<TableWidgetGroup, BinarySelectOneTableWidgetGroupBuilder>, View.OnClickListener {
 
     private static final String TAG = BinarySelectOneTableWidgetGroupBuilder.class.getName();
 
@@ -91,6 +91,7 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
                 .inflate(R.layout.template_binary_select_one_widget_group, null /*parent*/);
 
         for (BinarySelectOneWidget widget : mWidgets) {
+            widget.setOnClickCallback(this);
             group.addView(widget);
         }
 
@@ -98,6 +99,15 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         group.addRow(mNoneButton);
         setTopMargin(context, mNoneButton, 12);
         return group;
+    }
+
+    @Override public void onClick(View view) {
+        if (view instanceof BinarySelectOneWidget) {
+            BinarySelectOneWidget widget = (BinarySelectOneWidget) view;
+            if (widget.getState() == true) {
+                mNoneButton.setChecked(false);
+            }
+        }
     }
 
     private CheckBox createNoneButton(Context context, String label, ViewGroup parent) {
@@ -108,7 +118,7 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
             @Override public void onClick(View v) {
                 ((CheckBox) v).setChecked(true);
                 for (BinarySelectOneWidget widget : mWidgets) {
-                    widget.clearAnswer();
+                    widget.setState(false);
                 }
             }
         });
