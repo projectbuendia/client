@@ -3,6 +3,10 @@ package org.odk.collect.android.widgets2.group;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
+import android.widget.CheckBox;
 
 import org.javarosa.core.model.Constants;
 import org.javarosa.form.api.FormEntryPrompt;
@@ -15,8 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link WidgetGroupBuilder} that builds {@link TableWidgetGroup}s with a bunch of
- * {@link BinarySelectOneWidget}s.
+ * A {@link WidgetGroupBuilder} that builds a {@link TableWidgetGroup}
+ * containing several {@link BinarySelectOneWidget}s.  In Buendia, this
+ * is the way we present a set of choices that allows any number of choices
+ * to be selected.  This is logically equivalent to a group of checkboxes,
+ * but JavaRosa has no concept of a boolean control type; booleans are
+ * represented as select-one controls with "yes" and "no" as the two choices.
+ * This builder is triggered by the appearance "binary-select-one" on the
+ * group; see {@link WidgetGroupBuilderFactory}.
  */
 public class BinarySelectOneTableWidgetGroupBuilder implements
         WidgetGroupBuilder<TableWidgetGroup, BinarySelectOneTableWidgetGroupBuilder> {
@@ -25,6 +35,7 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
 
     private final Appearance mAppearance;
     private final List<BinarySelectOneWidget> mWidgets;
+    private CheckBox mNoneButton;
 
     public BinarySelectOneTableWidgetGroupBuilder(Appearance appearance) {
         mAppearance = appearance;
@@ -83,6 +94,30 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
             group.addView(widget);
         }
 
+        mNoneButton = createNoneButton(context, context.getString(R.string.none_of_the_above), group);
+        group.addRow(mNoneButton);
+        setTopMargin(context, mNoneButton, 12);
         return group;
+    }
+
+    private CheckBox createNoneButton(Context context, String label, ViewGroup parent) {
+        CheckBox cb = (CheckBox) LayoutInflater.from(context).inflate(
+            R.layout.template_check_box_button, parent, false);
+        cb.setText(label);
+        cb.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                ((CheckBox) v).setChecked(true);
+                for (BinarySelectOneWidget widget : mWidgets) {
+                    widget.clearAnswer();
+                }
+            }
+        });
+        return cb;
+    }
+
+    private void setTopMargin(Context context, View view, int marginSp) {
+        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+        params.topMargin = (int) (marginSp * context.getResources().getDisplayMetrics().scaledDensity);
+        view.setLayoutParams(params);
     }
 }

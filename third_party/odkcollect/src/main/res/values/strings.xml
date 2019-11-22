@@ -152,6 +152,7 @@
 <string name="view_hierarchy">Go To Prompt</string>
 <string name="yes">Yes</string>
 <string name="no">No</string>
+<string name="none_of_the_above">None of the above</string>
 <string name="general_preferences">General Settings</string>
 <string name="click_to_web">Tap to visit http://opendatakit.org</string>
 <string name="client">User Interface</string>
