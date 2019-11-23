@@ -28,7 +28,7 @@ import java.util.List;
  * Tapping the button toggles the state between "yes" and "unanswered"; the
  * setState() method allows setting the state to "yes", "unanswered", or "no".
  */
-public class BinarySelectOneWidget extends TypedWidget<SelectOneData> implements View.OnClickListener {
+public class BinarySelectWidget extends TypedWidget<SelectOneData> implements View.OnClickListener {
 
     private SelectChoice mYesChoice;
     private SelectChoice mNoChoice;
@@ -36,7 +36,10 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> implements
     private OnClickListener mOnClickCallback = null;
     private Boolean mState = null;  // true, false, or null (null means "unanswered")
 
-    public BinarySelectOneWidget(
+    private static final int OFF_TEXT_COLOR = 0xff999999;
+    private static final int DEFAULT_TEXT_COLOR = 0xff000000;
+
+    public BinarySelectWidget(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
         super(context, prompt, appearance, forceReadOnly);
 
@@ -79,7 +82,7 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> implements
     public void setState(Boolean state) {
         mState = state;
         mCheckBox.setChecked(mState == Boolean.TRUE);
-        mCheckBox.setTextColor(mState == Boolean.FALSE ? 0xffc80080 : 0xff000000);
+        mCheckBox.setTextColor(mState == Boolean.FALSE ? OFF_TEXT_COLOR : DEFAULT_TEXT_COLOR);
     }
 
     @Override public boolean forceSetAnswer(Object answer) {

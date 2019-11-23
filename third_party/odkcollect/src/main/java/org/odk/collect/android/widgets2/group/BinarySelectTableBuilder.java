@@ -13,37 +13,52 @@ import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.widgets2.common.Appearance;
-import org.odk.collect.android.widgets2.selectone.BinarySelectOneWidget;
+import org.odk.collect.android.widgets2.selectone.BinarySelectWidget;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A {@link WidgetGroupBuilder} that builds a {@link TableWidgetGroup}
- * containing several {@link BinarySelectOneWidget}s.  In Buendia, this
- * is the way we present a set of choices that allows any number of choices
- * to be selected.  This is logically equivalent to a group of checkboxes,
- * but JavaRosa has no concept of a boolean control type; booleans are
- * represented as select-one controls with "yes" and "no" as the two choices.
+ * containing several {@link BinarySelectWidget}s.  In Buendia, this how we
+ * present a set of choices that allows any number of choices to be selected.
+ * Each choice can be in a "yes" state, "no" state, or unanswered state.
  * This builder is triggered by the appearance "binary-select-one" on the
  * group; see {@link WidgetGroupBuilderFactory}.
+ *
+ * We don't want to assume a "no" for choices that the user may have skipped
+ * over; we wnat to require an explicit action to set the choices to "no".
+ * So, in addition to the choices in the group, we offer a "None of the above"
+ * button that can be tapped to explicitly specify "no" for all the choices.
+ *
+ * The group maintains the following invariant: either
+ *
+ * 1.  "None of the above" is selected and all choices are set to "no"; or
+ *
+ * 2.  "None of the above" is not selected and all the choices are either
+ *     "yes" or "unanswered".
+ *
+ * For now, we hope to keep the UX simple by not providing a way to set
+ * individual choices to "no" without setting them all to "no".  We also
+ * don't provide a button to clear the entire group to "unanswered"; the same
+ * effect can be achieved selecting and then deselecting "None of the above".
  */
-public class BinarySelectOneTableWidgetGroupBuilder implements
-        WidgetGroupBuilder<TableWidgetGroup, BinarySelectOneTableWidgetGroupBuilder>, View.OnClickListener {
+public class BinarySelectTableBuilder implements
+        WidgetGroupBuilder<TableWidgetGroup, BinarySelectTableBuilder>, View.OnClickListener {
 
-    private static final String TAG = BinarySelectOneTableWidgetGroupBuilder.class.getName();
+    private static final String TAG = BinarySelectTableBuilder.class.getName();
 
     private final Appearance mAppearance;
-    private final List<BinarySelectOneWidget> mWidgets;
+    private final List<BinarySelectWidget> mWidgets;
     private CheckBox mNoneButton;
 
-    public BinarySelectOneTableWidgetGroupBuilder(Appearance appearance) {
+    public BinarySelectTableBuilder(Appearance appearance) {
         mAppearance = appearance;
-        mWidgets = new ArrayList<BinarySelectOneWidget>();
+        mWidgets = new ArrayList<BinarySelectWidget>();
     }
 
     @Override
-    public BinarySelectOneTableWidgetGroupBuilder createAndAddWidget(
+    public BinarySelectTableBuilder createAndAddWidget(
             Context context,
             FormEntryPrompt prompt,
             Appearance appearance,
@@ -58,9 +73,9 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
             return this;
         }
 
-        BinarySelectOneWidget widget;
+        BinarySelectWidget widget;
         try {
-            widget = new BinarySelectOneWidget(context, prompt, appearance, forceReadOnly);
+            widget = new BinarySelectWidget(context, prompt, appearance, forceReadOnly);
         } catch (IllegalArgumentException e) {
             Log.w(
                     TAG,
@@ -90,7 +105,7 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         TableWidgetGroup group = (TableWidgetGroup) LayoutInflater.from(context)
                 .inflate(R.layout.template_binary_select_one_widget_group, null /*parent*/);
 
-        for (BinarySelectOneWidget widget : mWidgets) {
+        for (BinarySelectWidget widget : mWidgets) {
             widget.setOnClickCallback(this);
             group.addView(widget);
         }
@@ -101,11 +116,16 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         return group;
     }
 
+    /** Invoked after any choice is clicked. */
     @Override public void onClick(View view) {
-        if (view instanceof BinarySelectOneWidget) {
-            BinarySelectOneWidget widget = (BinarySelectOneWidget) view;
-            if (widget.getState() == true) {
+        if (view instanceof BinarySelectWidget) {
+            BinarySelectWidget widget = (BinarySelectWidget) view;
+            // When any choices are set to "yes", all other choices revert to
+            // the "unanswered" state instead of the "no" state.
+            if (widget.getState() == true && mNoneButton.isChecked()) {
                 mNoneButton.setChecked(false);
+                setAllChoices(null);
+                widget.setState(true);
             }
         }
     }
@@ -116,13 +136,16 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         cb.setText(label);
         cb.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                Boolean newState = ((CheckBox) v).isChecked() ? false : null;
-                for (BinarySelectOneWidget widget : mWidgets) {
-                    widget.setState(newState);
-                }
+                setAllChoices(((CheckBox) v).isChecked() ? false : null);
             }
         });
         return cb;
+    }
+
+    private void setAllChoices(Boolean state) {
+        for (BinarySelectWidget widget : mWidgets) {
+            widget.setState(state);
+        }
     }
 
     private void setTopMargin(Context context, View view, int marginSp) {
