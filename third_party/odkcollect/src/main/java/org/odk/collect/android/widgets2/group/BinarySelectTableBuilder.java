@@ -122,7 +122,7 @@ public class BinarySelectTableBuilder implements
             BinarySelectWidget widget = (BinarySelectWidget) view;
             // When any choices are set to "yes", all other choices revert to
             // the "unanswered" state instead of the "no" state.
-            if (widget.getState() == true && mNoneButton.isChecked()) {
+            if (widget.getState() == Boolean.TRUE && mNoneButton.isChecked()) {
                 mNoneButton.setChecked(false);
                 setAllChoices(null);
                 widget.setState(true);

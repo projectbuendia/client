@@ -68,15 +68,15 @@ public class BinarySelectWidget extends TypedWidget<SelectOneData> implements Vi
     @Override public void onClick(View view) {
         clearActivityFocus((Activity) view.getContext());
         FormEntryActivity.hideKeyboard(view.getContext(), view);
+        mState = mCheckBox.isChecked() ? true : null;
 
         if (mOnClickCallback != null) {
             mOnClickCallback.onClick(this);
-
         }
     }
 
     public Boolean getState() {
-        return mCheckBox.isChecked();
+        return mState;
     }
 
     public void setState(Boolean state) {
@@ -94,9 +94,9 @@ public class BinarySelectWidget extends TypedWidget<SelectOneData> implements Vi
     }
 
     @Override public SelectOneData getAnswer() {
-        return new SelectOneData(
-            mState == Boolean.TRUE ? new Selection(mYesChoice) :
-                mState == Boolean.FALSE ? new Selection(mNoChoice) : new Selection());
+        if (mState == Boolean.TRUE) return new SelectOneData(new Selection(mYesChoice));
+        if (mState == Boolean.FALSE) return new SelectOneData(new Selection(mNoChoice));
+        return null;
     }
 
     @Override public void clearAnswer() {
