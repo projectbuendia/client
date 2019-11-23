@@ -2,9 +2,6 @@ package org.odk.collect.android.widgets2.selectone;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -71,6 +68,7 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> implements
 
         if (mOnClickCallback != null) {
             mOnClickCallback.onClick(this);
+
         }
     }
 
@@ -82,14 +80,6 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> implements
         mState = state;
         mCheckBox.setChecked(mState == Boolean.TRUE);
         mCheckBox.setTextColor(mState == Boolean.FALSE ? 0xffc80080 : 0xff000000);
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            mCheckBox.setButtonTintMode(PorterDuff.Mode.SCREEN);
-            mCheckBox.setButtonTintList(
-                mState == Boolean.FALSE ?
-                    new ColorStateList(new int[0][0], new int[] {0x80ff0000}) : null
-            );
-        }
     }
 
     @Override public boolean forceSetAnswer(Object answer) {

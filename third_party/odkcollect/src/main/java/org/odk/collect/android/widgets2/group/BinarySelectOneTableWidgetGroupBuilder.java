@@ -116,9 +116,9 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         cb.setText(label);
         cb.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                ((CheckBox) v).setChecked(true);
+                Boolean newState = ((CheckBox) v).isChecked() ? false : null;
                 for (BinarySelectOneWidget widget : mWidgets) {
-                    widget.setState(false);
+                    widget.setState(newState);
                 }
             }
         });
