@@ -63,6 +63,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
+      android:padding="0sp"
       >
 
     <TableRow
@@ -385,7 +386,6 @@
             style="@style/text_field"
             android:layout_width="match_parent"
             android:inputType="textMultiLine|textCapSentences"
-            android:minLines="2"
             android:gravity="top|start"
             android:nextFocusUp="@id/order_series_length"
             android:nextFocusLeft="@id/order_series_length"

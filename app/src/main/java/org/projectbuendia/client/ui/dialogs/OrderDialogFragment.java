@@ -106,6 +106,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         EditText seriesLength = u.findView(R.id.order_series_length);
         TextView seriesLengthUnit = u.findView(R.id.order_series_length_unit);
         TextView scheduleDescription = u.findView(R.id.order_schedule_description);
+        TableRow scheduleDescriptionRow = u.findView(R.id.schedule_description_row);
         EditText notes = u.findView(R.id.order_notes);
         Button stopNow = u.findView(R.id.order_stop_now);
         Button delete = u.findView(R.id.order_delete);
@@ -480,6 +481,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
         Utils.showIf(v.frequencyRow, isSeries);
         Utils.showIf(v.seriesLengthRow, isSeries);
+        Utils.showIf(v.scheduleDescriptionRow, isSeries);
 
         int dosage = Utils.getInt(v.dosage, 0);
         double hours = Utils.getDouble(v.duration, 0);
