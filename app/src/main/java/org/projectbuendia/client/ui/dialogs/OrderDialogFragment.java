@@ -16,6 +16,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.method.KeyListener;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,26 +43,28 @@ import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.models.Catalog.Category;
 import org.projectbuendia.client.models.Catalog.DosingType;
+import org.projectbuendia.client.models.Catalog.Drug;
 import org.projectbuendia.client.models.Catalog.Format;
 import org.projectbuendia.client.models.Catalog.Route;
 import org.projectbuendia.client.models.Catalog.Unit;
 import org.projectbuendia.client.models.CatalogIndex;
-import org.projectbuendia.client.models.CatalogIndex.DrugCompletion;
 import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
+import org.projectbuendia.client.ui.AutocompleteAdapter.CompletionAdapter;
 import org.projectbuendia.client.ui.EditTextWatcher;
+import org.projectbuendia.client.utils.Loc;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
-import static org.projectbuendia.client.models.Catalog.Drug;
 import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY;
 import static org.projectbuendia.client.utils.Utils.eq;
 
@@ -116,6 +119,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     private String orderUuid;
     private DateTime start;
     private AutocompleteAdapter autocompleter;
+    private DrugCompletionAdapter adapter;
     private KeyListener drugKeyListener;
     private Map<String, Integer> buttonIdsByCategoryCode = new HashMap<>();
 
@@ -181,8 +185,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void initDrugAutocompletion() {
+        adapter = new DrugCompletionAdapter(index);
         autocompleter = new AutocompleteAdapter(
-            getActivity(), R.layout.captioned_item, index);
+            getActivity(), R.layout.captioned_item, adapter);
         v.drug.setAdapter(autocompleter);
         v.drug.setThreshold(1);
 
@@ -215,7 +220,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         v.drug.setOnItemClickListener(
             (parent, view, pos, id) -> onDrugSelected(
-                ((DrugCompletion) autocompleter.getItem(pos)).drug));
+                (Drug) autocompleter.getItem(pos)));
 
         v.format.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -402,6 +407,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         if (category == activeCategory) return;
 
         activeCategory = category;
+        if (adapter != null) adapter.setCategory(category);
         activeDrug = Drug.UNSPECIFIED;
         v.drug.setText("");
         populateFormatSpinner(new Format[] {Format.UNSPECIFIED});
@@ -600,5 +606,96 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         map.put(R.id.oral_category, Lists.newArrayList("PO"));
         map.put(R.id.injectable_category, Lists.newArrayList("IV", "SC", "IM"));
         return map;
+    }
+
+    /** An adapter that provides completions for the AutocompleteAdapter. */
+    class DrugCompletionAdapter implements CompletionAdapter<Drug> {
+        private Map<String, String> targetsByDrugCode = new HashMap<>();
+        private Category activeCategory = Category.UNSPECIFIED;
+
+        public DrugCompletionAdapter(CatalogIndex index) {
+            for (Category category : index.getCategories()) {
+                for (Drug drug : category.drugs) {
+                    targetsByDrugCode.put(drug.code, constructTarget(drug));
+                }
+            }
+        }
+
+        public void setCategory(Category category) {
+            activeCategory = category;
+        }
+
+        public List<Drug> suggestCompletions(CharSequence constraint) {
+            List<Drug> results = new ArrayList<>();
+            String[] searchKeys = getSearchKeys(constraint);
+            for (Drug drug : activeCategory.drugs) {
+                if (isCompletionFor(searchKeys, drug)) {
+                    results.add(drug);
+                }
+            }
+            return results;
+        }
+
+        public void showInView(View view, Drug drug) {
+            Utils.setText(view, R.id.label, App.localize(drug.name));
+            String result = "";
+            for (Loc caption : drug.captions) {
+                if (!result.isEmpty()) result += ", ";
+                result += App.localize(caption);
+            }
+            Utils.setText(view, R.id.caption, result);
+        }
+
+        public @NonNull String getCompletedText(Drug drug) {
+            return App.localize(drug.name);
+        }
+
+        private String[] getSearchKeys(CharSequence constraint) {
+            String[] searchKeys = normalize(constraint).trim().split(" ");
+            for (int i = 0; i < searchKeys.length; i++) {
+                searchKeys[i] = " " + searchKeys[i];
+            }
+            return searchKeys;
+        }
+
+        private boolean isCompletionFor(String[] searchKeys, Drug drug) {
+            String target = targetsByDrugCode.get(drug.code);
+
+            // Look for words matching the words in the input as prefixes.
+            int score = 0;
+            for (String searchKey : searchKeys) {
+                score += target.contains(searchKey) ? 1 : 0;
+            }
+            if (score == searchKeys.length) return true;
+
+            if (searchKeys.length == 1) {
+                // Look for words matching the letters in the input as initials.
+                score = 0;
+                char[] initials = searchKeys[0].trim().toCharArray();
+                for (char ch : initials) {
+                    score += target.contains(" " + ch) ? 1 : 0;
+                }
+                if (score == initials.length) return true;
+            }
+            return false;
+        }
+
+        private String constructTarget(Drug drug) {
+            String target = "";
+            for (String localizedName : drug.name.getAll()) {
+                target += " " + localizedName.toLowerCase();
+            }
+            for (Loc alias : drug.aliases) {
+                for (String localizedAlias : alias.getAll()) {
+                    target += " " + localizedAlias;
+                }
+            }
+            String collapsed = target.replaceAll("[^a-z0-9]+", "");
+            return normalize(" " + target + " " + collapsed + " ");
+        }
+
+        private String normalize(CharSequence name) {
+            return name.toString().toLowerCase().replaceAll("[^a-z0-9]+", " ");
+        }
     }
 }

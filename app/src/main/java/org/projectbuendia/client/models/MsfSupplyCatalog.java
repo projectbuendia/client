@@ -4,13 +4,10 @@ import android.support.annotation.NonNull;
 import android.view.View;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.ui.AutocompleteAdapter.Completer;
-import org.projectbuendia.client.ui.AutocompleteAdapter.Completion;
 import org.projectbuendia.client.utils.Loc;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class MsfSupplyCatalog implements Completer {
+public class MsfSupplyCatalog {
 
     // ==== Style conventions for captions ====
     //
@@ -456,7 +453,7 @@ public class MsfSupplyCatalog implements Completer {
         return result;
     }
 
-    @Override public Collection<? extends Completion> suggestCompletions(CharSequence constraint) {
+    public List<Med> suggestCompletions(CharSequence constraint) {
         String[] searchKeys = normalize(constraint).trim().split(" ");
         for (int i = 0; i < searchKeys.length; i++) {
             searchKeys[i] = " " + searchKeys[i];
@@ -493,7 +490,7 @@ public class MsfSupplyCatalog implements Completer {
         return name.toString().toLowerCase().replaceAll("[^a-z0-9]+", " ");
     }
 
-    public static class Med implements Completion {
+    public static class Med {
         String name;
         Loc[] captions;
         String[] aliases;
