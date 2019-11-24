@@ -227,7 +227,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             }
         });
 
-        v.isSeries.setOnCheckedChangeListener((v, id) -> updateUi());
+        v.isSeries.setOnCheckedChangeListener((v, id) -> onOrderTypeChanged());
         new EditTextWatcher(
             v.dosage, v.quantity, v.duration, v.frequency, v.seriesLength
         ).onChange(() -> updateUi());
@@ -449,6 +449,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         activeFormat = format;
         updateUi();
+        if (Utils.isVisible(v.dosageRow)) v.dosage.requestFocus();
+        if (Utils.isVisible(v.quantityOverDurationRow)) v.quantity.requestFocus();
     }
 
     private void clearDosage() {
@@ -464,6 +466,11 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.scheduleDescription.setText("");
     }
 
+    private void onOrderTypeChanged() {
+        updateUi();
+        if (Utils.isVisible(v.frequencyRow)) v.frequency.requestFocus();
+    }
+
     /** Updates labels and disables or hides elements according to changes in input fields. */
     private void updateUi() {
         boolean drugSelected = !eq(activeDrug, Drug.UNSPECIFIED);
@@ -471,7 +478,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         Utils.setEnabled(v.format, drugSelected);
         Utils.setEnabled(v.dosage, formatSelected);
-        Utils.setEnabled(v.route, formatSelected && activeCategory.routes.length > 1);
+        Utils.setEnabled(v.route, formatSelected); // && activeCategory.routes.length > 1);
         Utils.setEnabled(v.quantity, formatSelected);
         Utils.setEnabled(v.duration, formatSelected);
         Utils.setChildrenEnabled(v.isSeries, formatSelected);

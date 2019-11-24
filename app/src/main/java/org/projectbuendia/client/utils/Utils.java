@@ -711,6 +711,11 @@ public class Utils {
         }
     }
 
+    /** Returns true if a view's visibility is set to VISIBLE. */
+    public static boolean isVisible(@Nullable View view) {
+        return view != null && view.getVisibility() == View.VISIBLE;
+    }
+
     /** Sets the text of a child view identified by its ID. */
     public static void setText(@Nullable View view, int id, String text) {
         if (view != null) {
@@ -723,6 +728,7 @@ public class Utils {
     public static void setEnabled(View view, boolean enabled) {
         view.setEnabled(enabled);
         view.setFocusable(enabled);
+        if (view instanceof EditText) view.setFocusableInTouchMode(true);
     }
 
     /** Set the enabled state of all the children of a view. */

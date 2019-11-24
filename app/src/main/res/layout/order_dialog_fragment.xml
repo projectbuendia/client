@@ -96,7 +96,6 @@
         <TextView
             style="@style/inner_field_label"
             android:text=" "
-            android:labelFor="@id/order_dosage"
             />
 
       </LinearLayout>
@@ -129,7 +128,6 @@
         <TextView
             style="@style/inner_field_label"
             android:text=" "
-            android:labelFor="@id/order_dosage"
             />
 
       </LinearLayout>

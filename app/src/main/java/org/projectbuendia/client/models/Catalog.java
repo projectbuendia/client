@@ -90,7 +90,7 @@ public interface Catalog {
     }
 
     class Drug {
-        public static final Drug UNSPECIFIED = new Drug("", " ");
+        public static final Drug UNSPECIFIED = new Drug("", " ").withFormats(Format.UNSPECIFIED);
 
         public final String code;  // drug identifier, e.g. "DORAACSA"
         public final Loc name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
