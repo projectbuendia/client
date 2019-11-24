@@ -16,6 +16,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.method.KeyListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -114,6 +115,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     private String orderUuid;
     private DateTime start;
     private AutocompleteAdapter autocompleter;
+    private KeyListener drugKeyListener;
     private Map<String, Integer> buttonIdsByCategoryCode = new HashMap<>();
 
     private CatalogIndex index;
@@ -178,12 +180,22 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void initDrugAutocompletion() {
-        addClearButton(v.drug, R.drawable.abc_ic_clear_mtrl_alpha);
-
         autocompleter = new AutocompleteAdapter(
             getActivity(), R.layout.captioned_item, index);
         v.drug.setAdapter(autocompleter);
         v.drug.setThreshold(1);
+
+        addClearButton(v.drug, R.drawable.abc_ic_clear_mtrl_alpha);
+
+        // onDrugSelected disables editing when a completion is selected;
+        // here we need to restore editability when the field is cleared.
+        drugKeyListener = v.drug.getKeyListener();
+        new EditTextWatcher(v.drug).onChange(() -> {
+            if (v.drug.getText().toString().isEmpty()) {
+                v.drug.setKeyListener(drugKeyListener);
+                onDrugSelected(Drug.UNSPECIFIED);
+            }
+        });
 
         // After the dialog has been laid out and positioned, we can figure out
         // how to position and size the autocompletion dropdown.
@@ -416,6 +428,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         activeDrug = drug;
         populateFormatSpinner(drug.formats);
+        v.drug.setKeyListener(
+            v.drug.getText().toString().isEmpty() ? drugKeyListener : null);
 
         clearDosage();
         clearSchedule();
