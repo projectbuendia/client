@@ -50,7 +50,6 @@ import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.EditTextWatcher;
-import org.projectbuendia.client.ui.MedCompleter;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
@@ -116,7 +115,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     private DateTime start;
     private AutocompleteAdapter autocompleter;
 
-    private CatalogIndex index = MsfCatalog.INDEX;
+    private CatalogIndex index;
 
     /** The category for which the drug list and route list are configured. */
     private Category activeCategory = Category.UNSPECIFIED;
@@ -152,7 +151,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     @Override public void onOpen() {
         v = new Views();
 
-        // Attach Category objects to the category buttons.
+        // Attach the MSF catalog to the UI.
+        index = MsfCatalog.INDEX;
         u.findView(R.id.oral_category).setTag(MsfCatalog.ORAL);
         u.findView(R.id.injectable_category).setTag(MsfCatalog.INJECTABLE);
         u.findView(R.id.infusible_category).setTag(MsfCatalog.INFUSIBLE);
@@ -173,7 +173,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         addClearButton(v.drug, R.drawable.abc_ic_clear_mtrl_alpha);
 
         autocompleter = new AutocompleteAdapter(
-            getActivity(), R.layout.captioned_item, new MedCompleter());
+            getActivity(), R.layout.captioned_item, index);
         v.drug.setAdapter(autocompleter);
         v.drug.setThreshold(1);
 

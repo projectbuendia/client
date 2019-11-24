@@ -29,10 +29,6 @@ public class Loc {
         this.options = options;
     }
 
-    public String get(String languageTag) {
-        return get(Utils.toLocale(languageTag));
-    }
-
     public String get(Locale locale) {
         if (options == null || options.isEmpty()) return base;
 
@@ -50,6 +46,10 @@ public class Loc {
         if (options.containsKey(tag)) return options.get(tag);
 
         return base;
+    }
+
+    public String[] getAll() {
+        return options.values().toArray(new String[0]);
     }
 
     public static Loc[] newArray(String... strings) {

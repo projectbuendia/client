@@ -94,11 +94,11 @@ public interface Catalog {
 
         public final String code;  // drug identifier, e.g. "DORAACSA"
         public final Loc name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
-        public final String[] aliases;  // alternative names, title case, e.g. {"Aspirin", "ASA"}
+        public final Loc[] aliases;  // alternative names, title case, e.g. {"Aspirin", "ASA"}
         public final Loc[] captions;  // therapeutic action, lowercase noun, e.g. {"analgesic", "antipyretic"}
         public final Format[] formats;
 
-        public Drug(String code, Loc name, String[] aliases, Loc[] captions, Format[] formats) {
+        public Drug(String code, Loc name, Loc[] aliases, Loc[] captions, Format[] formats) {
             this.code = code;
             this.name = name;
             this.aliases = aliases;
@@ -107,7 +107,7 @@ public interface Catalog {
         }
 
         public Drug(String code, String name, String... aliases) {
-            this(code, new Loc(name), aliases, null, null);
+            this(code, new Loc(name), Loc.newArray(aliases), null, null);
         }
 
         public Drug withCaptions(Loc... captions) {
