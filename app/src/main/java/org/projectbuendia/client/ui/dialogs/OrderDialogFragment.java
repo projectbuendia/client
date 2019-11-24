@@ -16,8 +16,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -351,7 +349,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     /** Adds an "X" button to a text edit field. */
-    private static void addClearButton(final TextView view, int drawableId) {
+    private static void addClearButton(final EditText view, int drawableId) {
         final Drawable icon = view.getResources().getDrawable(drawableId);
         icon.setColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY);  // draw icon in black
         final int iw = icon.getIntrinsicWidth();
@@ -359,19 +357,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         icon.setBounds(0, 0, iw, ih);
 
         final Drawable cd[] = view.getCompoundDrawables();
-        view.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override public void afterTextChanged(Editable s) {
-                boolean show = view.getText().length() > 0;
-                view.setCompoundDrawables(cd[0], cd[1], show ? icon : cd[2], cd[3]);
-            }
+        new EditTextWatcher(view).onChange(() -> {
+            boolean show = view.getText().length() > 0;
+            view.setCompoundDrawables(cd[0], cd[1], show ? icon : cd[2], cd[3]);
         });
 
         view.setMinimumHeight(view.getPaddingTop() + ih + view.getPaddingBottom());
@@ -410,7 +398,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         populateRouteSpinner(category.routes);
         Utils.showIf(v.route, category.routes.length > 0);
-        v.route.setEnabled(activeFormat != null && category.routes.length > 1);
+        Utils.setEnabled(v.route, activeFormat != null && category.routes.length > 1);
 
         clearDosage();
         clearSchedule();
@@ -466,16 +454,14 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         boolean drugSelected = !eq(activeDrug, Drug.UNSPECIFIED);
         boolean formatSelected = !eq(activeFormat, Format.UNSPECIFIED);
 
-        v.format.setEnabled(drugSelected);
-        v.dosage.setEnabled(formatSelected);
-        v.route.setEnabled(formatSelected && activeCategory.routes.length > 1);
-        v.quantity.setEnabled(formatSelected);
-        v.duration.setEnabled(formatSelected);
-        for (View view : v.isSeries.getTouchables()) {
-            Utils.setEnabled(view, formatSelected);
-        }
-        v.frequency.setEnabled(formatSelected);
-        v.seriesLength.setEnabled(formatSelected);
+        Utils.setEnabled(v.format, drugSelected);
+        Utils.setEnabled(v.dosage, formatSelected);
+        Utils.setEnabled(v.route, formatSelected && activeCategory.routes.length > 1);
+        Utils.setEnabled(v.quantity, formatSelected);
+        Utils.setEnabled(v.duration, formatSelected);
+        Utils.setChildrenEnabled(v.isSeries, formatSelected);
+        Utils.setEnabled(v.frequency, formatSelected);
+        Utils.setEnabled(v.seriesLength, formatSelected);
 
         boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
         Utils.showIf(v.frequencyRow, isSeries);
@@ -537,18 +523,14 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         // If already executed, only the series length and the notes can be edited.
         if (args.executed) {
-            for (View view : v.category.getTouchables()) {
-                Utils.setEnabled(view, false);
-            }
+            Utils.setChildrenEnabled(v.category, false);
             Utils.setEnabled(v.drug, false);
             Utils.setEnabled(v.format, false);
             Utils.setEnabled(v.dosage, false);
             Utils.setEnabled(v.route, false);
             Utils.setEnabled(v.quantity, false);
             Utils.setEnabled(v.duration, false);
-            for (View view : v.isSeries.getTouchables()) {
-                Utils.setEnabled(view, false);
-            }
+            Utils.setChildrenEnabled(v.isSeries, false);
             Utils.setEnabled(v.frequency, false);
         }
 

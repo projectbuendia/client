@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -722,7 +723,13 @@ public class Utils {
     public static void setEnabled(View view, boolean enabled) {
         view.setEnabled(enabled);
         view.setFocusable(enabled);
-        view.setFocusableInTouchMode(enabled);
+    }
+
+    /** Set the enabled state of all the children of a view. */
+    public static void setChildrenEnabled(ViewGroup view, boolean enabled) {
+        for (int i = 0; i < view.getChildCount(); i++) {
+            setEnabled(view.getChildAt(i), enabled);
+        }
     }
 
     /** Brings up the soft keyboard. */
