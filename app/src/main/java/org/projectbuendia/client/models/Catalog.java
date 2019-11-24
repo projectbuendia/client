@@ -90,7 +90,7 @@ public interface Catalog {
     }
 
     class Drug {
-        public static final Drug UNSPECIFIED = new Drug("", "");
+        public static final Drug UNSPECIFIED = new Drug("", " ");
 
         public final String code;  // drug identifier, e.g. "DORAACSA"
         public final Loc name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
@@ -124,7 +124,7 @@ public interface Catalog {
     }
 
     class Format {
-        public static final Format UNSPECIFIED = new Format("", "", Unit.UNSPECIFIED);
+        public static final Format UNSPECIFIED = new Format("", " ", Unit.UNSPECIFIED);
 
         public final String code;  // stock code, e.g. "DORAACSA3TD"
         public final Loc description;  // quantity, concentration, form, e.g. "300 mg, disp. tab."
@@ -150,7 +150,7 @@ public interface Catalog {
     }
 
     class Route {
-        public static final Route UNSPECIFIED = new Route("", "", "");
+        public static final Route UNSPECIFIED = new Route("", " ", "");
 
         public final String code;  // identifier code, e.g. "IV"
         public final Loc name;  // route of administration, e.g. "intravenous"
@@ -172,7 +172,7 @@ public interface Catalog {
     }
 
     class Unit {
-        public static final Unit UNSPECIFIED = new Unit("", "");
+        public static final Unit UNSPECIFIED = new Unit("", " ");
 
         public final String code;  // identifier code, e.g. "TABLET"
         public final Loc singular;  // unit of prescription, singular, e.g. "tablet"
