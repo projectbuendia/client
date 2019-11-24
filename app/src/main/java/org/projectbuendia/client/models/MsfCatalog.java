@@ -48,4 +48,7 @@ public interface MsfCatalog extends Catalog {
     Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY);
 
     Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY);
+
+    CatalogIndex INDEX = new CatalogIndex(
+        ORAL, INJECTABLE, INFUSIBLE, EXTERNAL, VACCINE);
 }
