@@ -8,12 +8,16 @@ public interface MsfCatalog extends Catalog {
 
     Unit TABLET = new Unit("TABLET", "tablet [fr:comprimé]", "tablets [fr:comprimés]", "tab. [fr:comp.]");
     Unit CAPSULE = new Unit("CAPSULE", "capsule", "capsules", "cap.");
-    Unit MG = new Unit("MG", "mg", "mg", "mg");
-    Unit ML = new Unit("ML", "mL", "mL", "mL");
+    Unit MG = new Unit("MG", "milligram", "milligrams", "mg");
+    Unit ML = new Unit("ML", "milliliter", "milliliters", "mL");
     Unit DROP = new Unit("DROP", "drop", "drops", "drop");
     Unit PUFF = new Unit("PUFF", "puff", "puffs", "puff");
     Unit AMPOULE = new Unit("AMPOULE", "ampoule", "ampoules", "amp.");
     Unit SACHET = new Unit("SACHET", "sachet", "sachets", "sach.");
+
+    Unit HOUR = new Unit("HOUR", "hour", "hours", "hr", "h");
+    Unit MINUTE = new Unit("MINUTE", "minute", "minutes", "min");
+    Unit SECOND = new Unit("SECOND", "second", "seconds", "sec", "s");
 
     Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs(
         new Drug("DORAABCV", "ABACAVIR sulfate", "ABC").withCaptions(MsfSupplyCatalog.ANTIRETROVIRAL).withFormats(
