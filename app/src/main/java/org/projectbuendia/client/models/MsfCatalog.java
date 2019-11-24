@@ -6,14 +6,14 @@ public interface MsfCatalog extends Catalog {
     Route SC = new Route("SC", "subcutaneous", "SC");
     Route IM = new Route("IM", "intramuscular", "IM");
 
-    Unit TABLET = new Unit("tablet [fr:comprimé]", "tablets [fr:comprimés]");
-    Unit CAPSULE = new Unit("capsule", "capsules");
-    Unit MG = new Unit("mg", "mg");
-    Unit ML = new Unit("mL", "mL");
-    Unit DROP = new Unit("drop", "drops");
-    Unit PUFF = new Unit("puff", "puffs");
-    Unit AMPOULE = new Unit("ampoule", "ampoules");
-    Unit SACHET = new Unit("sachet", "sachets");
+    Unit TABLET = new Unit("TABLET", "tablet [fr:comprimé]", "tablets [fr:comprimés]");
+    Unit CAPSULE = new Unit("CAPSULE", "capsule", "capsules");
+    Unit MG = new Unit("MG", "mg", "mg");
+    Unit ML = new Unit("ML", "mL", "mL");
+    Unit DROP = new Unit("DROP", "drop", "drops");
+    Unit PUFF = new Unit("PUFF", "puff", "puffs");
+    Unit AMPOULE = new Unit("AMPOULE", "ampoule", "ampoules");
+    Unit SACHET = new Unit("SACHET", "sachet", "sachets");
 
     Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs(
         new Drug("DORAABCV", "ABACAVIR sulfate", "ABC").withCaptions(MsfSupplyCatalog.ANTIRETROVIRAL).withFormats(
@@ -34,7 +34,7 @@ public interface MsfCatalog extends Catalog {
         )
     );
 
-    Category INFUSIBLE = new Category("DINF", "infusible", DosingType.QUANTITY_OVER_TIME).withDrugs(
+    Category INFUSIBLE = new Category("DINF", "infusible", DosingType.QUANTITY_OVER_DURATION).withDrugs(
         new Drug("DINFRINL", "RINGER lactate").withCaptions(MsfSupplyCatalog.FLUID_REPLACER).withFormats(
             new Format("DINFRINL1FBF1", "1 L, flex. bag, PVC free", ML),
             new Format("DINFRINL1FBF5", "500 mL, flex. bag, PVC free", ML),

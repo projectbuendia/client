@@ -53,12 +53,14 @@ import static org.projectbuendia.client.utils.Utils.eq;
  * issue is as yet unresolved.
  */
 public interface Catalog {
-    enum DosingType { QUANTITY, QUANTITY_OVER_TIME };
+    enum DosingType {QUANTITY, QUANTITY_OVER_DURATION};
 
     class Category {
+        public static final Category UNSPECIFIED = new Category("", "", null);
+
         public final String code;  // category identifier, e.g. "DORA", "DINJ", "DEXT"
         public final Loc name;  // drug category, e.g. "oral", "injectable", "external"
-        public final DosingType dosingType;
+        public final DosingType dosingType;  // dosage specification type, e.g. QUANTITY
         public final Route[] routes;  // routes of administration
         public final Drug[] drugs;  // drugs in this category
 
@@ -143,6 +145,28 @@ public interface Catalog {
         }
     }
 
+    class Route {
+        public static final Route UNSPECIFIED = new Route("", "", "");
+
+        public final String code;  // identifier code, e.g. "IV"
+        public final Loc name;  // route of administration, e.g. "intravenous"
+        public final Loc abbr;  // abbreviation, e.g. "IV"
+
+        public Route(String code, String name, String abbr) {
+            this.code = code;
+            this.name = new Loc(name);
+            this.abbr = new Loc(abbr);
+        }
+
+        @Override public boolean equals(Object other) {
+            return other instanceof Route && eq(code, ((Route) other).code);
+        }
+
+        @Override public String toString() {
+            return abbr.get(App.getSettings().getLocale());
+        }
+    }
+
     class Unit {
         public static final Unit UNSPECIFIED = new Unit("", "");
 
@@ -171,28 +195,6 @@ public interface Catalog {
 
         @Override public boolean equals(Object other) {
             return other instanceof Unit && eq(code, ((Unit) other).code);
-        }
-    }
-
-    class Route {
-        public static final Route UNSPECIFIED = new Route("", "", "");
-
-        public final String code;  // identifier code, e.g. "IV"
-        public final Loc name;  // route of administration, e.g. "intravenous"
-        public final Loc abbr;  // abbreviation, e.g. "IV"
-
-        public Route(String code, String name, String abbr) {
-            this.code = code;
-            this.name = new Loc(name);
-            this.abbr = new Loc(abbr);
-        }
-
-        @Override public boolean equals(Object other) {
-            return other instanceof Route && eq(code, ((Route) other).code);
-        }
-
-        @Override public String toString() {
-            return abbr.get(App.getSettings().getLocale());
         }
     }
 }
