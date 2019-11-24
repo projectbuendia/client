@@ -289,7 +289,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
         clickElementMatchingSelector("#new-treatment");
 
         waitUntilVisible(viewThat(hasText("New treatment")));
-        type(medication, R.id.order_medication);
+        type(medication, R.id.order_drug);
         type(dosage, R.id.order_dosage);
         type(notes, R.id.order_notes);
         click("OK");

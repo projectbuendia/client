@@ -20,6 +20,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,7 +40,12 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
-import org.projectbuendia.client.models.Catalog;
+import org.projectbuendia.client.models.Catalog.Category;
+import org.projectbuendia.client.models.Catalog.DosingType;
+import org.projectbuendia.client.models.Catalog.Format;
+import org.projectbuendia.client.models.Catalog.Route;
+import org.projectbuendia.client.models.CatalogIndex;
+import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
@@ -55,14 +61,14 @@ import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
+import static org.projectbuendia.client.models.Catalog.Drug;
 import static org.projectbuendia.client.utils.Utils.DateStyle.SENTENCE_MONTH_DAY;
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** A DialogFragment for creating or editing a treatment order. */
 public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment, OrderDialogFragment.Args> {
     public static final int MAX_FREQUENCY = 24;  // maximum 24 times per day
     public static final int MAX_DURATION_DAYS = 30;  // maximum 30 days
-
-    private static final Map<Integer, List<String>> ROUTES_BY_CATEGORY_ID = getRoutesByCategoryId();
 
     // This should match the left/right padding in the TextViews in captioned_item.xml.
     private static final int ITEM_HORIZONTAL_PADDING = 12;
@@ -78,26 +84,27 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     class Views {
         RadioGroup category = u.findView(R.id.order_category);
 
-        AutoCompleteTextView medication = u.findView(R.id.order_medication);
+        AutoCompleteTextView drug = u.findView(R.id.order_drug);
         Spinner format = u.findView(R.id.order_format);
         TableRow dosageRow = u.findView(R.id.dosage_row);
         EditText dosage = u.findView(R.id.order_dosage);
-        TextView dosageUnits = u.findView(R.id.order_dosage_units);
+        TextView dosageUnit = u.findView(R.id.order_dosage_unit);
         Spinner route = u.findView(R.id.order_route);
-        TableRow infusionRow = u.findView(R.id.infusion_rate_row);
-        EditText volume = u.findView(R.id.order_volume);
-        EditText infusionDuration = u.findView(R.id.order_infusion_duration);
-        TextView infusionDurationUnits = u.findView(R.id.order_infusion_duration_units);
+        TableRow quantityOverDurationRow = u.findView(R.id.quantity_over_duration_row);
+        EditText quantity = u.findView(R.id.order_quantity);
+        TextView quantityUnit = u.findView(R.id.order_quantity_unit);
+        EditText duration = u.findView(R.id.order_duration);
+        TextView durationUnit = u.findView(R.id.order_duration_unit);
 
         RadioGroup isSeries = u.findView(R.id.order_is_series);
         RadioButton unary = u.findView(R.id.order_unary);
         RadioButton series = u.findView(R.id.order_series);
         TableRow frequencyRow = u.findView(R.id.frequency_row);
         EditText frequency = u.findView(R.id.order_frequency);
-        TextView frequencyUnits = u.findView(R.id.order_frequency_units);
-        TableRow seriesDurationRow = u.findView(R.id.series_duration_row);
-        EditText seriesDuration = u.findView(R.id.order_series_duration);
-        TextView seriesDurationUnits = u.findView(R.id.order_series_duration_units);
+        TextView frequencyUnit = u.findView(R.id.order_frequency_unit);
+        TableRow seriesLengthRow = u.findView(R.id.series_length_row);
+        EditText seriesLength = u.findView(R.id.order_series_length);
+        TextView seriesLengthUnit = u.findView(R.id.order_series_length_unit);
         TextView scheduleDescription = u.findView(R.id.order_schedule_description);
         EditText notes = u.findView(R.id.order_notes);
         Button stopNow = u.findView(R.id.order_stop_now);
@@ -107,6 +114,18 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     private Views v;
     private String orderUuid;
     private DateTime start;
+    private AutocompleteAdapter autocompleter;
+
+    private CatalogIndex index = MsfCatalog.INDEX;
+
+    /** The category for which the drug list and route list are configured. */
+    private Category activeCategory = Category.UNSPECIFIED;
+
+    /** The drug for which the format list is configured. */
+    private Drug activeDrug = Drug.UNSPECIFIED;
+
+    /* The format for which the dosing unit is configured. */
+    private Format activeFormat = Format.UNSPECIFIED;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderDialogFragment create(
@@ -133,52 +152,73 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     @Override public void onOpen() {
         v = new Views();
 
+        // Attach Category objects to the category buttons.
+        u.findView(R.id.oral_category).setTag(MsfCatalog.ORAL);
+        u.findView(R.id.injectable_category).setTag(MsfCatalog.INJECTABLE);
+        u.findView(R.id.infusible_category).setTag(MsfCatalog.INFUSIBLE);
+        u.findView(R.id.external_category).setTag(MsfCatalog.EXTERNAL);
+        u.findView(R.id.vaccine_category).setTag(MsfCatalog.VACCINE);
+
         orderUuid = args.order != null ? args.order.uuid : null;
         start = args.order != null ? args.order.start : args.now;
 
-        // Populate the dialog appropriately.
         dialog.setTitle(args.order == null ? R.string.title_new_order : R.string.title_edit_order);
         if (args.order != null) populateFields();
         updateUi();
-
-        // Finish building the dialog's behaviour.
-        addClearButton(v.medication, R.drawable.abc_ic_clear_mtrl_alpha);
-        v.medication.setThreshold(1);
-        v.medication.setAdapter(new AutocompleteAdapter(
-            getActivity(), R.layout.captioned_item, new MedCompleter()));
-
-        // Open the keyboard, ready to type into the medication field.
-        // TODO(ping): Figure out why this doesn't open the keyboard.
-        v.medication.requestFocus();
-
+        initDrugAutocompletion();
         addListeners();
     }
 
-    private void addListeners() {
+    private void initDrugAutocompletion() {
+        addClearButton(v.drug, R.drawable.abc_ic_clear_mtrl_alpha);
+
+        autocompleter = new AutocompleteAdapter(
+            getActivity(), R.layout.captioned_item, new MedCompleter());
+        v.drug.setAdapter(autocompleter);
+        v.drug.setThreshold(1);
+
         // After the dialog has been laid out and positioned, we can figure out
         // how to position and size the autocompletion dropdown.
-        v.medication.getViewTreeObserver().addOnPreDrawListener(() -> {
-            adjustDropDownSize(v.medication, ITEM_HORIZONTAL_PADDING);
+        v.drug.getViewTreeObserver().addOnPreDrawListener(() -> {
+            adjustDropDownSize(v.drug, ITEM_HORIZONTAL_PADDING);
             return true;
         });
 
-        v.category.setOnCheckedChangeListener((v, id) -> updateUi());
+        // Open the keyboard, ready to type into the drug field.
+        // TODO(ping): Figure out why this doesn't open the keyboard.
+        v.drug.requestFocus();
+    }
+
+    private void addListeners() {
+        v.category.setOnCheckedChangeListener((v, id) -> onCategorySelected());
+        v.drug.setOnItemClickListener(
+            (parent, view, pos, id) -> onDrugSelected((Drug) autocompleter.getItem(pos)));
+        v.format.setOnItemClickListener(
+            (parent, view, pos, id) -> onFormatSelected((Format) v.format.getSelectedItem()));
         v.isSeries.setOnCheckedChangeListener((v, id) -> updateUi());
         new EditTextWatcher(
-            v.dosage, v.infusionDuration,
-            v.frequency, v.seriesDuration
-        ).onChange(this::updateUi);
+            v.dosage, v.quantity, v.duration, v.frequency, v.seriesLength
+        ).onChange(() -> updateUi());
         v.stopNow.setOnClickListener(view -> onStopNow());
         v.delete.setOnClickListener(view -> onDelete());
     }
 
+    private void setSpinnerSelection(Spinner spinner, Object item) {
+        for (int pos = 0; pos < spinner.getCount(); pos++) {
+            if (eq(spinner.getItemAtPosition(pos), item)) {
+                spinner.setSelection(pos);
+                break;
+            }
+        }
+    }
+
     private void populateFields() {
-        v.medication.setText(args.order.instructions.medication);
-        v.format.setSelection(toFormatIndex(args.order.instructions.formatCode));
+        v.drug.setText(args.order.instructions.medication);
+        setSpinnerSelection(v.format, index.getFormat(args.order.instructions.formatCode));
+        setSpinnerSelection(v.route, index.getRoute(args.order.instructions.route));
         v.dosage.setText(args.order.instructions.dosage);
-        v.route.setSelection(toRouteIndex(args.order.instructions.route));
-        v.volume.setText("" + args.order.instructions.volumeMilliliters);
-        v.infusionDuration.setText("" + args.order.instructions.infusionHours);
+        v.quantity.setText("" + args.order.instructions.volumeMilliliters);
+        v.duration.setText("" + args.order.instructions.infusionHours);
 
         v.unary.setChecked(!args.order.isSeries());
         v.series.setChecked(args.order.isSeries());
@@ -187,71 +227,77 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.frequency.setText(frequency > 0 ? "" + frequency : "");
         if (args.order.stop != null) {
             int days = Days.daysBetween(start.toLocalDate(), args.order.stop.toLocalDate()).getDays();
-            if (days > 0) v.seriesDuration.setText("" + days);
+            if (days > 0) v.seriesLength.setText("" + days);
         }
         v.notes.setText(args.order.instructions.notes);
     }
 
     @Override protected void onSubmit() {
-        String medication = Utils.getText(v.medication);
-        String format = toFormatCode(v.format.getSelectedItemPosition());
+        String drug = activeDrug.code;
+        String format = activeFormat.code;
         String dosage = Utils.getText(v.dosage);
-        String route = (String) v.route.getSelectedItem();
-        double volume = Utils.getDouble(v.volume, 0);
-        double infusionHours = Utils.getDouble(v.infusionDuration, 0);
+        String route = ((Route) v.route.getSelectedItem()).code;
+        double volume = Utils.getDouble(v.quantity, 0);
+        double infusionHours = Utils.getDouble(v.duration, 0);
         int frequency = Utils.getInt(v.frequency, 0);
         String notes = Utils.getText(v.notes);
 
-        int categoryId = v.category.getCheckedRadioButtonId();
-        Order.Instructions instructions;
-        if (isLiquidInfusionCategory(categoryId)) {
-            instructions = new Order.Instructions(
-                medication, format, volume, infusionHours, frequency, notes);
-        } else {
-            instructions = new Order.Instructions(
-                medication, format, dosage, route, frequency, notes);
+        Order.Instructions instructions = null;
+        switch (activeCategory.dosingType) {
+            case QUANTITY:
+                instructions = new Order.Instructions(
+                    drug, format, dosage, route, frequency, notes);
+                break;
+            case QUANTITY_OVER_DURATION:
+                instructions = new Order.Instructions(
+                    drug, format, volume, infusionHours, frequency, notes);
+                break;
         }
 
-        int durationDays = Utils.getInt(v.seriesDuration, -1);
+        int seriesLengthDays = Utils.getInt(v.seriesLength, -1);
         boolean valid = true;
-        if (medication.isEmpty()) {
-            setError(v.medication, R.string.enter_medication);
+        if (drug.isEmpty()) {
+            setError(v.drug, R.string.enter_medication);
             valid = false;
         }
         if (frequency > MAX_FREQUENCY) {
             setError(v.frequency, R.string.order_cannot_exceed_n_times_per_day, MAX_FREQUENCY);
             valid = false;
         }
-        if (durationDays != -1) {
-            if (durationDays == 0) {
-                setError(v.seriesDuration, R.string.order_give_for_days_cannot_be_zero);
+        if (seriesLengthDays != -1) {
+            if (seriesLengthDays == 0) {
+                setError(v.seriesLength, R.string.order_give_for_days_cannot_be_zero);
                 valid = false;
             }
-            if (durationDays > MAX_DURATION_DAYS) {
-                setError(v.seriesDuration, R.string.order_cannot_exceed_n_days, MAX_DURATION_DAYS);
+            if (seriesLengthDays > MAX_DURATION_DAYS) {
+                setError(v.seriesLength, R.string.order_cannot_exceed_n_days, MAX_DURATION_DAYS);
                 valid = false;
             }
-            if (start.plusDays(durationDays).isBefore(args.now)) {
-                setError(v.seriesDuration, R.string.order_cannot_stop_in_past);
+            if (start.plusDays(seriesLengthDays).isBefore(args.now)) {
+                setError(v.seriesLength, R.string.order_cannot_stop_in_past);
                 valid = false;
             }
         }
         Utils.logUserAction("order_submitted",
             "valid", "" + valid,
             "uuid", orderUuid,
-            "medication", medication,
-            "route", route,
+            "drug", drug,
+            "format", format,
             "dosage", dosage,
+            "route", route,
+            "volume", "" + volume,
+            "infusionHours", "" + infusionHours,
             "frequency", "" + frequency,
-            "notes", notes,
-            "durationDays", "" + durationDays);
+            "seriesLengthDays", "" + seriesLengthDays,
+            "notes", notes);
         if (!valid) return;
 
         dialog.dismiss();
 
         // Post an event that triggers the PatientChartController to save the order.
         EventBus.getDefault().post(new OrderAddRequestedEvent(
-            orderUuid, args.patientUuid, Utils.getProviderUuid(), instructions, start, durationDays
+            orderUuid, args.patientUuid, Utils.getProviderUuid(),
+            instructions, start, seriesLengthDays
         ));
     }
 
@@ -277,9 +323,13 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         final Drawable cd[] = view.getCompoundDrawables();
         view.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override public void afterTextChanged(Editable s) {
                 boolean show = view.getText().length() > 0;
@@ -306,83 +356,117 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         return Utils.toIntOrDefault(field.getText().toString().trim(), defaultValue);
     }
 
-    private boolean isSingleNumericDosageCategory(int categoryId) {
-        return categoryId == R.id.oral_category ||
-            categoryId == R.id.injectable_category;
-    }
-
-    private boolean isLiquidInfusionCategory(int categoryId) {
-        return categoryId == R.id.infusible_category;
-    }
-
-    private Catalog.Format getFormat() {
-        return null;
-    }
-
-    private void updateFormatSpinner() {
-    }
-
-    private void updateRouteSpinner(List<String> routes) {
-    }
-
-    private int toFormatIndex(String code) {
-        return 0;
-    }
-
-    private String toFormatCode(int index) {
-        return "";
-    }
-
-    private int toRouteIndex(String route) {
-        return 0;
-    }
-
-    /** Updates labels and disables or hides elements according to the input fields. */
-    private void updateUi() {
+    /** Updates elements and spinner contents when a category is selected. */
+    private void onCategorySelected() {
         int categoryId = v.category.getCheckedRadioButtonId();
-        Utils.showIf(v.dosageRow, !isLiquidInfusionCategory(categoryId));
-        Utils.showIf(v.infusionRow, isLiquidInfusionCategory(categoryId));
+        Category category = categoryId == -1 ? Category.UNSPECIFIED :
+            (Category) u.findView(categoryId).getTag();
+        if (category == activeCategory) return;
 
-        List<String> routes = ROUTES_BY_CATEGORY_ID.get(categoryId);
-        int numRoutes = routes == null ? 0 : routes.size();
-        updateRouteSpinner(routes);
-        if (numRoutes == 1) {
-            v.route.setSelection(0);
+        activeCategory = category;
+        activeDrug = Drug.UNSPECIFIED;
+        v.drug.setText("");
+        populateFormatSpinner(new Format[] {Format.UNSPECIFIED});
+
+        Utils.showIf(v.dosageRow, category.dosingType == DosingType.QUANTITY);
+        Utils.showIf(v.quantityOverDurationRow, category.dosingType == DosingType.QUANTITY_OVER_DURATION);
+
+        populateRouteSpinner(category.routes);
+        Utils.showIf(v.route, category.routes.length > 0);
+        v.route.setEnabled(activeFormat != null && category.routes.length > 1);
+
+        clearDosage();
+        clearSchedule();
+        updateUi();
+    }
+
+    private void populateRouteSpinner(Route[] routes) {
+        Route[] spinnerRoutes = routes;
+        if (routes.length > 1) {
+            // If there is more than one possible route, set a blank route as
+            // the default so that the user has to make an explicit choice.
+            spinnerRoutes = Utils.concat(Route.UNSPECIFIED, routes);
         }
-        Utils.showIf(v.route, numRoutes > 0);
-        v.route.setEnabled(numRoutes > 1);
+        v.route.setAdapter(new ArrayAdapter<>(
+            getActivity(), R.layout.custom_spinner_item, spinnerRoutes));
+        if (routes.length > 0) v.route.setSelection(0);
+    }
 
-        Catalog.Format format = getFormat();
+    private void onDrugSelected(Drug drug) {
+        if (drug == activeDrug) return;
+
+        activeDrug = drug;
+        populateFormatSpinner(drug.formats);
+
+        clearDosage();
+        clearSchedule();
+        updateUi();
+    }
+
+    private void populateFormatSpinner(Format[] formats) {
+        // Always set a blank format as the default so that the user
+        // has to make an explicit choice.
+        Format[] spinnerFormats = Utils.concat(Format.UNSPECIFIED, formats);
+        v.format.setAdapter(new ArrayAdapter<>(
+            getActivity(), R.layout.custom_spinner_item, spinnerFormats));
+        if (formats.length > 0) v.format.setSelection(0);
+        activeFormat = Format.UNSPECIFIED;
+    }
+
+    private void onFormatSelected(Format format) {
+        if (format == activeFormat) return;
+
+        activeFormat = format;
+        updateUi();
+    }
+
+    private void clearDosage() {
+        v.dosage.setText("");
+        v.quantity.setText("");
+        v.duration.setText("");
+    }
+
+    private void clearSchedule() {
+        v.unary.setChecked(true);
+        v.series.setChecked(false);
+        v.frequency.setText("");
+        v.seriesLength.setText("");
+        v.scheduleDescription.setText("");
+    }
+
+    /** Updates labels and disables or hides elements according to changes in input fields. */
+    private void updateUi() {
+        Format format = (Format) v.format.getSelectedItem();
         Locale locale = App.getSettings().getLocale();
         v.dosage.setEnabled(format != null);
-        v.route.setEnabled(format != null && !isSingleNumericDosageCategory(categoryId));
-        v.volume.setEnabled(format != null);
-        v.infusionDuration.setEnabled(format != null);
+        v.route.setEnabled(format != null && activeCategory.routes.length > 1);
+        v.quantity.setEnabled(format != null);
+        v.duration.setEnabled(format != null);
         v.isSeries.setEnabled(format != null);
         v.frequency.setEnabled(format != null);
-        v.seriesDuration.setEnabled(format != null);
+        v.seriesLength.setEnabled(format != null);
 
         boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
         Utils.showIf(v.frequencyRow, isSeries);
-        Utils.showIf(v.seriesDuration, isSeries);
+        Utils.showIf(v.seriesLength, isSeries);
 
         int dosage = Utils.getInt(v.dosage, 0);
-        double hours = Utils.getDouble(v.infusionDuration, 0);
+        double hours = Utils.getDouble(v.duration, 0);
         int timesPerDay = Utils.getInt(v.frequency, 0);
-        int days = Utils.getInt(v.seriesDuration, 0);
+        int days = Utils.getInt(v.seriesLength, 0);
 
         LocalDate startDay = start.toLocalDate();
         LocalDate stopDay = startDay.plusDays(days);
 
-        v.dosageUnits.setText(
+        v.dosageUnit.setText(
             format == null ? "" :
             (dosage == 1 ? format.dosageUnit.singular :
                 format.dosageUnit.plural).get(locale));
-        v.infusionDurationUnits.setText(
+        v.durationUnit.setText(
             hours == 1 ? R.string.order_hour : R.string.order_hours);
-        v.frequencyUnits.setText(
+        v.frequencyUnit.setText(
             timesPerDay == 1 ? R.string.order_time_per_day : R.string.order_times_per_day);
-        v.seriesDurationUnits.setText(
+        v.seriesLengthUnit.setText(
             days == 1 ? R.string.order_day : R.string.order_days);
 
         int doses = timesPerDay * days;
@@ -417,8 +501,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             );
         }
 
-        // If the order has stopped, you can't change the frequency or duration.
+        // If the order has stopped, you can't change the frequency or series length.
         Utils.setEnabled(v.frequency, !args.stopped);
+        Utils.setEnabled(v.seriesLength, !args.stopped);
 
         // Hide or show the "Stop" and "Delete" buttons appropriately.
         Utils.showIf(v.stopNow, args.order != null && !args.stopped);
@@ -455,7 +540,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         // padding inside dropdown list items, so that the text in the list items
         // is horizontally aligned with the text in the input field.
         textView.setDropDownHorizontalOffset(-itemHorizontalPadding);
-        textView.setDropDownWidth(v.medication.getWidth() + itemHorizontalPadding * 2);
+        textView.setDropDownWidth(v.drug.getWidth() + itemHorizontalPadding * 2);
     }
 
     private static Map<Integer, List<String>> getRoutesByCategoryId() {
