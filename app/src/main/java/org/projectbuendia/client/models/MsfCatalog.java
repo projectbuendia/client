@@ -49,6 +49,7 @@ public interface MsfCatalog extends Catalog {
 
     Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY);
 
-    CatalogIndex INDEX = new CatalogIndex(
-        ORAL, INJECTABLE, INFUSIBLE, EXTERNAL, VACCINE);
+    CatalogIndex INDEX = new CatalogIndex(ORAL, INJECTABLE, INFUSIBLE, EXTERNAL, VACCINE)
+        .withRoutes(PO, IV, SC, IM)
+        .withUnits(TABLET, CAPSULE, MG, ML, DROP, PUFF, AMPOULE, SACHET);
 }

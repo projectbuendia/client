@@ -20,6 +20,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -44,7 +45,9 @@ import org.projectbuendia.client.models.Catalog.Category;
 import org.projectbuendia.client.models.Catalog.DosingType;
 import org.projectbuendia.client.models.Catalog.Format;
 import org.projectbuendia.client.models.Catalog.Route;
+import org.projectbuendia.client.models.Catalog.Unit;
 import org.projectbuendia.client.models.CatalogIndex;
+import org.projectbuendia.client.models.CatalogIndex.DrugCompletion;
 import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
@@ -55,7 +58,6 @@ import org.projectbuendia.client.utils.Utils;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
@@ -114,6 +116,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     private String orderUuid;
     private DateTime start;
     private AutocompleteAdapter autocompleter;
+    private Map<String, Integer> buttonIdsByCategoryCode = new HashMap<>();
 
     private CatalogIndex index;
 
@@ -153,20 +156,27 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         // Attach the MSF catalog to the UI.
         index = MsfCatalog.INDEX;
-        u.findView(R.id.oral_category).setTag(MsfCatalog.ORAL);
-        u.findView(R.id.injectable_category).setTag(MsfCatalog.INJECTABLE);
-        u.findView(R.id.infusible_category).setTag(MsfCatalog.INFUSIBLE);
-        u.findView(R.id.external_category).setTag(MsfCatalog.EXTERNAL);
-        u.findView(R.id.vaccine_category).setTag(MsfCatalog.VACCINE);
+        attachCategory(R.id.oral_category, MsfCatalog.ORAL);
+        attachCategory(R.id.injectable_category, MsfCatalog.INJECTABLE);
+        attachCategory(R.id.infusible_category, MsfCatalog.INFUSIBLE);
+        attachCategory(R.id.external_category, MsfCatalog.EXTERNAL);
+        attachCategory(R.id.vaccine_category, MsfCatalog.VACCINE);
 
         orderUuid = args.order != null ? args.order.uuid : null;
         start = args.order != null ? args.order.start : args.now;
 
         dialog.setTitle(args.order == null ? R.string.title_new_order : R.string.title_edit_order);
+        onCategorySelected();
         if (args.order != null) populateFields();
         updateUi();
         initDrugAutocompletion();
         addListeners();
+    }
+
+    private void attachCategory(int buttonId, Category category) {
+        RadioButton button = u.findView(buttonId);
+        button.setTag(category);
+        buttonIdsByCategoryCode.put(category.code, buttonId);
     }
 
     private void initDrugAutocompletion() {
@@ -191,14 +201,26 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
     private void addListeners() {
         v.category.setOnCheckedChangeListener((v, id) -> onCategorySelected());
+
         v.drug.setOnItemClickListener(
-            (parent, view, pos, id) -> onDrugSelected((Drug) autocompleter.getItem(pos)));
-        v.format.setOnItemClickListener(
-            (parent, view, pos, id) -> onFormatSelected((Format) v.format.getSelectedItem()));
+            (parent, view, pos, id) -> onDrugSelected(
+                ((DrugCompletion) autocompleter.getItem(pos)).drug));
+
+        v.format.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onFormatSelected((Format) v.format.getSelectedItem());
+            }
+
+            @Override public void onNothingSelected(AdapterView<?> parent) {
+                onFormatSelected(Format.UNSPECIFIED);
+            }
+        });
+
         v.isSeries.setOnCheckedChangeListener((v, id) -> updateUi());
         new EditTextWatcher(
             v.dosage, v.quantity, v.duration, v.frequency, v.seriesLength
         ).onChange(() -> updateUi());
+
         v.stopNow.setOnClickListener(view -> onStopNow());
         v.delete.setOnClickListener(view -> onDelete());
     }
@@ -213,15 +235,30 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void populateFields() {
-        v.drug.setText(args.order.instructions.medication);
-        setSpinnerSelection(v.format, index.getFormat(args.order.instructions.formatCode));
+        String formatCode = Utils.toNonnull(args.order.instructions.formatCode);
+        String drugCode = formatCode.length() >= 8 ? formatCode.substring(0, 8) : "";
+        String categoryCode = formatCode.length() >= 4 ? formatCode.substring(0, 4) : "";
+
+        Integer buttonId = buttonIdsByCategoryCode.get(categoryCode);
+        v.category.check(buttonId == null ? -1 : buttonId);
+        onCategorySelected();
+
+        Drug drug = index.getDrug(args.order.instructions.medication);
+        onDrugSelected(drug);
+        if (eq(drug, Drug.UNSPECIFIED)) {
+            v.drug.setText(args.order.instructions.medication);
+        }
+
+        Format format = index.getFormat(args.order.instructions.formatCode);
+        setSpinnerSelection(v.format, format);
+        onFormatSelected(format);
+
         setSpinnerSelection(v.route, index.getRoute(args.order.instructions.route));
         v.dosage.setText(args.order.instructions.dosage);
         v.quantity.setText("" + args.order.instructions.volumeMilliliters);
         v.duration.setText("" + args.order.instructions.infusionHours);
 
-        v.unary.setChecked(!args.order.isSeries());
-        v.series.setChecked(args.order.isSeries());
+        v.isSeries.check(args.order.isSeries() ? v.series.getId() : v.unary.getId());
 
         int frequency = args.order.instructions.frequency;
         v.frequency.setText(frequency > 0 ? "" + frequency : "");
@@ -381,14 +418,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void populateRouteSpinner(Route[] routes) {
-        Route[] spinnerRoutes = routes;
-        if (routes.length > 1) {
-            // If there is more than one possible route, set a blank route as
-            // the default so that the user has to make an explicit choice.
-            spinnerRoutes = Utils.concat(Route.UNSPECIFIED, routes);
-        }
         v.route.setAdapter(new ArrayAdapter<>(
-            getActivity(), R.layout.custom_spinner_item, spinnerRoutes));
+            getActivity(), R.layout.spinner_item, routes));
         if (routes.length > 0) v.route.setSelection(0);
     }
 
@@ -404,11 +435,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void populateFormatSpinner(Format[] formats) {
-        // Always set a blank format as the default so that the user
-        // has to make an explicit choice.
-        Format[] spinnerFormats = Utils.concat(Format.UNSPECIFIED, formats);
         v.format.setAdapter(new ArrayAdapter<>(
-            getActivity(), R.layout.custom_spinner_item, spinnerFormats));
+            getActivity(), R.layout.spinner_item, formats));
         if (formats.length > 0) v.format.setSelection(0);
         activeFormat = Format.UNSPECIFIED;
     }
@@ -427,8 +455,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void clearSchedule() {
-        v.unary.setChecked(true);
-        v.series.setChecked(false);
+        v.isSeries.check(v.unary.getId());
         v.frequency.setText("");
         v.seriesLength.setText("");
         v.scheduleDescription.setText("");
@@ -436,19 +463,23 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
     /** Updates labels and disables or hides elements according to changes in input fields. */
     private void updateUi() {
-        Format format = (Format) v.format.getSelectedItem();
-        Locale locale = App.getSettings().getLocale();
-        v.dosage.setEnabled(format != null);
-        v.route.setEnabled(format != null && activeCategory.routes.length > 1);
-        v.quantity.setEnabled(format != null);
-        v.duration.setEnabled(format != null);
-        v.isSeries.setEnabled(format != null);
-        v.frequency.setEnabled(format != null);
-        v.seriesLength.setEnabled(format != null);
+        boolean drugSelected = !eq(activeDrug, Drug.UNSPECIFIED);
+        boolean formatSelected = !eq(activeFormat, Format.UNSPECIFIED);
+
+        v.format.setEnabled(drugSelected);
+        v.dosage.setEnabled(formatSelected);
+        v.route.setEnabled(formatSelected && activeCategory.routes.length > 1);
+        v.quantity.setEnabled(formatSelected);
+        v.duration.setEnabled(formatSelected);
+        for (View view : v.isSeries.getTouchables()) {
+            Utils.setEnabled(view, formatSelected);
+        }
+        v.frequency.setEnabled(formatSelected);
+        v.seriesLength.setEnabled(formatSelected);
 
         boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
         Utils.showIf(v.frequencyRow, isSeries);
-        Utils.showIf(v.seriesLength, isSeries);
+        Utils.showIf(v.seriesLengthRow, isSeries);
 
         int dosage = Utils.getInt(v.dosage, 0);
         double hours = Utils.getDouble(v.duration, 0);
@@ -458,10 +489,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         LocalDate startDay = start.toLocalDate();
         LocalDate stopDay = startDay.plusDays(days);
 
-        v.dosageUnit.setText(
-            format == null ? "" :
-            (dosage == 1 ? format.dosageUnit.singular :
-                format.dosageUnit.plural).get(locale));
+        Unit dosageUnit = activeFormat.dosageUnit;
+        v.dosageUnit.setText(App.localize(
+            dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
         v.durationUnit.setText(
             hours == 1 ? R.string.order_hour : R.string.order_hours);
         v.frequencyUnit.setText(
@@ -501,9 +531,26 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             );
         }
 
-        // If the order has stopped, you can't change the frequency or series length.
+        // If the order has stopped, the frequency and series length cannot be edited.
         Utils.setEnabled(v.frequency, !args.stopped);
         Utils.setEnabled(v.seriesLength, !args.stopped);
+
+        // If already executed, only the series length and the notes can be edited.
+        if (args.executed) {
+            for (View view : v.category.getTouchables()) {
+                Utils.setEnabled(view, false);
+            }
+            Utils.setEnabled(v.drug, false);
+            Utils.setEnabled(v.format, false);
+            Utils.setEnabled(v.dosage, false);
+            Utils.setEnabled(v.route, false);
+            Utils.setEnabled(v.quantity, false);
+            Utils.setEnabled(v.duration, false);
+            for (View view : v.isSeries.getTouchables()) {
+                Utils.setEnabled(view, false);
+            }
+            Utils.setEnabled(v.frequency, false);
+        }
 
         // Hide or show the "Stop" and "Delete" buttons appropriately.
         Utils.showIf(v.stopNow, args.order != null && !args.stopped);

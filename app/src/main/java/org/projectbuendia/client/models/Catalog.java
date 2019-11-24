@@ -56,7 +56,7 @@ public interface Catalog {
     enum DosingType {QUANTITY, QUANTITY_OVER_DURATION};
 
     class Category {
-        public static final Category UNSPECIFIED = new Category("", "", null);
+        public static final Category UNSPECIFIED = new Category("", "", DosingType.QUANTITY);
 
         public final String code;  // category identifier, e.g. "DORA", "DINJ", "DEXT"
         public final Loc name;  // drug category, e.g. "oral", "injectable", "external"
@@ -143,6 +143,10 @@ public interface Catalog {
         @Override public boolean equals(Object other) {
             return other instanceof Format && eq(code, ((Format) other).code);
         }
+
+        @Override public String toString() {
+            return App.localize(description);
+        }
     }
 
     class Route {
@@ -163,7 +167,7 @@ public interface Catalog {
         }
 
         @Override public String toString() {
-            return abbr.get(App.getSettings().getLocale());
+            return App.localize(abbr);
         }
     }
 

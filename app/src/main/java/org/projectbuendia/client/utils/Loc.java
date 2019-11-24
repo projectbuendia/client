@@ -49,7 +49,11 @@ public class Loc {
     }
 
     public String[] getAll() {
-        return options.values().toArray(new String[0]);
+        String[] values = options.values().toArray(new String[0]);
+        String[] results = new String[values.length + 1];
+        results[0] = base;
+        System.arraycopy(values, 0, results, 1, values.length);
+        return results;
     }
 
     public static Loc[] newArray(String... strings) {

@@ -206,21 +206,21 @@ public class Utils {
 
     /** Concatenates two arrays. */
     public static <T> T[] concat(T[] a, T[] b) {
-        List<T> result = Arrays.asList(a);
+        List<T> result = new ArrayList<>(Arrays.asList(a));
         result.addAll(Arrays.asList(b));
         return result.toArray(b);
     }
 
     /** Prepends an item to an array to yield a new array. */
     public static <T> T[] concat(T a, T[] b) {
-        List<T> result = Arrays.asList(a);
+        List<T> result = new ArrayList<>(Arrays.asList(a));
         result.addAll(Arrays.asList(b));
         return result.toArray(b);
     }
 
     /** Appends an item to an array to yield a new array. */
     public static <T> T[] concat(T[] a, T b) {
-        List<T> result = Arrays.asList(a);
+        List<T> result = new ArrayList<>(Arrays.asList(a));
         result.add(b);
         return result.toArray(a);
     }

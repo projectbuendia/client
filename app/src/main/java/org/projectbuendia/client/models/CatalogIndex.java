@@ -23,12 +23,12 @@ import java.util.Map;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 public class CatalogIndex implements Completer {
-    Category[] categories;
+    Category[] categories = {};
     Map<String, Drug> drugs = new HashMap<>();
     List<DrugCompletion> completions = new ArrayList<>();
     Map<String, Format> formats = new HashMap<>();
-    Route[] routes;
-    Unit[] units;
+    Route[] routes = {};
+    Unit[] units = {};
 
     public CatalogIndex(Category... categories) {
         this.categories = categories;
@@ -43,12 +43,14 @@ public class CatalogIndex implements Completer {
         }
     }
 
-    public void addRoutes(Route... routes) {
+    public CatalogIndex withRoutes(Route... routes) {
         this.routes = routes;
+        return this;
     }
 
-    public void addUnits(Unit... units) {
+    public CatalogIndex withUnits(Unit... units) {
         this.units = units;
+        return this;
     }
 
     public Category getCategory(String code) {
@@ -124,13 +126,11 @@ public class CatalogIndex implements Completer {
     }
 
     public static class DrugCompletion implements Completion {
-        Loc name;
-        Loc[] captions;
-        String filterTarget;
+        public final Drug drug;
+        public final String filterTarget;
 
         public DrugCompletion(Drug drug) {
-            name = drug.name;
-            captions = drug.captions;
+            this.drug = drug;
             String target = "";
             for (String localizedName : drug.name.getAll()) {
                 target += " " + localizedName.toLowerCase();
@@ -145,13 +145,13 @@ public class CatalogIndex implements Completer {
         }
 
         public String getValue() {
-            return App.localize(name);
+            return App.localize(drug.name);
         }
 
         public void showInView(View itemView) {
-            Utils.setText(itemView, R.id.label, App.localize(name));
+            Utils.setText(itemView, R.id.label, App.localize(drug.name));
             String result = "";
-            for (Loc caption : captions) {
+            for (Loc caption : drug.captions) {
                 if (!result.isEmpty()) result += ", ";
                 result += App.localize(caption);
             }

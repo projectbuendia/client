@@ -82,6 +82,7 @@
             android:id="@+id/order_drug"
             style="@style/text_field"
             android:layout_width="match_parent"
+            android:paddingRight="0sp"
             android:ems="15"
             android:inputType="textCapSentences|textNoSuggestions"
             android:maxLength="80"
@@ -116,8 +117,11 @@
 
         <Spinner
             android:id="@+id/order_format"
+            style="@style/tight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="0sp"
+            android:textAppearance="@style/text"
             />
 
         <!-- For consistent vertical alignment -->
@@ -167,6 +171,8 @@
       <Spinner
           android:id="@+id/order_route"
           style="@style/tight"
+          android:padding="0sp"
+          android:textAppearance="@style/text"
           />
 
       </LinearLayout>
@@ -175,7 +181,7 @@
 
     <TableRow
         android:id="@+id/quantity_over_duration_row"
-        android:visibility="visible"
+        android:visibility="gone"
         style="@style/order_table_row"
         >
 
