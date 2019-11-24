@@ -6,14 +6,14 @@ public interface MsfCatalog extends Catalog {
     Route SC = new Route("SC", "subcutaneous", "SC");
     Route IM = new Route("IM", "intramuscular", "IM");
 
-    Unit TABLET = new Unit("TABLET", "tablet [fr:comprimé]", "tablets [fr:comprimés]");
-    Unit CAPSULE = new Unit("CAPSULE", "capsule", "capsules");
-    Unit MG = new Unit("MG", "mg", "mg");
-    Unit ML = new Unit("ML", "mL", "mL");
-    Unit DROP = new Unit("DROP", "drop", "drops");
-    Unit PUFF = new Unit("PUFF", "puff", "puffs");
-    Unit AMPOULE = new Unit("AMPOULE", "ampoule", "ampoules");
-    Unit SACHET = new Unit("SACHET", "sachet", "sachets");
+    Unit TABLET = new Unit("TABLET", "tablet [fr:comprimé]", "tablets [fr:comprimés]", "tab. [fr:comp.]");
+    Unit CAPSULE = new Unit("CAPSULE", "capsule", "capsules", "cap.");
+    Unit MG = new Unit("MG", "mg", "mg", "mg");
+    Unit ML = new Unit("ML", "mL", "mL", "mL");
+    Unit DROP = new Unit("DROP", "drop", "drops", "drop");
+    Unit PUFF = new Unit("PUFF", "puff", "puffs", "puff");
+    Unit AMPOULE = new Unit("AMPOULE", "ampoule", "ampoules", "amp.");
+    Unit SACHET = new Unit("SACHET", "sachet", "sachets", "sach.");
 
     Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs(
         new Drug("DORAABCV", "ABACAVIR sulfate", "ABC").withCaptions(MsfSupplyCatalog.ANTIRETROVIRAL).withFormats(

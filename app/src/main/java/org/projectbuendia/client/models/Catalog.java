@@ -172,29 +172,26 @@ public interface Catalog {
     }
 
     class Unit {
-        public static final Unit UNSPECIFIED = new Unit("", " ");
+        public static final Unit UNSPECIFIED = new Unit("", " ", " ", "");
 
         public final String code;  // identifier code, e.g. "TABLET"
-        public final Loc singular;  // unit of prescription, singular, e.g. "tablet"
-        public final Loc plural;  // unit of prescription, plural, e.g. "tablets"
+        public final Loc singular;  // singular text, e.g. "tablet"
+        public final Loc plural;  // plural text, e.g. "tablets"
+        public final Loc abbr;  // abbreviation, e.g. "tab."
 
-        public Unit(String code, String unit) {
-            this(code, new Loc(unit));
+        public Unit(String code, String name, String abbr) {
+            this(code, new Loc(name), new Loc(name), new Loc(abbr));
         }
 
-        public Unit(String code, Loc unit) {
-            this.code = code;
-            singular = plural = unit;
+        public Unit(String code, String singular, String plural, String abbr) {
+            this(code, new Loc(singular), new Loc(plural), new Loc(abbr));
         }
 
-        public Unit(String code, String singular, String plural) {
-            this(code, new Loc(singular), new Loc(plural));
-        }
-
-        public Unit(String code, Loc singular, Loc plural) {
+        public Unit(String code, Loc singular, Loc plural, Loc abbr) {
             this.code = code;
             this.singular = singular;
             this.plural = plural;
+            this.abbr = abbr;
         }
 
         @Override public boolean equals(Object other) {
