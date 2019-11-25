@@ -30,6 +30,10 @@ public class Quantity {
             && eq(unit, ((Quantity) other).unit);
     }
 
+    public String toString() {
+        return format(6);
+    }
+
     public String format(int maxPrec) {
         String abbr = App.localize(unit.abbr);
         String suffix = abbr.startsWith("\b") ? abbr.substring(1) : " " + abbr;
