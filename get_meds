@@ -38,6 +38,8 @@ def get_meds(code_column, en_desc_column, fr_desc_column, sheet, filename):
     drug_list = []
     formats = {}
     for code, en_desc, fr_desc in read_items(s, code_col, en_col, fr_col):
+        if not code.startswith('D'):
+            continue
         category = code[:4]
         drug = code[:8]
         if drug not in drugs:
@@ -50,11 +52,21 @@ def get_meds(code_column, en_desc_column, fr_desc_column, sheet, filename):
         en_name = get_drug_name([en for code, en, fr in formats[drug]])
         fr_name = get_drug_name([fr for code, en, fr in formats[drug]])
         name = pack_en_fr(en_name, fr_name)
+        lines = []
         for code, en_desc, fr_desc in formats[drug]:
             en_format = normalize(en_desc[len(en_name):])
             fr_format = normalize(fr_desc[len(fr_name):])
             format = pack_en_fr(en_format, fr_format)
-            results.append([code, name, format])
+            unit = guess_unit(en_desc)
+            lines.append('''\
+            new Format("%s", "%s", Unit.%s)''' % 
+                (code.strip('-'), format, unit))
+        joined_lines = ',\n'.join(lines)
+        sys.stdout.write('''\
+        new Drug("%s", "%s").withFormats(
+%s
+        ),
+''' % (drug, name, joined_lines))
 
     csv.writer(sys.stdout).writerows(results)
 
@@ -103,6 +115,15 @@ def normalize(desc):
     desc = re.sub(r'\s+', ' ', desc)
     desc = re.sub(r'([^ a-zA-Z])(kg|mg|ml)\b', r'\1 \2', desc)
     return desc
+
+def guess_unit(desc):
+    if re.findall(r'\btab\.?\b', desc):
+        return 'TABLET'
+    if re.findall(r'\bcaps?\.?\b', desc):
+        return 'CAPSULE'
+    if re.findall(r'/ *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
+        return 'ML'
+    return 'MG'
 
 if __name__ == '__main__':
     get_meds()
