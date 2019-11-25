@@ -12,7 +12,7 @@ import xlrd
     help='medication code column number (counted from 1)'
 )
 @click.option(
-    '-d', '--en-desc-column', default=2,
+    '-e', '--en-desc-column', default=2,
     help='English description column number (counted from 1)'
 )
 @click.option(
@@ -33,22 +33,64 @@ def get_meds(code_column, en_desc_column, fr_desc_column, sheet, filename):
         s = book.sheet_by_name(sheet)
     except:
         s = book.sheets()[int(sheet) - 1]
-    items = list(read_items(s, code_col, en_col, fr_col))
-    csv.writer(sys.stdout).writerows(items)
+
+    drugs = set()
+    drug_list = []
+    formats = {}
+    for code, en_desc, fr_desc in read_items(s, code_col, en_col, fr_col):
+        category = code[:4]
+        drug = code[:8]
+        if drug not in drugs:
+            drugs.add(drug)
+            drug_list.append(drug)
+        formats.setdefault(drug, []).append((code, en_desc, fr_desc))
+
+    results = []
+    for drug in drug_list:
+        en_name = get_drug_name([en for code, en, fr in formats[drug]])
+        fr_name = get_drug_name([fr for code, en, fr in formats[drug]])
+        name = pack_en_fr(en_name, fr_name)
+        for code, en_desc, fr_desc in formats[drug]:
+            en_format = normalize(en_desc[len(en_name):])
+            fr_format = normalize(fr_desc[len(fr_name):])
+            format = pack_en_fr(en_format, fr_format)
+            results.append([code, name, format])
+
+    csv.writer(sys.stdout).writerows(results)
+
+def pack_en_fr(en_text, fr_text):
+    if fr_text.strip():
+        return '%s [fr:%s]' % (normalize(en_text), normalize(fr_text))
+    else:
+        return normalize(en_text)
+
+def get_drug_name(descs):
+    if len(descs) == 0:
+        return ''
+    if len(descs) == 1:
+        return split_med(descs[0])[0]
+
+    words = [desc.split() for desc in descs]
+    sets = [set(group) for group in zip(*words)]
+    w = 0
+    while w < len(sets) - 1 and len(sets[w]) == 1:
+        w += 1
+    return ' '.join(set.pop() for set in sets[:w])
 
 def read_items(s, code_col, en_col, fr_col):
     for row in range(s.nrows):
-        code = s.cell(row, code_col).value
-        desc = s.cell(row, en_col).value
-        name, quantity = split_med(normalize_en(desc))
+        code = s.cell(row, code_col).value.strip()
+        if ' ' in code:
+            continue
+        en_desc = s.cell(row, en_col).value
+        fr_desc = ''
         if fr_col is not None:
             fr_desc = s.cell(row, fr_col).value
-            fr_name, fr_quantity = split_med(normalize_fr(fr_desc))
-            name += ' [fr:%s]' % fr_name
-            quantity += ' [fr:%s]' % fr_quantity
-        yield (code, name, quantity)
+        yield (code, normalize(en_desc), normalize(fr_desc))
 
 def split_med(med):
+    if '|' in med:
+        return med.split('|', 1)
     m = re.match(r'(.*), *(([eé]q[\. ]*)?\d.*)', med)
     if m:
         name, quantity = m.group(1), m.group(2).lstrip(', ')
@@ -56,18 +98,11 @@ def split_med(med):
         name, quantity = med, ''
     return name, quantity
 
-def normalize_en(med):
-    med = re.sub(r'\s+', ' ', med)
-    med = re.sub(r'\s*/\s*', ' / ', med)
-    med = re.sub(r'([^ a-zA-Z])(kg|mg|ml)\b', r'\1 \2', med)
-    return med
-
-def normalize_fr(med):
-    med = re.sub(r'\s+', ' ', med)
-    med = re.sub(r'\s*/\s*', ' / ', med)
-    med = re.sub(r'(\d),(\d)', r'\1.\2', med)
-    med = re.sub(r'([^ a-zA-Z])(kg|mg|ml)\b', r'\1 \2', med)
-    return med
+def normalize(desc):
+    desc = re.sub(r'^[ ,]+|[ ,]+$', '', desc)
+    desc = re.sub(r'\s+', ' ', desc)
+    desc = re.sub(r'([^ a-zA-Z])(kg|mg|ml)\b', r'\1 \2', desc)
+    return desc
 
 if __name__ == '__main__':
     get_meds()

@@ -15,7 +15,7 @@ public class Unit {
     public static final Unit MG = new Unit("MG", "milligram", "milligrams", "mg");
     public static final Unit ML = new Unit("ML", "milliliter", "milliliters", "mL");
     public static final Unit TABLET = new Unit("TABLET", "tablet [fr:comprimé]", "tablets [fr:comprimés]", "tab. [fr:comp.]");
-    public static final Unit CAPSULE = new Unit("CAPSULE", "capsule", "capsules", "cap.");
+    public static final Unit CAPSULE = new Unit("CAPSULE", "capsule", "capsules", "caps.");
     public static final Unit DROP = new Unit("DROP", "drop", "drops", "drop");
     public static final Unit PUFF = new Unit("PUFF", "puff", "puffs", "puff");
     public static final Unit AMPOULE = new Unit("AMPOULE", "ampoule", "ampoules", "amp.");
