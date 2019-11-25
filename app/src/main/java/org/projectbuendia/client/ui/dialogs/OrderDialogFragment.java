@@ -291,14 +291,14 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         Quantity amount = new Quantity(Utils.getDouble(v.dosage, 0), activeFormat.dosageUnit);
         Quantity duration = null;
         if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
-            amount = new Quantity(Utils.getDouble(v.amount, 0), MsfCatalog.ML);
-            duration = new Quantity(Utils.getDouble(v.duration, 0), MsfCatalog.HOUR);
+            amount = new Quantity(Utils.getDouble(v.amount, 0), Unit.ML);
+            duration = new Quantity(Utils.getDouble(v.duration, 0), Unit.HOUR);
         }
         Route activeRoute = Utils.orDefault((Route) v.route.getSelectedItem(), Route.UNSPECIFIED);
         String route = activeRoute.code;
         boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
         Quantity frequency = isSeries ?
-            new Quantity(Utils.getDouble(v.frequency, 0), MsfCatalog.PER_DAY) : null;
+            new Quantity(Utils.getDouble(v.frequency, 0), Unit.PER_DAY) : null;
         String notes = Utils.getText(v.notes);
 
         Order.Instructions instructions = new Order.Instructions(
