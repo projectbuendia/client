@@ -152,6 +152,9 @@
 
   <string name="order_notes">Notes</string>
   <string name="enter_medication">Enter a medication</string>
+  <string name="enter_dosage">Enter a dosage</string>
+  <string name="enter_duration">Enter a duration</string>
+  <string name="enter_number">Enter a number</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
   <string name="order_cannot_exceed_n_times_per_day">Cannot exceed %d times per day</string>
   <string name="order_cannot_exceed_n_days">Cannot exceed %d days</string>

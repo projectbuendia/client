@@ -179,7 +179,7 @@ public class Utils {
 
     /** Formats a number to the minimum necessary number of decimal places. */
     public static String format(double x, int maxPrec) {
-        String result = String.format("%." + maxPrec + "g", x);
+        String result = String.format("%." + maxPrec + "f", x);
         if (result.contains("e")) return result;
         if (!result.contains(".") && !result.contains(",")) return result;
         return result.replaceAll("[.,]?0*$", "");

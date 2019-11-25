@@ -288,10 +288,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         String code = activeFormat != Format.UNSPECIFIED ? activeFormat.code
             : activeDrug != Drug.UNSPECIFIED ? activeDrug.code
             : Utils.getText(v.drug);  // fall back to free text
-        Quantity amount = new Quantity(
-            Utils.getDouble(v.dosage, 0),
-            activeFormat.dosageUnit
-        );
+        Quantity amount = new Quantity(Utils.getDouble(v.dosage, 0), activeFormat.dosageUnit);
         Quantity duration = null;
         if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
             amount = new Quantity(Utils.getDouble(v.amount, 0), MsfCatalog.ML);
@@ -299,7 +296,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         }
         Route activeRoute = Utils.orDefault((Route) v.route.getSelectedItem(), Route.UNSPECIFIED);
         String route = activeRoute.code;
-        Quantity frequency = new Quantity(Utils.getDouble(v.frequency, 0), MsfCatalog.PER_DAY);
+        boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
+        Quantity frequency = isSeries ?
+            new Quantity(Utils.getDouble(v.frequency, 0), MsfCatalog.PER_DAY) : null;
         String notes = Utils.getText(v.notes);
 
         Order.Instructions instructions = new Order.Instructions(
@@ -312,11 +311,32 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             setError(v.drug, R.string.enter_medication);
             valid = false;
         }
-        if (frequency.mag > MAX_FREQUENCY) {
+        if (valid && activeDrug != null) {
+            if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
+                if (amount.mag == 0) {
+                    setError(v.amount, R.string.enter_dosage);
+                    valid = false;
+                }
+                if (valid && duration.mag == 0) {
+                    setError(v.duration, R.string.enter_duration);
+                    valid = false;
+                }
+            } else {
+                if (amount.mag == 0) {
+                    setError(v.dosage, R.string.enter_dosage);
+                    valid = false;
+                }
+            }
+        }
+        if (valid && isSeries && frequency.mag == 0) {
+            setError(v.frequency, R.string.enter_number);
+            valid = false;
+        }
+        if (valid && isSeries && frequency.mag > MAX_FREQUENCY) {
             setError(v.frequency, R.string.order_cannot_exceed_n_times_per_day, MAX_FREQUENCY);
             valid = false;
         }
-        if (seriesLengthDays != -1) {
+        if (valid && seriesLengthDays != -1) {
             if (seriesLengthDays == 0) {
                 setError(v.seriesLength, R.string.order_give_for_days_cannot_be_zero);
                 valid = false;
@@ -459,14 +479,19 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
     private void clearDosage() {
         v.dosage.setText("");
+        v.dosage.setError(null);
         v.amount.setText("");
+        v.amount.setError(null);
         v.duration.setText("");
+        v.duration.setError(null);
     }
 
     private void clearSchedule() {
         v.isSeries.check(v.unary.getId());
         v.frequency.setText("");
+        v.frequency.setError(null);
         v.seriesLength.setText("");
+        v.seriesLength.setError(null);
         v.scheduleDescription.setText("");
     }
 
