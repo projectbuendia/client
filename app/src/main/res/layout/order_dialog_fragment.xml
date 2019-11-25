@@ -155,8 +155,8 @@
             android:inputType="numberDecimal"
             android:nextFocusUp="@id/order_drug"
             android:nextFocusLeft="@id/order_drug"
-            android:nextFocusDown="@id/order_quantity"
-            android:nextFocusRight="@id/order_quantity"
+            android:nextFocusDown="@id/order_amount"
+            android:nextFocusRight="@id/order_amount"
             tools:text="100"
             />
 
@@ -179,7 +179,7 @@
     </TableRow>
 
     <TableRow
-        android:id="@+id/quantity_over_duration_row"
+        android:id="@+id/continuous_row"
         android:visibility="gone"
         style="@style/order_table_row"
         >
@@ -187,13 +187,13 @@
       <TextView
           style="@style/field_label"
           android:text="@string/order_dosage"
-          android:labelFor="@id/order_quantity"
+          android:labelFor="@id/order_amount"
           />
 
       <LinearLayout style="@style/order_cell_container">
 
         <EditText
-            android:id="@+id/order_quantity"
+            android:id="@+id/order_amount"
             style="@style/number_field"
             android:ems="3"
             android:maxLength="4"
@@ -205,7 +205,7 @@
             />
 
         <TextView
-            android:id="@+id/order_quantity_unit"
+            android:id="@+id/order_amount_unit"
             style="@style/inner_field_label"
             android:text="mL in"
             />
@@ -216,7 +216,7 @@
             android:ems="3"
             android:maxLength="2"
             android:nextFocusUp="@id/order_dosage"
-            android:nextFocusLeft="@id/order_quantity"
+            android:nextFocusLeft="@id/order_amount"
             android:nextFocusRight="@id/order_frequency"
             android:nextFocusDown="@id/order_frequency"
             tools:text="8"
@@ -355,7 +355,6 @@
             android:layout_gravity="top|start"
             android:gravity="top|start"
             android:minLines="2"
-            android:lines="2"
             tools:text="(commencé le 29 août; après 10 doses, arrêter le 31 août)"/>
         />
 

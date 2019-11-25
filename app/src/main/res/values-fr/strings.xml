@@ -150,9 +150,8 @@
   <string name="route_of_administration">Voie d\'administration</string>
 
   <string name="order_execution_title">L\'historique de traitement pour %s</string>
-  <string name="order_medication_route">%1$s %2$s</string>
   <string name="order_dosage_unary">%1$s</string>
-  <string name="order_dosage_series">%1$s, donné %2$d fois par jour</string>
+  <string name="order_dosage_series">%1$s, donné %2$s fois par jour</string>
   <string name="order_unspecified_dosage">Dosage non spécifié</string>
   <string name="order_frequency_value">%1$dx/jour</string>
   <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois %2$s</string>

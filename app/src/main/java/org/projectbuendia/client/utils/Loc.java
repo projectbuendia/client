@@ -9,13 +9,15 @@ import java.util.regex.Pattern;
 /** A localized string, made from a string of the form "cat [fr:chat] [es:gato]". */
 public class Loc {
     private static final Pattern BRACKETED_PATTERN = Pattern.compile("\\[(.*?)\\]");
+    private static final Pattern EXTRA_SPACES = Pattern.compile("^ *| *$");
 
     protected final String base;
     protected final Map<String, String> options;
 
     public Loc(String packed) {
         if (packed == null) packed = "";
-        base = BRACKETED_PATTERN.matcher(packed).replaceAll("").trim();
+        String unpacked = BRACKETED_PATTERN.matcher(packed).replaceAll("");
+        base = EXTRA_SPACES.matcher(unpacked).replaceAll("");
         options = new HashMap<>();
         Matcher matcher = BRACKETED_PATTERN.matcher(packed);
         for (int pos = 0; matcher.find(pos); pos = matcher.end(1)) {

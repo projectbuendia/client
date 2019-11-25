@@ -16,8 +16,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
  * category determines the set of possible administration routes (e.g. for the
  * injectable category, the possible routes are IV, SC, and IM).  The category
  * also determines the form in which a dosage is specified (e.g. as a single
- * quantity given at once, or as a quantity of liquid given continuously over
- * a period of time), which we call a DosingType.
+ * amount given at once, or as an amount of liquid given continuously over a
+ * period of time), which we call a DosingType.
  *
  * A Drug is a substance, or what is sometimes called an "active ingredient"
  * (e.g. aspirin is a drug).  A combination of substances is also considered
@@ -127,7 +127,7 @@ public interface Catalog {
         public static final Format UNSPECIFIED = new Format("", " ", Unit.UNSPECIFIED);
 
         public final String code;  // stock code, e.g. "DORAACSA3TD"
-        public final Loc description;  // quantity, concentration, form, e.g. "300 mg, disp. tab."
+        public final Loc description;  // amount, concentration, form, e.g. "300 mg, disp. tab."
         public final Unit dosageUnit;
 
         public Format(String code, String description, Unit dosageUnit) {
@@ -171,33 +171,4 @@ public interface Catalog {
         }
     }
 
-    class Unit {
-        public static final Unit UNSPECIFIED = new Unit("", " ", " ", " ", "");
-
-        public final String code;  // identifier code, e.g. "SECOND"
-        public final Loc singular;  // singular prose, e.g. "second"
-        public final Loc plural;  // plural prose, e.g. "seconds"
-        public final Loc terse;  // informal short form, e.g. "sec"
-        public final Loc abbr;  // standard abbreviation, e.g. "s"
-
-        public Unit(String code, String singular, String plural, String terse) {
-            this(code, singular, plural, terse, terse);
-        }
-
-        public Unit(String code, String singular, String plural, String terse, String abbr) {
-            this(code, new Loc(singular), new Loc(plural), new Loc(terse), new Loc(abbr));
-        }
-
-        public Unit(String code, Loc singular, Loc plural, Loc terse, Loc abbr) {
-            this.code = code;
-            this.singular = singular;
-            this.plural = plural;
-            this.terse = terse;
-            this.abbr = abbr;
-        }
-
-        @Override public boolean equals(Object other) {
-            return other instanceof Unit && eq(code, ((Unit) other).code);
-        }
-    }
 }

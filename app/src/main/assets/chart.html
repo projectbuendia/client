@@ -132,19 +132,21 @@
     {% set top = true %}
     {% for order in orders %}
       {% set ins = order.instructions %}
-      <tr class="order order-{{ins.medication | to_css_identifier}}">
+      {% set dosage = to_dosage_string(ins) %}
+      {% set frequency = to_frequency_string(ins) %}
+      <tr class="order order-{{ins.code | to_css_identifier}}">
         <th scope="row" onclick="c.onOrderHeadingPressed('{{order.uuid}}')">
           {% if ins.notes is not empty %}
             <div class="notes">{{ins.notes | slice(0, min(30, ins.notes|length))}}</div>
           {% endif %}
-          <div class="medication">{{ins.medication}}</div>
+          <div class="drug">{{ins.drugName}}</div>
           <div class="dosing">
-            <span class="dosage">{{ins.dosage}}</span
+            <span class="dosage">{{dosage}}</span
               >{% if ins.route is not empty %}
                 <span class="route">{{ins.route}}</span
-                >{% endif %}{% if ins.dosage + ins.route is not empty and ins.frequency > 0 %}<span class="sep">, </span
-                >{% endif %}{% if ins.frequency > 0 %}
-                <span class="frequency">{{ins.formattedFrequency}}</span>
+                >{% endif %}{% if dosage + ins.route is not empty and frequency is not empty %}<span class="sep">, </span
+                >{% endif %}{% if frequency is not empty %}
+                <span class="frequency">{{frequency}}</span>
               {% endif %}
           </div>
         </th>
@@ -153,7 +155,7 @@
         {% set future = false %}
         {% set started = false %}
         {% set divisionIndex = 0 %}
-        {% set showPerDivisionCounts = numColumnsPerDay >= ins.frequency %}
+        {% set showPerDivisionCounts = ins.isSeries and numColumnsPerDay >= ins.frequency.mag %}
 
         {% set prevStop = columns[0].start %}
         {% for column in columns %}

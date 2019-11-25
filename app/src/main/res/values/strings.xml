@@ -135,6 +135,7 @@
   <string name="external_category_abbr">Ext</string>
   <string name="vaccine_category_abbr">Vacc</string>
 
+  <string name="amount_in_duration">%1$s in %2$s</string>
   <string name="once">Once</string>
   <string name="multiple_times">Multiple times</string>
 
@@ -165,9 +166,8 @@
   <string name="route_of_administration">Route of administration</string>
 
   <string name="order_execution_title">Treatment history %s</string>
-  <string name="order_medication_route">%1$s %2$s</string>
   <string name="order_dosage_unary">%1$s</string>
-  <string name="order_dosage_series">%1$s, given %2$dx daily</string>
+  <string name="order_dosage_series">%1$s, given %2$sx daily</string>
   <string name="order_unspecified_dosage">Unspecified dosage</string>
   <string name="order_frequency_value">%1$dx/day</string>
   <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; %2$s</string>

@@ -65,6 +65,8 @@ public class PebbleExtension extends AbstractExtension {
         functions.put("intervals_overlap", new IntervalsOverlapFunction());
         functions.put("get_order_divisions", new GetOrderDivisionsFunction());
         functions.put("count_scheduled_doses", new CountScheduledDosesFunction());
+        functions.put("to_dosage_string", new ToDosageStringFunction());
+        functions.put("to_frequency_string", new ToFrequencyStringFunction());
     }
 
     public static final String TYPE_ERROR = "?";
@@ -382,6 +384,33 @@ public class PebbleExtension extends AbstractExtension {
             Order order = (Order) args.get("order");
             Interval interval = (Interval) args.get("interval");
             return order.countScheduledDosesIn(interval);
+        }
+    }
+
+    static class ToDosageStringFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("instructions");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            Order.Instructions instr = (Order.Instructions) args.get("instructions");
+            return instr.amount != null ? (
+                instr.duration != null ? App.str(
+                    R.string.amount_in_duration,
+                    instr.amount.format(2), instr.duration.format(2)
+                ) : instr.amount.format(2)
+            ) : "";
+        }
+    }
+
+    static class ToFrequencyStringFunction implements Function {
+        @Override public List<String> getArgumentNames() {
+            return ImmutableList.of("instructions");
+        }
+
+        @Override public Object execute(Map<String, Object> args) {
+            Order.Instructions instr = (Order.Instructions) args.get("instructions");
+            return instr.frequency != null ? instr.frequency.format(2) : "";
         }
     }
 }

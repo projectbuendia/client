@@ -19,6 +19,8 @@ public interface MsfCatalog extends Catalog {
     Unit MINUTE = new Unit("MINUTE", "minute", "minutes", "min");
     Unit SECOND = new Unit("SECOND", "second", "seconds", "sec", "s");
 
+    Unit PER_DAY = new Unit("PER_DAY", "time per day", "times per day", "\bx per day", "\bx/day");
+
     Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs(
         new Drug("DORAABCV", "ABACAVIR sulfate", "ABC").withCaptions(MsfSupplyCatalog.ANTIRETROVIRAL).withFormats(
             new Format("DORAABCV3T", "eq. 300 mg base, tab.", TABLET),

@@ -4,7 +4,6 @@ import org.projectbuendia.client.models.Catalog.Category;
 import org.projectbuendia.client.models.Catalog.Drug;
 import org.projectbuendia.client.models.Catalog.Format;
 import org.projectbuendia.client.models.Catalog.Route;
-import org.projectbuendia.client.models.Catalog.Unit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +44,7 @@ public class CatalogIndex {
     }
 
     public Category getCategory(String code) {
+        if (code.length() > 4) code = code.substring(0, 4);
         for (Category category : categories) {
             if (eq(code, category.code)) return category;
         }
@@ -52,6 +52,7 @@ public class CatalogIndex {
     }
 
     public Drug getDrug(String code) {
+        if (code.length() > 8) code = code.substring(0, 8);
         if (drugs.containsKey(code)) {
             return drugs.get(code);
         }
@@ -59,6 +60,7 @@ public class CatalogIndex {
     }
 
     public Format getFormat(String code) {
+        code = code.replaceAll("-*$", "");
         if (formats.containsKey(code)) {
             return formats.get(code);
         }
