@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+
+import click
+import csv
+import re
+import sys
+import xlrd
+
+@click.command()
+@click.option(
+    '-c', '--code-column', default=1,
+    help='medication code column number (counted from 1)'
+)
+@click.option(
+    '-d', '--en-desc-column', default=2,
+    help='English description column number (counted from 1)'
+)
+@click.option(
+    '-f', '--fr-desc-column', default=None, type=int,
+    help='French description column number (counted from 1)'
+)
+@click.option(
+    '-s', '--sheet', default=1,
+    help='sheet name or number (counted from 1)'
+)
+@click.argument('filename')
+def get_meds(code_column, en_desc_column, fr_desc_column, sheet, filename):
+    book = xlrd.open_workbook(filename)
+    code_col = code_column - 1
+    en_col = en_desc_column - 1
+    fr_col = fr_desc_column - 1 if fr_desc_column is not None else None
+    try:
+        s = book.sheet_by_name(sheet)
+    except:
+        s = book.sheets()[int(sheet) - 1]
+    items = list(read_items(s, code_col, en_col, fr_col))
+    csv.writer(sys.stdout).writerows(items)
+
+def read_items(s, code_col, en_col, fr_col):
+    for row in range(s.nrows):
+        code = s.cell(row, code_col).value
+        desc = s.cell(row, en_col).value
+        name, quantity = split_med(normalize_en(desc))
+        if fr_col is not None:
+            fr_desc = s.cell(row, fr_col).value
+            fr_name, fr_quantity = split_med(normalize_fr(fr_desc))
+            name += ' [fr:%s]' % fr_name
+            quantity += ' [fr:%s]' % fr_quantity
+        yield (code, name, quantity)
+
+def split_med(med):
+    m = re.match(r'(.*), *(([eé]q[\. ]*)?\d.*)', med)
+    if m:
+        name, quantity = m.group(1), m.group(2).lstrip(', ')
+    else:
+        name, quantity = med, ''
+    return name, quantity
+
+def normalize_en(med):
+    med = re.sub(r'\s+', ' ', med)
+    med = re.sub(r'\s*/\s*', ' / ', med)
+    med = re.sub(r'([^ a-zA-Z])(kg|mg|ml)\b', r'\1 \2', med)
+    return med
+
+def normalize_fr(med):
+    med = re.sub(r'\s+', ' ', med)
+    med = re.sub(r'\s*/\s*', ' / ', med)
+    med = re.sub(r'(\d),(\d)', r'\1.\2', med)
+    med = re.sub(r'([^ a-zA-Z])(kg|mg|ml)\b', r'\1 \2', med)
+    return med
+
+if __name__ == '__main__':
+    get_meds()
