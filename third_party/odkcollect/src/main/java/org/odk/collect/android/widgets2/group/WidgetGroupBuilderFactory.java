@@ -14,7 +14,7 @@ public class WidgetGroupBuilderFactory {
         Appearance appearance = Appearance.fromString(group.getAppearanceHint());
 
         if (appearance.hasQualifier("binary-select-one")) {
-            return new BinarySelectOneTableWidgetGroupBuilder(appearance);
+            return new BinarySelectTableBuilder(appearance);
         }
 
         return null;

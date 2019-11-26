@@ -3,6 +3,7 @@
 <string name="title_discard_observations">Jeter ces observations?</string>
 <string name="yes">Oui</string>
 <string name="no">Non</string>
+<string name="none_of_the_above">Aucune des choses ci-dessus</string>
 <string name="form_entry_save">Enregistrer</string>
 <string name="form_entry_discard">Jeter</string>
 <string name="question_is_required">Champ manquant: %s</string>
