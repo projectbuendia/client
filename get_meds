@@ -16,16 +16,16 @@ import xlrd
     help='English description column number (counted from 1)'
 )
 @click.option(
-    '-E', '--en-override-column', default=None, type=int,
-    help='English override column number (counted from 1)'
+    '-E', '--en-adjust-column', default=None, type=int,
+    help='English adjustment column number (counted from 1)'
 )
 @click.option(
     '-f', '--fr-desc-column', default=None, type=int,
     help='French description column number (counted from 1)'
 )
 @click.option(
-    '-F', '--fr-override-column', default=None, type=int,
-    help='French override column number (counted from 1)'
+    '-F', '--fr-adjust-column', default=None, type=int,
+    help='French adjustment column number (counted from 1)'
 )
 @click.option(
     '-s', '--sheet', default=1,
@@ -34,13 +34,13 @@ import xlrd
 @click.argument('filename')
 def get_meds(filename, sheet, code_column,
              en_desc_column, fr_desc_column,
-             en_override_column, fr_override_column):
+             en_adjust_column, fr_adjust_column):
     book = xlrd.open_workbook(filename)
     code_col = code_column - 1
     en_col = en_desc_column - 1
     fr_col = fr_desc_column - 1 if fr_desc_column else None
-    en_over = en_override_column - 1 if en_override_column else None
-    fr_over = fr_override_column - 1 if fr_override_column else None
+    en_adj = en_adjust_column - 1 if en_adjust_column else None
+    fr_adj = fr_adjust_column - 1 if fr_adjust_column else None
     try:
         s = book.sheet_by_name(sheet)
     except:
@@ -49,7 +49,7 @@ def get_meds(filename, sheet, code_column,
     drugs = set()
     drug_list = []
     formats = {}
-    items = read_items(s, code_col, en_col, fr_col, en_over, fr_over)
+    items = read_items(s, code_col, en_col, fr_col, en_adj, fr_adj)
     for code, en_desc, fr_desc in items:
         if not code.startswith('D'):
             continue
@@ -58,8 +58,8 @@ def get_meds(filename, sheet, code_column,
         if drug not in drugs:
             drugs.add(drug)
             drug_list.append(drug)
-        en_desc = normalize(unabbreviate(en_desc))
-        fr_desc = normalize(unabbreviate(fr_desc))
+        en_desc = normalize(en_desc)
+        fr_desc = normalize(fr_desc)
         formats.setdefault(drug, []).append((code, en_desc, fr_desc))
 
     write = sys.stdout.write
@@ -79,8 +79,8 @@ def get_meds(filename, sheet, code_column,
                 name = pack_en_fr(en_name, fr_name)
                 format_exprs = []
                 for code, en_desc, fr_desc in formats[drug]:
-                    en_format = en_desc[len(en_name):]
-                    fr_format = fr_desc[len(fr_name):]
+                    en_format = en_desc[len(en_name):].lstrip(' ^')
+                    fr_format = fr_desc[len(fr_name):].lstrip(' ^')
                     format = pack_en_fr(en_format, fr_format)
                     unit = guess_unit(en_desc)
                     format_exprs.append('''\
@@ -113,31 +113,57 @@ def get_drug_name(descs):
     words = [desc.split() for desc in descs]
     sets = [set(group) for group in zip(*words)]
     w = 0
-    while w < len(sets) - 1 and len(sets[w]) == 1 and not re.search(r'\d', list(sets[w])[0]):
+    while w < len(sets) - 1 and len(sets[w]) == 1 and not re.search(r'\d|\^', list(sets[w])[0]):
         w += 1
     result = ' '.join(set.pop() for set in sets[:w])
     return re.sub(r',* *[eé]q\. *$', '', result)
 
-def read_items(s, code_col, en_col, fr_col, en_over, fr_over):
+def read_items(s, code_col, en_col, fr_col, en_adj, fr_adj):
     for row in range(s.nrows):
         code = s.cell(row, code_col).value.strip()
         if ' ' in code:
             continue
         en_desc = s.cell(row, en_col).value
-        if en_over is not None:
-            en_override = s.cell(row, en_over).value
-            en_desc = en_override.strip() or en_desc
+        if en_adj is not None:
+            en_adjust = s.cell(row, en_adj).value
+            en_desc = apply_adjustments(en_desc, en_adjust)
         fr_desc = ''
         if fr_col is not None:
             fr_desc = s.cell(row, fr_col).value
-            if fr_over is not None:
-                fr_override = s.cell(row, fr_over).value
-                fr_desc = fr_override.strip() or fr_desc
+            if fr_adj is not None:
+                fr_adjust = s.cell(row, fr_adj).value
+                if fr_adjust == '=':
+                    fr_adjust = en_adj and en_adjust or ''
+                fr_desc = apply_adjustments(fr_desc, fr_adjust)
         yield (code, en_desc, fr_desc)
 
+def apply_adjustments(text, adjustments):
+    if not adjustments.strip():
+        return text
+    orig = text
+    for clause in adjustments.split('|'):
+        clause = clause.strip()
+        action, args = clause.split(' ', 1)
+        if action == 'sub':
+            old, new = args.split('>', 1)
+            text = text.replace(old.strip(), new.strip(), 1)
+        elif action == 'drug':
+            drug = args.strip()
+            format = text
+            for word in drug.split():
+                if re.search(r'\w', word):
+                    word = re.sub(r'^\W+|\W+$', '', word)
+                    format = re.sub(r'\b' + word + r'\b', '', format, 1)
+            text = drug + ' ^ ' + format
+        elif action == 'format':
+            format = args.strip()
+            drug, old = text.split('^', 1)
+            text = drug + ' ^ ' + format
+    return text
+
 def split_med(med):
-    if '|' in med:
-        return med.split('|', 1)
+    if '^' in med:
+        return med.split('^', 1)
     m = re.match(r'(.*), *(([eé]q[\. ]*)?\d.*)', med)
     if m:
         return m.group(1), m.group(2).lstrip(', ')
@@ -149,57 +175,33 @@ def split_med(med):
         return m.group(1), m.group(2).lstrip(', ')
     return med, ''
 
-def unabbreviate(desc):
-    for search, replace in [
-        (r'\bCLAV\.', 'CLAVULANIC '),
-        (r'\bDEXAMET\.', 'DEXAMETHASONE '),
-        (r'\bNEOMYC\.', 'NEOMYCINE '),
-        (r'\(vaccine BCG\)', 'VACCINE BCG,'),
-        (r'\(vaccin BCG\)', 'VACCIN BCG,'),
-        (r'\(vaccine measles\)', 'VACCINE MEASLES,'),
-        (r'\(vaccin rougeole\)', 'VACCIN ROUGEOLE,'),
-        (r'\(vaccine mening. A conj. ([-0-9]+ *(y|m|ans|mois))\)',
-            r'VACCINE MENINGOCOCCAL A CONJUGATE, \1,'),
-        (r'\(vaccin méning. A conj. ([-0-9]+ *(y|m|ans|mois))\)',
-            r'VACCIN MENINGOCOQUE A CONJUGUE, \1,'),
-        (r'VACCINE MENINGOCOCCAL A CONJ.',
-            r'VACCINE MENINGOCOCCAL A CONJUGATE'),
-        (r'VACCIN MENINGOCOQUE A CONJ.',
-            r'VACCIN MENINGOCOQUE A CONJUGUE'),
-        (r'\(MEASLES/RUBELLA VACCINE\)',
-            r'MEASLES/RUBELLA VACCINE, '),
-        (r'\(VACCIN ROUGEOLE/ROUBEOLE\)',
-            r'VACCIN ROUGEOLD/ROUBEOLE,'),
-        (r'\(vaccine MMR\)', 'VACCINE MMR, '),
-        (r'\(vaccin ROR\)', 'VACCIN ROR, '),
-        (r'\(VACCINE MMR,measles/mumps/rubella\)',
-            r'VACCINE MMR (measles/mumps/rubella),'),
-        (r'\(VACCIN ROR,rougeole/oreillons/rubéole\)',
-            r'VACCIN ROR (rougeole/oreillons/rubéole),'),
-        (r'\(bivalent oral polio vaccine\)',
-            'VACCINE POLIOMYELITIS, BIVALENT ORAL,'),
-        (r'\(vaccin polio oral bivalent\)',
-            'VACCINE POLIO, BIVALENT ORAL,')
-    ]:
-        desc = re.sub(search, replace, desc)
-    return desc
-
 def normalize(desc):
     for search, replace in [
-        (r'^[ ,]*|[ ,]*$', ''),  # remove leading/trailing spaces/commas
-        (r'\s+', ' '),  # collapse whitespace to single space
+        (r'([a-zA-Z])\.', r'\1. '),  # period after a letter is a word break
         (r'(\d),(\d)', r'\1.\2'),  # turn commas into decimal points
+        (r'(\d)(g|mg|µg|l|ml|IU|UI)\b', r'\1 \2'),  # space before any unit
+        (r'(\d)x(\d)', r'\1 x \2'),  # spaces around x as multiplication sign
+        (r'\bx(\d)', r'x \1'),  # spaces around x as multiplication sign
+        (r'(\d)x\b', r'\1 x'),  # spaces around x as multiplication sign
+        (r'[ ,]000', '000'),  # remove thousands separators
+        (r'[ ,]*/[ ,]*', ' / '),  # one space before and after any slash
+        (r'(\d) / (\d)', r'\1/\2'),  # no spaces around slash for fractions
+        (r',( *,)*', ','),  # collapse multiple commas to single comma
         (r' *, *', ' , '),  # one space before and after any comma
-        (r'(\d)(g|mg|µg|l|ml|IU)\b', r'\1 \2'),  # space before any unit
+        (r'\s+', ' '),  # collapse whitespace to single space
+        (r'^[ ,]*|[ ,]*$', ''),  # remove leading/trailing spaces/commas
     ]:
         desc = re.sub(search, replace, desc)
     return desc
 
 def clean(desc):
     for search, replace in [
-        (r'^[ ,]*|[ ,]*$', ''),  # remove leading/trailing spaces/commas
-        (r'\s+', ' '),  # collapse whitespace to single space
+        (r'[ ,]*/[ ,]*', ' / '),  # one space before and after any slash
+        (r'(\d) / (\d)', r'\1/\2'),  # no spaces around slash for fractions
+        (r',( *,)*', ','),  # collapse multiple commas to single comma
         (r' *, *', ', '),  # no space before and one space after any comma
+        (r'\s+', ' '),  # collapse whitespace to single space
+        (r'^[ ,]*|[ ,]*$', ''),  # remove leading/trailing spaces/commas
     ]:
         desc = re.sub(search, replace, desc)
     return desc
