@@ -392,7 +392,7 @@ public class ODKView extends LinearLayout {
             TextView tv = (TextView) LayoutInflater.from(getContext())
                     .inflate(R.layout.template_text_view_group, null);
             tv.setText(s.substring(0, s.length() - 3));
-            mView.addView(tv, mLayout);
+            if (tv.getText().length() > 0) mView.addView(tv, mLayout);
         }
     }
 
