@@ -64,18 +64,18 @@ def get_meds(filename, sheet, code_column,
 
     write = sys.stdout.write
 
-    for category, category_expr in [
+    for stock_prefix, category_expr in [
         ('DORA', 'Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs('),
-        ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY_OVER_DURATION).withDrugs('),
+        ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY, IV, SC, IM).withDrugs('),
         ('DINF', 'Category PERFUSION = new Category("DINF", "perfusion", DosingType.QUANTITY_OVER_DURATION).withDrugs('),
-        ('DEXT', 'Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY).withDrugs('),
+        ('DEX', 'Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY).withDrugs('),
         ('DVAC', 'Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY).withDrugs(')
     ]:
         en_names = set()
         fr_names = set()
         drug_exprs = []
         for drug in drug_list:
-            if drug.startswith(category):
+            if drug.startswith(stock_prefix):
                 en_name = clean(get_drug_name([en for code, en, fr in formats[drug]]))
                 fr_name = clean(get_drug_name([fr for code, en, fr in formats[drug]]))
                 if not en_name:
@@ -126,10 +126,14 @@ def get_drug_name(descs):
     words = [desc.split() for desc in descs]
     sets = [set(group) for group in zip(*words)]
     w = 0
-    while w < len(sets) - 1 and len(sets[w]) == 1 and not re.search(r'\d[^\w]|\^', list(sets[w])[0]):
+    while w < len(sets) - 1 and len(sets[w]) == 1:
+        next = sets[w]
+        word = list(next)[0]
+        if '^' in word: break
+        if re.match(r'^[0-9.% ]+$', word): break
         w += 1
     result = ' '.join(set.pop() for set in sets[:w])
-    return re.sub(r',* *[eé]q\. *$', '', result)
+    return re.sub(r',* *[eé]q\..*$', '', result)
 
 def read_items(s, code_col, en_col, fr_col, en_adj, fr_adj):
     for row in range(s.nrows):
@@ -174,13 +178,16 @@ def apply_adjustments(text, adjustments):
             text = drug + ' ^ ' + format
     return text
 
+import q
+
+@q
 def split_med(med):
     if '^' in med:
         return med.split('^', 1)
-    m = re.match(r'(.*), *(([eé]q[\. ]*)?\d.*)', med)
+    m = re.match(r'(.*), *(([eé]q[\. ]*)\d.*)', med)
     if m:
         return m.group(1), m.group(2).lstrip(', ')
-    m = re.match(r'([A-Z, ]+), *(.*)', med)
+    m = re.match(r'([A-Za-z ]+) ([0-9.%]+ .*)', med)
     if m:
         return m.group(1), m.group(2).lstrip(', ')
     m = re.match(r'([^,]+), *(.*)', med)
