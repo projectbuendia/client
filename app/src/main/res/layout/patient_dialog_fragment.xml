@@ -82,7 +82,7 @@
           android:id="@+id/patient_family_name"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
-          android:inputType="textCapWords|textPersonName"
+          android:inputType="textCapCharacters|textPersonName"
           android:singleLine="true"
           android:nextFocusLeft="@id/patient_given_name"
           android:nextFocusDown="@id/patient_age_years"
