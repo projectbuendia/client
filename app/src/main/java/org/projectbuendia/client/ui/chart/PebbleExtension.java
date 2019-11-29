@@ -5,8 +5,6 @@ import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
@@ -272,7 +270,7 @@ public class PebbleExtension extends AbstractExtension {
 
             if (input instanceof ReadableInstant) {
                 return DateTimeFormat.forPattern(pattern).print(
-                    new DateTime(input, DateTimeZone.getDefault())); //Convert to specific time zone
+                    Utils.toLocalDateTime((ReadableInstant) input));
             } else return TYPE_ERROR;
         }
     }

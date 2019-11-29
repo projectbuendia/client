@@ -42,6 +42,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
+import org.joda.time.base.AbstractInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
@@ -370,7 +371,7 @@ public class Utils {
     // ==== Dates and times ====
 
     private static final DateTimeFormatter ISO8601_UTC_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZoneUTC();
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
@@ -387,6 +388,16 @@ public class Utils {
         return date != null ? date.toString() : null;
     }
 
+    /** Creates a DateTime object in the default local time zone. */
+    public static @Nullable DateTime toLocalDateTime(@Nullable Long millis) {
+        return millis != null ? new DateTime(millis, DateTimeZone.getDefault()) : null;
+    }
+
+    /** Creates a DateTime object in the default local time zone. */
+    public static @Nullable DateTime toLocalDateTime(@Nullable ReadableInstant instant) {
+        return instant != null ? new DateTime(instant, DateTimeZone.getDefault()) : null;
+    }
+
     /** Converts a yyyy-mm-dd String or null to a nullable LocalDate. */
     public static @Nullable LocalDate toLocalDate(@Nullable String string) {
         try {
@@ -396,9 +407,9 @@ public class Utils {
         }
     }
 
-    /** Converts a nullable DateTime to a yyyy-mm-ddThh:mm:ssZ String or null. */
-    public static @Nullable String formatUtc8601(@Nullable DateTime dt) {
-        return dt != null ? ISO8601_UTC_DATETIME_FORMATTER.print(dt.withZone(DateTimeZone.UTC)) : null;
+    /** Formats a nullable DateTime or Instant as "yyyy-mm-ddThh:mm:ssZ" or null. */
+    public static @Nullable String formatUtc8601(@Nullable AbstractInstant t) {
+        return t != null ? t.toString(ISO8601_UTC_DATETIME_FORMATTER) : null;
     }
 
     /** Parses a nullable String into a nullable Interval. */
@@ -448,7 +459,7 @@ public class Utils {
 
     public static @Nullable String format(@Nullable DateTime datetime, DateStyle style) {
         if (datetime == null) return null;
-        return style.getFormatter().print(datetime.toLocalDateTime());
+        return style.getFormatter().print(datetime);
     }
 
     /** Gets the DateTime at the start of a day. */
@@ -584,7 +595,7 @@ public class Utils {
     /** Gets a nullable long value (in millis) from a cursor as a DateTime. */
     public static DateTime getDateTime(Cursor c, String columnName) {
         Long millis = getLong(c, columnName);
-        return millis == null ? null : new DateTime(millis);
+        return millis == null ? null : Utils.toLocalDateTime(millis);
     }
 
     /** Gets a nullable boolean value from a cursor. */
@@ -637,7 +648,7 @@ public class Utils {
     /** Gets a nullable DateTime value from a Bundle.  Always use this instead of getLong() directly. */
     public static DateTime getDateTime(Bundle bundle, String key) {
         // getLong never returns null; we have to check explicitly.
-        return bundle.containsKey(key) ? new DateTime(bundle.getLong(key)) : null;
+        return bundle.containsKey(key) ? Utils.toLocalDateTime(bundle.getLong(key)) : null;
     }
 
     /** Creates a Bundle containing one key-value pair. */

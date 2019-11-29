@@ -26,6 +26,7 @@ import com.joanzapata.iconify.fonts.FontAwesomeModule;
 
 import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
+import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
@@ -61,6 +62,7 @@ public class App extends Application {
     private static CrudEventBus sCrudEventBus;
     private static EventBus sHealthEventBus;
     private static HealthMonitor sHealthMonitor;
+    private static Troubleshooter sTroubleshooter;
     private static SyncManager sSyncManager;
     private static UpdateManager sUpdateManager;
     private static UserManager sUserManager;
@@ -75,6 +77,7 @@ public class App extends Application {
     @Inject CrudEventBus mCrudEventBus;
     @Inject EventBus mHealthEventBus;
     @Inject HealthMonitor mHealthMonitor;
+    @Inject Troubleshooter mTroubleshooter;
     @Inject SyncManager mSyncManager;
     @Inject UpdateManager mUpdateManager;
     @Inject UserManager mUserManager;
@@ -150,6 +153,10 @@ public class App extends Application {
         return sHealthMonitor;
     }
 
+    public static synchronized Troubleshooter getTroubleshooter() {
+        return sTroubleshooter;
+    }
+
     public static synchronized SyncManager getSyncManager() {
         return sSyncManager;
     }
@@ -204,6 +211,7 @@ public class App extends Application {
             sCrudEventBus = mCrudEventBus;
             sHealthEventBus = mHealthEventBus;
             sHealthMonitor = mHealthMonitor;
+            sTroubleshooter = mTroubleshooter;
             sSyncManager = mSyncManager;
             sUpdateManager = mUpdateManager;
             sUserManager = mUserManager;

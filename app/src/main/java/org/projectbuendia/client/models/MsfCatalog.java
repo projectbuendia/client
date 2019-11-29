@@ -927,7 +927,7 @@ public interface MsfCatalog extends Catalog {
         )
     );
 
-    Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY_OVER_DURATION).withDrugs(
+    Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY, IV, SC, IM).withDrugs(
         new Drug("DINJACCY", "ACETYLCYSTEINE, 200 mg / ml [fr:ACETYLCYSTEINE, 200 mg / ml]").withFormats(
             new Format("DINJACCY2A", "l, 10 ml, amp. [fr:l, 10 ml, amp.]", Unit.MG)
         ),

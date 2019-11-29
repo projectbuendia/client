@@ -69,6 +69,7 @@ public final @Immutable class Order extends Model implements Serializable {
     public final String patientUuid;
     public final String providerUuid;
     public final Instructions instructions;
+    // TODO(ping): Data model time fields should be Instants instead of DateTimes.
     public final DateTime start;
     public final @Nullable DateTime stop;  // null if unary, non-null if series
 
@@ -111,8 +112,8 @@ public final @Immutable class Order extends Model implements Serializable {
         String instructionsText, Long startMillis, @Nullable Long stopMillis) {
         this(
             uuid, patientUuid, providerUuid, instructionsText,
-            new DateTime(startMillis),
-            stopMillis != null ? new DateTime(stopMillis) : null
+            Utils.toLocalDateTime(startMillis),
+            stopMillis != null ? Utils.toLocalDateTime(stopMillis) : null
         );
     }
 

@@ -23,6 +23,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
+import org.projectbuendia.client.App;
+import org.projectbuendia.client.diagnostics.HealthIssue;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.utils.Logger;
 
@@ -39,6 +41,11 @@ public class OpenMrsErrorListener implements ErrorListener {
     public void displayVolleyError(VolleyError error) {
         // TODO(ping): Hand off to the HealthMonitor or use the snackbar.
         LOG.w(error.getClass().getSimpleName() + ": " + error.getMessage());
+        if (error instanceof NoConnectionError &&
+            App.getTroubleshooter() != null &&
+            App.getTroubleshooter().hasIssue(HealthIssue.SERVER_HOST_UNREACHABLE)) {
+            return;
+        }
         BigToast.show(formatErrorMessage(error));
     }
 

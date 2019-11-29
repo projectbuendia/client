@@ -36,7 +36,6 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.models.Chart;
-import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
@@ -76,8 +75,6 @@ public final class PatientChartActivity extends LoggedInActivity {
     private ProgressDialog mFormSubmissionDialog;
     private ChartRenderer mChartRenderer;
     private ProgressDialog mProgressDialog;
-    private DatePickerDialog mAdmissionDateDialog;
-    private DatePickerDialog mSymptomOnsetDateDialog;
     private Ui mUi;
 
     @Inject EventBus mEventBus;
@@ -148,11 +145,6 @@ public final class PatientChartActivity extends LoggedInActivity {
         mFormSubmissionDialog.setMessage(getString(R.string.submitting_form_message));
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
-
-        mAdmissionDateDialog = new DateObsDialog(
-            R.string.admission_date_picker_title, ConceptUuids.ADMISSION_DATE_UUID);
-        mSymptomOnsetDateDialog = new DateObsDialog(
-            R.string.symptoms_onset_date_picker_title, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
 
         // Remembering scroll position and applying it after the chart finished loading.
         mWebView.setWebViewClient(new WebViewClient() {

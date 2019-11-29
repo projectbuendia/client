@@ -120,20 +120,13 @@
   <string name="order_format">Format</string>
   <string name="order_dosage">Dosage</string>
   <string name="order_route">Route</string>
-  <string name="order_frequency_prefix">Give</string>
-  <string name="order_time_per_day">time per day</string>
-  <string name="order_times_per_day">times per day</string>
-  <string name="order_series_duration_prefix">For</string>
-  <string name="order_days">days</string>
-  <string name="order_day">day</string>
-  <string name="order_hours">hours</string>
-  <string name="order_hour">hour</string>
+  <string name="order_is_series_prefix">Give</string>
 
-  <string name="oral_category_abbr">Oral</string>
-  <string name="injectable_category_abbr">Inj</string>
-  <string name="infusible_category_abbr">Inf</string>
-  <string name="external_category_abbr">Ext</string>
-  <string name="vaccine_category_abbr">Vacc</string>
+  <string name="oral_category">Oral</string>
+  <string name="injectable_category">Injectable</string>
+  <string name="infusible_category">Perfusion</string>
+  <string name="external_category">External</string>
+  <string name="vaccine_category_abbr">Vaccine</string>
 
   <string name="amount_in_duration">%1$s in %2$s</string>
   <string name="once">Once</string>
@@ -155,6 +148,7 @@
   <string name="enter_dosage">Enter a dosage</string>
   <string name="enter_duration">Enter a duration</string>
   <string name="enter_number">Enter a number</string>
+  <string name="order_series_duration_prefix">For</string>
   <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
   <string name="order_cannot_exceed_n_times_per_day">Cannot exceed %d times per day</string>
   <string name="order_cannot_exceed_n_days">Cannot exceed %d days</string>
@@ -297,7 +291,7 @@
   <string name="api_health_problem">Unable to contact the server.  Please see the bar along the bottom of the screen for more information about the problem.</string>
   <string name="sync_failed_back">Back</string>
   <string name="no_user">No user is signed in.</string>
-  <string name="signed_out">Signed out.</string>
+  <string name="idle_signed_out">Signed out due to inactivity.</string>
   <string name="no_location">No location information has been loaded yet.</string>
   <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
   <string name="encounter_add_failed_unknown_server_error">An unknown error occurred on the server.</string>

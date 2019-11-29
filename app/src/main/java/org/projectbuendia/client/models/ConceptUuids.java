@@ -30,40 +30,23 @@ public class ConceptUuids {
         return Utils.expandUuid(id);
     }
 
-    // Dates shown as day numbers at top left.
-    public static final String FIRST_SYMPTOM_DATE_UUID = toUuid(1730);
-    public static final String ADMISSION_DATE_UUID = toUuid(162622);
-
-    // Ebola lab test results shown in a fixed tile.
-    public static final String PCR_NP_UUID = toUuid(162826);
-    public static final String PCR_GP_UUID = toUuid(777000025);
+    // Date used for calculating "Day 1", "Day 2", etc. table headings.
+    public static final String ADMISSION_DATETIME_UUID = toUuid(8001640);
 
     // Concepts whose values are prefilled in forms.
-    public static final String PREGNANCY_UUID = toUuid(5272);
-    public static final String IV_UUID = toUuid(777000011);
+    public static final String PREGNANCY_UUID = toUuid(2005272);
+    public static final String IV_UUID = toUuid(2900012);
 
     // Condition question and values.  Used to colour-code patient ID chips in patient lists.
-    public static final String GENERAL_CONDITION_UUID = toUuid(777000010);
-    public static final String GENERAL_CONDITION_WELL_UUID = toUuid(888001855);
-    public static final String GENERAL_CONDITION_UNWELL_UUID = toUuid(888137793);
-    public static final String GENERAL_CONDITION_CRITICAL_UUID = toUuid(777000009);
-    public static final String GENERAL_CONDITION_PALLIATIVE_UUID = "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
-    public static final String GENERAL_CONDITION_CONVALESCENT_UUID = toUuid(119844);
-    public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID = "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
-    public static final String GENERAL_CONDITION_DISCHARGED_CURED_UUID = toUuid(159791);
-    public static final String GENERAL_CONDITION_SUSPECTED_DEAD_UUID = "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
-    public static final String GENERAL_CONDITION_CONFIRMED_DEAD_UUID = toUuid(160432);
+    public static final String GENERAL_CONDITION_UUID = toUuid(2900018);
+    public static final String GENERAL_CONDITION_WELL_UUID = toUuid(4001855);
+    public static final String GENERAL_CONDITION_UNWELL_UUID = toUuid(4900039);
+    public static final String GENERAL_CONDITION_CRITICAL_UUID = toUuid(4900040);
 
     public static final String[] GENERAL_CONDITION_UUIDS = new String[] {
         GENERAL_CONDITION_WELL_UUID,
         GENERAL_CONDITION_UNWELL_UUID,
-        GENERAL_CONDITION_CRITICAL_UUID,
-        GENERAL_CONDITION_PALLIATIVE_UUID,
-        GENERAL_CONDITION_CONVALESCENT_UUID,
-        GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID,
-        GENERAL_CONDITION_DISCHARGED_CURED_UUID,
-        GENERAL_CONDITION_SUSPECTED_DEAD_UUID,
-        GENERAL_CONDITION_CONFIRMED_DEAD_UUID
+        GENERAL_CONDITION_CRITICAL_UUID
     };
 
 
@@ -150,12 +133,6 @@ public class ConceptUuids {
         .put(GENERAL_CONDITION_WELL_UUID, ResStatus.WELL)
         .put(GENERAL_CONDITION_UNWELL_UUID, ResStatus.UNWELL)
         .put(GENERAL_CONDITION_CRITICAL_UUID, ResStatus.CRITICAL)
-        .put(GENERAL_CONDITION_PALLIATIVE_UUID, ResStatus.PALLIATIVE)
-        .put(GENERAL_CONDITION_CONVALESCENT_UUID, ResStatus.CONVALESCENT)
-        .put(GENERAL_CONDITION_DISCHARGED_NON_CASE_UUID, ResStatus.DISCHARGED_NON_CASE)
-        .put(GENERAL_CONDITION_DISCHARGED_CURED_UUID, ResStatus.DISCHARGED_CURED)
-        .put(GENERAL_CONDITION_SUSPECTED_DEAD_UUID, ResStatus.SUSPECTED_DEAD)
-        .put(GENERAL_CONDITION_CONFIRMED_DEAD_UUID, ResStatus.CONFIRMED_DEAD)
         .build();
 
     /** Returns the {@link ResStatus} for the specified condition UUID. */

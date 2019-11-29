@@ -2,7 +2,6 @@ package org.projectbuendia.client.ui.chart;
 
 import org.apache.commons.text.ExtendedMessageFormat;
 import org.apache.commons.text.FormatFactory;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -331,8 +330,15 @@ public class ObsFormat extends Format {
 
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
-            if (value.date == null) return TYPE_ERROR;
-            return new LocalDate(value.date).toString(mPattern);
+            LocalDate date;
+            if (value.instant != null) {
+                date = Utils.toLocalDateTime(value.instant).toLocalDate();
+            } else if (value.date != null) {
+                date = value.date;
+            } else {
+                return TYPE_ERROR;
+            }
+            return new LocalDate(date).toString(mPattern);
         }
     }
 
@@ -347,7 +353,7 @@ public class ObsFormat extends Format {
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
             if (value.instant == null) return TYPE_ERROR;
-            return new DateTime(value.instant).toString(mPattern);
+            return Utils.toLocalDateTime(value.instant).toString(mPattern);
         }
     }
 
@@ -359,12 +365,19 @@ public class ObsFormat extends Format {
 
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
-            if (value.date == null) return TYPE_ERROR;
-            return formatNumber((double) Utils.dayNumberSince(value.date, LocalDate.now()));
+            LocalDate date;
+            if (value.instant != null) {
+                date = Utils.toLocalDateTime(value.instant).toLocalDate();
+            } else if (value.date != null) {
+                date = value.date;
+            } else {
+                return TYPE_ERROR;
+            }
+            return formatNumber((double) Utils.dayNumberSince(date, LocalDate.now()));
         }
     }
 
-    /** "day_number" format that describes today, counting the observed date as day 1.  Typical use: {1,day_number,Day #} */
+    /** "location" format */
     class ObsLocationFormat extends ObsTextFormat {
         public ObsLocationFormat(String pattern) {
             super(pattern);

@@ -14,6 +14,7 @@ package org.projectbuendia.client.ui.dialogs;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.text.InputFilter;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -79,6 +80,13 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
         v.sexMale.setTag(Sex.MALE);
         v.sexOther.setTag(Sex.OTHER);
         sexToggleGroup = new ToggleRadioGroup<>(v.sexRadioGroup);
+
+        v.idPrefix.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
+        v.familyName.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
+
+        if (patient == null) {
+            v.idPrefix.setText(App.getSettings().getLastIdPrefix());
+        }
 
         if (patient != null) {
             String idPrefix = "";
@@ -185,8 +193,8 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             newPatient.observations = ImmutableList.of(
                 new JsonObservation(new Obs(
                     null, null, null, Utils.getProviderUuid(),
-                    ConceptUuids.ADMISSION_DATE_UUID, Datatype.DATE,
-                    now, null, LocalDate.now().toString(), ""
+                    ConceptUuids.ADMISSION_DATETIME_UUID, Datatype.DATETIME,
+                    now, null, "" + DateTime.now().getMillis(), ""
                 )),
                 new JsonObservation(new Obs(
                     null, null, null, Utils.getProviderUuid(),
