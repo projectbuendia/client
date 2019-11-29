@@ -33,26 +33,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:lines="1"
+        android:ems="2"
         android:gravity="center_vertical|end"
-        android:padding="8sp"
-        android:textAppearance="@style/text.large"
-        android:textFontWeight="300"
-        android:textColor="@color/black"
+        android:paddingEnd="8sp"
+        android:textAppearance="@style/text.huge"
+        android:textFontWeight="100"
+        android:textColor="@color/gray_600"
         tools:text="2A"/>
 
     <View
         android:id="@+id/bed_bar"
         android:layout_width="1sp"
         android:layout_height="match_parent"
-        android:layout_marginEnd="12sp"
-        android:background="#000000" />
+        android:layout_marginEnd="8sp"
+        android:background="@color/gray_600" />
   </LinearLayout>
 
   <org.projectbuendia.client.widgets.ShrinkFitTextView
       android:id="@+id/id"
-      android:layout_width="64sp"
+      android:layout_width="88sp"
       android:layout_height="wrap_content"
-      android:layout_marginEnd="16sp"
+      android:layout_marginEnd="8sp"
       android:background="@drawable/id_oval"
       android:gravity="center"
       android:paddingLeft="4sp"
@@ -61,7 +63,7 @@
       android:paddingTop="12sp"
       android:textAppearance="@style/text.large"
       android:textColor="@color/white"
-      tools:text="1234"/>
+      tools:text="BN/123"/>
 
   <TextView
       android:id="@+id/name"
@@ -80,10 +82,10 @@
       android:id="@+id/sex"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:minWidth="60sp"
+      android:minWidth="32sp"
       android:textAppearance="@style/text.large"
       android:layout_gravity="center_vertical|start"
-      tools:text="F, prg"/>
+      tools:text="Fp"/>
 
   <TextView
       android:id="@+id/age"
@@ -91,7 +93,7 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical|end"
       android:gravity="center_vertical|end"
-      android:minWidth="66sp"
+      android:minWidth="64sp"
       android:textAppearance="@style/text.large"
       tools:text="99 mo"/>
 

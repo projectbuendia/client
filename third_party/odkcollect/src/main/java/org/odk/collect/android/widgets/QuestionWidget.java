@@ -71,7 +71,7 @@ public abstract class QuestionWidget extends LinearLayout {
         mQuestionFontsize = Collect.getQuestionFontsize();
 
         // Make the answer field fairly large.
-        mAnswerFontsize = mQuestionFontsize * 3;
+        mAnswerFontsize = mQuestionFontsize * 2;
 
         mPrompt = p;
 

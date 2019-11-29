@@ -8,6 +8,25 @@
 <script src="jquery-1.5.1.min.js"></script>
 <script src="chart.js"></script>
 <script>c.log('Start HTML');</script>
+<style>
+  {% for fixedRow in fixedRows %}
+    {% for tile in fixedRow %}
+      {{tile.item.cssStyle}}
+    {% endfor %}
+  {% endfor %}
+
+  {% for tileRow in tileRows %}
+    {% for tile in tileRow %}
+      {{tile.item.cssStyle}}
+    {% endfor %}
+  {% endfor %}
+
+  {% for group in rowGroups %}
+    {% for row in group.rows %}
+      {{row.item.cssStyle}}
+    {% endfor %}
+  {% endfor %}
+</style>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 <body>
@@ -87,9 +106,7 @@
               {% set summaryValue = (points | last).value %}
             {% endif %}
             {% set class = summaryValue | format_values(row.item.cssClass) %}
-            {% set style = summaryValue | format_values(row.item.cssStyle) %}
             <td class="{{column.stop == column.dayStop ? 'day-last' : ''}} {{column.start == nowColumn.start ? 'now' : ''}} {{class}}"
-              style="{{style}}"
               onclick="{% if points is not empty and row.item.type.string != 'text_icon' %}
                          c.showObsDialog('{{row.item.conceptUuidsList}}', {{column.start.millis}}, {{column.stop.millis}});
                        {% endif %}">
@@ -225,7 +242,9 @@
 
     <tr>
       <th scope="row" class="command" id="new-treatment" onclick="c.onNewOrderPressed()">
-        {{get_string("add_new_treatment")}}
+        <button>
+          {{get_string("add_new_treatment")}}
+        </button>
       </th>
     </tr>
   </tbody>
@@ -239,7 +258,7 @@
         {% set values = tile.points | values %}
         {% set class = values | format_values(tile.item.cssClass) %}
         {% set style = values | format_values(tile.item.cssStyle) %}
-      <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+      <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
           <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>
@@ -258,7 +277,7 @@
           {% set values = tile.points | values %}
           {% set class = values | format_values(tile.item.cssClass) %}
           {% set style = values | format_values(tile.item.cssStyle) %}
-          <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');" style="{{style}}">
+          <div class="tile concept-{{id}} {{class}}" onclick="c.showObsDialog('{{tile.item.conceptUuidsList}}');">
             <div class="heading">{{tile.item.label}}</div>
             <div class="value">{{values | format_values(tile.item.format) | line_break_html | raw}}</div>
             <div class="caption">{{values | format_values(tile.item.captionFormat) | line_break_html | raw}}</div>

@@ -37,16 +37,16 @@ public class ConceptUuids {
     public static final String PREGNANCY_UUID = toUuid(2005272);
     public static final String IV_UUID = toUuid(2900012);
 
-    // Condition question and values.  Used to colour-code patient ID chips in patient lists.
-    public static final String GENERAL_CONDITION_UUID = toUuid(2900018);
-    public static final String GENERAL_CONDITION_WELL_UUID = toUuid(4001855);
-    public static final String GENERAL_CONDITION_UNWELL_UUID = toUuid(4900039);
-    public static final String GENERAL_CONDITION_CRITICAL_UUID = toUuid(4900040);
+    // Patient colour category.  Used to colour-code patient ID chips in patient lists.
+    public static final String CATEGORY_UUID = toUuid(2900019);
+    public static final String CATEGORY_GREEN_UUID = toUuid(4900041);
+    public static final String CATEGORY_YELLOW_UUID = toUuid(4900042);
+    public static final String CATEGORY_RED_UUID = toUuid(4900043);
 
     public static final String[] GENERAL_CONDITION_UUIDS = new String[] {
-        GENERAL_CONDITION_WELL_UUID,
-        GENERAL_CONDITION_UNWELL_UUID,
-        GENERAL_CONDITION_CRITICAL_UUID
+        CATEGORY_GREEN_UUID,
+        CATEGORY_YELLOW_UUID,
+        CATEGORY_RED_UUID
     };
 
 
@@ -130,9 +130,9 @@ public class ConceptUuids {
     // ==== Mapping of general condition values to ResStatus values.
 
     public static final Map<String, ResStatus> STATUS_BY_CONDITION_UUID = new ImmutableMap.Builder<String, ResStatus>()
-        .put(GENERAL_CONDITION_WELL_UUID, ResStatus.WELL)
-        .put(GENERAL_CONDITION_UNWELL_UUID, ResStatus.UNWELL)
-        .put(GENERAL_CONDITION_CRITICAL_UUID, ResStatus.CRITICAL)
+        .put(CATEGORY_GREEN_UUID, ResStatus.WELL)
+        .put(CATEGORY_YELLOW_UUID, ResStatus.UNWELL)
+        .put(CATEGORY_RED_UUID, ResStatus.CRITICAL)
         .build();
 
     /** Returns the {@link ResStatus} for the specified condition UUID. */

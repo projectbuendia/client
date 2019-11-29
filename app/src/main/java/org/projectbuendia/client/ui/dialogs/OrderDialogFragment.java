@@ -18,6 +18,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.method.KeyListener;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -42,16 +45,15 @@ import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.models.Catalog.Category;
-import org.projectbuendia.client.models.Catalog.DosingType;
 import org.projectbuendia.client.models.Catalog.Drug;
 import org.projectbuendia.client.models.Catalog.Format;
 import org.projectbuendia.client.models.Catalog.Route;
-import org.projectbuendia.client.models.Quantity;
-import org.projectbuendia.client.models.Unit;
 import org.projectbuendia.client.models.CatalogIndex;
 import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Quantity;
+import org.projectbuendia.client.models.Unit;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.AutocompleteAdapter.CompletionAdapter;
 import org.projectbuendia.client.ui.EditTextWatcher;
@@ -76,6 +78,14 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
     // This should match the left/right padding in the TextViews in captioned_item.xml.
     private static final int ITEM_HORIZONTAL_PADDING = 12;
+
+    // This custom action mode callback disables the clipboard popup menu.
+    private static final ActionMode.Callback PASTE_DISABLED = new ActionMode.Callback() {
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) { return false; }
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) { return false; }
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) { return false; }
+        public void onDestroyActionMode(ActionMode mode) { }
+    };
 
     static class Args implements Serializable {
         String patientUuid;
@@ -160,6 +170,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     @Override public void onOpen() {
         v = new Views();
         drugKeyListener = v.drug.getKeyListener();
+        v.drug.setCustomSelectionActionModeCallback(PASTE_DISABLED);
 
         // Attach the MSF catalog to the UI.
         index = MsfCatalog.INDEX;
@@ -288,10 +299,12 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         String code = activeFormat != Format.UNSPECIFIED ? activeFormat.code
             : activeDrug != Drug.UNSPECIFIED ? activeDrug.code
             : Utils.getText(v.drug);  // fall back to free text
-        Quantity amount = new Quantity(Utils.getDouble(v.dosage, 0), activeFormat.dosageUnit);
+        Quantity amount = activeFormat.dosageUnit != null ?
+            new Quantity(Utils.getDouble(v.dosage, 0), activeFormat.dosageUnit) :
+            new Quantity(0, Unit.UNSPECIFIED);
         Quantity duration = null;
-        if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
-            amount = new Quantity(Utils.getDouble(v.amount, 0), Unit.ML);
+        if (activeCategory.isContinuous) {
+            amount = new Quantity(Utils.getDouble(v.amount, 0), activeFormat.dosageUnit);
             duration = new Quantity(Utils.getDouble(v.duration, 0), Unit.HOUR);
         }
         Route activeRoute = Utils.orDefault((Route) v.route.getSelectedItem(), Route.UNSPECIFIED);
@@ -312,7 +325,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             valid = false;
         }
         if (valid && activeDrug != null) {
-            if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
+            if (activeCategory.isContinuous) {
                 if (amount.mag == 0) {
                     setError(v.amount, R.string.enter_dosage);
                     valid = false;
@@ -386,7 +399,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     /** Adds an "X" button to a text edit field. */
     private void addClearButton(final EditText view, int drawableId) {
         final Drawable icon = view.getResources().getDrawable(drawableId);
-        icon.setColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY);  // draw icon in black
+        icon.setColorFilter(0xff999999, PorterDuff.Mode.MULTIPLY);  // draw icon in grey
         final int iw = icon.getIntrinsicWidth();
         final int ih = icon.getIntrinsicHeight();
         icon.setBounds(0, 0, iw, ih);
@@ -432,8 +445,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.drug.setText("");
         populateFormatSpinner(new Format[] {Format.UNSPECIFIED});
 
-        Utils.showIf(v.dosageRow, category.dosingType == DosingType.QUANTITY);
-        Utils.showIf(v.continuousRow, category.dosingType == DosingType.QUANTITY_OVER_DURATION);
+        Utils.showIf(v.dosageRow, !category.isContinuous);
+        Utils.showIf(v.continuousRow, category.isContinuous);
 
         populateRouteSpinner(category.routes);
         Utils.showIf(v.route, category.routes.length > 0);
@@ -531,8 +544,14 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         LocalDate stopDay = startDay.plusDays(days);
 
         Unit dosageUnit = activeFormat.dosageUnit;
-        v.dosageUnit.setText(App.localize(
-            dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
+        if (dosageUnit != null) {
+            v.dosageUnit.setText(App.localize(
+                dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
+        }
+        Utils.showIf(v.dosageRow, !activeCategory.isContinuous && dosageUnit != null);
+        Utils.showIf(v.continuousRow, activeCategory.isContinuous && dosageUnit != null);
+        v.amountUnit.setText(getString(
+            R.string.order_volume_unit_in, App.localize(dosageUnit.terse)));
         v.durationUnit.setText(App.localize(Unit.HOUR.forCount(hours)));
         v.frequencyUnit.setText(App.localize(Unit.PER_DAY.forCount(timesPerDay)));
         v.seriesLengthUnit.setText(App.localize(Unit.DAY.forCount(days)));
@@ -544,7 +563,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         if (args.order == null) {
             v.scheduleDescription.setText(
                 timesPerDay == 0 || timesPerDay * days == 1 ?
-                    u.str(R.string.order_one_dose_only) :
+                    "" :
                 days == 0 ?
                     u.str(R.string.order_start_now_indefinitely) :
                 days == 1 ?

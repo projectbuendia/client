@@ -119,6 +119,7 @@
   <string name="order_drug">Drug</string>
   <string name="order_format">Format</string>
   <string name="order_dosage">Dosage</string>
+  <string name="order_volume_unit_in">%s in</string>
   <string name="order_route">Route</string>
   <string name="order_is_series_prefix">Give</string>
 
@@ -132,7 +133,6 @@
   <string name="once">Once</string>
   <string name="multiple_times">Multiple times</string>
 
-  <string name="order_one_dose_only">(one dose only)</string>
   <string name="order_start_now_indefinitely">(start now; continue indefinitely)</string>
   <string name="order_start_now_stop_after_doses">(start now; stop after %d doses)</string>
   <string name="order_start_now_after_doses_stop_date">(start now; after %1$d doses, stop %2$s)</string>
@@ -238,7 +238,7 @@
   <string name="ebola_test_label">Ebola test</string>
   <string name="latest_pcr_label_with_date">Ebola test (%s)</string>
   <string name="action_add_test_result">Add test result</string>
-  <string name="pregnant_abbreviation">prg</string>
+  <string name="pregnant_suffix">p</string>
   <string name="pregnant">Pregnant</string>
   <string name="iv_fitted">IV fitted</string>
   <string name="cannot_eat">Cannot eat</string>

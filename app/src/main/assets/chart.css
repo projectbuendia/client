@@ -16,6 +16,9 @@ body { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; 
 #grid-left { flex-grow: 0; }
 #grid-body { flex-grow: 1; overflow: scroll; position: relative; }
 
+/* Hide the ugly arrow buttons for now. */
+#buttons { display: none; }
+
 #buttons button {
   font-size: 3.2rem;
   -webkit-text-stroke: 0.2rem black;
@@ -59,6 +62,7 @@ tbody td, th[scope="rowgroup"] { border-right-color: #ddd; }
 .division { border-right: 1px solid #ddd; }
 .division:last-child { border-right: none; }
 .command { border-right: transparent; }
+.command button { font-size: 1.9rem; padding: 0.5em 1em; }
 
 /* Row shading */
 tr.obs, tr.order { background: #f8f8f8; }
@@ -173,7 +177,8 @@ th.command { /* should match @style/ActionButton */
 #fixed { background: #eee; min-height: 1px; }
 #tiles { width: 100%; }
 .row { display: flex; flex-direction: row; }
-.tile { flex-basis: 0; flex-grow: 1; padding: 1rem 0 1rem 16px; }
+.row:first-child .tile { padding-top: 0.8rem; }
+.tile { flex-basis: 0; flex-grow: 1; padding: 0.4rem 4px 0.4rem 16px; }
 .tile, .tile div { overflow: hidden; white-space: nowrap; }
 .tile .heading { /* should match @style/text.caps */
   font-size: 1.4rem;

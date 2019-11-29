@@ -132,7 +132,7 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
         u.setText(R.id.bed_number, patient.bedNumber);
         u.show(R.id.bed_bar, !Utils.isEmpty(patient.bedNumber));
         ShrinkFitTextView idView = u.findView(R.id.id);
-        idView.setTextAndResize(patient.id);
+        idView.setTextAndResize(patient.id.replace('/', ' '));
         idView.setTextColor(status.getForegroundColor());
         idView.getBackground().setColorFilter(status.getBackgroundColor(), PorterDuff.Mode.SRC_ATOP);
         u.setText(R.id.sex, u.formatPatientDetails(patient, SHORT, SHORT, NONE));
@@ -195,7 +195,7 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
             Locale locale = App.getSettings().getLocale();
-            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID);
+            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.CATEGORY_UUID);
             return null;
         }
 

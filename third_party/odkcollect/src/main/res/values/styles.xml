@@ -19,7 +19,7 @@
     <!-- The style for heading text. -->
     <style name="TextAppearance.Odk.Heading">
         <item name="android:textSize">24sp</item>
-        <item name="android:textStyle">bold</item>
+        <!--<item name="android:textStyle">bold</item>-->
     </style>
 
     <!-- The style for EditText widgets. -->

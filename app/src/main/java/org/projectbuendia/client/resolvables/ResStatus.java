@@ -30,7 +30,7 @@ public enum ResStatus implements Resolvable<ResStatus.Resolved> {
     WELL(
         R.string.status_well,
         R.color.status_well,
-        R.color.vital_fg_light,
+        R.color.vital_fg_dark,
         R.string.status_short_desc_well),
     UNWELL(
         R.string.status_unwell,
@@ -40,7 +40,7 @@ public enum ResStatus implements Resolvable<ResStatus.Resolved> {
     CRITICAL(
         R.string.status_critical,
         R.color.status_critical,
-        R.color.vital_fg_light,
+        R.color.vital_fg_dark,
         R.string.status_short_desc_critical),
     PALLIATIVE(
         R.string.status_palliative,

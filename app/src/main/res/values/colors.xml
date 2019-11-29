@@ -20,15 +20,15 @@
     <!-- Vitals -->
     <color name="vital_fg_light">#ffffff</color>
     <color name="vital_fg_dark">#000000</color>
-    <color name="vital_fg_unknown">#757575</color>
+    <color name="vital_fg_unknown">#333333</color>
 
     <color name="vital_unknown">#b2cce1</color>
     <color name="vital_known">#01579b</color>
 
     <!-- Statuses -->
-    <color name="status_well">#417505</color>
-    <color name="status_unwell">#f5cd23</color>
-    <color name="status_critical">#d0021b</color>
+    <color name="status_well">#7c7</color>
+    <color name="status_unwell">#fc4</color>
+    <color name="status_critical">#f76</color>
     <color name="status_palliative">#bd10e0</color>
     <color name="status_convalescent">#30b2cf</color>
     <color name="status_discharged_non_case">#5eae00</color>

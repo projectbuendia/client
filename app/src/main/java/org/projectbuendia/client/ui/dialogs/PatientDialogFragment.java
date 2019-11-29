@@ -204,7 +204,7 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             );
             App.getModel().addPatient(App.getCrudEventBus(), newPatient);
         } else {
-            BigToast.show(R.string.updating_patient_please_wait);
+            BigToast.brief(R.string.updating_patient_please_wait);
             newPatient.uuid = patient.uuid;
             App.getModel().updatePatient(App.getCrudEventBus(), newPatient);
         }

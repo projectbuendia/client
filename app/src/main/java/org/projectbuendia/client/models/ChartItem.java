@@ -32,7 +32,7 @@ public class ChartItem {
     public final @Nullable Format format;
     public final @Nullable Format captionFormat;
     public final @Nullable Format cssClass;
-    public final @Nullable Format cssStyle;
+    public final @Nonnull String cssStyle;
     public final @Nonnull String script;
 
     public ChartItem(@Nullable String label, @Nullable String type, boolean required,
@@ -41,13 +41,13 @@ public class ChartItem {
                      @Nullable String cssStyle, @Nullable String script) {
         this(label, type, required, conceptUuids,
             ObsFormat.fromPattern(format), ObsFormat.fromPattern(captionFormat),
-            ObsFormat.fromPattern(cssClass), ObsFormat.fromPattern(cssStyle), script);
+            ObsFormat.fromPattern(cssClass), cssStyle, script);
     }
 
     public ChartItem(@Nullable String label, @Nullable String type, boolean required,
                      @Nullable String[] conceptUuids, @Nullable Format format,
                      @Nullable Format captionFormat, @Nullable Format cssClass,
-                     @Nullable Format cssStyle, @Nullable String script) {
+                     @Nullable String cssStyle, @Nullable String script) {
         this.label = Utils.toNonnull(label);
         this.type = Utils.toNonnull(type);
         this.required = required;
@@ -68,7 +68,7 @@ public class ChartItem {
         Format format = this.format;
         Format captionFormat = this.captionFormat;
         Format cssClass = this.cssClass;
-        Format cssStyle = this.cssStyle;
+        String cssStyle = this.cssStyle;
         String script = this.script;
         if (defaults != null) {
             format = Utils.orDefault(format, defaults.format);

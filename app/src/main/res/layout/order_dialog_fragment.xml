@@ -89,6 +89,7 @@
             android:maxLength="80"
             android:nextFocusDown="@id/order_dosage"
             android:nextFocusRight="@id/order_dosage"
+            android:textIsSelectable="false"
             tools:text="Paracetamol"
             />
 

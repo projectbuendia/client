@@ -12,6 +12,6 @@
     android:paddingRight="12dp"
     android:button="@null"
     android:background="@drawable/bg_radio_button"
-    android:textSize="32sp"
+    android:textSize="28sp"
     tools:text="Radio label">
 </RadioButton>

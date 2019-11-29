@@ -32,9 +32,11 @@ import xlrd
     help='sheet name or number (counted from 1)'
 )
 @click.argument('filename')
-def get_meds(filename, sheet, code_column,
+@click.argument('target', required=False)
+def get_meds(code_column,
              en_desc_column, fr_desc_column,
-             en_adjust_column, fr_adjust_column):
+             en_adjust_column, fr_adjust_column,
+             sheet, filename, target):
     book = xlrd.open_workbook(filename)
     code_col = code_column - 1
     en_col = en_desc_column - 1
@@ -49,33 +51,67 @@ def get_meds(filename, sheet, code_column,
     drugs = set()
     drug_list = []
     formats = {}
+    units = {}
     items = read_items(s, code_col, en_col, fr_col, en_adj, fr_adj)
     for code, en_desc, fr_desc in items:
         if not code.startswith('D'):
             continue
-        category = code[:4]
         drug = code[:8]
         if drug not in drugs:
             drugs.add(drug)
             drug_list.append(drug)
+        if '$' in en_desc:
+            en_desc, unit = en_desc.split('$', 1)
+            units[code] = unit.strip()
+        if '$' in fr_desc:
+            fr_desc, unit = fr_desc.split('$', 1)
+            units[code] = unit.strip()
         en_desc = normalize(en_desc)
         fr_desc = normalize(fr_desc)
         formats.setdefault(drug, []).append((code, en_desc, fr_desc))
 
-    write = sys.stdout.write
+    if target:
+        begin_marker = '==== BEGIN GENERATED OUTPUT ===='
+        end_marker = '==== END GENERATED OUTPUT ===='
+        with open(target) as file:
+            template = file.read()
+            if not (begin_marker in template and end_marker in template):
+                raise SystemExit('Markers %r and %r not found in %s' % (begin_marker, end_marker, target))
 
-    for category, category_expr in [
-        ('DORA', 'Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs('),
-        ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY_OVER_DURATION).withDrugs('),
-        ('DINF', 'Category PERFUSION = new Category("DINF", "perfusion", DosingType.QUANTITY_OVER_DURATION).withDrugs('),
-        ('DEXT', 'Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY).withDrugs('),
-        ('DVAC', 'Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY).withDrugs(')
+            prologue = template.split(begin_marker, 1)[0]
+            epilogue = template.rsplit(end_marker, 1)[1]
+            prologue = re.sub(r'.*$', '', prologue)
+            epilogue = re.sub(r'^.*\n', '', epilogue)
+
+        with open(target, 'w') as file:
+            file.write(prologue)
+            file.write('''\
+    // %s
+    // Produced by executing: get_meds %s
+
+''' % (begin_marker, ' '.join(sys.argv[1:-1])))
+            write_items(file, drug_list, formats, units, items)
+            file.write('''\
+    // %s
+''' % end_marker)
+            file.write(epilogue)
+
+    else:
+        write_items(sys.stdout, drug_list, formats, units, items)
+
+def write_items(file, drug_list, formats, units, items):
+    for stock_prefix, category_expr in [
+        ('DORA', 'Category ORAL = new Category("DORA", "oral", false, PO)'),
+        ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", false, IV, SC, IM)'),
+        ('DINF', 'Category PERFUSION = new Category("DINF", "perfusion", true)'),
+        ('DEX', 'Category EXTERNAL = new Category("DEXT", "external", false)'),
+        ('DVAC', 'Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", false)')
     ]:
         en_names = set()
         fr_names = set()
         drug_exprs = []
         for drug in drug_list:
-            if drug.startswith(category):
+            if drug.startswith(stock_prefix):
                 en_name = clean(get_drug_name([en for code, en, fr in formats[drug]]))
                 fr_name = clean(get_drug_name([fr for code, en, fr in formats[drug]]))
                 if not en_name:
@@ -95,17 +131,17 @@ def get_meds(filename, sheet, code_column,
                     en_format = clean(en_desc[len(en_name):].lstrip(' ^'))
                     fr_format = clean(fr_desc[len(fr_name):].lstrip(' ^'))
                     format = pack_en_fr(en_format, fr_format)
-                    unit = guess_unit(en_desc)
+                    unit = units.get(code) or ('Unit.%s' % guess_unit(en_desc))
                     format_exprs.append('''\
-            new Format("%s", "%s", Unit.%s)''' % 
+            new Format("%s", "%s", %s)''' % 
                         (code.strip('-'), format, unit))
                 drug_exprs.append('''\
         new Drug("%s", "%s").withFormats(
 %s
         )''' % (drug, name, ',\n'.join(format_exprs)))
 
-        write('''\
-    %s
+        file.write('''\
+    %s.withDrugs(
 %s
     );
 
@@ -126,34 +162,48 @@ def get_drug_name(descs):
     words = [desc.split() for desc in descs]
     sets = [set(group) for group in zip(*words)]
     w = 0
-    while w < len(sets) - 1 and len(sets[w]) == 1 and not re.search(r'\d[^\w]|\^', list(sets[w])[0]):
+    while w < len(sets) - 1 and len(sets[w]) == 1:
+        next = sets[w]
+        word = list(next)[0]
+        if '^' in word: break
+        if re.match(r'^[0-9.% ]+$', word): break
         w += 1
     result = ' '.join(set.pop() for set in sets[:w])
-    return re.sub(r',* *[eé]q\. *$', '', result)
+    return re.sub(r',* *[eé]q\..*$', '', result)
 
 def read_items(s, code_col, en_col, fr_col, en_adj, fr_adj):
     for row in range(s.nrows):
         code = s.cell(row, code_col).value.strip()
         if ' ' in code:
             continue
+        extra_code, extra_en_desc, extra_fr_desc = None, '', ''
         en_desc = s.cell(row, en_col).value
         if en_adj is not None:
             en_adjust = s.cell(row, en_adj).value
-            en_desc = apply_adjustments(en_desc, en_adjust)
-        fr_desc = ''
-        if fr_col is not None:
-            fr_desc = s.cell(row, fr_col).value
-            if fr_adj is not None:
-                fr_adjust = s.cell(row, fr_adj).value
-                if fr_adjust == '=':
-                    fr_adjust = en_adj and en_adjust or ''
+            if en_adjust.strip().startswith('add '):
+                add, adjust = en_adjust.split('|', 1)
+                extra_code = add.split()[1]
+                extra_en_desc = apply_adjustments(extra_en_desc, adjust)
+            else:
+                en_desc = apply_adjustments(en_desc, en_adjust)
+        fr_desc = '' if fr_col is None else s.cell(row, fr_col).value
+        if fr_adj is not None:
+            fr_adjust = s.cell(row, fr_adj).value
+            if fr_adjust == '=':
+                fr_adjust = en_adj and en_adjust or ''
+            if fr_adjust.strip().startswith('add '):
+                add, adjust = fr_adjust.split('|', 1)
+                extra_code = add.split()[1]
+                extra_fr_desc = apply_adjustments(extra_fr_desc, adjust)
+            else:
                 fr_desc = apply_adjustments(fr_desc, fr_adjust)
         yield (code, en_desc, fr_desc)
+        if extra_code is not None:
+            yield (extra_code, extra_en_desc, extra_fr_desc)
 
 def apply_adjustments(text, adjustments):
     if not adjustments.strip():
         return text
-    orig = text
     for clause in adjustments.split('|'):
         clause = clause.strip()
         action, args = clause.split(' ', 1)
@@ -172,15 +222,18 @@ def apply_adjustments(text, adjustments):
             format = args.strip()
             drug, old = text.split('^', 1)
             text = drug + ' ^ ' + format
+        elif action == 'unit':
+            unit = args.strip()
+            text = text + ' $ ' + unit
     return text
 
 def split_med(med):
     if '^' in med:
         return med.split('^', 1)
-    m = re.match(r'(.*), *(([eé]q[\. ]*)?\d.*)', med)
+    m = re.match(r'(.*), *(([eé]q[\. ]*)\d.*)', med)
     if m:
         return m.group(1), m.group(2).lstrip(', ')
-    m = re.match(r'([A-Z, ]+), *(.*)', med)
+    m = re.match(r'([A-Za-z ]+) ([0-9.%]+ .*)', med)
     if m:
         return m.group(1), m.group(2).lstrip(', ')
     m = re.match(r'([^,]+), *(.*)', med)
@@ -226,7 +279,9 @@ def guess_unit(desc):
         return 'TABLET'
     if re.findall(r'\bcaps?\.?\b', desc):
         return 'CAPSULE'
-    if re.findall(r'/ *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
+    if re.findall(r'/ *puff\b', desc):
+        return 'PUFF'
+    if re.findall(r' *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
         return 'ML'
     return 'MG'
 

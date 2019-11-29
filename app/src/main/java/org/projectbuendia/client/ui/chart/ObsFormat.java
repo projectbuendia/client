@@ -88,15 +88,17 @@ public class ObsFormat extends Format {
             pattern = "";
         }
         mPattern = pattern;
-        // Allow plain numeric formats like "#0.00" as a shorthand for "{0,number,#0.00}".
-        if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
-            try {
-                new DecimalFormat(pattern);  // check if it's a valid numeric format
-                pattern = "{0,number," + pattern + "}";
-            } catch (IllegalArgumentException e) { }
-        } else if (!pattern.contains("{") && pattern.contains("$")) {
-            // Allow "$" as a shorthand for "{0,text}".
-            pattern = pattern.replaceFirst("$", "{0,text}");
+        if (rootObsFormat == null) {
+            // Allow plain numeric formats like "#0.00" as a shorthand for "{0,number,#0.00}".
+            if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
+                try {
+                    new DecimalFormat(pattern);  // check if it's a valid numeric format
+                    pattern = "{0,number," + pattern + "}";
+                } catch (IllegalArgumentException e) { }
+            } else if (!pattern.contains("{") && pattern.contains("$")) {
+                // Allow "$" as a shorthand for "{0,text}".
+                pattern = pattern.replaceFirst("$", "{0,text}");
+            }
         }
         mRootObsFormat = Utils.orDefault(rootObsFormat, this);
         try {
@@ -391,7 +393,7 @@ public class ObsFormat extends Format {
         }
     }
 
-    private static final Pattern CONDITION_PATTERN = Pattern.compile("([<>=]*)(.*)");
+    private static final Pattern CONDITION_PATTERN = Pattern.compile("([<>=]*)(.+)");
 
     /**
      * "select" format for coded or numeric values.  Typical use:
@@ -424,7 +426,7 @@ public class ObsFormat extends Format {
                 char ch = pattern.charAt(pos);
                 if (ch == '\'') {
                     pos = skipQuotedString(pattern, pos);
-                } else if (option.operand.isEmpty() && ch == ':') {
+                } else if (depth == 0 && option.operand.isEmpty() && ch == ':') {
                     // A colon separates the condition from its pattern.
                     Matcher matcher = CONDITION_PATTERN.matcher(pattern.substring(start, pos));
                     if (matcher.matches()) {
@@ -488,6 +490,12 @@ public class ObsFormat extends Format {
             // Coerce the string operand to match the value's data type.
             ObsValue operand = null;
             if (value.uuid != null) {
+                Object id = Utils.compressUuid(value.uuid);
+                if (id instanceof Integer) {
+                    // For coded concept IDs, remove the type tag.
+                    int untypedId = ((Integer) id) % 1000000;
+                    value = ObsValue.newCoded(Utils.expandUuid(untypedId));
+                }
                 operand = ObsValue.newCoded(Utils.expandUuid(operandStr));
             } else if (value.number != null) {
                 try {

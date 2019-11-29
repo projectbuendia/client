@@ -43,14 +43,6 @@ public class CatalogIndex {
         return categories;
     }
 
-    public Category getCategory(String code) {
-        if (code.length() > 4) code = code.substring(0, 4);
-        for (Category category : categories) {
-            if (eq(code, category.code)) return category;
-        }
-        return Category.UNSPECIFIED;
-    }
-
     public Drug getDrug(String code) {
         if (code.length() > 8) code = code.substring(0, 8);
         if (drugs.containsKey(code)) {
