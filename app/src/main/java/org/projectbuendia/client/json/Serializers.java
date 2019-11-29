@@ -14,6 +14,7 @@ package org.projectbuendia.client.json;
 import com.google.gson.GsonBuilder;
 
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 
 /**
@@ -24,6 +25,7 @@ public class Serializers {
 
     public static void registerTo(GsonBuilder gson) {
         gson.registerTypeAdapter(DateTime.class, new DateTimeSerializer());
+        gson.registerTypeAdapter(Instant.class, new InstantSerializer());
         gson.registerTypeAdapter(LocalDate.class, new LocalDateSerializer());
     }
 }

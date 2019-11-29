@@ -42,6 +42,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
+import org.joda.time.base.AbstractInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
@@ -370,7 +371,7 @@ public class Utils {
     // ==== Dates and times ====
 
     private static final DateTimeFormatter ISO8601_UTC_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZoneUTC();
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
@@ -406,9 +407,9 @@ public class Utils {
         }
     }
 
-    /** Converts a nullable DateTime to a yyyy-mm-ddThh:mm:ssZ String or null. */
-    public static @Nullable String formatUtc8601(@Nullable DateTime dt) {
-        return dt != null ? ISO8601_UTC_DATETIME_FORMATTER.print(dt.withZone(DateTimeZone.UTC)) : null;
+    /** Formats a nullable DateTime or Instant as "yyyy-mm-ddThh:mm:ssZ" or null. */
+    public static @Nullable String formatUtc8601(@Nullable AbstractInstant t) {
+        return t != null ? t.toString(ISO8601_UTC_DATETIME_FORMATTER) : null;
     }
 
     /** Parses a nullable String into a nullable Interval. */
