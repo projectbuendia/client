@@ -27,26 +27,26 @@
     <RadioButton
         android:id="@+id/oral_category"
         style="@style/tight"
-        android:text="@string/oral_category_abbr"
+        android:text="@string/oral_category"
         android:checked="true"
         />
 
     <RadioButton
         android:id="@+id/injectable_category"
         style="@style/tight"
-        android:text="@string/injectable_category_abbr"
+        android:text="@string/injectable_category"
         />
 
     <RadioButton
         android:id="@+id/infusible_category"
         style="@style/tight"
-        android:text="@string/infusible_category_abbr"
+        android:text="@string/infusible_category"
         />
 
     <RadioButton
         android:id="@+id/external_category"
         style="@style/tight"
-        android:text="@string/external_category_abbr"
+        android:text="@string/external_category"
         />
 
     <RadioButton

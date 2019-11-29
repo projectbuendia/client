@@ -129,11 +129,11 @@
   <string name="order_hours">hours</string>
   <string name="order_hour">hour</string>
 
-  <string name="oral_category_abbr">Oral</string>
-  <string name="injectable_category_abbr">Inj</string>
-  <string name="infusible_category_abbr">Inf</string>
-  <string name="external_category_abbr">Ext</string>
-  <string name="vaccine_category_abbr">Vacc</string>
+  <string name="oral_category">Oral</string>
+  <string name="injectable_category">Injectable</string>
+  <string name="infusible_category">Perfusion</string>
+  <string name="external_category">External</string>
+  <string name="vaccine_category_abbr">Vaccine</string>
 
   <string name="amount_in_duration">%1$s in %2$s</string>
   <string name="once">Once</string>
