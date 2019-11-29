@@ -177,7 +177,8 @@ th.command { /* should match @style/ActionButton */
 #fixed { background: #eee; min-height: 1px; }
 #tiles { width: 100%; }
 .row { display: flex; flex-direction: row; }
-.tile { flex-basis: 0; flex-grow: 1; padding: 1rem 0 1rem 16px; }
+.row:first-child .tile { padding-top: 0.8rem; }
+.tile { flex-basis: 0; flex-grow: 1; padding: 0.4rem 4px 0.4rem 16px; }
 .tile, .tile div { overflow: hidden; white-space: nowrap; }
 .tile .heading { /* should match @style/text.caps */
   font-size: 1.4rem;
