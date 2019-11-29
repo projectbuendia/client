@@ -32,9 +32,11 @@ import xlrd
     help='sheet name or number (counted from 1)'
 )
 @click.argument('filename')
-def get_meds(filename, sheet, code_column,
+@click.argument('target', required=False)
+def get_meds(code_column,
              en_desc_column, fr_desc_column,
-             en_adjust_column, fr_adjust_column):
+             en_adjust_column, fr_adjust_column,
+             sheet, filename, target):
     book = xlrd.open_workbook(filename)
     code_col = code_column - 1
     en_col = en_desc_column - 1
@@ -68,8 +70,36 @@ def get_meds(filename, sheet, code_column,
         fr_desc = normalize(fr_desc)
         formats.setdefault(drug, []).append((code, en_desc, fr_desc))
 
-    write = sys.stdout.write
+    if target:
+        begin_marker = '==== BEGIN GENERATED OUTPUT ===='
+        end_marker = '==== END GENERATED OUTPUT ===='
+        with open(target) as file:
+            template = file.read()
+            if not (begin_marker in template and end_marker in template):
+                raise SystemExit('Markers %r and %r not found in %s' % (begin_marker, end_marker, target))
 
+            prologue = template.split(begin_marker, 1)[0]
+            epilogue = template.rsplit(end_marker, 1)[1]
+            prologue = re.sub(r'.*$', '', prologue)
+            epilogue = re.sub(r'^.*\n', '', epilogue)
+
+        with open(target, 'w') as file:
+            file.write(prologue)
+            file.write('''\
+    // %s
+    // Produced by executing: get_meds %s
+
+''' % (begin_marker, ' '.join(sys.argv[1:-1])))
+            write_items(file, drug_list, formats, units, items)
+            file.write('''\
+    // %s
+''' % end_marker)
+            file.write(epilogue)
+
+    else:
+        write_items(sys.stdout, drug_list, formats, units, items)
+
+def write_items(file, drug_list, formats, units, items):
     for stock_prefix, category_expr in [
         ('DORA', 'Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs('),
         ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY, IV, SC, IM).withDrugs('),
@@ -110,7 +140,7 @@ def get_meds(filename, sheet, code_column,
 %s
         )''' % (drug, name, ',\n'.join(format_exprs)))
 
-        write('''\
+        file.write('''\
     %s
 %s
     );
