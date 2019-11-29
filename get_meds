@@ -49,15 +49,21 @@ def get_meds(filename, sheet, code_column,
     drugs = set()
     drug_list = []
     formats = {}
+    units = {}
     items = read_items(s, code_col, en_col, fr_col, en_adj, fr_adj)
     for code, en_desc, fr_desc in items:
         if not code.startswith('D'):
             continue
-        category = code[:4]
         drug = code[:8]
         if drug not in drugs:
             drugs.add(drug)
             drug_list.append(drug)
+        if '$' in en_desc:
+            en_desc, unit = en_desc.split('$', 1)
+            units[code] = unit.strip()
+        if '$' in fr_desc:
+            fr_desc, unit = fr_desc.split('$', 1)
+            units[code] = unit.strip()
         en_desc = normalize(en_desc)
         fr_desc = normalize(fr_desc)
         formats.setdefault(drug, []).append((code, en_desc, fr_desc))
@@ -95,9 +101,9 @@ def get_meds(filename, sheet, code_column,
                     en_format = clean(en_desc[len(en_name):].lstrip(' ^'))
                     fr_format = clean(fr_desc[len(fr_name):].lstrip(' ^'))
                     format = pack_en_fr(en_format, fr_format)
-                    unit = guess_unit(en_desc)
+                    unit = units.get(code) or ('Unit.%s' % guess_unit(en_desc))
                     format_exprs.append('''\
-            new Format("%s", "%s", Unit.%s)''' % 
+            new Format("%s", "%s", %s)''' % 
                         (code.strip('-'), format, unit))
                 drug_exprs.append('''\
         new Drug("%s", "%s").withFormats(
@@ -140,24 +146,34 @@ def read_items(s, code_col, en_col, fr_col, en_adj, fr_adj):
         code = s.cell(row, code_col).value.strip()
         if ' ' in code:
             continue
+        extra_code, extra_en_desc, extra_fr_desc = None, '', ''
         en_desc = s.cell(row, en_col).value
         if en_adj is not None:
             en_adjust = s.cell(row, en_adj).value
-            en_desc = apply_adjustments(en_desc, en_adjust)
-        fr_desc = ''
-        if fr_col is not None:
-            fr_desc = s.cell(row, fr_col).value
-            if fr_adj is not None:
-                fr_adjust = s.cell(row, fr_adj).value
-                if fr_adjust == '=':
-                    fr_adjust = en_adj and en_adjust or ''
+            if en_adjust.strip().startswith('add '):
+                add, adjust = en_adjust.split('|', 1)
+                extra_code = add.split()[1]
+                extra_en_desc = apply_adjustments(extra_en_desc, adjust)
+            else:
+                en_desc = apply_adjustments(en_desc, en_adjust)
+        fr_desc = '' if fr_col is None else s.cell(row, fr_col).value
+        if fr_adj is not None:
+            fr_adjust = s.cell(row, fr_adj).value
+            if fr_adjust == '=':
+                fr_adjust = en_adj and en_adjust or ''
+            if fr_adjust.strip().startswith('add '):
+                add, adjust = fr_adjust.split('|', 1)
+                extra_code = add.split()[1]
+                extra_fr_desc = apply_adjustments(extra_fr_desc, adjust)
+            else:
                 fr_desc = apply_adjustments(fr_desc, fr_adjust)
         yield (code, en_desc, fr_desc)
+        if extra_code is not None:
+            yield (extra_code, extra_en_desc, extra_fr_desc)
 
 def apply_adjustments(text, adjustments):
     if not adjustments.strip():
         return text
-    orig = text
     for clause in adjustments.split('|'):
         clause = clause.strip()
         action, args = clause.split(' ', 1)
@@ -176,11 +192,11 @@ def apply_adjustments(text, adjustments):
             format = args.strip()
             drug, old = text.split('^', 1)
             text = drug + ' ^ ' + format
+        elif action == 'unit':
+            unit = args.strip()
+            text = text + ' $ ' + unit
     return text
 
-import q
-
-@q
 def split_med(med):
     if '^' in med:
         return med.split('^', 1)
@@ -233,6 +249,8 @@ def guess_unit(desc):
         return 'TABLET'
     if re.findall(r'\bcaps?\.?\b', desc):
         return 'CAPSULE'
+    if re.findall(r'/ *puff\b', desc):
+        return 'PUFF'
     if re.findall(r'/ *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
         return 'ML'
     return 'MG'
