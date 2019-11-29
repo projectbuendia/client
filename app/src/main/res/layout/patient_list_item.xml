@@ -23,7 +23,7 @@
     android:orientation="horizontal">
 
   <LinearLayout
-      android:layout_width="48sp"
+      android:layout_width="60sp"
       android:layout_height="match_parent"
       android:orientation="horizontal"
       android:gravity="center_vertical|end">
@@ -33,13 +33,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:lines="1"
+        android:ems="2"
         android:gravity="center_vertical|end"
-        android:paddingTop="8sp"
-        android:paddingBottom="8sp"
         android:paddingEnd="8sp"
-        android:textAppearance="@style/text.large"
-        android:textFontWeight="200"
-        android:textColor="@color/black"
+        android:textAppearance="@style/text.huge"
+        android:textFontWeight="100"
+        android:textColor="@color/gray_600"
         tools:text="2A"/>
 
     <View
@@ -47,7 +47,7 @@
         android:layout_width="1sp"
         android:layout_height="match_parent"
         android:layout_marginEnd="8sp"
-        android:background="#000000" />
+        android:background="@color/gray_600" />
   </LinearLayout>
 
   <org.projectbuendia.client.widgets.ShrinkFitTextView

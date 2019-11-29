@@ -24,25 +24,45 @@ import java.util.Locale;
 /** A {@link Toast} with a large text size. */
 public final class BigToast {
     /** Displays a toast with the given message. */
-    public static void show(String message) {
+    private static void pop(String message, int length) {
         Context context = App.getContext();
-        Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+        Toast toast = Toast.makeText(context, message, length);
         LinearLayout layout = (LinearLayout) toast.getView();
         TextView view = (TextView) layout.getChildAt(0);
         view.setTextAppearance(context, R.style.text_large_white);
         toast.show();
     }
 
+    public static void show(String message) {
+        pop(message, Toast.LENGTH_LONG);
+    }
+
     /**  Displays a toast with the given formatted string resource. */
     public static void show(int messageId, Object... args) {
-        show(App.str(messageId), args);
+        pop(format(App.str(messageId), args), Toast.LENGTH_LONG);
     }
 
     /** Displays a toast with the given formatted string. */
     public static void show(String message, Object... args) {
+        pop(format(message, args), Toast.LENGTH_LONG);
+    }
+
+    public static void brief(String message) {
+        pop(message, Toast.LENGTH_SHORT);
+    }
+
+    public static void brief(int messageId, Object... args) {
+        pop(format(App.str(messageId), args), Toast.LENGTH_SHORT);
+    }
+
+    public static void brief(String message, Object... args) {
+        pop(format(message, args), Toast.LENGTH_SHORT);
+    }
+
+    private static String format(String message, Object... args) {
         Context context = App.getContext();
         Locale locale = context.getResources().getConfiguration().locale;
-        show(String.format(locale, message, args));
+        return String.format(locale, message, args);
     }
 
     private BigToast() {

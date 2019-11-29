@@ -132,7 +132,7 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
         u.setText(R.id.bed_number, patient.bedNumber);
         u.show(R.id.bed_bar, !Utils.isEmpty(patient.bedNumber));
         ShrinkFitTextView idView = u.findView(R.id.id);
-        idView.setTextAndResize(patient.id);
+        idView.setTextAndResize(patient.id.replace('/', ' '));
         idView.setTextColor(status.getForegroundColor());
         idView.getBackground().setColorFilter(status.getBackgroundColor(), PorterDuff.Mode.SRC_ATOP);
         u.setText(R.id.sex, u.formatPatientDetails(patient, SHORT, SHORT, NONE));
