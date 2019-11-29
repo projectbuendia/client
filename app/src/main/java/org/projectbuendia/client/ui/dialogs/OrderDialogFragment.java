@@ -288,7 +288,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         String code = activeFormat != Format.UNSPECIFIED ? activeFormat.code
             : activeDrug != Drug.UNSPECIFIED ? activeDrug.code
             : Utils.getText(v.drug);  // fall back to free text
-        Quantity amount = new Quantity(Utils.getDouble(v.dosage, 0), activeFormat.dosageUnit);
+        Quantity amount = activeFormat.dosageUnit != null ?
+            new Quantity(Utils.getDouble(v.dosage, 0), activeFormat.dosageUnit) :
+            new Quantity(0, Unit.UNSPECIFIED);
         Quantity duration = null;
         if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
             amount = new Quantity(Utils.getDouble(v.amount, 0), Unit.ML);
@@ -531,8 +533,11 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         LocalDate stopDay = startDay.plusDays(days);
 
         Unit dosageUnit = activeFormat.dosageUnit;
-        v.dosageUnit.setText(App.localize(
-            dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
+        if (dosageUnit != null) {
+            v.dosageUnit.setText(App.localize(
+                dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
+        }
+        Utils.showIf(v.dosageRow, activeCategory.dosingType == DosingType.QUANTITY && dosageUnit != null);
         v.amountUnit.setText(getString(
             R.string.order_volume_unit_in, App.localize(Unit.ML.terse)));
         v.durationUnit.setText(App.localize(Unit.HOUR.forCount(hours)));
