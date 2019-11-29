@@ -334,14 +334,14 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             ConceptService concepts = App.getConceptService();
             Datatype type = concepts.getType(uuid);
 
-            if (type == Datatype.DATE || type == Datatype.TEXT) {
+            if (type == Datatype.TEXT) {
                 String title = concepts.getName(uuid, App.getSettings().getLocale());
                 Map<String, Obs> latest = mChartHelper.getLatestObservations(mPatientUuid);
                 Obs obs = latest.get(uuid);
                 if (obs == null) {
                     obs = new Obs(null, null, mPatientUuid, null, uuid, type, DateTime.now(), null, "", "");
                 }
-                if (type == Datatype.DATE) mUi.showDateObsDialog(title, obs);
+                // if (type == Datatype.DATE) mUi.showDateObsDialog(title, obs);
                 if (type == Datatype.TEXT) mUi.showTextObsDialog(title, obs);
                 return;
             }
