@@ -331,8 +331,15 @@ public class ObsFormat extends Format {
 
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
-            if (value.date == null) return TYPE_ERROR;
-            return new LocalDate(value.date).toString(mPattern);
+            LocalDate date;
+            if (value.instant != null) {
+                date = value.instant.toDateTime().toLocalDate();
+            } else if (value.date != null) {
+                date = value.date;
+            } else {
+                return TYPE_ERROR;
+            }
+            return new LocalDate(date).toString(mPattern);
         }
     }
 
