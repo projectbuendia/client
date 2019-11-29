@@ -80,6 +80,10 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
         v.sexOther.setTag(Sex.OTHER);
         sexToggleGroup = new ToggleRadioGroup<>(v.sexRadioGroup);
 
+        if (patient == null) {
+            v.idPrefix.setText(App.getSettings().getLastIdPrefix());
+        }
+
         if (patient != null) {
             String idPrefix = "";
             String id = Utils.toNonnull(patient.id);
