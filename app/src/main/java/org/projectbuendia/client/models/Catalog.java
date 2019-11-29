@@ -56,32 +56,32 @@ public interface Catalog {
     enum DosingType {QUANTITY, QUANTITY_OVER_DURATION};
 
     class Category {
-        public static final Category UNSPECIFIED = new Category("", "", DosingType.QUANTITY);
+        public static final Category UNSPECIFIED = new Category("", "", false);
 
         public final String code;  // category identifier, e.g. "DORA", "DINJ", "DEXT"
         public final Loc name;  // drug category, e.g. "oral", "injectable", "external"
-        public final DosingType dosingType;  // dosage specification type, e.g. QUANTITY
+        public final boolean isContinuous;  // dosed continuously, in quantity over time
         public final Route[] routes;  // routes of administration
         public final Drug[] drugs;  // drugs in this category
 
-        public Category(String code, Loc name, DosingType dosingType, Route[] routes, Drug[] drugs) {
+        public Category(String code, Loc name, boolean isContinuous, Route[] routes, Drug[] drugs) {
             this.code = code;
             this.name = name;
-            this.dosingType = dosingType;
+            this.isContinuous = isContinuous;
             this.routes = routes;
             this.drugs = drugs;
         }
 
-        public Category(String code, String name, DosingType dosingType, Route[] routes, Drug[] drugs) {
-            this(code, new Loc(name), dosingType, routes, drugs);
+        public Category(String code, String name, boolean isContinuous, Route[] routes, Drug[] drugs) {
+            this(code, new Loc(name), isContinuous, routes, drugs);
         }
 
-        public Category(String code, String name, DosingType dosingType, Route... routes) {
-            this(code, name, dosingType, routes, new Drug[0]);
+        public Category(String code, String name, boolean isContinuous, Route... routes) {
+            this(code, name, isContinuous, routes, new Drug[0]);
         }
 
         public Category withDrugs(Drug... drugs) {
-            return new Category(code, name, dosingType, routes, drugs);
+            return new Category(code, name, isContinuous, routes, drugs);
         }
 
         @Override public boolean equals(Object other) {

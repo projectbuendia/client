@@ -42,16 +42,15 @@ import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.models.Catalog.Category;
-import org.projectbuendia.client.models.Catalog.DosingType;
 import org.projectbuendia.client.models.Catalog.Drug;
 import org.projectbuendia.client.models.Catalog.Format;
 import org.projectbuendia.client.models.Catalog.Route;
-import org.projectbuendia.client.models.Quantity;
-import org.projectbuendia.client.models.Unit;
 import org.projectbuendia.client.models.CatalogIndex;
 import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Quantity;
+import org.projectbuendia.client.models.Unit;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.AutocompleteAdapter.CompletionAdapter;
 import org.projectbuendia.client.ui.EditTextWatcher;
@@ -292,8 +291,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             new Quantity(Utils.getDouble(v.dosage, 0), activeFormat.dosageUnit) :
             new Quantity(0, Unit.UNSPECIFIED);
         Quantity duration = null;
-        if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
-            amount = new Quantity(Utils.getDouble(v.amount, 0), Unit.ML);
+        if (activeCategory.isContinuous) {
+            amount = new Quantity(Utils.getDouble(v.amount, 0), activeFormat.dosageUnit);
             duration = new Quantity(Utils.getDouble(v.duration, 0), Unit.HOUR);
         }
         Route activeRoute = Utils.orDefault((Route) v.route.getSelectedItem(), Route.UNSPECIFIED);
@@ -314,7 +313,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             valid = false;
         }
         if (valid && activeDrug != null) {
-            if (activeCategory.dosingType == DosingType.QUANTITY_OVER_DURATION) {
+            if (activeCategory.isContinuous) {
                 if (amount.mag == 0) {
                     setError(v.amount, R.string.enter_dosage);
                     valid = false;
@@ -434,8 +433,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.drug.setText("");
         populateFormatSpinner(new Format[] {Format.UNSPECIFIED});
 
-        Utils.showIf(v.dosageRow, category.dosingType == DosingType.QUANTITY);
-        Utils.showIf(v.continuousRow, category.dosingType == DosingType.QUANTITY_OVER_DURATION);
+        Utils.showIf(v.dosageRow, !category.isContinuous);
+        Utils.showIf(v.continuousRow, category.isContinuous);
 
         populateRouteSpinner(category.routes);
         Utils.showIf(v.route, category.routes.length > 0);
@@ -537,9 +536,10 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             v.dosageUnit.setText(App.localize(
                 dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
         }
-        Utils.showIf(v.dosageRow, activeCategory.dosingType == DosingType.QUANTITY && dosageUnit != null);
+        Utils.showIf(v.dosageRow, !activeCategory.isContinuous && dosageUnit != null);
+        Utils.showIf(v.continuousRow, activeCategory.isContinuous && dosageUnit != null);
         v.amountUnit.setText(getString(
-            R.string.order_volume_unit_in, App.localize(Unit.ML.terse)));
+            R.string.order_volume_unit_in, App.localize(dosageUnit.terse)));
         v.durationUnit.setText(App.localize(Unit.HOUR.forCount(hours)));
         v.frequencyUnit.setText(App.localize(Unit.PER_DAY.forCount(timesPerDay)));
         v.seriesLengthUnit.setText(App.localize(Unit.DAY.forCount(days)));

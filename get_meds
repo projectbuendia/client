@@ -101,11 +101,11 @@ def get_meds(code_column,
 
 def write_items(file, drug_list, formats, units, items):
     for stock_prefix, category_expr in [
-        ('DORA', 'Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs('),
-        ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY, IV, SC, IM).withDrugs('),
-        ('DINF', 'Category PERFUSION = new Category("DINF", "perfusion", DosingType.QUANTITY_OVER_DURATION).withDrugs('),
-        ('DEX', 'Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY).withDrugs('),
-        ('DVAC', 'Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY).withDrugs(')
+        ('DORA', 'Category ORAL = new Category("DORA", "oral", false, PO)'),
+        ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", false, IV, SC, IM)'),
+        ('DINF', 'Category PERFUSION = new Category("DINF", "perfusion", true)'),
+        ('DEX', 'Category EXTERNAL = new Category("DEXT", "external", false)'),
+        ('DVAC', 'Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", false)')
     ]:
         en_names = set()
         fr_names = set()
@@ -141,7 +141,7 @@ def write_items(file, drug_list, formats, units, items):
         )''' % (drug, name, ',\n'.join(format_exprs)))
 
         file.write('''\
-    %s
+    %s.withDrugs(
 %s
     );
 
@@ -281,7 +281,7 @@ def guess_unit(desc):
         return 'CAPSULE'
     if re.findall(r'/ *puff\b', desc):
         return 'PUFF'
-    if re.findall(r'/ *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
+    if re.findall(r' *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
         return 'ML'
     return 'MG'
 

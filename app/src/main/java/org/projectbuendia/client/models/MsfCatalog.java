@@ -9,7 +9,7 @@ public interface MsfCatalog extends Catalog {
     // ==== BEGIN GENERATED OUTPUT ====
     // Produced by executing: get_meds -s 2 -e 3 -f 4 -E 7 -F 8 mml-buendia.xlsx
 
-    Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs(
+    Category ORAL = new Category("DORA", "oral", false, PO).withDrugs(
         new Drug("DORAABCV", "ABACAVIR sulfate (ABC) [fr:ABACAVIR sulfate (ABC)]").withFormats(
             new Format("DORAABCV3T", "eq. 300 mg base, tab. [fr:éq. 300 mg base, comp.]", Unit.TABLET),
             new Format("DORAABCV6TD", "60 mg, disp. tab. [fr:60 mg, comp. disp.]", Unit.TABLET)
@@ -227,7 +227,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DORACODE3T", "30 mg, tab. [fr:30 mg, comp.]", Unit.TABLET)
         ),
         new Drug("DORACOLC", "COLECALCIFEROL (vit. D3) [fr:COLECALCIFEROL (vit. D3)]").withFormats(
-            new Format("DORACOLC1S1", "10.000 IU / ml, sol., 10 ml, bot. [fr:10000 UI / ml, sol., 10 ml, fl.]", Unit.MG)
+            new Format("DORACOLC1S1", "10.000 IU / ml, sol., 10 ml, bot. [fr:10000 UI / ml, sol., 10 ml, fl.]", Unit.ML)
         ),
         new Drug("DORACOLH", "COLCHICINE [fr:COLCHICINE]").withFormats(
             new Format("DORACOLH1T", "1 mg, tab. [fr:1 mg, comp.]", Unit.TABLET)
@@ -424,14 +424,14 @@ public interface MsfCatalog extends Catalog {
             new Format("DORAGRIS5T", "500 mg, tab. [fr:500 mg, comp.]", Unit.TABLET)
         ),
         new Drug("DORAHALO", "HALOTHANE [fr:HALOTHANE]").withFormats(
-            new Format("DORAHALO1A2", "250 ml, bot. [fr:250 ml, fl.]", Unit.MG)
+            new Format("DORAHALO1A2", "250 ml, bot. [fr:250 ml, fl.]", Unit.ML)
         ),
         new Drug("DORAHALP", "HALOPERIDOL [fr:HALOPERIDOL]").withFormats(
             new Format("DORAHALP05C", "0.5 mg, caps. [fr:0.5 mg, gél.]", Unit.CAPSULE),
             new Format("DORAHALP05T", "0.5 mg, tab. [fr:0.5 mg, comp.]", Unit.TABLET),
-            new Format("DORAHALP1S2", "2 mg / ml, oral sol., 100 ml, bot. with pipette [fr:2 mg / ml, sol. orale, 100 ml, fl. avec pipette]", Unit.MG),
+            new Format("DORAHALP1S2", "2 mg / ml, oral sol., 100 ml, bot. with pipette [fr:2 mg / ml, sol. orale, 100 ml, fl. avec pipette]", Unit.ML),
             new Format("DORAHALP1T", "1 mg, tab. [fr:1 mg, comp.]", Unit.TABLET),
-            new Format("DORAHALP3D", "2 mg / ml / 20 drops, 30 ml, bot. [fr:2 mg / ml / 20 gouttes, 30 ml, fl.]", Unit.MG),
+            new Format("DORAHALP3D", "2 mg / ml / 20 drops, 30 ml, bot. [fr:2 mg / ml / 20 gouttes, 30 ml, fl.]", Unit.ML),
             new Format("DORAHALP5T", "5 mg, tab. [fr:5 mg, comp.]", Unit.TABLET)
         ),
         new Drug("DORAHPST", "INH / PYRIDOXINE / SMX / TMP [fr:INH / PYRIDOXINE / SMX / TMP]").withFormats(
@@ -470,17 +470,17 @@ public interface MsfCatalog extends Catalog {
             new Format("DORAIODO1C", "190 mg, caps. [fr:190 mg, gél.]", Unit.CAPSULE)
         ),
         new Drug("DORAIPRA", "IPRATROPIUM bromide [fr:IPRATROPIUM bromure]").withFormats(
-            new Format("DORAIPRA2N", "0.250 mg / ml, 1 ml, sol. for nebuliser [fr:0.250 mg / ml, 1 ml, sol. pour nébuliseur]", Unit.MG),
-            new Format("DORAIPRA2N2", "0.125 mg / ml, 2 ml, sol. for nebuliser [fr:0.125 mg / ml, 2 ml, sol. pour nébuliseur]", Unit.MG),
+            new Format("DORAIPRA2N", "0.250 mg / ml, 1 ml, sol. for nebuliser [fr:0.250 mg / ml, 1 ml, sol. pour nébuliseur]", Unit.ML),
+            new Format("DORAIPRA2N2", "0.125 mg / ml, 2 ml, sol. for nebuliser [fr:0.125 mg / ml, 2 ml, sol. pour nébuliseur]", Unit.ML),
             new Format("DORAIPRA2SF", "20 µg / puff, 200 puffs, aerosol [fr:20 µg / bouffée, 200 bouffées, aerosol]", Unit.PUFF),
-            new Format("DORAIPRA5N", "0.250 mg / ml, 2 ml, sol. for nebuliser [fr:0.250 mg / ml, 2 ml, sol. pour nébuliseur]", Unit.MG)
+            new Format("DORAIPRA5N", "0.250 mg / ml, 2 ml, sol. for nebuliser [fr:0.250 mg / ml, 2 ml, sol. pour nébuliseur]", Unit.ML)
         ),
         new Drug("DORAISOB", "ISOSORBIDE DINITRATE [fr:ISOSORBIDE DINITRATE]").withFormats(
             new Format("DORAISOB1T", "10 mg, tab [fr:10 mg, comp]", Unit.TABLET),
             new Format("DORAISOB5T", "5 mg, sublingual tab. [fr:5 mg, comp. sublingual]", Unit.TABLET)
         ),
         new Drug("DORAISOF", "ISOFLURANE [fr:ISOFLURANE]").withFormats(
-            new Format("DORAISOF2L", "liquid, 250 ml, bot. [fr:liquide, 250 ml, fl.]", Unit.MG)
+            new Format("DORAISOF2L", "liquid, 250 ml, bot. [fr:liquide, 250 ml, fl.]", Unit.ML)
         ),
         new Drug("DORAISON", "ISONIAZID (H) [fr:ISONIAZIDE (H)]").withFormats(
             new Format("DORAISON1T1", "100 mg, breakable tab., blister [fr:100 mg, comp. sécable, blister]", Unit.TABLET),
@@ -711,7 +711,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DORAPHLO8TOD", "80 mg, orodisp. tab. [fr:80 mg, comp. orodisp.]", Unit.TABLET)
         ),
         new Drug("DORAPHYT", "PHYTOMENADIONE (vitamin K1) [fr:PHYTOMENADIONE (vitamine K1)]").withFormats(
-            new Format("DORAPHYT1A1", "10 mg / ml, 1 ml, amp. [fr:10 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DORAPHYT1A1", "10 mg / ml, 1 ml, amp. [fr:10 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DORAPOTC", "POTASSIUM chloride [fr:POTASSIUM chlorure]").withFormats(
             new Format("DORAPOTC6TP", "600 mg (8mEq), prolonged-release tab. [fr:600 mg (8mEq), comp. libération prolongée]", Unit.TABLET),
@@ -805,7 +805,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DORARITO8S", "400 mg / 5 ml, oral sol., 90 ml, bot. [fr:400 mg / 5 ml, sol. orale, 90 ml, fl.]", Unit.ML)
         ),
         new Drug("DORASALB", "SALBUTAMOL [fr:SALBUTAMOL]").withFormats(
-            new Format("DORASALB1N", "solution for nebulizer, 2 mg / ml, 2.5 ml monodose [fr:solution pour nébuliseur, 2 mg / ml, 2.5 ml unidose]", Unit.MG),
+            new Format("DORASALB1N", "solution for nebulizer, 2 mg / ml, 2.5 ml monodose [fr:solution pour nébuliseur, 2 mg / ml, 2.5 ml unidose]", Unit.ML),
             new Format("DORASALB2SF", "sulfate, eq. 0.1 mg base / puff, 200 puffs, aerosol [fr:sulfate, éq. 0.1 mg base / bouffée, 200 bouff. aérosol]", Unit.PUFF)
         ),
         new Drug("DORASALM", "SALMETEROL [fr:SALMETEROL]").withFormats(
@@ -870,7 +870,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DORATINI5T", "500 mg, tab. [fr:500 mg, comp.]", Unit.TABLET)
         ),
         new Drug("DORATRAM", "TRAMADOL hydrochloride [fr:TRAMADOL chlorhydrate]").withFormats(
-            new Format("DORATRAM1S", "100 mg / ml / 40 drops, 10 ml, bot. [fr:100 mg / ml / 40 gouttes, 10 ml, fl.]", Unit.MG),
+            new Format("DORATRAM1S", "100 mg / ml / 40 drops, 10 ml, bot. [fr:100 mg / ml / 40 gouttes, 10 ml, fl.]", Unit.ML),
             new Format("DORATRAM5C", "50 mg, caps. [fr:50 mg, gél.]", Unit.CAPSULE)
         ),
         new Drug("DORATRAN", "TRANEXAMIC ACID [fr:ACIDE TRANEXAMIQUE]").withFormats(
@@ -889,7 +889,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DORAVALG4T", "eq. 450 mg base, tab. [fr:éq. 450 mg base, comp.]", Unit.TABLET)
         ),
         new Drug("DORAVALP", "VALPROATE SODIUM [fr:VALPROATE de SODIUM]").withFormats(
-            new Format("DORAVALP1S", "200 mg / ml, 40 ml, bot. + syringe [fr:200 mg / ml, 40 ml, fl. + seringue]", Unit.MG),
+            new Format("DORAVALP1S", "200 mg / ml, 40 ml, bot. + syringe [fr:200 mg / ml, 40 ml, fl. + seringue]", Unit.ML),
             new Format("DORAVALP2S", "200 mg / 5 ml, 300 ml, bot. [fr:200 mg / 5 ml, 300 ml, fl.]", Unit.ML),
             new Format("DORAVALP2TG", "200 mg, gastro-resistant tab. [fr:200 mg, comp. gastro-résistant]", Unit.TABLET),
             new Format("DORAVALP5TG", "500 mg, gastro-resistant tab. [fr:500 mg, comp. gastro-résistant]", Unit.TABLET)
@@ -932,16 +932,16 @@ public interface MsfCatalog extends Catalog {
         )
     );
 
-    Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY, IV, SC, IM).withDrugs(
+    Category INJECTABLE = new Category("DINJ", "injectable", false, IV, SC, IM).withDrugs(
         new Drug("DINJACCY", "ACETYLCYSTEINE [fr:ACETYLCYSTEINE]").withFormats(
-            new Format("DINJACCY2A", "200 mg / ml, 10 ml, amp. [fr:200 mg / ml, 10 ml, amp.]", Unit.MG)
+            new Format("DINJACCY2A", "200 mg / ml, 10 ml, amp. [fr:200 mg / ml, 10 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJACIV", "ACICLOVIR sodium [fr:ACICLOVIR sodique]").withFormats(
             new Format("DINJACIV2V", "eq. 250 mg base, powder, vial [fr:éq. 250 mg base, poudre, fl]", Unit.MG),
-            new Format("DINJACIV2V1", "eq. 25 mg / ml base, 10 ml, vial [fr:éq. 25 mg / ml base, 10 ml, fl.]", Unit.MG)
+            new Format("DINJACIV2V1", "eq. 25 mg / ml base, 10 ml, vial [fr:éq. 25 mg / ml base, 10 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJADEN", "ADENOSINE [fr:ADENOSINE]").withFormats(
-            new Format("DINJADEN6V", "3 mg / ml, 2 ml, vial [fr:3 mg / ml, 2 ml, fl.]", Unit.MG)
+            new Format("DINJADEN6V", "3 mg / ml, 2 ml, vial [fr:3 mg / ml, 2 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJAMBC", "AMPHOTERICIN B conventional [fr:AMPHOTERICINE B conventionnelle]").withFormats(
             new Format("DINJAMBC5V", "50 mg, powder, vial [fr:50 mg, poudre, fl.]", Unit.MG)
@@ -950,11 +950,11 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJAMBL5V", "50 mg, powder, vial [fr:50 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJAMIK", "AMIKACIN sulfate [fr:AMIKACINE sulfate]").withFormats(
-            new Format("DINJAMIK5A", "eq. 250 mg / ml base, 2 ml, amp. [fr:éq. 250 mg / ml base, 2 ml, amp.]", Unit.MG),
-            new Format("DINJAMIK5V1", "eq. 250 mg / ml base, 2 ml, vial [fr:éq. 250 mg / ml base, 2 ml, fl.]", Unit.MG)
+            new Format("DINJAMIK5A", "eq. 250 mg / ml base, 2 ml, amp. [fr:éq. 250 mg / ml base, 2 ml, amp.]", Unit.ML),
+            new Format("DINJAMIK5V1", "eq. 250 mg / ml base, 2 ml, vial [fr:éq. 250 mg / ml base, 2 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJAMIO", "AMIODARONE hydrochloride [fr:AMIODARONE chlorhydrate]").withFormats(
-            new Format("DINJAMIO1A", "50 mg / ml, 3 ml, amp. [fr:50 mg / ml, 3 ml, amp.]", Unit.MG)
+            new Format("DINJAMIO1A", "50 mg / ml, 3 ml, amp. [fr:50 mg / ml, 3 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJAMOC", "AMOXICILLIN / CLAVULANIC acid [fr:AMOXICILLINE / acide CLAVULANIQUE]").withFormats(
             new Format("DINJAMOC1V2", "1 g / 200 mg, powder [fr:1 g / 200 mg, poudre]", Unit.MG)
@@ -970,23 +970,23 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJARTS6V", "60 mg, powder, vial +NaHCO3 5% 1 ml +NaCl 0.9% 5 ml [fr:60 mg, poudre, fl +NaHCO3 5% 1 ml +NaCl 0.9% 5 ml]", Unit.ML)
         ),
         new Drug("DINJATRB", "ATRACURIUM besilate [fr:besilate d'ATRACURIUM]").withFormats(
-            new Format("DINJATRB2A", "10 mg / ml, 2.5 ml, amp. [fr:10 mg / ml, 2.5 ml, amp.]", Unit.MG)
+            new Format("DINJATRB2A", "10 mg / ml, 2.5 ml, amp. [fr:10 mg / ml, 2.5 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJATRO", "ATROPINE sulfate [fr:ATROPINE sulfate]").withFormats(
-            new Format("DINJATRO1A", "1 mg / ml, 1 ml, amp. [fr:1 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJATRO1A", "1 mg / ml, 1 ml, amp. [fr:1 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJBLEO", "BLEOMYCIN sulfate [fr:BLEOMYCINE sulfate]").withFormats(
             new Format("DINJBLEO1V", "eq 15.000 IU base, powder, vial [fr:éq. 15.000 UI base, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJBUPI", "BUPIVACAINE HCl, hyperbaric / spinal [fr:BUPIVACAINE HCl, hyperbare / rachi]").withFormats(
-            new Format("DINJBUPI2A", "l, eq. 5 mg / ml base, 4 ml, amp [fr:i, éq. 5 mg / ml base, 4 ml, amp]", Unit.MG)
+            new Format("DINJBUPI2A", "l, eq. 5 mg / ml base, 4 ml, amp [fr:i, éq. 5 mg / ml base, 4 ml, amp]", Unit.ML)
         ),
         new Drug("DINJCAFC", "CAFFEINE CITRATE [fr:CAFEINE CITRATE]").withFormats(
-            new Format("DINJCAFC1A", "10 mg / ml, eq. 5 mg caffeine base, 1 ml, amp. [fr:10 mg / ml, éq. 5 mg caféine base, 1 ml, amp.]", Unit.MG),
-            new Format("DINJCAFC2A", "20 mg / ml eq. 10 mg caffeine base, 1 ml, amp. [fr:20 mg / ml, éq. 10 mg caféine base, 1 ml, amp.]", Unit.MG)
+            new Format("DINJCAFC1A", "10 mg / ml, eq. 5 mg caffeine base, 1 ml, amp. [fr:10 mg / ml, éq. 5 mg caféine base, 1 ml, amp.]", Unit.ML),
+            new Format("DINJCAFC2A", "20 mg / ml eq. 10 mg caffeine base, 1 ml, amp. [fr:20 mg / ml, éq. 10 mg caféine base, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJCALG", "CALCIUM GLUCONATE [fr:CALCIUM GLUCONATE]").withFormats(
-            new Format("DINJCALG1A", "100 mg / ml, 10 ml, amp. [fr:100 mg / ml, 10 ml, amp.]", Unit.MG)
+            new Format("DINJCALG1A", "100 mg / ml, 10 ml, amp. [fr:100 mg / ml, 10 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJCAPR", "CAPREOMYCIN sulfate [fr:CAPREOMYCINE sulfate]").withFormats(
             new Format("DINJCAPR1V", "eq. 1 g base, powder, vial [fr:éq. 1 g base, poudre, fl.]", Unit.MG)
@@ -1014,14 +1014,14 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJCHLO1V", "1 g powder, vial [fr:1 g, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJCIPR", "CIPROFLOXACIN salt [fr:sel de CIPROFLOXACINE]").withFormats(
-            new Format("DINJCIPR2FBF", "eq. 2 mg / ml base, 100 ml, flex. bag PVC free [fr:éq. 2 mg / ml base, 100 ml, poche sple ssPVC]", Unit.MG),
-            new Format("DINJCIPR2SRF", "eq. 2 mg / ml base, 100 ml, semi-r. bot PVCfree [fr:éq. 2 mg / ml base, 100 ml, fl. semi-r. ssPVC]", Unit.MG)
+            new Format("DINJCIPR2FBF", "eq. 2 mg / ml base, 100 ml, flex. bag PVC free [fr:éq. 2 mg / ml base, 100 ml, poche sple ssPVC]", Unit.ML),
+            new Format("DINJCIPR2SRF", "eq. 2 mg / ml base, 100 ml, semi-r. bot PVCfree [fr:éq. 2 mg / ml base, 100 ml, fl. semi-r. ssPVC]", Unit.ML)
         ),
         new Drug("DINJCLIN", "CLINDAMYCIN phosphate [fr:CLINDAMYCINE phosphate]").withFormats(
-            new Format("DINJCLIN3A", "eq. 150 mg base / ml, 2 ml, amp. [fr:éq. 150 mg base / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJCLIN3A", "eq. 150 mg base / ml, 2 ml, amp. [fr:éq. 150 mg base / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJCLON", "CLONIDINE [fr:CLONIDINE]").withFormats(
-            new Format("DINJCLON1A", "0.15 mg / ml, 1 ml, amp. [fr:0.15 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJCLON1A", "0.15 mg / ml, 1 ml, amp. [fr:0.15 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJCLOX", "CLOXACILLIN sodium [fr:CLOXACILLINE sodique]").withFormats(
             new Format("DINJCLOX5VV", "eq. 500 mg base, powder, vial IV [fr:éq. 500 mg base, poudre, fl. IV]", Unit.MG)
@@ -1031,43 +1031,43 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJCOLI2V", "2 M IU, powder, vial, for infusion [fr:2 M UI, poudre, flacon, pour perf.]", Unit.MG)
         ),
         new Drug("DINJCOTR", "COTRIMOXAZOLE [fr:COTRIMOXAZOLE]").withFormats(
-            new Format("DINJCOTR4A", "80 mg / 16 mg / ml, 5 ml for infusion, amp. [fr:80 mg / 16 mg / ml, 5 ml pour perfusion, amp.]", Unit.MG)
+            new Format("DINJCOTR4A", "80 mg / 16 mg / ml, 5 ml for infusion, amp. [fr:80 mg / 16 mg / ml, 5 ml pour perfusion, amp.]", Unit.ML)
         ),
         new Drug("DINJDEFE", "DEFEROXAMINE (desferrioxamine) mesilate [fr:DEFEROXAMINE (desferrioxamine) mesilate]").withFormats(
             new Format("DINJDEFE5V", "500 mg, powder, vial [fr:500 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJDEXA", "DEXAMETHASONE phosphate [fr:DEXAMETHASONE phosphate]").withFormats(
-            new Format("DINJDEXA4A", "4 mg / ml, 1 ml, amp. [fr:4 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJDEXA4A", "4 mg / ml, 1 ml, amp. [fr:4 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJDIAZ", "DIAZEPAM [fr:DIAZEPAM]").withFormats(
-            new Format("DINJDIAZ1A", "5 mg / ml, 2 ml, amp. [fr:5 mg / ml, 2 ml, amp.]", Unit.MG),
-            new Format("DINJDIAZ1AE", "5 mg / ml, 2 ml, emulsion, amp. [fr:5 mg / ml, 2 ml, émulsion, amp.]", Unit.MG)
+            new Format("DINJDIAZ1A", "5 mg / ml, 2 ml, amp. [fr:5 mg / ml, 2 ml, amp.]", Unit.ML),
+            new Format("DINJDIAZ1AE", "5 mg / ml, 2 ml, emulsion, amp. [fr:5 mg / ml, 2 ml, émulsion, amp.]", Unit.ML)
         ),
         new Drug("DINJDICL", "DICLOFENAC sodium [fr:DICLOFENAC sodique]").withFormats(
-            new Format("DINJDICL7A", "25 mg / ml, 3 ml, amp. [fr:25 mg / ml, 3 ml, amp.]", Unit.MG)
+            new Format("DINJDICL7A", "25 mg / ml, 3 ml, amp. [fr:25 mg / ml, 3 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJDIGO", "DIGOXIN [fr:DIGOXINE]").withFormats(
-            new Format("DINJDIGO5A", "0.25 mg / ml, 2 ml, amp. [fr:0.25 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJDIGO5A", "0.25 mg / ml, 2 ml, amp. [fr:0.25 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJDILT", "DILTIAZEM hydrochloride [fr:DILTIAZEM chlorhydrate]").withFormats(
             new Format("DINJDILT2V", "25 mg, powder, vial [fr:25 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJDOBU", "DOBUTAMINE HCl. [fr:DOBUTAMINE HCl.]").withFormats(
-            new Format("DINJDOBU2A", "eq. 12.5 mg / ml base, 20 ml, sol for infusion [fr:éq. 12.5 mg / ml base, 20 ml, sol pour perfusion]", Unit.MG)
+            new Format("DINJDOBU2A", "eq. 12.5 mg / ml base, 20 ml, sol for infusion [fr:éq. 12.5 mg / ml base, 20 ml, sol pour perfusion]", Unit.ML)
         ),
         new Drug("DINJDOPA", "DOPAMINE hydrochloride [fr:DOPAMINE chlorhydrate]").withFormats(
-            new Format("DINJDOPA2A", "40 mg / ml, 5 ml, amp. [fr:40 mg / ml, 5 ml, amp.]", Unit.MG)
+            new Format("DINJDOPA2A", "40 mg / ml, 5 ml, amp. [fr:40 mg / ml, 5 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJDOPL", "DOXORUBICIN HCl, pegylated liposomal [fr:DOXORUBICINE HCl, pégylée liposomale]").withFormats(
-            new Format("DINJDOPL2V", "l, 2 mg / ml, 10 ml vial [fr:e, 2 mg / ml, 10 ml fl.]", Unit.MG),
-            new Format("DINJDOPL5V", "l, 2 mg / ml, 25 ml vial [fr:e, 2 mg / ml, 25 ml fl.]", Unit.MG)
+            new Format("DINJDOPL2V", "l, 2 mg / ml, 10 ml vial [fr:e, 2 mg / ml, 10 ml fl.]", Unit.ML),
+            new Format("DINJDOPL5V", "l, 2 mg / ml, 25 ml vial [fr:e, 2 mg / ml, 25 ml fl.]", Unit.ML)
         ),
         new Drug("DINJDOXO", "DOXORUBICIN hydrochloride [fr:DOXORUBICINE chlorhydrate]").withFormats(
             new Format("DINJDOXO1V", "10 mg, powder, vial [fr:10 mg, poudre, fl.]", Unit.MG),
-            new Format("DINJDOXO1V5", "2 mg / ml, 5 ml, vial [fr:2 mg / ml, 5 ml, fl.]", Unit.MG)
+            new Format("DINJDOXO1V5", "2 mg / ml, 5 ml, vial [fr:2 mg / ml, 5 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJEFLO", "EFLORNITHINE hydrochloride [fr:EFLORNITHINE chlorhydrate]").withFormats(
-            new Format("DINJEFLO2V", "eq. 200 mg / ml base, 100 ml, vial [fr:éq. 200 mg / ml base, 100 ml, fl.]", Unit.MG)
+            new Format("DINJEFLO2V", "eq. 200 mg / ml base, 100 ml, vial [fr:éq. 200 mg / ml base, 100 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJENOX", "ENOXAPARIN sodium [fr:ENOXAPARINE sodique]").withFormats(
             new Format("DINJENOX10S", "10.000 IU / 1 ml, syringe [fr:10000 UI / 1 ml, seringue]", Unit.ML),
@@ -1076,48 +1076,48 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJENOX60S", "6.000 IU / 0.6 ml, syringe [fr:6000 UI / 0.6 ml, seringue]", Unit.ML)
         ),
         new Drug("DINJEPHE", "EPHEDRINE hydrochloride [fr:EPHEDRINE chlorhydrate]").withFormats(
-            new Format("DINJEPHE3A", "30 mg / ml, 1 ml, amp. [fr:30 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJEPHE3A", "30 mg / ml, 1 ml, amp. [fr:30 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJEPIN", "EPINEPHRINE (adrenaline) tartrate [fr:EPINEPHRINE (adrenaline) tartrate]").withFormats(
-            new Format("DINJEPIN1AM", "eq. 1 mg / ml base, 1 ml amp IM [fr:éq. 1 mg / ml base, 1 ml amp IM]", Unit.MG),
-            new Format("DINJEPIN1AV", "eq. 1 mg / ml base, 1 ml amp IV [fr:éq. 1 mg / ml base, 1 ml amp IV]", Unit.MG)
+            new Format("DINJEPIN1AM", "eq. 1 mg / ml base, 1 ml amp IM [fr:éq. 1 mg / ml base, 1 ml amp IM]", Unit.ML),
+            new Format("DINJEPIN1AV", "eq. 1 mg / ml base, 1 ml amp IV [fr:éq. 1 mg / ml base, 1 ml amp IV]", Unit.ML)
         ),
         new Drug("DINJEPOA", "EPOETIN ALFA [fr:EPOETINE ALFA]").withFormats(
-            new Format("DINJEPOA1S", "10000 IU / ml, 1 ml, graduated syringe [fr:10000 UI / ml, 1 ml, seringue graduée]", Unit.MG)
+            new Format("DINJEPOA1S", "10000 IU / ml, 1 ml, graduated syringe [fr:10000 UI / ml, 1 ml, seringue graduée]", Unit.ML)
         ),
         new Drug("DINJERYT", "ERYTHROMYCIN lactobionate [fr:ERYTHROMYCINE lactobionate]").withFormats(
             new Format("DINJERYT1V", "eq. to 1 g base, pdr, vial [fr:éq. à 1 g base, pdr, fl.]", Unit.MG)
         ),
         new Drug("DINJETAM", "ETAMSYLATE [fr:ETAMSYLATE]").withFormats(
-            new Format("DINJETAM2A", "125 mg / ml, 2 ml, amp. [fr:125 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJETAM2A", "125 mg / ml, 2 ml, amp. [fr:125 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJETON", "ETONOGESTREL implant [fr:ETONOGESTREL implant]").withFormats(
             new Format("DINJETON6I", "1 x 68 mg, with applicator s. u. [fr:1 x 68 mg, avec applicateur u. u.]", Unit.MG)
         ),
         new Drug("DINJFENT", "FENTANYL citrate [fr:FENTANYL citrate]").withFormats(
-            new Format("DINJFENT1A", "eq. 0.05 mg / ml base, 2 ml, amp. [fr:éq. 0.05 mg / ml base, 2 ml, amp.]", Unit.MG)
+            new Format("DINJFENT1A", "eq. 0.05 mg / ml base, 2 ml, amp. [fr:éq. 0.05 mg / ml base, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJFERC", "FERRIC carboxymaltose [fr:carboxymaltose FERRIQUE]").withFormats(
-            new Format("DINJFERC1A", "eq. 50 mg / ml iron, 2 ml, amp. [fr:eq. 50 mg / ml fer, 2 ml, amp.]", Unit.MG)
+            new Format("DINJFERC1A", "eq. 50 mg / ml iron, 2 ml, amp. [fr:eq. 50 mg / ml fer, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJFLUC", "FLUCONAZOLE [fr:FLUCONAZOLE]").withFormats(
-            new Format("DINJFLUC2FBF", "2 mg / ml, 100 ml, flexible bag PVC free [fr:2 mg / ml, 100 ml, poche souple sans PVC]", Unit.MG),
-            new Format("DINJFLUC2SRF", "2 mg / ml, 100 ml, semi-rigid bot. PVC free [fr:2 mg / ml, 100 ml, fl. semi-rigide sans PVC]", Unit.MG)
+            new Format("DINJFLUC2FBF", "2 mg / ml, 100 ml, flexible bag PVC free [fr:2 mg / ml, 100 ml, poche souple sans PVC]", Unit.ML),
+            new Format("DINJFLUC2SRF", "2 mg / ml, 100 ml, semi-rigid bot. PVC free [fr:2 mg / ml, 100 ml, fl. semi-rigide sans PVC]", Unit.ML)
         ),
         new Drug("DINJFLUM", "FLUMAZENIL [fr:FLUMAZENIL]").withFormats(
-            new Format("DINJFLUM1A", "0.1 mg / ml, 10 ml, amp. [fr:0.1 mg / 1 ml, 10 ml, amp.]", Unit.MG),
-            new Format("DINJFLUM5A", "0.1 mg / ml, 5 ml, amp. [fr:0.1 mg / ml, 5 ml, amp.]", Unit.MG)
+            new Format("DINJFLUM1A", "0.1 mg / ml, 10 ml, amp. [fr:0.1 mg / 1 ml, 10 ml, amp.]", Unit.ML),
+            new Format("DINJFLUM5A", "0.1 mg / ml, 5 ml, amp. [fr:0.1 mg / ml, 5 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJFURO", "FUROSEMIDE [fr:FUROSEMIDE]").withFormats(
-            new Format("DINJFURO2A", "10 mg / ml, 2 ml, amp. [fr:10 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJFURO2A", "10 mg / ml, 2 ml, amp. [fr:10 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJGANC", "GANCICLOVIR sodium [fr:GANCICLOVIR sodique]").withFormats(
             new Format("DINJGANC5V", "eq. 500 mg base, powder, vial fr infusion [fr:éq. 500 mg base, poudre, flacon perfusion]", Unit.MG)
         ),
         new Drug("DINJGENT", "GENTAMICIN sulfate [fr:GENTAMICINE sulfate]").withFormats(
-            new Format("DINJGENT2A", "eq. 10 mg / ml base, 2 ml, amp. [fr:éq. 10 mg / ml base, 2 ml, amp.]", Unit.MG),
-            new Format("DINJGENT2V", "eq. 10 mg / ml base, 2 ml, vial [fr:éq. 10 mg / ml base, 2 ml, fl.]", Unit.MG),
-            new Format("DINJGENT8A", "eq. 40 mg / ml base, 2 ml, amp. [fr:eq. 40 mg / ml base, 2 ml, amp.]", Unit.MG)
+            new Format("DINJGENT2A", "eq. 10 mg / ml base, 2 ml, amp. [fr:éq. 10 mg / ml base, 2 ml, amp.]", Unit.ML),
+            new Format("DINJGENT2V", "eq. 10 mg / ml base, 2 ml, vial [fr:éq. 10 mg / ml base, 2 ml, fl.]", Unit.ML),
+            new Format("DINJGENT8A", "eq. 40 mg / ml base, 2 ml, amp. [fr:eq. 40 mg / ml base, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJGLUC", "GLUCOSE [fr:GLUCOSE]").withFormats(
             new Format("DINJGLUC1A1", "hypertonic, 10%, 10 ml, amp [fr:hypertonique, 10%, 10 ml, amp]", Unit.ML),
@@ -1125,14 +1125,14 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJGLUC5V5", "hypertonic, 50%, 50 ml, vial [fr:hypertonique, 50%, 50 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJGLYC", "GLYCOPYRRONIUM bromide [fr:GLYCOPYRRONIUM bromure]").withFormats(
-            new Format("DINJGLYC2A", "0.2 mg / ml, 1 ml, amp. [fr:0.2 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJGLYC2A", "0.2 mg / ml, 1 ml, amp. [fr:0.2 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJHALP", "HALOPERIDOL [fr:HALOPERIDOL]").withFormats(
-            new Format("DINJHALP5A", "5 mg / ml, 1 ml, amp. [fr:5 mg / ml, 1 ml, amp.]", Unit.MG),
-            new Format("DINJHALP5AD", "decanoate, 50 mg / ml, 1 ml, amp. [fr:decanoate, 50 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJHALP5A", "5 mg / ml, 1 ml, amp. [fr:5 mg / ml, 1 ml, amp.]", Unit.ML),
+            new Format("DINJHALP5AD", "decanoate, 50 mg / ml, 1 ml, amp. [fr:decanoate, 50 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJHEPA", "HEPARIN SODIUM [fr:HEPARINE SODIQUE]").withFormats(
-            new Format("DINJHEPA2A", "5000 IU / ml, 5 ml, amp. [fr:5000 UI / ml, 5 ml, amp.]", Unit.MG)
+            new Format("DINJHEPA2A", "5000 IU / ml, 5 ml, amp. [fr:5000 UI / ml, 5 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJHYDA", "HYDRALAZINE hydrochloride [fr:HYDRALAZINE chlorhydrate]").withFormats(
             new Format("DINJHYDA2A", "20 mg, powder, amp. [fr:20 mg, poudre, amp.]", Unit.MG)
@@ -1148,45 +1148,45 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJIMCI55V", "500 mg / 500 mg, powder, vial [fr:500 mg / 500 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJINSA", "INSULIN [fr:INSULINE]").withFormats(
-            new Format("DINJINSAB3APL", "LISPRO, BIPHASIC 25-75 IU / ml, 3 ml, autoinj. pref. L [fr:LISPRO, BIPHASIQUE 25-75 UI / ml, 3 ml, stylo prér. L]", Unit.MG),
-            new Format("DINJINSAB3APN", "ASPART, BIPHASIC 30-70 IU / ml, 3 ml, autoinj. pref. N [fr:ASPART, BIPHASIQUE 30-70 UI / ml, 3 ml, stylo prér. N]", Unit.MG),
-            new Format("DINJINSAL1VS", "GLARGINE, LONG 100 IU / ml, 10 ml, vial S [fr:GLARGINE, LENTE 100 UI / ml, 10 ml, fl. S]", Unit.MG),
-            new Format("DINJINSAL3APS", "GLARGINE, LONG, 100 IU / ml, 3 ml, autoinjector pref. S [fr:GLARGINE, LENTE, 100 UI / ml, 3 ml, stylo prérempli S]", Unit.MG),
-            new Format("DINJINSAU3APL", "LISPRO, ULTRARAPID 100 UI / ml, 3 ml, autoinject. pref. L [fr:LISPRO, ULTRARAPIDE 100 UI / ml, 3 ml, stylo prér. L]", Unit.MG),
-            new Format("DINJINSAU3APN", "ASPART, ULTRARAPID 100 UI / ml, 3 ml, autoinject. pref. N [fr:ASPART, ULTRARAPIDE 100 UI / ml, 3 ml, stylo prér. N]", Unit.MG)
+            new Format("DINJINSAB3APL", "LISPRO, BIPHASIC 25-75 IU / ml, 3 ml, autoinj. pref. L [fr:LISPRO, BIPHASIQUE 25-75 UI / ml, 3 ml, stylo prér. L]", Unit.ML),
+            new Format("DINJINSAB3APN", "ASPART, BIPHASIC 30-70 IU / ml, 3 ml, autoinj. pref. N [fr:ASPART, BIPHASIQUE 30-70 UI / ml, 3 ml, stylo prér. N]", Unit.ML),
+            new Format("DINJINSAL1VS", "GLARGINE, LONG 100 IU / ml, 10 ml, vial S [fr:GLARGINE, LENTE 100 UI / ml, 10 ml, fl. S]", Unit.ML),
+            new Format("DINJINSAL3APS", "GLARGINE, LONG, 100 IU / ml, 3 ml, autoinjector pref. S [fr:GLARGINE, LENTE, 100 UI / ml, 3 ml, stylo prérempli S]", Unit.ML),
+            new Format("DINJINSAU3APL", "LISPRO, ULTRARAPID 100 UI / ml, 3 ml, autoinject. pref. L [fr:LISPRO, ULTRARAPIDE 100 UI / ml, 3 ml, stylo prér. L]", Unit.ML),
+            new Format("DINJINSAU3APN", "ASPART, ULTRARAPID 100 UI / ml, 3 ml, autoinject. pref. N [fr:ASPART, ULTRARAPIDE 100 UI / ml, 3 ml, stylo prér. N]", Unit.ML)
         ),
         new Drug("DINJINSH", "INSULIN HUMAN [fr:INSULINE HUMAINE]").withFormats(
-            new Format("DINJINSHB1VL", "BIPHASIC 30-70 IU / ml, 10 ml, vial L [fr:BIPHASIQUE 30-70 UI / ml, 10 ml, fl. L]", Unit.MG),
-            new Format("DINJINSHB1VN", "BIPHASIC 30-70 IU / ml, 10 ml, vial N [fr:BIPHASIQUE 30-70 UI / ml, 10 ml, fl. N]", Unit.MG),
-            new Format("DINJINSHB1VS", "BIPHASIC 30-70 IU / ml, 10 ml, vial S [fr:BIPHASIQUE 30-70 UI / ml, 10 ml, fl. S]", Unit.MG),
-            new Format("DINJINSHI1VN", "ISOPHANE (NPH) 100 UI / ml, 10 ml, vial N [fr:ISOPHANE (NPH) 100 UI / ml, 10 ml, fl. N]", Unit.MG),
-            new Format("DINJINSHI1VS", "ISOPHANE (NPH) 100 UI / ml, 10 ml, vial S [fr:ISOPHANE (NPH) 100 UI / ml, 10 ml, fl. S]", Unit.MG),
-            new Format("DINJINSHI3APN", "ISOPHANE (NPH) 100 UI / ml, 3 ml, autoinj. pref. N [fr:ISOPHANE (NPH) 100 UI / ml, 3 ml, stylo prér. N]", Unit.MG),
-            new Format("DINJINSHR1VN", "RAPID 100 IU / ml, 10 ml, vial N [fr:RAPIDE 100 UI / ml, 10 ml, fl. N]", Unit.MG),
-            new Format("DINJINSHR1VS", "RAPID 100 IU / ml, 10 ml, vial S [fr:RAPIDE 100 UI / ml, 10 ml, fl. S]", Unit.MG)
+            new Format("DINJINSHB1VL", "BIPHASIC 30-70 IU / ml, 10 ml, vial L [fr:BIPHASIQUE 30-70 UI / ml, 10 ml, fl. L]", Unit.ML),
+            new Format("DINJINSHB1VN", "BIPHASIC 30-70 IU / ml, 10 ml, vial N [fr:BIPHASIQUE 30-70 UI / ml, 10 ml, fl. N]", Unit.ML),
+            new Format("DINJINSHB1VS", "BIPHASIC 30-70 IU / ml, 10 ml, vial S [fr:BIPHASIQUE 30-70 UI / ml, 10 ml, fl. S]", Unit.ML),
+            new Format("DINJINSHI1VN", "ISOPHANE (NPH) 100 UI / ml, 10 ml, vial N [fr:ISOPHANE (NPH) 100 UI / ml, 10 ml, fl. N]", Unit.ML),
+            new Format("DINJINSHI1VS", "ISOPHANE (NPH) 100 UI / ml, 10 ml, vial S [fr:ISOPHANE (NPH) 100 UI / ml, 10 ml, fl. S]", Unit.ML),
+            new Format("DINJINSHI3APN", "ISOPHANE (NPH) 100 UI / ml, 3 ml, autoinj. pref. N [fr:ISOPHANE (NPH) 100 UI / ml, 3 ml, stylo prér. N]", Unit.ML),
+            new Format("DINJINSHR1VN", "RAPID 100 IU / ml, 10 ml, vial N [fr:RAPIDE 100 UI / ml, 10 ml, fl. N]", Unit.ML),
+            new Format("DINJINSHR1VS", "RAPID 100 IU / ml, 10 ml, vial S [fr:RAPIDE 100 UI / ml, 10 ml, fl. S]", Unit.ML)
         ),
         new Drug("DINJISOB", "ISOSORBIDE DINITRATE [fr:ISOSORBIDE DINITRATE]").withFormats(
-            new Format("DINJISOB1A", "1 mg / ml, 10 ml, amp. [fr:1 mg / ml, 10 ml, amp.]", Unit.MG)
+            new Format("DINJISOB1A", "1 mg / ml, 10 ml, amp. [fr:1 mg / ml, 10 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJKANA", "KANAMYCIN sulfate [fr:KANAMYCINE sulfate]").withFormats(
-            new Format("DINJKANA1A4", "eq. 0.250 g / ml base, 4 ml, amp. [fr:éq. 0.250 g / ml base, 4 ml, amp.]", Unit.MG),
+            new Format("DINJKANA1A4", "eq. 0.250 g / ml base, 4 ml, amp. [fr:éq. 0.250 g / ml base, 4 ml, amp.]", Unit.ML),
             new Format("DINJKANA1V", "eq. 1 g base, powder, vial [fr:éq. 1 g base, poudre, fl.]", Unit.MG),
-            new Format("DINJKANA5A2", "eq. 0.250 g / ml base, 2 ml, amp. [fr:éq. 0.250 g / ml base, 2 ml, amp.]", Unit.MG),
+            new Format("DINJKANA5A2", "eq. 0.250 g / ml base, 2 ml, amp. [fr:éq. 0.250 g / ml base, 2 ml, amp.]", Unit.ML),
             new Format("DINJKANA5V", "eq. 0.5 g base, powder, vial [fr:éq. 0.5 g base, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJKETA", "KETAMINE hydrochloride [fr:KETAMINE chlorhydrate]").withFormats(
-            new Format("DINJKETA2A", "eq. 50 mg / ml base, 5 ml, amp. [fr:éq. 50 mg / ml base, 5 ml, amp.]", Unit.MG),
-            new Format("DINJKETA5V", "eq. 50 mg / ml base, 10 ml, vial [fr:éq. 50 mg / ml base, 10 ml, fl.]", Unit.MG)
+            new Format("DINJKETA2A", "eq. 50 mg / ml base, 5 ml, amp. [fr:éq. 50 mg / ml base, 5 ml, amp.]", Unit.ML),
+            new Format("DINJKETA5V", "eq. 50 mg / ml base, 10 ml, vial [fr:éq. 50 mg / ml base, 10 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJLABE", "LABETALOL hydrochloride [fr:LABETALOL chlorhydrate]").withFormats(
-            new Format("DINJLABE1A", "5 mg / ml, 20 ml amp. [fr:5 mg / ml, 20 ml amp.]", Unit.MG)
+            new Format("DINJLABE1A", "5 mg / ml, 20 ml amp. [fr:5 mg / ml, 20 ml amp.]", Unit.ML)
         ),
         new Drug("DINJLEVB", "LEVOBUPIVACAINE hydrochloride [fr:LEVOBUPIVACAINE chlorhydrate]").withFormats(
-            new Format("DINJLEVB2A", "eq. 2.5 mg / ml base, 10 ml, amp. [fr:éq. 2.5 mg / ml base, 10 ml, amp.]", Unit.MG),
-            new Format("DINJLEVB5A", "eq. 5 mg / ml base, 10 ml, amp [fr:éq. 5 mg / ml base, 10 ml, amp]", Unit.MG)
+            new Format("DINJLEVB2A", "eq. 2.5 mg / ml base, 10 ml, amp. [fr:éq. 2.5 mg / ml base, 10 ml, amp.]", Unit.ML),
+            new Format("DINJLEVB5A", "eq. 5 mg / ml base, 10 ml, amp [fr:éq. 5 mg / ml base, 10 ml, amp]", Unit.ML)
         ),
         new Drug("DINJLEVE", "LEVETIRACETAM [fr:LEVETIRACETAM]").withFormats(
-            new Format("DINJLEVE5V", "100 mg / ml, 5 ml, vial [fr:100 mg / ml, 5 ml, fl.]", Unit.MG)
+            new Format("DINJLEVE5V", "100 mg / ml, 5 ml, vial [fr:100 mg / ml, 5 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJLEVN", "LEVONORGESTREL implant [fr:LEVONORGESTREL implant]").withFormats(
             new Format("DINJLEVN15I", "2 x 75 mg (Jadelle) + trocar [fr:2 x 75 mg (Jadelle) + trocart]", Unit.MG)
@@ -1205,38 +1205,38 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJLIPE2FBF2", "20%, 250 ml, flex. bag, PVC free [fr:20%, 250 ml bot., poche souple, sans PVC]", Unit.ML)
         ),
         new Drug("DINJMAGS", "MAGNESIUM sulfate [fr:MAGNESIUM sulfate]").withFormats(
-            new Format("DINJMAGS5A", "0.5 g / ml, 10 ml, amp. [fr:0.5 g / ml, 10 ml, amp.]", Unit.MG)
+            new Format("DINJMAGS5A", "0.5 g / ml, 10 ml, amp. [fr:0.5 g / ml, 10 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJMEDR", "MEDROXYPROGESTERONE acetate [fr:MEDROXYPROGESTERONE acétate]").withFormats(
-            new Format("DINJMEDR1S", "150 mg, 1 ml, syringe [fr:150 mg, 1 ml, seringue]", Unit.MG),
-            new Format("DINJMEDR1V", "150 mg, 1 ml, vial [fr:150 mg, 1 ml, fl.]", Unit.MG),
+            new Format("DINJMEDR1S", "150 mg, 1 ml, syringe [fr:150 mg, 1 ml, seringue]", Unit.ML),
+            new Format("DINJMEDR1V", "150 mg, 1 ml, vial [fr:150 mg, 1 ml, fl.]", Unit.ML),
             new Format("DINJMEDR6IP", "104 mg / 0.65 ml, injector prefilled [fr:104 mg / 0.65 ml, injecteur prérempl]", Unit.ML)
         ),
         new Drug("DINJMEGA", "MEGLUMINE ANTIMONIATE [fr:MEGLUMINE ANTIMONIATE]").withFormats(
-            new Format("DINJMEGA4A", "pentaval. antimony 81 mg / ml, 5 ml, amp [fr:antimoine pentaval. 81 mg / ml, 5 ml, amp]", Unit.MG)
+            new Format("DINJMEGA4A", "pentaval. antimony 81 mg / ml, 5 ml, amp [fr:antimoine pentaval. 81 mg / ml, 5 ml, amp]", Unit.ML)
         ),
         new Drug("DINJMELA", "MELARSOPROL [fr:MELARSOPROL]").withFormats(
-            new Format("DINJMELA3A5", "36 mg / ml, 5 ml, amp. [fr:36 mg / ml, 5 ml, amp.]", Unit.MG)
+            new Format("DINJMELA3A5", "36 mg / ml, 5 ml, amp. [fr:36 mg / ml, 5 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJMERG", "METHYLERGOMETRINE maleate [fr:METHYLERGOMETRINE maleate]").withFormats(
-            new Format("DINJMERG2A", "0.2 mg / ml, 1 ml, amp. [fr:0.2 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJMERG2A", "0.2 mg / ml, 1 ml, amp. [fr:0.2 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJMERO", "MEROPENEM [fr:MEROPENEME]").withFormats(
             new Format("DINJMERO1V", "1 g, powder, vial [fr:1 g, poudre, fl]", Unit.MG),
             new Format("DINJMERO5V", "500 mg, powder, vial [fr:500 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJMETN", "METRONIDAZOLE [fr:METRONIDAZOLE]").withFormats(
-            new Format("DINJMETN5FBF", "5 mg / ml, 100 ml, flex. bag PVC free [fr:5 mg / ml, 100 ml, poche souple sans PVC]", Unit.MG),
-            new Format("DINJMETN5SRF", "5 mg / ml, 100 ml, semi-rigid bot. PVC free [fr:5 mg / ml, 100 ml, fl. semi-rigide sans PVC]", Unit.MG)
+            new Format("DINJMETN5FBF", "5 mg / ml, 100 ml, flex. bag PVC free [fr:5 mg / ml, 100 ml, poche souple sans PVC]", Unit.ML),
+            new Format("DINJMETN5SRF", "5 mg / ml, 100 ml, semi-rigid bot. PVC free [fr:5 mg / ml, 100 ml, fl. semi-rigide sans PVC]", Unit.ML)
         ),
         new Drug("DINJMETO", "METOCLOPRAMIDE hydrochloride [fr:METOCLOPRAMIDE chlorhydrate]").withFormats(
-            new Format("DINJMETO1A", "5 mg / ml, 2 ml, amp. [fr:5 mg / ml, 2 ml, amp]", Unit.MG)
+            new Format("DINJMETO1A", "5 mg / ml, 2 ml, amp. [fr:5 mg / ml, 2 ml, amp]", Unit.ML)
         ),
         new Drug("DINJMIDA", "MIDAZOLAM [fr:MIDAZOLAM]").withFormats(
-            new Format("DINJMIDA5A", "1 mg / ml, 5 ml, amp [fr:1 mg / ml, 5 ml, amp]", Unit.MG)
+            new Format("DINJMIDA5A", "1 mg / ml, 5 ml, amp [fr:1 mg / ml, 5 ml, amp]", Unit.ML)
         ),
         new Drug("DINJMORP", "MORPHINE hydrochloride [fr:MORPHINE chlorhydrate]").withFormats(
-            new Format("DINJMORP1A", "10 mg / ml, 1 ml, amp. [fr:10 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJMORP1A", "10 mg / ml, 1 ml, amp. [fr:10 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJNADR", "NADROPARIN calcium [fr:NADROPARINE calcique]").withFormats(
             new Format("DINJNADR2S", "1900 IU / 0.2 ml, syringe [fr:1900 UI / 0.2 ml, seringue]", Unit.ML),
@@ -1245,38 +1245,38 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJNADR5S", "5700 UI / 0.6 ml, syringe [fr:5700 UI / 0.6 ml, seringue]", Unit.ML)
         ),
         new Drug("DINJNALO", "NALOXONE hydrochloride [fr:NALOXONE chlorhydrate]").withFormats(
-            new Format("DINJNALO4A", "0.4 mg / ml, 1 ml, amp. [fr:0.4 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJNALO4A", "0.4 mg / ml, 1 ml, amp. [fr:0.4 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJNEOS", "NEOSTIGMINE methylsulfate [fr:NEOSTIGMINE méthylsulfate]").withFormats(
-            new Format("DINJNEOS2A", "2.5 mg / ml, 1 ml, amp. [fr:2.5 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJNEOS2A", "2.5 mg / ml, 1 ml, amp. [fr:2.5 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJNEPI", "NOREPINEPHRINE (noradrenaline) tartrate [fr:NOREPINEPHRINE (noradrénaline) tartrate]").withFormats(
-            new Format("DINJNEPI4AV", "eq. 1 mg / ml base, 4 ml [fr:éq. 1 mg / ml base, 4 ml]", Unit.MG)
+            new Format("DINJNEPI4AV", "eq. 1 mg / ml base, 4 ml [fr:éq. 1 mg / ml base, 4 ml]", Unit.ML)
         ),
         new Drug("DINJNICA", "NICARDIPINE hydrochloride [fr:NICARDIPINE chlorhydrate]").withFormats(
-            new Format("DINJNICA1A", "1 mg / ml, 10 ml, amp. [fr:1 mg / ml, 10 ml, amp.]", Unit.MG),
+            new Format("DINJNICA1A", "1 mg / ml, 10 ml, amp. [fr:1 mg / ml, 10 ml, amp.]", Unit.ML),
             new Format("DINJNICA5A", "1 mg / 1 ml, 5 ml, amp. [fr:1 mg / 1 ml, 5 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJOMEP", "OMEPRAZOLE sodium [fr:OMEPRAZOLE sodique]").withFormats(
             new Format("DINJOMEP4V", "eq. 40 mg base, powder, vial, fr infusion [fr:éq. 40 mg base, poudre, fl. pr perfusion]", Unit.MG)
         ),
         new Drug("DINJONDA", "ONDANSETRON hydrochloride [fr:ONDANSETRON chlorhydrate]").withFormats(
-            new Format("DINJONDA4A", "eq. 2 mg / ml base, 2 ml, amp. [fr:éq. 2 mg / ml base, 2 ml, amp.]", Unit.MG)
+            new Format("DINJONDA4A", "eq. 2 mg / ml base, 2 ml, amp. [fr:éq. 2 mg / ml base, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJOXYT", "OXYTOCIN [fr:OXYTOCINE]").withFormats(
-            new Format("DINJOXYT1A", "10 IU / ml, 1 ml, amp. [fr:10 UI / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJOXYT1A", "10 IU / ml, 1 ml, amp. [fr:10 UI / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJPACL", "PACLITAXEL [fr:PACLITAXEL]").withFormats(
-            new Format("DINJPACL1V", "6 mg / ml sol. to be diluted, 16.7 ml, bot. [fr:6 mg / ml sol. a diluer, 16.7 ml, fl.]", Unit.MG)
+            new Format("DINJPACL1V", "6 mg / ml sol. to be diluted, 16.7 ml, bot. [fr:6 mg / ml sol. a diluer, 16.7 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJPARA", "PARACETAMOL (acetaminophen) [fr:PARACETAMOL (acétaminophène)]").withFormats(
-            new Format("DINJPARA1B", "10 mg / ml, 100 ml, bot. [fr:10 mg / ml, 100 ml, fl.]", Unit.MG),
-            new Format("DINJPARA1FBF", "10 mg / ml, 100 ml, flex. bag PVC free [fr:10 mg / ml, 100 ml, poche s. ss PVC]", Unit.MG),
-            new Format("DINJPARA5B", "10 mg / ml, 50 ml, bot. [fr:10 mg / ml, 50 ml, fl.]", Unit.MG),
-            new Format("DINJPARA5FBF", "10 mg / ml, 50 ml, flex. bag PVC free [fr:10 mg / ml, 50 ml, poche s. ss PVC]", Unit.MG)
+            new Format("DINJPARA1B", "10 mg / ml, 100 ml, bot. [fr:10 mg / ml, 100 ml, fl.]", Unit.ML),
+            new Format("DINJPARA1FBF", "10 mg / ml, 100 ml, flex. bag PVC free [fr:10 mg / ml, 100 ml, poche s. ss PVC]", Unit.ML),
+            new Format("DINJPARA5B", "10 mg / ml, 50 ml, bot. [fr:10 mg / ml, 50 ml, fl.]", Unit.ML),
+            new Format("DINJPARA5FBF", "10 mg / ml, 50 ml, flex. bag PVC free [fr:10 mg / ml, 50 ml, poche s. ss PVC]", Unit.ML)
         ),
         new Drug("DINJPARO", "PAROMOMYCIN sulfate [fr:PAROMOMYCINE sulfate]").withFormats(
-            new Format("DINJPARO1A", "eq. 375 mg / ml base, 2 ml, amp [fr:éq. 375 mg / ml base, 2 ml, amp]", Unit.MG)
+            new Format("DINJPARO1A", "eq. 375 mg / ml base, 2 ml, amp [fr:éq. 375 mg / ml base, 2 ml, amp]", Unit.ML)
         ),
         new Drug("DINJPENB", "BENZATHINE BENZYLPENICILLIN [fr:BENZATHINE BENZYLPENICILLINE]").withFormats(
             new Format("DINJPENB1V", "1.2 M IU, powder, vial [fr:1.2 M UI, poudre, fl.]", Unit.MG),
@@ -1292,17 +1292,17 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJPENT3V", "300 mg, powder, vial [fr:300 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJPHEE", "PHENYLEPHRINE hydrochloride [fr:PHENYLEPHRINE chlorhydrate]").withFormats(
-            new Format("DINJPHEE5A", "eq. 50 µg base / ml, 10 ml amp. [fr:éq. 50 µg base / ml, 10 ml amp.]", Unit.MG)
+            new Format("DINJPHEE5A", "eq. 50 µg base / ml, 10 ml amp. [fr:éq. 50 µg base / ml, 10 ml amp.]", Unit.ML)
         ),
         new Drug("DINJPHEN", "PHENOBARBITAL sodium [fr:PHENOBARBITAL sodique]").withFormats(
-            new Format("DINJPHEN2A1", "200 mg / ml, 1 ml, amp. [fr:200 mg / ml, 1 ml, amp.]", Unit.MG)
+            new Format("DINJPHEN2A1", "200 mg / ml, 1 ml, amp. [fr:200 mg / ml, 1 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJPHEY", "PHENYTOIN sodium [fr:PHENYTOINE sodique]").withFormats(
-            new Format("DINJPHEY2A", "50 mg / ml, 5 ml, amp. [fr:50 mg / ml, 5 ml, amp.]", Unit.MG),
-            new Format("DINJPHEY2V", "50 mg / ml, 5 ml, vial [fr:50 mg / ml, 5 ml, fl.]", Unit.MG)
+            new Format("DINJPHEY2A", "50 mg / ml, 5 ml, amp. [fr:50 mg / ml, 5 ml, amp.]", Unit.ML),
+            new Format("DINJPHEY2V", "50 mg / ml, 5 ml, vial [fr:50 mg / ml, 5 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJPHLT", "PHLOROGLUCINOL / TRIMETHYLPHLOROGLUCINOL [fr:PHLOROGLUCINOL / TRIMETHYLPHLOROGLUCINOL]").withFormats(
-            new Format("DINJPHLT44A", "10 mg / ml / 10 µg / ml, 4 ml, amp. [fr:10 mg / ml / 10 µg / ml, 4 ml, amp.]", Unit.MG)
+            new Format("DINJPHLT44A", "10 mg / ml / 10 µg / ml, 4 ml, amp. [fr:10 mg / ml / 10 µg / ml, 4 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJPHYT", "PHYTOMENADIONE (vitamin K1) [fr:PHYTOMENADIONE (vitamine K1)]").withFormats(
             new Format("DINJPHYT2AN", "10 mg / ml (2 mg / 0.2 ml), 0.2 ml amp. [fr:10 mg / ml (2 mg / 0.2 ml), 0.2 ml amp.]", Unit.ML)
@@ -1311,26 +1311,26 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJPITA45V", "4 g / 500 mg, powder, vial for inf. [fr:4 g / 500 mg, poudre, fl. pour perf.]", Unit.MG)
         ),
         new Drug("DINJPOTC", "POTASSIUM chloride [fr:POTASSIUM chlorure]").withFormats(
-            new Format("DINJPOTC1A", "100 mg / ml, 10 ml, amp. [fr:100 mg / ml, 10 ml, amp.]", Unit.MG)
+            new Format("DINJPOTC1A", "100 mg / ml, 10 ml, amp. [fr:100 mg / ml, 10 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJPRAL", "PRALIDOXIME [fr:PRALIDOXIME]").withFormats(
             new Format("DINJPRAL2A1S", "2%, vial powder + amp. solvant, 10 ml. [fr:2% flacons poudre+ ampoules solvant, 10 ml.]", Unit.ML)
         ),
         new Drug("DINJPROM", "PROMETHAZINE hydrochloride [fr:PROMETHAZINE chlorhydrate]").withFormats(
-            new Format("DINJPROM2A", "eq. 25 mg / ml base, 1 ml, amp. [fr:éq. 25 mg / ml base, 1 ml, amp.]", Unit.MG),
-            new Format("DINJPROM5A", "eq. 25 mg / ml base, 2 ml, amp. [fr:éq. 25 mg / ml base, 2 ml, amp.]", Unit.MG)
+            new Format("DINJPROM2A", "eq. 25 mg / ml base, 1 ml, amp. [fr:éq. 25 mg / ml base, 1 ml, amp.]", Unit.ML),
+            new Format("DINJPROM5A", "eq. 25 mg / ml base, 2 ml, amp. [fr:éq. 25 mg / ml base, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJPROP", "PROPOFOL [fr:PROPOFOL]").withFormats(
-            new Format("DINJPROP2AE", "10 mg / ml, 20 ml, emulsion, amp. [fr:10 mg / ml, 20 ml, émulsion, amp.]", Unit.MG)
+            new Format("DINJPROP2AE", "10 mg / ml, 20 ml, emulsion, amp. [fr:10 mg / ml, 20 ml, émulsion, amp.]", Unit.ML)
         ),
         new Drug("DINJPROT", "PROTAMINE sulfate [fr:PROTAMINE sulfate]").withFormats(
-            new Format("DINJPROT5A", "10 mg / ml, 5 ml, amp. [fr:10 mg / ml, 5 ml, amp.]", Unit.MG)
+            new Format("DINJPROT5A", "10 mg / ml, 5 ml, amp. [fr:10 mg / ml, 5 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJRANI", "RANITIDINE [fr:RANITIDINE]").withFormats(
-            new Format("DINJRANI5A", "25 mg / ml, 2 ml, amp. [fr:25 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJRANI5A", "25 mg / ml, 2 ml, amp. [fr:25 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJRIBA", "RIBAVIRIN [fr:RIBAVIRINE]").withFormats(
-            new Format("DINJRIBA1A", "100 mg / ml, 12 ml, amp. [fr:100 mg / ml, 12 ml, amp.]", Unit.MG)
+            new Format("DINJRIBA1A", "100 mg / ml, 12 ml, amp. [fr:100 mg / ml, 12 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJRIFA", "RIFAMPICIN (R) [fr:RIFAMPICINE (R)]").withFormats(
             new Format("DINJRIFA6VS", "600 mg, powder, vial + solvent [fr:600 mg, poudre, fl. + solvant]", Unit.MG)
@@ -1351,8 +1351,8 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJSPEC2VS", "eq. 2 g base, powder, vial+SOLVENT [fr:éq. 2 g base, poudre, fl. + SOLVANT]", Unit.MG)
         ),
         new Drug("DINJSSGL", "SODIUM STIBOGLUCONATE, pentaval. antimony [fr:SODIUM STIBOGLUCONATE, antimoine pentaval.]").withFormats(
-            new Format("DINJSSGL1V1", "y 100 mg / ml 100 ml vial [fr:. 100 mg / ml 100 ml fl]", Unit.MG),
-            new Format("DINJSSGL1V3", "y 100 mg / ml, 30 ml vial [fr:. 100 mg / ml, 30 ml fl]", Unit.MG)
+            new Format("DINJSSGL1V1", "y 100 mg / ml 100 ml vial [fr:. 100 mg / ml 100 ml fl]", Unit.ML),
+            new Format("DINJSSGL1V3", "y 100 mg / ml, 30 ml vial [fr:. 100 mg / ml, 30 ml fl]", Unit.ML)
         ),
         new Drug("DINJSTRE", "STREPTOMYCIN sulfate [fr:STREPTOMYCINE sulfate]").withFormats(
             new Format("DINJSTRE1V", "eq. 1 g base, powder, vial [fr:éq. 1 g base, poudre, fl.]", Unit.MG)
@@ -1361,25 +1361,25 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJSTRK1V", "1.500.000 IU, powder, vial [fr:1.500.000 IU, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJSUXC", "SUXAMETHONIUM chloride [fr:SUXAMETHONIUM chlorure]").withFormats(
-            new Format("DINJSUXC1A", "50 mg / ml, 2 ml, amp. [fr:50 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJSUXC1A", "50 mg / ml, 2 ml, amp. [fr:50 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJTHIA", "THIAMINE (vitamin B1) [fr:THIAMINE (vitamine B1)]").withFormats(
-            new Format("DINJTHIA1A", "50 mg / ml, 2 ml, amp. [fr:50 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJTHIA1A", "50 mg / ml, 2 ml, amp. [fr:50 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJTHIO", "THIOPENTAL sodium [fr:THIOPENTAL sodique]").withFormats(
             new Format("DINJTHIO5V", "500 mg, powder, vial [fr:500 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJTRAM", "TRAMADOL hydrochloride [fr:TRAMADOL chlorhydrate]").withFormats(
-            new Format("DINJTRAM1A", "50 mg / ml, 2 ml, amp. [fr:50 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJTRAM1A", "50 mg / ml, 2 ml, amp. [fr:50 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJTRAN", "TRANEXAMIC ACID [fr:ACIDE TRANEXAMIQUE]").withFormats(
-            new Format("DINJTRAN5A", "100 mg / ml, 5 ml amp. [fr:100 mg / ml, 5 ml amp.]", Unit.MG)
+            new Format("DINJTRAN5A", "100 mg / ml, 5 ml amp. [fr:100 mg / ml, 5 ml amp.]", Unit.ML)
         ),
         new Drug("DINJUROK", "UROKINASE [fr:UROKINASE]").withFormats(
             new Format("DINJUROK1V", "100000 IU, powder, vial [fr:100000 UI, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJVALP", "VALPROATE SODIUM [fr:VALPROATE DE SODIUM]").withFormats(
-            new Format("DINJVALP4A", "100 mg / ml, 4 ml amp. [fr:100 mg / ml, 4 ml amp.]", Unit.MG)
+            new Format("DINJVALP4A", "100 mg / ml, 4 ml amp. [fr:100 mg / ml, 4 ml amp.]", Unit.ML)
         ),
         new Drug("DINJVANC", "VANCOMYCIN hydrocloride [fr:VANCOMYCINE]").withFormats(
             new Format("DINJVANC1V", "eq. 1 g base, powder, vial [fr:chlorydrate, éq. 1 g base, poudre, fl.]", Unit.MG),
@@ -1389,18 +1389,18 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJVECB1V", "10 mg, powder, vial [fr:10 mg, poudre, fl.]", Unit.MG)
         ),
         new Drug("DINJVERA", "VERAPAMIL hydrochloride [fr:VERAPAMIL chlorhydrate]").withFormats(
-            new Format("DINJVERA2A", "2.5 mg / ml, 2 ml, amp. [fr:2.5 mg / ml, 2 ml, amp.]", Unit.MG)
+            new Format("DINJVERA2A", "2.5 mg / ml, 2 ml, amp. [fr:2.5 mg / ml, 2 ml, amp.]", Unit.ML)
         ),
         new Drug("DINJVINC", "VINCRISTINE sulfate [fr:VINCRISTINE sulfate]").withFormats(
-            new Format("DINJVINC1V", "1 mg / ml, 1 ml, vial [fr:1 mg / ml, 1 ml, fl.]", Unit.MG),
-            new Format("DINJVINC2V", "1 mg / ml, 2 ml, vial [fr:1 mg / ml, 2 ml, fl.]", Unit.MG)
+            new Format("DINJVINC1V", "1 mg / ml, 1 ml, vial [fr:1 mg / ml, 1 ml, fl.]", Unit.ML),
+            new Format("DINJVINC2V", "1 mg / ml, 2 ml, vial [fr:1 mg / ml, 2 ml, fl.]", Unit.ML)
         ),
         new Drug("DINJWATE", "WATER for injection [fr:EAU pour injection]").withFormats(
-            new Format("DINJWATE1A", "10 ml, plastic amp. [fr:10 ml, amp. plastique]", Unit.MG)
+            new Format("DINJWATE1A", "10 ml, plastic amp. [fr:10 ml, amp. plastique]", Unit.ML)
         )
     );
 
-    Category PERFUSION = new Category("DINF", "perfusion", DosingType.QUANTITY_OVER_DURATION).withDrugs(
+    Category PERFUSION = new Category("DINF", "perfusion", true).withDrugs(
         new Drug("DINFDERI", "DEXTROSE (GLUCOSE) / RINGER LACTATE [fr:GLUCOSE / RINGER LACTATE]").withFormats(
             new Format("DINFDERI5FBF5", "GLUCOSE 5% + RL, 500 ml, flex. bag, PVC free [fr:GLUCOSE 5% + RL, 500 ml, poche souple, sans PVC]", Unit.ML),
             new Format("DINFDERIXX10", "GLUCOSE 10% + RL, prepared by hand (nonstandard) [fr:GLUCOSE 10% + RL, préparé à la main (non standard)]", Unit.ML)
@@ -1424,17 +1424,17 @@ public interface MsfCatalog extends Catalog {
             new Format("DINFMANN2FBF5", "20%, 500 ml, flex. bag, PVC free [fr:20%, 500 ml, poche souple, sans PVC]", Unit.ML)
         ),
         new Drug("DINFPLAS", "MODIFIED FLUID GELATIN / POLYGELIN [fr:PLASMA SUBSTITUT, gélatine]").withFormats(
-            new Format("DINFPLAS1FBF5", "500 ml, flex. bag, PVC free [fr:e, 500 ml, poche souple, ss PVC]", Unit.MG),
-            new Format("DINFPLAS1FBP5", "500 ml, flex. bag, PVC [fr:e, 500 ml, poche souple, PVC]", Unit.MG),
-            new Format("DINFPLAS1SRF5", "500 ml, semi-rigid bt, PVCfree [fr:e, 500 ml, fl. semi-rigide, ss PVC]", Unit.MG)
+            new Format("DINFPLAS1FBF5", "500 ml, flex. bag, PVC free [fr:e, 500 ml, poche souple, ss PVC]", Unit.ML),
+            new Format("DINFPLAS1FBP5", "500 ml, flex. bag, PVC [fr:e, 500 ml, poche souple, PVC]", Unit.ML),
+            new Format("DINFPLAS1SRF5", "500 ml, semi-rigid bt, PVCfree [fr:e, 500 ml, fl. semi-rigide, ss PVC]", Unit.ML)
         ),
         new Drug("DINFRINL", "RINGER lactate [fr:RINGER lactate]").withFormats(
             new Format("DINFRINL1FBF1", "1 l, flex. bag, PVC free [fr:1 l, poche souple, sans PVC]", Unit.MG),
-            new Format("DINFRINL1FBF5", "500 ml, flex. bag, PVC free [fr:500 m l, poche souple, sans PVC]", Unit.MG),
+            new Format("DINFRINL1FBF5", "500 ml, flex. bag, PVC free [fr:500 m l, poche souple, sans PVC]", Unit.ML),
             new Format("DINFRINL1FBP1", "1 l, flex. bag, PVC [fr:1 l, poche souple, PVC]", Unit.MG),
-            new Format("DINFRINL1FBP5", "500 ml, flex. bag, PVC [fr:500 m l, poche souple, PVC]", Unit.MG),
+            new Format("DINFRINL1FBP5", "500 ml, flex. bag, PVC [fr:500 m l, poche souple, PVC]", Unit.ML),
             new Format("DINFRINL1SRF1", "1 l, semi-rigid bot., PVC free [fr:1 l, fl. semi-rigide, sans PVC]", Unit.MG),
-            new Format("DINFRINL1SRF5", "500 ml, semi-rigid bot., PVC free [fr:500 ml, fl. semi-rigide, sans PVC]", Unit.MG)
+            new Format("DINFRINL1SRF5", "500 ml, semi-rigid bot., PVC free [fr:500 ml, fl. semi-rigide, sans PVC]", Unit.ML)
         ),
         new Drug("DINFSODC", "SODIUM chloride (NaCl) [fr:SODIUM chlorure (NaCl)]").withFormats(
             new Format("DINFSODC9FBF0", "0.9%, 100 ml, flex. bag, PVC free [fr:0.9%, 100 ml, poche souple, sans PVC]", Unit.ML),
@@ -1451,18 +1451,18 @@ public interface MsfCatalog extends Catalog {
             new Format("DINFSODC9SRF5", "0.9%, 500 ml, semi-rigid bot., PVC free [fr:0.9%, 500 ml, fl. semi-rigide, sans PVC]", Unit.ML)
         ),
         new Drug("DINFWATE", "WATER FOR INJECTION [fr:EAU POUR PREPARATION INJECTABLE]").withFormats(
-            new Format("DINFWATE1B1", "100 ml, bot. [fr:100 ml, fl.]", Unit.MG),
-            new Format("DINFWATE1FB05", "50 ml, flex. bag, PVC free [fr:50 ml, poche souple, ss PVC]", Unit.MG),
-            new Format("DINFWATE1FBF1", "100 ml, flex. bag, PVC free [fr:100 ml, poche souple, ss PVC]", Unit.MG),
-            new Format("DINFWATE1FBF2", "250 ml, flex. bag, PVC free [fr:250 ml, poche souple, ss PVC]", Unit.MG),
-            new Format("DINFWATE1FBP1", "100 ml, flex. bag, PVC [fr:100 ml, poche souple, PVC]", Unit.MG),
-            new Format("DINFWATE1FBP2", "250 ml, flex. bag, PVC [fr:250 ml, poche souple, PVC]", Unit.MG),
-            new Format("DINFWATE1SRF1", "100 ml, semi-rigid bot., PVC free [fr:100 ml, fl. semi-rigide, ss PVC]", Unit.MG),
-            new Format("DINFWATE1SRF2", "250 ml, semi-rigid bot., PVC free [fr:250 ml, fl. semi-rigide, ss PVC]", Unit.MG)
+            new Format("DINFWATE1B1", "100 ml, bot. [fr:100 ml, fl.]", Unit.ML),
+            new Format("DINFWATE1FB05", "50 ml, flex. bag, PVC free [fr:50 ml, poche souple, ss PVC]", Unit.ML),
+            new Format("DINFWATE1FBF1", "100 ml, flex. bag, PVC free [fr:100 ml, poche souple, ss PVC]", Unit.ML),
+            new Format("DINFWATE1FBF2", "250 ml, flex. bag, PVC free [fr:250 ml, poche souple, ss PVC]", Unit.ML),
+            new Format("DINFWATE1FBP1", "100 ml, flex. bag, PVC [fr:100 ml, poche souple, PVC]", Unit.ML),
+            new Format("DINFWATE1FBP2", "250 ml, flex. bag, PVC [fr:250 ml, poche souple, PVC]", Unit.ML),
+            new Format("DINFWATE1SRF1", "100 ml, semi-rigid bot., PVC free [fr:100 ml, fl. semi-rigide, ss PVC]", Unit.ML),
+            new Format("DINFWATE1SRF2", "250 ml, semi-rigid bot., PVC free [fr:250 ml, fl. semi-rigide, ss PVC]", Unit.ML)
         )
     );
 
-    Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY).withDrugs(
+    Category EXTERNAL = new Category("DEXT", "external", false).withDrugs(
         new Drug("DEXOACIV", "ACICLOVIR ophth. [fr:ACICLOVIR ophth.]").withFormats(
             new Format("DEXOACIV3T4", "3%, eye ointment, sterile, 4.5 g, tube [fr:3%, pommade ophtalmique, stérile, 4.5 g, tube]", Unit.ML)
         ),
@@ -1473,13 +1473,13 @@ public interface MsfCatalog extends Catalog {
             new Format("DEXOCHLO5D1", "0.5%, eye drops, sterile, 10 ml, bot. [fr:0.5%, collyre, stérile, 10 ml, fl.]", Unit.ML)
         ),
         new Drug("DEXODENP", "DEXAMETHASONE / NEOMYCIN / POLYMYXIN B [fr:DEXAMETHASONE / NEOMYCINE / POLYMYXINE B]").withFormats(
-            new Format("DEXODENP513D5", "DEXAMETHASONE5 mg / NEOMYCIN17500 IU / 30000 IU, eye drops, 5 ml [fr:DEXAMETHASONE5 mg / NEOMYCINE17500 UI / 30000 UI, collyre, 5 ml]", Unit.MG)
+            new Format("DEXODENP513D5", "DEXAMETHASONE5 mg / NEOMYCIN17500 IU / 30000 IU, eye drops, 5 ml [fr:DEXAMETHASONE5 mg / NEOMYCINE17500 UI / 30000 UI, collyre, 5 ml]", Unit.ML)
         ),
         new Drug("DEXODEXN", "DEXAMETHASONE / NEOMYCIN [fr:DEXAMETHASONE / NEOMYCINE]").withFormats(
-            new Format("DEXODEXN5D5", "5 mg / 17500 IU, eye drops, 5 ml, bot [fr:5 mg / 17500 UI, collyre, 5 ml, fl.]", Unit.MG)
+            new Format("DEXODEXN5D5", "5 mg / 17500 IU, eye drops, 5 ml, bot [fr:5 mg / 17500 UI, collyre, 5 ml, fl.]", Unit.ML)
         ),
         new Drug("DEXODEXT", "DEXAMETHASONE / TOBRAMYCIN [fr:DEXAMETHASONE / TOBRAMYCINE]").withFormats(
-            new Format("DEXODEXT51D", "5 mg / 15 mg, eye drops, 5 ml, bot [fr:5 mg / 15 mg, collyre, 5 ml, fl.]", Unit.MG)
+            new Format("DEXODEXT51D", "5 mg / 15 mg, eye drops, 5 ml, bot [fr:5 mg / 15 mg, collyre, 5 ml, fl.]", Unit.ML)
         ),
         new Drug("DEXOFLUO", "FLUORESCEIN [fr:FLUORESCEINE]").withFormats(
             new Format("DEXOFLUO1D4", "0.5%, eye drops, ster, 0.4 ml, unidose, amp. [fr:0.5%, collyre, stérile, 0.4 ml, unidose, amp.]", Unit.ML),
@@ -1515,12 +1515,12 @@ public interface MsfCatalog extends Catalog {
             new Format("DEXTACIV5C1", "5%, cream, 10 g, tube [fr:5%, crème, 10 g, tube]", Unit.ML)
         ),
         new Drug("DEXTALCD", "DENATURED ALCOHOL [fr:ALCOOL DENATURE]").withFormats(
-            new Format("DEXTALCDB5", "500 ml, bot. [fr:500 ml, fl.]", Unit.MG)
+            new Format("DEXTALCDB5", "500 ml, bot. [fr:500 ml, fl.]", Unit.ML)
         ),
         new Drug("DEXTALCO", "ALCOHOL-BASED HAND RUB [fr:HYDRO-ALCOOLIQUE]").withFormats(
-            new Format("DEXTALCO1G", "gel, 100 ml, bot. [fr:gel, 100 ml, fl.]", Unit.MG),
-            new Format("DEXTALCO3G", "gel, 30 ml, bot. [fr:gel, 30 ml, fl.]", Unit.MG),
-            new Format("DEXTALCO5S", "solution, 500 ml, bot. [fr:solution, 500 ml, fl.]", Unit.MG)
+            new Format("DEXTALCO1G", "gel, 100 ml, bot. [fr:gel, 100 ml, fl.]", Unit.ML),
+            new Format("DEXTALCO3G", "gel, 30 ml, bot. [fr:gel, 30 ml, fl.]", Unit.ML),
+            new Format("DEXTALCO5S", "solution, 500 ml, bot. [fr:solution, 500 ml, fl.]", Unit.ML)
         ),
         new Drug("DEXTANTH", "ANTIHAEMORROID [fr:ANTI HEMORROIDAIRE]").withFormats(
             new Format("DEXTANTH1C2", "cream, 25 g, tube [fr:crème, 25 g, tube]", Unit.MG),
@@ -1562,13 +1562,13 @@ public interface MsfCatalog extends Catalog {
             new Format("DEXTCLOT5T", "500 mg, vaginal tab. + applicator [fr:500 mg, comp. vaginal + applicateur]", Unit.TABLET)
         ),
         new Drug("DEXTCOLD", "COLD CREAM [fr:COLD CREAM]").withFormats(
-            new Format("DEXTCOLD1C", "cream, 1000 ml, jar [fr:crème, 1000 ml, pot]", Unit.MG)
+            new Format("DEXTCOLD1C", "cream, 1000 ml, jar [fr:crème, 1000 ml, pot]", Unit.ML)
         ),
         new Drug("DEXTDEET", "D. E. E. T. [fr:D. E. E. T.]").withFormats(
             new Format("DEXTDEET1C", "anti-mosquito repellent lotion, 30% [fr:lotion répulsive anti-moustique, 30%]", Unit.ML)
         ),
         new Drug("DEXTDIAZ", "DIAZEPAM [fr:DIAZEPAM]").withFormats(
-            new Format("DEXTDIAZ1RS", "4 mg / ml, rectal sol., 2.5 ml, tube [fr:4 mg / ml, sol. rectale, 2.5 ml, tube]", Unit.MG),
+            new Format("DEXTDIAZ1RS", "4 mg / ml, rectal sol., 2.5 ml, tube [fr:4 mg / ml, sol. rectale, 2.5 ml, tube]", Unit.ML),
             new Format("DEXTDIAZ2RS", "2 mg / 1 ml, rectal sol., 1.25 ml, tube [fr:2 mg / 1 ml, sol. rectale, 1.25 ml, tube]", Unit.ML)
         ),
         new Drug("DEXTDICL", "DICLOFENAC [fr:DICLOFENAC]").withFormats(
@@ -1578,7 +1578,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DEXTDINO1G", "1 mg, vaginal gel, sterile [fr:1 mg, gel vaginal stérile]", Unit.MG)
         ),
         new Drug("DEXTENEM", "ENEMA [fr:LAVEMENT]").withFormats(
-            new Format("DEXTENEM5RS", "rectal sol., 5 ml, tube [fr:sol. rectale, 5 ml, tube]", Unit.MG)
+            new Format("DEXTENEM5RS", "rectal sol., 5 ml, tube [fr:sol. rectale, 5 ml, tube]", Unit.ML)
         ),
         new Drug("DEXTFENT", "FENTANYL [fr:FENTANYL]").withFormats(
             new Format("DEXTFENT2TP", "2.1 mg / 5.25cm2, 12 μg / h, transdermal patch [fr:2.1 mg / 5.25cm2, 12 μg / h, dispositif transdermique]", Unit.MG),
@@ -1634,7 +1634,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DEXTMUPI2O1", "2%, ointment, 15 g, tube [fr:2%, pommade, 15 g, tube]", Unit.ML)
         ),
         new Drug("DEXTOFLO", "OFLOXACIN [fr:OFLOXACINE]").withFormats(
-            new Format("DEXTOFLO1S5", "3 mg / ml, ear sol., 0.5 ml, monodose [fr:3 mg / ml, sol. auriculaire, 0.5 ml, unidose]", Unit.MG)
+            new Format("DEXTOFLO1S5", "3 mg / ml, ear sol., 0.5 ml, monodose [fr:3 mg / ml, sol. auriculaire, 0.5 ml, unidose]", Unit.ML)
         ),
         new Drug("DEXTPARA", "PARACETAMOL (acetaminophen) [fr:PARACETAMOL (acétaminophène)]").withFormats(
             new Format("DEXTPARA12SU", "120 mg, suppository [fr:120 mg, suppositoire]", Unit.MG),
@@ -1668,39 +1668,39 @@ public interface MsfCatalog extends Catalog {
         )
     );
 
-    Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY).withDrugs(
+    Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", false).withDrugs(
         new Drug("DVACDTUB", "TUBERCULIN [fr:TUBERCULINE]").withFormats(
             new Format("DVACDTUB5T", "5 TU / 0.1 ml, multidose, 1 dose, vial. [fr:5 UI / 0.1 ml, multidose, 1 dose, fl.]", Unit.ML)
         ),
         new Drug("DVACIMAS", "IMMUNOGLOBULIN AFRICAN SNAKE ANTIVENOM [fr:IMMUNOGLOBULINE ANTIVENIN SERPENTS AFRICAINS]").withFormats(
             new Format("DVACIMAS2V", "EchiTab-Plus, vial [fr:EchiTab-Plus, fl]", Unit.MG),
-            new Format("DVACIMAS3A", "SAIMR, 10 ml amp. [fr:SAIMR, 10 ml amp]", Unit.MG)
+            new Format("DVACIMAS3A", "SAIMR, 10 ml amp. [fr:SAIMR, 10 ml amp]", Unit.ML)
         ),
         new Drug("DVACIMHB", "IMMUNOGLOBULIN HUMAN HEPATITIS B [fr:IMMUNOGLOBULINE HUMAINE HEPATITE B]").withFormats(
-            new Format("DVACIMHB1V", "180 IU / ml, 1 ml, vial [fr:180 UI / ml, 1 ml, fl.]", Unit.MG)
+            new Format("DVACIMHB1V", "180 IU / ml, 1 ml, vial [fr:180 UI / ml, 1 ml, fl.]", Unit.ML)
         ),
         new Drug("DVACIMHD", "IMMUNOGLOBULIN HUMAN anti-D [fr:IMMUNOGLOBULINE HUMAINE anti-D]").withFormats(
             new Format("DVACIMHD1S", "300 µg, syringe [fr:300 µg, seringue]", Unit.MG),
             new Format("DVACIMHD1V", "300 µg, powder + diluent, vial [fr:300 µg, poudre + solvant, fl.]", Unit.MG)
         ),
         new Drug("DVACIMHR", "IMMUNOGLOBULIN HUMAN ANTIRABIES [fr:IMMUNOGLOBULINE HUM.]").withFormats(
-            new Format("DVACIMHR3V", "150 UI / ml, 2 ml, vial [fr:ANTIRABIQUES, 150 UI / ml, 2 ml, fl.]", Unit.MG),
-            new Format("DVACIMHR3V1", "300 IU / ml, 1 ml, vial [fr:ANTIRABIQUE, 300 UI / ml, 1 ml, fl.]", Unit.MG),
-            new Format("DVACIMHR3V5", "300 IU / ml, 5 ml, vial [fr:ANTIRABIQUE, 300 UI / ml, 5 ml, fl.]", Unit.MG)
+            new Format("DVACIMHR3V", "150 UI / ml, 2 ml, vial [fr:ANTIRABIQUES, 150 UI / ml, 2 ml, fl.]", Unit.ML),
+            new Format("DVACIMHR3V1", "300 IU / ml, 1 ml, vial [fr:ANTIRABIQUE, 300 UI / ml, 1 ml, fl.]", Unit.ML),
+            new Format("DVACIMHR3V5", "300 IU / ml, 5 ml, vial [fr:ANTIRABIQUE, 300 UI / ml, 5 ml, fl.]", Unit.ML)
         ),
         new Drug("DVACIMPH", "IMMUNOGLOBULIN [fr:IMMUNOGLOBULINE]").withFormats(
-            new Format("DVACIMPH1V", "polyvalent, human, 0.1 g / ml, 100 ml, vial [fr:polyvalent, humaine, 0.1 g / ml, 100 ml, fl.]", Unit.MG)
+            new Format("DVACIMPH1V", "polyvalent, human, 0.1 g / ml, 100 ml, vial [fr:polyvalent, humaine, 0.1 g / ml, 100 ml, fl.]", Unit.ML)
         ),
         new Drug("DVACIMTE", "IMMUNOGLOBULIN HUMAN ANTITETANUS [fr:IMMUNOGLOBULINE HUM. ANTITETANIQUE]").withFormats(
             new Format("DVACIMTE2S", "250 IU / ml, syr. [fr:250 UI / ml, sering.]", Unit.MG)
         ),
         new Drug("DVACVBCG", "VACCINE BCG [fr:VACCIN BCG]").withFormats(
             new Format("DVACVBCG3SD", "DILUENT, 1 dose, multidose vial [fr:SOLVANT, 1 dose, multidose fl.]", Unit.MG),
-            new Format("DVACVBCG3VD", "1 dose, multidose vial, 0.05 ml / dose [fr:1 dose, fl. multidose, 0.05 ml / dose]", Unit.MG)
+            new Format("DVACVBCG3VD", "1 dose, multidose vial, 0.05 ml / dose [fr:1 dose, fl. multidose, 0.05 ml / dose]", Unit.ML)
         ),
         new Drug("DVACVCHO", "VACCINE CHOLERA, ORAL, monodose [fr:VACCIN CHOLERA, ORAL, monodose]").withFormats(
-            new Format("DVACVCHO1PT", "se, 1.5 ml, plastic tube [fr:se, 1.5 ml, tube plast.]", Unit.MG),
-            new Format("DVACVCHO1V", "se, 1.5 ml, vial [fr:se, 1.5 ml, fl]", Unit.MG)
+            new Format("DVACVCHO1PT", "se, 1.5 ml, plastic tube [fr:se, 1.5 ml, tube plast.]", Unit.ML),
+            new Format("DVACVCHO1V", "se, 1.5 ml, vial [fr:se, 1.5 ml, fl]", Unit.ML)
         ),
         new Drug("DVACVDHH", "VACCINE DPT / HEPATITIS B / Hib [fr:VACCIN DTC / HEPATITE B / Hib]").withFormats(
             new Format("DVACVDHH1VD", "1 dose, multidose vial [fr:1 dose, fl. multidose]", Unit.MG)
@@ -1709,7 +1709,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DVACVDTB1VD", "1 dose, multidose vial [fr:1 dose, fl. multid.]", Unit.MG)
         ),
         new Drug("DVACVENC", "VACCINE JAPANESE ENCEPHALITIS [fr:VACCIN ENCEPHALITE JAPONAISE]").withFormats(
-            new Format("DVACVENC1S", "monodose, syringe, 0.5 ml [fr:monodose, seringue, 0.5 ml]", Unit.MG)
+            new Format("DVACVENC1S", "monodose, syringe, 0.5 ml [fr:monodose, seringue, 0.5 ml]", Unit.ML)
         ),
         new Drug("DVACVHEA", "VACCINE HEPATITIS A [fr:VACCIN HEPATITE A]").withFormats(
             new Format("DVACVHEA1S", "1 dose, adult, monodose, syringe [fr:1 dose, adult, monodose, seringue]", Unit.MG)
@@ -1717,25 +1717,25 @@ public interface MsfCatalog extends Catalog {
         new Drug("DVACVHEB", "VACCINE HEPATITIS B [fr:VACCIN HEPATITE B]").withFormats(
             new Format("DVACVHEB1U", "1 adult dose, monodose, uniject [fr:1 dose adulte, monodose, uniject]", Unit.MG),
             new Format("DVACVHEB1VD", "1 adult dose, multidose vial [fr:1 dose adulte, fl. multidose]", Unit.MG),
-            new Format("DVACVHEB2V", "1 adult dose, monodose, 1 ml, vial [fr:1 dose adulte, monodose, 1 ml, fl.]", Unit.MG),
-            new Format("DVACVHEB3V", "1 child dose, monodose, 0.5 ml, vial [fr:1 dose enfant, monodose, 0.5 ml, fl.]", Unit.MG),
+            new Format("DVACVHEB2V", "1 adult dose, monodose, 1 ml, vial [fr:1 dose adulte, monodose, 1 ml, fl.]", Unit.ML),
+            new Format("DVACVHEB3V", "1 child dose, monodose, 0.5 ml, vial [fr:1 dose enfant, monodose, 0.5 ml, fl.]", Unit.ML),
             new Format("DVACVHEB3VD", "1 child dose, multidose vial [fr:1 dose enfant, fl. multidose]", Unit.MG)
         ),
         new Drug("DVACVHIB", "VACCINE HAEMOPHILUS INFLUENZAE type b [fr:VACCIN HAEMOPHILUS INFLUENZAE type b]").withFormats(
-            new Format("DVACVHIB1S", "monodose, 0.5 ml, syr. [fr:monodose, 0.5 ml, ser.]", Unit.MG)
+            new Format("DVACVHIB1S", "monodose, 0.5 ml, syr. [fr:monodose, 0.5 ml, ser.]", Unit.ML)
         ),
         new Drug("DVACVHPV", "VACCINE HPV [fr:VACCIN HPV]").withFormats(
-            new Format("DVACVHPV2V", "bivalent, monodose, 0.5 ml, vial [fr:bivalent, monodose, 0.5 ml, fl.]", Unit.MG),
-            new Format("DVACVHPV4V", "quadrivalent, monodose, 0.5 ml, vial [fr:quadrivalent, monodose, 0.5 ml, fl.]", Unit.MG)
+            new Format("DVACVHPV2V", "bivalent, monodose, 0.5 ml, vial [fr:bivalent, monodose, 0.5 ml, fl.]", Unit.ML),
+            new Format("DVACVHPV4V", "quadrivalent, monodose, 0.5 ml, vial [fr:quadrivalent, monodose, 0.5 ml, fl.]", Unit.ML)
         ),
         new Drug("DVACVMEA", "VACCINE MEASLES [fr:VACCIN ROUGEOLE]").withFormats(
             new Format("DVACVMEA2SD", "DILUENT, 1 dose, multidose vial [fr:SOLVANT, 1 dose, fl. multidose]", Unit.MG),
             new Format("DVACVMEA2VD", "1 dose, multidose vial [fr:1 dose, fl. multidose]", Unit.MG)
         ),
         new Drug("DVACVMEN", "VACCINE MENINGITIS [fr:VACCIN MENINGITE]").withFormats(
-            new Format("DVACVMEN1VWCJ", "MENINGITIS CJ A+C+W135+Y, monod. + dil. 0.5 ml (Menveo) [fr:MENINGITE CJ A+C+W135+Y, monod. + solv. 0.5 ml (Menveo)]", Unit.MG),
+            new Format("DVACVMEN1VWCJ", "MENINGITIS CJ A+C+W135+Y, monod. + dil. 0.5 ml (Menveo) [fr:MENINGITE CJ A+C+W135+Y, monod. + solv. 0.5 ml (Menveo)]", Unit.ML),
             new Format("DVACVMEN2VWCJ", "MENINGITIS CJ A+C+W135+Y, monod., vial (Menactra) [fr:MENINGITE CJ A+C+W135+Y, monod. fl. (Menactra)]", Unit.MG),
-            new Format("DVACVMEN3VWCJ", "MENINGITIS CJ A+C+W135+Y, monod. +dil. 0.5 ml (Nimenrix) [fr:MENINGITE CJ A+C+W135+Y, monod. +solv. 0.5 ml (Nimenrix)]", Unit.MG),
+            new Format("DVACVMEN3VWCJ", "MENINGITIS CJ A+C+W135+Y, monod. +dil. 0.5 ml (Nimenrix) [fr:MENINGITE CJ A+C+W135+Y, monod. +solv. 0.5 ml (Nimenrix)]", Unit.ML),
             new Format("DVACVMENA1SD", "MENINGOCOCCAL A CONJUGATE, 1-29years) DILUENT 1 dose, multidose v. [fr:MENINGOCOQUE A CONJUGUE, 1-29 ans) SOLVANT 1 dose, fl. multidose]", Unit.MG),
             new Format("DVACVMENA1VD", "MENINGOCOCCAL A CONJUGATE, 1-29years, 1dose, multid. v [fr:MENINGOCOQUE A CONJUGUE, 1-29 ans, 1dose, fl. multid.]", Unit.MG),
             new Format("DVACVMENA2SD", "MENINGOCOCCAL A CONJUGATE, 3-24months) DILUENT, 1 dose, multidose [fr:MENINGOCOQUE A CONJUGUE, 3-24 mois) SOLVANT, 1 dose, multidose]", Unit.MG),
@@ -1759,14 +1759,14 @@ public interface MsfCatalog extends Catalog {
         ),
         new Drug("DVACVPOI", "VACCINE POLIOMYELITIS, INACTIVATED [fr:VACCIN POLIO]").withFormats(
             new Format("DVACVPOI1VD", "D, 1 dose, multidose vial [fr:INACTIVE, 1 dose, fl. multidose]", Unit.MG),
-            new Format("DVACVPOI2S", "D, 0.5 ml, monodose syringe [fr:INACTIVE (IPV) inject, monodose, 0.5 ml, sering]", Unit.MG)
+            new Format("DVACVPOI2S", "D, 0.5 ml, monodose syringe [fr:INACTIVE (IPV) inject, monodose, 0.5 ml, sering]", Unit.ML)
         ),
         new Drug("DVACVPOL", "VACCINE POLIOMYELITIS, BIVALENT ORAL [fr:VACCIN POLIO, BIVALENT ORAL]").withFormats(
             new Format("DVACVPOL13BD", "L, 1 dose, multidose vial [fr:L, 1 dose, fl. multidose]", Unit.MG),
             new Format("DVACVPOL13DR", "L, DROPPER [fr:L, COMPTE-GOUTTE]", Unit.MG)
         ),
         new Drug("DVACVPPV", "VACCINE PNEUMOCOCCAL polysaccharide [fr:VACCIN PNEUMOCOQUE polysaccharide]").withFormats(
-            new Format("DVACVPPV23S", "23, monodose, 0.5 ml, syr. [fr:23, monodose, 0.5 ml, ser.]", Unit.MG)
+            new Format("DVACVPPV23S", "23, monodose, 0.5 ml, syr. [fr:23, monodose, 0.5 ml, ser.]", Unit.ML)
         ),
         new Drug("DVACVRAB", "VACCINE RABIES, CCV, cell culture, monodose [fr:VACCIN ANTIRABIQUE, VCC, culture cellulaire, monodose]").withFormats(
             new Format("DVACVRAB1V", "ose, vial [fr:ose, fl.]", Unit.MG),
@@ -1774,19 +1774,19 @@ public interface MsfCatalog extends Catalog {
             new Format("DVACVRAB3V", "ose, vial [fr:ose, fl.]", Unit.MG)
         ),
         new Drug("DVACVROT", "VACCINE ROTAVIRUS [fr:VACCIN ROTAVIRUS]").withFormats(
-            new Format("DVACVROT1T", "ORAL (Rotarix), monodose, 1.5 ml, tube [fr:ORAL (Rotarix), monodose, 1.5 ml, tube]", Unit.MG)
+            new Format("DVACVROT1T", "ORAL (Rotarix), monodose, 1.5 ml, tube [fr:ORAL (Rotarix), monodose, 1.5 ml, tube]", Unit.ML)
         ),
         new Drug("DVACVTET", "VACCINE TT (tetanus) [fr:VACCIN TT (tétanos)]").withFormats(
-            new Format("DVACVTET1S", "monodose, 0.5 ml, syringe [fr:monodose, 0.5 ml, seringue]", Unit.MG),
+            new Format("DVACVTET1S", "monodose, 0.5 ml, syringe [fr:monodose, 0.5 ml, seringue]", Unit.ML),
             new Format("DVACVTET1VD", "1 dose, multidose vial [fr:1 dose, fl. multidose]", Unit.MG)
         ),
         new Drug("DVACVTYP", "VACCINE TYPHOID [fr:VACCIN TYPHOIDIQUE]").withFormats(
-            new Format("DVACVTYP1S", "polysaccharide 25 µg, monodosis, 0.5 ml, syringe [fr:polyosidique 25 µg, monodose, 0.5 ml, seringue]", Unit.MG),
+            new Format("DVACVTYP1S", "polysaccharide 25 µg, monodosis, 0.5 ml, syringe [fr:polyosidique 25 µg, monodose, 0.5 ml, seringue]", Unit.ML),
             new Format("DVACVTYP2VD", "Typhim Vi, 1 dose, multidose vial [fr:Typhim Vi, 1 dose, fl. multidose]", Unit.MG),
             new Format("DVACVTYPC1VD", "CONJUGATE, 1dose, multidose vial [fr:CONJUGUE, 1 dose, fl. multidose]", Unit.MG)
         ),
         new Drug("DVACVYEF", "VACCINE YELLOW FEVER [fr:VACCIN FIEVRE JAUNE]").withFormats(
-            new Format("DVACVYEF1S", "monodose amp. + syr. solvent 0.5 ml [fr:monodose amp. + seringue solvant 0.5 ml]", Unit.MG),
+            new Format("DVACVYEF1S", "monodose amp. + syr. solvent 0.5 ml [fr:monodose amp. + seringue solvant 0.5 ml]", Unit.ML),
             new Format("DVACVYEF2SD", "DILUENT, 1 dose, multidose vial [fr:SOLVANT, 1 dose, fl. multidose]", Unit.MG),
             new Format("DVACVYEF2VD", "1 dose, multidose vial [fr:1 dose, fl. multidose]", Unit.MG)
         )
