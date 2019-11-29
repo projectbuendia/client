@@ -133,7 +133,6 @@
   <string name="once">Once</string>
   <string name="multiple_times">Multiple times</string>
 
-  <string name="order_one_dose_only">(one dose only)</string>
   <string name="order_start_now_indefinitely">(start now; continue indefinitely)</string>
   <string name="order_start_now_stop_after_doses">(start now; stop after %d doses)</string>
   <string name="order_start_now_after_doses_stop_date">(start now; after %1$d doses, stop %2$s)</string>

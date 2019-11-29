@@ -18,6 +18,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.method.KeyListener;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -75,6 +78,14 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
     // This should match the left/right padding in the TextViews in captioned_item.xml.
     private static final int ITEM_HORIZONTAL_PADDING = 12;
+
+    // This custom action mode callback disables the clipboard popup menu.
+    private static final ActionMode.Callback PASTE_DISABLED = new ActionMode.Callback() {
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) { return false; }
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) { return false; }
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) { return false; }
+        public void onDestroyActionMode(ActionMode mode) { }
+    };
 
     static class Args implements Serializable {
         String patientUuid;
@@ -159,6 +170,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     @Override public void onOpen() {
         v = new Views();
         drugKeyListener = v.drug.getKeyListener();
+        v.drug.setCustomSelectionActionModeCallback(PASTE_DISABLED);
 
         // Attach the MSF catalog to the UI.
         index = MsfCatalog.INDEX;
@@ -387,7 +399,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     /** Adds an "X" button to a text edit field. */
     private void addClearButton(final EditText view, int drawableId) {
         final Drawable icon = view.getResources().getDrawable(drawableId);
-        icon.setColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY);  // draw icon in black
+        icon.setColorFilter(0xff999999, PorterDuff.Mode.MULTIPLY);  // draw icon in grey
         final int iw = icon.getIntrinsicWidth();
         final int ih = icon.getIntrinsicHeight();
         icon.setBounds(0, 0, iw, ih);
@@ -551,7 +563,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         if (args.order == null) {
             v.scheduleDescription.setText(
                 timesPerDay == 0 || timesPerDay * days == 1 ?
-                    u.str(R.string.order_one_dose_only) :
+                    "" :
                 days == 0 ?
                     u.str(R.string.order_start_now_indefinitely) :
                 days == 1 ?
