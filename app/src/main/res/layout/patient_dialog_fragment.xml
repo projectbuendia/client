@@ -28,6 +28,7 @@
           android:text="@string/id_prefix" />
       <EditText
           android:id="@+id/patient_id_prefix"
+          android:textAllCaps="true"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:inputType="textCapCharacters"
@@ -81,6 +82,7 @@
           android:id="@+id/patient_family_name"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
+          android:textAllCaps="true"
           android:inputType="textCapCharacters"
           android:singleLine="true"
           android:nextFocusLeft="@id/patient_given_name"
