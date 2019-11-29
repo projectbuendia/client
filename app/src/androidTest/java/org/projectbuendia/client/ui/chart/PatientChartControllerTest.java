@@ -67,7 +67,7 @@ public final class PatientChartControllerTest {
     private static final Obs OBS_1 = new Obs(
         null, null, PATIENT_ID_1, null,
         ConceptUuids.ADMISSION_DATETIME_UUID, Datatype.DATETIME,
-        new DateTime(1568091838123L), null, "2019-01-01T02:03:04", ""
+        new DateTime(1568091838123L), null, "1546308184789", ""
     );
 
     private PatientChartController mController;
