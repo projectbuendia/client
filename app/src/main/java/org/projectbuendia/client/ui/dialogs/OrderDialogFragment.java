@@ -533,6 +533,8 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         Unit dosageUnit = activeFormat.dosageUnit;
         v.dosageUnit.setText(App.localize(
             dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
+        v.amountUnit.setText(getString(
+            R.string.order_volume_unit_in, App.localize(Unit.ML.terse)));
         v.durationUnit.setText(App.localize(Unit.HOUR.forCount(hours)));
         v.frequencyUnit.setText(App.localize(Unit.PER_DAY.forCount(timesPerDay)));
         v.seriesLengthUnit.setText(App.localize(Unit.DAY.forCount(days)));

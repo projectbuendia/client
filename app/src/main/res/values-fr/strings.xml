@@ -116,6 +116,7 @@
   <string name="order_drug">Méd.</string>
   <string name="order_format">Format</string>
   <string name="order_dosage">Dosage</string>
+  <string name="order_volume_unit_in">%s dans</string>
   <string name="order_route">Voie</string>
   <string name="order_is_series_prefix">À donner</string>
 
