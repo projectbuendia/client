@@ -225,7 +225,6 @@
         <TextView
             android:id="@+id/order_duration_unit"
             style="@style/inner_field_label"
-            android:text="@string/order_hours"
             />
 
       </LinearLayout>
@@ -240,7 +239,7 @@
 
       <TextView
           style="@style/field_label"
-          android:text="Give"
+          android:text="@string/order_is_series_prefix"
           android:labelFor="@id/order_is_series"
           />
 
@@ -294,7 +293,6 @@
         <TextView
             android:id="@+id/order_frequency_unit"
             style="@style/inner_field_label"
-            android:text="@string/order_times_per_day"
             android:labelFor="@id/order_frequency"
             />
 
@@ -331,7 +329,6 @@
         <TextView
             android:id="@+id/order_series_length_unit"
             style="@style/inner_field_label"
-            android:text="@string/order_days"
             />
 
       </LinearLayout>

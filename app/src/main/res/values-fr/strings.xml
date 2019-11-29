@@ -113,17 +113,17 @@
 
   <string name="title_new_order">Nouveau traitement</string>
   <string name="title_edit_order">Modifier traitement</string>
-  <string name="order_medication">Médicament</string>
+  <string name="order_drug">Méd.</string>
+  <string name="order_format">Format</string>
   <string name="order_dosage">Dosage</string>
   <string name="order_route">Voie</string>
-  <string name="order_frequency">Fréquence</string>
-  <string name="order_time_per_day">fois par jour</string>
-  <string name="order_times_per_day">fois par jour</string>
-  <string name="order_give_for">Donner pour</string>
-  <string name="order_days">jours</string>
-  <string name="order_day">jour</string>
+  <string name="order_is_series_prefix">À donner</string>
 
-  <string name="order_one_dose_only">(seul dose)</string>
+  <string name="amount_in_duration">%1$s dans %2$s</string>
+  <string name="once">Dose unique</string>
+  <string name="multiple_times">Plusieurs fois</string>
+
+  <string name="order_one_dose_only">(dose unique)</string>
   <string name="order_start_now_indefinitely">(commencer maintenant; continuer indéfiniment)</string>
   <string name="order_start_now_stop_after_doses">(commencer maintenant; arrêter après %d doses)</string>
   <string name="order_start_now_after_doses_stop_date">(commencer maintenant; après %1$d doses, arrêter %2$s)</string>
@@ -136,6 +136,9 @@
 
   <string name="order_notes">Remarques</string>
   <string name="enter_medication">Entrez le médicament</string>
+  <string name="enter_dosage">Entrez le dosage</string>
+  <string name="enter_duration">Entrez le duration</string>
+  <string name="enter_number">Entrez un numéro</string>
   <string name="order_give_for_days_cannot_be_zero">Doit être vide ou supérieure à 0</string>
   <string name="order_cannot_exceed_n_times_per_day">Ne peut pas dépasser %d fois par jour</string>
   <string name="order_cannot_exceed_n_days">Ne peut pas dépasser %d jours</string>

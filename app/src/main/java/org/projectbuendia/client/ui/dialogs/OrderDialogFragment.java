@@ -533,12 +533,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         Unit dosageUnit = activeFormat.dosageUnit;
         v.dosageUnit.setText(App.localize(
             dosage == 1 ? dosageUnit.singular : dosageUnit.plural));
-        v.durationUnit.setText(
-            hours == 1 ? R.string.order_hour : R.string.order_hours);
-        v.frequencyUnit.setText(
-            timesPerDay == 1 ? R.string.order_time_per_day : R.string.order_times_per_day);
-        v.seriesLengthUnit.setText(
-            days == 1 ? R.string.order_day : R.string.order_days);
+        v.durationUnit.setText(App.localize(Unit.HOUR.forCount(hours)));
+        v.frequencyUnit.setText(App.localize(Unit.PER_DAY.forCount(timesPerDay)));
+        v.seriesLengthUnit.setText(App.localize(Unit.DAY.forCount(days)));
 
         int doses = timesPerDay * days;
         String startDate = friendlyDateFormat(startDay);

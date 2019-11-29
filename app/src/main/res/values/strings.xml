@@ -120,14 +120,7 @@
   <string name="order_format">Format</string>
   <string name="order_dosage">Dosage</string>
   <string name="order_route">Route</string>
-  <string name="order_frequency_prefix">Give</string>
-  <string name="order_time_per_day">time per day</string>
-  <string name="order_times_per_day">times per day</string>
-  <string name="order_series_duration_prefix">For</string>
-  <string name="order_days">days</string>
-  <string name="order_day">day</string>
-  <string name="order_hours">hours</string>
-  <string name="order_hour">hour</string>
+  <string name="order_is_series_prefix">Give</string>
 
   <string name="oral_category">Oral</string>
   <string name="injectable_category">Injectable</string>
