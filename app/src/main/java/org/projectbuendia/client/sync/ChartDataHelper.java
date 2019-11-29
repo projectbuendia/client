@@ -80,6 +80,10 @@ public class ChartDataHelper {
         return orders;
     }
 
+    private static String formatInstant(long millis) {
+        DateTime dt = new DateTime(millis);
+        return Utils.formatUtc8601(dt).replace('T', ' ');
+    }
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
         String uuid = Utils.getString(c, Observations.UUID);
         String providerUuid = Utils.getString(c, Observations.PROVIDER_UUID);
@@ -90,7 +94,9 @@ public class ChartDataHelper {
         DateTime time = Utils.getDateTime(c, Observations.MILLIS);
         Datatype type = Datatype.valueOf(Utils.getString(c, Observations.TYPE));
         String value = Utils.getString(c, Observations.VALUE, "");
-        String valueName = type == Datatype.CODED ? concepts.getName(value, locale) : value;
+        String valueName = type == Datatype.CODED ? concepts.getName(value, locale)
+            : type == Datatype.DATETIME ? formatInstant(Long.valueOf(value))
+            : value;
         return new Obs(uuid, encounterUuid, patientUuid, providerUuid,
             conceptUuid, type, time, orderUuid, value, valueName);
     }

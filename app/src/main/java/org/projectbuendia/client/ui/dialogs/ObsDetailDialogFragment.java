@@ -9,14 +9,18 @@ import android.widget.CheckBox;
 
 import com.google.common.base.Joiner;
 
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
+import org.projectbuendia.client.json.Datatype;
 import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.client.models.ObsValue;
 import org.projectbuendia.client.sync.ConceptService;
 import org.projectbuendia.client.utils.Utils;
+import org.projectbuendia.client.utils.Utils.DateStyle;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -135,10 +139,15 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
     }
 
     private CharSequence formatValue(Obs obs) {
+        ObsValue value = obs.getObsValue();
+        String display =
+            obs.type == Datatype.DATE ? Utils.format(value.date, DateStyle.YEAR_MONTH_DAY) :
+            obs.type == Datatype.DATETIME ? Utils.format(new DateTime(value.instant), DateStyle.MONTH_DAY_HOUR_MINUTE) :
+            obs.valueName;
         return Html.fromHtml(
             "<span style='color: #33b5e5'>" + Utils.format(obs.time, HOUR_MINUTE)
                 + "</span>" + "&nbsp;&nbsp;&nbsp;"
-                + Html.escapeHtml(obs.valueName));
+                + Html.escapeHtml(display));
     }
 
     private void updateUi() {
