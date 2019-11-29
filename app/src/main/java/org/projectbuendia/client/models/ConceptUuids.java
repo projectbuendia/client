@@ -30,9 +30,8 @@ public class ConceptUuids {
         return Utils.expandUuid(id);
     }
 
-    // Dates shown as day numbers at top left.
-    public static final String FIRST_SYMPTOM_DATE_UUID = toUuid(1730);
-    public static final String ADMISSION_DATE_UUID = toUuid(162622);
+    // Date used for calculating "Day 1", "Day 2", etc. table headings.
+    public static final String ADMISSION_DATETIME_UUID = toUuid(1640);
 
     // Ebola lab test results shown in a fixed tile.
     public static final String PCR_NP_UUID = toUuid(162826);

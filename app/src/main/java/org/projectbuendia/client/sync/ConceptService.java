@@ -49,10 +49,6 @@ public class ConceptService {
         Map<String, Datatype> types = new HashMap<>();
         Map<String, Loc> names = new HashMap<>();
 
-        // Special case: these are dates even if no forms or charts mention them.
-        types.put(ConceptUuids.ADMISSION_DATE_UUID, Datatype.DATE);
-        types.put(ConceptUuids.FIRST_SYMPTOM_DATE_UUID, Datatype.DATE);
-
         try (Cursor c = resolver.query(Concepts.URI, null, null, null, null)) {
             while (c.moveToNext()) {
                 String uuid = Utils.getString(c, Concepts.UUID);

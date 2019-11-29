@@ -172,7 +172,7 @@ public class ChartRenderer {
         List<Order> mOrders;
         DateTime mNow;
         Column mNowColumn;
-        LocalDate mAdmissionDate;
+        DateTime mAdmissionDateTime;
 
         Map<String, ExecutionHistory> mExecutionHistories = new HashMap<String, ExecutionHistory>() {
             @Override public @NonNull ExecutionHistory get(Object key) {
@@ -192,8 +192,8 @@ public class ChartRenderer {
 
             mOrders = orders;
             mNow = DateTime.now();
-            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATE_UUID);
-            mAdmissionDate = obs != null ? Utils.toLocalDate(obs.value) : null;
+            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATETIME_UUID);
+            mAdmissionDateTime = obs != null ? new DateTime(Long.valueOf(obs.value)) : null;
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
             for (ChartSection section : chart.fixedGroups) {
@@ -336,7 +336,7 @@ public class ChartRenderer {
         }
 
         String formatDayNumber(LocalDate date) {
-            int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
+            int admitDay = Utils.dayNumberSince(mAdmissionDateTime.toLocalDate(), date);
             return (admitDay >= 1) ? mResources.getString(R.string.day_n, admitDay) : "";
         }
 

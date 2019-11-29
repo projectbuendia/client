@@ -185,8 +185,8 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             newPatient.observations = ImmutableList.of(
                 new JsonObservation(new Obs(
                     null, null, null, Utils.getProviderUuid(),
-                    ConceptUuids.ADMISSION_DATE_UUID, Datatype.DATE,
-                    now, null, LocalDate.now().toString(), ""
+                    ConceptUuids.ADMISSION_DATETIME_UUID, Datatype.DATETIME,
+                    now, null, "" + DateTime.now().getMillis(), ""
                 )),
                 new JsonObservation(new Obs(
                     null, null, null, Utils.getProviderUuid(),
