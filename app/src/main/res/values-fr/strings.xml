@@ -310,7 +310,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="syncing_patients">Synchronisation des patients…</string>
   <string name="syncing_concepts">Synchronisation des concepts…</string>
   <string name="syncing_charts">Synchronisation des graphiques…</string>
-  <string name="syncing_observations">Synchronisation observations…</string>
+  <string name="syncing_observations">Synchronisation des observations…</string>
   <string name="syncing_orders">Synchronisation des commandes…</string>
   <string name="syncing_forms">Synchronisation des formes…</string>
   <string name="syncing_locations">Synchronisation des emplacements…</string>
@@ -451,15 +451,15 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
 
   <!-- Observation details dialog -->
   <string name="obs_detail_title">Observations</string>
-  <string name="obs_detail_day">Toutes les observations enregistrée le %s:</string>
+  <string name="obs_detail_day">Toutes les observations enregistrées le %s:</string>
   <string name="obs_detail_day_empty">Aucune observation n\'a été enregistrée le %s.</string>
-  <string name="obs_detail_interval">Les observations enregistrée le %1$s entre %2$s et %3$s:</string>
+  <string name="obs_detail_interval">Les observations enregistrées le %1$s entre %2$s et %3$s:</string>
   <string name="obs_detail_interval_empty">Aucune observation n\'a été enregistrée le %1$s entre %2$s et %3$s.</string>
   <string name="obs_detail_concept">Toutes les observations de %s:</string>
   <string name="obs_detail_concept_empty">Aucune observation de %s n\'a été enregistrée.</string>
-  <string name="obs_detail_concept_day">Les observations de %1$s enregistrée le %2$s:</string>
+  <string name="obs_detail_concept_day">Les observations de %1$s enregistrées le %2$s:</string>
   <string name="obs_detail_concept_day_empty">Aucune observation de %1$s n\'a été enregistrée le %2$s.</string>
-  <string name="obs_detail_concept_interval">Les observations de %1$s enregistrée le %2$s entre %3$s et %4$s:</string>
+  <string name="obs_detail_concept_interval">Les observations de %1$s enregistrées le %2$s entre %3$s et %4$s:</string>
   <string name="obs_detail_concept_interval_empty">Aucune observation de %1$s n\'a été enregistrée le %2$s entre %3$s et %4$s.</string>
   <string name="delete_selected">Supprimer les sélectionnés</string>
 </resources>
