@@ -384,7 +384,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     @JavascriptInterface public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
-        DateTime start = Utils.toDateTime(startMillis);
+        DateTime start = Utils.toLocalDateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
         mUi.showOrderExecutionDialog(order, interval, getExecutions(orderUuid));
     }

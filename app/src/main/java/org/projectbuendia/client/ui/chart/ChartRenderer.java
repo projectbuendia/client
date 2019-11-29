@@ -194,7 +194,7 @@ public class ChartRenderer {
             mOrders = orders;
             mNow = DateTime.now();
             Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATETIME_UUID);
-            mAdmissionDateTime = obs != null ? new DateTime(Long.valueOf(obs.value)) : null;
+            mAdmissionDateTime = obs != null ? Utils.toLocalDateTime(Long.valueOf(obs.value)) : null;
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
             for (ChartSection section : chart.fixedGroups) {
@@ -304,7 +304,7 @@ public class ChartRenderer {
 
         /** Finds the segment that contains the given instant. */
         Pair<DateTime, DateTime> getSegmentBounds(ReadableInstant instant) {
-            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
+            LocalDate date = Utils.toLocalDateTime(instant).toLocalDate();  // a day in the local time zone
             DateTime[] fenceposts = getSegmentFenceposts(date);
             for (int i = 0; i + 1 < fenceposts.length; i++) {
                 if (!instant.isBefore(fenceposts[i]) && instant.isBefore(fenceposts[i + 1])) {
@@ -316,7 +316,7 @@ public class ChartRenderer {
 
         /** Gets the column for a given instant, creating columns for the whole day if needed. */
         Column getColumnContainingTime(ReadableInstant instant) {
-            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
+            LocalDate date = Utils.toLocalDateTime(instant).toLocalDate();  // a day in the local time zone
             Pair<DateTime, DateTime> bounds = getSegmentBounds(instant);
             long startMillis = bounds.first.getMillis();
             if (!mColumnsByStartMillis.containsKey(startMillis)) {
@@ -425,7 +425,7 @@ public class ChartRenderer {
         void insertEmptyColumns() {
             List<DateTime> starts = new ArrayList<>();
             for (Long startMillis : mColumnsByStartMillis.keySet()) {
-                starts.add(new DateTime(startMillis));
+                starts.add(Utils.toLocalDateTime(startMillis));
             }
             int maxEmptyColumns = 3 / getSegmentStartTimes().length;
             DateTime prev = starts.get(0);

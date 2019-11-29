@@ -27,7 +27,8 @@ import com.android.volley.NoConnectionError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
-import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.UpdateAvailableEvent;
 import org.projectbuendia.client.events.UpdateNotAvailableEvent;
@@ -75,7 +76,7 @@ public class UpdateManager {
     private final DownloadManager mDownloadManager;
     private final AppSettings mSettings;
 
-    private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
+    private Instant mLastCheckForUpdateTime = new Instant(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
 
     // TODO: Consider caching this in SharedPreferences OR standardizing the location of it
@@ -97,8 +98,9 @@ public class UpdateManager {
      * UpdateAvailableEvent and UpdateReadyToInstallEvent.
      */
     public void checkForUpdate() {
-        DateTime now = DateTime.now();
-        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(mSettings.getApkUpdateInterval()))) {
+        Instant now = Instant.now();
+        if (now.isBefore(mLastCheckForUpdateTime.plus(
+            new Duration(mSettings.getApkUpdateInterval() * 1000)))) {
             if (!isDownloadInProgress()) {
                 // This immediate check just updates the event state to match any current
                 // knowledge of an available or downloaded update.  The more interesting

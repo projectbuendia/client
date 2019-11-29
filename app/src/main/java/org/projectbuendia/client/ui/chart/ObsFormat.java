@@ -2,7 +2,6 @@ package org.projectbuendia.client.ui.chart;
 
 import org.apache.commons.text.ExtendedMessageFormat;
 import org.apache.commons.text.FormatFactory;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -333,7 +332,7 @@ public class ObsFormat extends Format {
             if (value == null) return EN_DASH;
             LocalDate date;
             if (value.instant != null) {
-                date = value.instant.toDateTime().toLocalDate();
+                date = Utils.toLocalDateTime(value.instant).toLocalDate();
             } else if (value.date != null) {
                 date = value.date;
             } else {
@@ -354,7 +353,7 @@ public class ObsFormat extends Format {
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
             if (value.instant == null) return TYPE_ERROR;
-            return new DateTime(value.instant).toString(mPattern);
+            return Utils.toLocalDateTime(value.instant).toString(mPattern);
         }
     }
 
@@ -368,7 +367,7 @@ public class ObsFormat extends Format {
             if (value == null) return EN_DASH;
             LocalDate date;
             if (value.instant != null) {
-                date = value.instant.toDateTime().toLocalDate();
+                date = Utils.toLocalDateTime(value.instant).toLocalDate();
             } else if (value.date != null) {
                 date = value.date;
             } else {

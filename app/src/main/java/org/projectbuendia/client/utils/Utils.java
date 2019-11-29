@@ -387,6 +387,16 @@ public class Utils {
         return date != null ? date.toString() : null;
     }
 
+    /** Creates a DateTime object in the default local time zone. */
+    public static @Nullable DateTime toLocalDateTime(@Nullable Long millis) {
+        return millis != null ? new DateTime(millis, DateTimeZone.getDefault()) : null;
+    }
+
+    /** Creates a DateTime object in the default local time zone. */
+    public static @Nullable DateTime toLocalDateTime(@Nullable ReadableInstant instant) {
+        return instant != null ? new DateTime(instant, DateTimeZone.getDefault()) : null;
+    }
+
     /** Converts a yyyy-mm-dd String or null to a nullable LocalDate. */
     public static @Nullable LocalDate toLocalDate(@Nullable String string) {
         try {
@@ -448,7 +458,7 @@ public class Utils {
 
     public static @Nullable String format(@Nullable DateTime datetime, DateStyle style) {
         if (datetime == null) return null;
-        return style.getFormatter().print(datetime.toLocalDateTime());
+        return style.getFormatter().print(datetime);
     }
 
     /** Gets the DateTime at the start of a day. */
@@ -584,7 +594,7 @@ public class Utils {
     /** Gets a nullable long value (in millis) from a cursor as a DateTime. */
     public static DateTime getDateTime(Cursor c, String columnName) {
         Long millis = getLong(c, columnName);
-        return millis == null ? null : new DateTime(millis);
+        return millis == null ? null : Utils.toLocalDateTime(millis);
     }
 
     /** Gets a nullable boolean value from a cursor. */
@@ -637,7 +647,7 @@ public class Utils {
     /** Gets a nullable DateTime value from a Bundle.  Always use this instead of getLong() directly. */
     public static DateTime getDateTime(Bundle bundle, String key) {
         // getLong never returns null; we have to check explicitly.
-        return bundle.containsKey(key) ? new DateTime(bundle.getLong(key)) : null;
+        return bundle.containsKey(key) ? Utils.toLocalDateTime(bundle.getLong(key)) : null;
     }
 
     /** Creates a Bundle containing one key-value pair. */

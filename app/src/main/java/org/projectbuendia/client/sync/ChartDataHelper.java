@@ -81,8 +81,7 @@ public class ChartDataHelper {
     }
 
     private static String formatInstant(long millis) {
-        DateTime dt = new DateTime(millis);
-        return Utils.formatUtc8601(dt).replace('T', ' ');
+        return Utils.formatUtc8601(new DateTime(millis)).replace('T', ' ');
     }
     private static Obs loadObs(Cursor c, Locale locale, ConceptService concepts) {
         String uuid = Utils.getString(c, Observations.UUID);
