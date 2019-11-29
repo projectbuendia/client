@@ -165,7 +165,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         index = MsfCatalog.INDEX;
         attachCategory(R.id.oral_category, MsfCatalog.ORAL);
         attachCategory(R.id.injectable_category, MsfCatalog.INJECTABLE);
-        attachCategory(R.id.infusible_category, MsfCatalog.INFUSIBLE);
+        attachCategory(R.id.infusible_category, MsfCatalog.PERFUSION);
         attachCategory(R.id.external_category, MsfCatalog.EXTERNAL);
         attachCategory(R.id.vaccine_category, MsfCatalog.VACCINE);
 
