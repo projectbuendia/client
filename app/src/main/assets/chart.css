@@ -16,6 +16,9 @@ body { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; 
 #grid-left { flex-grow: 0; }
 #grid-body { flex-grow: 1; overflow: scroll; position: relative; }
 
+/* Hide the ugly arrow buttons for now. */
+#buttons { display: none; }
+
 #buttons button {
   font-size: 3.2rem;
   -webkit-text-stroke: 0.2rem black;
