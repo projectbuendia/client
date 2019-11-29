@@ -51,6 +51,7 @@ import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
 
+import static org.projectbuendia.client.utils.Utils.EN_DASH;
 import static org.projectbuendia.client.utils.Utils.HOUR;
 import static org.projectbuendia.client.utils.Utils.eq;
 
@@ -172,7 +173,7 @@ public class ChartRenderer {
         List<Order> mOrders;
         DateTime mNow;
         Column mNowColumn;
-        LocalDate mAdmissionDate;
+        DateTime mAdmissionDateTime;
 
         Map<String, ExecutionHistory> mExecutionHistories = new HashMap<String, ExecutionHistory>() {
             @Override public @NonNull ExecutionHistory get(Object key) {
@@ -192,8 +193,8 @@ public class ChartRenderer {
 
             mOrders = orders;
             mNow = DateTime.now();
-            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATE_UUID);
-            mAdmissionDate = obs != null ? Utils.toLocalDate(obs.value) : null;
+            Obs obs = latestObservations.get(ConceptUuids.ADMISSION_DATETIME_UUID);
+            mAdmissionDateTime = obs != null ? Utils.toLocalDateTime(Long.valueOf(obs.value)) : null;
             mNowColumn = getColumnContainingTime(mNow); // ensure there's a column for today
 
             for (ChartSection section : chart.fixedGroups) {
@@ -303,7 +304,7 @@ public class ChartRenderer {
 
         /** Finds the segment that contains the given instant. */
         Pair<DateTime, DateTime> getSegmentBounds(ReadableInstant instant) {
-            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
+            LocalDate date = Utils.toLocalDateTime(instant).toLocalDate();  // a day in the local time zone
             DateTime[] fenceposts = getSegmentFenceposts(date);
             for (int i = 0; i + 1 < fenceposts.length; i++) {
                 if (!instant.isBefore(fenceposts[i]) && instant.isBefore(fenceposts[i + 1])) {
@@ -315,7 +316,7 @@ public class ChartRenderer {
 
         /** Gets the column for a given instant, creating columns for the whole day if needed. */
         Column getColumnContainingTime(ReadableInstant instant) {
-            LocalDate date = new DateTime(instant).toLocalDate();  // a day in the local time zone
+            LocalDate date = Utils.toLocalDateTime(instant).toLocalDate();  // a day in the local time zone
             Pair<DateTime, DateTime> bounds = getSegmentBounds(instant);
             long startMillis = bounds.first.getMillis();
             if (!mColumnsByStartMillis.containsKey(startMillis)) {
@@ -336,7 +337,8 @@ public class ChartRenderer {
         }
 
         String formatDayNumber(LocalDate date) {
-            int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
+            if (mAdmissionDateTime == null) return EN_DASH;
+            int admitDay = Utils.dayNumberSince(mAdmissionDateTime.toLocalDate(), date);
             return (admitDay >= 1) ? mResources.getString(R.string.day_n, admitDay) : "";
         }
 
@@ -423,7 +425,7 @@ public class ChartRenderer {
         void insertEmptyColumns() {
             List<DateTime> starts = new ArrayList<>();
             for (Long startMillis : mColumnsByStartMillis.keySet()) {
-                starts.add(new DateTime(startMillis));
+                starts.add(Utils.toLocalDateTime(startMillis));
             }
             int maxEmptyColumns = 3 / getSegmentStartTimes().length;
             DateTime prev = starts.get(0);

@@ -31,6 +31,8 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
+import org.projectbuendia.client.models.Catalog.Drug;
+import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.utils.Utils;
@@ -99,7 +101,7 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
         u.show(dialog.getButton(BUTTON_NEUTRAL), args.executions.size() > 0);
 
         // Show what was ordered and when the order started.
-        v.orderDescription.setText(Html.fromHtml(describeOrderHtml(args.order)));
+        v.orderDescription.setText(Html.fromHtml(describeOrderHtml(args.order.instructions)));
         v.orderStartTime.setText(getString(
             R.string.order_started_datetime,
             Utils.format(args.order.start, Utils.DateStyle.SENTENCE_MONTH_DAY_HOUR_MINUTE)));
@@ -178,22 +180,21 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
     }
 
     /** Constructs an HTML description of the order. */
-    private String describeOrderHtml(Order order) {
-        String htmlDescription = toBoldHtml(getString(
-            R.string.order_medication_route,
-            order.instructions.medication,
-            order.instructions.route
-        ));
-        String dosage = order.instructions.dosage;
-        if (Utils.isBlank(dosage)) {
-            dosage = u.str(R.string.order_unspecified_dosage);
-        }
-        htmlDescription += "<br>" + toHtml(getString(
-            order.isSeries() ? R.string.order_dosage_series : R.string.order_dosage_unary,
-            dosage, order.instructions.frequency
-        ));
-        if (!Utils.isBlank(order.instructions.notes)) {
-            htmlDescription += "<br>" + toItalicHtml(order.instructions.notes);
+    private String describeOrderHtml(Order.Instructions instr) {
+        Drug drug = MsfCatalog.INDEX.getDrug(instr.code);
+        String dosage = instr.amount != null ? (
+            instr.duration != null ? u.str(
+                R.string.amount_in_duration,
+                instr.amount.formatLong(2), instr.duration.formatLong(2)
+            ) : instr.amount.formatLong(2)
+        ) : u.str(R.string.order_unspecified_dosage);
+        String htmlDescription = toBoldHtml(instr.getDrugName()) + "<br>" + toHtml(
+            instr.isSeries()
+                ? getString(R.string.order_dosage_series, dosage, Utils.format(instr.frequency.mag, 2))
+                : getString(R.string.order_dosage_unary, dosage)
+        );
+        if (!Utils.isBlank(instr.notes)) {
+            htmlDescription += "<br>" + toItalicHtml(instr.notes);
         }
         return htmlDescription;
     }

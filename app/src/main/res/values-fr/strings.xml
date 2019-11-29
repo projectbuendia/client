@@ -113,17 +113,17 @@
 
   <string name="title_new_order">Nouveau traitement</string>
   <string name="title_edit_order">Modifier traitement</string>
-  <string name="order_medication">Médicament</string>
+  <string name="order_drug">Méd.</string>
+  <string name="order_format">Format</string>
   <string name="order_dosage">Dosage</string>
   <string name="order_route">Voie</string>
-  <string name="order_frequency">Fréquence</string>
-  <string name="order_time_per_day">fois par jour</string>
-  <string name="order_times_per_day">fois par jour</string>
-  <string name="order_give_for">Donner pour</string>
-  <string name="order_give_for_days">jours</string>
-  <string name="order_give_for_day">jour</string>
+  <string name="order_is_series_prefix">À donner</string>
 
-  <string name="order_one_dose_only">(seul dose)</string>
+  <string name="amount_in_duration">%1$s dans %2$s</string>
+  <string name="once">Dose unique</string>
+  <string name="multiple_times">Plusieurs fois</string>
+
+  <string name="order_one_dose_only">(dose unique)</string>
   <string name="order_start_now_indefinitely">(commencer maintenant; continuer indéfiniment)</string>
   <string name="order_start_now_stop_after_doses">(commencer maintenant; arrêter après %d doses)</string>
   <string name="order_start_now_after_doses_stop_date">(commencer maintenant; après %1$d doses, arrêter %2$s)</string>
@@ -136,6 +136,9 @@
 
   <string name="order_notes">Remarques</string>
   <string name="enter_medication">Entrez le médicament</string>
+  <string name="enter_dosage">Entrez le dosage</string>
+  <string name="enter_duration">Entrez le duration</string>
+  <string name="enter_number">Entrez un numéro</string>
   <string name="order_give_for_days_cannot_be_zero">Doit être vide ou supérieure à 0</string>
   <string name="order_cannot_exceed_n_times_per_day">Ne peut pas dépasser %d fois par jour</string>
   <string name="order_cannot_exceed_n_days">Ne peut pas dépasser %d jours</string>
@@ -150,11 +153,11 @@
   <string name="route_of_administration">Voie d\'administration</string>
 
   <string name="order_execution_title">L\'historique de traitement pour %s</string>
-  <string name="order_medication_route">%1$s %2$s</string>
   <string name="order_dosage_unary">%1$s</string>
-  <string name="order_dosage_series">%1$s, donné %2$d fois par jour</string>
+  <string name="order_dosage_series">%1$s, donné %2$s fois par jour</string>
   <string name="order_unspecified_dosage">Dosage non spécifié</string>
   <string name="order_frequency_value">%1$dx/jour</string>
+  <string name="order_series_duration_prefix">Pour</string>
   <string name="order_execution_historical_singular_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois %2$s</string>
   <string name="order_execution_historical_plural_html">Donné &lt;b&gt;%1$d&lt;/b&gt; fois %2$s</string>
   <string name="order_execution_today_singular_html">Donné &lt;b&gt;une&lt;/b&gt; fois aujourd\'hui</string>
@@ -162,6 +165,12 @@
   <string name="order_execution_mark_as_given_now">Marquer comme donné maintenant</string>
   <string name="order_execution_marked_as_given_now">&#x2713; Marqué comme donné maintenant</string>
   <string name="order_started_datetime">Commencé %s</string>
+
+  <string name="oral_category">Orale</string>
+  <string name="injectable_category">Injectable</string>
+  <string name="infusible_category">Perfusion</string>
+  <string name="external_category">External</string>
+  <string name="vaccine_category_abbr">Vaccin</string>
 
   <string name="string_with_paren">%1$s (%2$s)</string>
   <string name="unknown_tent">Tente inconnu</string>
@@ -281,7 +290,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="api_health_problem">Impossible de contacter le serveur. SVP voir la barre du bas de l\'écran pour plus d\'informations.</string>
   <string name="sync_failed_back">Arrière</string>
   <string name="no_user">Aucun utilisateur n\'est connecté.</string>
-  <string name="signed_out">Déconnecté.</string>
+  <string name="idle_signed_out">Déconnecté en raison de l\'inactivité.</string>
   <string name="no_location">Aucune information des lieux n\'a encore été chargée.</string>
   <string name="encounter_add_failed_unknown_reason">Erreur inconnue</string>
   <string name="encounter_add_failed_unknown_server_error">Erreur inconnue sur le serveur.</string>
@@ -301,7 +310,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="syncing_patients">Synchronisation des patients…</string>
   <string name="syncing_concepts">Synchronisation des concepts…</string>
   <string name="syncing_charts">Synchronisation des graphiques…</string>
-  <string name="syncing_observations">Synchronisation observations…</string>
+  <string name="syncing_observations">Synchronisation des observations…</string>
   <string name="syncing_orders">Synchronisation des commandes…</string>
   <string name="syncing_forms">Synchronisation des formes…</string>
   <string name="syncing_locations">Synchronisation des emplacements…</string>
@@ -442,15 +451,15 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
 
   <!-- Observation details dialog -->
   <string name="obs_detail_title">Observations</string>
-  <string name="obs_detail_day">Toutes les observations enregistrée le %s:</string>
+  <string name="obs_detail_day">Toutes les observations enregistrées le %s:</string>
   <string name="obs_detail_day_empty">Aucune observation n\'a été enregistrée le %s.</string>
-  <string name="obs_detail_interval">Les observations enregistrée le %1$s entre %2$s et %3$s:</string>
+  <string name="obs_detail_interval">Les observations enregistrées le %1$s entre %2$s et %3$s:</string>
   <string name="obs_detail_interval_empty">Aucune observation n\'a été enregistrée le %1$s entre %2$s et %3$s.</string>
   <string name="obs_detail_concept">Toutes les observations de %s:</string>
   <string name="obs_detail_concept_empty">Aucune observation de %s n\'a été enregistrée.</string>
-  <string name="obs_detail_concept_day">Les observations de %1$s enregistrée le %2$s:</string>
+  <string name="obs_detail_concept_day">Les observations de %1$s enregistrées le %2$s:</string>
   <string name="obs_detail_concept_day_empty">Aucune observation de %1$s n\'a été enregistrée le %2$s.</string>
-  <string name="obs_detail_concept_interval">Les observations de %1$s enregistrée le %2$s entre %3$s et %4$s:</string>
+  <string name="obs_detail_concept_interval">Les observations de %1$s enregistrées le %2$s entre %3$s et %4$s:</string>
   <string name="obs_detail_concept_interval_empty">Aucune observation de %1$s n\'a été enregistrée le %2$s entre %3$s et %4$s.</string>
   <string name="delete_selected">Supprimer les sélectionnés</string>
 </resources>

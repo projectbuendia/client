@@ -23,9 +23,9 @@ import android.widget.TextView;
  */
 public class WrappingRadioGroup extends RadioGroup {
     /** Padding between container and radio buttons. */
-    public static final int PADDING = 20;
+    public static final int PADDING = 0;
     /** Padding between radio buttons. */
-    public static final int BUTTON_PADDING = 7;
+    public static final int BUTTON_PADDING = 8;
 
     public WrappingRadioGroup(Context context) {
         super(context);

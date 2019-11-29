@@ -49,8 +49,8 @@ import static org.projectbuendia.client.utils.Utils.eq;
 /** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class LoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
-    private static final Duration IDLE_AUTO_LOGOUT_DURATION = Duration.standardMinutes(15);
-    private static final Duration DOCKED_AUTO_LOGOUT_DURATION = Duration.ZERO; // log out immediately
+    private static final Duration UNDOCKED_AUTOLOGOUT_IDLE_DURATION = Duration.standardMinutes(10);
+    private static final Duration DOCKED_AUTOLOGOUT_IDLE_DURATION = Duration.standardSeconds(30);
 
     private JsonUser mLastActiveUser;
     private Menu mMenu;
@@ -202,10 +202,12 @@ public abstract class LoggedInActivity extends BaseActivity {
     protected void onTick() {
         Duration idle = getIdleDuration();
         Duration docked = batteryWatcher.getDockedDuration();
-        if (docked.isLongerThan(DOCKED_AUTO_LOGOUT_DURATION) ||
-            idle.isLongerThan(IDLE_AUTO_LOGOUT_DURATION)) {
+        Duration idleLimit = batteryWatcher.isDocked() ?
+            DOCKED_AUTOLOGOUT_IDLE_DURATION :
+            UNDOCKED_AUTOLOGOUT_IDLE_DURATION;
+        if (idle.isLongerThan(idleLimit)) {
             LOG.i("Auto logout (idle for %s, docked for %s)", idle, docked);
-            BigToast.show(R.string.signed_out);
+            BigToast.show(R.string.idle_signed_out);
             Utils.jumpToActivity(this, LoginActivity.class);
         }
     }

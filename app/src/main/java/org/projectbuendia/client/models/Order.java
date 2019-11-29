@@ -24,18 +24,18 @@ import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.JsonOrder;
+import org.projectbuendia.client.models.Catalog.Drug;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.Immutable;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /**
  * An order for a scheduled treatment.
@@ -55,15 +55,13 @@ import javax.annotation.concurrent.Immutable;
  * the divisions that contain or come after the start time but do not contain or
  * come after the stop time.  Note that the divisions (and hence the dose intervals)
  * for a given order are not necessarily of uniform length, because certain days
- * are longer or shorter than 24 hours.
+ * are longer or shorter than 24 hours.  Also note that the first dose interval
+ * does not end at a fixed length of time after the start time, because divisions
+ * are aligned to the day, not to the start time.
  *
- * The OpenMRS Order data type has no fields for medication, dosage, or frequency;
- * our hack to get around this is to format these three fields into one string
- * that is stored in the "instructions" field.  This string is designed to be
- * human-readable (e.g. "Paracetamol 500 mg 3x daily") but also unambiguous to
- * parse (e.g. everything up to the first space is the medication name; in a
- * multi-word medication name, there are non-breaking spaces betwen the words
- * instead of regular spaces).
+ * The OpenMRS Order data type has no fields for the drug, dosage, or frequency;
+ * our hack to get around this is to format these fields into one string that
+ * is stored in the "instructions" field.
  */
 public final @Immutable class Order extends Model implements Serializable {
     public static final char NON_BREAKING_SPACE = '\u00a0';
@@ -71,6 +69,7 @@ public final @Immutable class Order extends Model implements Serializable {
     public final String patientUuid;
     public final String providerUuid;
     public final Instructions instructions;
+    // TODO(ping): Data model time fields should be Instants instead of DateTimes.
     public final DateTime start;
     public final @Nullable DateTime stop;  // null if unary, non-null if series
 
@@ -113,13 +112,17 @@ public final @Immutable class Order extends Model implements Serializable {
         String instructionsText, Long startMillis, @Nullable Long stopMillis) {
         this(
             uuid, patientUuid, providerUuid, instructionsText,
-            new DateTime(startMillis),
-            stopMillis != null ? new DateTime(stopMillis) : null
+            Utils.toLocalDateTime(startMillis),
+            stopMillis != null ? Utils.toLocalDateTime(stopMillis) : null
         );
     }
 
+    public boolean isContinuous() {
+        return instructions.isContinuous();
+    }
+
     public boolean isSeries() {
-        return instructions.frequency > 0;
+        return instructions.isSeries();
     }
 
     public Interval getInterval() {
@@ -182,7 +185,13 @@ public final @Immutable class Order extends Model implements Serializable {
 
     /** Returns the number of divisions per day (always positive, 1 for a unary order). */
     public int getNumDivisionsPerDay() {
-        return instructions.frequency == 0 ? 1 : instructions.frequency;
+        Quantity freq = instructions.frequency;
+        if (freq != null) {
+            if (freq.unit == Unit.get("PER_DAY") || freq.unit == Unit.UNSPECIFIED) {
+                return (int) freq.mag;
+            }
+        }
+        return 1;
     }
 
     /** Returns all the scheduled dose intervals for this order on a given day. */
@@ -235,11 +244,11 @@ public final @Immutable class Order extends Model implements Serializable {
         // equals() method to decide whether to re-render the chart grid.
         if (other instanceof Order) {
             Order o = (Order) other;
-            return Objects.equals(uuid, o.uuid)
-                && Objects.equals(patientUuid, o.patientUuid)
-                && Objects.equals(instructions, o.instructions)
-                && Objects.equals(start, o.start)
-                && Objects.equals(stop, o.stop);
+            return eq(uuid, o.uuid)
+                && eq(patientUuid, o.patientUuid)
+                && eq(instructions, o.instructions)
+                && eq(start, o.start)
+                && eq(stop, o.stop);
         }
         return false;
     }
@@ -270,15 +279,16 @@ public final @Immutable class Order extends Model implements Serializable {
      * An OpenMRS Order does not have any of these specific fields; rather, it
      * only has a string field called "instructions".  Our workaround is for the
      * Instructions class to know how to pack these fields into a single String,
-     * in a way that is human-readable and can also be unambiguously unpacked
-     * into the original fields.
+     * in a way that is vaguely human-readable and can also be unambiguously
+     * unpacked into the original fields.
      */
     public static class Instructions implements Serializable {
-        // These String fields are empty if missing, but never null.
-        public final @NonNull String medication;
-        public final @NonNull String route;
-        public final @NonNull String dosage;
-        public final int frequency;  // == 0 if unary, > 0 if series
+        // All String fields are empty if missing, but never null.
+        public final @NonNull String code;  // drug or format code (or free-text name)
+        public final Quantity amount;  // amount of drug (mass or volume)
+        public final Quantity duration;  // duration of administration, if continuously administered
+        public final @NonNull String route;  // route code
+        public final Quantity frequency;  // frequency of repeats, if a series order
         public final @NonNull String notes;
 
         // ASCII 30 is the "record separator" character; it renders as a space.
@@ -287,22 +297,12 @@ public final @Immutable class Order extends Model implements Serializable {
         // ASCII 31 is the "unit separator" character; it renders as a space.
         public static final String US = "\u001f";
 
-        // This pattern unpacks the output of a previous implementation of
-        // Instructions.format() that did not use the ASCII 31 (unit separator)
-        // character to separate the fields.  The part before the first space
-        // is the medication (with spaces replaced by non-breaking spaces),
-        // followed by the dosage, and optionally a frequency consisting of a
-        // number followed by "x".
-        public static final Pattern OLD_PATTERN = Pattern.compile(
-            "([^ ]*) (.*) ([0-9]+)x .*"  // example: "Paracetamol 500 mg 3x daily"
-                + "|" +
-                "([^ ]*) ?(.*)");  // example: "Prednisone 1 L 10 mg/L"
-
-        public Instructions(String medication, String route, String dosage, int frequency, String notes) {
-            this.medication = Utils.toNonnull(medication);
+        public Instructions(String code, Quantity amount, Quantity duration, String route, Quantity frequency, String notes) {
+            this.code = Utils.toNonnull(code);
+            this.amount = amount;
+            this.duration = duration;
             this.route = Utils.toNonnull(route);
-            this.dosage = Utils.toNonnull(dosage);
-            this.frequency = frequency > 0 ? frequency : 0;
+            this.frequency = frequency;
             this.notes = Utils.toNonnull(notes);
         }
 
@@ -310,55 +310,73 @@ public final @Immutable class Order extends Model implements Serializable {
             // Instructions are serialized to a String consisting of records
             // separated by RS, and fields within those records separated by US.
             // The records and fields within them are as follows:
-            //   - Record 0: medication, route
-            //   - Record 1: dosage, unit, concentration, unit
-            //   - Record 2: frequency, unit
+            //   - Record 0: code, route
+            //   - Record 1: amount, amount unit, duration, duration unit
+            //   - Record 2: frequency, frequency unit
             //   - Record 3: notes
             String[] records = Utils.splitFields(instructionsText, RS, 4);
 
-            // Medication
+            // Drug and route
             String[] fields = Utils.splitFields(records[0], US, 2);
-            medication = fields[0].trim();
+            code = fields[0].trim();
             route = fields[1].trim();
 
             // Dosage
-            fields = Utils.splitFields(records[1], US, 2);
-            dosage = fields[0].trim();
-            // TODO(ping): Support dosage units and concentration.
+            fields = Utils.splitFields(records[1], US, 4);
+            Quantity q = new Quantity(
+                Utils.toDoubleOrDefault(fields[0], 0), Unit.get(fields[1]));
+            amount = q.mag != 0 ? q : null;
+            q = new Quantity(
+                Utils.toDoubleOrDefault(fields[2], 0), Unit.get(fields[3]));
+            duration = q.mag != 0 ? q : null;
 
             // Frequency
             fields = Utils.splitFields(records[2], US, 2);
-            frequency = Utils.toIntOrDefault(fields[0].trim(), 0);
-            // TODO(ping): Support frequency units (currently "per day" is assumed).
+            q = new Quantity(
+                Utils.toDoubleOrDefault(fields[0], 0), Unit.get(fields[1]));
+            frequency = q.mag != 0 ? q : null;
 
             // Notes
             fields = Utils.splitFields(records[3], US, 2);
             notes = fields[0].trim();
         }
 
-        /** Packs medication, dosage, and frequency into a single instruction string. */
+        /** Packs all the fields into a single instruction string. */
         public String format() {
-            return (medication + US + route)
-                + RS + (dosage)
-                + RS + (frequency > 0 ? (frequency + US + "x daily") : "")
-                + RS + (notes)
-                + RS + US + US + ".";
+            return (code + US + route)
+                + RS + (formatFields(amount) + US + formatFields(duration))
+                + RS + (formatFields(frequency))
+                + RS + (notes);
         }
 
-        public String getFormattedFrequency() {
-            return frequency != 0 ? App.str(R.string.order_frequency_value, frequency) : "";
+        private String formatFields(Quantity q) {
+            return q != null ? Utils.format(q.mag, 6) + US + q.unit : "";
+        }
+
+        public boolean isContinuous() {
+            return duration != null;
+        }
+
+        public boolean isSeries() {
+            return frequency != null;
         }
 
         public boolean equals(Object other) {
             if (other instanceof Instructions) {
                 Instructions o = (Instructions) other;
-                return Objects.equals(medication, o.medication)
-                    && Objects.equals(route, o.route)
-                    && Objects.equals(dosage, o.dosage)
-                    && Objects.equals(frequency, o.frequency)
-                    && Objects.equals(notes, o.notes);
+                return eq(code, o.code)
+                    && eq(amount, o.amount)
+                    && eq(duration, o.duration)
+                    && eq(route, o.route)
+                    && eq(frequency, o.frequency)
+                    && eq(notes, o.notes);
             }
             return false;
+        }
+
+        public String getDrugName() {
+            Drug drug = MsfCatalog.INDEX.getDrug(code);
+            return eq(drug, Drug.UNSPECIFIED) ? code : App.localize(drug.name);
         }
     }
 }

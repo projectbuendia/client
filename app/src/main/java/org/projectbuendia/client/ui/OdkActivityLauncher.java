@@ -622,8 +622,11 @@ public class OdkActivityLauncher {
 
                 Object answerObject = answer.getValue();
                 String value;
-                if ("CWE".equals(openmrsDatatype.getValue().getValue())) {
+                Object typeCode = openmrsDatatype.getValue().getValue();
+                if ("CWE".equals(typeCode)) {
                     value = getConceptId(xformConceptIdsAccumulator, answerObject.toString()).toString();
+                } else if ("TS".equals(typeCode)) {
+                    value = "" + DateTime.parse(answerObject.toString()).getMillis();
                 } else {
                     value = answerObject.toString();
                 }

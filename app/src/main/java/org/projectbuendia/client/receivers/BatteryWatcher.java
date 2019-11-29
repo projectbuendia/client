@@ -32,6 +32,10 @@ public class BatteryWatcher extends BroadcastReceiver {
         acPlugged = newAcPlugged;
     }
 
+    public @Nonnull boolean isDocked() {
+        return dockTime != null;
+    }
+
     public @Nonnull Duration getDockedDuration() {
         return dockTime != null
             ? new Duration(dockTime, Instant.now())

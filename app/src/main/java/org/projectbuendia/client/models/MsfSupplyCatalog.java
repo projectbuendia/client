@@ -1,4 +1,4 @@
-package org.projectbuendia.client.ui;
+package org.projectbuendia.client.models;
 
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -12,9 +12,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
-public class MedCompleter {
+public class MsfSupplyCatalog {
 
     // ==== Style conventions for captions ====
     //
@@ -530,4 +531,24 @@ public class MedCompleter {
             return name;
         }
     }
+
+    public static class Inventory {
+        Map<String, List<Med>> categories;  // oral, injectable, infusion, etc.
+    }
+
+    // Examples of combined medications:
+
+    // name = "Amoxicillin/Clavulanic acid" (separated by slash without spaces)
+    // aliases = {"Co-amoxiclav"}
+    // code = "DORAAMOC4S5"
+    // formulation = "400 mg/57 mg per 5 ml, powd. oral susp."
+    // dosageUnit = "ml"
+
+    // code = "DORAARLU2TD1"
+    // name = "Artemether/Lumefantrine"
+    // aliases = {"AL", "Co-artemether"}
+    // formulation = "20 mg/120 mg, blister of 12 disp. tab."
+    // dosageUnit = "tablet"
+
+
 }

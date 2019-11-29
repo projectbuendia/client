@@ -21,15 +21,14 @@
       android:layout_gravity="center"
       android:stretchColumns="1">
 
-    <TableRow
-        android:visibility="gone">
+    <TableRow>
       <TextView
           style="@style/field_label"
           android:labelFor="@+id/patient_id_prefix"
           android:text="@string/id_prefix" />
       <EditText
           android:id="@+id/patient_id_prefix"
-          android:enabled="false"
+          android:textAllCaps="true"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:inputType="textCapCharacters"
@@ -83,7 +82,8 @@
           android:id="@+id/patient_family_name"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
-          android:inputType="textCapWords|textPersonName"
+          android:textAllCaps="true"
+          android:inputType="textCapCharacters"
           android:singleLine="true"
           android:nextFocusLeft="@id/patient_given_name"
           android:nextFocusDown="@id/patient_age_years"

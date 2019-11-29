@@ -270,14 +270,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
         return request;
     }
 
-    public void onEbolaTestResultsPressed() {
-        String[] conceptUuids = new String[] {ConceptUuids.PCR_GP_UUID, ConceptUuids.PCR_NP_UUID};
-        List<Obs> observations = mChartHelper.getPatientObservations(mPatientUuid, conceptUuids, null, null);
-        if (!observations.isEmpty()) {
-            mUi.showObsDetailDialog(null, conceptUuids, conceptUuids, observations);
-        }
-    }
-
     public void onFormRequested(String formUuid) {
         if (!dialogShowing()) requestForm(formUuid, null);
     }
@@ -392,7 +384,7 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     @JavascriptInterface public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
-        DateTime start = new DateTime(startMillis);
+        DateTime start = Utils.toLocalDateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
         mUi.showOrderExecutionDialog(order, interval, getExecutions(orderUuid));
     }

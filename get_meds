@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+
+import click
+import csv
+import re
+import sys
+import xlrd
+
+@click.command()
+@click.option(
+    '-c', '--code-column', default=1,
+    help='medication code column number (counted from 1)'
+)
+@click.option(
+    '-e', '--en-desc-column', default=2,
+    help='English description column number (counted from 1)'
+)
+@click.option(
+    '-E', '--en-adjust-column', default=None, type=int,
+    help='English adjustment column number (counted from 1)'
+)
+@click.option(
+    '-f', '--fr-desc-column', default=None, type=int,
+    help='French description column number (counted from 1)'
+)
+@click.option(
+    '-F', '--fr-adjust-column', default=None, type=int,
+    help='French adjustment column number (counted from 1)'
+)
+@click.option(
+    '-s', '--sheet', default=1,
+    help='sheet name or number (counted from 1)'
+)
+@click.argument('filename')
+def get_meds(filename, sheet, code_column,
+             en_desc_column, fr_desc_column,
+             en_adjust_column, fr_adjust_column):
+    book = xlrd.open_workbook(filename)
+    code_col = code_column - 1
+    en_col = en_desc_column - 1
+    fr_col = fr_desc_column - 1 if fr_desc_column else None
+    en_adj = en_adjust_column - 1 if en_adjust_column else None
+    fr_adj = fr_adjust_column - 1 if fr_adjust_column else None
+    try:
+        s = book.sheet_by_name(sheet)
+    except:
+        s = book.sheets()[int(sheet) - 1]
+
+    drugs = set()
+    drug_list = []
+    formats = {}
+    items = read_items(s, code_col, en_col, fr_col, en_adj, fr_adj)
+    for code, en_desc, fr_desc in items:
+        if not code.startswith('D'):
+            continue
+        category = code[:4]
+        drug = code[:8]
+        if drug not in drugs:
+            drugs.add(drug)
+            drug_list.append(drug)
+        en_desc = normalize(en_desc)
+        fr_desc = normalize(fr_desc)
+        formats.setdefault(drug, []).append((code, en_desc, fr_desc))
+
+    write = sys.stdout.write
+
+    for category, category_expr in [
+        ('DORA', 'Category ORAL = new Category("DORA", "oral", DosingType.QUANTITY, PO).withDrugs('),
+        ('DINJ', 'Category INJECTABLE = new Category("DINJ", "injectable", DosingType.QUANTITY_OVER_DURATION).withDrugs('),
+        ('DINF', 'Category PERFUSION = new Category("DINF", "perfusion", DosingType.QUANTITY_OVER_DURATION).withDrugs('),
+        ('DEXT', 'Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY).withDrugs('),
+        ('DVAC', 'Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY).withDrugs(')
+    ]:
+        en_names = set()
+        fr_names = set()
+        drug_exprs = []
+        for drug in drug_list:
+            if drug.startswith(category):
+                en_name = clean(get_drug_name([en for code, en, fr in formats[drug]]))
+                fr_name = clean(get_drug_name([fr for code, en, fr in formats[drug]]))
+                if not en_name:
+                    warn('Could not separate drug name: %r' % formats[drug][0][1])
+                if not fr_name:
+                    warn('Could not separate drug name: %r' % formats[drug][0][2])
+                if en_name and en_name in en_names:
+                    warn('Duplicate drug name: %r' % en_name)
+                if fr_name and fr_name in fr_names:
+                    warn('Duplicate drug name: %r' % fr_name)
+                en_names.add(en_name)
+                fr_names.add(fr_name)
+
+                name = pack_en_fr(en_name, fr_name)
+                format_exprs = []
+                for code, en_desc, fr_desc in formats[drug]:
+                    en_format = clean(en_desc[len(en_name):].lstrip(' ^'))
+                    fr_format = clean(fr_desc[len(fr_name):].lstrip(' ^'))
+                    format = pack_en_fr(en_format, fr_format)
+                    unit = guess_unit(en_desc)
+                    format_exprs.append('''\
+            new Format("%s", "%s", Unit.%s)''' % 
+                        (code.strip('-'), format, unit))
+                drug_exprs.append('''\
+        new Drug("%s", "%s").withFormats(
+%s
+        )''' % (drug, name, ',\n'.join(format_exprs)))
+
+        write('''\
+    %s
+%s
+    );
+
+''' % (category_expr, ',\n'.join(drug_exprs)))
+
+def pack_en_fr(en_text, fr_text):
+    if fr_text.strip():
+        return '%s [fr:%s]' % (en_text, fr_text)
+    else:
+        return en_text
+
+def get_drug_name(descs):
+    if len(descs) == 0:
+        return ''
+    if len(descs) == 1:
+        return split_med(descs[0])[0]
+
+    words = [desc.split() for desc in descs]
+    sets = [set(group) for group in zip(*words)]
+    w = 0
+    while w < len(sets) - 1 and len(sets[w]) == 1 and not re.search(r'\d[^\w]|\^', list(sets[w])[0]):
+        w += 1
+    result = ' '.join(set.pop() for set in sets[:w])
+    return re.sub(r',* *[eé]q\. *$', '', result)
+
+def read_items(s, code_col, en_col, fr_col, en_adj, fr_adj):
+    for row in range(s.nrows):
+        code = s.cell(row, code_col).value.strip()
+        if ' ' in code:
+            continue
+        en_desc = s.cell(row, en_col).value
+        if en_adj is not None:
+            en_adjust = s.cell(row, en_adj).value
+            en_desc = apply_adjustments(en_desc, en_adjust)
+        fr_desc = ''
+        if fr_col is not None:
+            fr_desc = s.cell(row, fr_col).value
+            if fr_adj is not None:
+                fr_adjust = s.cell(row, fr_adj).value
+                if fr_adjust == '=':
+                    fr_adjust = en_adj and en_adjust or ''
+                fr_desc = apply_adjustments(fr_desc, fr_adjust)
+        yield (code, en_desc, fr_desc)
+
+def apply_adjustments(text, adjustments):
+    if not adjustments.strip():
+        return text
+    orig = text
+    for clause in adjustments.split('|'):
+        clause = clause.strip()
+        action, args = clause.split(' ', 1)
+        if action == 'sub':
+            old, new = args.split('>', 1)
+            text = text.replace(old.strip(), new.strip(), 1)
+        elif action == 'drug':
+            drug = args.strip()
+            format = text
+            for word in drug.split():
+                if re.search(r'\w', word):
+                    word = re.sub(r'^\W+|\W+$', '', word)
+                    format = re.sub(r'\b' + word + r'\b', '', format, 1)
+            text = drug + ' ^ ' + format
+        elif action == 'format':
+            format = args.strip()
+            drug, old = text.split('^', 1)
+            text = drug + ' ^ ' + format
+    return text
+
+def split_med(med):
+    if '^' in med:
+        return med.split('^', 1)
+    m = re.match(r'(.*), *(([eé]q[\. ]*)?\d.*)', med)
+    if m:
+        return m.group(1), m.group(2).lstrip(', ')
+    m = re.match(r'([A-Z, ]+), *(.*)', med)
+    if m:
+        return m.group(1), m.group(2).lstrip(', ')
+    m = re.match(r'([^,]+), *(.*)', med)
+    if m:
+        return m.group(1), m.group(2).lstrip(', ')
+    return med, ''
+
+def normalize(desc):
+    for search, replace in [
+        (r'([a-zA-Z])\.', r'\1. '),  # period after a letter is a word break
+        (r'(\d),(\d)', r'\1.\2'),  # turn commas into decimal points
+        (r'(\d)(g|mg|µg|l|ml|IU|UI)\b', r'\1 \2'),  # space before any unit
+        (r'(\d)x(\d)', r'\1 x \2'),  # spaces around x as multiplication sign
+        (r'\bx(\d)', r'x \1'),  # spaces around x as multiplication sign
+        (r'(\d)x\b', r'\1 x'),  # spaces around x as multiplication sign
+        (r'(\d) *%', r'\1%'), # no spaces between number and percent sign
+        (r'%', '% '), # end of a percentage is a word break
+        (r'[ ,]000', '000'),  # remove thousands separators
+        (r'[ ,]*/[ ,]*', ' / '),  # one space before and after any slash
+        (r'(\d) / (\d)', r'\1/\2'),  # no spaces around slash for fractions
+        (r',( *,)*', ','),  # collapse multiple commas to single comma
+        (r' *, *', ' , '),  # one space before and after any comma
+        (r'\s+', ' '),  # collapse whitespace to single space
+        (r'^[ ,]*|[ ,]*$', ''),  # remove leading/trailing spaces/commas
+    ]:
+        desc = re.sub(search, replace, desc)
+    return desc
+
+def clean(desc):
+    for search, replace in [
+        (r'[ ,]*/[ ,]*', ' / '),  # one space before and after any slash
+        (r'(\d) / (\d)', r'\1/\2'),  # no spaces around slash for fractions
+        (r',( *,)*', ','),  # collapse multiple commas to single comma
+        (r' *, *', ', '),  # no space before and one space after any comma
+        (r'\s+', ' '),  # collapse whitespace to single space
+        (r'^[ ,]*|[ ,]*$', ''),  # remove leading/trailing spaces/commas
+    ]:
+        desc = re.sub(search, replace, desc)
+    return desc
+
+def guess_unit(desc):
+    if re.findall(r'\btab\.?\b', desc):
+        return 'TABLET'
+    if re.findall(r'\bcaps?\.?\b', desc):
+        return 'CAPSULE'
+    if re.findall(r'/ *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
+        return 'ML'
+    return 'MG'
+
+def warn(message):
+    print(message, file=sys.stderr)
+
+if __name__ == '__main__':
+    get_meds()

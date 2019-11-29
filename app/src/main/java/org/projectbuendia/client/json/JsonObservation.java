@@ -3,6 +3,7 @@ package org.projectbuendia.client.json;
 import android.content.ContentValues;
 
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.providers.Contracts.Observations;
@@ -24,7 +25,7 @@ public class JsonObservation {
     public Double value_numeric;
     public String value_text;
     public LocalDate value_date;
-    public DateTime value_datetime;
+    public Instant value_datetime;
     public boolean voided;
 
     public JsonObservation(Obs obs) {
@@ -41,7 +42,7 @@ public class JsonObservation {
             if (obs.type == Datatype.NUMERIC) this.value_numeric = Double.valueOf(obs.value);
             if (obs.type == Datatype.TEXT) this.value_text = obs.value;
             if (obs.type == Datatype.DATE) this.value_date = Utils.toLocalDate(obs.value);
-            if (obs.type == Datatype.DATETIME) this.value_datetime = new DateTime(Long.valueOf(obs.value));
+            if (obs.type == Datatype.DATETIME) this.value_datetime = new Instant(Long.valueOf(obs.value));
         }
     }
 

@@ -13,217 +13,405 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    style="@style/vertical"
+    android:padding="16dp"
+    >
+
+  <org.odk.collect.android.views.WrappingRadioGroup
+      android:id="@+id/order_category"
+      style="@style/horizontal"
+      android:layout_marginLeft="-4sp"
+      android:layout_marginBottom="8sp"
+      >
+
+    <RadioButton
+        android:id="@+id/oral_category"
+        style="@style/tight"
+        android:text="@string/oral_category"
+        android:checked="true"
+        />
+
+    <RadioButton
+        android:id="@+id/injectable_category"
+        style="@style/tight"
+        android:text="@string/injectable_category"
+        />
+
+    <RadioButton
+        android:id="@+id/infusible_category"
+        style="@style/tight"
+        android:text="@string/infusible_category"
+        />
+
+    <RadioButton
+        android:id="@+id/external_category"
+        style="@style/tight"
+        android:text="@string/external_category"
+        />
+
+    <RadioButton
+        android:id="@+id/vaccine_category"
+        style="@style/tight"
+        android:text="@string/vaccine_category_abbr"
+        />
+
+  </org.odk.collect.android.views.WrappingRadioGroup>
 
   <TableLayout
+      android:id="@+id/order"
+      android:paddingLeft="4sp"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
-      android:padding="16sp">
+      android:padding="0sp"
+      >
 
     <TableRow
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:id="@+id/medication_row"
+        style="@style/order_table_row"
+        >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
-          android:layout_marginEnd="12sp"
-          android:text="@string/order_medication"
-          android:labelFor="@id/order_medication"/>
+          android:text="@string/order_drug"
+          android:labelFor="@id/order_drug"
+          />
 
-      <AutoCompleteTextView
-          android:id="@+id/order_medication"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
-          android:layout_span="2"
-          android:layout_weight="1"
-          android:ems="15"
-          android:inputType="textCapSentences|textNoSuggestions"
-          android:maxLength="80"
-          android:imeOptions="actionNext"
-          android:nextFocusDown="@id/order_dosage"
-          android:nextFocusRight="@id/order_dosage" />
+      <LinearLayout style="@style/order_cell_container">
+
+        <AutoCompleteTextView
+            android:id="@+id/order_drug"
+            style="@style/text_field"
+            android:layout_width="match_parent"
+            android:paddingRight="4sp"
+            android:ems="15"
+            android:inputType="textCapSentences|textNoSuggestions"
+            android:maxLength="80"
+            android:nextFocusDown="@id/order_dosage"
+            android:nextFocusRight="@id/order_dosage"
+            tools:text="Paracetamol"
+            />
+
+        <!-- For consistent vertical alignment -->
+        <TextView
+            style="@style/inner_field_label"
+            android:text=" "
+            />
+
+      </LinearLayout>
+
     </TableRow>
 
     <TableRow
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:id="@+id/format_row"
+        style="@style/order_table_row"
+        >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
-          android:layout_marginEnd="12sp"
+          android:text="@string/order_format"
+          android:labelFor="@id/order_format"
+          />
+
+      <LinearLayout style="@style/order_cell_container">
+
+        <Spinner
+            android:id="@+id/order_format"
+            style="@style/tight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="0sp"
+            android:textAppearance="@style/text"
+            />
+
+        <!-- For consistent vertical alignment -->
+        <TextView
+            style="@style/inner_field_label"
+            android:text=" "
+            />
+
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/dosage_row"
+        style="@style/order_table_row"
+        >
+
+      <TextView
+          style="@style/field_label"
           android:text="@string/order_dosage"
-          android:labelFor="@id/order_dosage"/>
+          android:labelFor="@id/order_dosage"
+          />
 
-      <EditText
-          android:id="@+id/order_dosage"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
-          android:layout_span="2"
+      <LinearLayout style="@style/order_cell_container">
+
+        <EditText
+            android:id="@+id/order_dosage"
+            style="@style/number_field"
+            android:ems="3"
+            android:maxLength="4"
+            android:inputType="numberDecimal"
+            android:nextFocusUp="@id/order_drug"
+            android:nextFocusLeft="@id/order_drug"
+            android:nextFocusDown="@id/order_amount"
+            android:nextFocusRight="@id/order_amount"
+            tools:text="100"
+            />
+
+      <TextView
+          android:id="@+id/order_dosage_unit"
+          style="@style/inner_field_label"
           android:layout_weight="1"
-          android:ems="15"
-          android:inputType="textNoSuggestions"
-          android:maxLength="40"
-          android:imeOptions="actionNext"
-          android:nextFocusLeft="@id/order_medication"
-          android:nextFocusRight="@id/order_route"
-          android:nextFocusDown="@id/order_route" />
+          tools:text="capsules"
+          />
 
-      <EditText
+      <Spinner
           android:id="@+id/order_route"
-          style="?android:attr/spinnerStyle"
-          android:inputType="none"
-          android:focusable="false"
-          android:textSize="19sp"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="2"
-          android:hint="@string/order_route"
-          android:nextFocusDown="@id/order_frequency" />
+          style="@style/tight"
+          android:padding="0sp"
+          android:textAppearance="@style/text"
+          />
+
+      </LinearLayout>
 
     </TableRow>
 
     <TableRow
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:id="@+id/continuous_row"
+        android:visibility="gone"
+        style="@style/order_table_row"
+        >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
-          android:layout_marginEnd="12sp"
-          android:text="@string/order_frequency"
-          android:labelFor="@id/order_frequency"/>
+          android:text="@string/order_dosage"
+          android:labelFor="@id/order_amount"
+          />
 
-      <EditText
-          android:id="@+id/order_frequency"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
-          android:digits="0123456789"
-          android:ems="3"
-          android:inputType="numberDecimal"
-          android:maxLength="2"
-          android:imeOptions="actionNext"
-          android:nextFocusDown="@id/order_give_for_days"/>
+      <LinearLayout style="@style/order_cell_container">
 
-      <TextView
-          android:id="@+id/order_times_per_day_label"
-          android:layout_weight="1"
-          android:layout_column="2"
-          android:layout_gravity="top|start"
-          android:layout_marginStart="4sp"
-          android:text="@string/order_times_per_day"/>
+        <EditText
+            android:id="@+id/order_amount"
+            style="@style/number_field"
+            android:ems="3"
+            android:maxLength="4"
+            android:nextFocusUp="@id/order_dosage"
+            android:nextFocusLeft="@id/order_dosage"
+            android:nextFocusRight="@id/order_duration"
+            android:nextFocusDown="@id/order_frequency"
+            tools:text="1500"
+            />
+
+        <TextView
+            android:id="@+id/order_amount_unit"
+            style="@style/inner_field_label"
+            android:text="mL in"
+            />
+
+        <EditText
+            android:id="@+id/order_duration"
+            style="@style/number_field"
+            android:ems="3"
+            android:maxLength="2"
+            android:nextFocusUp="@id/order_dosage"
+            android:nextFocusLeft="@id/order_amount"
+            android:nextFocusRight="@id/order_frequency"
+            android:nextFocusDown="@id/order_frequency"
+            tools:text="8"
+            />
+
+        <TextView
+            android:id="@+id/order_duration_unit"
+            style="@style/inner_field_label"
+            />
+
+      </LinearLayout>
+
     </TableRow>
 
     <TableRow
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:id="@+id/is_series_row"
+        style="@style/order_table_row"
+        android:layout_marginTop="16sp"
+        >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
-          android:layout_marginEnd="12sp"
-          android:gravity="center_vertical"
-          android:text="@string/order_give_for"
-          android:labelFor="@id/order_give_for_days"/>
+          android:text="@string/order_is_series_prefix"
+          android:labelFor="@id/order_is_series"
+          />
 
-      <EditText
-          android:id="@+id/order_give_for_days"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_column="1"
-          android:digits="0123456789"
-          android:ems="3"
-          android:inputType="numberDecimal"
-          android:maxLength="2"
-          android:imeOptions="actionNext"
-          android:nextFocusDown="@id/order_notes"/>
+      <LinearLayout style="@style/order_cell_container">
 
-      <TextView
-          android:id="@+id/order_give_for_days_label"
-          android:layout_weight="1"
-          android:layout_column="2"
-          android:layout_gravity="top|start"
-          android:layout_marginStart="4sp"
-          android:text="@string/order_give_for_days"/>
+        <org.odk.collect.android.views.WrappingRadioGroup
+            android:id="@+id/order_is_series"
+            style="@style/horizontal"
+            android:layout_marginTop="2sp"
+            >
+
+          <RadioButton
+              android:id="@+id/order_unary"
+              style="@style/tight"
+              android:text="@string/once"
+              android:checked="true"
+              />
+
+          <RadioButton
+              android:id="@+id/order_series"
+              style="@style/tight"
+              android:text="@string/multiple_times"
+              />
+
+        </org.odk.collect.android.views.WrappingRadioGroup>
+
+      </LinearLayout>
+
     </TableRow>
 
     <TableRow
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:id="@+id/frequency_row"
+        style="@style/order_table_row"
+        android:visibility="gone"
+        >
 
-      <TextView
-          android:id="@+id/order_duration_label"
-          style="@style/field_label"
-          android:minLines="2"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          android:layout_column="1"
-          android:layout_gravity="top|start"
-          android:layout_marginStart="4sp"
-          android:layout_span="2"
-          tools:text="(commencé le 29 août; après 10 doses, arrêter le 31 août)"/>
+      <LinearLayout style="@style/order_cell_container">
+
+        <EditText
+            android:id="@+id/order_frequency"
+            style="@style/number_field"
+            android:digits="0123456789"
+            android:ems="3"
+            android:maxLength="2"
+            android:nextFocusUp="@id/order_frequency"
+            android:nextFocusLeft="@id/order_frequency"
+            android:nextFocusRight="@id/order_series_length"
+            android:nextFocusDown="@id/order_series_length"
+            />
+
+        <TextView
+            android:id="@+id/order_frequency_unit"
+            style="@style/inner_field_label"
+            android:labelFor="@id/order_frequency"
+            />
+
+      </LinearLayout>
+
     </TableRow>
 
     <TableRow
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:id="@+id/series_length_row"
+        style="@style/order_table_row"
+        android:visibility="gone"
+        >
 
       <TextView
           style="@style/field_label"
-          android:layout_column="0"
-          android:layout_marginEnd="12sp"
+          android:text="@string/order_series_duration_prefix"
+          android:labelFor="@id/order_series_length"
+          />
+
+      <LinearLayout style="@style/order_cell_container">
+
+        <EditText
+            android:id="@+id/order_series_length"
+            style="@style/number_field"
+            android:digits="0123456789"
+            android:ems="3"
+            android:maxLength="2"
+            android:nextFocusUp="@id/order_frequency"
+            android:nextFocusLeft="@id/order_frequency"
+            android:nextFocusRight="@id/order_notes"
+            android:nextFocusDown="@id/order_notes"
+            />
+
+        <TextView
+            android:id="@+id/order_series_length_unit"
+            style="@style/inner_field_label"
+            />
+
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/schedule_description_row"
+        style="@style/order_table_row"
+        android:layout_marginTop="8sp"
+        >
+
+      <LinearLayout style="@style/order_cell_container">
+
+        <TextView
+            android:id="@+id/order_schedule_description"
+            style="@style/field_label"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12sp"
+            android:layout_marginEnd="0sp"
+            android:layout_gravity="top|start"
+            android:gravity="top|start"
+            android:minLines="2"
+            tools:text="(commencé le 29 août; après 10 doses, arrêter le 31 août)"/>
+        />
+
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/notes_row"
+        style="@style/order_table_row"
+        android:layout_marginTop="8sp"
+        >
+
+      <TextView
+          style="@style/field_label"
+          android:layout_gravity="top"
+          android:layout_marginTop="0sp"
           android:text="@string/order_notes"
-          android:labelFor="@id/order_notes"/>
+          android:labelFor="@id/order_notes"
+          />
 
-      <EditText
-          android:id="@+id/order_notes"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginBottom="12sp"
-          android:layout_column="1"
-          android:layout_span="2"
-          android:layout_weight="1"
-          android:ems="15"
-          android:inputType="textMultiLine|textCapSentences"
-          android:lines="2"
-          android:minLines="2"
-          android:maxLines="2"
-          android:gravity="top|start"
-          android:imeOptions="actionNone" />
+      <LinearLayout style="@style/order_cell_container">
+
+        <EditText
+            android:id="@+id/order_notes"
+            style="@style/text_field"
+            android:layout_width="match_parent"
+            android:inputType="textMultiLine|textCapSentences"
+            android:gravity="top|start"
+            android:nextFocusUp="@id/order_series_length"
+            android:nextFocusLeft="@id/order_series_length"
+            tools:text="Administer carefully"
+            />
+
+      </LinearLayout>
+
     </TableRow>
 
   </TableLayout>
 
   <LinearLayout
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal">
+      style="@style/horizontal"
+      android:layout_marginTop="16sp"
+      >
 
     <Button
         android:id="@+id/order_stop_now"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16sp"
+        style="@style/tight"
         android:layout_marginBottom="16sp"
-        android:padding="16sp"
-        android:text="@string/order_stop_now"/>
+        android:text="@string/order_stop_now"
+        />
 
     <Button
         android:id="@+id/order_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/tight"
         android:layout_marginStart="16sp"
         android:layout_marginBottom="16sp"
-        android:padding="16sp"
-        android:text="@string/order_delete"/>
+        android:text="@string/order_delete"
+        />
+
   </LinearLayout>
 
 </LinearLayout>

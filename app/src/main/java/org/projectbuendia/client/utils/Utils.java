@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -41,6 +42,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
+import org.joda.time.base.AbstractInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
@@ -176,6 +178,13 @@ public class Utils {
         return (x - floorMod(x, d)) / d;
     }
 
+    /** Formats a number to the minimum necessary number of decimal places. */
+    public static String format(double x, int maxPrec) {
+        String result = String.format("%." + maxPrec + "f", x);
+        if (result.contains("e")) return result;
+        if (!result.contains(".") && !result.contains(",")) return result;
+        return result.replaceAll("[.,]?0*$", "");
+    }
 
     // ==== Collections ====
 
@@ -202,6 +211,27 @@ public class Utils {
     /** Performs a null-safe check for a Collection with at least one item. */
     public static boolean hasItems(@Nullable Collection collection) {
         return collection != null && collection.size() > 0;
+    }
+
+    /** Concatenates two arrays. */
+    public static <T> T[] concat(T[] a, T[] b) {
+        List<T> result = new ArrayList<>(Arrays.asList(a));
+        result.addAll(Arrays.asList(b));
+        return result.toArray(b);
+    }
+
+    /** Prepends an item to an array to yield a new array. */
+    public static <T> T[] concat(T a, T[] b) {
+        List<T> result = new ArrayList<>(Arrays.asList(a));
+        result.addAll(Arrays.asList(b));
+        return result.toArray(b);
+    }
+
+    /** Appends an item to an array to yield a new array. */
+    public static <T> T[] concat(T[] a, T b) {
+        List<T> result = new ArrayList<>(Arrays.asList(a));
+        result.add(b);
+        return result.toArray(a);
     }
 
 
@@ -279,24 +309,22 @@ public class Utils {
     // ==== Number parsing ====
 
     /** Converts a String to an integer, returning null if parsing fails. */
-    public static Integer toIntOrNull(String text) {
+    public static Integer toIntOrNull(@Nullable String str) {
+        if (str == null) return null;
         try {
-            return Integer.valueOf(text);
+            return Integer.valueOf(str);
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
     /** Converts a String to an integer, returning a default value if parsing fails. */
-    public static int toIntOrDefault(String text, int defaultValue) {
-        try {
-            return Integer.valueOf(text);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+    public static int toIntOrDefault(String str, int defaultValue) {
+        Integer value = toIntOrNull(str);
+        return value == null ? defaultValue : value;
     }
 
-    /** Parses a long integer value from a string, or returns null if parsing fails. */
+    /** Converts a String to a long integer, returning null if parsing fails. */
     public static @Nullable Long toLongOrNull(@Nullable String str) {
         if (str == null) return null;
         try {
@@ -306,14 +334,20 @@ public class Utils {
         }
     }
 
-    /** Parses a double value from a string, or returns null if parsing fails. */
+    /** Converts a String to a double, returning null if parsing fails. */
     public static @Nullable Double toDoubleOrNull(@Nullable String str) {
         if (str == null) return null;
         try {
-            return Double.parseDouble(str);
+            return Double.parseDouble(str.trim());
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    /** Converts a String to a double, returning a default value if parsing fails. */
+    public static double toDoubleOrDefault(@Nullable String str, double defaultValue) {
+        Double value = toDoubleOrNull(str);
+        return value == null ? defaultValue : value;
     }
 
     /** Converts objects of integer types to longs. */
@@ -337,7 +371,7 @@ public class Utils {
     // ==== Dates and times ====
 
     private static final DateTimeFormatter ISO8601_UTC_DATETIME_FORMATTER =
-        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZoneUTC();
 
     /** Returns the lesser of two DateTimes, treating null as the greatest value. */
     public static @Nullable DateTime min(DateTime a, DateTime b) {
@@ -354,6 +388,16 @@ public class Utils {
         return date != null ? date.toString() : null;
     }
 
+    /** Creates a DateTime object in the default local time zone. */
+    public static @Nullable DateTime toLocalDateTime(@Nullable Long millis) {
+        return millis != null ? new DateTime(millis, DateTimeZone.getDefault()) : null;
+    }
+
+    /** Creates a DateTime object in the default local time zone. */
+    public static @Nullable DateTime toLocalDateTime(@Nullable ReadableInstant instant) {
+        return instant != null ? new DateTime(instant, DateTimeZone.getDefault()) : null;
+    }
+
     /** Converts a yyyy-mm-dd String or null to a nullable LocalDate. */
     public static @Nullable LocalDate toLocalDate(@Nullable String string) {
         try {
@@ -363,9 +407,9 @@ public class Utils {
         }
     }
 
-    /** Converts a nullable DateTime to a yyyy-mm-ddThh:mm:ssZ String or null. */
-    public static @Nullable String formatUtc8601(@Nullable DateTime dt) {
-        return dt != null ? ISO8601_UTC_DATETIME_FORMATTER.print(dt.withZone(DateTimeZone.UTC)) : null;
+    /** Formats a nullable DateTime or Instant as "yyyy-mm-ddThh:mm:ssZ" or null. */
+    public static @Nullable String formatUtc8601(@Nullable AbstractInstant t) {
+        return t != null ? t.toString(ISO8601_UTC_DATETIME_FORMATTER) : null;
     }
 
     /** Parses a nullable String into a nullable Interval. */
@@ -415,7 +459,7 @@ public class Utils {
 
     public static @Nullable String format(@Nullable DateTime datetime, DateStyle style) {
         if (datetime == null) return null;
-        return style.getFormatter().print(datetime.toLocalDateTime());
+        return style.getFormatter().print(datetime);
     }
 
     /** Gets the DateTime at the start of a day. */
@@ -551,7 +595,7 @@ public class Utils {
     /** Gets a nullable long value (in millis) from a cursor as a DateTime. */
     public static DateTime getDateTime(Cursor c, String columnName) {
         Long millis = getLong(c, columnName);
-        return millis == null ? null : new DateTime(millis);
+        return millis == null ? null : Utils.toLocalDateTime(millis);
     }
 
     /** Gets a nullable boolean value from a cursor. */
@@ -604,7 +648,7 @@ public class Utils {
     /** Gets a nullable DateTime value from a Bundle.  Always use this instead of getLong() directly. */
     public static DateTime getDateTime(Bundle bundle, String key) {
         // getLong never returns null; we have to check explicitly.
-        return bundle.containsKey(key) ? new DateTime(bundle.getLong(key)) : null;
+        return bundle.containsKey(key) ? Utils.toLocalDateTime(bundle.getLong(key)) : null;
     }
 
     /** Creates a Bundle containing one key-value pair. */
@@ -665,7 +709,7 @@ public class Utils {
     }
 
 
-    // ==== User interface ====
+    // ==== UI Views ====
 
     /** Shows or hides a dialog based on a boolean flag. */
     public static void showDialogIf(@Nullable Dialog dialog, boolean show) {
@@ -685,6 +729,11 @@ public class Utils {
         }
     }
 
+    /** Returns true if a view's visibility is set to VISIBLE. */
+    public static boolean isVisible(@Nullable View view) {
+        return view != null && view.getVisibility() == View.VISIBLE;
+    }
+
     /** Sets the text of a child view identified by its ID. */
     public static void setText(@Nullable View view, int id, String text) {
         if (view != null) {
@@ -697,7 +746,14 @@ public class Utils {
     public static void setEnabled(View view, boolean enabled) {
         view.setEnabled(enabled);
         view.setFocusable(enabled);
-        view.setFocusableInTouchMode(enabled);
+        if (view instanceof EditText) view.setFocusableInTouchMode(true);
+    }
+
+    /** Set the enabled state of all the children of a view. */
+    public static void setChildrenEnabled(ViewGroup view, boolean enabled) {
+        for (int i = 0; i < view.getChildCount(); i++) {
+            setEnabled(view.getChildAt(i), enabled);
+        }
     }
 
     /** Brings up the soft keyboard. */
@@ -719,6 +775,21 @@ public class Utils {
             fields[0].requestFocus();
             fields[0].setSelection(fields[0].getText().length());
         }
+    }
+
+    /** Gets the text in an editable text field and trims away whitespace. */
+    public static String getText(EditText field) {
+        return field.getText().toString().trim();
+    }
+
+    /** Gets the integer value in a text field, or a default value if invalid. */
+    public static int getInt(EditText field, int defaultValue) {
+        return toIntOrDefault(field.getText().toString().trim(), defaultValue);
+    }
+
+    /** Gets the numeric value in a text field, or a default value if invalid. */
+    public static double getDouble(EditText field, double defaultValue) {
+        return toDoubleOrDefault(field.getText().toString().trim(), defaultValue);
     }
 
 

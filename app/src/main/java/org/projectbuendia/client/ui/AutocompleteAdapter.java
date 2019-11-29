@@ -9,22 +9,24 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
-public class AutocompleteAdapter extends ArrayAdapter<AutocompleteAdapter.Completion> {
+public class AutocompleteAdapter<T> extends ArrayAdapter<T> {
     private final LayoutInflater inflater;
     private final int resourceId;
     private final Filter filter;
+    private final CompletionAdapter<T> adapter;
 
-    public AutocompleteAdapter(Context context, int resourceId, final Completer completer) {
+    public AutocompleteAdapter(Context context, int resourceId, CompletionAdapter<T> adapter) {
         super(context, resourceId, 0, new ArrayList<>());
         this.inflater = LayoutInflater.from(context);
         this.resourceId = resourceId;
+        this.adapter = adapter;
         this.filter = new Filter() {
             @Override protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
                 if (constraint != null) {
-                    Collection<? extends Completion> completions = completer.suggestCompletions(constraint);
+                    List<T> completions = adapter.suggestCompletions(constraint);
                     results.values = completions;
                     results.count = completions.size();
                 }
@@ -32,13 +34,13 @@ public class AutocompleteAdapter extends ArrayAdapter<AutocompleteAdapter.Comple
             }
 
             @Override public CharSequence convertResultToString(Object result) {
-                return (result instanceof Completion) ? ((Completion) result).getValue() : "";
+                return adapter.getCompletedText((T) result);
             }
 
             @Override protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0) {
                     clear();
-                    addAll((Collection<? extends Completion>) results.values);
+                    addAll((List<T>) results.values);
                 }
             }
         };
@@ -49,7 +51,7 @@ public class AutocompleteAdapter extends ArrayAdapter<AutocompleteAdapter.Comple
         if (view == null) {
             view = inflater.inflate(resourceId, parent, false);
         }
-        getItem(position).showInView(view);
+        adapter.showInView(view, getItem(position));
         return view;
     }
 
@@ -61,12 +63,9 @@ public class AutocompleteAdapter extends ArrayAdapter<AutocompleteAdapter.Comple
         return filter;
     }
 
-    public interface Completer {
-        Collection<? extends Completion> suggestCompletions(CharSequence constraint);
-    }
-
-    public interface Completion {
-        void showInView(View itemView);
-        @NonNull String getValue();
+    public interface CompletionAdapter<T> {
+        List<T> suggestCompletions(CharSequence constraint);
+        void showInView(View itemView, T item);
+        @NonNull String getCompletedText(T item);
     }
 }
