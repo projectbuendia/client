@@ -236,7 +236,7 @@
   <string name="ebola_test_label">Essai d\'Ebola</string>
   <string name="latest_pcr_label_with_date">Essai d\'Ebola (%s)</string>
   <string name="action_add_test_result">Ajouter le résultat du test</string>
-  <string name="pregnant_abbreviation">enc</string>
+  <string name="pregnant_suffix">e</string>
   <string name="pregnant">Enceinte</string>
   <string name="iv_fitted">Cathéter intraveineux en place</string>
   <string name="cannot_eat">Ne peut pas manger</string>

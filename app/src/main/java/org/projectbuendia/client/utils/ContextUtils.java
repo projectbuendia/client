@@ -208,7 +208,7 @@ public class ContextUtils extends ContextWrapper {
             labels.add(str(R.string.sex_unknown));
         }
         if (patient.pregnancy) {
-            if (pregnancy == FormatStyle.SHORT) labels.add(str(R.string.pregnant_abbreviation));
+            if (pregnancy == FormatStyle.SHORT) labels.add(str(R.string.pregnant_suffix));
             if (pregnancy == FormatStyle.LONG) labels.add(str(R.string.pregnant).toLowerCase());
         }
         if (patient.birthdate != null && (age == FormatStyle.SHORT || age == FormatStyle.LONG)) {

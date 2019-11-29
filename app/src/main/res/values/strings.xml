@@ -238,7 +238,7 @@
   <string name="ebola_test_label">Ebola test</string>
   <string name="latest_pcr_label_with_date">Ebola test (%s)</string>
   <string name="action_add_test_result">Add test result</string>
-  <string name="pregnant_abbreviation">prg</string>
+  <string name="pregnant_suffix">p</string>
   <string name="pregnant">Pregnant</string>
   <string name="iv_fitted">IV fitted</string>
   <string name="cannot_eat">Cannot eat</string>

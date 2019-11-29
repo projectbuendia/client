@@ -23,7 +23,7 @@
     android:orientation="horizontal">
 
   <LinearLayout
-      android:layout_width="60sp"
+      android:layout_width="48sp"
       android:layout_height="match_parent"
       android:orientation="horizontal"
       android:gravity="center_vertical|end">
@@ -34,9 +34,11 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center_vertical|end"
-        android:padding="8sp"
+        android:paddingTop="8sp"
+        android:paddingBottom="8sp"
+        android:paddingEnd="8sp"
         android:textAppearance="@style/text.large"
-        android:textFontWeight="300"
+        android:textFontWeight="200"
         android:textColor="@color/black"
         tools:text="2A"/>
 
@@ -50,7 +52,7 @@
 
   <org.projectbuendia.client.widgets.ShrinkFitTextView
       android:id="@+id/id"
-      android:layout_width="64sp"
+      android:layout_width="80sp"
       android:layout_height="wrap_content"
       android:layout_marginEnd="16sp"
       android:background="@drawable/id_oval"
@@ -80,10 +82,10 @@
       android:id="@+id/sex"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:minWidth="60sp"
+      android:minWidth="32sp"
       android:textAppearance="@style/text.large"
       android:layout_gravity="center_vertical|start"
-      tools:text="F, prg"/>
+      tools:text="Fp"/>
 
   <TextView
       android:id="@+id/age"
@@ -91,7 +93,7 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical|end"
       android:gravity="center_vertical|end"
-      android:minWidth="66sp"
+      android:minWidth="64sp"
       android:textAppearance="@style/text.large"
       tools:text="99 mo"/>
 
