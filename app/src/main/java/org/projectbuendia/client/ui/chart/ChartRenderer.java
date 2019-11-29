@@ -51,6 +51,7 @@ import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
 
+import static org.projectbuendia.client.utils.Utils.EN_DASH;
 import static org.projectbuendia.client.utils.Utils.HOUR;
 import static org.projectbuendia.client.utils.Utils.eq;
 
@@ -336,6 +337,7 @@ public class ChartRenderer {
         }
 
         String formatDayNumber(LocalDate date) {
+            if (mAdmissionDateTime == null) return EN_DASH;
             int admitDay = Utils.dayNumberSince(mAdmissionDateTime.toLocalDate(), date);
             return (admitDay >= 1) ? mResources.getString(R.string.day_n, admitDay) : "";
         }
