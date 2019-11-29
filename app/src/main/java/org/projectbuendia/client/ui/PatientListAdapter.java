@@ -195,7 +195,7 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
             Locale locale = App.getSettings().getLocale();
-            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID);
+            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.CATEGORY_UUID);
             return null;
         }
 
