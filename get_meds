@@ -71,16 +71,29 @@ def get_meds(filename, sheet, code_column,
         ('DEXT', 'Category EXTERNAL = new Category("DEXT", "external", DosingType.QUANTITY).withDrugs('),
         ('DVAC', 'Category VACCINE = new Category("DVAC", "vaccines/immunoglobulins", DosingType.QUANTITY).withDrugs(')
     ]:
+        en_names = set()
+        fr_names = set()
         drug_exprs = []
         for drug in drug_list:
             if drug.startswith(category):
-                en_name = get_drug_name([en for code, en, fr in formats[drug]])
-                fr_name = get_drug_name([fr for code, en, fr in formats[drug]])
+                en_name = clean(get_drug_name([en for code, en, fr in formats[drug]]))
+                fr_name = clean(get_drug_name([fr for code, en, fr in formats[drug]]))
+                if not en_name:
+                    warn('Could not separate drug name: %r' % formats[drug][0][1])
+                if not fr_name:
+                    warn('Could not separate drug name: %r' % formats[drug][0][2])
+                if en_name and en_name in en_names:
+                    warn('Duplicate drug name: %r' % en_name)
+                if fr_name and fr_name in fr_names:
+                    warn('Duplicate drug name: %r' % fr_name)
+                en_names.add(en_name)
+                fr_names.add(fr_name)
+
                 name = pack_en_fr(en_name, fr_name)
                 format_exprs = []
                 for code, en_desc, fr_desc in formats[drug]:
-                    en_format = en_desc[len(en_name):].lstrip(' ^')
-                    fr_format = fr_desc[len(fr_name):].lstrip(' ^')
+                    en_format = clean(en_desc[len(en_name):].lstrip(' ^'))
+                    fr_format = clean(fr_desc[len(fr_name):].lstrip(' ^'))
                     format = pack_en_fr(en_format, fr_format)
                     unit = guess_unit(en_desc)
                     format_exprs.append('''\
@@ -100,9 +113,9 @@ def get_meds(filename, sheet, code_column,
 
 def pack_en_fr(en_text, fr_text):
     if fr_text.strip():
-        return '%s [fr:%s]' % (clean(en_text), clean(fr_text))
+        return '%s [fr:%s]' % (en_text, fr_text)
     else:
-        return clean(en_text)
+        return en_text
 
 def get_drug_name(descs):
     if len(descs) == 0:
@@ -113,7 +126,7 @@ def get_drug_name(descs):
     words = [desc.split() for desc in descs]
     sets = [set(group) for group in zip(*words)]
     w = 0
-    while w < len(sets) - 1 and len(sets[w]) == 1 and not re.search(r'\d|\^', list(sets[w])[0]):
+    while w < len(sets) - 1 and len(sets[w]) == 1 and not re.search(r'\d[^\w]|\^', list(sets[w])[0]):
         w += 1
     result = ' '.join(set.pop() for set in sets[:w])
     return re.sub(r',* *[eé]q\. *$', '', result)
@@ -183,6 +196,8 @@ def normalize(desc):
         (r'(\d)x(\d)', r'\1 x \2'),  # spaces around x as multiplication sign
         (r'\bx(\d)', r'x \1'),  # spaces around x as multiplication sign
         (r'(\d)x\b', r'\1 x'),  # spaces around x as multiplication sign
+        (r'(\d) *%', r'\1%'), # no spaces between number and percent sign
+        (r'%', '% '), # end of a percentage is a word break
         (r'[ ,]000', '000'),  # remove thousands separators
         (r'[ ,]*/[ ,]*', ' / '),  # one space before and after any slash
         (r'(\d) / (\d)', r'\1/\2'),  # no spaces around slash for fractions
@@ -214,6 +229,9 @@ def guess_unit(desc):
     if re.findall(r'/ *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
         return 'ML'
     return 'MG'
+
+def warn(message):
+    print(message, file=sys.stderr)
 
 if __name__ == '__main__':
     get_meds()
