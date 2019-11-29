@@ -359,12 +359,19 @@ public class ObsFormat extends Format {
 
         @Override public String formatObsValue(@Nullable ObsValue value) {
             if (value == null) return EN_DASH;
-            if (value.date == null) return TYPE_ERROR;
-            return formatNumber((double) Utils.dayNumberSince(value.date, LocalDate.now()));
+            LocalDate date;
+            if (value.instant != null) {
+                date = value.instant.toDateTime().toLocalDate();
+            } else if (value.date != null) {
+                date = value.date;
+            } else {
+                return TYPE_ERROR;
+            }
+            return formatNumber((double) Utils.dayNumberSince(date, LocalDate.now()));
         }
     }
 
-    /** "day_number" format that describes today, counting the observed date as day 1.  Typical use: {1,day_number,Day #} */
+    /** "location" format */
     class ObsLocationFormat extends ObsTextFormat {
         public ObsLocationFormat(String pattern) {
             super(pattern);
