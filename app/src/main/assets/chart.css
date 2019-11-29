@@ -59,6 +59,7 @@ tbody td, th[scope="rowgroup"] { border-right-color: #ddd; }
 .division { border-right: 1px solid #ddd; }
 .division:last-child { border-right: none; }
 .command { border-right: transparent; }
+.command button { font-size: 1.9rem; padding: 0.5em 1em; }
 
 /* Row shading */
 tr.obs, tr.order { background: #f8f8f8; }
