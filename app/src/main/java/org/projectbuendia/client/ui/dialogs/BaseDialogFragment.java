@@ -69,7 +69,7 @@ public abstract class BaseDialogFragment<T extends BaseDialogFragment, A extends
             .setNegativeButton(getString(R.string.cancel), null)
             .create();
 
-        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCanceledOnTouchOutside(true);
 
         dialog.setOnShowListener(di -> {
             // Make the "Cancel" and "OK" button text match the rest of the UI text.

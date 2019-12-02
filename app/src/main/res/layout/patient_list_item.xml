@@ -38,7 +38,7 @@
         android:gravity="center_vertical|end"
         android:paddingEnd="8sp"
         android:textAppearance="@style/text.huge"
-        android:textFontWeight="100"
+        android:textFontWeight="300"
         android:textColor="@color/gray_600"
         tools:text="2A"/>
 
