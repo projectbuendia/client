@@ -40,9 +40,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:lines="1"
             android:ellipsize="end"
-            tools:text="11:00: Yes"
+            tools:text="11h00  A long comment has been entered here"
             />
 
         <TextView

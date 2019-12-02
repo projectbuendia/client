@@ -668,7 +668,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DORAORMA2S8", "rehydration acute complic. malnut., sach. 84 g / 2 l [fr:réhydratation malnut. aiguë compliq, sach. 84 g / 2 l]", Unit.MG)
         ),
         new Drug("DORAORSA", "ORAL REHYDRATION SALTS (ORS) low osmol. [fr:SELS REHYDRATATION ORALE (SRO) basse osmol.]").withFormats(
-            new Format("DORAORSA2S", "sachet 20.5 g / 1 l [fr:sachet 20.5 g / 1 l]", Unit.MG)
+            new Format("DORAORSA2S", "sachet 20.5 g / 1 l [fr:sachet 20.5 g / 1 l]", Unit.ML)
         ),
         new Drug("DORAOSEL", "OSELTAMIVIR phosphate [fr:OSELTAMIVIR phosphate]").withFormats(
             new Format("DORAOSEL7C", "eq. 75 mg base, caps. [fr:éq. 75 mg base, gél.]", Unit.CAPSULE)
@@ -967,7 +967,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DINJAREP4C1", "4% / 1/100000, 1.7 ml, dent. cartr. [fr:4% / 1/100000, 1.7 ml carp. dent.]", Unit.ML)
         ),
         new Drug("DINJARTS", "ARTESUNATE [fr:ARTESUNATE]").withFormats(
-            new Format("DINJARTS6V", "60 mg, powder, vial +NaHCO3 5% 1 ml +NaCl 0.9% 5 ml [fr:60 mg, poudre, fl +NaHCO3 5% 1 ml +NaCl 0.9% 5 ml]", Unit.ML)
+            new Format("DINJARTS6V", "60 mg, powder, vial +NaHCO3 5% 1 ml +NaCl 0.9% 5 ml [fr:60 mg, poudre, fl +NaHCO3 5% 1 ml +NaCl 0.9% 5 ml]", Unit.MG)
         ),
         new Drug("DINJATRB", "ATRACURIUM besilate [fr:besilate d'ATRACURIUM]").withFormats(
             new Format("DINJATRB2A", "10 mg / ml, 2.5 ml, amp. [fr:10 mg / ml, 2.5 ml, amp.]", Unit.ML)
@@ -1427,6 +1427,16 @@ public interface MsfCatalog extends Catalog {
             new Format("DINFPLAS1FBF5", "500 ml, flex. bag, PVC free [fr:e, 500 ml, poche souple, ss PVC]", Unit.ML),
             new Format("DINFPLAS1FBP5", "500 ml, flex. bag, PVC [fr:e, 500 ml, poche souple, PVC]", Unit.ML),
             new Format("DINFPLAS1SRF5", "500 ml, semi-rigid bt, PVCfree [fr:e, 500 ml, fl. semi-rigide, ss PVC]", Unit.ML)
+        ),
+        new Drug("DINFBLDT", "BLOOD transfusion [fr:transfusion SANGUINE]").withFormats(
+            new Format("DINFBLDTON", "group O− [fr:groupe O−]", Unit.ML),
+            new Format("DINFBLDTOP", "group O+ [fr:groupe O+]", Unit.ML),
+            new Format("DINFBLDTAN", "group A− [fr:groupe A−]", Unit.ML),
+            new Format("DINFBLDTAP", "group A+ [fr:groupe A+]", Unit.ML),
+            new Format("DINFBLDTBN", "group B− [fr:groupe B−]", Unit.ML),
+            new Format("DINFBLDTBP", "group B+ [fr:groupe B+]", Unit.ML),
+            new Format("DINFBLDTABN", "group AB− [fr:groupe AB−]", Unit.ML),
+            new Format("DINFBLDTABP", "group AB+ [fr:groupe AB+]", Unit.ML)
         ),
         new Drug("DINFRINL", "RINGER lactate [fr:RINGER lactate]").withFormats(
             new Format("DINFRINL1FBF1", "1 l, flex. bag, PVC free [fr:1 l, poche souple, sans PVC]", Unit.MG),

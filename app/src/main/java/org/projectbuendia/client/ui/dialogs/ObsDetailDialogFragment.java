@@ -143,10 +143,11 @@ public class ObsDetailDialogFragment extends BaseDialogFragment<ObsDetailDialogF
             obs.type == Datatype.DATE ? Utils.format(value.date, DateStyle.YEAR_MONTH_DAY) :
             obs.type == Datatype.DATETIME ? Utils.format(Utils.toLocalDateTime(value.instant), DateStyle.MONTH_DAY_HOUR_MINUTE) :
             obs.valueName;
-        return Html.fromHtml(
-            "<span style='color: #33b5e5'>" + Utils.format(obs.time, HOUR_MINUTE)
-                + "</span>" + "&nbsp;&nbsp;&nbsp;"
-                + Html.escapeHtml(display));
+        String time = Utils.format(obs.time, HOUR_MINUTE);
+        String html = "<span style='color: #33b5e5'>" + time + "</span>"
+            + "&nbsp;&nbsp;&nbsp;"
+            + Html.escapeHtml(display.replace("\n", "\\\\")).replace("\\\\", "<br>");
+        return Html.fromHtml(html);
     }
 
     private void updateUi() {
