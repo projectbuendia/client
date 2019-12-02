@@ -167,6 +167,8 @@
   <string name="order_dosage_series">%1$s, given %2$sx daily</string>
   <string name="order_unspecified_dosage">Unspecified dosage</string>
   <string name="order_frequency_value">%1$dx/day</string>
+  <string name="order_execution_format">Format: %s</string>
+  <string name="order_execution_dosage">Dosage: %s</string>
   <string name="order_execution_historical_singular_html">Given &lt;b&gt;once&lt;/b&gt; %2$s</string>
   <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times %2$s</string>
   <string name="order_execution_today_singular_html">Given &lt;b&gt;once&lt;/b&gt; today</string>

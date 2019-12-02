@@ -32,6 +32,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
 import org.projectbuendia.client.models.Catalog.Drug;
+import org.projectbuendia.client.models.Catalog.Format;
 import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
@@ -182,17 +183,24 @@ public class OrderExecutionDialogFragment extends BaseDialogFragment<OrderExecut
     /** Constructs an HTML description of the order. */
     private String describeOrderHtml(Order.Instructions instr) {
         Drug drug = MsfCatalog.INDEX.getDrug(instr.code);
+        Format format = MsfCatalog.INDEX.getFormat(instr.code);
         String dosage = instr.amount != null ? (
             instr.duration != null ? u.str(
                 R.string.amount_in_duration,
                 instr.amount.formatLong(2), instr.duration.formatLong(2)
             ) : instr.amount.formatLong(2)
         ) : u.str(R.string.order_unspecified_dosage);
-        String htmlDescription = toBoldHtml(instr.getDrugName()) + "<br>" + toHtml(
-            instr.isSeries()
-                ? getString(R.string.order_dosage_series, dosage, Utils.format(instr.frequency.mag, 2))
-                : getString(R.string.order_dosage_unary, dosage)
-        );
+        String htmlDescription = toBoldHtml(App.localize(drug.name))
+            + "<br>"
+            + (format != null ? toHtml(getString(R.string.order_execution_format,
+                App.localize(format.description))
+            ) : "")
+            + "<br>"
+            + toHtml(getString(R.string.order_execution_dosage,
+                instr.isSeries()
+                    ? getString(R.string.order_dosage_series, dosage, Utils.format(instr.frequency.mag, 2))
+                    : getString(R.string.order_dosage_unary, dosage)
+            ));
         if (!Utils.isBlank(instr.notes)) {
             htmlDescription += "<br>" + toItalicHtml(instr.notes);
         }
