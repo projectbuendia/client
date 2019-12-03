@@ -58,7 +58,6 @@
   <string name="status_discharged_cured">Déchargée guéri</string>
   <string name="status_suspected_dead">Susceptible morte</string>
   <string name="status_confirmed_dead">Confirmé mort</string>
-  <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>
   <string name="title_patient_chart">Dossier du patient</string>
   <string name="title_activity_patient_add">Nouveau patient</string>

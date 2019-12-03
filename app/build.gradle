@@ -108,12 +108,14 @@ tasks['spoon'].outputs.upToDateWhen { false }
 def versionInteger = 0
 
 // Development builds get a version name that identifies the commit.
+def appName = 'Buendia dev'
 def repo = org.ajoberstar.grgit.Grgit.open(dir: project.rootDir)
 def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' : '+')
 
 // For a release build, use -PversionNumber=1.2.3 to set the version number.
 // It should have at most three parts, all numeric (e.g. 1, 1.2, or 1.2.3).
 if (project.hasProperty('versionNumber')) {
+    appName = 'Buendia'  // production app name
     // The version number is converted to an integer for the version code,
     // e.g. 2.34.5 becomes 2340005.
     def versionParts = project.versionNumber.split('\\.').toList()
@@ -223,6 +225,7 @@ android {
 
         versionCode versionInteger
         versionName versionString
+        resValue 'string', 'app_name', appName
         resValue 'string', 'app_version', versionString
 
         // To run tests in Android Studio, you will need to open the run configuration
