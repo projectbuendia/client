@@ -12,14 +12,20 @@ public class Unit {
 
     public static final Unit UNSPECIFIED = new Unit("", " ", " ", " ", "");
 
+    public static final Unit G = new Unit("G", "gram [fr:gramme]", "grams [fr:grammes]", "g");
     public static final Unit MG = new Unit("MG", "milligram [fr:milligramme]", "milligrams [fr:milligrammes]", "mg");
+    public static final Unit MCG = new Unit("MCG", "microgram [fr:microgramme]", "micrograms [fr:microgrammes]", "µg");
+    public static final Unit L = new Unit("L", "liter [fr:litre]", "liters [fr:litres]", "L");
     public static final Unit ML = new Unit("ML", "milliliter [fr:millilitre]", "milliliters [fr:millilitres]", "mL");
+    public static final Unit IU = new Unit("IU", "IU [fr:UI]", "IU [fr:UI]", "IU");
     public static final Unit TABLET = new Unit("TABLET", "tablet [fr:comprimé]", "tablets [fr:comprimés]", "tab. [fr:comp.]");
     public static final Unit CAPSULE = new Unit("CAPSULE", "capsule", "capsules", "caps.");
     public static final Unit DROP = new Unit("DROP", "drop [fr:goutte]", "drops [fr:gouttes]", "drop [fr:goutte]");
     public static final Unit PUFF = new Unit("PUFF", "puff [fr:bouffée]", "puffs [fr:bouffées]", "puff [fr:bouffée]");
     public static final Unit AMPOULE = new Unit("AMPOULE", "ampoule", "ampoules", "amp.");
     public static final Unit SACHET = new Unit("SACHET", "sachet", "sachets", "sach.");
+    public static final Unit OVULE = new Unit("OVULE", "ovule", "ovules", "ov.");
+    public static final Unit SUPP = new Unit("SUPP", "suppository [fr:suppositoire]", "suppositories [fr:suppositoires]", "supp.");
 
     public static final Unit DAY = new Unit("DAY", "day [fr:jour]", "days [fr:jours]", "d [fr:j]", "d [fr:j]");
     public static final Unit HOUR = new Unit("HOUR", "hour [fr:heure]", "hours [fr:heures]", "hr", "h");

@@ -128,7 +128,7 @@ public interface Catalog {
 
         public final String code;  // stock code, e.g. "DORAACSA3TD"
         public final Loc description;  // amount, concentration, form, e.g. "300 mg, disp. tab."
-        public final Unit dosageUnit;
+        public final Unit dosageUnit;  // null means this format takes no dosage specification
 
         public Format(String code, String description, Unit dosageUnit) {
             this(code, new Loc(description), dosageUnit);
