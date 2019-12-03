@@ -400,7 +400,7 @@ public class SnackBar {
                     dismissButton.setOnClickListener(v -> dismiss(m.key));
                     dismissButton.setVisibility(View.VISIBLE);
                 } else {
-                    dismissButton.setVisibility(View.INVISIBLE);
+                    dismissButton.setVisibility(View.GONE);
                 }
             }
             return newView;
