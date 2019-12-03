@@ -59,7 +59,6 @@
   <string name="status_suspected_dead">Suspected Dead</string>
   <string name="status_confirmed_dead">Confirmed Dead</string>
 
-  <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>
   <string name="title_patient_chart">Patient chart</string>
   <string name="title_activity_patient_add">New patient</string>
