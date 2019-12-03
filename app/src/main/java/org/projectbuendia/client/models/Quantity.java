@@ -8,6 +8,8 @@ import javax.annotation.Nonnull;
 import static org.projectbuendia.client.utils.Utils.eq;
 
 public class Quantity {
+    public static final Quantity ZERO = new Quantity(0, Unit.UNSPECIFIED);
+
     public final double mag;
     public final @Nonnull Unit unit;
 

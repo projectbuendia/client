@@ -1,10 +1,13 @@
 package org.projectbuendia.client.models;
 
 public interface MsfCatalog extends Catalog {
-    Route PO = new Route("PO", "oral", "PO");
-    Route IV = new Route("IV", "intravenous", "IV");
-    Route SC = new Route("SC", "subcutaneous", "SC");
-    Route IM = new Route("IM", "intramuscular", "IM");
+    Route UNSPECIFIED = new Route("", "", "");
+    Route PO = new Route("PO", "oral [fr:orale]", "PO");
+    Route IV = new Route("IV", "intravenous [fr:intraveineuse]", "IV");
+    Route SC = new Route("SC", "subcutaneous [fr:sous-cutanée", "SC");
+    Route IM = new Route("IM", "intramuscular [fr:intramusculaire]", "IM");
+    Route IO = new Route("IO", "intraosseous [fr:intraosseux]", "IO");
+    Route OC = new Route("OC", "ocular [fr:oculaire]", "OC");
 
     // ==== BEGIN GENERATED OUTPUT ====
     // Produced by executing: get_meds -s 2 -e 3 -f 4 -E 7 -F 8 mml-buendia.xlsx
@@ -932,7 +935,7 @@ public interface MsfCatalog extends Catalog {
         )
     );
 
-    Category INJECTABLE = new Category("DINJ", "injectable", false, IV, SC, IM).withDrugs(
+    Category INJECTABLE = new Category("DINJ", "injectable", false, IV, SC, IM, IO).withDrugs(
         new Drug("DINJACCY", "ACETYLCYSTEINE [fr:ACETYLCYSTEINE]").withFormats(
             new Format("DINJACCY2A", "200 mg / ml, 10 ml, amp. [fr:200 mg / ml, 10 ml, amp.]", Unit.ML)
         ),
@@ -1472,7 +1475,7 @@ public interface MsfCatalog extends Catalog {
         )
     );
 
-    Category EXTERNAL = new Category("DEXT", "external", false).withDrugs(
+    Category EXTERNAL = new Category("DEXT", "external", false, UNSPECIFIED, OC).withDrugs(
         new Drug("DEXOACIV", "ACICLOVIR ophth. [fr:ACICLOVIR ophth.]").withFormats(
             new Format("DEXOACIV3T4", "3%, eye ointment, sterile, 4.5 g, tube [fr:3%, pommade ophtalmique, stérile, 4.5 g, tube]", Unit.ML)
         ),
@@ -1805,6 +1808,13 @@ public interface MsfCatalog extends Catalog {
     // ==== END GENERATED OUTPUT ====
 
     CatalogIndex INDEX = new CatalogIndex(ORAL, INJECTABLE, PERFUSION, EXTERNAL, VACCINE)
-        .withRoutes(PO, IV, SC, IM)
-        .withUnits(Unit.TABLET, Unit.CAPSULE, Unit.MG, Unit.ML, Unit.DROP, Unit.PUFF, Unit.AMPOULE, Unit.SACHET);
+        .withRoutes(UNSPECIFIED, PO, IV, SC, IM, IO, OC)
+        .withDosageUnits(
+            Unit.TABLET, Unit.CAPSULE,
+            Unit.G, Unit.MG, Unit.MCG,
+            Unit.L, Unit.ML,
+            Unit.IU,
+            Unit.DROP, Unit.PUFF,
+            Unit.AMPOULE, Unit.SACHET,
+            Unit.OVULE, Unit.SUPP);
 }

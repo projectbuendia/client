@@ -15,7 +15,7 @@ public class CatalogIndex {
     Map<String, Drug> drugs = new HashMap<>();
     Map<String, Format> formats = new HashMap<>();
     Route[] routes = {};
-    Unit[] units = {};
+    Unit[] dosageUnits = {};
 
     public CatalogIndex(Category... categories) {
         this.categories = categories;
@@ -34,8 +34,8 @@ public class CatalogIndex {
         return this;
     }
 
-    public CatalogIndex withUnits(Unit... units) {
-        this.units = units;
+    public CatalogIndex withDosageUnits(Unit... units) {
+        this.dosageUnits = units;
         return this;
     }
 
@@ -66,10 +66,7 @@ public class CatalogIndex {
         return Route.UNSPECIFIED;
     }
 
-    public Unit getUnit(String code) {
-        for (Unit unit : units) {
-            if (eq(code, unit.code)) return unit;
-        }
-        return Unit.UNSPECIFIED;
+    public Unit[] getDosageUnits() {
+        return dosageUnits;
     }
 }

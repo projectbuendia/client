@@ -574,7 +574,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     Utils.logEvent("download_update_button_pressed");
                     //TODO: programatically dismiss the snackbar message
                     EventBus.getDefault().post(new DownloadRequestedEvent());
-                });
+                }, 35, false);
         }
 
         @Override public void showUpdateReadyToInstall(DownloadedUpdateInfo updateInfo) {
@@ -584,7 +584,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     Utils.logEvent("install_update_button_pressed");
                     //TODO: programatically dismiss the snackbar message
                     EventBus.getDefault().post(new InstallationRequestedEvent());
-                });
+                }, 35, false);
         }
 
         @Override public void hideSoftwareUpdateNotifications() {
