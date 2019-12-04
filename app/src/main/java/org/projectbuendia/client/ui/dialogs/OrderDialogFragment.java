@@ -43,6 +43,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderDialogRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.models.Catalog.Category;
 import org.projectbuendia.client.models.Catalog.Drug;
@@ -411,11 +412,19 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         dialog.dismiss();
 
+        // Facilitate entering several orders one after another.
+        u.prompt(R.string.title_next_treatment, R.string.add_another_treatment,
+            R.string.title_new_order, R.string.done, this::openNextOrder);
+
         // Post an event that triggers the PatientChartController to save the order.
         EventBus.getDefault().post(new OrderAddRequestedEvent(
             orderUuid, args.patientUuid, Utils.getProviderUuid(),
             instructions, start, seriesLengthDays > 0 ? seriesLengthDays : null
         ));
+    }
+
+    private void openNextOrder() {
+        EventBus.getDefault().post(new OrderDialogRequestedEvent());
     }
 
     private void onStopNow() {

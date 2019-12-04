@@ -224,11 +224,15 @@ public class ContextUtils extends ContextWrapper {
     // ==== User interface ====
 
     public void prompt(int titleId, int messageId, int actionId, Runnable action) {
+        prompt(titleId, messageId, actionId, R.string.cancel, action);
+    }
+
+    public void prompt(int titleId, int messageId, int actionId, int cancelId, Runnable action) {
         new AlertDialog.Builder(this)
             .setTitle(titleId)
             .setMessage(messageId)
             .setPositiveButton(actionId, (d, i) -> action.run())
-            .setNegativeButton(R.string.cancel, null)
+            .setNegativeButton(cancelId, null)
             .create()
             .show();
     }
