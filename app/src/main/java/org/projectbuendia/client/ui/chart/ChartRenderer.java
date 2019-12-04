@@ -144,23 +144,30 @@ public class ChartRenderer {
 
         LOG.elapsed("render", "HTML generated");
 
-        // To avoid showing stale, possibly misleading data from a previous
-        // patient, clear out any previous chart HTML before showing the WebView.
-        mView.loadUrl("about:blank");
-        mView.clearView();
-        mView.setVisibility(View.VISIBLE);
-        mView.loadDataWithBaseURL(
-            "file:///android_asset/", html, "text/html; charset=utf-8", "utf-8", null);
-        mView.setWebContentsDebuggingEnabled(true);
+        // Record the scroll position of the viewport in the document so we can restore it.
+        mView.evaluateJavascript("getScrollPosition()", (value) -> {
+            value = value.replace('"', ' ').trim();
+            String scrollJs = "<script>setScrollPosition('" + value + "');</script>";
+            LOG.i("scrollJs = %s", Utils.repr(scrollJs));
 
-        LOG.finish("render", "HTML loaded into WebView");
+            // To avoid showing stale, possibly misleading data from a previous
+            // patient, clear out any previous chart HTML before showing the WebView.
+            mView.loadUrl("about:blank");
+            mView.clearView();
+            mView.setVisibility(View.VISIBLE);
+            mView.loadDataWithBaseURL(
+                "file:///android_asset/", html + scrollJs, "text/html; charset=utf-8", "utf-8", null);
+            mView.setWebContentsDebuggingEnabled(true);
 
-        mLastChartName = chart.name;
-        mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
-        mLastRenderedObs = observations;
-        mLastRenderedOrders = orders;
+            LOG.finish("render", "HTML loaded into WebView");
 
-        LOG.start("ChartJS");
+            mLastChartName = chart.name;
+            mLastRenderedZoomIndex = mSettings.getChartZoomIndex();
+            mLastRenderedObs = observations;
+            mLastRenderedOrders = orders;
+
+            LOG.start("ChartJS");
+        });
     }
 
     /** Gets the starting times (in ms) of the segments into which the day is divided. */
