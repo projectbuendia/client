@@ -26,7 +26,7 @@ import de.greenrobot.event.EventBus;
  * want this behaviour should instantiate this controller and call its init()
  * and suspend() methods, in addition to other controllers they may have.
  */
-public class UpdateNotificationController {
+public class UpdateCheckController {
     Ui mUi;
     AvailableUpdateInfo mAvailableUpdateInfo;
     DownloadedUpdateInfo mDownloadedUpdateInfo;
@@ -42,7 +42,7 @@ public class UpdateNotificationController {
         void hideSoftwareUpdateNotifications();
     }
 
-    public UpdateNotificationController(Ui ui) {
+    public UpdateCheckController(Ui ui) {
         mUi = ui;
         handler = new Handler();
     }

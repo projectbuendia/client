@@ -147,7 +147,9 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                             mConnectionDetails.getUser(),
                             mConnectionDetails.getPassword()),
                         "UTF-8", false));
+                    LOG.i("HTTP GET: " + httpGet.getURI());
                     HttpResponse httpResponse = httpClient.execute(httpGet);
+                    LOG.i("Response: " + httpResponse.getStatusLine());
                     if (httpResponse.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
                         LOG.w("The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
                             uri, httpResponse.getStatusLine().getStatusCode());

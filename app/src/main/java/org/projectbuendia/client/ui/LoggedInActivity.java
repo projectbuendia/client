@@ -56,8 +56,6 @@ public abstract class LoggedInActivity extends BaseActivity {
     private Menu mMenu;
     private UserMenuPopup mUserMenu;
 
-    protected UpdateNotificationController mUpdateNotificationController = null;
-
     private ReadyState mReadyState = ReadyState.READY;
 
     @Override protected boolean onCreateImpl(Bundle state) {
@@ -155,11 +153,7 @@ public abstract class LoggedInActivity extends BaseActivity {
             super.onResume();
             return;
         }
-
         onResumeImpl();
-        if (mUpdateNotificationController != null) {
-            mUpdateNotificationController.init();
-        }
     }
 
     protected void onResumeImpl() {
@@ -170,10 +164,6 @@ public abstract class LoggedInActivity extends BaseActivity {
         if (!mIsCreated) {
             super.onPause();
             return;
-        }
-
-        if (mUpdateNotificationController != null) {
-            mUpdateNotificationController.suspend();
         }
         onPauseImpl();
     }

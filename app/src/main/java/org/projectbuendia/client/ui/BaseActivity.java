@@ -92,6 +92,7 @@ public abstract class BaseActivity extends FragmentActivity {
     private SnackBar snackBar;
     private Locale initialLocale; // for restarting when locale has changed
     private Set<String> openDialogTypes;
+    protected UpdateCheckController updateCheckController = null;
 
     // NOTE: Don't override this method; override onCreateImpl() instead.
     @Override protected final void onCreate(Bundle state) {
@@ -108,6 +109,8 @@ public abstract class BaseActivity extends FragmentActivity {
         settings = App.getSettings();
         initialLocale = Locale.getDefault();
         openDialogTypes = new HashSet<>();
+        updateCheckController =
+            new UpdateCheckController(new UpdateNotificationUi());
 
         if (!settings.isAuthorized() && !(this instanceof AuthorizationActivity)) {
             Utils.jumpToActivity(this, AuthorizationActivity.class);
@@ -141,11 +144,17 @@ public abstract class BaseActivity extends FragmentActivity {
                 HealthIssue.PERIODIC_SYNC_DISABLED.resolved
         );
         Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
+        if (updateCheckController != null) {
+            updateCheckController.init();
+        }
         idleStartTime = Instant.now();
         tick.run();
     }
 
     @Override protected void onPause() {
+        if (updateCheckController != null) {
+            updateCheckController.suspend();
+        }
         unregisterReceiver(batteryWatcher);
         EventBus.getDefault().unregister(this);
         App.getHealthMonitor().stop();
@@ -563,7 +572,7 @@ public abstract class BaseActivity extends FragmentActivity {
     public static class InstallationRequestedEvent {
     }
 
-    protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
+    protected class UpdateNotificationUi implements UpdateCheckController.Ui {
 
         public UpdateNotificationUi() {}
 
