@@ -58,7 +58,6 @@
   <string name="status_discharged_cured">Déchargée guéri</string>
   <string name="status_suspected_dead">Susceptible morte</string>
   <string name="status_confirmed_dead">Confirmé mort</string>
-  <string name="app_name">Buendia</string>
   <string name="title_patient_list">Patients</string>
   <string name="title_patient_chart">Dossier du patient</string>
   <string name="title_activity_patient_add">Nouveau patient</string>
@@ -169,6 +168,10 @@
   <string name="order_execution_mark_as_given_now">Marquer comme donné maintenant</string>
   <string name="order_execution_marked_as_given_now">&#x2713; Marqué comme donné maintenant</string>
   <string name="order_started_datetime">Commencé %s</string>
+
+  <string name="title_next_treatment">Prochain traitement</string>
+  <string name="add_another_treatment">Ajouter le prochain treatment?</string>
+  <string name="done">Fini</string>
 
   <string name="oral_category">Orale</string>
   <string name="injectable_category">Injectable</string>
