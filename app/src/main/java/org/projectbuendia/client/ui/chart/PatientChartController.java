@@ -32,6 +32,7 @@ import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderDialogRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
@@ -584,6 +585,10 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
             mFormPending = false;
             mUi.showFormLoadingDialog(false);
             mUi.showError(messageId);
+        }
+
+        public void onEventMainThread(OrderDialogRequestedEvent event) {
+            mUi.showOrderDialog(mPatientUuid, null, null);
         }
 
         public void onEventMainThread(OrderAddRequestedEvent event) {
