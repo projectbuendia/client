@@ -27,8 +27,8 @@
 
         <!-- The delay interval in seconds between looking for APK updates -->
         <org.projectbuendia.client.widgets.EditIntegerPreference
-            android:key="apk_update_interval"
-            android:title="@string/pref_title_apk_update_interval"
+            android:key="apk_check_interval"
+            android:title="@string/pref_title_apk_check_interval"
             android:defaultValue="@integer/apk_check_interval_default" />
 
         <!-- The delay interval in seconds between small (< 100 ms) syncs -->

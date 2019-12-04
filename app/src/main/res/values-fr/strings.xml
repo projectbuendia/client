@@ -428,7 +428,7 @@ S\'il vous plaît patienter pendant que les données du patient et l\'emplacemen
   <string name="pref_title_language">Langue</string>
   <string name="select_language">Sélectionnez la langue</string>
 
-  <string name="pref_title_apk_update_interval">Intervalle de vérification des mises à jour APK (secondes)</string>
+  <string name="pref_title_apk_check_interval">Intervalle de vérification des mises à jour APK (secondes)</string>
   <string name="pref_title_small_sync_interval">Intervalle des petites synchronisations (seconds)</string>
   <string name="pref_title_medium_sync_interval">Intervalle des moyennes synchronisations (seconds)</string>
   <string name="pref_title_large_sync_interval">Intervalle des grandes synchronisations (seconds)</string>

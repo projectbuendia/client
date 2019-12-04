@@ -159,7 +159,7 @@ def serverFantastica = '192.168.1.161'
 def serverLocalhost = '127.0.0.1'
 
 // The interval at which we check for APK updates.
-def apkCheckIntervalDefault = 120
+def apkCheckIntervalDefault = 10
 
 // These control the periodic sync frequency for various categories of data.
 def smallSyncIntervalDefault = 10  // for syncs that take less than 100 ms

@@ -145,7 +145,7 @@ public class AppSettings {
      will not check the package server for new updates.
      */
     public int getApkUpdateInterval() {
-        return prefs.getInt("apk_update_interval",
+        return prefs.getInt("apk_check_interval",
             resources.getInteger(R.integer.apk_check_interval_default));
     }
 
