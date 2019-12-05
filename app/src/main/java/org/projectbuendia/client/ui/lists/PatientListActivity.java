@@ -30,7 +30,6 @@ import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoggedInActivity;
 import org.projectbuendia.client.ui.ReadyState;
-import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -107,10 +106,6 @@ public abstract class PatientListActivity extends LoggedInActivity {
             new EventBusWrapper(mEventBus),
             App.getModel(),
             App.getSyncManager());
-
-        mUpdateNotificationController = new UpdateNotificationController(
-            new UpdateNotificationUi()
-        );
 
         // To facilitate chart development, there's a developer setting that
         // causes the app to go straight to a patient chart on startup.

@@ -28,7 +28,7 @@ import org.projectbuendia.client.sync.ThreadedSyncScheduler;
 import org.projectbuendia.client.ui.AuthorizationActivity;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
-import org.projectbuendia.client.ui.UpdateNotificationController;
+import org.projectbuendia.client.ui.UpdateCheckController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.PatientDialogFragment;
@@ -85,7 +85,7 @@ import dagger.Provides;
         LocationListActivity.class,
         PatientListFragment.class,
         SingleLocationFragment.class,
-        UpdateNotificationController.class,
+        UpdateCheckController.class,
         LoginActivity.class,
         LoginFragment.class,
         SettingsActivity.class,

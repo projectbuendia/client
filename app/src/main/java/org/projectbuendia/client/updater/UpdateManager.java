@@ -100,7 +100,7 @@ public class UpdateManager {
     public void checkForUpdate() {
         Instant now = Instant.now();
         if (now.isBefore(mLastCheckForUpdateTime.plus(
-            new Duration(mSettings.getApkUpdateInterval() * 1000)))) {
+            Duration.standardSeconds(mSettings.getApkUpdateInterval() - 1)))) {
             if (!isDownloadInProgress()) {
                 // This immediate check just updates the event state to match any current
                 // knowledge of an available or downloaded update.  The more interesting

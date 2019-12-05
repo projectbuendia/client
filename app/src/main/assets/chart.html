@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html>
 <title>Patient Chart</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -29,8 +28,6 @@
 </style>
 
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
-<body>
-
 <table id="grid-table" cellspacing=0 cellpadding=0>
   <thead>
     <tr class="top">
@@ -361,6 +358,7 @@
   frozenHeadings.css({top: scrolling.offset().top + 'px'});
 
   var yOffset = 0;
+  var lastLeft, lastTop;
 
   function updateY() {
     yOffset = scrolling.scrollTop() - tiles.height();
@@ -368,6 +366,7 @@
     frozenHeadings.toggle(yOffset > 0);
     floatingHeadings.hide();
     floatingHeadings.css({top: yOffset});
+    lastTop = $(window).scrollTop();
   }
 
   var lastTimeout = 0;
@@ -380,6 +379,17 @@
       window.clearTimeout(lastTimeout);
       lastTimeout = window.setTimeout(updateY, 50);
     }
+    lastLeft = $('#grid-body').scrollLeft();
+  }
+
+  function getScrollPosition() {
+    return gridBody.scrollLeft() + ',' + scrolling.scrollTop();
+  }
+
+  function setScrollPosition(pos) {
+    var xy = pos.split(',');
+    gridBody.scrollLeft(xy[0] - 0);
+    scrolling.scrollTop(xy[1] - 0);
   }
 
   scrolling.scroll(updateY);
@@ -455,5 +465,3 @@
 
   c.finish();
 </script>
-</body>
-</html>

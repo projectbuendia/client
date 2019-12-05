@@ -302,7 +302,6 @@ public final class PatientChartActivity extends LoggedInActivity {
         @Override public void updateTilesAndGrid(Chart chart, Map<String, Obs> latestObservations,
             List<Obs> observations, List<Order> orders) {
             mChartRenderer.render(chart, latestObservations, observations, orders, mController);
-            mWebView.invalidate();
         }
 
         @Override public void updatePatientDetailsUi(Patient patient) {

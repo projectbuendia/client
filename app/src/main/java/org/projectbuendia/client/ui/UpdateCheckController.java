@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.ui;
 
+import android.os.Handler;
+
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.events.UpdateAvailableEvent;
 import org.projectbuendia.client.events.UpdateReadyToInstallEvent;
@@ -24,10 +26,12 @@ import de.greenrobot.event.EventBus;
  * want this behaviour should instantiate this controller and call its init()
  * and suspend() methods, in addition to other controllers they may have.
  */
-public class UpdateNotificationController {
+public class UpdateCheckController {
     Ui mUi;
     AvailableUpdateInfo mAvailableUpdateInfo;
     DownloadedUpdateInfo mDownloadedUpdateInfo;
+    boolean isRunning = false;
+    Handler handler;
 
     public interface Ui {
 
@@ -38,15 +42,26 @@ public class UpdateNotificationController {
         void hideSoftwareUpdateNotifications();
     }
 
-    public UpdateNotificationController(Ui ui) {
+    public UpdateCheckController(Ui ui) {
         mUi = ui;
+        handler = new Handler();
     }
 
     /** Activate the controller.  Called whenever user enters a new activity. */
     public void init() {
         EventBus.getDefault().register(this);
-        App.getUpdateManager().checkForUpdate();
-        updateAvailabilityNotifications();
+        isRunning = true;
+        handler.post(this::doNextCheck);
+    }
+
+    private void doNextCheck() {
+        if (isRunning) {
+            App.getUpdateManager().checkForUpdate();
+            updateAvailabilityNotifications();
+            handler.postDelayed(
+                this::doNextCheck,
+                App.getSettings().getApkUpdateInterval() * 1000);
+        }
     }
 
     /**
@@ -74,6 +89,7 @@ public class UpdateNotificationController {
     }
 
     public void suspend() {
+        isRunning = false;
         EventBus.getDefault().unregister(this);
     }
 
