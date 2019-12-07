@@ -61,7 +61,7 @@ public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDia
 
     @Override protected void onSubmit() {
         Utils.logUserAction("go_to_patient_submitted",
-            "patient_id", v.patientId.getText().toString(),
+            "query_id", v.patientId.getText().toString(),
             "patient_uuid", patientUuid);
         if (patientUuid != null) {
             dialog.dismiss();

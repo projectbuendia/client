@@ -53,6 +53,7 @@ import org.projectbuendia.client.models.CatalogIndex;
 import org.projectbuendia.client.models.MsfCatalog;
 import org.projectbuendia.client.models.Obs;
 import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Order.Instructions;
 import org.projectbuendia.client.models.Quantity;
 import org.projectbuendia.client.models.Unit;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
@@ -288,7 +289,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void populateFields() {
-        Order.Instructions instr = args.order.instructions;
+        Instructions instr = args.order.instructions;
         boolean isContinuous = args.order.isContinuous();
         boolean isSeries = args.order.isSeries();
         DateTime stop = args.order.stop;
@@ -349,7 +350,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             new Quantity(Utils.getDouble(v.frequency, 0), Unit.PER_DAY) : null;
         String notes = Utils.getText(v.notes);
 
-        Order.Instructions instructions = new Order.Instructions(
+        Instructions instructions = new Instructions(
             code, amount, duration, route, frequency, notes
         );
 
@@ -430,13 +431,37 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     private void onStopNow() {
         dialog.dismiss();
         u.prompt(R.string.title_confirmation, R.string.confirm_order_stop, R.string.order_stop_now,
-            () -> EventBus.getDefault().post(new OrderStopRequestedEvent(orderUuid)));
+            () -> {
+                Instructions instr = args.order.instructions;
+                Utils.logUserAction("order_stop_requested",
+                    "uuid", orderUuid,
+                    "code", instr.code,
+                    "amount", "" + instr.amount,
+                    "duration", "" + instr.duration,
+                    "route", instr.route,
+                    "frequency", "" + instr.frequency,
+                    "notes", instr.notes);
+                EventBus.getDefault().post(new OrderStopRequestedEvent(orderUuid));
+            }
+        );
     }
 
     private void onDelete() {
         dialog.dismiss();
         u.prompt(R.string.title_confirmation, R.string.confirm_order_delete, R.string.delete,
-            () -> EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid)));
+            () -> {
+                Instructions instr = args.order.instructions;
+                Utils.logUserAction("order_delete_requested",
+                    "uuid", orderUuid,
+                    "code", instr.code,
+                    "amount", "" + instr.amount,
+                    "duration", "" + instr.duration,
+                    "route", instr.route,
+                    "frequency", "" + instr.frequency,
+                    "notes", instr.notes);
+                EventBus.getDefault().post(new OrderDeleteRequestedEvent(orderUuid));
+            }
+        );
     }
 
     /** Adds an "X" button to a text edit field. */
