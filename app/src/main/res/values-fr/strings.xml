@@ -124,14 +124,14 @@
   <string name="multiple_times">Plusieurs fois</string>
 
   <string name="order_start_now_indefinitely">(commencer maintenant; continuer indéfiniment)</string>
-  <string name="order_start_now_stop_after_doses">(commencer maintenant; arrêter après %d doses)</string>
-  <string name="order_start_now_after_doses_stop_date">(commencer maintenant; après %1$d doses, arrêter %2$s)</string>
+  <string name="order_start_now_stop_after_n_doses">(commencer maintenant; arrêter après %d doses)</string>
+  <string name="order_start_now_after_n_doses_stop_date">(commencer maintenant; après %1$d doses, arrêter %2$s)</string>
 
   <string name="order_one_dose_only_ordered_date">(dose unique, commandé %s)</string>
   <string name="order_started_date_stopped_date">(commencé %1$s; arrêté %2$s)</string>
   <string name="order_started_date_indefinitely">(commencé %s; continuer indéfiniment)</string>
-  <string name="order_started_date_stop_after_doses">(commencé %1$s; arrêter après %2$d doses)</string>
-  <string name="order_started_date_after_doses_stop_date">(commencé %1$s; après %2$d doses, arrêter %3$s)</string>
+  <string name="order_n_doses_in_one_day_ordered_date">(%1$d doses dans un jour, commandé %2$s)</string>
+  <string name="order_started_date_after_n_doses_stop_date">(commencé %1$s; après %2$d doses, arrêter %3$s)</string>
 
   <string name="order_notes">Remarques</string>
   <string name="enter_medication">Entrez le médicament</string>

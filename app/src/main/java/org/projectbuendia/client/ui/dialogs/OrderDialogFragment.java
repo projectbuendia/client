@@ -244,7 +244,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.amountUnit.setOnClickListener(this::selectUnit);
         v.dosageUnit.setOnClickListener(this::selectUnit);
 
-        v.isSeries.setOnCheckedChangeListener((v, id) -> onOrderTypeChanged());
+        v.isSeries.setOnCheckedChangeListener((v, id) -> onIsSeriesChanged());
         new EditTextWatcher(
             v.dosage, v.amount, v.duration, v.frequency, v.seriesLength
         ).onChange(() -> updateUi());
@@ -254,7 +254,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
     }
 
     private void selectUnit(View v) {
-        if (args.stopped || args.executed) return;
+        if (args.executed) return;  // Can't change dosage if already executed
 
         Unit[] units = index.getDosageUnits();
         String[] labels = new String[units.length];
@@ -553,7 +553,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.scheduleDescription.setText("");
     }
 
-    private void onOrderTypeChanged() {
+    private void onIsSeriesChanged() {
         updateUi();
         if (Utils.isVisible(v.frequencyRow)) v.frequency.requestFocus();
     }
@@ -578,7 +578,6 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         boolean isSeries = v.isSeries.getCheckedRadioButtonId() == R.id.order_series;
         Utils.showIf(v.frequencyRow, isSeries);
         Utils.showIf(v.seriesLengthRow, isSeries);
-        Utils.showIf(v.scheduleDescriptionRow, isSeries);
 
         double dosage = Utils.getDouble(v.dosage, 0);
         double amount = Utils.getDouble(v.amount, 0);
@@ -612,37 +611,27 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         if (args.order == null) {
             v.scheduleDescription.setText(
-                timesPerDay == 0 || timesPerDay * days == 1 ?
-                    "" :
+                !isSeries || timesPerDay == 0 || timesPerDay * days == 1 ?
+                    u.str(R.string.order_one_dose_only_ordered_date, startDate) :
                 days == 0 ?
                     u.str(R.string.order_start_now_indefinitely) :
                 days == 1 ?
-                    u.str(R.string.order_start_now_stop_after_doses, doses) :
-                u.str(R.string.order_start_now_after_doses_stop_date, doses, stopDate)
-            );
-        } else if (args.stopped) {
-            v.scheduleDescription.setText(
-                timesPerDay == 0 || timesPerDay * days == 1 ?
-                    u.str(R.string.order_one_dose_only_ordered_date, startDate) :
-                u.str(R.string.order_started_date_stopped_date, startDate, stopDate)
+                    u.str(R.string.order_start_now_stop_after_n_doses, doses) :
+                u.str(R.string.order_start_now_after_n_doses_stop_date, doses, stopDate)
             );
         } else {
             v.scheduleDescription.setText(
-                timesPerDay == 0 || timesPerDay * days == 1 ?
+                !isSeries || timesPerDay == 0 || timesPerDay * days == 1 ?
                     u.str(R.string.order_one_dose_only_ordered_date, startDate) :
                 days == 0 ?
                     u.str(R.string.order_started_date_indefinitely, startDate) :
                 days == 1 ?
-                    u.str(R.string.order_started_date_stop_after_doses, startDate, doses) :
-                u.str(R.string.order_started_date_after_doses_stop_date, startDate, doses, stopDate)
+                    u.str(R.string.order_n_doses_in_one_day_ordered_date, doses, startDate) :
+                u.str(R.string.order_started_date_after_n_doses_stop_date, startDate, doses, stopDate)
             );
         }
 
-        // If the order has stopped, the frequency and series length are read-only.
-        Utils.setEnabled(v.frequency, !args.stopped);
-        Utils.setEnabled(v.seriesLength, !args.stopped);
-
-        // If already executed, all fields except series length and notes are read-only.
+        // If already executed, all dosing fields are read-only.
         if (args.executed) {
             Utils.setChildrenEnabled(v.category, false);
             Utils.setEnabled(v.drug, false);
@@ -651,11 +640,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             Utils.setEnabled(v.route, false);
             Utils.setEnabled(v.amount, false);
             Utils.setEnabled(v.duration, false);
-            Utils.setChildrenEnabled(v.isSeries, false);
-            Utils.setEnabled(v.frequency, false);
-            if (!getActivity().getCurrentFocus().isEnabled()) {
-                (isSeries ? v.seriesLength : v.notes).requestFocus();
-            }
+            (isSeries ? v.frequency : v.notes).requestFocus();  // focus on first enabled field
         }
 
         // Hide or show the "Stop" and "Delete" buttons appropriately.
