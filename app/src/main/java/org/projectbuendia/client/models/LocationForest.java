@@ -166,7 +166,7 @@ public class LocationForest {
     }
 
     /** Gets the location with a given UUID. */
-    public Location get(String uuid) {
+    public @Nullable Location get(@Nullable String uuid) {
         return locationsByUuid.get(uuid);
     }
 
@@ -188,8 +188,8 @@ public class LocationForest {
     }
 
     /** Returns true if the given location is a leaf node. */
-    public boolean isLeaf(@Nonnull Location location) {
-        return !nonleafUuids.contains(location.uuid);
+    public boolean isLeaf(@Nullable Location location) {
+        return location != null && !nonleafUuids.contains(location.uuid);
     }
 
     /** Given a UUID, counts the patients just at its node. */

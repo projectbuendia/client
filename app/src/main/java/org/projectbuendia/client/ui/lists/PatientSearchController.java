@@ -70,7 +70,7 @@ public class PatientSearchController {
     }
 
     public interface FragmentUi {
-        void setPatients(TypedCursor<Patient> patients, LocationForest forest);
+        void setPatients(TypedCursor<Patient> patients, LocationForest forest, String rootLocationUuid);
         void showSpinner(boolean show);
     }
 
@@ -148,7 +148,7 @@ public class PatientSearchController {
 
     private void updateFragmentUi(FragmentUi fragmentUi) {
         if (mPatientsCursor != null) {
-            fragmentUi.setPatients(getFilteredCursor(), mForest);
+            fragmentUi.setPatients(getFilteredCursor(), mForest, mRootLocationUuid);
             fragmentUi.showSpinner(false);
         }
     }

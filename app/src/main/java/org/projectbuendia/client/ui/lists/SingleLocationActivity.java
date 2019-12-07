@@ -36,7 +36,7 @@ public class SingleLocationActivity extends PatientListActivity {
 
         setTitle(R.string.title_single_location);
         mLocationUuid = getIntent().getStringExtra("uuid");
-        setContentView(R.layout.activity_round);
+        setContentView(R.layout.activity_single_location);
         getSearchController().setLocationFilter(mLocationUuid);
         return true;
     }
