@@ -52,6 +52,8 @@
         <EditText
             android:id="@+id/bed_number"
             android:ems="5"
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/text.huge"
