@@ -30,7 +30,6 @@ import android.widget.TextView;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
@@ -114,10 +113,8 @@ public class Utils {
 
     // ==== Basic types ====
 
-    /**
-     * Java's default .equals() and == are both broken whereas Objects.equals is
-     * usually correct, so let's make its logic available under a short, easy name.
-     */
+    // Java's default .equals() and == are both broken whereas Objects.equals is
+    // usually correct, so let's make its logic available under a short, easy name.
     public static boolean eq(Object a, Object b) {
         // noinspection EqualsReplaceableByObjectsCall (this is deliberately inlined)
         return (a == b) || (a != null && a.equals(b));
@@ -200,7 +197,7 @@ public class Utils {
 
     /** Converts nulls to empty Lists. */
     public static <T> List<T> toNonnull(@Nullable List<T> list) {
-        return list != null ? list : ImmutableList.of();
+        return list != null ? list : Arrays.<T>asList();
     }
 
     /** Performs a null-safe check for an array with at least one item. */

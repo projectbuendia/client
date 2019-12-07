@@ -63,6 +63,7 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
 
     private Location[] mLocations;
     private Map<String, Obs> mConditionObs = new HashMap<>();
+    private boolean mGroupsVisible = true;
 
     public PatientListAdapter(Context context) {
         u = ContextUtils.from(context);
@@ -88,6 +89,10 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
 
     @Override public View getGroupView(
         int groupIndex, boolean isExpanded, View view, ViewGroup parent) {
+        if (!mGroupsVisible) {
+            return u.inflate(R.layout.patient_list_empty_heading, parent);
+        }
+
         Location location = getGroup(groupIndex);
         view = u.reuseOrInflate(view, R.layout.patient_list_group_heading, parent);
 
@@ -154,8 +159,9 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
      * Updates the adapter to show all patients from the given cursor.  (Does not
      * take ownership; the original owner remains responsible for closing it.)
      */
-    public void setPatients(TypedCursor<Patient> cursor, LocationForest forest) {
+    public void setPatients(TypedCursor<Patient> cursor, LocationForest forest, boolean showGroups) {
         mPatientsByLocation.clear();
+        mGroupsVisible = showGroups;
 
         // Add all patients from cursor.
         int count = cursor.getCount();

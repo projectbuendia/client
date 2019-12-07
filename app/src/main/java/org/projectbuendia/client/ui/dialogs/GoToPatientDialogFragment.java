@@ -106,6 +106,10 @@ public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDia
             patientUuid = null;
             v.searchResult.setText("");
         } else {
+            if (id.matches("^\\d+$")) {
+                String prefix = Utils.nonemptyOrDefault(App.getSettings().getLastIdPrefix(), "BN"); // TODO(ping): Remove this Bunia-specific hack.
+                id = prefix + "/" + id;
+            }
             try (Cursor cursor = getActivity().getContentResolver().query(
                 Patients.URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
                 if (cursor.moveToNext()) {  // found locally

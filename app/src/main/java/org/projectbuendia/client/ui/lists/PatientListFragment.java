@@ -20,6 +20,7 @@ import android.widget.ListView;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationForest;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
@@ -101,7 +102,7 @@ public class PatientListFragment extends ProgressFragment implements
         mListView = view.findViewById(R.id.fragment_patient_list);
         mListView.setEmptyView(view.findViewById(R.id.empty));
         mListView.setOnChildClickListener(this);
-        mPatientAdapter = getAdapterInstance();
+        mPatientAdapter = new PatientListAdapter(getActivity());
         mListView.setAdapter(mPatientAdapter);
 
         mSwipeToRefresh =
@@ -116,10 +117,6 @@ public class PatientListFragment extends ProgressFragment implements
             && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
-    }
-
-    protected PatientListAdapter getAdapterInstance() {
-        return new PatientListAdapter(getActivity());
     }
 
     private void setActivatedPosition(int position) {
@@ -154,9 +151,11 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
-        @Override public void setPatients(TypedCursor<Patient> patients, LocationForest forest) {
+        @Override public void setPatients(
+            TypedCursor<Patient> patients, LocationForest forest, String rootLocationUuid) {
             if (mPatientAdapter != null) {
-                mPatientAdapter.setPatients(patients, forest);
+                Location root = forest.get(rootLocationUuid);
+                mPatientAdapter.setPatients(patients, forest, !forest.isLeaf(root));
             }
         }
 

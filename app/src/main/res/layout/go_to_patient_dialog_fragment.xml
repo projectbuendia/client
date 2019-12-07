@@ -38,9 +38,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:digits="0123456789"
+                android:textAllCaps="true"
+                android:inputType="textCapCharacters"
                 android:ems="12"
-                android:inputType="numberDecimal"
                 tools:text="23"
                 />
         </TableRow>

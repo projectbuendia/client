@@ -40,7 +40,6 @@ import org.projectbuendia.client.ui.lists.PatientListActivity;
 import org.projectbuendia.client.ui.lists.PatientListController;
 import org.projectbuendia.client.ui.lists.PatientListFragment;
 import org.projectbuendia.client.ui.lists.SingleLocationActivity;
-import org.projectbuendia.client.ui.lists.SingleLocationFragment;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.login.LoginFragment;
 import org.projectbuendia.client.updater.UpdateModule;
@@ -84,7 +83,6 @@ import dagger.Provides;
         SingleLocationActivity.class,
         LocationListActivity.class,
         PatientListFragment.class,
-        SingleLocationFragment.class,
         UpdateCheckController.class,
         LoginActivity.class,
         LoginFragment.class,
