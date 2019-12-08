@@ -1,6 +1,6 @@
 package org.projectbuendia.client.models;
 
-import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Intl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,20 +34,20 @@ public class Unit {
     public static final Unit PER_DAY = new Unit("PER_DAY", "time per day [fr:fois par jour]", "times per day [fr:fois par jour]", "\bx per day [fr:\bx par jour]", "\bx/day [fr:\bx/jour]");
 
     public final String code;  // identifier code, e.g. "SECOND"
-    public final Loc singular;  // singular prose, e.g. "second"
-    public final Loc plural;  // plural prose, e.g. "seconds"
-    public final Loc terse;  // informal short form, e.g. "sec"
-    public final Loc abbr;  // standard abbreviation, e.g. "s"
+    public final Intl singular;  // singular prose, e.g. "second"
+    public final Intl plural;  // plural prose, e.g. "seconds"
+    public final Intl terse;  // informal short form, e.g. "sec"
+    public final Intl abbr;  // standard abbreviation, e.g. "s"
 
     public Unit(String code, String singular, String plural, String terse) {
         this(code, singular, plural, terse, terse);
     }
 
     public Unit(String code, String singular, String plural, String terse, String abbr) {
-        this(code, new Loc(singular), new Loc(plural), new Loc(terse), new Loc(abbr));
+        this(code, new Intl(singular), new Intl(plural), new Intl(terse), new Intl(abbr));
     }
 
-    public Unit(String code, Loc singular, Loc plural, Loc terse, Loc abbr) {
+    public Unit(String code, Intl singular, Intl plural, Intl terse, Intl abbr) {
         this.code = code;
         this.singular = singular;
         this.plural = plural;
@@ -64,11 +64,11 @@ public class Unit {
         return code;
     }
 
-    public Loc forCount(double count) {
+    public Intl forCount(double count) {
         return count == 1 ? singular : plural;
     }
 
-    public Loc forCount(int count) {
+    public Intl forCount(int count) {
         return count == 1 ? singular : plural;
     }
 

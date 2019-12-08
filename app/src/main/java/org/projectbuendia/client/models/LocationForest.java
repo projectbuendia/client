@@ -13,7 +13,7 @@ package org.projectbuendia.client.models;
 
 import android.support.annotation.Nullable;
 
-import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Intl;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -94,7 +94,7 @@ public class LocationForest {
             String uuid = uuids.get(i);
             String name = namesByUuid.get(uuid);
             if (name.contains("*")) defaultUuid = uuid;
-            Loc loc = new Loc(name);
+            Intl intl = new Intl(name);
 
             // Use the short IDs to construct a sortable path string for each node.
             // Each path component ends with a terminating character so that
@@ -106,7 +106,7 @@ public class LocationForest {
                 numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + count);
             }
 
-            locations[i] = new Location(uuid, loc.get(locale));
+            locations[i] = new Location(uuid, intl.get(locale));
             pathsByUuid.put(uuid, path);
             locationsByUuid.put(uuid, locations[i]);
         }

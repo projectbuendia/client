@@ -59,7 +59,7 @@ import org.projectbuendia.client.models.Unit;
 import org.projectbuendia.client.ui.AutocompleteAdapter;
 import org.projectbuendia.client.ui.AutocompleteAdapter.CompletionAdapter;
 import org.projectbuendia.client.ui.EditTextWatcher;
-import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Intl;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
@@ -744,7 +744,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         public void showInView(View view, Drug drug) {
             Utils.setText(view, R.id.label, App.localize(drug.name));
             String result = "";
-            for (Loc caption : drug.captions) {
+            for (Intl caption : drug.captions) {
                 if (!result.isEmpty()) result += ", ";
                 result += App.localize(caption);
             }
@@ -790,7 +790,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             for (String localizedName : drug.name.getAll()) {
                 target += " " + localizedName.toLowerCase();
             }
-            for (Loc alias : drug.aliases) {
+            for (Intl alias : drug.aliases) {
                 for (String localizedAlias : alias.getAll()) {
                     target += " " + localizedAlias;
                 }

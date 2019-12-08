@@ -1,7 +1,7 @@
 package org.projectbuendia.client.models;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Intl;
 import org.projectbuendia.client.utils.Utils;
 
 import static org.projectbuendia.client.utils.Utils.eq;
@@ -59,12 +59,12 @@ public interface Catalog {
         public static final Category UNSPECIFIED = new Category("", "", false);
 
         public final String code;  // category identifier, e.g. "DORA", "DINJ", "DEXT"
-        public final Loc name;  // drug category, e.g. "oral", "injectable", "external"
+        public final Intl name;  // drug category, e.g. "oral", "injectable", "external"
         public final boolean isContinuous;  // dosed continuously, in quantity over time
         public final Route[] routes;  // routes of administration
         public final Drug[] drugs;  // drugs in this category
 
-        public Category(String code, Loc name, boolean isContinuous, Route[] routes, Drug[] drugs) {
+        public Category(String code, Intl name, boolean isContinuous, Route[] routes, Drug[] drugs) {
             this.code = code;
             this.name = name;
             this.isContinuous = isContinuous;
@@ -73,7 +73,7 @@ public interface Catalog {
         }
 
         public Category(String code, String name, boolean isContinuous, Route[] routes, Drug[] drugs) {
-            this(code, new Loc(name), isContinuous, routes, drugs);
+            this(code, new Intl(name), isContinuous, routes, drugs);
         }
 
         public Category(String code, String name, boolean isContinuous, Route... routes) {
@@ -93,24 +93,24 @@ public interface Catalog {
         public static final Drug UNSPECIFIED = new Drug("", " ").withFormats(Format.UNSPECIFIED);
 
         public final String code;  // drug identifier, e.g. "DORAACSA"
-        public final Loc name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
-        public final Loc[] aliases;  // alternative names, title case, e.g. {"Aspirin", "ASA"}
-        public final Loc[] captions;  // therapeutic action, lowercase noun, e.g. {"analgesic", "antipyretic"}
+        public final Intl name;  // active ingredient, title case, e.g. "Acetylsalicylic Acid"
+        public final Intl[] aliases;  // alternative names, title case, e.g. {"Aspirin", "ASA"}
+        public final Intl[] captions;  // therapeutic action, lowercase noun, e.g. {"analgesic", "antipyretic"}
         public final Format[] formats;
 
-        public Drug(String code, Loc name, Loc[] aliases, Loc[] captions, Format[] formats) {
+        public Drug(String code, Intl name, Intl[] aliases, Intl[] captions, Format[] formats) {
             this.code = code;
             this.name = name;
             this.aliases = aliases;
-            this.captions = Utils.orDefault(captions, new Loc[0]);
+            this.captions = Utils.orDefault(captions, new Intl[0]);
             this.formats = Utils.orDefault(formats, new Format[0]);
         }
 
         public Drug(String code, String name, String... aliases) {
-            this(code, new Loc(name), Loc.newArray(aliases), null, null);
+            this(code, new Intl(name), Intl.newArray(aliases), null, null);
         }
 
-        public Drug withCaptions(Loc... captions) {
+        public Drug withCaptions(Intl... captions) {
             return new Drug(code, name, aliases, captions, formats);
         }
 
@@ -127,14 +127,14 @@ public interface Catalog {
         public static final Format UNSPECIFIED = new Format("", " ", Unit.UNSPECIFIED);
 
         public final String code;  // stock code, e.g. "DORAACSA3TD"
-        public final Loc description;  // amount, concentration, form, e.g. "300 mg, disp. tab."
+        public final Intl description;  // amount, concentration, form, e.g. "300 mg, disp. tab."
         public final Unit dosageUnit;  // null means this format takes no dosage specification
 
         public Format(String code, String description, Unit dosageUnit) {
-            this(code, new Loc(description), dosageUnit);
+            this(code, new Intl(description), dosageUnit);
         }
 
-        public Format(String code, Loc description, Unit dosageUnit) {
+        public Format(String code, Intl description, Unit dosageUnit) {
             this.code = code;
             this.description = description;
             this.dosageUnit = dosageUnit;
@@ -153,13 +153,13 @@ public interface Catalog {
         public static final Route UNSPECIFIED = new Route("", " ", "");
 
         public final String code;  // identifier code, e.g. "IV"
-        public final Loc name;  // route of administration, e.g. "intravenous"
-        public final Loc abbr;  // abbreviation, e.g. "IV"
+        public final Intl name;  // route of administration, e.g. "intravenous"
+        public final Intl abbr;  // abbreviation, e.g. "IV"
 
         public Route(String code, String name, String abbr) {
             this.code = code;
-            this.name = new Loc(name);
-            this.abbr = new Loc(abbr);
+            this.name = new Intl(name);
+            this.abbr = new Intl(abbr);
         }
 
         @Override public boolean equals(Object other) {

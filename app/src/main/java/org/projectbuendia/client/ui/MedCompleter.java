@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Intl;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -28,69 +28,69 @@ public class MedCompleter {
     //   - If primarily for a specific disease, optionally append "for" and the
     //     disease name in parentheses (e.g. "insecticide (for scabies)")
 
-    public static final Loc ABORTIFACIENT = new Loc("abortifacient [fr:abortif]");
-    public static final Loc ADSORBENT = new Loc("adsorbent [fr:adsorbant]");
-    public static final Loc ANAESTHETIC = new Loc("anaesthetic [fr:anesthésique]");
-    public static final Loc ANALGESIC = new Loc("analgesic [fr:analgésique]");
-    public static final Loc ANTACID = new Loc("antacid [fr:antiacide]");
-    public static final Loc ANTHELMINTHIC = new Loc("anthelminthic [fr:anthelminthique]");
-    public static final Loc ANTIANAEMIC = new Loc("antianaemic [fr:anti-anémique]");
-    public static final Loc ANTIANAPHYLACTIC = new Loc("antianaphylactic [fr:anti-anaphylactique]");
-    public static final Loc ANTIANGINAL = new Loc("antianginal [fr:anti-angineux]");
-    public static final Loc ANTIBACTERIAL = new Loc("antibacterial [fr:antibactérien]");
-    public static final Loc ANTICHOLINERGIC = new Loc("anticholinergic [fr:anticholinergique]");
-    public static final Loc ANTICOAGULANT = new Loc("anticoagulant [fr:anticoagulant]");
-    public static final Loc ANTICONVULSANT = new Loc("anticonvulsant [fr:anticonvulsivant]");
-    public static final Loc ANTIDEPRESSANT = new Loc("antidepressant [fr:antidépresseur]");
-    public static final Loc ANTIDIABETIC = new Loc("antidiabetic [fr:antidiabétique]");
-    public static final Loc ANTIDIARRHOEAL = new Loc("antidiarrhoeal [fr:antidiarrhéique]");
-    public static final Loc ANTIEMETIC = new Loc("antiemetic [fr:antiémétique]");
-    public static final Loc ANTIEPILEPTIC = new Loc("antiepileptic [fr:antiépileptique]");
-    public static final Loc ANTIFIBRINOLYTIC = new Loc("antifibrinolytic [fr:antifibrinolytique]");
-    public static final Loc ANTIFUNGAL = new Loc("antifungal [fr:antifongique]");
-    public static final Loc ANTIHISTAMINE = new Loc("antihistamine [fr:antihistaminique]");
-    public static final Loc ANTIHYPERTENSIVE = new Loc("antihypertensive [fr:antihypertenseur]");
-    public static final Loc ANTILEPROTIC = new Loc("antileprotic [fr:antileprotique]");
-    public static final Loc ANTIMALARIAL = new Loc("antimalarial [fr:antipaludique]");
-    public static final Loc ANTIOXYTOCIC = new Loc("antioxytocic [fr:antioxytocique]");
-    public static final Loc ANTIPARKINSONIAN = new Loc("antiparkinsonian [fr:antiparkinsonien]");
-    public static final Loc ANTIPROTOZOAL = new Loc("antiprotozoal [fr:antiprotozoaire]");
-    public static final Loc ANTIPROTOZOAL_FOR_SLEEPING_SICKNESS = new Loc("antiprotozoal (for sleeping sickness) [fr:antiprotozoaire (pour la maladie du sommeil)]");
-    public static final Loc ANTIPRURITIC = new Loc("antipruritic [fr:antiprurigineux]");
-    public static final Loc ANTIPSYCHOTIC = new Loc("antipsychotic [fr:antipsychotique]");
-    public static final Loc ANTIPYRETIC = new Loc("antipyretic [fr:antipyrétique]");
-    public static final Loc ANTIRETROVIRAL = new Loc("antiretroviral [fr:antirétroviral]");
-    public static final Loc ANTISEPTIC = new Loc("antiseptic [fr:antiseptique]");
-    public static final Loc ANTISPASMODIC = new Loc("antispasmodic [fr:antispasmodique]");
-    public static final Loc ANTITUBERCULAR = new Loc("antitubercular [fr:antituberculeux]");
-    public static final Loc ANTIVIRAL = new Loc("antiviral [fr:antiviral]");
-    public static final Loc ANTIVIRAL_FOR_HPV = new Loc("antiviral (for HPV) [fr:antiviral (pour le VPH)]");
-    public static final Loc BETA_BLOCKER = new Loc("beta blocker [fr:bêta-bloquant]");
-    public static final Loc BRONCHODILATOR = new Loc("bronchodilator [fr:bronchodilatateur]");
-    public static final Loc CARDIOTONIC = new Loc("cardiotonic [fr:cardiotonique]");
-    public static final Loc CONTRACEPTIVE = new Loc("contraceptive [fr:contraceptif]");
-    public static final Loc CORTICOSTEROID = new Loc("corticosteroid [fr:corticostéroïde]");
-    public static final Loc DIAGNOSTIC_STAINING_AGENT = new Loc("diagnostic staining agent [fr:agent de coloration diagnostique]");
-    public static final Loc DISINFECTANT = new Loc("disinfectant [fr:désinfectant]");
-    public static final Loc DIURETIC = new Loc("diuretic [fr:diurétique]");
-    public static final Loc EXPERIMENTAL_EBOLA_TREATMENT = new Loc("experimental Ebola treatment [fr:traitement expérimental contre Ebola]");
-    public static final Loc EXPERIMENTAL_EBOLA_VACCINE = new Loc("experimental Ebola vaccine [fr:vaccin expérimental contre Ebola]");
-    public static final Loc FLUID_REPLACER = new Loc("fluid replacer [fr:substitut fluide]");
-    public static final Loc HEPARIN_ANTIDOTE = new Loc("heparin antidote [fr:antidote à l'héparine]");
-    public static final Loc INSECTICIDE = new Loc("insecticide [fr:insecticide]");
-    public static final Loc INSECTICIDE_FOR_LICE = new Loc("insecticide (for lice) [fr:insecticide (pour les poux)]");
-    public static final Loc INSECTICIDE_FOR_SCABIES = new Loc("insecticide (for scabies) [fr:insecticide (pour la gale)]");
-    public static final Loc LACTATION_INHIBITOR = new Loc("lactation inhibitor [fr:inhibiteur de la lactation]");
-    public static final Loc LAXATIVE = new Loc("laxative [fr:laxatif]");
-    public static final Loc MIOTIC = new Loc("miotic [fr:miotique]");
-    public static final Loc OPIOID_ANALGESIC = new Loc("opioid analgesic [fr:analgésique opioïde]");
-    public static final Loc OPIOID_ANTAGONIST = new Loc("opioid antagonist [fr:antagoniste des opioïdes]");
-    public static final Loc OXYTOCIC = new Loc("oxytocic [fr:ocytocique]");
-    public static final Loc PLASMA_SUBSTITUTE = new Loc("plasma substitute [fr:substitut de plasma]");
-    public static final Loc SEDATIVE = new Loc("sedative [fr:sedatif]");
-    public static final Loc SKIN_PROTECTOR = new Loc("skin protector [fr:protecteur de la peau]");
-    public static final Loc SUPPLEMENT = new Loc("supplement [fr:supplément]");
-    public static final Loc VACCINE = new Loc("vaccine [fr:vaccin]");
+    public static final Intl ABORTIFACIENT = new Intl("abortifacient [fr:abortif]");
+    public static final Intl ADSORBENT = new Intl("adsorbent [fr:adsorbant]");
+    public static final Intl ANAESTHETIC = new Intl("anaesthetic [fr:anesthésique]");
+    public static final Intl ANALGESIC = new Intl("analgesic [fr:analgésique]");
+    public static final Intl ANTACID = new Intl("antacid [fr:antiacide]");
+    public static final Intl ANTHELMINTHIC = new Intl("anthelminthic [fr:anthelminthique]");
+    public static final Intl ANTIANAEMIC = new Intl("antianaemic [fr:anti-anémique]");
+    public static final Intl ANTIANAPHYLACTIC = new Intl("antianaphylactic [fr:anti-anaphylactique]");
+    public static final Intl ANTIANGINAL = new Intl("antianginal [fr:anti-angineux]");
+    public static final Intl ANTIBACTERIAL = new Intl("antibacterial [fr:antibactérien]");
+    public static final Intl ANTICHOLINERGIC = new Intl("anticholinergic [fr:anticholinergique]");
+    public static final Intl ANTICOAGULANT = new Intl("anticoagulant [fr:anticoagulant]");
+    public static final Intl ANTICONVULSANT = new Intl("anticonvulsant [fr:anticonvulsivant]");
+    public static final Intl ANTIDEPRESSANT = new Intl("antidepressant [fr:antidépresseur]");
+    public static final Intl ANTIDIABETIC = new Intl("antidiabetic [fr:antidiabétique]");
+    public static final Intl ANTIDIARRHOEAL = new Intl("antidiarrhoeal [fr:antidiarrhéique]");
+    public static final Intl ANTIEMETIC = new Intl("antiemetic [fr:antiémétique]");
+    public static final Intl ANTIEPILEPTIC = new Intl("antiepileptic [fr:antiépileptique]");
+    public static final Intl ANTIFIBRINOLYTIC = new Intl("antifibrinolytic [fr:antifibrinolytique]");
+    public static final Intl ANTIFUNGAL = new Intl("antifungal [fr:antifongique]");
+    public static final Intl ANTIHISTAMINE = new Intl("antihistamine [fr:antihistaminique]");
+    public static final Intl ANTIHYPERTENSIVE = new Intl("antihypertensive [fr:antihypertenseur]");
+    public static final Intl ANTILEPROTIC = new Intl("antileprotic [fr:antileprotique]");
+    public static final Intl ANTIMALARIAL = new Intl("antimalarial [fr:antipaludique]");
+    public static final Intl ANTIOXYTOCIC = new Intl("antioxytocic [fr:antioxytocique]");
+    public static final Intl ANTIPARKINSONIAN = new Intl("antiparkinsonian [fr:antiparkinsonien]");
+    public static final Intl ANTIPROTOZOAL = new Intl("antiprotozoal [fr:antiprotozoaire]");
+    public static final Intl ANTIPROTOZOAL_FOR_SLEEPING_SICKNESS = new Intl("antiprotozoal (for sleeping sickness) [fr:antiprotozoaire (pour la maladie du sommeil)]");
+    public static final Intl ANTIPRURITIC = new Intl("antipruritic [fr:antiprurigineux]");
+    public static final Intl ANTIPSYCHOTIC = new Intl("antipsychotic [fr:antipsychotique]");
+    public static final Intl ANTIPYRETIC = new Intl("antipyretic [fr:antipyrétique]");
+    public static final Intl ANTIRETROVIRAL = new Intl("antiretroviral [fr:antirétroviral]");
+    public static final Intl ANTISEPTIC = new Intl("antiseptic [fr:antiseptique]");
+    public static final Intl ANTISPASMODIC = new Intl("antispasmodic [fr:antispasmodique]");
+    public static final Intl ANTITUBERCULAR = new Intl("antitubercular [fr:antituberculeux]");
+    public static final Intl ANTIVIRAL = new Intl("antiviral [fr:antiviral]");
+    public static final Intl ANTIVIRAL_FOR_HPV = new Intl("antiviral (for HPV) [fr:antiviral (pour le VPH)]");
+    public static final Intl BETA_BLOCKER = new Intl("beta blocker [fr:bêta-bloquant]");
+    public static final Intl BRONCHODILATOR = new Intl("bronchodilator [fr:bronchodilatateur]");
+    public static final Intl CARDIOTONIC = new Intl("cardiotonic [fr:cardiotonique]");
+    public static final Intl CONTRACEPTIVE = new Intl("contraceptive [fr:contraceptif]");
+    public static final Intl CORTICOSTEROID = new Intl("corticosteroid [fr:corticostéroïde]");
+    public static final Intl DIAGNOSTIC_STAINING_AGENT = new Intl("diagnostic staining agent [fr:agent de coloration diagnostique]");
+    public static final Intl DISINFECTANT = new Intl("disinfectant [fr:désinfectant]");
+    public static final Intl DIURETIC = new Intl("diuretic [fr:diurétique]");
+    public static final Intl EXPERIMENTAL_EBOLA_TREATMENT = new Intl("experimental Ebola treatment [fr:traitement expérimental contre Ebola]");
+    public static final Intl EXPERIMENTAL_EBOLA_VACCINE = new Intl("experimental Ebola vaccine [fr:vaccin expérimental contre Ebola]");
+    public static final Intl FLUID_REPLACER = new Intl("fluid replacer [fr:substitut fluide]");
+    public static final Intl HEPARIN_ANTIDOTE = new Intl("heparin antidote [fr:antidote à l'héparine]");
+    public static final Intl INSECTICIDE = new Intl("insecticide [fr:insecticide]");
+    public static final Intl INSECTICIDE_FOR_LICE = new Intl("insecticide (for lice) [fr:insecticide (pour les poux)]");
+    public static final Intl INSECTICIDE_FOR_SCABIES = new Intl("insecticide (for scabies) [fr:insecticide (pour la gale)]");
+    public static final Intl LACTATION_INHIBITOR = new Intl("lactation inhibitor [fr:inhibiteur de la lactation]");
+    public static final Intl LAXATIVE = new Intl("laxative [fr:laxatif]");
+    public static final Intl MIOTIC = new Intl("miotic [fr:miotique]");
+    public static final Intl OPIOID_ANALGESIC = new Intl("opioid analgesic [fr:analgésique opioïde]");
+    public static final Intl OPIOID_ANTAGONIST = new Intl("opioid antagonist [fr:antagoniste des opioïdes]");
+    public static final Intl OXYTOCIC = new Intl("oxytocic [fr:ocytocique]");
+    public static final Intl PLASMA_SUBSTITUTE = new Intl("plasma substitute [fr:substitut de plasma]");
+    public static final Intl SEDATIVE = new Intl("sedative [fr:sedatif]");
+    public static final Intl SKIN_PROTECTOR = new Intl("skin protector [fr:protecteur de la peau]");
+    public static final Intl SUPPLEMENT = new Intl("supplement [fr:supplément]");
+    public static final Intl VACCINE = new Intl("vaccine [fr:vaccin]");
 
 
     // === Style conventions for medication names ====
@@ -491,14 +491,14 @@ public class MedCompleter {
 
     public static class Med {
         String name;
-        Loc[] captions;
+        Intl[] captions;
         String[] aliases;
         String label;
         String filterTarget;
 
         public Med(String name, String... aliases) {
             this.name = name;
-            this.captions = new Loc[0];
+            this.captions = new Intl[0];
             this.aliases = aliases;
             label = name;
             filterTarget = " " + name.toLowerCase();
@@ -510,7 +510,7 @@ public class MedCompleter {
             filterTarget = normalize(" " + filterTarget + " " + collapsed + " ");
         }
 
-        public Med caption(Loc... captions) {
+        public Med caption(Intl... captions) {
             this.captions = captions;
             return this;
         }
@@ -519,9 +519,9 @@ public class MedCompleter {
             Locale locale = Locale.getDefault();
             Utils.setText(itemView, R.id.label, label);
             String caption = "";
-            for (Loc loc : captions) {
+            for (Intl intl : captions) {
                 if (!caption.isEmpty()) caption += ", ";
-                caption += loc.get(locale);
+                caption += intl.get(locale);
             }
             Utils.setText(itemView, R.id.caption, caption);
         }
