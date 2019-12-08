@@ -217,7 +217,7 @@ public class ChartDataHelper {
             while (c.moveToNext()) {
                 Long rowid = Utils.getLong(c, ChartItems.ROWID);
                 Long parentRowid = Utils.getLong(c, ChartItems.PARENT_ROWID);
-                String label = new Intl(Utils.getString(c, ChartItems.LABEL, "")).get(locale);
+                String label = new Intl(Utils.getString(c, ChartItems.LABEL, "")).loc(locale);
                 if (parentRowid == null) {
                     // Add a section.
                     String sectionType = Utils.getString(c, ChartItems.SECTION_TYPE);
@@ -250,10 +250,10 @@ public class ChartDataHelper {
                             Utils.getString(c, ChartItems.TYPE),
                             Utils.getLong(c, ChartItems.REQUIRED, 0L) > 0L,
                             Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(","),
-                            new Intl(Utils.getString(c, ChartItems.FORMAT)).get(locale),
-                            new Intl(Utils.getString(c, ChartItems.CAPTION_FORMAT)).get(locale),
-                            new Intl(Utils.getString(c, ChartItems.CSS_CLASS)).get(locale),
-                            new Intl(Utils.getString(c, ChartItems.CSS_STYLE)).get(locale),
+                            new Intl(Utils.getString(c, ChartItems.FORMAT)).loc(locale),
+                            new Intl(Utils.getString(c, ChartItems.CAPTION_FORMAT)).loc(locale),
+                            new Intl(Utils.getString(c, ChartItems.CSS_CLASS)).loc(locale),
+                            new Intl(Utils.getString(c, ChartItems.CSS_STYLE)).loc(locale),
                             Utils.getString(c, ChartItems.SCRIPT));
                         section.items.add(item);
                     } else {

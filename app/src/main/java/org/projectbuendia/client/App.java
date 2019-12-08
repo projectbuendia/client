@@ -114,7 +114,7 @@ public class App extends Application {
     }
 
     public static String localize(Intl packed) {
-        return packed.get(getSettings().getLocale());
+        return packed.loc(getSettings().getLocale());
     }
 
     public static void inject(Object obj) {

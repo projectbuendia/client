@@ -37,7 +37,7 @@ public class ConceptService {
     public synchronized String getName(String uuid, Locale locale) {
         if (names == null) load();
         Intl intl = names.get(uuid);
-        return intl != null ? intl.get(locale) : Utils.compressUuid(uuid) + "?";
+        return intl != null ? intl.loc(locale) : Utils.compressUuid(uuid) + "?";
     }
 
     public synchronized void invalidate() {

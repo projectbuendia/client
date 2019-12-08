@@ -31,8 +31,8 @@ public class Intl {
         this.options = options;
     }
 
-    public String get(Locale locale) {
-        if (options == null || options.isEmpty()) return base;
+    public String loc(Locale locale) {
+        if (options == null || options.isEmpty() || locale == null) return base;
 
         String tag = Utils.toLanguageTag(locale);
         if (options.containsKey(tag)) return options.get(tag);

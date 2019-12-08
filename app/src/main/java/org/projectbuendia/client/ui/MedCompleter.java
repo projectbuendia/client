@@ -521,7 +521,7 @@ public class MedCompleter {
             String caption = "";
             for (Intl intl : captions) {
                 if (!caption.isEmpty()) caption += ", ";
-                caption += intl.get(locale);
+                caption += intl.loc(locale);
             }
             Utils.setText(itemView, R.id.caption, caption);
         }

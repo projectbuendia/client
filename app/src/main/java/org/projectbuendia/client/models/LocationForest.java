@@ -106,7 +106,7 @@ public class LocationForest {
                 numPatientsInSubtree.put(u, numPatientsInSubtree.get(u) + count);
             }
 
-            locations[i] = new Location(uuid, intl.get(locale));
+            locations[i] = new Location(uuid, intl.loc(locale));
             pathsByUuid.put(uuid, path);
             locationsByUuid.put(uuid, locations[i]);
         }
