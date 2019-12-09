@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
-import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.models.Patient;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;

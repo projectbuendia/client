@@ -23,7 +23,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.data.ItemLoadFailedEvent;
 import org.projectbuendia.client.events.data.ItemLoadedEvent;
-import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.models.Patient;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.ui.EditTextWatcher;
 import org.projectbuendia.client.utils.Utils;

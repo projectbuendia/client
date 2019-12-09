@@ -22,8 +22,8 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Order;
+import org.projectbuendia.models.Encounter;
+import org.projectbuendia.models.Order;
 
 import java.util.List;
 

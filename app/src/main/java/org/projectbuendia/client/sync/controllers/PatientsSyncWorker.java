@@ -21,7 +21,7 @@ import android.net.Uri;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonPatient;
-import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 

@@ -28,7 +28,7 @@ import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.sync.ChartDataHelper;

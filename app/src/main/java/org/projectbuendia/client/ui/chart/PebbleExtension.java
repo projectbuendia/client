@@ -11,9 +11,9 @@ import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ObsPoint;
-import org.projectbuendia.client.models.ObsValue;
-import org.projectbuendia.client.models.Order;
+import org.projectbuendia.models.ObsPoint;
+import org.projectbuendia.models.ObsValue;
+import org.projectbuendia.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 

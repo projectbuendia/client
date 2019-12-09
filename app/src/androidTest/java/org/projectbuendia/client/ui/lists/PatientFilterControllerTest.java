@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeForestFactory;
-import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.models.AppModel;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 
 import static org.mockito.Matchers.argThat;

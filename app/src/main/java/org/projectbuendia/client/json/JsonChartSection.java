@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.json;
 
-import org.projectbuendia.client.models.ChartSectionType;
+import org.projectbuendia.models.ChartSectionType;
 
 /** A section in a chart (a row of tiles or a group of grid rows). */
 public class JsonChartSection {

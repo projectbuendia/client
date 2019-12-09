@@ -16,9 +16,9 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.models.Location;
+import org.projectbuendia.models.Patient;
+import org.projectbuendia.models.TypedCursor;
 
 /** A patient list for a single location. */
 public class SingleLocationActivity extends PatientListActivity {

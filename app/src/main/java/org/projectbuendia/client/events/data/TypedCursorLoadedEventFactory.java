@@ -11,8 +11,8 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.models.Patient;
+import org.projectbuendia.models.TypedCursor;
 
 /** A factory that creates instances of subclasses of {@link TypedCursorLoadedEvent}. */
 public class TypedCursorLoadedEventFactory {

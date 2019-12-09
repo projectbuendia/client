@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.models.Patient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import static android.support.test.espresso.matcher.ViewMatchers.withId;

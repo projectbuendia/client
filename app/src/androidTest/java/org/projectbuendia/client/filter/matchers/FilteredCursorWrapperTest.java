@@ -18,7 +18,7 @@ import com.google.common.collect.Iterators;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projectbuendia.client.FakeTypedCursor;
-import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.models.TypedCursor;
 
 import java.util.Iterator;
 

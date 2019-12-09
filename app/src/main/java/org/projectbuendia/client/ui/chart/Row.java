@@ -1,6 +1,6 @@
 package org.projectbuendia.client.ui.chart;
 
-import org.projectbuendia.client.models.ChartItem;
+import org.projectbuendia.models.ChartItem;
 
 import java.util.HashMap;
 import java.util.Map;

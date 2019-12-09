@@ -13,7 +13,7 @@ package org.projectbuendia.client;
 
 import com.google.common.collect.Iterators;
 
-import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.models.TypedCursor;
 
 import java.util.Iterator;
 

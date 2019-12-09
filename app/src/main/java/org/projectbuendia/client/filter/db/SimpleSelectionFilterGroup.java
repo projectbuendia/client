@@ -15,7 +15,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Model;
+import org.projectbuendia.models.Model;
 
 import java.util.ArrayList;
 import java.util.Collections;

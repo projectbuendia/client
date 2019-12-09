@@ -1,6 +1,6 @@
 package org.projectbuendia.client.events.actions;
 
-import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.models.Obs;
 
 import java.util.Collection;
 

@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.models.Obs;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment;
 import org.projectbuendia.client.ui.dialogs.ObsDetailDialogFragment.Group;
 import org.projectbuendia.client.utils.ContextUtils;

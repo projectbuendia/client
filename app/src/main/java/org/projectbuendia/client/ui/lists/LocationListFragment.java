@@ -19,8 +19,8 @@ import android.widget.ScrollView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.models.Location;
+import org.projectbuendia.models.LocationForest;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.ui.ReadyState;
 import org.projectbuendia.client.utils.Logger;

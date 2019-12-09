@@ -13,7 +13,7 @@ package org.projectbuendia.client.ui.lists;
 
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
-import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.models.AppModel;
 
 import java.util.List;
 

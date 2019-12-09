@@ -19,11 +19,11 @@ import android.widget.ListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationForest;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.models.AppModel;
+import org.projectbuendia.models.Location;
+import org.projectbuendia.models.LocationForest;
+import org.projectbuendia.models.Patient;
+import org.projectbuendia.models.TypedCursor;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.PatientListAdapter;

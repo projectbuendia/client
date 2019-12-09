@@ -16,8 +16,8 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.Sex;
+import org.projectbuendia.models.Patient;
+import org.projectbuendia.models.Sex;
 
 import androidx.test.filters.SmallTest;
 

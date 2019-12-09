@@ -24,7 +24,7 @@ import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.sync.SyncCancelledEvent;
 import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.models.AppModel;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.ReadyState;
 

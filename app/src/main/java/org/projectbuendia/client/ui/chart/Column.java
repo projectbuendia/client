@@ -4,7 +4,7 @@ import org.joda.time.Instant;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadableInstant;
-import org.projectbuendia.client.models.ObsPoint;
+import org.projectbuendia.models.ObsPoint;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;

@@ -16,10 +16,10 @@ import com.google.common.base.Joiner;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationForest;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.Sex;
+import org.projectbuendia.models.Location;
+import org.projectbuendia.models.LocationForest;
+import org.projectbuendia.models.Patient;
+import org.projectbuendia.models.Sex;
 import org.projectbuendia.client.resolvables.ResStatus;
 
 import java.util.ArrayList;

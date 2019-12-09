@@ -7,8 +7,8 @@ import android.widget.TextView;
 import com.google.android.flexbox.FlexboxLayout;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.models.Location;
+import org.projectbuendia.models.LocationForest;
 import org.projectbuendia.client.utils.ContextUtils;
 import org.projectbuendia.client.utils.Utils;
 

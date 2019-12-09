@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.projectbuendia.client.models.Order;
+import org.projectbuendia.models.Order;
 
 import java.util.AbstractList;
 import java.util.ArrayList;

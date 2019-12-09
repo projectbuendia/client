@@ -14,7 +14,7 @@ package org.projectbuendia.client.json;
 import android.content.ContentValues;
 
 import org.joda.time.LocalDate;
-import org.projectbuendia.client.models.Sex;
+import org.projectbuendia.models.Sex;
 import org.projectbuendia.client.providers.Contracts.Patients;
 
 import java.io.Serializable;

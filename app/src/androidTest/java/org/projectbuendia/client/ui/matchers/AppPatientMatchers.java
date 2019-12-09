@@ -15,8 +15,8 @@ import android.support.test.espresso.matcher.BoundedMatcher;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.models.Patient;
+import org.projectbuendia.models.PatientDelta;
 
 /** Matchers for {@link Patient} objects. */
 public class AppPatientMatchers {

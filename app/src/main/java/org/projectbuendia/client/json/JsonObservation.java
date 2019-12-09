@@ -5,7 +5,7 @@ import android.content.ContentValues;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
-import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.models.Obs;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Utils;
 

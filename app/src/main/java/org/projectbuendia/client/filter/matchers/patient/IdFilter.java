@@ -14,7 +14,7 @@ package org.projectbuendia.client.filter.matchers.patient;
 import android.support.annotation.Nullable;
 
 import org.projectbuendia.client.filter.matchers.MatchingFilter;
-import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.models.Patient;
 
 /** Matches based on user-specified patient id. */
 public final class IdFilter implements MatchingFilter<Patient> {

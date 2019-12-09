@@ -5,7 +5,7 @@ import android.database.Cursor;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.Datatype;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.models.ConceptUuids;
 import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.utils.Intl;
 import org.projectbuendia.client.utils.Utils;

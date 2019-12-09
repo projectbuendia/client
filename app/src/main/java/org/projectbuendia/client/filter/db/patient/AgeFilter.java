@@ -15,7 +15,7 @@ import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
 
 /** Matches only patients below a specified age in years. */
