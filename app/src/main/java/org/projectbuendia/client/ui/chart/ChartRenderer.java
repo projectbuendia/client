@@ -61,6 +61,7 @@ public class ChartRenderer {
         new ZoomLevel(R.string.zoom_day, 0),
         new ZoomLevel(R.string.zoom_half, 0, 12*HOUR),
         new ZoomLevel(R.string.zoom_third, 0, 8*HOUR, 16*HOUR),
+        new ZoomLevel(R.string.zoom_bunia_etc, 0, 8*HOUR, 13*HOUR, 18*HOUR),
         new ZoomLevel(R.string.zoom_quarter, 0, 6*HOUR, 12*HOUR, 18*HOUR),
         new ZoomLevel(R.string.zoom_sixth, 0, 4*HOUR, 8*HOUR, 12*HOUR, 16*HOUR, 20*HOUR)
     };
