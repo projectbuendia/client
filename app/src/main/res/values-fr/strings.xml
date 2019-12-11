@@ -149,6 +149,7 @@
   <string name="confirm_order_delete">Supprimer ce traitement?</string>
   <string name="delete">Supprimer</string>
   <string name="select_dosage_unit">Unité de dosage</string>
+  <string name="select_duration_unit">Unité de la durée</string>
   <string name="unit_with_abbreviation">%1$s (%2$s)</string>
 
   <string name="route_of_administration">Voie d\'administration</string>

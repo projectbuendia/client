@@ -16,6 +16,7 @@ public class CatalogIndex {
     Map<String, Format> formats = new HashMap<>();
     Route[] routes = {};
     Unit[] dosageUnits = {};
+    Unit[] durationUnits = {};
 
     public CatalogIndex(Category... categories) {
         this.categories = categories;
@@ -36,6 +37,11 @@ public class CatalogIndex {
 
     public CatalogIndex withDosageUnits(Unit... units) {
         this.dosageUnits = units;
+        return this;
+    }
+
+    public CatalogIndex withDurationUnits(Unit... units) {
+        this.durationUnits = units;
         return this;
     }
 
@@ -68,5 +74,9 @@ public class CatalogIndex {
 
     public Unit[] getDosageUnits() {
         return dosageUnits;
+    }
+
+    public Unit[] getDurationUnits() {
+        return durationUnits;
     }
 }
