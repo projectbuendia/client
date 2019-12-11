@@ -668,7 +668,7 @@ public interface MsfCatalog extends Catalog {
             new Format("DORAONDA8T", "hydrochloride, eq. 8 mg base, tab. [fr:chlorhydrate, éq. 8 mg base, comp]", Unit.TABLET)
         ),
         new Drug("DORAORMA", "RESOMAL [fr:RESOMAL]").withFormats(
-            new Format("DORAORMA2S8", "rehydration acute complic. malnut., sach. 84 g / 2 l [fr:réhydratation malnut. aiguë compliq, sach. 84 g / 2 l]", Unit.MG)
+            new Format("DORAORMA2S8", "rehydration acute complic. malnut., sach. 84 g / 2 l [fr:réhydratation malnut. aiguë compliq, sach. 84 g / 2 l]", Unit.ML)
         ),
         new Drug("DORAORSA", "ORAL REHYDRATION SALTS (ORS) low osmol. [fr:SELS REHYDRATATION ORALE (SRO) basse osmol.]").withFormats(
             new Format("DORAORSA2S", "sachet 20.5 g / 1 l [fr:sachet 20.5 g / 1 l]", Unit.ML)
@@ -1442,11 +1442,11 @@ public interface MsfCatalog extends Catalog {
             new Format("DINFBLDTABP", "group AB+ [fr:groupe AB+]", Unit.ML)
         ),
         new Drug("DINFRINL", "RINGER lactate [fr:RINGER lactate]").withFormats(
-            new Format("DINFRINL1FBF1", "1 l, flex. bag, PVC free [fr:1 l, poche souple, sans PVC]", Unit.MG),
+            new Format("DINFRINL1FBF1", "1 l, flex. bag, PVC free [fr:1 l, poche souple, sans PVC]", Unit.ML),
             new Format("DINFRINL1FBF5", "500 ml, flex. bag, PVC free [fr:500 m l, poche souple, sans PVC]", Unit.ML),
-            new Format("DINFRINL1FBP1", "1 l, flex. bag, PVC [fr:1 l, poche souple, PVC]", Unit.MG),
+            new Format("DINFRINL1FBP1", "1 l, flex. bag, PVC [fr:1 l, poche souple, PVC]", Unit.ML),
             new Format("DINFRINL1FBP5", "500 ml, flex. bag, PVC [fr:500 m l, poche souple, PVC]", Unit.ML),
-            new Format("DINFRINL1SRF1", "1 l, semi-rigid bot., PVC free [fr:1 l, fl. semi-rigide, sans PVC]", Unit.MG),
+            new Format("DINFRINL1SRF1", "1 l, semi-rigid bot., PVC free [fr:1 l, fl. semi-rigide, sans PVC]", Unit.ML),
             new Format("DINFRINL1SRF5", "500 ml, semi-rigid bot., PVC free [fr:500 ml, fl. semi-rigide, sans PVC]", Unit.ML)
         ),
         new Drug("DINFSODC", "SODIUM chloride (NaCl) [fr:SODIUM chlorure (NaCl)]").withFormats(

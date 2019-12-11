@@ -281,7 +281,7 @@ def guess_unit(desc):
         return 'CAPSULE'
     if re.findall(r'/ *puff\b', desc):
         return 'PUFF'
-    if re.findall(r' *[0-9.]+ *ml\b', desc) or re.findall(r'\d%', desc):
+    if re.findall(r' *[0-9.]+ *m?l\b', desc) or re.findall(r'\d%', desc):
         return 'ML'
     return 'MG'
 
