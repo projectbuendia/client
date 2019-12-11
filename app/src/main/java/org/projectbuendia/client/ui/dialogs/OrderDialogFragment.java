@@ -45,6 +45,11 @@ import org.projectbuendia.client.events.actions.OrderAddRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderDialogRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderStopRequestedEvent;
+import org.projectbuendia.client.ui.AutocompleteAdapter;
+import org.projectbuendia.client.ui.AutocompleteAdapter.CompletionAdapter;
+import org.projectbuendia.client.ui.EditTextWatcher;
+import org.projectbuendia.client.utils.Intl;
+import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.models.Catalog.Category;
 import org.projectbuendia.models.Catalog.Drug;
 import org.projectbuendia.models.Catalog.Format;
@@ -56,11 +61,6 @@ import org.projectbuendia.models.Order;
 import org.projectbuendia.models.Order.Instructions;
 import org.projectbuendia.models.Quantity;
 import org.projectbuendia.models.Unit;
-import org.projectbuendia.client.ui.AutocompleteAdapter;
-import org.projectbuendia.client.ui.AutocompleteAdapter.CompletionAdapter;
-import org.projectbuendia.client.ui.EditTextWatcher;
-import org.projectbuendia.client.utils.Intl;
-import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -150,6 +150,9 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
     /* The currently selected unit for dosage quantity. */
     private Unit activeUnit = Unit.UNSPECIFIED;
+
+    /* The currently selected unit for administration duration. */
+    private Unit activeDurationUnit = Unit.UNSPECIFIED;
 
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderDialogFragment create(
@@ -242,8 +245,20 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             }
         });
 
-        v.amountUnit.setOnClickListener(this::selectUnit);
-        v.dosageUnit.setOnClickListener(this::selectUnit);
+        View.OnClickListener onDosageUnitClicked = (view) -> selectUnit(
+            R.string.select_dosage_unit, index.getDosageUnits(), (unit) -> {
+                activeUnit = unit;
+                updateUi();
+            }
+        );
+        v.amountUnit.setOnClickListener(onDosageUnitClicked);
+        v.dosageUnit.setOnClickListener(onDosageUnitClicked);
+        v.durationUnit.setOnClickListener((view) -> selectUnit(
+            R.string.select_duration_unit, index.getDurationUnits(), (unit) -> {
+                activeDurationUnit = unit;
+                updateUi();
+            }
+        ));
 
         v.isSeries.setOnCheckedChangeListener((v, id) -> onIsSeriesChanged());
         new EditTextWatcher(
@@ -254,10 +269,36 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.delete.setOnClickListener(view -> onDelete());
     }
 
-    private void selectUnit(View v) {
+    interface OnUnitSelectedListener {
+        void onUnitSelected(Unit unit);
+    }
+
+    private void selectUnit(int titleId, Unit[] units, OnUnitSelectedListener listener) {
         if (args.executed) return;  // Can't change dosage if already executed
 
-        Unit[] units = index.getDosageUnits();
+        String[] labels = new String[units.length];
+        int i = 0;
+        for (Unit unit : units) {
+            labels[i++] = getString(R.string.unit_with_abbreviation,
+                App.localize(unit.abbr), App.localize(unit.plural));
+        }
+
+        new AlertDialog.Builder(getActivity())
+            .setTitle(titleId)
+            .setSingleChoiceItems(
+                labels,
+                Arrays.asList(units).indexOf(activeUnit),
+                (dialog, index) -> {
+                    listener.onUnitSelected(units[index]);
+                    dialog.dismiss();
+                })
+            .show();
+    }
+
+    private void selectDurationUnit(View v) {
+        if (args.executed) return;  // Can't change dosage if already executed
+
+        Unit[] units = index.getDurationUnits();
         String[] labels = new String[units.length];
 
         int i = 0;
@@ -315,6 +356,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             activeUnit = instr.amount.unit;
             if (isContinuous) {
                 v.amount.setText(Utils.format(instr.amount.mag, 2));
+                activeDurationUnit = instr.duration.unit;
                 v.duration.setText(Utils.format(instr.duration.mag, 2));
             } else {
                 v.dosage.setText(Utils.format(instr.amount.mag, 2));
@@ -340,7 +382,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
             amount = new Quantity(Utils.getDouble(v.dosage, 0), activeUnit);
             if (activeCategory.isContinuous) {
                 amount = new Quantity(Utils.getDouble(v.amount, 0), activeUnit);
-                duration = new Quantity(Utils.getDouble(v.duration, 0), Unit.HOUR);
+                duration = new Quantity(Utils.getDouble(v.duration, 0), activeDurationUnit);
             }
         }
         Route activeRoute = Utils.orDefault((Route) v.route.getSelectedItem(), Route.UNSPECIFIED);
@@ -554,6 +596,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         activeFormat = format;
         activeUnit = format.dosageUnit;
+        activeDurationUnit = Unit.HOUR;
         updateUi();
         if (Utils.isVisible(v.dosageRow)) v.dosage.requestFocus();
         if (Utils.isVisible(v.continuousRow)) v.amount.requestFocus();
@@ -567,6 +610,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
         v.duration.setText("");
         v.duration.setError(null);
         activeUnit = Unit.UNSPECIFIED;
+        activeDurationUnit = Unit.UNSPECIFIED;
     }
 
     private void clearSchedule() {
@@ -606,7 +650,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
 
         double dosage = Utils.getDouble(v.dosage, 0);
         double amount = Utils.getDouble(v.amount, 0);
-        double hours = Utils.getDouble(v.duration, 0);
+        double duration = Utils.getDouble(v.duration, 0);
         int timesPerDay = Utils.getInt(v.frequency, 0);
         int days = Utils.getInt(v.seriesLength, 0);
 
@@ -622,7 +666,7 @@ public class OrderDialogFragment extends BaseDialogFragment<OrderDialogFragment,
                     R.string.order_volume_unit_in,
                     App.localize(activeUnit.forCount(amount))
                 ));
-                v.durationUnit.setText(App.localize(Unit.HOUR.forCount(hours)));
+                v.durationUnit.setText(App.localize(activeDurationUnit.forCount(duration)));
             } else {
                 v.dosageUnit.setText(App.localize(activeUnit.forCount(dosage)));
             }

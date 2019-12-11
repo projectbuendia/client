@@ -1816,5 +1816,11 @@ public interface MsfCatalog extends Catalog {
             Unit.IU,
             Unit.DROP, Unit.PUFF,
             Unit.AMPOULE, Unit.SACHET,
-            Unit.OVULE, Unit.SUPP);
+            Unit.OVULE, Unit.SUPP)
+        .withDurationUnits(
+            Unit.HOUR,
+            Unit.MINUTE,
+            Unit.SECOND
+        );
+
 }
