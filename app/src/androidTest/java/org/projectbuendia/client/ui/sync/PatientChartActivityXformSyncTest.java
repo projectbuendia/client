@@ -18,9 +18,9 @@ import com.google.common.base.Optional;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.Sex;
+import org.projectbuendia.models.Patient;
+import org.projectbuendia.models.PatientDelta;
+import org.projectbuendia.models.Sex;
 
 import java.util.UUID;
 

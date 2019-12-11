@@ -19,7 +19,7 @@ import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.json.Datatype;
-import org.projectbuendia.client.models.Obs;
+import org.projectbuendia.models.Obs;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;

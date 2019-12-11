@@ -28,7 +28,7 @@ import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.sync.ChartDataHelper;
@@ -37,7 +37,7 @@ import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.updater.UpdateManager;
 import org.projectbuendia.client.user.UserManager;
-import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Intl;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -110,11 +110,11 @@ public class App extends Application {
     }
 
     public static String localize(String packed) {
-        return localize(new Loc(packed));
+        return localize(new Intl(packed));
     }
 
-    public static String localize(Loc packed) {
-        return packed.get(getSettings().getLocale());
+    public static String localize(Intl packed) {
+        return packed.loc(getSettings().getLocale());
     }
 
     public static void inject(Object obj) {

@@ -15,8 +15,8 @@ import com.google.common.collect.ImmutableList;
 
 import org.projectbuendia.client.filter.db.AllFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.models.Location;
+import org.projectbuendia.models.LocationForest;
 
 import java.util.ArrayList;
 import java.util.List;

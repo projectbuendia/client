@@ -13,7 +13,7 @@ package org.projectbuendia.client;
 
 import com.google.common.collect.ImmutableList;
 
-import org.projectbuendia.client.models.LocationForest;
+import org.projectbuendia.models.LocationForest;
 
 import java.util.Arrays;
 

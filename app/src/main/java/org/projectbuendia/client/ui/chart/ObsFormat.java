@@ -5,9 +5,9 @@ import org.apache.commons.text.FormatFactory;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.ObsPoint;
-import org.projectbuendia.client.models.ObsValue;
+import org.projectbuendia.models.Location;
+import org.projectbuendia.models.ObsPoint;
+import org.projectbuendia.models.ObsValue;
 import org.projectbuendia.client.utils.Utils;
 
 import java.lang.reflect.InvocationTargetException;

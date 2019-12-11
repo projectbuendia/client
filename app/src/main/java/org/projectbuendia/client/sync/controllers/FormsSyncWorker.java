@@ -12,7 +12,7 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonForm;
-import org.projectbuendia.client.models.Form;
+import org.projectbuendia.models.Form;
 import org.projectbuendia.client.net.OpenMrsServer;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.ui.OdkActivityLauncher;

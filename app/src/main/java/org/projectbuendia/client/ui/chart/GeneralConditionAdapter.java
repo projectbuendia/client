@@ -21,7 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.models.ConceptUuids;
 import org.projectbuendia.client.resolvables.ResStatus;
 
 import butterknife.ButterKnife;

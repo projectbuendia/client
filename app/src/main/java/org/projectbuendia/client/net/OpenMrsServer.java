@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.net;
 
+import android.database.Cursor;
 import android.support.annotation.Nullable;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -33,15 +34,18 @@ import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonUser;
-import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Order;
+import org.projectbuendia.models.ConceptUuids;
+import org.projectbuendia.models.Encounter;
+import org.projectbuendia.models.Order;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.projectbuendia.client.utils.Utils.eq;
 
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
 public class OpenMrsServer implements Server {
@@ -79,13 +83,31 @@ public class OpenMrsServer implements Server {
         List<String> params = new ArrayList<>();
         JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
-            pairs.add("user_name");
+            pairs.add("provider_name");
             pairs.add(user.getName());
-            pairs.add("user_uuid");
+            pairs.add("provider_uuid");
             pairs.add(user.getUuid());
         }
+        String patientUuid = null;
         for (int i = 0; i + 1 < pairs.size(); i += 2) {
+            if (eq(pairs.get(i), "patient_uuid")) {
+                patientUuid = pairs.get(i + 1);
+            }
             params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
+        }
+        if (patientUuid != null) {
+            try (Cursor cursor = App.getResolver().query(
+                Patients.URI.buildUpon().appendPath(patientUuid).build(),
+                new String[] {Patients.ID, Patients.GIVEN_NAME, Patients.FAMILY_NAME},
+                null, null, null, null
+            )) {
+                if (cursor.moveToFirst()) {
+                    String id = cursor.getString(0);
+                    String name = cursor.getString(1) + " " + cursor.getString(2);
+                    params.add("patient_id=" + Utils.urlEncode(id));
+                    params.add("patient_name=" + Utils.urlEncode(name));
+                }
+            }
         }
         Collections.sort(params);
         params.add(0, timestamp);

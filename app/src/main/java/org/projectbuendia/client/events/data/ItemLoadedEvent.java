@@ -12,7 +12,7 @@
 package org.projectbuendia.client.events.data;
 
 import org.projectbuendia.client.events.DefaultCrudEventBus;
-import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.models.TypedCursor;
 
 /**
  * Indicates that a single item has been fetched from the data store.

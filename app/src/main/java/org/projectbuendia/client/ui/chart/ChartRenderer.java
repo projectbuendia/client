@@ -23,14 +23,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Chart;
-import org.projectbuendia.client.models.ChartItem;
-import org.projectbuendia.client.models.ChartSection;
-import org.projectbuendia.client.models.ConceptUuids;
-import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.ObsPoint;
-import org.projectbuendia.client.models.ObsValue;
-import org.projectbuendia.client.models.Order;
+import org.projectbuendia.models.Chart;
+import org.projectbuendia.models.ChartItem;
+import org.projectbuendia.models.ChartSection;
+import org.projectbuendia.models.ConceptUuids;
+import org.projectbuendia.models.Obs;
+import org.projectbuendia.models.ObsPoint;
+import org.projectbuendia.models.ObsValue;
+import org.projectbuendia.models.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -61,6 +61,7 @@ public class ChartRenderer {
         new ZoomLevel(R.string.zoom_day, 0),
         new ZoomLevel(R.string.zoom_half, 0, 12*HOUR),
         new ZoomLevel(R.string.zoom_third, 0, 8*HOUR, 16*HOUR),
+        new ZoomLevel(R.string.zoom_bunia_etc, 0, 8*HOUR, 13*HOUR, 18*HOUR),
         new ZoomLevel(R.string.zoom_quarter, 0, 6*HOUR, 12*HOUR, 18*HOUR),
         new ZoomLevel(R.string.zoom_sixth, 0, 4*HOUR, 8*HOUR, 12*HOUR, 16*HOUR, 20*HOUR)
     };

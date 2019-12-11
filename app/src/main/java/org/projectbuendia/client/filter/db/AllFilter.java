@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.filter.db;
 
-import org.projectbuendia.client.models.Model;
+import org.projectbuendia.models.Model;
 
 /** A pass-through filter that matches all results. */
 public final class AllFilter<T extends Model> extends SimpleSelectionFilter<T> {

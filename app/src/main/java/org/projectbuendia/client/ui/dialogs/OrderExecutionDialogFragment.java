@@ -31,11 +31,11 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.ObsDeleteRequestedEvent;
 import org.projectbuendia.client.events.actions.OrderExecutionAddRequestedEvent;
-import org.projectbuendia.client.models.Catalog.Drug;
-import org.projectbuendia.client.models.Catalog.Format;
-import org.projectbuendia.client.models.MsfCatalog;
-import org.projectbuendia.client.models.Obs;
-import org.projectbuendia.client.models.Order;
+import org.projectbuendia.models.Catalog.Drug;
+import org.projectbuendia.models.Catalog.Format;
+import org.projectbuendia.models.MsfCatalog;
+import org.projectbuendia.models.Obs;
+import org.projectbuendia.models.Order;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;

@@ -1,7 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
-import org.projectbuendia.client.models.ChartItem;
-import org.projectbuendia.client.models.ObsPoint;
+import org.projectbuendia.models.ChartItem;
+import org.projectbuendia.models.ObsPoint;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class Tile {
         DEFAULTS.put("date", new ChartItem("", "", false, null, "{1,date,YYYY-MM-dd}", "", "", "", ""));
         DEFAULTS.put("time", new ChartItem("", "", false, null, "{1,time,HH:mm}", "", "", "", ""));
     }
-    
+
     public Tile(@Nonnull ChartItem item, @Nonnull ObsPoint[] points) {
         this.item = item.withDefaults(DEFAULTS.get(item.type));
         this.points = points;

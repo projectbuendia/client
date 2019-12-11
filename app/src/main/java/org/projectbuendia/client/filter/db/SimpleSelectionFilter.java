@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.filter.db;
 
-import org.projectbuendia.client.models.Model;
+import org.projectbuendia.models.Model;
 
 /**
  * A container for a filter string (part of an SQL WHERE clause) and the arguments to insert into

@@ -12,7 +12,7 @@
 package org.projectbuendia.client.filter.db.encounter;
 
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.models.Encounter;
 import org.projectbuendia.client.providers.Contracts;
 
 /** Matches only the encounter with the given UUID. */

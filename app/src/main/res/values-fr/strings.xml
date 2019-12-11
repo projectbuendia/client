@@ -149,6 +149,7 @@
   <string name="confirm_order_delete">Supprimer ce traitement?</string>
   <string name="delete">Supprimer</string>
   <string name="select_dosage_unit">Unité de dosage</string>
+  <string name="select_duration_unit">Unité de la durée</string>
   <string name="unit_with_abbreviation">%1$s (%2$s)</string>
 
   <string name="route_of_administration">Voie d\'administration</string>
@@ -207,6 +208,7 @@
   <string name="zoom_day">1 colonne par jour</string>
   <string name="zoom_half">2 colonnes par jour</string>
   <string name="zoom_third">3 colonnes par jour</string>
+  <string name="zoom_bunia_etc">Limites des colonnes à 8h, 13h, 18h (passations au CTE de Bunia)</string>
   <string name="zoom_quarter">4 colonnes par jour</string>
   <string name="zoom_sixth">6 colonnes par jour</string>
 

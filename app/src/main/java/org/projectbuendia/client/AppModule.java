@@ -17,8 +17,8 @@ import android.preference.PreferenceManager;
 
 import org.projectbuendia.client.diagnostics.DiagnosticsModule;
 import org.projectbuendia.client.events.EventsModule;
-import org.projectbuendia.client.models.AppModelModule;
-import org.projectbuendia.client.models.tasks.AddPatientTask;
+import org.projectbuendia.models.AppModelModule;
+import org.projectbuendia.models.tasks.AddPatientTask;
 import org.projectbuendia.client.net.NetModule;
 import org.projectbuendia.client.sync.BuendiaSyncEngine;
 import org.projectbuendia.client.sync.ChartDataHelper;

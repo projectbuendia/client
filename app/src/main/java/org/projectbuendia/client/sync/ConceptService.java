@@ -5,9 +5,9 @@ import android.database.Cursor;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.Datatype;
-import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.models.ConceptUuids;
 import org.projectbuendia.client.providers.Contracts.Concepts;
-import org.projectbuendia.client.utils.Loc;
+import org.projectbuendia.client.utils.Intl;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashMap;
@@ -19,7 +19,7 @@ public class ConceptService {
     private final ContentResolver resolver;
 
     private Map<String, Datatype> types = null;
-    private Map<String, Loc> names = null;
+    private Map<String, Intl> names = null;
 
     public ConceptService(ContentResolver resolver) {
         this.resolver = resolver;
@@ -36,8 +36,8 @@ public class ConceptService {
 
     public synchronized String getName(String uuid, Locale locale) {
         if (names == null) load();
-        Loc loc = names.get(uuid);
-        return loc != null ? loc.get(locale) : Utils.compressUuid(uuid) + "?";
+        Intl intl = names.get(uuid);
+        return intl != null ? intl.loc(locale) : Utils.compressUuid(uuid) + "?";
     }
 
     public synchronized void invalidate() {
@@ -47,7 +47,7 @@ public class ConceptService {
 
     private void load() {
         Map<String, Datatype> types = new HashMap<>();
-        Map<String, Loc> names = new HashMap<>();
+        Map<String, Intl> names = new HashMap<>();
 
         try (Cursor c = resolver.query(Concepts.URI, null, null, null, null)) {
             while (c.moveToNext()) {
@@ -59,13 +59,13 @@ public class ConceptService {
                 } catch (IllegalArgumentException e) {
                     continue;  // bad concept type name
                 }
-                names.put(uuid, new Loc(name));
+                names.put(uuid, new Intl(name));
             }
         }
 
         // Special case: yes and no concepts.
-        names.put(ConceptUuids.YES_UUID, new Loc("Yes [fr:Oui]"));
-        names.put(ConceptUuids.NO_UUID, new Loc("No [fr:Non]"));
+        names.put(ConceptUuids.YES_UUID, new Intl("Yes [fr:Oui]"));
+        names.put(ConceptUuids.NO_UUID, new Intl("No [fr:Non]"));
 
         synchronized (this) {
             this.types = types;

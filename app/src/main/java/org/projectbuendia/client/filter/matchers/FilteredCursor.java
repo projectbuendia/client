@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.filter.matchers;
 
-import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.models.TypedCursor;
 
 import java.util.ArrayList;
 import java.util.Iterator;

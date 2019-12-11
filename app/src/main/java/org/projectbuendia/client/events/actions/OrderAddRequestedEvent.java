@@ -14,7 +14,7 @@ package org.projectbuendia.client.events.actions;
 import android.support.annotation.Nullable;
 
 import org.joda.time.DateTime;
-import org.projectbuendia.client.models.Order;
+import org.projectbuendia.models.Order;
 
 /**
  * Event indicating that the user has entered a new order that needs to be
