@@ -29,7 +29,6 @@ import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 import org.joda.time.DateTime;
@@ -120,6 +119,13 @@ public class Utils {
         return (a == b) || (a != null && a.equals(b));
     }
 
+    public static boolean eqAny(Object x, Object... values) {
+        for (Object value : values) {
+            if (eq(x, value)) return true;
+        }
+        return false;
+    }
+
     /** Returns a value if that value is not null, or a specified default value otherwise. */
     public static @Nonnull <T> T orDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value != null ? value : defaultValue;
@@ -185,6 +191,19 @@ public class Utils {
 
     // ==== Collections ====
 
+    public static boolean isEmpty(Object obj) {
+        if (obj instanceof Collection) {
+            return isEmpty((Collection) obj);
+        }
+        if (obj instanceof String) {
+            return eq(obj, "");
+        }
+        if (obj instanceof Object[]) {
+            return ((Object[]) obj).length == 0;
+        }
+        return obj == null;
+    }
+
     /** Performs a null-safe check for a null or empty array. */
     public static <T> boolean isEmpty(@Nullable T[] array) {
         return array == null || array.length == 0;
@@ -229,6 +248,31 @@ public class Utils {
         List<T> result = new ArrayList<>(Arrays.asList(a));
         result.add(b);
         return result.toArray(a);
+    }
+
+    /** Gets an item given a Pythonic list index, or null if out of bounds. */
+    public static <T> @Nullable T getitem(List<T> list, int index) {
+      int n = list.size();
+      if (index < 0) index += n;
+      if (index > n) index = n;
+      return (index >= 0 && index < n) ? list.get(index) : null;
+    }
+
+    public static <T> @Nullable T first(List<T> list) {
+        return getitem(list, 0);
+    }
+
+    public static <T> @Nullable T last(List<T> list) {
+        return getitem(list, -1);
+    }
+
+    public static <T> List<T> slice(List<T> list, int start, int stop) {
+        int n = list.size();
+        if (start < 0) start += n;
+        if (stop < 0) stop += n;
+        if (start > n) start = n;
+        if (stop > n) stop = n;
+        return list.subList(start, stop);
     }
 
 
@@ -1003,7 +1047,26 @@ public class Utils {
 
     /** Returns a list-like string representation of an array of objects, suitable for logging. */
     public static String repr(Object[] array) {
-        return "[" + Joiner.on(", ").join(array) + "]";
+        return "[" + join(", ", array) + "]";
+    }
+
+    public static String join(String sep, Object[] array) {
+        String result = "";
+        if (array.length > 0) result += array[0];
+        for (int i = 1; i < array.length; i++) {
+            result += sep + array[i];
+        }
+        return result;
+    }
+
+    public static String join(String sep, Iterable<?> iterable) {
+        String result = "";
+        int i = 0;
+        for (Object obj : iterable) {
+            if (i++ > 0) result += sep;
+            result += obj;
+        }
+        return result;
     }
 
     /** Uses backslash sequences to form a printable representation of a string. */
