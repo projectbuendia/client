@@ -1,0 +1,20 @@
+#!/bin/bash
+
+version=$(.circleci/get_package_version)
+tag_message="$(git tag --format='%(contents)' -l v$version)"
+
+echo "
+### How to install
+
+This app works on any Android tablet or phone.
+
+Using the tablet, download **buendia-$version.apk** (in **Assets** below).
+
+Then find the file (by pulling down notifications or opening the Downloads app), open it, and follow the prompts to install it.
+
+When first opened, the app requires you to sign into a server.  For demos, you can use demo server at **demo.buendia.org** with the username **buendia** and password **buendia**.
+
+### What's new?
+
+$tag_message
+"

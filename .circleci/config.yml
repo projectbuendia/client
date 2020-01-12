@@ -49,15 +49,17 @@ references:
       # command: ./gradlew lint test
       command: ./gradlew test
 
-  make_artifact_store: &make_artifact_store
-    run:
-      name: Make artifact store
-      command: mkdir -p /tmp/artifacts
-
   store_artifacts: &store_artifacts
     store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
       path: /tmp/artifacts
       destination: artifacts
+
+  publish_github_release: &publish_github_release
+    run:
+      name: Publish GitHub release
+      command: |
+        go get github.com/tcnksm/ghr
+        ghr -delete -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n "Buendia ${PACKAGE_VERSION}" -b "$(.circleci/describe_release)" v${PACKAGE_VERSION} /tmp/artifacts/*.apk
  
 jobs:
   build:
@@ -75,12 +77,11 @@ jobs:
 
       - *save_cache
 
-      - *make_artifact_store
-      
       - run:
           name: Build debug APK
           command: |
             ./gradlew assembleDebug
+            mkdir -p /tmp/artifacts
             cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}-debug.apk
 
       - *run_unit_tests
@@ -105,17 +106,16 @@ jobs:
 
       - *save_cache
 
-      - *make_artifact_store
- 
       - run:
           name: Generate keystore
           command: |
             echo "$ANDROID_KEYSTORE" | base64 -d > $ANDROID_KEYSTORE_FILE
-      
+
       - run:
           name: Build release APK
           command: |
             ./gradlew -PversionNumber=${PACKAGE_VERSION} assembleRelease
+            mkdir -p /tmp/artifacts
             cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk
 
       - run:
@@ -127,6 +127,8 @@ jobs:
       - *run_unit_tests
 
       - *store_artifacts
+
+      - *publish_github_release
  
 workflows:
   version: 2
