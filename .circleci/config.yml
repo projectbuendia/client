@@ -82,7 +82,7 @@ jobs:
           command: |
             ./gradlew assembleDebug
             mkdir -p /tmp/artifacts
-            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}-debug.apk
+            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-${PACKAGE_VERSION}-debug.apk
 
       - *run_unit_tests
 
@@ -116,12 +116,12 @@ jobs:
           command: |
             ./gradlew -PversionNumber=${PACKAGE_VERSION} assembleRelease
             mkdir -p /tmp/artifacts
-            cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk
+            cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-${PACKAGE_VERSION}.apk
 
       - run:
           name: Verify APK signature
           command: |
-            keytool -list -printcert -jarfile /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk | tee /tmp/cert.txt
+            keytool -list -printcert -jarfile /tmp/artifacts/buendia-${PACKAGE_VERSION}.apk | tee /tmp/cert.txt
             grep -q Buendia /tmp/cert.txt
 
       - *run_unit_tests
