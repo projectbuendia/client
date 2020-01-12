@@ -32,11 +32,6 @@ references:
       name: Init client-libs submodule
       command: git submodule update --init client-libs
 
-  get_package_version: &get_package_version
-    run:
-      name: Get package version
-      command: echo "export PACKAGE_VERSION=$(.circleci/get_package_version)" >> $BASH_ENV
-
   get_dependencies: &get_dependencies
     run:
       name: Download dependencies
@@ -59,7 +54,7 @@ references:
       name: Publish GitHub release
       command: |
         go get github.com/tcnksm/ghr
-        ghr -delete -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n "Buendia ${PACKAGE_VERSION}" -b "$(.circleci/describe_release)" v${PACKAGE_VERSION} /tmp/artifacts/*.apk
+        ghr -delete -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n "Buendia $(.circleci/get_version)" -b "$(.circleci/describe_release)" v$(.circleci/get_version) /tmp/artifacts/*.apk
  
 jobs:
   build:
@@ -68,8 +63,6 @@ jobs:
       - checkout
 
       - *init_client_libs
-
-      - *get_package_version
 
       - *restore_cache
 
@@ -82,7 +75,7 @@ jobs:
           command: |
             ./gradlew assembleDebug
             mkdir -p /tmp/artifacts
-            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-${PACKAGE_VERSION}-debug.apk
+            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-$(.circleci/get_version)-debug.apk
 
       - *run_unit_tests
 
@@ -98,8 +91,6 @@ jobs:
 
       - *init_client_libs
 
-      - *get_package_version
-
       - *restore_cache
 
       - *get_dependencies
@@ -114,14 +105,14 @@ jobs:
       - run:
           name: Build release APK
           command: |
-            ./gradlew -PversionNumber=${PACKAGE_VERSION} assembleRelease
+            ./gradlew -PversionNumber=$(.circleci/get_version) assembleRelease
             mkdir -p /tmp/artifacts
-            cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-${PACKAGE_VERSION}.apk
+            cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-$(.circleci/get_version).apk
 
       - run:
           name: Verify APK signature
           command: |
-            keytool -list -printcert -jarfile /tmp/artifacts/buendia-${PACKAGE_VERSION}.apk | tee /tmp/cert.txt
+            keytool -list -printcert -jarfile /tmp/artifacts/buendia-$(.circleci/get_version).apk | tee /tmp/cert.txt
             grep -q Buendia /tmp/cert.txt
 
       - *run_unit_tests
