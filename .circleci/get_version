@@ -1,0 +1,40 @@
+#!/bin/bash
+# Copyright 2019 The Project Buendia Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy
+# of the License at: http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distrib-
+# uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+# OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+# specific language governing permissions and limitations under the License.
+
+# get_version constructs a sensible package version numbe for the current
+# build situation.  Only release packages built in CI get a clean version
+# number; for other builds, the build number or commit hash is appended.
+#
+# We treat CI builds as newer than release builds for the same version tag
+# because we want to allow deployment of replicable pre-release builds.
+# But we do NOT treat manual builds with the same version tag as newer,
+# because we don't want accidental deployment of developer builds.
+
+# Case 1: This is a tagged release.
+if echo "$CIRCLE_TAG" | grep -Eq '^v([0-9]+\.?)+$'; then
+    echo "${CIRCLE_TAG#v}"
+    exit
+fi
+
+# Find the most recent release tag on master.
+TAG=$(git describe --match='v*' --abbrev=0 origin/master)
+
+# Case 2: This is a non-production build in CircleCI; include the build number.
+if [ -n "$CIRCLE_BUILD_NUM" ]; then
+    echo "${TAG#v}+b${CIRCLE_BUILD_NUM}"
+    exit
+fi
+
+# Case 3: This is a local developer build; include the commit hash.  We use
+# "~" because Debian treats "x.y.z~anything" as _less_ recent than "x.y.z".
+COMMIT_HASH=$(git show-ref -s --abbrev HEAD)
+echo "${TAG#v}~${COMMIT_HASH}"

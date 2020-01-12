@@ -32,11 +32,6 @@ references:
       name: Init client-libs submodule
       command: git submodule update --init client-libs
 
-  get_package_version: &get_package_version
-    run:
-      name: Get package version
-      command: echo "export PACKAGE_VERSION=$(.circleci/get_package_version)" >> $BASH_ENV
-
   get_dependencies: &get_dependencies
     run:
       name: Download dependencies
@@ -49,15 +44,17 @@ references:
       # command: ./gradlew lint test
       command: ./gradlew test
 
-  make_artifact_store: &make_artifact_store
-    run:
-      name: Make artifact store
-      command: mkdir -p /tmp/artifacts
-
   store_artifacts: &store_artifacts
     store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
       path: /tmp/artifacts
       destination: artifacts
+
+  publish_github_release: &publish_github_release
+    run:
+      name: Publish GitHub release
+      command: |
+        go get github.com/tcnksm/ghr
+        ghr -delete -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n "Buendia $(.circleci/get_version)" -b "$(.circleci/describe_release)" v$(.circleci/get_version) /tmp/artifacts/*.apk
  
 jobs:
   build:
@@ -67,21 +64,18 @@ jobs:
 
       - *init_client_libs
 
-      - *get_package_version
-
       - *restore_cache
 
       - *get_dependencies
 
       - *save_cache
 
-      - *make_artifact_store
-      
       - run:
           name: Build debug APK
           command: |
             ./gradlew assembleDebug
-            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}-debug.apk
+            mkdir -p /tmp/artifacts
+            cp app/build/outputs/apk/debug/app-debug.apk /tmp/artifacts/buendia-$(.circleci/get_version)-debug.apk
 
       - *run_unit_tests
 
@@ -97,36 +91,35 @@ jobs:
 
       - *init_client_libs
 
-      - *get_package_version
-
       - *restore_cache
 
       - *get_dependencies
 
       - *save_cache
 
-      - *make_artifact_store
- 
       - run:
           name: Generate keystore
           command: |
             echo "$ANDROID_KEYSTORE" | base64 -d > $ANDROID_KEYSTORE_FILE
-      
+
       - run:
           name: Build release APK
           command: |
-            ./gradlew -PversionNumber=${PACKAGE_VERSION} assembleRelease
-            cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk
+            ./gradlew -PversionNumber=$(.circleci/get_version) assembleRelease
+            mkdir -p /tmp/artifacts
+            cp app/build/outputs/apk/release/app-release.apk /tmp/artifacts/buendia-$(.circleci/get_version).apk
 
       - run:
           name: Verify APK signature
           command: |
-            keytool -list -printcert -jarfile /tmp/artifacts/buendia-client-${PACKAGE_VERSION}.apk | tee /tmp/cert.txt
+            keytool -list -printcert -jarfile /tmp/artifacts/buendia-$(.circleci/get_version).apk | tee /tmp/cert.txt
             grep -q Buendia /tmp/cert.txt
 
       - *run_unit_tests
 
       - *store_artifacts
+
+      - *publish_github_release
  
 workflows:
   version: 2
