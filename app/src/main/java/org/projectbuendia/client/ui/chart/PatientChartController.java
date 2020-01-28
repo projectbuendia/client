@@ -76,9 +76,6 @@ public final class PatientChartController implements ChartRenderer.JsInterface {
 
     @VisibleForTesting public static String currentPatientUuid;
 
-    // Form UUIDs specific to Ebola deployments.
-    static final String EBOLA_LAB_TEST_FORM_UUID = "buendia_form_ebola_lab_test";
-
     /**
      * Period between observation syncs while the chart view is active.
      * It would be nice to make this very short, but note that the grid

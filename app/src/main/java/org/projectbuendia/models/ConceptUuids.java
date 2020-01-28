@@ -73,7 +73,6 @@ public class ConceptUuids {
     public static final String NO_UUID = toUuid(1066);  // answer: no
     public static final String NONE_UUID = toUuid(1107);  // answer: none
     public static final String NORMAL_UUID = toUuid(1115);  // answer: normal
-    public static final String SOLID_FOOD_UUID = toUuid(159597);  // answer: patient can eat solid food
     public static final String MILD_UUID = toUuid(1148);  // answer: mild (severity)
     public static final String MODERATE_UUID = toUuid(1499);  // answer: moderate (severity)
     public static final String SEVERE_UUID = toUuid(1500);  // answer: severe
@@ -90,7 +89,6 @@ public class ConceptUuids {
             .put(ConceptUuids.NO_UUID, -100)
             .put(ConceptUuids.NONE_UUID, -1)
             .put(ConceptUuids.NORMAL_UUID, -1)
-            .put(ConceptUuids.SOLID_FOOD_UUID, -1)
             .put(ConceptUuids.MILD_UUID, 1)
             .put(ConceptUuids.MODERATE_UUID, 2)
             .put(ConceptUuids.SEVERE_UUID, 3)
@@ -122,8 +120,7 @@ public class ConceptUuids {
     public static boolean isNormal(String uuid) {
         return NORMAL_UUID.equals(uuid)
             || NONE_UUID.equals(uuid)
-            || NO_UUID.equals(uuid)
-            || SOLID_FOOD_UUID.equals(uuid);
+            || NO_UUID.equals(uuid);
     }
 
 
