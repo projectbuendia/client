@@ -96,7 +96,7 @@ public class GoToPatientDialogFragment extends BaseDialogFragment<GoToPatientDia
 
     private String formatSearchResult(Patient patient) {
         String details = u.formatPatientDetails(patient, SHORT, LONG, LONG);
-        return Utils.format("%s (%s)", u.formatPatientName(patient),
+        return Utils.format("%s (%s)", patient.getDisplayName(),
             Utils.nonemptyOrDefault(details, u.str(R.string.unknown)));
     }
 

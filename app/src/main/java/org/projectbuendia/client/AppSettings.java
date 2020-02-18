@@ -229,8 +229,8 @@ public class AppSettings {
     // This category is for syncs expected to take up to 500 ms, for data
     // that changes (on average) less than once an hour.
     public int getMediumSyncInterval() {
-       return prefs.getInt("medium_sync_interval",
-           resources.getInteger(R.integer.medium_sync_interval_default));
+        return prefs.getInt("medium_sync_interval",
+            resources.getInteger(R.integer.medium_sync_interval_default));
     }
 
     /** Gets the interval for syncs that are non-incremental and large (concepts, forms). */
@@ -252,6 +252,27 @@ public class AppSettings {
 
     public void setLastIdPrefix(String prefix) {
         prefs.edit().putString("last_id_prefix", prefix).commit();
+    }
+
+    public void clearAnonymizePatientExceptions() {
+        prefs.edit().putString("anonymize_patient_exceptions", "").commit();
+    }
+
+    /* Adds a patient to the list of patients whose names not to anonymize. */
+    // When patients are created locally, we don't want to anonymize them
+    // (because that would look confusing in a demo).
+    public void addAnonymizePatientException(String uuid) {
+        String newValue = prefs.getString("anonymize_patient_exceptions", "") + "[" + uuid + "]";
+        prefs.edit().putString("anonymize_patient_exceptions", newValue).commit();
+    }
+
+    public boolean patientShouldBeAnonymized(String uuid) {
+        return prefs.getBoolean("anonymize_patients", false) &&
+            !prefs.getString("anonymize_patient_exceptions", "").contains("[" + uuid + "]");
+    }
+
+    public boolean providersShouldBeAnonymized() {
+        return prefs.getBoolean("anonymize_providers", false);
     }
 }
 

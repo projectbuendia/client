@@ -71,7 +71,9 @@ public class JsonUser implements Serializable {
     }
 
     public String getLocalizedName() {
-        return isGuestUser() ? App.str(R.string.guest_user_name) : name;
+        return App.getSettings().providersShouldBeAnonymized() ?
+            getLocalizedInitials().charAt(0) + Utils.EN_DASH :
+            isGuestUser() ? App.str(R.string.guest_user_name) : name;
     }
 
     /** Returns the user's initials, using the first letter of each word of the user's full name. */

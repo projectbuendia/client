@@ -4,6 +4,18 @@
     <PreferenceCategory
         android:title="@string/pref_header_advanced">
 
+        <CheckBoxPreference
+            android:key="anonymize_patients"
+            android:title="@string/pref_title_anonymize_patients"
+            android:summary="@string/pref_desc_anonymize_patients"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="anonymize_providers"
+            android:title="@string/pref_title_anonymize_providers"
+            android:summary="@string/pref_desc_anonymize_providers"
+            android:defaultValue="false" />
+
         <org.projectbuendia.client.widgets.EditAndClearDataPreference
             android:key="openmrs_root_url"
             android:title="@string/pref_title_openmrs_root_url"

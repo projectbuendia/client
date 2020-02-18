@@ -61,10 +61,7 @@ import static org.projectbuendia.client.utils.Utils.eq;
 public class SettingsActivity extends PreferenceActivity {
     private static final Logger LOG = Logger.create();
 
-    /**
-     Controls whether to always show the simplified UI, where settings are
-     arranged in a single list without a left navigation panel.
-     */
+    // Keys of all the preference views that are to be watched for changes.
     static final String[] PREF_KEYS = {
         "server",
         "openmrs_user",
@@ -80,7 +77,9 @@ public class SettingsActivity extends PreferenceActivity {
         "periodic_sync_disabled",
         "form_instances_retained",
         "non_wifi_allowed",
-        "server_responses_fabricated"
+        "server_responses_fabricated",
+        "anonymize_patients",
+        "anonymize_providers"
     };
     static boolean updatingPrefValues = false;
 
@@ -126,6 +125,9 @@ public class SettingsActivity extends PreferenceActivity {
                             true /* indeterminate */, false /* cancelable */);
                         syncManager.stopSyncing(() -> sSyncPendingDialog.dismiss());
                     }
+                    break;
+                case "anonymize_patients":
+                    App.getSettings().clearAnonymizePatientExceptions();
                     break;
             }
         } finally {

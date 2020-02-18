@@ -143,6 +143,10 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
             return;
         }
 
+        // Newly created patients shouldn't have their names hidden, even
+        // when anonymization is enabled.
+        App.getSettings().addAnonymizePatientException(mUuid);
+
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         LoadItemTask<Patient> task = mTaskFactory.newLoadItemTask(

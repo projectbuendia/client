@@ -81,6 +81,7 @@ public class Utils {
     public static final String EN_DASH = "\u2013";
     public static final String EM_DASH = "\u2014";
     public static final String BULLET = "\u2022";
+    public static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     // Minimum and maximum representable Instant, DateTime, and LocalDate values.
     public static final Instant MIN_TIME = new Instant(Long.MIN_VALUE);

@@ -61,6 +61,7 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
     private Patient patient;
     private ToggleRadioGroup<Sex> sexToggleGroup;
     private boolean ageChanged;
+    private boolean nameChanged;
 
     public static PatientDialogFragment create(Patient patient) {
         return new PatientDialogFragment().withArgs(patient);
@@ -101,8 +102,8 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
             }
             v.idPrefix.setText(idPrefix);
             v.id.setText(id);
-            v.givenName.setText(Utils.toNonnull(patient.givenName));
-            v.familyName.setText(Utils.toNonnull(patient.familyName));
+            v.givenName.setText(patient.getDisplayGivenName());
+            v.familyName.setText(patient.getDisplayFamilyName());
             if (patient.birthdate != null) {
                 Period age = new Period(patient.birthdate, LocalDate.now());
                 v.ageYears.setText(String.valueOf(age.getYears()));
@@ -113,6 +114,7 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
         }
 
         new EditTextWatcher(v.ageYears, v.ageMonths).onChange(() -> ageChanged = true);
+        new EditTextWatcher(v.givenName, v.familyName).onChange(() -> nameChanged = true);
         // TODO(ping): Figure out why the keyboard doesn't appear and focus
         // isn't placed on the first field.
         // TODO(ping): Make the name fields auto-capitalize the first letter.
@@ -124,8 +126,8 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
     @Override public void onSubmit() {
         String idPrefix = v.idPrefix.getText().toString().trim();
         String id = Utils.toNonemptyOrNull(v.id.getText().toString().trim());
-        String givenName = Utils.toNonemptyOrNull(v.givenName.getText().toString().trim());
-        String familyName = Utils.toNonemptyOrNull(v.familyName.getText().toString().trim());
+        String givenName = patient.givenName;
+        String familyName = patient.familyName;
         Sex sex = sexToggleGroup.getSelection();
         String ageYears = v.ageYears.getText().toString().trim();
         String ageMonths = v.ageMonths.getText().toString().trim();
@@ -135,6 +137,16 @@ public class PatientDialogFragment extends BaseDialogFragment<PatientDialogFragm
         if (id == null) {
             setError(v.id, R.string.patient_validation_missing_id);
             valid = false;
+        }
+        // Update the name only when the name fields have been edited; we don't
+        // want to replace the real name with an anonymized display name.
+        if (nameChanged) {
+            givenName = Utils.toNonemptyOrNull(v.givenName.getText().toString().trim());
+            familyName = Utils.toNonemptyOrNull(v.familyName.getText().toString().trim());
+            if (patient != null) {
+                // Once you edit the name, you should be able to see what you entered.
+                App.getSettings().addAnonymizePatientException(patient.uuid);
+            }
         }
         // Recalculate the birthdate only when the age fields have been edited;
         // otherwise, simply opening and submitting the dialog would shift the

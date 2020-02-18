@@ -133,7 +133,7 @@ public class PatientListAdapter extends BaseExpandableListAdapter {
             ConceptUuids.getResStatus(condition).resolve(u.getResources());
 
         u.setContainer(view);
-        u.setText(R.id.name, u.formatPatientName(patient));
+        u.setText(R.id.name, patient.getDisplayName());
         u.setText(R.id.bed_number, patient.bedNumber);
         u.show(R.id.bed_bar, !Utils.isEmpty(patient.bedNumber));
         ShrinkFitTextView idView = u.findView(R.id.id);

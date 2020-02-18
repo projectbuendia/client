@@ -308,7 +308,7 @@ public final class PatientChartActivity extends LoggedInActivity {
             ActionBar actionBar = getActionBar();
             if (actionBar != null) {
                 String id = Utils.orDefault(patient.id, EN_DASH);
-                actionBar.setTitle(id + ". " + u.formatPatientName(patient));
+                actionBar.setTitle(id + ". " + patient.getDisplayName());
                 actionBar.setSubtitle(u.formatPatientDetails(patient, LONG, LONG, LONG));
             }
         }

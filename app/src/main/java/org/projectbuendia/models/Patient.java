@@ -15,12 +15,14 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Utils;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 public final @Immutable class Patient extends Model implements Serializable {
@@ -76,6 +78,33 @@ public final @Immutable class Patient extends Model implements Serializable {
         this.pregnancy = pregnancy;
         this.locationUuid = Utils.toNonnull(locationUuid);
         this.bedNumber = Utils.toNonnull(bedNumber);
+    }
+
+    /** Gets the patient's possibly anonymized given name. */
+    public @Nonnull String getDisplayGivenName() {
+        if (App.getSettings().patientShouldBeAnonymized(uuid)) {
+            return getLetter((uuid + ".given").hashCode()) + Utils.EN_DASH;
+        } else {
+            return Utils.orDefault(givenName, Utils.EN_DASH);
+        }
+    }
+
+    public @Nonnull String getDisplayFamilyName() {
+        if (App.getSettings().patientShouldBeAnonymized(uuid)) {
+            return getLetter((uuid + ".family").hashCode()) + Utils.EN_DASH;
+        } else {
+            return Utils.orDefault(familyName, Utils.EN_DASH);
+        }
+    }
+
+    /** Formats a patient name for display, including anonymization. */
+    public @Nonnull String getDisplayName() {
+        return getDisplayGivenName() + " " + getDisplayFamilyName();
+    }
+
+    private static char getLetter(int n) {
+        n = ((n % 26) + 26) % 26;
+        return "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(n);
     }
 
     public static Patient load(Cursor cursor) {

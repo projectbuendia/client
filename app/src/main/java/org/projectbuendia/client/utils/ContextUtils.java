@@ -187,13 +187,6 @@ public class ContextUtils extends ContextWrapper {
             : str(R.string.n_patients, count);
     }
 
-    /** Formats a patient name, using an en-dash if either part is missing. */
-    public String formatPatientName(Patient patient) {
-        String given = Utils.orDefault(patient.givenName, EN_DASH);
-        String family = Utils.orDefault(patient.familyName, EN_DASH);
-        return given + " " + family;
-    }
-
     public enum FormatStyle { NONE, SHORT, LONG };
 
     /** Formats the sex, pregnancy status, and/or age of a patient. */
